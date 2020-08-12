@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,11 +7,10 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Net.Mime;
-using TKS.Apis.LogApi.Extensions;
-using TKS.Apis.LogApi.Filters;
+using TGS.Apis.LogApi.Extensions;
+using TGS.Apis.LogApi.Filters;
 
-namespace TKS.Apis.LogApi
+namespace TGS.Apis.LogApi
 {
     public class Startup
     {

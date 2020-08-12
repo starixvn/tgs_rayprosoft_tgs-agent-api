@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TKS.Apis.LogApi.DataService.Models
+namespace TGS.Apis.LogApi.DataService.Models
 {
     public class ApiLog
     {

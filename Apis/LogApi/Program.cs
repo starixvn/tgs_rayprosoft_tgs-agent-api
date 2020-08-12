@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TKS.Apis.LogApi.DataService;
-using TKS.Apis.LogApi.Extensions;
+using TGS.Apis.LogApi.DataService;
+using TGS.Apis.LogApi.Extensions;
 
-namespace TKS.Apis.LogApi
+namespace TGS.Apis.LogApi
 {
     public class Program
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TKS.Apis.LogApi.Exceptions
+namespace TGS.Apis.LogApi.Exceptions
 {
     public class HttpResponseException : Exception
     {

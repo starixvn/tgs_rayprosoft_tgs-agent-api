@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace TKS.Apis.LogApi.Migrations
+namespace TGS.Apis.LogApi.Migrations
 {
     public partial class InitialCreate : Migration
     {

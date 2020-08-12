@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TKS.Apis.LogApi.DataService.Models;
+using TGS.Apis.LogApi.DataService.Models;
 
-namespace TKS.Apis.LogApi.DataService.EntityTypeConfiguration
+namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
     public sealed class ApiLogConfiguration : IEntityTypeConfiguration<ApiLog>
     {

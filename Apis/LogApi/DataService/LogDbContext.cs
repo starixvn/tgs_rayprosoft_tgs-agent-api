@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TKS.Apis.LogApi.DataService.EntityTypeConfiguration;
-using TKS.Apis.LogApi.DataService.Models;
+using TGS.Apis.LogApi.DataService.EntityTypeConfiguration;
+using TGS.Apis.LogApi.DataService.Models;
 
-namespace TKS.Apis.LogApi.DataService
+namespace TGS.Apis.LogApi.DataService
 {
     public class LogDbContext : DbContext
     {

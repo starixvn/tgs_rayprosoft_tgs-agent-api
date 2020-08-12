@@ -3,10 +3,10 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TKS.Apis.LogApi.Controllers.Messages;
-using TKS.Apis.LogApi.DataService;
+using TGS.Apis.LogApi.Controllers.Messages;
+using TGS.Apis.LogApi.DataService;
 
-namespace TKS.Apis.LogApi.Controllers
+namespace TGS.Apis.LogApi.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]

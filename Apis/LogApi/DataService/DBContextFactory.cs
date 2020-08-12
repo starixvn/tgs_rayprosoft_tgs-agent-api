@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace TKS.Apis.LogApi.DataService
+namespace TGS.Apis.LogApi.DataService
 {
     public sealed class DBContextFactory : IDesignTimeDbContextFactory<LogDbContext>
     {

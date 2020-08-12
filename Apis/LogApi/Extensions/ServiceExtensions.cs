@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TKS.Apis.LogApi.DataService;
+using TGS.Apis.LogApi.DataService;
 
-namespace TKS.Apis.LogApi.Extensions
+namespace TGS.Apis.LogApi.Extensions
 {
     public static class ServiceExtensions
     {
