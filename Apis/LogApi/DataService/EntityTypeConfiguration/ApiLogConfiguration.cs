@@ -43,7 +43,7 @@ namespace TKS.Apis.LogApi.DataService.EntityTypeConfiguration
                 .IsUnicode();
 
             builder.Property(c => c.RequestContent)
-                .HasColumnType("nvarchar(65536)")
+                .HasColumnType("nvarchar(4000)")
                 .IsRequired()
                 .IsUnicode();
 
@@ -53,7 +53,7 @@ namespace TKS.Apis.LogApi.DataService.EntityTypeConfiguration
                 .IsUnicode();
 
             builder.Property(c => c.ResponseContent)
-                .HasColumnType("nvarchar(65536)")
+                .HasColumnType("nvarchar(4000)")
                 .IsRequired()
                 .IsUnicode();
 
