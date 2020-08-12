@@ -8,14 +8,65 @@ namespace TKS.Apis.LogApi.DataService.EntityTypeConfiguration
     {
         void IEntityTypeConfiguration<ApiLog>.Configure(EntityTypeBuilder<ApiLog> builder)
         {
-            builder.ToTable("ApiLog", "dbo")
-                .HasKey(p => p.Id)
-                .ForSqlServerIsClustered();
+            builder.ToTable("ApiLogs", "dbo");
 
-            //builder.Property(c => c.Title)
-            //  .HasColumnType("nvarchar(50)")
-            //  .IsRequired()
-            //  .IsUnicode();
+            builder.HasKey(p => p.Id);
+
+            builder.Property(c => c.Ip)
+              .HasColumnType("nvarchar(50)")
+              .IsRequired()
+              .IsUnicode();
+
+            builder.Property(c => c.ServerName)
+                .HasColumnType("nvarchar(30)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Path)
+                .HasColumnType("nvarchar(256)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Method)
+                .HasColumnType("nvarchar(256)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Prefix)
+                .HasColumnType("nvarchar(256)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.RequestHeaders)
+                .HasColumnType("nvarchar(4000)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.RequestContent)
+                .HasColumnType("nvarchar(65536)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.ResponseHeaders)
+                .HasColumnType("nvarchar(4000)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.ResponseContent)
+                .HasColumnType("nvarchar(65536)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.ResponseCode)
+                .HasColumnType("int")
+                .IsRequired();
+
+            builder.Property(c => c.ExecutionTimeMs)
+                .HasColumnType("int");
+
+            builder.Property(c => c.RecordedOn)
+                .HasColumnType("datetimeoffset")
+                .IsRequired();
         }
     }
 }
