@@ -25,10 +25,7 @@ namespace TKS.Apis.LogApi
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetConnectionString("LogDB");
-<<<<<<< HEAD
-=======
             services.AddEntityFrameworkSqlServer();
->>>>>>> 275d23a6805e2bdae8512b3a87f2448bad4593c3
             services.AddLogDbContext(connectionString);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
