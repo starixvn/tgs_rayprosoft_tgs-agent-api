@@ -1,4 +1,3 @@
-using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Net.Mime;
 using TKS.Apis.LogApi.Extensions;
 using TKS.Apis.LogApi.Filters;
 
@@ -25,7 +25,6 @@ namespace TKS.Apis.LogApi
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetConnectionString("LogDB");
-            //services.AddEntityFrameworkSqlServer();
             services.AddLogDbContext(connectionString);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
