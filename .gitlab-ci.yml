@@ -4,7 +4,7 @@ stages:
   - build
   - test
 variables:
-  solution: "tks.sln"
+  solution: "tgs.sln"
   
 before_script:
   - "dotnet restore $solution"
