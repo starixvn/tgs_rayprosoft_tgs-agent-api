@@ -1,2 +1,2 @@
-# turnkey-gaming-system
+# rpt is the first project for rayprosoft.
 

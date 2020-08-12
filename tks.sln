@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30330.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructures", "Infrastructures", "{59292A3F-5BAC-4741-A414-0DF26F868677}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apis", "Apis", "{C330CA2B-48D4-4571-8D65-2434B8DD8DB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogApi", "Apis\LogApi\LogApi.csproj", "{4B902759-F350-43BA-A320-070B28614029}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{D5DDCB06-E90A-4CD6-A26D-65A1DD59B0B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lobby", "Lobby", "{E5E69479-B8C6-4056-9FDB-23E5FC9B8A9F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mocksite", "Mocksite", "{D23E07AF-BCD3-46E6-B0DB-41C05DB8C185}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackOffice", "BackOffice", "{F425A138-277E-4EC1-A712-E07AFE7B1001}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GameProviers", "GameProviers", "{56F5E5E2-AE74-4A19-B3A2-21B27B5F97EB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4EB1B234-984A-41E3-9D91-7989D8BCD591}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions", "Infrastructures\Extensions\Extensions.csproj", "{3D9F61EB-58EC-4CB9-8D0D-1F9492C055BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4B902759-F350-43BA-A320-070B28614029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B902759-F350-43BA-A320-070B28614029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B902759-F350-43BA-A320-070B28614029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B902759-F350-43BA-A320-070B28614029}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D9F61EB-58EC-4CB9-8D0D-1F9492C055BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D9F61EB-58EC-4CB9-8D0D-1F9492C055BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D9F61EB-58EC-4CB9-8D0D-1F9492C055BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D9F61EB-58EC-4CB9-8D0D-1F9492C055BA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4B902759-F350-43BA-A320-070B28614029} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
+		{E5E69479-B8C6-4056-9FDB-23E5FC9B8A9F} = {D5DDCB06-E90A-4CD6-A26D-65A1DD59B0B8}
+		{D23E07AF-BCD3-46E6-B0DB-41C05DB8C185} = {D5DDCB06-E90A-4CD6-A26D-65A1DD59B0B8}
+		{F425A138-277E-4EC1-A712-E07AFE7B1001} = {D5DDCB06-E90A-4CD6-A26D-65A1DD59B0B8}
+		{3D9F61EB-58EC-4CB9-8D0D-1F9492C055BA} = {59292A3F-5BAC-4741-A414-0DF26F868677}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
+	EndGlobalSection
+EndGlobal

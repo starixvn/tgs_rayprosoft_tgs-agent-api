@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RepositoryUrl></RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <RootNamespace>TKS.Infrastructures.Extensions.UnitTests</RootNamespace>
+    <AssemblyName>TKS.Infrastructures.Extensions.UnitTests</AssemblyName>
+    <Version>3.0.0</Version>
+    <Copyright>Copyright © Asia Fusion Technology 2018</Copyright>
+    <Description>UGS.Infrastructures.Extensions.UnitTests</Description>
+    <Authors>UGS</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" Version="4.6.0" />
+    <PackageReference Include="FluentAssertions" Version="5.5.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="NSubstitute" Version="3.1.0" />
+    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
+    <PackageReference Include="TeamCity.VSTest.TestAdapter" Version="1.0.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Extensions\Extensions.csproj" />
+  </ItemGroup>
+</Project>
