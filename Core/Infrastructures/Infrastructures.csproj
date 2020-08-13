@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>TGS.Infrastructure</AssemblyName>
-    <RootNamespace>TGS.Infrastructure</RootNamespace>
+    <AssemblyName>TGS.Infrastructures</AssemblyName>
+    <RootNamespace>TGS.Infrastructures</RootNamespace>
   </PropertyGroup>
 
 </Project>
