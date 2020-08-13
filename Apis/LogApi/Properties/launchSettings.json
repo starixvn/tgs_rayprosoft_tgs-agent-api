@@ -29,9 +29,13 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/status",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "Container in Kubernetes": {
+      "commandName": "Docker",
+      "launchBrowser": true
     }
   }
 }
