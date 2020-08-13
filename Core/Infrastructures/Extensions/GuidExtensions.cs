@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 
-namespace TGS.Infrastructure.Extensions
+namespace TGS.Infrastructures.Extensions
 {
     public static class GuidExtensions
     {
@@ -20,7 +20,7 @@ namespace TGS.Infrastructure.Extensions
         }
 
         [DllImport("rpcrt4.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
-        static extern int UuidCreateSequential(out Guid guid);
+        private static extern int UuidCreateSequential(out Guid guid);
 
         public static Guid NewSequentialGuid()
         {
@@ -31,14 +31,13 @@ namespace TGS.Infrastructure.Extensions
         private static Guid NewSequentialGuidByWindows()
         {
             const int RPC_S_OK = 0;
-            Guid guid;
-            int hr = UuidCreateSequential(out guid);
+            var hr = UuidCreateSequential(out var guid);
             if (hr != RPC_S_OK)
                 throw new InvalidOperationException("UuidCreateSequential failed: " + hr);
             var s = guid.ToByteArray();
 
             // reverse 0~3
-            byte tmp = s[3];
+            var tmp = s[3];
             s[3] = s[0];
             s[0] = tmp;
 
