@@ -1,4 +1,4 @@
-﻿namespace TGS.Core.DataService
+﻿namespace TGS.Core.DataServices
 {
     //public sealed class DBContextFactory : IDesignTimeDbContextFactory<TgsRepository>
     //{

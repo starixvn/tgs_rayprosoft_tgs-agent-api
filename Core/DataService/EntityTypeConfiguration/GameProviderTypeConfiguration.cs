@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataService.Models;
+using TGS.Core.DataServices.Models;
 
-namespace TGS.Core.DataService.EntityTypeConfiguration
+namespace TGS.Core.DataServices.EntityTypeConfiguration
 {
     public class GameProviderTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<GameProvider>
     {

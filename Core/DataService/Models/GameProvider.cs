@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TGS.Core.DataService.Models
+namespace TGS.Core.DataServices.Models
 {
     public class GameProvider : BaseEntity
     {

@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using TGS.Core.DataService.EntityTypeConfiguration;
-using TGS.Core.DataService.Models;
+﻿using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.EntityTypeConfiguration;
+using TGS.Core.DataServices.Models;
 
-namespace TGS.Core.DataService
+namespace TGS.Core.DataServices
 {
     public class TgsRepository : DbContext, ITgsRepository
     {

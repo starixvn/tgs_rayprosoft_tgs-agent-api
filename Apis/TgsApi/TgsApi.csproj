@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>TGS.TgsApi</AssemblyName>
+    <RootNamespace>TGS.TgsApi</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\DataService\DataServices.csproj" />
+  </ItemGroup>
+
+
+</Project>

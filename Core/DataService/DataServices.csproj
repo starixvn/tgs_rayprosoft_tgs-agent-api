@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>TGS.Core.DataService</AssemblyName>
-    <RootNamespace>TGS.Core.DataService</RootNamespace>
+    <AssemblyName>TGS.Core.DataServices</AssemblyName>
+    <RootNamespace>TGS.Core.DataServices</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

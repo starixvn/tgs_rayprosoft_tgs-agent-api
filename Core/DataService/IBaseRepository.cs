@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace TGS.Core.DataService
+namespace TGS.Core.DataServices
 {
     public interface IBaseRepository : IDisposable
     {
