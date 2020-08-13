@@ -1,6 +1,6 @@
 using System;
 
-namespace TGS.Core.DataService.Models
+namespace TGS.Core.DataServices.Models
 {
     public class LicenseeLanguage
     {

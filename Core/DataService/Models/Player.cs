@@ -1,7 +1,7 @@
 ﻿using System;
-using TGS.Core.DataService.Enums;
+using TGS.Core.DataServices.Enums;
 
-namespace TGS.Core.DataService.Models
+namespace TGS.Core.DataServices.Models
 {
     public class Player
     {

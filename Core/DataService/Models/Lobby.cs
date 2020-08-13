@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using TGS.Core.DataService.Enums;
+using TGS.Core.DataServices.Enums;
 
-namespace TGS.Core.DataService.Models
+namespace TGS.Core.DataServices.Models
 {
     public class Lobby : BaseEntity
     {

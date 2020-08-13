@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
 using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.Extensions;
 
@@ -19,6 +20,12 @@ namespace TGS.Apis.LogApi
             _host = CreateHostBuilder(args).Build();
             ProcessDbMigration();
             _host.Run();
+
+
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

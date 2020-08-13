@@ -34,7 +34,7 @@
       "useSSL": true
     },
     "Container in Kubernetes": {
-      "commandName": "Docker",
+      "commandName": "IISExpress",
       "launchBrowser": true
     }
   }
