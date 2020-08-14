@@ -11,6 +11,10 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
             builder.ToTable("Licensees", "dbo");
             BaseConfigureProperties(builder);
 
+            builder.HasOne(p => p.Reseller)
+                .WithMany(p => p.Licensees)
+                .HasForeignKey(p => p.ResellerId);
+
         }
     }
 }

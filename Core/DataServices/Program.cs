@@ -1,5 +1,8 @@
 ﻿using EFSecondLevelCache.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -58,7 +61,20 @@ namespace TGS.Core.DataServices
 
         private static void ProcessDbMigration()
         {
-            var dbContextBuilder = new DbContextOptionsBuilder<TgsRepository>()
+            using var db = new TgsRepository(CreateDbOptionsBuilder().Options);
+            if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
+            {
+                db.Database.Migrate();
+            }
+            else if (db.Database.GetPendingMigrations().Any())
+            {
+                db.Database.Migrate();
+            }
+        }
+
+        private static DbContextOptionsBuilder<TgsRepository> CreateDbOptionsBuilder()
+        {
+            return new DbContextOptionsBuilder<TgsRepository>()
                 .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
                 .UseSqlServer(_connectionString, serverOptions =>
                 {

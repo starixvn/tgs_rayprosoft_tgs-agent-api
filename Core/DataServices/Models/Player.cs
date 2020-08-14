@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
@@ -19,14 +20,11 @@ namespace TGS.Core.DataServices.Models
         public DateTimeOffset LastActiveOn { get; set; }
         public PlayerStatus Status { get; set; }
         public int BetLimitGroupId { get; set; }
-        //public BetLimitGroup BetLimitGroup { get; set; }
         public PlayerTypes Type { get; set; }
         public string LastLoginUrl { get; set; }
         public string LastCashierUrl { get; set; }
         public string LastHelpUrl { get; set; }
         public string LastTermsUrl { get; set; }
-        //public virtual ICollection<Token> Tokens { get; set; }
-        //public virtual ICollection<Wallet> Wallets { get; set; }
-        //public virtual ICollection<RewardCampaignPlayer> RewardCampaignPlayers { get; set; }
+        public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }

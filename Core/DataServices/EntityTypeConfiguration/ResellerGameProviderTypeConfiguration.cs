@@ -8,6 +8,8 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
     {
         void IEntityTypeConfiguration<ResellerGameProvider>.Configure(EntityTypeBuilder<ResellerGameProvider> builder)
         {
+            builder.ToTable("ResellerGameProviders", "dbo");
+
             builder.HasKey(bc => new { bc.ResellerId, bc.GameProviderId });
             builder
                 .HasOne(bc => bc.GameProvider)

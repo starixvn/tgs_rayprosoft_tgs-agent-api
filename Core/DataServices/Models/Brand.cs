@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
@@ -11,15 +12,7 @@ namespace TGS.Core.DataServices.Models
 
         public string OperationalEmail { get; set; }
 
-        public string ClientId { get; set; }
-
-        public string ClientSecret { get; set; }
-
         public string TimeZoneId { get; set; }
-
-        public bool IpChecking { get; set; }
-
-        public bool SingleSession { get; set; }
 
         public Guid ResellerId { get; set; }
 
@@ -44,5 +37,7 @@ namespace TGS.Core.DataServices.Models
         public string MobileHelpUrl { get; set; }
 
         public string MobileTermsUrl { get; set; }
+
+        public virtual ICollection<BrandGame> Games { get; set; }
     }
 }

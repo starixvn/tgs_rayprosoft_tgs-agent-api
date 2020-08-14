@@ -28,7 +28,20 @@ namespace TGS.Core.DataServices
 
         DbSet<GameProviderConfiguration> GameProviderConfigurations { get; set; }
 
+        DbSet<BrandGame> BrandGames { get; set; }
+
+        DbSet<LocalizedString> LocalizedStrings { get; set; }
+
+        DbSet<Player> Players { get; set; }
+
+        DbSet<Wallet> Wallets { get; set; }
+
+        DbSet<Setting> Settings { get; set; }
+
+        DbSet<Whitelist> Whitelists { get; set; }
+
         Task<bool> CanConnectionAsync();
+
         void SetTimeoutToSeconds(int seconds);
     }
 }
