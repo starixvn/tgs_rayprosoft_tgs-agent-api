@@ -17,11 +17,5 @@ namespace TGS.Core.DataServices.Models
         public string BrandCurrencyCode { get; set; }
 
         public int DisplayOrder { get; set; }
-
-        public decimal? PlayerCapAmount { get; set; }
-
-        public decimal? BrandCapAmount { get; set; }
-
-        public decimal? QuickFundInCustomizedAmount { get; set; }
     }
 }
