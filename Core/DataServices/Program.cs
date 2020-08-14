@@ -1,6 +1,7 @@
 ﻿using EFSecondLevelCache.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +63,10 @@ namespace TGS.Core.DataServices
         {
             using var db = new TgsRepository(CreateDbOptionsBuilder().Options);
             if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
+            {
+                db.Database.Migrate();
+            }
+            else if (db.Database.GetPendingMigrations().Any())
             {
                 db.Database.Migrate();
             }
