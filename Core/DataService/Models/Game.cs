@@ -1,5 +1,5 @@
 ﻿using System;
-using TGS.Core.DataServices.Enums;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
@@ -26,8 +26,5 @@ namespace TGS.Core.DataServices.Models
         public PlatformType PlatformType { get; set; }
 
         public bool ZeroTurnoverOnTieBet { get; set; }
-
-
-
     }
 }

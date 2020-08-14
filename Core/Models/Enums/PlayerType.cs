@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace TGS.Core.DataServices.Enums
+namespace TGS.Core.Models.Enums
 {
     [Flags]
     public enum PlayerTypes : byte

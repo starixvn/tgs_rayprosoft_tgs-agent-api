@@ -1,4 +1,4 @@
-﻿namespace TGS.Core.DataServices.Enums
+﻿namespace TGS.Core.Models.Enums
 {
     public enum GameType
     {

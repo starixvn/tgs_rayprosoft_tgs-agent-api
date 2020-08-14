@@ -40,4 +40,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj" />
+  </ItemGroup>
+
 </Project>
