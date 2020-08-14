@@ -14,10 +14,8 @@ namespace TGS.Core.DataServices
         DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
         DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
         DbSet<LicenseeLanguage> ITgsRepository.LicenseeLanguages { get; set; }
-
         DbSet<ResellerCurrency> ITgsRepository.ResellerCurrencies { get; set; }
         DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
-
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
         DbSet<Language> ITgsRepository.Languages { get; set; }
         DbSet<BrandGame> ITgsRepository.BrandGames { get; set; }
