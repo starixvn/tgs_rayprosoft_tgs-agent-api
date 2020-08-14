@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataService\DataServices.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
   </ItemGroup>
 
 
