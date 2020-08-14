@@ -1,6 +1,6 @@
-﻿namespace TGS.Core.DataServices.Enums
+﻿namespace TGS.Core.Models.Enums
 {
-    public enum TgsStatus
+    public enum Status
     {
         Active = 0,
         Inactive = 1,

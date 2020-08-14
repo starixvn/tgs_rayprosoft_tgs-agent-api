@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using TGS.Core.DataServices.Enums;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
