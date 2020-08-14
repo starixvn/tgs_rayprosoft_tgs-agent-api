@@ -8,14 +8,6 @@ namespace TGS.Core.DataServices.Models
 
         public string OperationalEmail { get; set; }
 
-        public string ClientId { get; set; }
-
-        public string ClientSecret { get; set; }
-
-        public int? LicenseeLimit { get; set; }
-
-        public int? BrandLimit { get; set; }
-
         public virtual ICollection<Licensee> Licensees { get; set; }
 
         public virtual ICollection<Brand> Brands { get; set; }
@@ -26,6 +18,5 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<ResellerCurrency> Currencies { get; set; }
 
-        public bool CanConfigureMultipleGames { get; set; }
     }
 }

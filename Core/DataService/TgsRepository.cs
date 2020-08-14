@@ -45,12 +45,16 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new GameTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameProviderTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GpcTypeConfiguration());
+
             modelBuilder.ApplyConfiguration(new ResellerTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ResellerGameProviderTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LicenseeCurrencyTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LicenseeLanguageTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ResellerCurrencyTypeConfiguration());
+
             modelBuilder.ApplyConfiguration(new ResellerLanguageTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BrandTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LicenseeTypeConfiguration());
         }
     }
 }

@@ -96,12 +96,7 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Description = table.Column<string>(nullable: true),
-                    OperationalEmail = table.Column<string>(nullable: true),
-                    ClientId = table.Column<string>(nullable: true),
-                    ClientSecret = table.Column<string>(nullable: true),
-                    LicenseeLimit = table.Column<int>(nullable: true),
-                    BrandLimit = table.Column<int>(nullable: true),
-                    CanConfigureMultipleGames = table.Column<bool>(nullable: false)
+                    OperationalEmail = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -240,18 +235,18 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Licensee",
+                name: "Licensees",
                 schema: "dbo",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(30)", nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    CreatedByUsername = table.Column<string>(nullable: true),
-                    UpdatedByUsername = table.Column<string>(nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Description = table.Column<string>(nullable: true),
                     OperationalEmail = table.Column<string>(nullable: true),
                     BrandLimit = table.Column<int>(nullable: false),
@@ -259,9 +254,9 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Licensee", x => x.Id);
+                    table.PrimaryKey("PK_Licensees", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Licensee_Resellers_ResellerId",
+                        name: "FK_Licensees_Resellers_ResellerId",
                         column: x => x.ResellerId,
                         principalSchema: "dbo",
                         principalTable: "Resellers",
@@ -297,6 +292,33 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ResellerGameProviders",
+                schema: "dbo",
+                columns: table => new
+                {
+                    ResellerId = table.Column<Guid>(nullable: false),
+                    GameProviderId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResellerGameProviders", x => new { x.ResellerId, x.GameProviderId });
+                    table.ForeignKey(
+                        name: "FK_ResellerGameProviders_GameProviders_GameProviderId",
+                        column: x => x.GameProviderId,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ResellerGameProviders_Resellers_ResellerId",
+                        column: x => x.ResellerId,
+                        principalSchema: "dbo",
+                        principalTable: "Resellers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ResellerLanguages",
                 schema: "dbo",
                 columns: table => new
@@ -324,52 +346,21 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TGS.Core.DataServices.ITgsRepository.ResellerGameProviders",
-                schema: "dbo",
-                columns: table => new
-                {
-                    ResellerId = table.Column<Guid>(nullable: false),
-                    GameProviderId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TGS.Core.DataServices.ITgsRepository.ResellerGameProviders", x => new { x.ResellerId, x.GameProviderId });
-                    table.ForeignKey(
-                        name: "FK_TGS.Core.DataServices.ITgsRepository.ResellerGameProviders_GameProviders_GameProviderId",
-                        column: x => x.GameProviderId,
-                        principalSchema: "dbo",
-                        principalTable: "GameProviders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TGS.Core.DataServices.ITgsRepository.ResellerGameProviders_Resellers_ResellerId",
-                        column: x => x.ResellerId,
-                        principalSchema: "dbo",
-                        principalTable: "Resellers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Brand",
+                name: "Brands",
                 schema: "dbo",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(30)", nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    CreatedByUsername = table.Column<string>(nullable: true),
-                    UpdatedByUsername = table.Column<string>(nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Description = table.Column<string>(nullable: true),
                     OperationalEmail = table.Column<string>(nullable: true),
-                    ClientId = table.Column<string>(nullable: true),
-                    ClientSecret = table.Column<string>(nullable: true),
                     TimeZoneId = table.Column<string>(nullable: true),
-                    IpChecking = table.Column<bool>(nullable: false),
-                    SingleSession = table.Column<bool>(nullable: false),
                     ResellerId = table.Column<Guid>(nullable: false),
                     LicenseeId = table.Column<Guid>(nullable: false),
                     LoginUrl = table.Column<string>(nullable: true),
@@ -383,21 +374,21 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Brand", x => x.Id);
+                    table.PrimaryKey("PK_Brands", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Brand_Licensee_LicenseeId",
+                        name: "FK_Brands_Licensees_LicenseeId",
                         column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "Licensee",
+                        principalTable: "Licensees",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Brand_Resellers_ResellerId",
+                        name: "FK_Brands_Resellers_ResellerId",
                         column: x => x.ResellerId,
                         principalSchema: "dbo",
                         principalTable: "Resellers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -419,10 +410,10 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LicenseeCurrencies_Licensee_LicenseeId",
+                        name: "FK_LicenseeCurrencies_Licensees_LicenseeId",
                         column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "Licensee",
+                        principalTable: "Licensees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -446,10 +437,10 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "LanguageCode",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LicenseeLanguages_Licensee_LicenseeId",
+                        name: "FK_LicenseeLanguages_Licensees_LicenseeId",
                         column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "Licensee",
+                        principalTable: "Licensees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -469,10 +460,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_BrandCurrency", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BrandCurrency_Brand_BrandId",
+                        name: "FK_BrandCurrency_Brands_BrandId",
                         column: x => x.BrandId,
                         principalSchema: "dbo",
-                        principalTable: "Brand",
+                        principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -500,10 +491,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_BrandLanguage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BrandLanguage_Brand_BrandId",
+                        name: "FK_BrandLanguage_Brands_BrandId",
                         column: x => x.BrandId,
                         principalSchema: "dbo",
-                        principalTable: "Brand",
+                        principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -544,10 +535,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_Player", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Player_Brand_BrandId",
+                        name: "FK_Player_Brands_BrandId",
                         column: x => x.BrandId,
                         principalSchema: "dbo",
-                        principalTable: "Brand",
+                        principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -558,18 +549,6 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "LanguageCode",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Brand_LicenseeId",
-                schema: "dbo",
-                table: "Brand",
-                column: "LicenseeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Brand_ResellerId",
-                schema: "dbo",
-                table: "Brand",
-                column: "ResellerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BrandCurrency_BrandId",
@@ -594,6 +573,18 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "BrandLanguage",
                 column: "LanguageCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Brands_LicenseeId",
+                schema: "dbo",
+                table: "Brands",
+                column: "LicenseeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Brands_ResellerId",
+                schema: "dbo",
+                table: "Brands",
+                column: "ResellerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GameProviderConfigurations_GameProviderId",
@@ -632,12 +623,6 @@ namespace TGS.Core.DataServices.Migrations
                 column: "GameProviderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Licensee_ResellerId",
-                schema: "dbo",
-                table: "Licensee",
-                column: "ResellerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_LicenseeCurrencies_CurrencyCode",
                 schema: "dbo",
                 table: "LicenseeCurrencies",
@@ -648,6 +633,12 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "LicenseeLanguages",
                 column: "CultureCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Licensees_ResellerId",
+                schema: "dbo",
+                table: "Licensees",
+                column: "ResellerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Player_BrandId",
@@ -668,16 +659,16 @@ namespace TGS.Core.DataServices.Migrations
                 column: "CurrencyCode");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ResellerGameProviders_GameProviderId",
+                schema: "dbo",
+                table: "ResellerGameProviders",
+                column: "GameProviderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ResellerLanguages_CultureCode",
                 schema: "dbo",
                 table: "ResellerLanguages",
                 column: "CultureCode");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TGS.Core.DataServices.ITgsRepository.ResellerGameProviders_GameProviderId",
-                schema: "dbo",
-                table: "TGS.Core.DataServices.ITgsRepository.ResellerGameProviders",
-                column: "GameProviderId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -723,15 +714,15 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "ResellerGameProviders",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "ResellerLanguages",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "TGS.Core.DataServices.ITgsRepository.ResellerGameProviders",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "Brand",
+                name: "Brands",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -739,15 +730,15 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Languages",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
                 name: "GameProviders",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Licensee",
+                name: "Languages",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Licensees",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

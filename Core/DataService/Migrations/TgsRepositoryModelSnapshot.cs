@@ -29,17 +29,15 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("CashierUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ClientId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientSecret")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -49,9 +47,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("HelpUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IpChecking")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
@@ -72,16 +67,15 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(true);
 
                     b.Property<string>("OperationalEmail")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ResellerId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("SingleSession")
-                        .HasColumnType("bit");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -93,7 +87,9 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -104,7 +100,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("ResellerId");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brands","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.BrandCurrency", b =>
@@ -516,10 +512,14 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -528,7 +528,9 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(true);
 
                     b.Property<string>("OperationalEmail")
                         .HasColumnType("nvarchar(max)");
@@ -540,7 +542,9 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -549,7 +553,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("ResellerId");
 
-                    b.ToTable("Licensee");
+                    b.ToTable("Licensees","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.LicenseeCurrency", b =>
@@ -657,18 +661,6 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("BrandLimit")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("CanConfigureMultipleGames")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ClientId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientSecret")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -684,9 +676,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("LicenseeLimit")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -739,7 +728,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("GameProviderId");
 
-                    b.ToTable("TGS.Core.DataServices.ITgsRepository.ResellerGameProviders");
+                    b.ToTable("ResellerGameProviders","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.ResellerLanguage", b =>
@@ -762,13 +751,13 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
                         .WithMany("Brands")
                         .HasForeignKey("LicenseeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Reseller", "Reseller")
                         .WithMany("Brands")
                         .HasForeignKey("ResellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

@@ -8,15 +8,7 @@ namespace TGS.Core.DataServices.Models
 
         public string OperationalEmail { get; set; }
 
-        public string ClientId { get; set; }
-
-        public string ClientSecret { get; set; }
-
         public string TimeZoneId { get; set; }
-
-        public bool IpChecking { get; set; }
-
-        public bool SingleSession { get; set; }
 
         public Guid ResellerId { get; set; }
 
