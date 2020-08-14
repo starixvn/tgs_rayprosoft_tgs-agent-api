@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200814031433_initial")]
+    [Migration("20200814032615_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,9 +115,6 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("BrandCapAmount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("BrandCurrencyCode")
                         .HasColumnType("nvarchar(max)");
 
@@ -129,12 +126,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("PlayerCapAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("QuickFundInCustomizedAmount")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -593,52 +584,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("LicenseeLanguages","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Models.Lobby", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Path")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte>("PlatformType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<Guid>("ResellerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResellerId");
-
-                    b.ToTable("Lobby");
-                });
-
             modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>
                 {
                     b.Property<Guid>("Id")
@@ -934,15 +879,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
                         .WithMany("Languages")
                         .HasForeignKey("LicenseeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Models.Lobby", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Models.Reseller", "Reseller")
-                        .WithMany("Lobbies")
-                        .HasForeignKey("ResellerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

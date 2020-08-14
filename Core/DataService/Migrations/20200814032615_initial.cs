@@ -270,36 +270,6 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Lobby",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    Status = table.Column<int>(nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    CreatedByUsername = table.Column<string>(nullable: true),
-                    UpdatedByUsername = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    PlatformType = table.Column<byte>(nullable: false),
-                    Path = table.Column<string>(nullable: true),
-                    ResellerId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Lobby", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Lobby_Resellers_ResellerId",
-                        column: x => x.ResellerId,
-                        principalSchema: "dbo",
-                        principalTable: "Resellers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ResellerCurrencies",
                 schema: "dbo",
                 columns: table => new
@@ -493,10 +463,7 @@ namespace TGS.Core.DataServices.Migrations
                     BrandId = table.Column<Guid>(nullable: false),
                     CurrencyCode = table.Column<string>(nullable: true),
                     BrandCurrencyCode = table.Column<string>(nullable: true),
-                    DisplayOrder = table.Column<int>(nullable: false),
-                    PlayerCapAmount = table.Column<decimal>(nullable: true),
-                    BrandCapAmount = table.Column<decimal>(nullable: true),
-                    QuickFundInCustomizedAmount = table.Column<decimal>(nullable: true)
+                    DisplayOrder = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -683,12 +650,6 @@ namespace TGS.Core.DataServices.Migrations
                 column: "CultureCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lobby_ResellerId",
-                schema: "dbo",
-                table: "Lobby",
-                column: "ResellerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Player_BrandId",
                 schema: "dbo",
                 table: "Player",
@@ -751,10 +712,6 @@ namespace TGS.Core.DataServices.Migrations
 
             migrationBuilder.DropTable(
                 name: "LicenseeLanguages",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "Lobby",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
