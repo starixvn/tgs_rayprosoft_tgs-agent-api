@@ -6,6 +6,5 @@
         Inactive = 1,
         Archived = 2,
         Maintenance = 3,
-
     }
 }
