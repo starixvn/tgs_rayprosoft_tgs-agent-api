@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
             builder.HasKey(p => p.Id);
 
             builder.Property(c => c.Code)
-                .HasColumnType("nvarchar(50)")
+                .HasColumnType("nvarchar(10)")
                 .IsRequired()
                 .IsUnicode();
 

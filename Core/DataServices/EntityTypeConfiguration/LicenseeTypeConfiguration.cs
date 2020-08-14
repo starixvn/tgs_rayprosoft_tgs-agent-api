@@ -15,6 +15,15 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
                 .WithMany(p => p.Licensees)
                 .HasForeignKey(p => p.ResellerId);
 
+            builder.Property(c => c.Description)
+                .HasColumnType("nvarchar(128)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Status)
+                .HasColumnType("smallint")
+                .IsRequired();
+
         }
     }
 }

@@ -17,6 +17,12 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
             builder.Property(c => c.Status)
                 .HasColumnType("smallint");
 
+            builder.Property(c => c.PlaceBetTimeout)
+                .HasColumnType("int");
+
+            builder.Property(c => c.SettleBetTimeout)
+                .HasColumnType("int");
+
             builder.HasMany(p => p.Games)
                 .WithOne(p => p.GameProvider)
                 .HasForeignKey(p => p.GameProviderId);

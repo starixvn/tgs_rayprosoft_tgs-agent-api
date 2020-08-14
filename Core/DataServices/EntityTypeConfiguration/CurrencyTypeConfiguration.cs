@@ -11,6 +11,11 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
             builder.ToTable("Currecies", "dbo");
             builder.HasKey(p => p.Code);
 
+            builder.Property(c => c.Code)
+                .HasColumnType("nvarchar(10")
+                .IsRequired()
+                .IsUnicode();
+
             builder.Property(c => c.NativeName)
                 .HasColumnType("nvarchar(64)");
 

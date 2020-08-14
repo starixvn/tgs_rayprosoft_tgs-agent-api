@@ -15,6 +15,11 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
 
             builder.HasMany(c => c.Licensees)
                 .WithOne(e => e.Reseller);
+
+            builder.Property(c => c.Description)
+                .HasColumnType("nvarchar(256)")
+                .IsUnicode();
+
         }
     }
 }
