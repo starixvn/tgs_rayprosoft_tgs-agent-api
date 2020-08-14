@@ -15,7 +15,5 @@ namespace TGS.Core.DataServices.Models
         public Currency Currency { get; set; }
 
         public string BrandCurrencyCode { get; set; }
-
-        public int DisplayOrder { get; set; }
     }
 }

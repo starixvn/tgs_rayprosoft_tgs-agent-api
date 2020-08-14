@@ -10,6 +10,26 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
         {
             builder.ToTable("LocalizedStrings", "dbo");
             builder.HasKey(bc => new { bc.Context, bc.CultureCode, bc.Code });
+
+            builder.Property(c => c.Code)
+                .HasColumnType("nvarchar(200)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Context)
+                .HasColumnType("nvarchar(200)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.CultureCode)
+                .HasColumnType("nvarchar(200)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Translation)
+                .HasColumnType("nvarchar(1024)")
+                .IsRequired()
+                .IsUnicode();
         }
     }
 }

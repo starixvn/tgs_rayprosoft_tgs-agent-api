@@ -11,8 +11,6 @@ namespace TGS.Core.DataServices.Models
 
         public string Name { get; set; }
 
-        public string LocalizedName { get; set; }
-
         public virtual ICollection<BrandLanguage> BrandLanguages { get; set; }
 
         public virtual ICollection<LicenseeLanguage> LicenseeLanguages { get; set; }

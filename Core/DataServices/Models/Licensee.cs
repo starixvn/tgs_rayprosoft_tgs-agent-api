@@ -7,12 +7,8 @@ namespace TGS.Core.DataServices.Models
     public class Licensee : BaseEntity
     {
         public string Description { get; set; }
-        
+
         public Status Status { get; set; }
-
-        public string OperationalEmail { get; set; }
-
-        public int BrandLimit { get; set; }
 
         public virtual ICollection<Brand> Brands { get; set; }
 

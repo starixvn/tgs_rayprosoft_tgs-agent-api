@@ -40,6 +40,10 @@ namespace TGS.Core.DataServices
 
         DbSet<Whitelist> Whitelists { get; set; }
 
+        DbSet<GameProviderCurrency> GameProviderCurrencies { get; set; }
+
+        DbSet<GameProviderLanguage> GameProviderLanguages { get; set; }
+
         Task<bool> CanConnectionAsync();
 
         void SetTimeoutToSeconds(int seconds);

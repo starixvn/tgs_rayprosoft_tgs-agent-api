@@ -14,10 +14,8 @@ namespace TGS.Core.DataServices
         DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
         DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
         DbSet<LicenseeLanguage> ITgsRepository.LicenseeLanguages { get; set; }
-
         DbSet<ResellerCurrency> ITgsRepository.ResellerCurrencies { get; set; }
         DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
-
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
         DbSet<Language> ITgsRepository.Languages { get; set; }
         DbSet<BrandGame> ITgsRepository.BrandGames { get; set; }
@@ -26,6 +24,8 @@ namespace TGS.Core.DataServices
         DbSet<Wallet> ITgsRepository.Wallets { get; set; }
         DbSet<Setting> ITgsRepository.Settings { get; set; }
         DbSet<Whitelist> ITgsRepository.Whitelists { get; set; }
+        DbSet<GameProviderCurrency> ITgsRepository.GameProviderCurrencies { get; set; }
+        DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
 
         public TgsRepository(DbContextOptions options) : base(options)
         {
@@ -68,6 +68,10 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new WalletTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LocalizedStringTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BrandCurrencyTypeConfiguration());
+
+            modelBuilder.ApplyConfiguration(new GameProviderCurrencyTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameProviderLanguageTypeConfiguration());
         }
     }
 }

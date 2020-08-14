@@ -11,6 +11,21 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
             builder.ToTable("GameProviders", "dbo");
             BaseConfigureProperties(builder);
 
+            builder.Property(c => c.Description)
+                .HasColumnType("nvarchar(128)");
+
+            builder.Property(c => c.Status)
+                .HasColumnType("smallint");
+
+            builder.Property(c => c.PlaceBetTimeout)
+                .HasColumnType("int");
+
+            builder.Property(c => c.SettleBetTimeout)
+                .HasColumnType("int");
+
+            builder.HasMany(p => p.Games)
+                .WithOne(p => p.GameProvider)
+                .HasForeignKey(p => p.GameProviderId);
         }
     }
 }
