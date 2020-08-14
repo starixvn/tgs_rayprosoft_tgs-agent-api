@@ -10,8 +10,6 @@ namespace TGS.Core.DataServices.Models
 
         public string Description { get; set; }
 
-        public string OperationalEmail { get; set; }
-
         public string TimeZoneId { get; set; }
 
         public Guid ResellerId { get; set; }
@@ -39,5 +37,7 @@ namespace TGS.Core.DataServices.Models
         public string MobileTermsUrl { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }
+
+        public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
     }
 }
