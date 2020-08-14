@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TGS.Core.Models.Services;
 
 namespace TGS.Services.GameServices
 {
@@ -8,11 +9,16 @@ namespace TGS.Services.GameServices
 
         Task GetBalanceAsync(string gameProviderCode, string playerCode);
 
-        // Task PlaceBetAsync(BetData data);
+        Task<BetResult> LockAmountAsync(BetData data);
 
+        Task<BetResult> PlaceBetAsync(BetData data);
+
+        Task<BetResult> SettleBetAsync(BetData data);
+
+        Task<BetResult> CancelTransactionAsync(BetData data);
     }
 
-    public class GamePlayActions
+    public sealed class GamePlayActions
     {
     }
 }
