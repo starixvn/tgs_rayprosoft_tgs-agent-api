@@ -18,6 +18,10 @@ namespace TGS.Core.DataServices
 
         DbSet<LicenseeLanguage> LicenseeLanguages { get; set; }
 
+        DbSet<ResellerCurrency> ResellerCurrencies { get; set; }
+
+        DbSet<ResellerLanguage> ResellerLanguages { get; set; }
+
         DbSet<Game> Games { get; set; }
 
         DbSet<GameProvider> GameProviders { get; set; }
