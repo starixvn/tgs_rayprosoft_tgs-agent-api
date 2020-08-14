@@ -10,8 +10,8 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200814090241_initial")]
-    partial class initial
+    [Migration("20200814095410_addTables")]
+    partial class addTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -109,13 +109,13 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BrandCurrencyCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CurrencyCode")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
@@ -123,7 +123,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("CurrencyCode");
 
-                    b.ToTable("BrandCurrency");
+                    b.ToTable("BrandCurrencies","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.BrandGame", b =>
@@ -174,7 +174,7 @@ namespace TGS.Core.DataServices.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Models.Currency", b =>
                 {
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(10")
+                        .HasColumnType("nvarchar(10)")
                         .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")
@@ -204,7 +204,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("Currecies","dbo");
+                    b.ToTable("Currencies","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Game", b =>
@@ -388,12 +388,11 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.GameProviderCurrency", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("GameProviderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CurrencyCode")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
@@ -401,26 +400,23 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("GameProviderCurrencyCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("GameProviderId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("GameProviderId", "CurrencyCode");
 
                     b.HasIndex("CurrencyCode");
 
-                    b.HasIndex("GameProviderId");
-
-                    b.ToTable("GameProviderCurrency");
+                    b.ToTable("GameProviderCurrencies","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.GameProviderLanguage", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("GameProviderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CultureCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(6)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
@@ -428,19 +424,14 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("GameProviderCultureCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("GameProviderId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("LanguageCultureCode")
-                        .HasColumnType("nvarchar(6)");
+                    b.HasKey("GameProviderId", "CultureCode");
 
-                    b.HasKey("Id");
+                    b.HasIndex("CultureCode");
 
-                    b.HasIndex("GameProviderId");
-
-                    b.HasIndex("LanguageCultureCode");
-
-                    b.ToTable("GameProviderLanguage");
+                    b.ToTable("GameProviderLanguages","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Language", b =>
@@ -536,7 +527,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CurrencyCode")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("LicenseeId", "CurrencyCode");
 
@@ -722,7 +713,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CurrencyCode")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("ResellerId", "CurrencyCode");
 
@@ -981,10 +972,12 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     b.HasOne("TGS.Core.DataServices.Models.Currency", "Currency")
                         .WithMany("GameProviderCurrencies")
-                        .HasForeignKey("CurrencyCode");
+                        .HasForeignKey("CurrencyCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
-                        .WithMany()
+                        .WithMany("Currencies")
                         .HasForeignKey("GameProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -992,15 +985,17 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.GameProviderLanguage", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
-                        .WithMany()
-                        .HasForeignKey("GameProviderId")
+                    b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
+                        .WithMany("GameProviderLanguages")
+                        .HasForeignKey("CultureCode")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
-                        .WithMany("GameProviderLanguages")
-                        .HasForeignKey("LanguageCultureCode");
+                    b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
+                        .WithMany("Languages")
+                        .HasForeignKey("GameProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Licensee", b =>

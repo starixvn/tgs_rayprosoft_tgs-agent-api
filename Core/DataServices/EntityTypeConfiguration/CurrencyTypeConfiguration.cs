@@ -8,11 +8,11 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
     {
         void IEntityTypeConfiguration<Currency>.Configure(EntityTypeBuilder<Currency> builder)
         {
-            builder.ToTable("Currecies", "dbo");
+            builder.ToTable("Currencies", "dbo");
             builder.HasKey(p => p.Code);
 
             builder.Property(c => c.Code)
-                .HasColumnType("nvarchar(10")
+                .HasColumnType("nvarchar(10)")
                 .IsRequired()
                 .IsUnicode();
 

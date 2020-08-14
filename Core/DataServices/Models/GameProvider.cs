@@ -9,6 +9,8 @@ namespace TGS.Core.DataServices.Models
         public string Description { get; set; }
         public virtual ICollection<Game> Games { get; set; }
         public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
+        public virtual ICollection<GameProviderCurrency> Currencies { get; set; }
+        public virtual ICollection<GameProviderLanguage> Languages { get; set; }
         public virtual ICollection<GameProviderConfiguration> GameProviderConfigurations { get; set; }
         public bool AutoCloseRound { get; set; }
         public bool SupportTestPlayer { get; set; }

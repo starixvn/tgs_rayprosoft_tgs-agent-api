@@ -11,11 +11,11 @@ namespace TGS.Core.DataServices.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
-                name: "Currecies",
+                name: "Currencies",
                 schema: "dbo",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(10", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(10)", nullable: false),
                     Name = table.Column<string>(nullable: true),
                     NativeName = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     Symbol = table.Column<string>(type: "nvarchar(16)", nullable: true),
@@ -26,7 +26,7 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Currecies", x => x.Code);
+                    table.PrimaryKey("PK_Currencies", x => x.Code);
                 });
 
             migrationBuilder.CreateTable(
@@ -155,10 +155,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_GameProviderCurrency", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GameProviderCurrency_Currecies_CurrencyCode",
+                        name: "FK_GameProviderCurrency_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
-                        principalTable: "Currecies",
+                        principalTable: "Currencies",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -297,10 +297,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_ResellerCurrencies", x => new { x.ResellerId, x.CurrencyCode });
                     table.ForeignKey(
-                        name: "FK_ResellerCurrencies_Currecies_CurrencyCode",
+                        name: "FK_ResellerCurrencies_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
-                        principalTable: "Currecies",
+                        principalTable: "Currencies",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -423,10 +423,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_LicenseeCurrencies", x => new { x.LicenseeId, x.CurrencyCode });
                     table.ForeignKey(
-                        name: "FK_LicenseeCurrencies_Currecies_CurrencyCode",
+                        name: "FK_LicenseeCurrencies_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
-                        principalTable: "Currecies",
+                        principalTable: "Currencies",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -486,10 +486,10 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BrandCurrency_Currecies_CurrencyCode",
+                        name: "FK_BrandCurrency_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
-                        principalTable: "Currecies",
+                        principalTable: "Currencies",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -657,10 +657,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_Wallets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Wallets_Currecies_CurrencyCode",
+                        name: "FK_Wallets_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
-                        principalTable: "Currecies",
+                        principalTable: "Currencies",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -902,7 +902,7 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Currecies",
+                name: "Currencies",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
