@@ -20,6 +20,12 @@ namespace TGS.Core.DataServices
 
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
         DbSet<Language> ITgsRepository.Languages { get; set; }
+        DbSet<BrandGame> ITgsRepository.BrandGames { get; set; }
+        DbSet<LocalizedString> ITgsRepository.LocalizedStrings { get; set; }
+        DbSet<Player> ITgsRepository.Players { get; set; }
+        DbSet<Wallet> ITgsRepository.Wallets { get; set; }
+        DbSet<Setting> ITgsRepository.Settings { get; set; }
+        DbSet<Whitelist> ITgsRepository.Whitelists { get; set; }
 
         public TgsRepository(DbContextOptions options) : base(options)
         {
@@ -54,7 +60,14 @@ namespace TGS.Core.DataServices
 
             modelBuilder.ApplyConfiguration(new ResellerLanguageTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BrandTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BrandGameTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LicenseeTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlayerTypeConfiguration());
+
+            modelBuilder.ApplyConfiguration(new WhitelistTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new WalletTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SettingTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LocalizedStringTypeConfiguration());
         }
     }
 }

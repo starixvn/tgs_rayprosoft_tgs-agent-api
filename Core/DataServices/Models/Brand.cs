@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
@@ -36,5 +37,7 @@ namespace TGS.Core.DataServices.Models
         public string MobileHelpUrl { get; set; }
 
         public string MobileTermsUrl { get; set; }
+
+        public virtual ICollection<BrandGame> Games { get; set; }
     }
 }
