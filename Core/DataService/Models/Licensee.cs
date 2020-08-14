@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
     public class Licensee : BaseEntity
     {
         public string Description { get; set; }
+        
+        public Status Status { get; set; }
 
         public string OperationalEmail { get; set; }
 

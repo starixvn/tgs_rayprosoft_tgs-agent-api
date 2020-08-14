@@ -5,10 +5,9 @@ namespace TGS.Core.DataServices.Models
 {
     public class Player
     {
-        public Guid Id { get; set; }
+        public string PlayerCode { get; set; }
         public string Username { get; set; }
         public string ExternalId { get; set; }
-        public string PlayerCode { get; set; }
         public string IpAddress { get; set; }
         public string CultureCode { get; set; }
         public Language Language { get; set; }

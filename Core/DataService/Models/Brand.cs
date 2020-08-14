@@ -1,9 +1,12 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
     public class Brand : BaseEntity
     {
+        public Status Status { get; set; }
+
         public string Description { get; set; }
 
         public string OperationalEmail { get; set; }

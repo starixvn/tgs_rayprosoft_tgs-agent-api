@@ -5,17 +5,15 @@ namespace TGS.Core.DataServices.Models
 {
     public class Game : BaseEntity
     {
+        public GameStatus Status { get; set; }
+
         public string ExternalId { get; set; }
 
         public string Description { get; set; }
 
         public string EndpointPath { get; set; }
 
-        public string DemoUrl { get; set; }
-
         public string RuleUrl { get; set; }
-
-        public int DisplayOrder { get; set; }
 
         public Guid GameProviderId { get; set; }
 
@@ -25,6 +23,6 @@ namespace TGS.Core.DataServices.Models
 
         public PlatformType PlatformType { get; set; }
 
-        public bool ZeroTurnoverOnTieBet { get; set; }
+        //public bool ZeroTurnoverOnTieBet { get; set; }
     }
 }
