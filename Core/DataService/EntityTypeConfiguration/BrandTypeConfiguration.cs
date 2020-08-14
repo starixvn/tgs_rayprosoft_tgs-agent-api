@@ -8,7 +8,7 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
     {
         void IEntityTypeConfiguration<Brand>.Configure(EntityTypeBuilder<Brand> builder)
         {
-            builder.ToTable("ApiLogs", "dbo");
+            builder.ToTable("Brands", "dbo");
             BaseConfigureProperties(builder);
 
         }

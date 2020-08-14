@@ -12,6 +12,9 @@ namespace TGS.Core.DataServices
         DbSet<GameProvider> ITgsRepository.GameProviders { get; set; }
         DbSet<GameProviderConfiguration> ITgsRepository.GameProviderConfigurations { get; set; }
         DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
+        DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
+        DbSet<LicenseeLanguage> ITgsRepository.LicenseeLanguages { get; set; }
+
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
         DbSet<Language> ITgsRepository.Languages { get; set; }
 
@@ -41,6 +44,8 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new GpcTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ResellerTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ResellerGameProviderTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LicenseeCurrencyTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LicenseeLanguageTypeConfiguration());
         }
     }
 }

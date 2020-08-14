@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Models
 {
@@ -11,6 +12,14 @@ namespace TGS.Core.DataServices.Models
         public string NativeName { get; set; }
 
         public string Symbol { get; set; }
+
+        public virtual ICollection<ResellerCurrency> ResellerCurrencies { get; set; }
+
+        public virtual ICollection<LicenseeCurrency> LicenseeCurrencies { get; set; }
+
+        public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
+
+        public virtual ICollection<GameProviderCurrency> GameProviderCurrencies { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
 

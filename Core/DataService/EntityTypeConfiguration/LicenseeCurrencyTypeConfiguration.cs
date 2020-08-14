@@ -1,0 +1,23 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Models;
+
+namespace TGS.Core.DataServices.EntityTypeConfiguration
+{
+    public class LicenseeCurrencyTypeConfiguration : IEntityTypeConfiguration<LicenseeCurrency>
+    {
+        void IEntityTypeConfiguration<LicenseeCurrency>.Configure(EntityTypeBuilder<LicenseeCurrency> builder)
+        {
+            builder.ToTable("LicenseeCurrencies", "dbo");
+            builder.HasKey(bc => new { bc.LicenseeId, bc.CurrencyCode });
+            builder
+                .HasOne(bc => bc.Licensee)
+                .WithMany(c => c.Currencies)
+                .HasForeignKey(bc => bc.LicenseeId);
+            builder
+                .HasOne(bc => bc.Currency)
+                .WithMany(c => c.LicenseeCurrencies)
+                .HasForeignKey(bc => bc.CurrencyCode);
+        }
+    }
+}
