@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using TGS.Core.DataServices.Enums;
 
 namespace TGS.Core.DataServices.Models
@@ -9,17 +7,9 @@ namespace TGS.Core.DataServices.Models
     {
         public string Description { get; set; }
 
-        public string ClientId { get; set; }
-
-        public string ClientSecret { get; set; }
-
         public PlatformType PlatformType { get; set; }
 
         public string Path { get; set; }
-
-        public Guid? LobbyTemplateId { get; set; }
-
-        public virtual ICollection<BitVector32.Section> Sections { get; set; }
 
         public Guid ResellerId { get; set; }
 

@@ -9,7 +9,7 @@ namespace TGS.Core.DataServices.Models
         public int? PopupWidth { get; set; }
         public int? PopupHeight { get; set; }
         public virtual ICollection<Game> Games { get; set; }
-        public virtual ICollection<Reseller> Resellers { get; set; }
+        public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
         public virtual ICollection<GameProviderConfiguration> GameProviderConfigurations { get; set; }
         public bool AutoCloseRound { get; set; }
         public bool SupportTestPlayer { get; set; }

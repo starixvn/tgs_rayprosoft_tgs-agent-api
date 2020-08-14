@@ -1,0 +1,16 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Models;
+
+namespace TGS.Core.DataServices.EntityTypeConfiguration
+{
+    public class ResellerTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<Reseller>
+    {
+        void IEntityTypeConfiguration<Reseller>.Configure(EntityTypeBuilder<Reseller> builder)
+        {
+            builder.ToTable("Resellers", "dbo");
+            BaseConfigureProperties(builder);
+
+        }
+    }
+}

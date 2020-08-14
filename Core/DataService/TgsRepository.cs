@@ -7,11 +7,15 @@ namespace TGS.Core.DataServices
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
+        DbSet<Reseller> ITgsRepository.Resellers { get; set; }
         DbSet<Game> ITgsRepository.Games { get; set; }
         DbSet<GameProvider> ITgsRepository.GameProviders { get; set; }
         DbSet<GameProviderConfiguration> ITgsRepository.GameProviderConfigurations { get; set; }
+        DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
+        DbSet<Currency> ITgsRepository.Currencies { get; set; }
+        DbSet<Language> ITgsRepository.Languages { get; set; }
 
-        public TgsRepository(DbContextOptions options)
+        public TgsRepository(DbContextOptions options) : base(options)
         {
 
         }
@@ -30,9 +34,13 @@ namespace TGS.Core.DataServices
         {
             modelBuilder.HasDefaultSchema("dbo");
 
+            modelBuilder.ApplyConfiguration(new CurrencyTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LanguageTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameProviderTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GpcTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ResellerTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ResellerGameProviderTypeConfiguration());
         }
     }
 }

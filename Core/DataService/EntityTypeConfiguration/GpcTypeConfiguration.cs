@@ -10,7 +10,6 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
         {
             builder.ToTable("GameProviderConfigurations", "dbo");
             BaseConfigureProperties(builder);
-
         }
     }
 }

@@ -22,7 +22,7 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<Lobby> Lobbies { get; set; }
 
-        public virtual ICollection<GameProvider> GameProviders { get; set; }
+        public virtual ICollection<ResellerGameProvider> GameProviders { get; set; }
 
         public virtual ICollection<ResellerLanguage> Languages { get; set; }
 
