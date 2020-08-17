@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Data.Common;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -51,7 +50,7 @@ namespace TGS.Core.DataServices
             return Database.BeginTransactionAsync(level);
         }
 
-        DbConnection IBaseRepository.GetDbConnection()
+        IDbConnection IBaseRepository.GetDbConnection()
         {
             return Database.GetDbConnection();
         }

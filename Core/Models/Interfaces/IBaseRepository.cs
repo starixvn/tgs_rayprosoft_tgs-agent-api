@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Data.Common;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -14,6 +13,6 @@ namespace TGS.Core.Models.Interfaces
 
         Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level);
 
-        DbConnection GetDbConnection();
+        IDbConnection GetDbConnection();
     }
 }

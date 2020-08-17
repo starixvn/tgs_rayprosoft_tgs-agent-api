@@ -2,7 +2,6 @@
 using System.Data;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.Models.Interfaces;
 
