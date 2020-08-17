@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Services
+namespace TGS.Core.Models.Services.Games
 {
     public class TransactionData
     {
