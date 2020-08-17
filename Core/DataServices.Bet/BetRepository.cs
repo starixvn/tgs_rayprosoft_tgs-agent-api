@@ -35,7 +35,7 @@ namespace TGS.Core.DataServices.Bet
             return Database.BeginTransactionAsync(level);
         }
 
-        DbConnection IBaseRepository.GetDbConnection()
+        IDbConnection IBaseRepository.GetDbConnection()
         {
             return Database.GetDbConnection();
         }
