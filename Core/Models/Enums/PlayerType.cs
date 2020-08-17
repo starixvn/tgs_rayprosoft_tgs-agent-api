@@ -11,10 +11,10 @@ namespace TGS.Core.Models.Enums
         RealPlayer = 1,
         [Description("Operator Test Player")]
         OperatorTestPlayer = 2,
-        [Description("UGS Test Player")]
-        UgsTestPlayer = 4,
-        ExcludeUgsTestPlayer = RealPlayer | OperatorTestPlayer,
-        TestPlayers = OperatorTestPlayer | UgsTestPlayer,
-        All = RealPlayer | OperatorTestPlayer | UgsTestPlayer
+        [Description("TGS Test Player")]
+        TgsTestPlayer = 3,
+        ExcludeTgsTestPlayer = RealPlayer | OperatorTestPlayer,
+        TestPlayers = OperatorTestPlayer | TgsTestPlayer,
+        All = RealPlayer | OperatorTestPlayer | TgsTestPlayer
     }
 }

@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Runtime.ExceptionServices;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using TGS.Infrastructures.Extensions;
+using TGS.Core.Models.Interfaces;
 
-namespace TGS.Core.DataServices
+namespace TGS.Services.Operations
 {
     public interface ITransactionManager
     {
@@ -20,7 +17,7 @@ namespace TGS.Core.DataServices
             Func<TContext, IDbContextTransaction, Task<TResult>> execute,
             Func<TContext, TResult, Task> onPostCommit = null,
             Func<TContext, TResult, Exception, Task> onPostRollback = null)
-            where TContext : DbContext;
+            where TContext : IBaseRepository;
     }
 
     public sealed class TransactionManager : ITransactionManager
@@ -41,7 +38,7 @@ namespace TGS.Core.DataServices
             Func<TContext, TResult, Exception, Task> onPostRollback)
         {
             await using var context = contextFactory();
-            await using var transaction = await context.Database.BeginTransactionAsync(level);
+            await using var transaction = await context.BeginTransactionAsync(level);
             ExceptionDispatchInfo errorInfo;
             TResult result = default;
 

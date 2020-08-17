@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Bet.Models;
+using TGS.Core.Models.Interfaces;
 
 namespace TGS.Core.DataServices.Bet
 {
-    public interface IBetRepository
+    public interface IBetRepository : IBaseRepository
     {
         DbSet<Round> Rounds { get; set; }
 
@@ -13,9 +14,5 @@ namespace TGS.Core.DataServices.Bet
         DbSet<GameAction> GameActions { get; set; }
 
         DbSet<GameActionBatch> GameActionBatches { get; set; }
-
-        Task<bool> CanConnectionAsync();
-
-        void SetTimeoutToSeconds(int seconds);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Core.Models.Services
+namespace TGS.Core.Models.Services.Games
 {
     public class BetData
     {
