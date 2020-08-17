@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Models.Interfaces;
 
 namespace TGS.Core.DataServices
 {
-    public interface ITgsRepository
+    public interface ITgsRepository : IBaseRepository
     {
         DbSet<Currency> Currencies { get; set; }
 
@@ -43,9 +43,5 @@ namespace TGS.Core.DataServices
         DbSet<GameProviderCurrency> GameProviderCurrencies { get; set; }
 
         DbSet<GameProviderLanguage> GameProviderLanguages { get; set; }
-
-        Task<bool> CanConnectionAsync();
-
-        void SetTimeoutToSeconds(int seconds);
     }
 }
