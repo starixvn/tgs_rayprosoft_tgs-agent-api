@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.TgsApi.Controllers.Message;
 using TGS.Core.DataServices;
+using TGS.Core.DataServices.Bet;
 
 namespace TGS.Apis.TgsApi.Controllers
 {
@@ -13,11 +14,13 @@ namespace TGS.Apis.TgsApi.Controllers
     [ApiController]
     public class StatusController : ControllerBase
     {
-        private readonly ITgsRepository _repository;
+        private readonly ITgsRepository _tgpRepository;
+        private readonly IBetRepository _betRepository;
 
-        public StatusController(ITgsRepository repository)
+        public StatusController(ITgsRepository tgpRepository, IBetRepository betRepository)
         {
-            _repository = repository;
+            _tgpRepository = tgpRepository;
+            _betRepository = betRepository;
         }
 
         [HttpGet]
@@ -33,7 +36,8 @@ namespace TGS.Apis.TgsApi.Controllers
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
-                CanConnectDb = await _repository.CanConnectionAsync()
+                CanConnectTgsDb = await _tgpRepository.CanConnectionAsync(),
+                CanConnectBetDb = await _betRepository.CanConnectionAsync()
             };
         }
     }

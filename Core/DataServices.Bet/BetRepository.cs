@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Bet
         DbSet<GameAction> IBetRepository.GameActions { get; set; }
         DbSet<GameActionBatch> IBetRepository.GameActionBatches { get; set; }
 
-        public BetRepository(DbContextOptions options) : base(options)
+        public BetRepository(DbContextOptions<BetRepository> options) : base(options)
         {
 
         }

@@ -1,50 +1,21 @@
 ﻿using EFSecondLevelCache.Core;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices;
+using TGS.Core.DataServices.Bet;
 
 namespace TGS.Apis.TgsApi.Extensions
 {
     public static class ServiceExtensions
     {
         public static IServiceCollection AddServices(this IServiceCollection services,
-            string connectionString)
+            string tgsConnectionString,
+            string betConnectionString)
         {
             services.AddEntityFrameworkSqlServer();
             services.AddEFSecondLevelCache();
-            services.AddTgsRepository(connectionString);
-            AddDbMigration(connectionString);
-            services.AddScoped<ITgsRepository, TgsRepository>();
+            services.AddBetRepository(betConnectionString);
+            services.AddTgsRepository(tgsConnectionString);
             return services;
-        }
-
-        private static void AddDbMigration(string connectionString)
-        {
-            using var db = new TgsRepository(CreateDbOptionsBuilder(connectionString).Options);
-            if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
-            {
-                db.Database.Migrate();
-            }
-            else if (db.Database.GetPendingMigrations().Any())
-            {
-                db.Database.Migrate();
-            }
-        }
-
-        private static DbContextOptionsBuilder<TgsRepository> CreateDbOptionsBuilder(string connectionString)
-        {
-            return new DbContextOptionsBuilder<TgsRepository>()
-                .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                .UseSqlServer(connectionString, serverOptions =>
-                {
-                    serverOptions.CommandTimeout(5 * 60);
-                    serverOptions.EnableRetryOnFailure(3);
-                    serverOptions.MigrationsHistoryTable("_MigrationsHistory", "dbo");
-                });
         }
     }
 }

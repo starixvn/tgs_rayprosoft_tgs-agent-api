@@ -8,6 +8,7 @@
         public string Environment { get; set; }
         public string OsVersion { get; set; }
         public int ProcessCount { get; set; }
-        public bool CanConnectDb { get; set; }
+        public bool CanConnectTgsDb { get; set; }
+        public bool CanConnectBetDb { get; set; }
     }
 }
