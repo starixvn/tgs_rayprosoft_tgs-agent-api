@@ -20,44 +20,29 @@ namespace TGS.Core.DataServices
                     builder.AddConsole();
                     builder.SetMinimumLevel(LogLevel.Information);
                 }));
-                option.EnableSensitiveDataLogging(true);
+
+                option.EnableSensitiveDataLogging();
 #endif
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(180);
                     serverOption.EnableRetryOnFailure(3);
+                    serverOption.MigrationsHistoryTable("_MigrationsHistory", "dbo");
                 });
+
+                using var db = new TgsRepository((DbContextOptions<TgsRepository>)option.Options);
+
+                var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                                db.Database.GetPendingMigrations().Any();
+
+                if (isMigrate)
+                {
+                    db.Database.Migrate();
+                }
+
             }, 128);
 
-            AddTgsDbMigration(connectionString);
-            services.AddScoped<ITgsRepository, TgsRepository>();
-
             return services;
-        }
-
-        private static void AddTgsDbMigration(string connectionString)
-        {
-            using var db = new TgsRepository(CreateTgsDbOptionsBuilder(connectionString).Options);
-            if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
-            {
-                db.Database.Migrate();
-            }
-            else if (db.Database.GetPendingMigrations().Any())
-            {
-                db.Database.Migrate();
-            }
-        }
-
-        private static DbContextOptionsBuilder<TgsRepository> CreateTgsDbOptionsBuilder(string connectionString)
-        {
-            return new DbContextOptionsBuilder<TgsRepository>()
-                .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                .UseSqlServer(connectionString, serverOptions =>
-                {
-                    serverOptions.CommandTimeout(5 * 60);
-                    serverOptions.EnableRetryOnFailure(3);
-                    serverOptions.MigrationsHistoryTable("_MigrationsHistory", "dbo");
-                });
         }
     }
 }
