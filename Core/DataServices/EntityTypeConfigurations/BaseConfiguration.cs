@@ -11,22 +11,22 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(p => p.Id).IsClustered(false); ;
 
             builder.Property(c => c.Code)
-                .HasColumnType("nvarchar(10)")
+                .HasColumnType("nvarchar(255)")
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Name)
-                .HasColumnType("nvarchar(30)")
+                .HasColumnType("nvarchar(255)")
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType("nvarchar(256)")
+                .HasColumnType("nvarchar(255)")
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType("nvarchar(256)")
+                .HasColumnType("nvarchar(255)")
                 .IsRequired()
                 .IsUnicode();
 
