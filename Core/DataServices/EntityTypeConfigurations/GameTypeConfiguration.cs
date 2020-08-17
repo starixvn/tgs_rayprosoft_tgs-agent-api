@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Models;
 
-namespace TGS.Core.DataServices.EntityTypeConfiguration
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
     public class GameTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<Game>
     {

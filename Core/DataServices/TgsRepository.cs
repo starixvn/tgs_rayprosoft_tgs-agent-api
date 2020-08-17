@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.EntityTypeConfiguration;
+using TGS.Core.DataServices.EntityTypeConfigurations;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices

@@ -2,27 +2,27 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Models;
 
-namespace TGS.Core.DataServices.EntityTypeConfiguration
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class LanguageTypeConfiguration : IEntityTypeConfiguration<Language>
+    public class WhitelistTypeConfiguration : IEntityTypeConfiguration<Whitelist>
     {
-        void IEntityTypeConfiguration<Language>.Configure(EntityTypeBuilder<Language> builder)
+        void IEntityTypeConfiguration<Whitelist>.Configure(EntityTypeBuilder<Whitelist> builder)
         {
-            builder.ToTable("Languages", "dbo");
-            builder.HasKey(p => p.CultureCode);
+            builder.ToTable("Whitelists", "dbo");
+            builder.HasKey(bc => bc.Id);
 
-            builder.Property(c => c.CultureCode)
-                .HasColumnType("nvarchar(6)")
+            builder.Property(c => c.IpAddress)
+                .HasColumnType("nvarchar(64)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.LanguageCode)
-                .HasColumnType("nvarchar(10)")
+            builder.Property(c => c.Description)
+                .HasColumnType("nvarchar(256)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.Name)
-                .HasColumnType("nvarchar(30)")
+            builder.Property(c => c.InternalNote)
+                .HasColumnType("nvarchar(256)")
                 .IsRequired()
                 .IsUnicode();
 
