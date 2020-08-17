@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Core\Models\Model
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices", "Core\DataServices\DataServices.csproj", "{23A90D5D-81E9-4ABE-8B7F-36A9C1176552}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataServices.Bet", "Core\DataServices.Bet\DataServices.Bet.csproj", "{B3772AA4-2DAB-443A-A797-463E39EAF713}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{23A90D5D-81E9-4ABE-8B7F-36A9C1176552}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23A90D5D-81E9-4ABE-8B7F-36A9C1176552}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23A90D5D-81E9-4ABE-8B7F-36A9C1176552}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,6 +84,7 @@ Global
 		{85728D57-9FE6-439C-A6CA-F01E1D164E7F} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{3763ECF4-01E1-416E-BAAC-887FBB939516} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{23A90D5D-81E9-4ABE-8B7F-36A9C1176552} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
+		{B3772AA4-2DAB-443A-A797-463E39EAF713} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
