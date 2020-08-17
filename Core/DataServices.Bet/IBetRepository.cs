@@ -8,6 +8,8 @@ namespace TGS.Core.DataServices.Bet
     {
         DbSet<Round> Rounds { get; set; }
 
+        DbSet<RoundDetail> RoundDetails { get; set; }
+
         DbSet<GameAction> GameActions { get; set; }
 
         DbSet<GameActionBatch> GameActionBatches { get; set; }

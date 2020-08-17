@@ -29,6 +29,7 @@ namespace TGS.Core.DataServices.Bet.Models
         public virtual ICollection<GameAction> FollowUpGameActions { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
         public DateTimeOffset? SentOn { get; set; }
+        public DateTime? StoredOn { get; set; }
         public string PlayerIp { get; set; }
         public Guid? BrandId { get; set; }
         public decimal? Amount { get; set; }

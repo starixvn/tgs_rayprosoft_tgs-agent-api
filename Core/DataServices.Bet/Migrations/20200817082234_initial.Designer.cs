@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Bet;
 namespace TGS.Core.DataServices.Bet.Migrations
 {
     [DbContext(typeof(BetRepository))]
-    [Migration("20200817051300_initial")]
+    [Migration("20200817082234_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,34 +29,40 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal?>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .IsRequired()
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<decimal?>("Balance")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<Guid?>("BetId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BetType")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<Guid?>("BrandId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("ClosingRoundExplicitRequest")
                         .HasColumnType("bit");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ExternalBetId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("ExternalGameActionGroupId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ExternalTransactionId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid?>("GameActionBatchId")
                         .HasColumnType("uniqueidentifier");
@@ -65,22 +71,24 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("GameProviderConfiguration")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<Guid>("GameProviderConfigurationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("GrossGamingRevenue")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<bool>("IsClosingRound")
                         .HasColumnType("bit");
 
                     b.Property<string>("PlayerIp")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("varchar(128)");
 
                     b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<Guid?>("ReferencedGameActionId")
                         .HasColumnType("uniqueidentifier");
@@ -89,19 +97,23 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("SentOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
+
+                    b.Property<DateTime?>("StoredOn")
+                        .IsRequired()
+                        .HasColumnType("datetime");
 
                     b.Property<Guid?>("TokenId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Turnover")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint");
 
                     b.Property<decimal>("UnsettledBets")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<Guid>("WalletId")
                         .HasColumnType("uniqueidentifier");
@@ -125,22 +137,24 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<string>("ErrorDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1024)");
 
-                    b.Property<int>("ErrorType")
-                        .HasColumnType("int");
+                    b.Property<short>("ErrorType")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("ErrorsJson")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ExternalId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("GameProviderConfiguration")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<int>("TransactionsCount")
                         .HasColumnType("int");
@@ -157,77 +171,100 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AdditionalData")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTimeOffset?>("AggregatedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<decimal?>("BetAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<Guid?>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("ClosedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<decimal?>("Commission")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(10)")
+                        .IsUnicode(true);
 
                     b.Property<DateTimeOffset?>("ExternalAggregatedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<DateTimeOffset?>("ExternalClosedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<DateTimeOffset?>("ExternalCreatedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<string>("ExternalRoundId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("GameCode")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .IsUnicode(true);
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("GameName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .IsUnicode(true);
 
                     b.Property<string>("GameProviderCode")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .IsUnicode(true);
 
                     b.Property<string>("GameProviderConfiguration")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
                     b.Property<Guid>("GameProviderConfigurationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("GameProviderName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .IsUnicode(true);
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint");
 
                     b.Property<decimal?>("GrossGamingRevenue")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
-                    b.Property<decimal?>("JackpotContributionConvertedAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<short>("PlatformType")
+                        .HasColumnType("smallint");
 
-                    b.Property<Guid?>("SessionId")
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("varchar(16)")
+                        .IsUnicode(true);
+
+                    b.Property<short>("PlayerTypes")
+                        .HasColumnType("smallint");
+
+                    b.Property<Guid>("RoundDetailId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
 
                     b.Property<decimal?>("TiebetAdjustment")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 6)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset(7)");
 
                     b.Property<Guid>("WalletId")
                         .HasColumnType("uniqueidentifier");
@@ -238,19 +275,52 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.ToTable("Rounds","dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdditionalData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
+
+                    b.HasIndex("RoundId")
+                        .IsUnique();
+
+                    b.ToTable("RoundDetails","dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Bet.Models.GameActionBatch", "GameActionBatch")
                         .WithMany("GameActions")
-                        .HasForeignKey("GameActionBatchId");
+                        .HasForeignKey("GameActionBatchId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TGS.Core.DataServices.Bet.Models.GameAction", "ReferencedGameAction")
                         .WithMany("FollowUpGameActions")
-                        .HasForeignKey("ReferencedGameActionId");
+                        .HasForeignKey("ReferencedGameActionId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
                         .WithMany("GameActions")
                         .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
+                        .WithOne("RoundDetail")
+                        .HasForeignKey("TGS.Core.DataServices.Bet.Models.RoundDetail", "RoundId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
