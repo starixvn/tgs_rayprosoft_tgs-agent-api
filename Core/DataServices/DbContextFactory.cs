@@ -24,7 +24,7 @@ namespace TGS.Core.DataServices
                 {
                     serverOptions.CommandTimeout(5 * 60);
                     serverOptions.EnableRetryOnFailure(3);
-                    serverOptions.MigrationsHistoryTable("_EFCoreMigrationHistory", "dbo");
+                    serverOptions.MigrationsHistoryTable("_MigrationHistory", "dbo");
                 });
 
             return new TgsRepository(dbContextBuilder.Options);

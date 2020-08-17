@@ -2,15 +2,21 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Models;
 
-namespace TGS.Core.DataServices.EntityTypeConfiguration
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class BaseConfiguration
+    public class LanguageTypeConfiguration : IEntityTypeConfiguration<Language>
     {
-        protected void BaseConfigureProperties<T>(EntityTypeBuilder<T> builder) where T : BaseEntity
+        void IEntityTypeConfiguration<Language>.Configure(EntityTypeBuilder<Language> builder)
         {
-            builder.HasKey(p => p.Id).IsClustered(false); ;
+            builder.ToTable("Languages", "dbo");
+            builder.HasKey(p => p.CultureCode);
 
-            builder.Property(c => c.Code)
+            builder.Property(c => c.CultureCode)
+                .HasColumnType("nvarchar(6)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.LanguageCode)
                 .HasColumnType("nvarchar(10)")
                 .IsRequired()
                 .IsUnicode();

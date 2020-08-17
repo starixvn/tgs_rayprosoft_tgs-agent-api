@@ -2,27 +2,21 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Models;
 
-namespace TGS.Core.DataServices.EntityTypeConfiguration
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class WhitelistTypeConfiguration : IEntityTypeConfiguration<Whitelist>
+    public class BaseConfiguration
     {
-        void IEntityTypeConfiguration<Whitelist>.Configure(EntityTypeBuilder<Whitelist> builder)
+        protected void BaseConfigureProperties<T>(EntityTypeBuilder<T> builder) where T : BaseEntity
         {
-            builder.ToTable("Whitelists", "dbo");
-            builder.HasKey(bc => bc.Id);
+            builder.HasKey(p => p.Id).IsClustered(false); ;
 
-            builder.Property(c => c.IpAddress)
-                .HasColumnType("nvarchar(64)")
+            builder.Property(c => c.Code)
+                .HasColumnType("nvarchar(10)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.Description)
-                .HasColumnType("nvarchar(256)")
-                .IsRequired()
-                .IsUnicode();
-
-            builder.Property(c => c.InternalNote)
-                .HasColumnType("nvarchar(256)")
+            builder.Property(c => c.Name)
+                .HasColumnType("nvarchar(30)")
                 .IsRequired()
                 .IsUnicode();
 
