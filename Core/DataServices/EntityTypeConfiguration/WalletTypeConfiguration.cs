@@ -27,7 +27,7 @@ namespace TGS.Core.DataServices.EntityTypeConfiguration
                 .IsUnicode();
 
             builder.Property(c => c.Balance)
-                .HasColumnType("decimal")
+                .HasColumnType("decimal(18,6)")
                 .IsRequired()
                 .IsUnicode();
 

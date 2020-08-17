@@ -50,7 +50,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GameProviders", x => x.Id);
+                    table.PrimaryKey("PK_GameProviders", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,7 +89,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Resellers", x => x.Id);
+                    table.PrimaryKey("PK_Resellers", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                 });
 
             migrationBuilder.CreateTable(
@@ -130,7 +132,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GameProviderConfigurations", x => x.Id);
+                    table.PrimaryKey("PK_GameProviderConfigurations", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
                         name: "FK_GameProviderConfigurations_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
@@ -141,28 +144,28 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GameProviderCurrency",
+                name: "GameProviderCurrencies",
                 schema: "dbo",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
                     GameProviderId = table.Column<Guid>(nullable: false),
-                    CurrencyCode = table.Column<string>(nullable: true),
+                    CurrencyCode = table.Column<string>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false),
                     GameProviderCurrencyCode = table.Column<string>(nullable: true),
                     DisplayOrder = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GameProviderCurrency", x => x.Id);
+                    table.PrimaryKey("PK_GameProviderCurrencies", x => new { x.GameProviderId, x.CurrencyCode });
                     table.ForeignKey(
-                        name: "FK_GameProviderCurrency_Currencies_CurrencyCode",
+                        name: "FK_GameProviderCurrencies_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
                         principalTable: "Currencies",
                         principalColumn: "Code",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GameProviderCurrency_GameProviders_GameProviderId",
+                        name: "FK_GameProviderCurrencies_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
@@ -193,7 +196,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Games", x => x.Id);
+                    table.PrimaryKey("PK_Games", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
                         name: "FK_Games_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
@@ -204,34 +208,33 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GameProviderLanguage",
+                name: "GameProviderLanguages",
                 schema: "dbo",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
                     GameProviderId = table.Column<Guid>(nullable: false),
-                    CultureCode = table.Column<string>(nullable: true),
-                    LanguageCultureCode = table.Column<string>(nullable: true),
+                    CultureCode = table.Column<string>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false),
                     GameProviderCultureCode = table.Column<string>(nullable: true),
                     DisplayOrder = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GameProviderLanguage", x => x.Id);
+                    table.PrimaryKey("PK_GameProviderLanguages", x => new { x.GameProviderId, x.CultureCode });
                     table.ForeignKey(
-                        name: "FK_GameProviderLanguage_GameProviders_GameProviderId",
+                        name: "FK_GameProviderLanguages_Languages_CultureCode",
+                        column: x => x.CultureCode,
+                        principalSchema: "dbo",
+                        principalTable: "Languages",
+                        principalColumn: "CultureCode",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GameProviderLanguages_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GameProviderLanguage_Languages_LanguageCultureCode",
-                        column: x => x.LanguageCultureCode,
-                        principalSchema: "dbo",
-                        principalTable: "Languages",
-                        principalColumn: "CultureCode",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -275,7 +278,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Licensees", x => x.Id);
+                    table.PrimaryKey("PK_Licensees", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
                         name: "FK_Licensees_Resellers_ResellerId",
                         column: x => x.ResellerId,
@@ -394,7 +398,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Brands", x => x.Id);
+                    table.PrimaryKey("PK_Brands", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
                         name: "FK_Brands_Licensees_LicenseeId",
                         column: x => x.LicenseeId,
@@ -466,27 +471,27 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandCurrency",
+                name: "BrandCurrencies",
                 schema: "dbo",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     BrandId = table.Column<Guid>(nullable: false),
                     CurrencyCode = table.Column<string>(nullable: true),
-                    BrandCurrencyCode = table.Column<string>(nullable: true)
+                    BrandCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandCurrency", x => x.Id);
+                    table.PrimaryKey("PK_BrandCurrencies", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BrandCurrency_Brands_BrandId",
+                        name: "FK_BrandCurrencies_Brands_BrandId",
                         column: x => x.BrandId,
                         principalSchema: "dbo",
                         principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BrandCurrency_Currencies_CurrencyCode",
+                        name: "FK_BrandCurrencies_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
                         principalTable: "Currencies",
@@ -648,8 +653,7 @@ namespace TGS.Core.DataServices.Migrations
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     CurrencyCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
                     ExternalCurrencyCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Balance = table.Column<decimal>(type: "decimal", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     CreatedOn = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     LastModifiedOn = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
@@ -673,15 +677,15 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BrandCurrency_BrandId",
+                name: "IX_BrandCurrencies_BrandId",
                 schema: "dbo",
-                table: "BrandCurrency",
+                table: "BrandCurrencies",
                 column: "BrandId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BrandCurrency_CurrencyCode",
+                name: "IX_BrandCurrencies_CurrencyCode",
                 schema: "dbo",
-                table: "BrandCurrency",
+                table: "BrandCurrencies",
                 column: "CurrencyCode");
 
             migrationBuilder.CreateIndex(
@@ -721,28 +725,16 @@ namespace TGS.Core.DataServices.Migrations
                 column: "GameProviderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GameProviderCurrency_CurrencyCode",
+                name: "IX_GameProviderCurrencies_CurrencyCode",
                 schema: "dbo",
-                table: "GameProviderCurrency",
+                table: "GameProviderCurrencies",
                 column: "CurrencyCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GameProviderCurrency_GameProviderId",
+                name: "IX_GameProviderLanguages_CultureCode",
                 schema: "dbo",
-                table: "GameProviderCurrency",
-                column: "GameProviderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameProviderLanguage_GameProviderId",
-                schema: "dbo",
-                table: "GameProviderLanguage",
-                column: "GameProviderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameProviderLanguage_LanguageCultureCode",
-                schema: "dbo",
-                table: "GameProviderLanguage",
-                column: "LanguageCultureCode");
+                table: "GameProviderLanguages",
+                column: "CultureCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Games_GameProviderId",
@@ -838,7 +830,7 @@ namespace TGS.Core.DataServices.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BrandCurrency",
+                name: "BrandCurrencies",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -854,11 +846,11 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "GameProviderCurrency",
+                name: "GameProviderCurrencies",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "GameProviderLanguage",
+                name: "GameProviderLanguages",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

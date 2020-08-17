@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TGS.Core.DataServices;
-using TGS.TgsApi.Filters;
+using TGS.Apis.TgsApi.Extensions;
+using TGS.Apis.TgsApi.Filters;
 
-namespace TGS.TgsApi
+namespace TGS.Apis.TgsApi
 {
     public class Startup
     {
@@ -24,9 +24,7 @@ namespace TGS.TgsApi
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetConnectionString("TGS");
-            services.AddEntityFrameworkSqlServer();
-
-            services.AddTgsRepository(connectionString);
+            services.AddServices(connectionString);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>

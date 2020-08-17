@@ -1,25 +1,16 @@
-using EFSecondLevelCache.Core;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TGS.Core.DataServices;
 
-namespace TGS.TgsApi
+namespace TGS.Apis.TgsApi
 {
     public class Program
     {
-        private static string _connectionString;
-        private static IHost _host;
-        public static void Main(string[] args)
+        public static Task Main(string[] args)
         {
-            _host = CreateHostBuilder(args).Build();
-            ProcessDbMigration();
-            _host.Run();
+            return CreateHostBuilder(args).Build().RunAsync();
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args)
@@ -29,6 +20,10 @@ namespace TGS.TgsApi
                            {
                                config.AddEnvironmentVariables();
                            })
+                           .ConfigureWebHostDefaults(webBuilder =>
+                           {
+                               webBuilder.UseStartup<Startup>();
+                           })
                            .ConfigureAppConfiguration((hostContext, config) =>
                            {
                                config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
@@ -37,12 +32,6 @@ namespace TGS.TgsApi
                                {
                                    config.AddCommandLine(args);
                                }
-                           })
-                           .ConfigureServices((hostcontext, services) =>
-                           {
-                               services.AddEFSecondLevelCache();
-                               _connectionString = hostcontext.Configuration.GetConnectionString("TGS");
-                               services.AddTgsRepository(_connectionString);
                            })
                            .ConfigureLogging((hostcontext, loggin) =>
                            {
@@ -55,29 +44,6 @@ namespace TGS.TgsApi
                            });
         }
 
-        private static void ProcessDbMigration()
-        {
-            using var db = new TgsRepository(CreateDbOptionsBuilder().Options);
-            if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
-            {
-                db.Database.Migrate();
-            }
-            else if (db.Database.GetPendingMigrations().Any())
-            {
-                db.Database.Migrate();
-            }
-        }
 
-        private static DbContextOptionsBuilder<TgsRepository> CreateDbOptionsBuilder()
-        {
-            return new DbContextOptionsBuilder<TgsRepository>()
-                .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                .UseSqlServer(_connectionString, serverOptions =>
-                {
-                    serverOptions.CommandTimeout(5 * 60);
-                    serverOptions.EnableRetryOnFailure(3);
-                    serverOptions.MigrationsHistoryTable("_EFCoreMigrationHistory", "dbo");
-                });
-        }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using TGS.TgsApi.Exceptions;
+using TGS.Apis.TgsApi.Exceptions;
 
-namespace TGS.TgsApi.Filters
+namespace TGS.Apis.TgsApi.Filters
 {
     public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
     {

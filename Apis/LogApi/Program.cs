@@ -29,7 +29,7 @@ namespace TGS.Apis.LogApi
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    _connectionString = hostContext.Configuration.GetConnectionString("LogDb");
+                    _connectionString = hostContext.Configuration.GetConnectionString("Log");
                     services.AddLogDbContext(_connectionString);
                 })
         ;

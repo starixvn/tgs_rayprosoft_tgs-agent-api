@@ -91,7 +91,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
 
                     b.HasIndex("LicenseeId");
 
@@ -261,7 +262,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
 
                     b.HasIndex("GameProviderId");
 
@@ -318,7 +320,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
 
                     b.ToTable("GameProviders","dbo");
                 });
@@ -377,7 +380,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
 
                     b.HasIndex("GameProviderId");
 
@@ -512,7 +516,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
 
                     b.HasIndex("ResellerId");
 
@@ -700,7 +705,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
 
                     b.ToTable("Resellers","dbo");
                 });
@@ -792,7 +798,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Balance")
-                        .HasColumnType("decimal")
+                        .HasColumnType("decimal(18,6)")
                         .IsUnicode(true);
 
                     b.Property<string>("CreatedOn")
@@ -814,9 +820,6 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(32)")
                         .IsUnicode(true);
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()

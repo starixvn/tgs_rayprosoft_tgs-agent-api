@@ -3,10 +3,10 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.TgsApi.Controllers.Message;
 using TGS.Core.DataServices;
-using TGS.TgsApi.Controllers.Message;
 
-namespace TGS.TgsApi.Controllers
+namespace TGS.Apis.TgsApi.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>TGS.TgsApi</AssemblyName>
-    <RootNamespace>TGS.TgsApi</RootNamespace>
+    <AssemblyName>TGS.Apis.TgsApi</AssemblyName>
+    <RootNamespace>TGS.Apis.TgsApi</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

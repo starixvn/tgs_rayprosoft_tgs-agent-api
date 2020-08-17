@@ -1,4 +1,4 @@
-﻿namespace TGS.TgsApi.Controllers.Message
+﻿namespace TGS.Apis.TgsApi.Controllers.Message
 {
     public class StatusModel
     {
