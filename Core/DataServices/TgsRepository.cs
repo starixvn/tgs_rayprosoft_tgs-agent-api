@@ -27,7 +27,7 @@ namespace TGS.Core.DataServices
         DbSet<GameProviderCurrency> ITgsRepository.GameProviderCurrencies { get; set; }
         DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
 
-        public TgsRepository(DbContextOptions options) : base(options)
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
 
         }
