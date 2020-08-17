@@ -6,7 +6,7 @@ namespace TGS.Core.DataServices.Bet
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddTgsRepository(this IServiceCollection services,
+        public static IServiceCollection AddBetRepository(this IServiceCollection services,
             string connectionString)
         {
             services.AddDbContextPool<BetRepository>((option) =>

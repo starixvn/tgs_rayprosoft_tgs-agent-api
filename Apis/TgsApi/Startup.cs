@@ -23,8 +23,9 @@ namespace TGS.Apis.TgsApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = Configuration.GetConnectionString("TGS");
-            services.AddServices(connectionString);
+            var tgsConnectionString = Configuration.GetConnectionString("TGS");
+            var betConnectionString = Configuration.GetConnectionString("BET");
+            services.AddServices(tgsConnectionString, betConnectionString);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>
@@ -41,7 +42,7 @@ namespace TGS.Apis.TgsApi
                     };
                 });
 
-            services.AddMvc(options =>
+            services.AddMvcCore(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
