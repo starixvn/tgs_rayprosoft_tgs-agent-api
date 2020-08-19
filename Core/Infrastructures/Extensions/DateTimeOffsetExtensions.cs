@@ -2,7 +2,7 @@
 
 namespace TGS.Infrastructures.Extensions
 {
-    public static class DateTimeOffsetExtensions
+    public static class RedisCacheManager
     {
         public static string ToIso8601String(this DateTimeOffset dateTimeOffset)
         {
