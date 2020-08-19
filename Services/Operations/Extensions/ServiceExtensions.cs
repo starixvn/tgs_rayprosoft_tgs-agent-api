@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -13,7 +12,7 @@ namespace TGS.Services.Operations.Extensions
     public static class ServiceExtensions
     {
         public static IServiceCollection AddRepository<TInterface, TRepository>(this IServiceCollection services,
-            string connectionString, int commandTimeout = 180, int maxRetryCount = 3)
+            IConfiguration configuration, string connectionName, int commandTimeout = 180, int maxRetryCount = 3)
             where TInterface : class
             where TRepository : DbContext, TInterface
         {
@@ -27,44 +26,31 @@ namespace TGS.Services.Operations.Extensions
                 }));
                 option.EnableSensitiveDataLogging();
 #endif
+
+                var connectionString = configuration.GetConnectionString(connectionName);
+
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(commandTimeout);
                     serverOption.EnableRetryOnFailure(maxRetryCount);
+                    serverOption.MigrationsHistoryTable("_MigrationsHistory", "dbo");
                 });
+
+                var options = (DbContextOptions<TRepository>)option.Options;
+                using var db = (DbContext) Activator.CreateInstance(typeof(TRepository), options);
+                
+                var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                                db.Database.GetPendingMigrations().Any();
+
+                if (isMigrate)
+                {
+                    db.Database.Migrate();
+                }
             }, 128);
 
-            AddDbMigration<TRepository>(connectionString);
             services.AddScoped<TInterface, TRepository>();
 
             return services;
-        }
-
-        private static void AddDbMigration<TRepository>(string connectionString) where TRepository : DbContext
-        {
-            var options = CreateBetDbOptionsBuilder<TRepository>(connectionString).Options;
-            using var db = (DbContext) Activator.CreateInstance(typeof(TRepository), options);
-            if (db == null ||
-                db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                !db.Database.GetPendingMigrations().Any())
-            {
-                return;
-            }
-            
-            db.Database.Migrate();
-        }
-
-        private static DbContextOptionsBuilder<TRepository>
-            CreateBetDbOptionsBuilder<TRepository>(string connectionString) where TRepository : DbContext
-        {
-            return new DbContextOptionsBuilder<TRepository>()
-                .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                .UseSqlServer(connectionString, serverOptions =>
-                {
-                    serverOptions.CommandTimeout(5 * 60);
-                    serverOptions.EnableRetryOnFailure(3);
-                    serverOptions.MigrationsHistoryTable("_MigrationsHistory", "dbo");
-                });
         }
     }
 }

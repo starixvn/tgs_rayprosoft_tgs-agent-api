@@ -39,8 +39,7 @@ namespace TGS.Core.DataServices.Bet
         {
             return Database.GetDbConnection();
         }
-
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
