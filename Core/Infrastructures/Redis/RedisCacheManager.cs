@@ -149,14 +149,14 @@ namespace TGS.Infrastructures.Redis
             return count;
         }
 
-        internal static TimeSpan CapExpiry(TimeSpan? expiresIn)
+        public static TimeSpan CapExpiry(TimeSpan? expiresIn)
         {
             if (expiresIn == null || expiresIn.Value > MaxTimeSpan)
                 return MaxTimeSpan;
             return expiresIn.Value;
         }
 
-        internal static string FormCacheKey(object cacheType, object key)
+        public static string FormCacheKey(object cacheType, object key)
         {
             return $"{cacheType}:{key}";
         }

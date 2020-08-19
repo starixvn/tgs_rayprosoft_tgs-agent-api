@@ -37,9 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Bet", "Core\Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operations", "Services\Operations\Operations.csproj", "{087A84A8-9BB1-41FC-8134-3A6876BD34D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.IntegrationTests", "Tests\Redis.IntegrationTests\Redis.IntegrationTests.csproj", "{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.IntegrationTests", "Tests\Redis.IntegrationTests\Redis.IntegrationTests.csproj", "{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nats.IntegrationTests", "Tests\Nats.IntegrationTests\Nats.IntegrationTests.csproj", "{5C1CCE46-0C09-41B5-A6CE-44256B44492F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nats.IntegrationTests", "Tests\Nats.IntegrationTests\Nats.IntegrationTests.csproj", "{5C1CCE46-0C09-41B5-A6CE-44256B44492F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
