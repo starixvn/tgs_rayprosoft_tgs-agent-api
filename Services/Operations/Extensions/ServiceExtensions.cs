@@ -37,8 +37,8 @@ namespace TGS.Services.Operations.Extensions
                 });
 
                 var options = (DbContextOptions<TRepository>)option.Options;
-                using var db = (DbContext) Activator.CreateInstance(typeof(TRepository), options);
-                
+                using var db = (DbContext)Activator.CreateInstance(typeof(TRepository), options);
+
                 var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
                                 db.Database.GetPendingMigrations().Any();
 

@@ -9,60 +9,45 @@ namespace TGS.Infrastructures.Redis
     {
         public static IServiceCollection AddRedisServices(this IServiceCollection services)
         {
-            services.AddScoped<IRedisConfig, RedisConfig>(ReuseWithinContainer);
-            services.AddScoped<IRedisConnection, RedisCoreConnection>(ReuseWithinContainer);
-            services.AddScoped<IRedisRepository, RedisRepository>(ReuseWithinContainer);
-            services.AddScoped<IRedisSourcesFactory, RedisSourcesFactory>(ReuseWithinContainer);
-            services.AddScoped<IRedisCacheManager, RedisCacheManager>(ReuseWithinContainer);
+            services.AddScoped<IRedisConfig, RedisConfig>();
+            services.AddScoped<IRedisConnection, RedisCoreConnection>();
+            services.AddScoped<IRedisRepository, RedisRepository>();
+            services.AddScoped<IRedisCacheManager, RedisCacheManager>();
             services.AddTransient(typeof(IRedisList<>), typeof(RedisList<>));
             services.AddTransient(typeof(IRedisSortedSet<>), typeof(RedisSortedSet<>));
-            services.AddScoped<IRedisPublisher, RedisPublisher>(ReuseWithinContainer);
-            services.AddScoped<IRedisSubscriber, RedisSubscriber>(ReuseWithinContainer);
+            services.AddScoped<IRedisPublisher, RedisPublisher>();
+            services.AddScoped<IRedisSubscriber, RedisSubscriber>();
 
-            services.AddScoped<IRedisConnection, RedisCoreConnection>(RedisConnectionType.Core.ToString());
-            services.AddScoped<IRedisConnection, RedisSignalRConnection>(RedisConnectionType.SignalR.ToString());
-            container.RegisterFactory<Func<string, IRedisConnection>>(c => new Func<string, IRedisConnection>(code => c.Resolve<IRedisConnection>(code))
-                , ReuseWithinContainer);
+            //services.AddScoped<IRedisConnection, RedisCoreConnection>(RedisConnectionType.Core.ToString());
+            //services.AddScoped<IRedisConnection, RedisSignalRConnection>(RedisConnectionType.SignalR.ToString());
+            services.AddScoped<Func<string, IRedisConnection>>(c => new Func<string, IRedisConnection>(code => c.GetService<IRedisConnection>()));
 
-            container.RegisterFactory<Func<string, IRedisRepository>>(c => new Func<string, IRedisRepository>(
-                 code => new RedisRepository(c.Resolve<IRedisConnection>(code)))
-                , ReuseWithinContainer);
-            container.RegisterFactory<Func<string, IRedisCacheManager>>(c => new Func<string, IRedisCacheManager>(
+            services.AddScoped<Func<string, IRedisRepository>>(c => new Func<string, IRedisRepository>(
+                 code => new RedisRepository(c.GetService<IRedisConnection>())));
+            services.AddScoped<Func<string, IRedisCacheManager>>(c => new Func<string, IRedisCacheManager>(
                 code =>
                 {
-                    var factory = c.Resolve<Func<string, IRedisRepository>>();
+                    var factory = c.GetService<Func<string, IRedisRepository>>();
                     return new RedisCacheManager(factory(code),
-                        c.Resolve<IJsonSerializationProvider>(),
-                        c.Resolve<IOsLog>());
-                }), ReuseWithinContainer);
+                        c.GetService<IJsonSerializationProvider>(),
+                        c.GetService<IOsLog>());
+                }));
 
-            container.RegisterFactory<Func<string, IRedisPublisher>>(c => new Func<string, IRedisPublisher>(
-                code => new RedisPublisher(c.Resolve<IRedisConnection>(code), c.Resolve<IJsonSerializationProvider>()))
-                , ReuseWithinContainer);
+            //services.AddScoped<Func<string, IRedisPublisher>>(c => new Func<string, IRedisPublisher>(
+            //    code => new RedisPublisher(c.GetService<IRedisConnection>(code), c.GetService<IJsonSerializationProvider>())));
 
-            container.RegisterFactory<Func<string, IRedisSubscriber>>(c => new Func<string, IRedisSubscriber>(
-                code => new RedisSubscriber(c.Resolve<IRedisConnection>(code), c.Resolve<IJsonSerializationProvider>()))
-                , ReuseWithinContainer);
+            //services.AddScoped<Func<string, IRedisSubscriber>>(c => new Func<string, IRedisSubscriber>(
+            //    code => new RedisSubscriber(c.GetService<IRedisConnection>(code), c.GetService<IJsonSerializationProvider>())));
 
-            services.AddScoped<IRedisLock, RedisLock>(NewEachTime);
+            services.AddTransient<IRedisLock, RedisLock>();
 
-            container.RegisterFactory<Func<string, IRedisLock>>(c => new Func<string, IRedisLock>(
+            services.AddScoped<Func<string, IRedisLock>>(c => new Func<string, IRedisLock>(
                 code =>
                 {
-                    var factory = c.Resolve<Func<string, IRedisRepository>>();
+                    var factory = c.GetService<Func<string, IRedisRepository>>();
                     return new RedisLock(factory(code));
-                }), ReuseWithinContainer);
+                }));
+            return services;
         }
-
-        public static void SetupRedisWithDependencies(this IUnityContainer container)
-        {
-            container.SetupJson();
-            container.SetupOsLog();
-            container.SetupRedis();
-        }
-
-        private static ContainerControlledLifetimeManager ReuseWithinContainer => new ContainerControlledLifetimeManager();
-
-        private static ITypeLifetimeManager NewEachTime => new TransientLifetimeManager();
     }
 }
