@@ -11,7 +11,6 @@ namespace TGS.Apis.TgsApi.Extensions
         public static IServiceCollection AddRepositoriesAndExecuteMigrations(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddEntityFrameworkSqlServer();
             services.AddRepository<IBetRepository, BetRepository>(configuration, "BET");
             services.AddRepository<ITgsRepository, TgsRepository>(configuration, "TGS");
             return services;
