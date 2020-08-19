@@ -22,10 +22,8 @@ namespace TGS.Apis.TgsApi
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
-        {
-            var tgsConnectionString = Configuration.GetConnectionString("TGS");
-            var betConnectionString = Configuration.GetConnectionString("BET");
-            services.AddServices(tgsConnectionString, betConnectionString);
+        { 
+            services.AddRepositoriesAndExecuteMigrations(Configuration);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>
