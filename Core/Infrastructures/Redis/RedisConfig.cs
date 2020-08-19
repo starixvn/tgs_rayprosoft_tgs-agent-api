@@ -1,13 +1,19 @@
-﻿namespace TGS.Infrastructures.Redis
+﻿using Microsoft.Extensions.Configuration;
+
+namespace TGS.Infrastructures.Redis
 {
     public sealed class RedisConfig : IRedisConfig
     {
-        private const string Prefix = "Ugs";
+        private readonly IConfiguration _configuration;
+        public RedisConfig(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         string IRedisConfig.RedisConfigurationString =>
-            ConfigurationManager.AppSettings[Prefix + "RedisConfigurationString"];
+            _configuration.GetConnectionString("RedisConfigurationString");
 
         string IRedisConfig.SignalRRedisConnectionString =>
-           ConfigurationManager.AppSettings[Prefix + "SignalRRedisConnectionString"];
+           _configuration.GetConnectionString("SignalRRedisConnectionString");
     }
 }

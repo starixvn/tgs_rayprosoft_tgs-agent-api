@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>TGS.Apis.TgsApi</AssemblyName>
     <RootNamespace>TGS.Apis.TgsApi</RootNamespace>
     <Nullable>enable</Nullable>

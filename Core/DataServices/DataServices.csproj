@@ -2,10 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>TGS.Core.DataServices</AssemblyName>
     <RootNamespace>TGS.Core.DataServices</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DbContextFactory.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="appsettings.json" />
