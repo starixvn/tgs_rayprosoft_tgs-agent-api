@@ -19,6 +19,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
+
             var provider = new ServiceCollection()
                 .AddRedisServices()
                 .BuildServiceProvider();

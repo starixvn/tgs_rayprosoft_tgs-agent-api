@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using TGS.Infrastructures.Json;
@@ -46,6 +47,16 @@ namespace TGS.Infrastructures.Redis
                         return connection;
                     };
                 });
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddScoped<IOsLog, OsLog>();
+            services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
 
             services.AddScoped<IRedisConfig, RedisConfig>();
             services.AddScoped<IRedisConnection, RedisCoreConnection>();
