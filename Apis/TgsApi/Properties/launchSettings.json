@@ -20,7 +20,7 @@
     "TgsApi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchUrl": "api/status",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
