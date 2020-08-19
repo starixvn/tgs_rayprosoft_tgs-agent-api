@@ -26,11 +26,14 @@ namespace TGS.Services.GameServices
     public sealed class GamePlayActions : IGamePlayActions
     {
         private readonly IPlayerOperations _playerOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public GamePlayActions(
-            IPlayerOperations playerOperations)
+            IPlayerOperations playerOperations,
+            IGameProviderOperations gameProviderOperations)
         {
             _playerOperations = playerOperations;
+            _gameProviderOperations = gameProviderOperations;
         }
 
         Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
@@ -40,11 +43,17 @@ namespace TGS.Services.GameServices
 
         async Task<GetBalanceResult> IGamePlayActions.GetBalanceAsync(string gameProviderCode, string playerCode)
         {
-            //var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
+
+            //var cur = await _gpCurrencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
+
+            //var balance = await GetWalletBalanceAsync(gameProviderId, player, forceUpdate);
 
             return new GetBalanceResult
             {
-
+                //Balance = balance,
+                //CurrencyCode = cur
             };
         }
 

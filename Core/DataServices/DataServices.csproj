@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +18,10 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
   </ItemGroup>
 
   <ItemGroup>
