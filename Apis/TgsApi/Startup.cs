@@ -22,7 +22,7 @@ namespace TGS.Apis.TgsApi
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
-        { 
+        {
             services.AddRepositoriesAndExecuteMigrations(Configuration);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
