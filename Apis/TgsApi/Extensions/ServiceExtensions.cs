@@ -1,5 +1,4 @@
-﻿using EFSecondLevelCache.Core;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
 
@@ -12,9 +11,10 @@ namespace TGS.Apis.TgsApi.Extensions
             string betConnectionString)
         {
             services.AddEntityFrameworkSqlServer();
-            services.AddEFSecondLevelCache();
             services.AddBetRepository(betConnectionString);
             services.AddTgsRepository(tgsConnectionString);
+            services.AddScoped<ITgsRepository, TgsRepository>();
+            services.AddScoped<IBetRepository, BetRepository>();
             return services;
         }
     }

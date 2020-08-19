@@ -26,38 +26,21 @@ namespace TGS.Core.DataServices.Bet
                 {
                     serverOption.CommandTimeout(180);
                     serverOption.EnableRetryOnFailure(3);
+                    serverOption.MigrationsHistoryTable("_MigrationsHistory", "dbo");
                 });
+
+                using var db = new BetRepository((DbContextOptions<BetRepository>)option.Options);
+
+                var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                                db.Database.GetPendingMigrations().Any();
+
+                if (isMigrate)
+                {
+                    db.Database.Migrate();
+                }
             }, 128);
 
-            AddBetDbMigration(connectionString);
-            services.AddScoped<IBetRepository, BetRepository>();
-
             return services;
-        }
-
-        private static void AddBetDbMigration(string connectionString)
-        {
-            using var db = new BetRepository(CreateBetDbOptionsBuilder(connectionString).Options);
-            if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
-            {
-                db.Database.Migrate();
-            }
-            else if (db.Database.GetPendingMigrations().Any())
-            {
-                db.Database.Migrate();
-            }
-        }
-
-        private static DbContextOptionsBuilder<BetRepository> CreateBetDbOptionsBuilder(string connectionString)
-        {
-            return new DbContextOptionsBuilder<BetRepository>()
-                .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                .UseSqlServer(connectionString, serverOptions =>
-                {
-                    serverOptions.CommandTimeout(5 * 60);
-                    serverOptions.EnableRetryOnFailure(3);
-                    serverOptions.MigrationsHistoryTable("_MigrationsHistory", "dbo");
-                });
         }
     }
 }
