@@ -16,7 +16,7 @@ namespace TGS.Apis.LogApi.DataService
 
             var config = builder.Build();
 
-            var connectionString = config.GetConnectionString("LogDB");
+            var connectionString = config.GetConnectionString("Log");
 
             var dbContextBuilder = new DbContextOptionsBuilder<LogDbContext>()
                  .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
@@ -24,7 +24,7 @@ namespace TGS.Apis.LogApi.DataService
                  {
                      serverOptions.CommandTimeout(5 * 60);
                      serverOptions.EnableRetryOnFailure(3);
-                     serverOptions.MigrationsHistoryTable("_EFCoreMigrationHistory", "dbo");
+                     serverOptions.MigrationsHistoryTable("_MigrationHistory", "dbo");
                  });
 
             return new LogDbContext(dbContextBuilder.Options);
