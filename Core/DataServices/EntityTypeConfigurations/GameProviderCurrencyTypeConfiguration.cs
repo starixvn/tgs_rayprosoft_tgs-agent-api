@@ -9,15 +9,26 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<GameProviderCurrency>.Configure(EntityTypeBuilder<GameProviderCurrency> builder)
         {
             builder.ToTable("GameProviderCurrencies", "dbo");
-            builder.HasKey(bc => new { bc.GameProviderId, bc.CurrencyCode });
+            builder.HasKey(gpc => new { gpc.GameProviderId, gpc.CurrencyCode });
+            
             builder
-                .HasOne(bc => bc.GameProvider)
-                .WithMany(c => c.Currencies)
-                .HasForeignKey(bc => bc.GameProviderId);
+                .HasOne(gpc => gpc.GameProvider)
+                .WithMany(gp => gp.Currencies)
+                .HasForeignKey(gpc => gpc.GameProviderId);
+
             builder
-                .HasOne(bc => bc.Currency)
+                .HasOne(gpc => gpc.Currency)
                 .WithMany(c => c.GameProviderCurrencies)
-                .HasForeignKey(bc => bc.CurrencyCode);
+                .HasForeignKey(gpc => gpc.CurrencyCode);
+
+            builder.Property(gpc => gpc.CurrencyCode)
+                .HasColumnType("nvarchar(16)")
+                .IsUnicode();
+
+            builder.Property(gpc => gpc.GameProviderCurrencyCode)
+                .HasColumnType("nvarchar(16)")
+                .IsUnicode()
+                .IsRequired();
         }
     }
 }

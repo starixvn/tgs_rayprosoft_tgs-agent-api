@@ -29,6 +29,8 @@ namespace TGS.Core.DataServices
         DbSet<Whitelist> ITgsRepository.Whitelists { get; set; }
         DbSet<GameProviderCurrency> ITgsRepository.GameProviderCurrencies { get; set; }
         DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
+        DbSet<BrandCurrency> ITgsRepository.BrandCurrencies { get; set; }
+        DbSet<BrandLanguage> ITgsRepository.BrandBrandLanguages { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -82,6 +84,7 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new SettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LocalizedStringTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BrandCurrencyTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BrandLanguageTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new GameProviderCurrencyTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameProviderLanguageTypeConfiguration());
