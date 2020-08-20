@@ -10,82 +10,80 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
     [Category(Named.Integration)]
     public class RedisSubscriberPublisherTest
     {
-        private Func<string, IRedisPublisher> _redisPublisherFactory;
-        private Func<string, IRedisSubscriber> _redisSubscriberFactory;
+        private IRedisPublisher _redisPublisher;
+        private IRedisSubscriber _redisSubscriber;
 
         [SetUp]
         public void SetUp()
         {
             var provider = new ServiceCollection()
+                .AddConfiguration()
                 .AddRedis()
                 .BuildServiceProvider();
 
-            _redisPublisherFactory = provider.GetService<Func<string, IRedisPublisher>>();
-            _redisSubscriberFactory = provider.GetService<Func<string, IRedisSubscriber>>();
+            _redisPublisher = provider.GetService<IRedisPublisher>();
+            _redisSubscriber = provider.GetService<IRedisSubscriber>();
         }
 
         [TearDown]
         public void TearDown()
         {
-            foreach (var type in Enum.GetNames(typeof(RedisConnectionType)))
-            {
-                AsyncHelper.RunSync(() =>
-                    _redisSubscriberFactory(type).UnsubscribeAsync<TestValue>());
-            }
+            AsyncHelper.RunSync(() =>
+                    _redisSubscriber.UnsubscribeAsync<TestValue>());
         }
 
-        [TestCase(RedisConnectionType.Core)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task Can_Subscribe_When_Execute_Publish_By_Object(RedisConnectionType type)
+
+        [Test]
+        public async Task Can_Subscribe_When_Execute_Publish_By_Object()
         {
             var value = new TestValue { Id = 2, Name = "TGS" };
             var result = new TestValue();
             var tcs = new TaskCompletionSource<bool>();
-            await _redisSubscriberFactory(type.ToString()).SubscribeAsync<TestValue>(message =>
+            await _redisSubscriber.SubscribeAsync<TestValue>(message =>
             {
                 result = message;
                 tcs.SetResult(true);
             });
 
-            await _redisPublisherFactory(type.ToString()).PublishAsync(value);
+            await _redisPublisher.PublishAsync(value);
             await tcs.Task;
 
             result.Id.Should().Be(value.Id);
             result.Name.Should().Be(value.Name);
         }
 
-        [TestCase(RedisConnectionType.Core)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task Can_Subscribe_And_Unsubscribe(RedisConnectionType type)
+
+        [Test]
+        public async Task Can_Subscribe_And_Unsubscribe()
         {
             var value = new TestValue { Id = 12, Name = "ValueToGet" };
             var result = new TestValue();
 
-            await _redisSubscriberFactory(type.ToString()).SubscribeAsync<TestValue>(message =>
+            await _redisSubscriber.SubscribeAsync<TestValue>(message =>
             {
                 Console.WriteLine($"Processing {message.Id}:{message.Name}");
                 result = message;
             });
 
-            await _redisPublisherFactory(type.ToString()).PublishAsync(value);
+            await _redisPublisher.PublishAsync(value);
             await Task.Delay(300);
-            await _redisSubscriberFactory(type.ToString()).UnsubscribeAsync<TestValue>();
+            await _redisSubscriber.UnsubscribeAsync<TestValue>();
             await Task.Delay(300);
-            await _redisPublisherFactory(type.ToString()).PublishAsync(new TestValue { Id = 23, Name = "NotReceivedValue" });
+            await _redisPublisher.PublishAsync(new TestValue { Id = 23, Name = "NotReceivedValue" });
             await Task.Delay(300);
 
             result.Id.Should().Be(value.Id);
             result.Name.Should().Be(value.Name);
         }
 
-        [TestCase(RedisConnectionType.Core)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task Exception_does_not_break_subscription(RedisConnectionType type)
+
+        [Test]
+        public async Task Exception_does_not_break_subscription()
         {
             var result = new TestValue();
             var messagesProcessed = 0;
 
-            await _redisSubscriberFactory(type.ToString()).SubscribeAsync<TestValue>(message =>
+            await _redisSubscriber.SubscribeAsync<TestValue>(message =>
             {
                 Console.WriteLine($"Processing {message.Id}:{message.Name}");
 
@@ -105,9 +103,9 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
                 Id = 13,
                 Name = "Correct"
             };
-            await _redisPublisherFactory(type.ToString()).PublishAsync(new TestValue { Id = 7, Name = "Error" });
+            await _redisPublisher.PublishAsync(new TestValue { Id = 7, Name = "Error" });
             await Task.Delay(300); // to ensure that first message will be processed first
-            await _redisPublisherFactory(type.ToString()).PublishAsync(item);
+            await _redisPublisher.PublishAsync(item);
             await Task.Delay(300);
 
             messagesProcessed.Should().Be(2);
@@ -115,14 +113,14 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             result.Name.Should().Be(item.Name);
         }
 
-        [TestCase(RedisConnectionType.Core)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task Exception_does_not_break_subscription_using_real_async(RedisConnectionType type)
+
+        [Test]
+        public async Task Exception_does_not_break_subscription_using_real_async()
         {
             var result = new TestValue();
             var messagesProcessed = 0;
 
-            await _redisSubscriberFactory(type.ToString()).SubscribeAsync<TestValue>(async message =>
+            await _redisSubscriber.SubscribeAsync<TestValue>(async message =>
             {
                 Console.WriteLine($"Processing {message.Id}:{message.Name}");
 
@@ -142,9 +140,9 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
                 Id = 13,
                 Name = "Correct"
             };
-            await _redisPublisherFactory(type.ToString()).PublishAsync(new TestValue { Id = 7, Name = "Error" });
+            await _redisPublisher.PublishAsync(new TestValue { Id = 7, Name = "Error" });
             await Task.Delay(300); // to ensure that first message will be processed first
-            await _redisPublisherFactory(type.ToString()).PublishAsync(item);
+            await _redisPublisher.PublishAsync(item);
             await Task.Delay(300);
 
             messagesProcessed.Should().Be(2);

@@ -12,29 +12,28 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
     [Category(Named.Integration)]
     public class RedisLockTests
     {
-        private Func<string, IRedisLock> _redisLockFactory;
+        private IRedisLock _redisLock;
         private static object Locker = new object();
 
         [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
             var provider = new ServiceCollection()
-                .AddRedisServices()
+                .AddConfiguration()
+                .AddRedis()
                 .BuildServiceProvider();
 
-            _redisLockFactory = provider.GetService<Func<string, IRedisLock>>();
+            _redisLock = provider.GetService<IRedisLock>();
         }
 
-        [TestCase(RedisConnectionType.Core), Timeout(10000)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task TestSingleLock(RedisConnectionType type)
-        {
-            var redisLock = _redisLockFactory(type.ToString());
 
+        [Test]
+        public async Task TestSingleLock()
+        {
             var resource = $"testredislock:{Guid.NewGuid()}";
             IRedisLockSummary firstLock = null;
 
-            await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
+            await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
                  c =>
                 {
                     firstLock = c;
@@ -46,21 +45,20 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             firstLock.IsReleased.Should().BeTrue();
         }
 
-        [TestCase(RedisConnectionType.Core), Timeout(10000)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task TestOverlappingLocks(RedisConnectionType type)
+
+        [Test]
+        public async Task TestOverlappingLocks()
         {
-            var redisLock = _redisLockFactory(type.ToString());
             var resource = $"testredislock:{Guid.NewGuid()}";
 
             IRedisLockSummary firstLock = null;
-            await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
+            await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
                 async c =>
                 {
                     firstLock = c;
                     firstLock.IsAcquired.Should().BeTrue();
                     IRedisLockSummary secondLock = null;
-                    await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
+                    await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
                         cc => Task.FromResult(true), cc =>
                         {
                             secondLock = cc;
@@ -75,16 +73,15 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             firstLock.IsReleased.Should().BeTrue();
         }
 
-        [TestCase(RedisConnectionType.Core), Timeout(10000)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task TestSequentialLocks(RedisConnectionType type)
+
+        [Test]
+        public async Task TestSequentialLocks()
         {
-            var redisLock = _redisLockFactory(type.ToString());
             var resource = $"testredislock:{Guid.NewGuid()}";
 
             IRedisLockSummary firstLock = null;
 
-            await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
+            await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
                 c =>
                 {
                     firstLock = c;
@@ -95,7 +92,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
 
             firstLock.IsReleased.Should().BeTrue();
 
-            await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
+            await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
                 c =>
                 {
                     firstLock = c;
@@ -106,17 +103,16 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             firstLock.IsReleased.Should().BeTrue();
         }
 
-        [TestCase(RedisConnectionType.Core), Timeout(10000)]
-        [TestCase(RedisConnectionType.SignalR)]
-        public async Task TestLockReleasedAfterTimeout(RedisConnectionType type)
+
+        [Test]
+        public async Task TestLockReleasedAfterTimeout()
         {
-            var redisLock = _redisLockFactory(type.ToString());
             var resource = $"testredislock:{Guid.NewGuid()}";
 
             var expiredTime = TimeSpan.FromSeconds(3);
             IRedisLockSummary firstLock = null;
 
-            await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(3),
+            await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(3),
                 async c =>
                 {
                     firstLock = c;
@@ -124,7 +120,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
                     var waitTime = expiredTime.Add(TimeSpan.FromSeconds(1));
                     await Task.Delay(waitTime);
                     IRedisLockSummary secondLock = null;
-                    await redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
+                    await _redisLock.ExecuteLockAsync(resource, TimeSpan.FromSeconds(10),
                         cc =>
                         {
                             secondLock = cc;
@@ -138,10 +134,9 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             firstLock.IsReleased.Should().BeFalse();
         }
 
-        [TestCase(RedisConnectionType.Core, 100), Timeout(30000)]
-        public async Task TestBlockingConcurrentLocks(RedisConnectionType type, int totalTask)
+        [TestCase(100), Timeout(30000)]
+        public async Task TestBlockingConcurrentLocks(int totalTask)
         {
-            var redisLock = _redisLockFactory(type.ToString());
             var resource = $"testredislock:{Guid.NewGuid()}";
 
             var expiredTime = TimeSpan.FromSeconds(60);
@@ -164,7 +159,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
 
             Task LockAsync()
             {
-                return redisLock.ExecuteLockAsync(resource, expiredTime,
+                return _redisLock.ExecuteLockAsync(resource, expiredTime,
                     c =>
                     {
                         lockCount++;
@@ -189,10 +184,9 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             }
         }
 
-        [TestCase(RedisConnectionType.Core), Timeout(30000)]
-        public async Task TestWaitLocks(RedisConnectionType type)
+        [Test]
+        public async Task TestWaitLocks()
         {
-            var redisLock = _redisLockFactory(type.ToString());
             var resource = ":::testredislock:::";
 
             var expiredTime = TimeSpan.FromSeconds(60);
@@ -222,7 +216,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
 
             Task LockAsync()
             {
-                return redisLock.ExecuteLockAsync(resource, expiredTime,
+                return _redisLock.ExecuteLockAsync(resource, expiredTime,
                     c =>
                     {
                         lockCount++;
@@ -242,10 +236,9 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             }
         }
 
-        [TestCase(RedisConnectionType.Core), Timeout(30000)]
-        public async Task TestWaitLocksNoReturn(RedisConnectionType type)
+        [Test]
+        public async Task TestWaitLocksNoReturn()
         {
-            var redisLock = _redisLockFactory(type.ToString());
             var resource = ":::testredislock:::";
 
             var expiredTime = TimeSpan.FromSeconds(60);
@@ -275,7 +268,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
 
             Task LockAsync()
             {
-                return redisLock.ExecuteLockAsync(resource, expiredTime,
+                return _redisLock.ExecuteLockAsync(resource, expiredTime,
                      () =>
                     {
                         lockCount++;

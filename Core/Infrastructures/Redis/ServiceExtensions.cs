@@ -16,6 +16,7 @@ namespace TGS.Infrastructures.Redis
             services.AddScoped<IRedisConnection, RedisCoreConnection>();
             services.AddScoped<IRedisRepository, RedisRepository>();
             services.AddScoped<IRedisCacheManager, RedisCacheManager>();
+            services.AddScoped<IRedisLock, RedisLock>();
             services.AddTransient(typeof(IRedisList<>), typeof(RedisList<>));
             services.AddTransient(typeof(IRedisSortedSet<>), typeof(RedisSortedSet<>));
             services.AddScoped<IRedisPublisher, RedisPublisher>();
