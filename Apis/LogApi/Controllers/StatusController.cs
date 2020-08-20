@@ -29,11 +29,11 @@ namespace TGS.Apis.LogApi.Controllers
             {
                 MachineName = Environment.MachineName,
                 HostName = hostName,
-                HostIP = hostIp.ToString(),
+                HostIp = hostIp.ToString(),
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
-                OSVersion = $"{Environment.OSVersion}",
+                OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
-                CanConnectDB = await _context.Database.CanConnectAsync()
+                CanConnectDb = await _context.Database.CanConnectAsync()
             };
         }
     }

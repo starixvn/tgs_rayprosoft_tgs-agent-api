@@ -3,7 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.SqlClient;
-using TGS.Core.Models.Interfaces;
+using TGS.Core.DataServices.Base.Interfaces;
 
 namespace TGS.Services.Operations.Extensions
 {
