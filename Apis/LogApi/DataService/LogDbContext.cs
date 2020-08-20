@@ -12,11 +12,15 @@ namespace TGS.Apis.LogApi.DataService
 
         public DbSet<ApiLog> ApiLogs { get; set; }
 
+        public DbSet<EventLog> EventLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
 
             modelBuilder.ApplyConfiguration(new ApiLogConfiguration());
+
+            modelBuilder.ApplyConfiguration(new EventLogConfiguration());
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TGS.Core.Models
+﻿namespace TGS.Core.Models
 {
     public class Consts
     {
@@ -13,5 +7,7 @@ namespace TGS.Core.Models
             public const string GameProviderToTgsMap = "GameProviderToTgsMap";
             public const string TgsToGameProviderMap = "TgsToGameProviderMap";
         }
+
+        public const string NatsUgsLogQueueName = "UgsLogQueue";
     }
 }

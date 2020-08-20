@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.LogApi.Extensions;
 using TGS.Apis.LogApi.Filters;
+using TGS.Apis.LogApi.Services;
 
 namespace TGS.Apis.LogApi
 {
@@ -26,6 +27,8 @@ namespace TGS.Apis.LogApi
         {
             var connectionString = Configuration.GetConnectionString("Log");
             services.AddEntityFrameworkSqlServer();
+
+            services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
             services.AddLogDbContext(connectionString);
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
