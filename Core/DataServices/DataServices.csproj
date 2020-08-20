@@ -48,6 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 

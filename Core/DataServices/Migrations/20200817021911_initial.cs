@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Migrations
 {
@@ -825,6 +827,15 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
+
+            #region Store Procedure
+
+            var assembly = Assembly.GetExecutingAssembly();
+
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderIdByCode.sql");
+
+            #endregion
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
