@@ -17,19 +17,18 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsUnicode();
 
             builder.Property(c => c.CurrencyCode)
-                .HasColumnType("nvarchar(10)")
+                .HasColumnType("nvarchar(16)")
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.ExternalCurrencyCode)
-                .HasColumnType("nvarchar(10)")
+                .HasColumnType("nvarchar(16)")
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Balance)
                 .HasColumnType("decimal(18,6)")
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.CreatedOn)
                 .HasColumnType("nvarchar(32)")

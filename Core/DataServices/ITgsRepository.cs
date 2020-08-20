@@ -43,5 +43,9 @@ namespace TGS.Core.DataServices
         DbSet<GameProviderCurrency> GameProviderCurrencies { get; set; }
 
         DbSet<GameProviderLanguage> GameProviderLanguages { get; set; }
+
+        DbSet<BrandCurrency> BrandCurrencies { get; set; }
+
+        DbSet<BrandLanguage> BrandBrandLanguages { get; set; }
     }
 }

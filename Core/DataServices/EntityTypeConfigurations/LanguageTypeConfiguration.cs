@@ -9,38 +9,38 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<Language>.Configure(EntityTypeBuilder<Language> builder)
         {
             builder.ToTable("Languages", "dbo");
-            builder.HasKey(p => p.CultureCode);
+            builder.HasKey(l => l.CultureCode);
 
-            builder.Property(c => c.CultureCode)
+            builder.Property(l => l.CultureCode)
                 .HasColumnType("nvarchar(6)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.LanguageCode)
+            builder.Property(l => l.LanguageCode)
                 .HasColumnType("nvarchar(10)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.Name)
+            builder.Property(l => l.Name)
                 .HasColumnType("nvarchar(30)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.CreatedByUsername)
+            builder.Property(l => l.CreatedByUsername)
                 .HasColumnType("nvarchar(256)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.UpdatedByUsername)
+            builder.Property(l => l.UpdatedByUsername)
                 .HasColumnType("nvarchar(256)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.CreatedOn)
+            builder.Property(l => l.CreatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
 
-            builder.Property(c => c.UpdatedOn)
+            builder.Property(l => l.UpdatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
         }

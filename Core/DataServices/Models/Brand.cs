@@ -39,5 +39,7 @@ namespace TGS.Core.DataServices.Models
         public virtual ICollection<BrandGame> Games { get; set; }
 
         public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
+
+        public virtual ICollection<BrandLanguage> BrandLanguages { get; set; }
     }
 }

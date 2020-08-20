@@ -9,15 +9,26 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<GameProviderLanguage>.Configure(EntityTypeBuilder<GameProviderLanguage> builder)
         {
             builder.ToTable("GameProviderLanguages", "dbo");
-            builder.HasKey(bc => new { bc.GameProviderId, bc.CultureCode });
+            builder.HasKey(gpl => new {gpl.GameProviderId, gpl.CultureCode});
+
             builder
-                .HasOne(bc => bc.GameProvider)
-                .WithMany(c => c.Languages)
-                .HasForeignKey(bc => bc.GameProviderId);
+                .HasOne(gpl => gpl.GameProvider)
+                .WithMany(gp => gp.Languages)
+                .HasForeignKey(gpl => gpl.GameProviderId);
+            
             builder
-                .HasOne(bc => bc.Language)
-                .WithMany(c => c.GameProviderLanguages)
-                .HasForeignKey(bc => bc.CultureCode);
+                .HasOne(gpl => gpl.Language)
+                .WithMany(l => l.GameProviderLanguages)
+                .HasForeignKey(gpl => gpl.CultureCode);
+
+            builder.Property(gpl => gpl.CultureCode)
+                .HasColumnType("nvarchar(6)")
+                .IsUnicode();
+
+            builder.Property(gpl => gpl.GameProviderCultureCode)
+                .HasColumnType("nvarchar(6)")
+                .IsUnicode()
+                .IsRequired();
         }
     }
 }

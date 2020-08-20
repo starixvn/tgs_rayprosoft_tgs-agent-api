@@ -9,7 +9,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<BrandCurrency>.Configure(EntityTypeBuilder<BrandCurrency> builder)
         {
             builder.ToTable("BrandCurrencies", "dbo");
-            builder.HasKey(bc => bc.Id);
+            builder.HasKey(bc => new {bc.BrandId, bc.CurrencyCode});
             builder
                 .HasOne(bc => bc.Brand)
                 .WithMany(c => c.BrandCurrencies)
@@ -20,9 +20,15 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithMany(c => c.BrandCurrencies)
                 .HasForeignKey(bc => bc.CurrencyCode);
 
-            builder.Property(c => c.BrandCurrencyCode)
-                .HasColumnType("nvarchar(16)");
+            builder.Property(c => c.CurrencyCode)
+                .HasColumnType("nvarchar(16)")
+                .IsUnicode()
+                .IsRequired();
 
+            builder.Property(c => c.BrandCurrencyCode)
+                .HasColumnType("nvarchar(16)")
+                .IsUnicode()
+                .IsRequired();
         }
     }
 }

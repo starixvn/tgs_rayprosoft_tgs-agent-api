@@ -13,8 +13,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.PlayerCode)
                 .HasColumnType("varchar(16)")
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.HasMany(p => p.Wallets)
                 .WithOne(p => p.Player)
