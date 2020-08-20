@@ -10,6 +10,7 @@ Add-Migration NewMigrationName
 ## Install Redis using Docker
 
 docker pull redis
-docker run --name redis-tgs -p 6379:6379 -d redis --restart unless-stopped
+
+docker run --name redis-tgs -p 6379:6379 -d redis
 
 

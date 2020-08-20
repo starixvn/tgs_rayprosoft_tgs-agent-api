@@ -9,7 +9,6 @@ namespace TGS.Infrastructures.Redis
     {
         public static IServiceCollection AddRedis(this IServiceCollection services)
         {
-
             services.AddScoped<IOsLog, OsLog>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
 
