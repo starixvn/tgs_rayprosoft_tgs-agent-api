@@ -29,7 +29,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         {
             foreach (var type in Enum.GetNames(typeof(RedisConnectionType)))
             {
-                UgsAsyncHelper.RunSync(() =>
+                AsyncHelper.RunSync(() =>
                     _redisSubscriberFactory(type).UnsubscribeAsync<TestValue>());
             }
         }
@@ -152,7 +152,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             result.Name.Should().Be(item.Name);
         }
 
-        private Task ThrowExceptionAsync()
+        private static Task ThrowExceptionAsync()
         {
             throw new ArgumentException("Some test exception");
         }

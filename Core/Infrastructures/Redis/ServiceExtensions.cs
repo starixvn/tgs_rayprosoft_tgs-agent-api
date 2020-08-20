@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Log;
 
@@ -15,38 +12,38 @@ namespace TGS.Infrastructures.Redis
         private delegate IRedisConnection RedisConnectionMapper(string key);
         public static IServiceCollection AddRedisServices(this IServiceCollection services)
         {
-            services.AddSignalR()
-                .AddMessagePackProtocol(options =>
-                {
-                    options.FormatterResolvers = new List<MessagePack.IFormatterResolver>()
-                    {
-                        MessagePack.Resolvers.StandardResolver.Instance
-                    };
-                })
-                .AddStackExchangeRedis(o =>
-                {
-                    o.ConnectionFactory = async writer =>
-                    {
-                        var config = new ConfigurationOptions
-                        {
-                            AbortOnConnectFail = false
-                        };
-                        config.EndPoints.Add(IPAddress.Loopback, 0);
-                        config.SetDefaultPorts();
-                        var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
-                        connection.ConnectionFailed += (_, e) =>
-                        {
-                            Console.WriteLine("Connection to Redis failed.");
-                        };
+            //services.AddSignalR()
+            //    .AddMessagePackProtocol(options =>
+            //    {
+            //        options.FormatterResolvers = new List<MessagePack.IFormatterResolver>()
+            //        {
+            //            MessagePack.Resolvers.StandardResolver.Instance
+            //        };
+            //    })
+            //    .AddStackExchangeRedis(o =>
+            //    {
+            //        o.ConnectionFactory = async writer =>
+            //        {
+            //            var config = new ConfigurationOptions
+            //            {
+            //                AbortOnConnectFail = false
+            //            };
+            //            config.EndPoints.Add(IPAddress.Loopback, 0);
+            //            config.SetDefaultPorts();
+            //            var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
+            //            connection.ConnectionFailed += (_, e) =>
+            //            {
+            //                Console.WriteLine("Connection to Redis failed.");
+            //            };
 
-                        if (!connection.IsConnected)
-                        {
-                            Console.WriteLine("Did not connect to Redis.");
-                        }
+            //            if (!connection.IsConnected)
+            //            {
+            //                Console.WriteLine("Did not connect to Redis.");
+            //            }
 
-                        return connection;
-                    };
-                });
+            //            return connection;
+            //        };
+            //    });
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(System.IO.Directory.GetCurrentDirectory())
@@ -59,7 +56,6 @@ namespace TGS.Infrastructures.Redis
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
 
             services.AddScoped<IRedisConfig, RedisConfig>();
-            services.AddScoped<IRedisConnection, RedisCoreConnection>();
             services.AddScoped<IRedisRepository, RedisRepository>();
             services.AddScoped<IRedisCacheManager, RedisCacheManager>();
             services.AddTransient(typeof(IRedisList<>), typeof(RedisList<>));
@@ -70,48 +66,101 @@ namespace TGS.Infrastructures.Redis
             services.AddScoped<RedisCoreConnection>();
             services.AddScoped<RedisSignalRConnection>();
 
-
-            services.AddSingleton<RedisConnectionMapper>(provider => key =>
+            services.AddTransient<Func<string, IRedisConnection>>(serviceProvider => key =>
             {
-                switch ((string.IsNullOrEmpty(key) ? " " : key).ToUpper())
+                switch (key)
                 {
                     case "Core":
-                        return provider.GetRequiredService<RedisCoreConnection>();
+                        return serviceProvider.GetRequiredService<RedisCoreConnection>();
                     case "SignalR":
-                        return provider.GetRequiredService<RedisSignalRConnection>();
+                        return serviceProvider.GetRequiredService<RedisSignalRConnection>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddTransient<Func<string, IRedisRepository>>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case "Core":
+                        return new RedisRepository(serviceProvider.GetRequiredService<RedisCoreConnection>());
+                    case "SignalR":
+                        return new RedisRepository(serviceProvider.GetRequiredService<RedisSignalRConnection>());
                     default:
                         return null;
                 }
             });
 
 
-            //services.AddScoped<Func<string, IRedisConnection>>(c => new Func<string, IRedisConnection>(
-            //    code => c.GetService<IRedisConnection>(code)));
-            services.AddScoped<Func<string, IRedisRepository>>(c => new Func<string, IRedisRepository>(
-                 code => new RedisRepository(c.GetService<IRedisConnection>())));
-            services.AddScoped<Func<string, IRedisCacheManager>>(c => new Func<string, IRedisCacheManager>(
-                code =>
+            services.AddTransient<Func<string, IRedisCacheManager>>(serviceProvider => key =>
+            {
+                switch (key)
                 {
-                    var factory = c.GetService<Func<string, IRedisRepository>>();
-                    return new RedisCacheManager(factory(code),
-                        c.GetService<IJsonSerializationProvider>(),
-                        c.GetService<IOsLog>());
-                }));
+                    case "Core":
+                        return new RedisCacheManager(new RedisRepository(
+                                serviceProvider.GetRequiredService<RedisCoreConnection>()),
+                                              serviceProvider.GetService<IJsonSerializationProvider>(),
+                            serviceProvider.GetService<IOsLog>());
+                    case "SignalR":
+                        return new RedisCacheManager(new RedisRepository(
+                                serviceProvider.GetRequiredService<RedisSignalRConnection>()),
+                            serviceProvider.GetService<IJsonSerializationProvider>(),
+                            serviceProvider.GetService<IOsLog>());
+                    default:
+                        return null;
+                }
+            });
 
-            //services.AddScoped<Func<string, IRedisPublisher>>(c => new Func<string, IRedisPublisher>(
-            //    code => new RedisPublisher(c.GetService<IRedisConnection>(code), c.GetService<IJsonSerializationProvider>())));
+            services.AddTransient<Func<string, IRedisPublisher>>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case "Core":
+                        return new RedisPublisher(
+                            serviceProvider.GetRequiredService<RedisCoreConnection>(),
+                            serviceProvider.GetService<IJsonSerializationProvider>());
+                    case "SignalR":
+                        return new RedisPublisher(
+                            serviceProvider.GetRequiredService<RedisSignalRConnection>(),
+                            serviceProvider.GetService<IJsonSerializationProvider>());
+                    default:
+                        return null;
+                }
+            });
 
-            //services.AddScoped<Func<string, IRedisSubscriber>>(c => new Func<string, IRedisSubscriber>(
-            //    code => new RedisSubscriber(c.GetService<IRedisConnection>(code), c.GetService<IJsonSerializationProvider>())));
+            services.AddTransient<Func<string, IRedisSubscriber>>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case "Core":
+                        return new RedisSubscriber(
+                            serviceProvider.GetRequiredService<RedisCoreConnection>(),
+                            serviceProvider.GetService<IJsonSerializationProvider>());
+                    case "SignalR":
+                        return new RedisSubscriber(
+                            serviceProvider.GetRequiredService<RedisSignalRConnection>(),
+                            serviceProvider.GetService<IJsonSerializationProvider>());
+                    default:
+                        return null;
+                }
+            });
 
             services.AddTransient<IRedisLock, RedisLock>();
 
-            services.AddScoped<Func<string, IRedisLock>>(c => new Func<string, IRedisLock>(
-                code =>
+            services.AddTransient<Func<string, IRedisLock>>(serviceProvider => key =>
+            {
+                switch (key)
                 {
-                    var factory = c.GetService<Func<string, IRedisRepository>>();
-                    return new RedisLock(factory(code));
-                }));
+                    case "Core":
+                        return new RedisLock(new RedisRepository(serviceProvider.GetRequiredService<RedisCoreConnection>()));
+                    case "SignalR":
+                        return new RedisLock(new RedisRepository(serviceProvider.GetRequiredService<RedisSignalRConnection>()));
+                    default:
+                        return null;
+                }
+            });
+
             return services;
         }
     }
