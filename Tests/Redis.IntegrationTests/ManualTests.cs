@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using TGS.Tests.TestsCommon;
 
 namespace TGS.Infrastructures.Redis.IntegrationTests
 {
@@ -19,7 +20,6 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
-
             var provider = new ServiceCollection()
                 .AddConfiguration()
                 .AddRedis()
