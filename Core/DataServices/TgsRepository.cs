@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.EntityTypeConfigurations;
 using TGS.Core.DataServices.Models;
-using TGS.Core.Models.Interfaces;
 
 namespace TGS.Core.DataServices
 {

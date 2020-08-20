@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
+using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.TgsApi.Extensions

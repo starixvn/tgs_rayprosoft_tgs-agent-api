@@ -3,7 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace TGS.Core.Models.Interfaces
+namespace TGS.Core.DataServices.Base.Interfaces
 {
     public interface IBaseRepository : IAsyncDisposable
     {

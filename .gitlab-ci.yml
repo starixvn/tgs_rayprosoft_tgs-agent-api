@@ -1,11 +1,19 @@
-image: mcr.microsoft.com/dotnet/core/sdk:3.1
+image: mcr.microsoft.com/dotnet/sdk:5.0
 
 stages:
   - build
   - test
 variables:
   solution: "tgs.sln"
-  
+
+services:
+  - redis:latest
+
+connect:
+  image: redis
+  script:
+  - redis-cli -h redis PING
+
 before_script:
   - "dotnet restore $solution"
 
@@ -15,7 +23,7 @@ build:
   script:
     - "dotnet build $solution"
 
-unit test:
+tests:
   stage: test
   script:
     - "dotnet test $solution"  

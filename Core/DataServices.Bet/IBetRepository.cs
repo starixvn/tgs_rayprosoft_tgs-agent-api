@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.Models;
-using TGS.Core.Models.Interfaces;
 
 namespace TGS.Core.DataServices.Bet
 {

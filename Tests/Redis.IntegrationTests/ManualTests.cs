@@ -21,7 +21,8 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         {
 
             var provider = new ServiceCollection()
-                .AddRedisServices()
+                .AddConfiguration()
+                .AddRedis()
                 .BuildServiceProvider();
 
             _redisRepository = provider.GetService<IRedisRepository>();

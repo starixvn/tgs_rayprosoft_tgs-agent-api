@@ -10,5 +10,7 @@
         public int ProcessCount { get; set; }
         public bool CanConnectTgsDb { get; set; }
         public bool CanConnectBetDb { get; set; }
+        public string RedisConnectionStatus { get; set; }
+        public string NatsConnectionStatus { get; set; }
     }
 }
