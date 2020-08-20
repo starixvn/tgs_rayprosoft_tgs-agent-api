@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Infrastructures.Redis.IntegrationTests
 {
-    public static class UgsAsyncHelper
+    public static class AsyncHelper
     {
         private static readonly TaskFactory MyTaskFactory = new
             TaskFactory(CancellationToken.None,

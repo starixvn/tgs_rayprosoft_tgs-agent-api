@@ -31,7 +31,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         [TearDown]
         public void TearDown()
         {
-            var amount = UgsAsyncHelper.RunSync(() =>
+            var amount = AsyncHelper.RunSync(() =>
                 _cacheManager.ClearCacheByPatternAsync(_cacheType, "*"));
             Console.WriteLine($"TearDown removed {amount} keys");
         }

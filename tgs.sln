@@ -41,6 +41,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.IntegrationTests", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nats.IntegrationTests", "Tests\Nats.IntegrationTests\Nats.IntegrationTests.csproj", "{5C1CCE46-0C09-41B5-A6CE-44256B44492F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{897541B7-3AE6-4AEE-9D3E-51221088F2CC}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Base", "Core\DataServices.Base\DataServices.Base.csproj", "{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}"
 EndProject
 Global

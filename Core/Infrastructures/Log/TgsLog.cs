@@ -5,7 +5,7 @@ using TGS.Infrastructures.Log.Interfaces;
 
 namespace TGS.Infrastructures.Log
 {
-    internal sealed class UgsLog : IUgsLog
+    internal sealed class TgsLog : IUgsLog
     {
         internal const string LogPublisher = "LogPublisher";
         private string _loggerName;

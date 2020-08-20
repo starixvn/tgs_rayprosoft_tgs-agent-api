@@ -40,7 +40,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         {
             foreach (var type in Enum.GetNames(typeof(RedisConnectionType)))
             {
-                var amount = UgsAsyncHelper.RunSync(() =>
+                var amount = AsyncHelper.RunSync(() =>
                     _cacheManagerFactory(type).ClearCacheByPatternAsync(CacheType, "*"));
                 Console.WriteLine($"TearDown removed {amount} keys");
             }
