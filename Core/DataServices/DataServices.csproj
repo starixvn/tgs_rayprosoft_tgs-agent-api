@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
   </ItemGroup>
 
@@ -25,6 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
   </ItemGroup>
 

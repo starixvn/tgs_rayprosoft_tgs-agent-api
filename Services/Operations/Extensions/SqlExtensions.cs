@@ -9,7 +9,7 @@ namespace TGS.Services.Operations.Extensions
 {
     public static class SqlExtensions
     {
-        public static async Task<IEnumerable<TEntity>> SqlQueryListAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
+        public static async Task<IEnumerable<TEntity>> SqlQueryMultipleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
         {
             using var conn = repository.GetDbConnection();
  
@@ -28,7 +28,7 @@ namespace TGS.Services.Operations.Extensions
             return await conn.QueryAsync<TEntity>(sql, param, commandType: commandType);
         }
 
-        public static async Task<TEntity> SqlQueryAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
+        public static async Task<TEntity> SqlQuerySingleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
         {
             using var conn = repository.GetDbConnection();
  
