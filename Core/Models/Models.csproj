@@ -6,8 +6,4 @@
     <RootNamespace>TGS.Core.Models</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
-  </ItemGroup>
-
 </Project>
