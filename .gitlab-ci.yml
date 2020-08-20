@@ -5,9 +5,16 @@ stages:
   - test
 variables:
   solution: "tgs.sln"
-  
+
+services:
+  - redis:latest
+
+connect:
+  image: redis
+  script:
+  - redis-cli -h redis PING
+
 before_script:
-  - "docker run --name redis-tgs -p 6379:6379 -d redis --restart unless-stopped"
   - "dotnet restore $solution"
 
 build:
