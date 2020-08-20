@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.TgsApi.Controllers.Message;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
+using TGS.Infrastructures.Redis;
 
 namespace TGS.Apis.TgsApi.Controllers
 {
@@ -16,12 +17,13 @@ namespace TGS.Apis.TgsApi.Controllers
     {
         private readonly ITgsRepository _tgpRepository;
         private readonly IBetRepository _betRepository;
-        //private readonly IRedisRepository _redisRepository;
+        private readonly IRedisRepository _redisRepository;
 
-        public StatusController(ITgsRepository tgpRepository, IBetRepository betRepository)
+        public StatusController(ITgsRepository tgpRepository, IBetRepository betRepository, IRedisRepository redisRepository)
         {
             _tgpRepository = tgpRepository;
             _betRepository = betRepository;
+            _redisRepository = redisRepository;
         }
 
         [HttpGet]
@@ -38,7 +40,8 @@ namespace TGS.Apis.TgsApi.Controllers
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectTgsDb = await _tgpRepository.CanConnectionAsync(),
-                CanConnectBetDb = await _betRepository.CanConnectionAsync()
+                CanConnectBetDb = await _betRepository.CanConnectionAsync(),
+                RedisConnectionStatus = _redisRepository.GetConnectionStatus()
             };
         }
     }

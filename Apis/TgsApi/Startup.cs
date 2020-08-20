@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
+using TGS.Infrastructures.Redis;
 
 namespace TGS.Apis.TgsApi
 {
@@ -24,6 +25,7 @@ namespace TGS.Apis.TgsApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepositoriesAndExecuteMigrations(Configuration);
+            services.AddRedis();
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>
