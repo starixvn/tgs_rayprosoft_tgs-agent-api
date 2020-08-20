@@ -7,7 +7,7 @@ variables:
   solution: "tgs.sln"
   
 before_script:
-  - "docker pull redis docker run --name redis-tgs -p 6379:6379 -d redis --restart unless-stopped"
+  - "docker run --name redis-tgs -p 6379:6379 -d redis --restart unless-stopped"
   - "dotnet restore $solution"
 
 build:
