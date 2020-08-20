@@ -10,7 +10,7 @@ namespace TGS.Infrastructures.Redis
     public static class ServiceExtensions
     {
         private delegate IRedisConnection RedisConnectionMapper(string key);
-        public static IServiceCollection AddRedisServices(this IServiceCollection services)
+        public static IServiceCollection AddRedis(this IServiceCollection services)
         {
             //services.AddSignalR()
             //    .AddMessagePackProtocol(options =>
@@ -63,6 +63,8 @@ namespace TGS.Infrastructures.Redis
             services.AddScoped<IRedisPublisher, RedisPublisher>();
             services.AddScoped<IRedisSubscriber, RedisSubscriber>();
 
+            services.AddScoped<IRedisConnection, RedisCoreConnection>();
+            services.AddScoped<IRedisConnection, RedisSignalRConnection>();
             services.AddScoped<RedisCoreConnection>();
             services.AddScoped<RedisSignalRConnection>();
 

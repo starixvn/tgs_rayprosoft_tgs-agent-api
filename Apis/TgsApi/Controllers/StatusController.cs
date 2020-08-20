@@ -16,6 +16,7 @@ namespace TGS.Apis.TgsApi.Controllers
     {
         private readonly ITgsRepository _tgpRepository;
         private readonly IBetRepository _betRepository;
+        //private readonly IRedisRepository _redisRepository;
 
         public StatusController(ITgsRepository tgpRepository, IBetRepository betRepository)
         {

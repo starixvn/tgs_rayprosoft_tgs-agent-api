@@ -17,7 +17,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         public void SetUp()
         {
             var provider = new ServiceCollection()
-                .AddRedisServices()
+                .AddRedis()
                 .BuildServiceProvider();
 
             _redisPublisherFactory = provider.GetService<Func<string, IRedisPublisher>>();

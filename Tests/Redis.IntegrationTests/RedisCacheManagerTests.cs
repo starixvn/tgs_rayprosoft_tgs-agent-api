@@ -22,7 +22,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         public void TestFixtureSetUp()
         {
             var provider = new ServiceCollection()
-                .AddRedisServices()
+                .AddRedis()
                 .BuildServiceProvider();
 
             _redisRepositoryFactory = provider.GetService<Func<string, IRedisRepository>>();
