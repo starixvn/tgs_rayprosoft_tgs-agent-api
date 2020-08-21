@@ -4,7 +4,7 @@ using TGS.Apis.LogApi.DataService.Models;
 
 namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
-    public sealed class ApiLogConfiguration : IEntityTypeConfiguration<ApiLog>
+    public sealed class ApiLogTypeConfiguration : IEntityTypeConfiguration<ApiLog>
     {
         void IEntityTypeConfiguration<ApiLog>.Configure(EntityTypeBuilder<ApiLog> builder)
         {

@@ -7,9 +7,10 @@ namespace TGS.Infrastructures.Log
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddLogServices(this IServiceCollection services, Action<LogBusEvent> logPublisher)
+        public static IServiceCollection AddLogServices(this IServiceCollection services)
         {
-            //services.AddTransient<Action<LogBusEvent>>((p) => logPublisher);
+            services.AddTransient<LogBusEvent>();
+            services.AddSingleton(provider => new Func<LogBusEvent>(provider.GetService<LogBusEvent>));
             services.AddTransient<ITgsLog, TgsLog>();
             return services;
         }

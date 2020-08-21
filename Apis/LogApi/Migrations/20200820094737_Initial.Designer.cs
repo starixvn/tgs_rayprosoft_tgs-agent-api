@@ -4,12 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TGS.Apis.LogApi.DataService;
 
 namespace TGS.Apis.LogApi.Migrations
 {
-    [DbContext(typeof(LogDbContext))]
+    [DbContext(typeof(LogRepository))]
     [Migration("20200820094737_Initial")]
     partial class Initial
     {
@@ -84,7 +83,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApiLogs","dbo");
+                    b.ToTable("ApiLogs", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.EventLog", b =>
@@ -113,7 +112,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EventLogs","dbo");
+                    b.ToTable("EventLogs", "dbo");
                 });
 #pragma warning restore 612, 618
         }

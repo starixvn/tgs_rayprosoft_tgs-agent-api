@@ -3,12 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using TGS.Apis.LogApi.Services;
 
 namespace TGS.Apis.LogApi.DataService
 {
-    public sealed class DBContextFactory : IDesignTimeDbContextFactory<LogDbContext>
+    public sealed class DBContextFactory : IDesignTimeDbContextFactory<LogRepository>
     {
-        public LogDbContext CreateDbContext(string[] args)
+        public LogRepository CreateDbContext(string[] args)
         {
             var builder = new ConfigurationBuilder()
                  .SetBasePath(Directory.GetCurrentDirectory())
@@ -18,7 +19,7 @@ namespace TGS.Apis.LogApi.DataService
 
             var connectionString = config.GetConnectionString("Log");
 
-            var dbContextBuilder = new DbContextOptionsBuilder<LogDbContext>()
+            var dbContextBuilder = new DbContextOptionsBuilder<LogRepository>()
                  .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
                  .UseSqlServer(connectionString, serverOptions =>
                  {
@@ -27,7 +28,7 @@ namespace TGS.Apis.LogApi.DataService
                      serverOptions.MigrationsHistoryTable("_MigrationHistory", "dbo");
                  });
 
-            return new LogDbContext(dbContextBuilder.Options);
+            return new LogRepository(dbContextBuilder.Options);
         }
     }
 }

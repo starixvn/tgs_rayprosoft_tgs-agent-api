@@ -2,7 +2,7 @@
 
 namespace TGS.Infrastructures.Log
 {
-    public interface IOsLog
+    public interface RequestAnalyzer
     {
         void WriteEventLogError(string errorMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
 

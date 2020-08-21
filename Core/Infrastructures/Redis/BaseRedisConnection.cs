@@ -8,9 +8,9 @@ namespace TGS.Infrastructures.Redis
     {
         private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
 
-        private readonly IOsLog _osLog;
+        private readonly RequestAnalyzer _osLog;
 
-        protected BaseRedisConnection(string connectionString, IOsLog osLog)
+        protected BaseRedisConnection(string connectionString, RequestAnalyzer osLog)
         {
             _osLog = osLog;
 

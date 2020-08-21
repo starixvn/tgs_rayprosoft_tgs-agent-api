@@ -4,7 +4,7 @@ using TGS.Apis.LogApi.DataService.Models;
 
 namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
-    public sealed class EventLogConfiguration : IEntityTypeConfiguration<EventLog>
+    public sealed class EventLogTypeConfiguration : IEntityTypeConfiguration<EventLog>
     {
         void IEntityTypeConfiguration<EventLog>.Configure(EntityTypeBuilder<EventLog> builder)
         {

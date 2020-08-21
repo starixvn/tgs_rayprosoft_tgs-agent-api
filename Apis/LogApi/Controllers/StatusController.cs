@@ -13,11 +13,11 @@ namespace TGS.Apis.LogApi.Controllers
     [ApiController]
     public class StatusController : ControllerBase
     {
-        private readonly LogDbContext _context;
+        private readonly ILogRepository _logRepository;
 
-        public StatusController(LogDbContext context)
+        public StatusController(ILogRepository logRepository)
         {
-            _context = context;
+            _logRepository = logRepository;
         }
 
         [HttpGet]
@@ -33,7 +33,7 @@ namespace TGS.Apis.LogApi.Controllers
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
-                CanConnectDb = await _context.Database.CanConnectAsync()
+                CanConnectDb = await _logRepository.CanConnectionAsync()
             };
         }
     }

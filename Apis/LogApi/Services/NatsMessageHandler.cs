@@ -33,7 +33,7 @@ namespace TGS.Apis.LogApi.Services
     public class NatsMessageHandler : IMessageHandler
     {
         private readonly Func<string, ILoggerEventWriter> _logWriterFactory;
-        private readonly IOsLog _osLog;
+        private readonly RequestAnalyzer _osLog;
         private readonly INatsManager _natsManager;
         private IAsyncSubscription _ugsAdminLogSubscription;
         private IAsyncSubscription _ugsApiCallLogSubscription;
@@ -48,7 +48,7 @@ namespace TGS.Apis.LogApi.Services
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
         public NatsMessageHandler(
             Func<string, ILoggerEventWriter> logWriterFactory,
-            IOsLog osLog,
+            RequestAnalyzer osLog,
             IOptions<LoggerServiceConfig> loggerServiceConfig,
             INatsManager natsManager)
         {
@@ -113,8 +113,8 @@ namespace TGS.Apis.LogApi.Services
                     async logs =>
                     {
                         var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(ApiCallEvent), logs.Count);
-                        await WriteLogsAsync(nameof(ApiCallEvent), logs);
+                        CountReceivedLogs(now, nameof(ApiLogEvent), logs.Count);
+                        await WriteLogsAsync(nameof(ApiLogEvent), logs);
                     },
                     ex => _osLog.WriteEventLogError("error occurred when RX executed:" + ex));
         }
@@ -177,8 +177,8 @@ namespace TGS.Apis.LogApi.Services
 
         private void RegisterApiCallLogSubscriberClient()
         {
-            _ugsApiCallLogSubscription = _natsManager.SubscribeAsync<ApiCallEvent>(
-                nameof(ApiCallEvent),
+            _ugsApiCallLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
+                nameof(ApiLogEvent),
                 Consts.NatsUgsLogQueueName,
                 message =>
                 {

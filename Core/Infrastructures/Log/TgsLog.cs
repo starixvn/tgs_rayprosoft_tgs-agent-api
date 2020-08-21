@@ -11,11 +11,10 @@ namespace TGS.Infrastructures.Log
         private string _loggerName;
         private readonly Action<LogBusEvent> _logPublisher;
 
-        //public UgsLog(
-        //    [Dependency(LogPublisher)] Action<LogBusEvent> logPublisher)
-        //{
-        //    _logPublisher = logPublisher;
-        //}
+        public TgsLog(Action<LogBusEvent> logPublisher)
+        {
+            _logPublisher = logPublisher;
+        }
 
         private const string TrackingIdCallContextSlotName = "callcontext::trackingid";
 
@@ -63,10 +62,10 @@ namespace TGS.Infrastructures.Log
                 logger = trackingData
             });
 
-        void ITgsLog.LogApi(ApiCallEvent apiCallEvent)
+        void ITgsLog.LogApi(ApiLogEvent apiLogEvent)
         {
-            apiCallEvent.trackingid = TrackingId;
-            _logPublisher(apiCallEvent);
+            apiLogEvent.trackingid = TrackingId;
+            _logPublisher(apiLogEvent);
         }
 
         void ITgsLog.LogAdmin(AdminLogEvent adminEvent)

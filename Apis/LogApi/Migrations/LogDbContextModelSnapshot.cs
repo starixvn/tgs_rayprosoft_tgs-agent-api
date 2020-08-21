@@ -8,7 +8,7 @@ using TGS.Apis.LogApi.DataService;
 
 namespace TGS.Apis.LogApi.Migrations
 {
-    [DbContext(typeof(LogDbContext))]
+    [DbContext(typeof(LogRepository))]
     partial class LogDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

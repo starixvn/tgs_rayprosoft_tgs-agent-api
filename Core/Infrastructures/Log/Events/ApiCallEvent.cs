@@ -6,7 +6,7 @@ using MessagePack;
 namespace TGS.Infrastructures.Log.Events
 {
     [MessagePackObject((true))]
-    public class ApiCallEvent : LogBusEvent
+    public class ApiLogEvent : LogBusEvent
     {
         public Guid trackingid { get; set; }
         public string ip { get; set; }

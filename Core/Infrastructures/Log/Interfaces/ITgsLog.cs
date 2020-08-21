@@ -37,7 +37,7 @@ namespace TGS.Infrastructures.Log.Interfaces
 
         void LogTrackingData(string trackingData);
 
-        void LogApi(ApiCallEvent apiCall);
+        void LogApi(ApiLogEvent apiCall);
         void LogAdmin(AdminLogEvent adminEvent);
     }
 }

@@ -10,16 +10,16 @@ namespace TGS.Apis.LogApi.Extensions
         public static IServiceCollection AddLogDbContext(this IServiceCollection services,
             string connectionString)
         {
-            services.AddDbContextPool<LogDbContext>((option) =>
+            services.AddDbContextPool<LogRepository>((option) =>
             {
-//#if DEBUG
+                //#if DEBUG
                 option.UseLoggerFactory(LoggerFactory.Create(builder =>
                 {
                     builder.AddConsole();
                     builder.SetMinimumLevel(LogLevel.Information);
                 }));
                 option.EnableSensitiveDataLogging(true);
-//#endif
+                //#endif
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(180);
