@@ -7,6 +7,7 @@ namespace TGS.Apis.LogApi.DataService.Models
     public class ApiLog
     {
         public Guid Id { get; set; }
+        public Guid TrackingId { get; set; }
         public string Ip { get; set; }
         public string Path { get; set; }
         public string Method { get; set; }
@@ -25,6 +26,7 @@ namespace TGS.Apis.LogApi.DataService.Models
             return new ApiLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                TrackingId = a.trackingid,
                 Ip = a.ip,
                 Path = a.path,
                 Method = a.method,

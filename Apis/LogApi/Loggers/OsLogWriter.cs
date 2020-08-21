@@ -8,37 +8,31 @@ using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
 {
-    public interface ILoggerEventWriter : IAsyncDisposable
-    {
-        Task SaveLogEventsAsync(IList<LogBusEvent> events);
-        Task SaveLogEventAsync(LogBusEvent @event);
-    }
-
-    public sealed class ApiLogEventWriter : ILoggerEventWriter
+    public sealed class OsLogWriter : ILoggerEventWriter
     {
         private readonly ILogRepository _logRepository;
 
-        public ApiLogEventWriter(ILogRepository logRepository)
+        public OsLogWriter(ILogRepository logRepository)
         {
             _logRepository = logRepository;
         }
 
-        Task ILoggerEventWriter.SaveLogEventsAsync(IList<LogBusEvent> events)
+        Task ILoggerEventWriter.SaveLogsAsync(IList<LogBusEvent> events)
         {
             var logs = events
                 .Select(Convert)
                 .ToList();
 
-            return _logRepository.AddApiLogsAsync(logs);
+            return _logRepository.AddOsLogsAsync(logs);
         }
 
-        Task ILoggerEventWriter.SaveLogEventAsync(LogBusEvent @event)
+        Task ILoggerEventWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
-            return _logRepository.AddApiLogAsync(log);
+            return _logRepository.AddOsLogAsync(log);
         }
 
-        private static ApiLog Convert(LogBusEvent ent) => (ApiLog)ent;
+        private static OsLog Convert(LogBusEvent ent) => (OsLog)ent;
 
         ValueTask IAsyncDisposable.DisposeAsync()
         {

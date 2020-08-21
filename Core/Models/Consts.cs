@@ -8,6 +8,6 @@
             public const string TgsToGameProviderMap = "TgsToGameProviderMap";
         }
 
-        public const string NatsUgsLogQueueName = "UgsLogQueue";
+        public const string NatsTgsLogQueueName = "TgsLogQueue";
     }
 }

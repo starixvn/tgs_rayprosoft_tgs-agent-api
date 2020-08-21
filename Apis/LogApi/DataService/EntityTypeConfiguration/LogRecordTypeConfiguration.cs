@@ -4,18 +4,23 @@ using TGS.Apis.LogApi.DataService.Models;
 
 namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
-    public sealed class EventLogTypeConfiguration : IEntityTypeConfiguration<EventLog>
+    public sealed class LogRecordTypeConfiguration : IEntityTypeConfiguration<LogRecord>
     {
-        void IEntityTypeConfiguration<EventLog>.Configure(EntityTypeBuilder<EventLog> builder)
+        void IEntityTypeConfiguration<LogRecord>.Configure(EntityTypeBuilder<LogRecord> builder)
         {
-            builder.ToTable("EventLogs", "dbo");
+            builder.ToTable("LogRecords", "dbo");
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.Module)
-              .HasColumnType("nvarchar(32)")
+            builder.Property(c => c.ServerName)
+              .HasColumnType("nvarchar(64)")
               .IsRequired()
               .IsUnicode();
+
+            builder.Property(c => c.Level)
+                .HasColumnType("int")
+                .IsRequired()
+                .IsUnicode();
 
             builder.Property(c => c.Message)
                 .HasColumnType("nvarchar(512)")

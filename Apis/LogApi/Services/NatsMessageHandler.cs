@@ -35,9 +35,9 @@ namespace TGS.Apis.LogApi.Services
         private readonly Func<string, ILoggerEventWriter> _logWriterFactory;
         private readonly RequestAnalyzer _osLog;
         private readonly INatsManager _natsManager;
-        private IAsyncSubscription _ugsAdminLogSubscription;
-        private IAsyncSubscription _ugsApiCallLogSubscription;
-        private IAsyncSubscription _ugsLogRecordSubscription;
+        private IAsyncSubscription _osLogSubscription;
+        private IAsyncSubscription _apiLogSubscription;
+        private IAsyncSubscription _logRecordSubscription;
         private DateTimeOffset _lastReceivedEventTime;
         private LogBusEvent _lastBusEvent;
         private DateTimeOffset _startupTime;
@@ -60,10 +60,10 @@ namespace TGS.Apis.LogApi.Services
 
         void IMessageHandler.StartReceiveMessages()
         {
-            SubscribeAdminLogReceived();
-            SubscribeApiCallLogReceived();
+            SubscribeOsLogReceived();
+            SubscribeApiLogReceived();
             SubscribeLogRecordReceived();
-            RegisterAdminLogSubscriberClient();
+            RegisterOsLogSubscriberClient();
             RegisterApiCallLogSubscriberClient();
             RegisterLogRecordSubscriberClient();
             _startupTime = DateTimeOffset.UtcNow;
@@ -71,16 +71,16 @@ namespace TGS.Apis.LogApi.Services
 
         public event Action<LogBusEvent> LogRecordReceived;
 
-        public event Action<LogBusEvent> ApiCallReceived;
+        public event Action<LogBusEvent> ApiLogReceived;
 
-        public event Action<LogBusEvent> AdminLogReceived;
+        public event Action<LogBusEvent> OsLogReceived;
 
-        private void SubscribeAdminLogReceived()
+        private void SubscribeOsLogReceived()
         {
             var query =
                 from logs in Observable.FromEvent<LogBusEvent>(
-                        ev => AdminLogReceived += ev,
-                        ev => AdminLogReceived -= ev)
+                        ev => OsLogReceived += ev,
+                        ev => OsLogReceived -= ev)
                     .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
                 where logs.Count > 0
                 select logs;
@@ -91,18 +91,18 @@ namespace TGS.Apis.LogApi.Services
                     async logs =>
                     {
                         var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(AdminLogEvent), logs.Count);
-                        await WriteLogsAsync(nameof(AdminLogEvent), logs);
+                        CountReceivedLogs(now, nameof(OsLogEvent), logs.Count);
+                        await WriteLogsAsync(nameof(OsLogEvent), logs);
                     },
                     ex => _osLog.WriteEventLogError("error occurred when RX executed:" + ex));
         }
 
-        private void SubscribeApiCallLogReceived()
+        private void SubscribeApiLogReceived()
         {
             var query =
                 from logs in Observable.FromEvent<LogBusEvent>(
-                        ev => ApiCallReceived += ev,
-                        ev => ApiCallReceived -= ev)
+                        ev => ApiLogReceived += ev,
+                        ev => ApiLogReceived -= ev)
                     .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
                 where logs.Count > 0
                 select logs;
@@ -143,9 +143,9 @@ namespace TGS.Apis.LogApi.Services
 
         void IMessageHandler.StopReceiveMessages()
         {
-            _ugsAdminLogSubscription?.Dispose();
-            _ugsApiCallLogSubscription?.Dispose();
-            _ugsLogRecordSubscription?.Dispose();
+            _osLogSubscription?.Dispose();
+            _apiLogSubscription?.Dispose();
+            _logRecordSubscription?.Dispose();
             Task.WaitAll(Task.Delay(_loggerServiceConfig.Value.BatchInsertWaitingSeconds.Add(TimeSpan.FromSeconds(3))));
             _subscription?.Dispose();
         }
@@ -162,37 +162,37 @@ namespace TGS.Apis.LogApi.Services
 
         ConcurrentDictionary<string, uint> IMessageHandler.LogReceivedCount => _logReceivedCount;
 
-        private void RegisterAdminLogSubscriberClient()
+        private void RegisterOsLogSubscriberClient()
         {
-            _ugsAdminLogSubscription = _natsManager.SubscribeAsync<AdminLogEvent>(
-                nameof(AdminLogEvent),
-                Consts.NatsUgsLogQueueName,
+            _osLogSubscription = _natsManager.SubscribeAsync<OsLogEvent>(
+                nameof(OsLogEvent),
+                Consts.NatsTgsLogQueueName,
                 message =>
                 {
                     _lastBusEvent = message.DataObject;
                     _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    AdminLogReceived?.Invoke(message.DataObject);
+                    OsLogReceived?.Invoke(message.DataObject);
                 });
         }
 
         private void RegisterApiCallLogSubscriberClient()
         {
-            _ugsApiCallLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
+            _apiLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
                 nameof(ApiLogEvent),
-                Consts.NatsUgsLogQueueName,
+                Consts.NatsTgsLogQueueName,
                 message =>
                 {
                     _lastBusEvent = message.DataObject;
                     _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    ApiCallReceived?.Invoke(message.DataObject);
+                    ApiLogReceived?.Invoke(message.DataObject);
                 });
         }
 
         private void RegisterLogRecordSubscriberClient()
         {
-            _ugsLogRecordSubscription = _natsManager.SubscribeAsync<LogRecordEvent>(
+            _logRecordSubscription = _natsManager.SubscribeAsync<LogRecordEvent>(
                 nameof(LogRecordEvent),
-                Consts.NatsUgsLogQueueName,
+                Consts.NatsTgsLogQueueName,
                 message =>
                 {
                     _lastBusEvent = message.DataObject;

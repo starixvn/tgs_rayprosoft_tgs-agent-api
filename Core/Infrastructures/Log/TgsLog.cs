@@ -31,6 +31,8 @@ namespace TGS.Infrastructures.Log
             }
         }
 
+        Guid ITgsLog.TrackingId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         ITgsLog ITgsLog.SetLogger(string name)
         {
             _loggerName = name;
@@ -68,10 +70,14 @@ namespace TGS.Infrastructures.Log
             _logPublisher(apiLogEvent);
         }
 
-        void ITgsLog.LogAdmin(AdminLogEvent adminEvent)
+        void ITgsLog.LogOs(OsLogEvent logEvent)
         {
-            adminEvent.trackingid = TrackingId;
-            _logPublisher(adminEvent);
+            logEvent.trackingid = TrackingId;
+            logEvent.servicename = logEvent.servicename;
+            logEvent.message = logEvent.message;
+            logEvent.exception = logEvent.exception;
+            logEvent.recordedon = DateTimeOffset.UtcNow;
+            _logPublisher(logEvent);
         }
 
         private void SendLogRecord(TgsLogLevel level, string message, Exception exception,
