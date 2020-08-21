@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>TGS.Infrastructures.Redis.IntegrationTests</AssemblyName>
+    <AssemblyName>TGS.Tests.Redis.IntegrationTests</AssemblyName>
 
-    <RootNamespace>TGS.Infrastructures.Redis.IntegrationTests</RootNamespace>
+    <RootNamespace>TGS.Tests.Redis.IntegrationTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

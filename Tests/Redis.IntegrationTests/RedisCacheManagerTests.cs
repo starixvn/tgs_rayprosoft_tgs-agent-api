@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using TGS.Infrastructures.Redis;
 using TGS.Tests.TestsCommon;
 
-namespace TGS.Infrastructures.Redis.IntegrationTests
+namespace TGS.Tests.Redis.IntegrationTests
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     [Category(Named.Integration)]
     public partial class RedisCacheManagerTests
     {
@@ -41,84 +43,20 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         public void TearDown()
         {
             var amount = AsyncHelper.RunSync(() =>
-                    _cacheManager.ClearCacheByPatternAsync(CacheType, "*"));
+                _cacheManager.ClearCacheByPatternAsync(CacheType, "*"));
             Console.WriteLine($"TearDown removed {amount} keys");
         }
-
-
-        [Test]
-        public async Task Get_returns_value_if_it_is_in_cache()
-        {
-            await _cacheManager.CacheAsync(CacheType, _cacheKey, null, NewData);
-
-            var dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(NewData);
-        }
-
-
-        [Test]
-        public async Task Get_returns_default_if_it_is_not_in_cache()
-        {
-            var dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(default(string));
-        }
-
-
-        [Test]
-        public async Task Get_creates_data_if_it_is_not_in_cache()
-        {
-            var dataFromCache = await _cacheManager.GetAsync(CacheType, _cacheKey, () => Task.FromResult(NewData));
-            dataFromCache.Should().Be(NewData);
-
-            dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(default(string));
-        }
-
-
-        [Test]
-        public async Task GetAndCache_creates_and_caches_data_if_it_is_not_in_cache()
-        {
-            var dataFromCache = await _cacheManager.GetAndCacheAsync(CacheType, _cacheKey, null, () => Task.FromResult(NewData));
-            dataFromCache.Should().Be(NewData);
-
-            dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(NewData);
-        }
-
-
-        [Test]
-        public async Task Cache_caches_data_if_it_is_not_in_cache()
-        {
-            await _cacheManager.CacheAsync(CacheType, _cacheKey, null, NewData);
-
-            var dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(NewData);
-        }
-
-
-        [Test]
-        public async Task Cache_replaces_data_if_it_is_in_cache()
-        {
-            await _cacheManager.CacheAsync(CacheType, _cacheKey, null, NewData);
-
-            var rewriteData = "Rewrite data";
-            await _cacheManager.CacheAsync(CacheType, _cacheKey, null, rewriteData);
-
-            var dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(rewriteData);
-        }
-
 
         [Test]
         public async Task CacheList_caches_data_if_it_is_not_in_cache()
         {
             await _cacheManager.CacheListAsync(CacheType, _cacheKey, null, NewData);
 
-            var listFromCache = await _cacheManager.GetListAsync(CacheType, _cacheKey, () => Task.FromResult(new List<string>()));
+            var listFromCache =
+                await _cacheManager.GetListAsync(CacheType, _cacheKey, () => Task.FromResult(new List<string>()));
             listFromCache.Count.Should().Be(1);
             listFromCache[0].Should().Be(NewData);
         }
-
 
         [Test]
         public async Task CacheList_pushes_data_if_it_is_in_cache()
@@ -126,22 +64,22 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             await _cacheManager.CacheListAsync(CacheType, _cacheKey, null, NewData);
             await _cacheManager.CacheListAsync(CacheType, _cacheKey, null, NewData);
 
-            var listFromCache = await _cacheManager.GetListAsync(CacheType, _cacheKey, () => Task.FromResult(new List<string>()));
+            var listFromCache =
+                await _cacheManager.GetListAsync(CacheType, _cacheKey, () => Task.FromResult(new List<string>()));
             listFromCache.Count.Should().Be(2);
             listFromCache[0].Should().Be(NewData);
             listFromCache[1].Should().Be(NewData);
         }
 
-
         [Test]
         public async Task GetList_creates_data_if_it_is_not_in_cache()
         {
-            var createdList = await _cacheManager.GetListAsync(CacheType, _cacheKey, () => Task.FromResult(new List<string> { NewData, NewData }));
+            var createdList = await _cacheManager.GetListAsync(CacheType, _cacheKey,
+                () => Task.FromResult(new List<string> {NewData, NewData}));
             createdList.Count.Should().Be(2);
             createdList[0].Should().Be(NewData);
             createdList[1].Should().Be(NewData);
         }
-
 
         [Test]
         public async Task ClearCache_clears_cache()
@@ -150,9 +88,8 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             await _cacheManager.ClearCacheAsync(CacheType, _cacheKey);
 
             var dataFromCache = await _cacheManager.GetAsync<string>(CacheType, _cacheKey);
-            dataFromCache.Should().Be(default(string));
+            dataFromCache.Should().Be(default);
         }
-
 
         [Test]
         public async Task Set_expireIn_sets_expire()
@@ -160,7 +97,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             var key = Guid.NewGuid();
             var cacheKey = RedisCacheManager.FormCacheKey(CacheType, key);
 
-            await _cacheManager.CacheAsync(CacheType, key, null, NewData);
+            await _cacheManager.SafeCacheAsync(CacheType, key, null, NewData);
             var database = _redisRepository.GetDb();
             var value = await database.StringGetWithExpiryAsync(cacheKey);
             var expiresIn = RedisCacheManager.CapExpiry(null);
@@ -171,7 +108,6 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             value = await database.StringGetWithExpiryAsync(cacheKey);
             value.Expiry.Should().BeCloseTo(expiresIn, 100);
         }
-
 
         [Test]
         public async Task Set_expireIn_changes_expire()
@@ -190,7 +126,6 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             value = await database.StringGetWithExpiryAsync(cacheKey);
             value.Expiry.Should().BeCloseTo(expiresIn, 100);
         }
-
 
         [Test]
         public async Task ClearCacheByPattern_clear_right_keys()
@@ -215,10 +150,9 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             amount.Should().Be(2);
             key11Value.Should().Be(NewData);
             key12Value.Should().Be(NewData);
-            key21Value.Should().Be(default(string));
-            key22Value.Should().Be(default(string));
+            key21Value.Should().Be(default);
+            key22Value.Should().Be(default);
         }
-
 
         [Test]
         public async Task Can_ClearCacheByPattern_when_no_matches()
@@ -227,14 +161,11 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
             amount.Should().Be(0);
         }
 
-
         [Test]
         public async Task Can_ClearCacheByPattern_when_lots_of_matches()
         {
             for (var i = 0; i < 2000; i++)
-            {
                 await _cacheManager.CacheAsync(CacheType, $"pattern:{i % 2}:{i:D4}", null, NewData);
-            }
             var amount = await _cacheManager.ClearCacheByPatternAsync(CacheType, "pattern:0:*");
             amount.Should().Be(1000);
         }

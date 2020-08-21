@@ -18,18 +18,15 @@ namespace TGS.Services.Operations
     public sealed class PlayerOperations : IPlayerOperations
     {
         private readonly IRedisCacheManager _cacheManager;
-        private readonly IRedisRepository _redisRepository;
         private readonly IWalletQueries _walletQueries;
         private readonly Func<IPlayerQueries> _playerQueriesFactory;
 
         public PlayerOperations( 
             IRedisCacheManager cacheManager,
-            IRedisRepository redisRepository,
             IWalletQueries walletQueries,
             Func<IPlayerQueries> playerQueriesFactory)
         {
             _cacheManager = cacheManager;
-            _redisRepository = redisRepository;
             _walletQueries = walletQueries;
             _playerQueriesFactory = playerQueriesFactory;
         }
@@ -63,8 +60,7 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var db = _redisRepository.GetDb();
-                var values = await db.HashGetAsync(GetCachedPlayerCacheKey(playerCode), new RedisValue[]
+                var values = await _cacheManager.GetHashSetAsync(RedisCacheType.Player, playerCode, new RedisValue[]
                 {
                     CachedPlayerFields.BrandId,
                     CachedPlayerFields.ExternalId,
@@ -80,8 +76,7 @@ namespace TGS.Services.Operations
                     CachedPlayerFields.LastCashierUrl,
                     CachedPlayerFields.LastHelpUrl,
                     CachedPlayerFields.LastLoginUrl,
-                    CachedPlayerFields.ExternalCurrencyCode,
-                    //CachedPlayerFields.BrandProxyWalletConfigurationId,
+                    CachedPlayerFields.ExternalCurrencyCode
                 });
 
                 if (values.All(a => !a.IsNull))
@@ -103,8 +98,7 @@ namespace TGS.Services.Operations
                         LastCashierUrl = values[11],
                         LastHelpUrl = values[12],
                         LastLoginUrl = values[13],
-                        ExternalCurrencyCode = values[14],
-                        //BrandProxyWalletConfigurationId = values[15].HasValue ? Guid.Parse(values[15]) : (Guid?)null,
+                        ExternalCurrencyCode = values[14]
                     };
                 }
             }
@@ -120,17 +114,14 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var cacheKey = GetCachedPlayerCacheKey(playerCode);
-                var db = _redisRepository.GetDb();
-                await db.HashSetAsync(cacheKey, new[]
+                var fields = new[]
                 {
                     new HashEntry(CachedPlayerFields.BrandId, player.BrandId.ToString()),
                     new HashEntry(CachedPlayerFields.BrandCode, player.BrandCode),
-                    //new HashEntry(CachedPlayerFields.BrandProxyWalletConfigurationId, player.BrandProxyWalletConfigurationId.ToString()),
                     new HashEntry(CachedPlayerFields.ExternalId, player.ExternalId),
-                    new HashEntry(CachedPlayerFields.Type, (int)player.Type),
+                    new HashEntry(CachedPlayerFields.Type, (int) player.Type),
                     new HashEntry(CachedPlayerFields.Username, player.Username),
-                    new HashEntry(CachedPlayerFields.Status, (int)player.Status),
+                    new HashEntry(CachedPlayerFields.Status, (int) player.Status),
                     new HashEntry(CachedPlayerFields.DefaultWalletId, player.DefaultWalletId.ToString()),
                     new HashEntry(CachedPlayerFields.DefaultWalletCurrencyCode, player.DefaultWalletCurrencyCode),
                     new HashEntry(CachedPlayerFields.CultureCode, player.CultureCode),
@@ -140,9 +131,9 @@ namespace TGS.Services.Operations
                     new HashEntry(CachedPlayerFields.LastHelpUrl, player.LastHelpUrl ?? string.Empty),
                     new HashEntry(CachedPlayerFields.LastTermsUrl, player.LastTermsUrl ?? string.Empty),
                     new HashEntry(CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
-                });
+                };
 
-                await db.KeyExpireAsync(cacheKey, TimeSpan.FromHours(2), CommandFlags.FireAndForget);
+                await _cacheManager.CacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2), true);
             }
             catch (Exception e)
             {
@@ -150,16 +141,10 @@ namespace TGS.Services.Operations
             }
         }
 
-        private static string GetCachedPlayerCacheKey(string playerCode)
-        {
-            return $"player:{playerCode}";
-        }
-
         private static class CachedPlayerFields
         {
             public const string BrandId = "brandId";
             public const string BrandCode = "brandCode";
-            //public const string BrandProxyWalletConfigurationId = "brandProxyWalletConfigurationId";
             public const string ExternalId = "externalId";
             public const string Type = "type";
             public const string Username = "username";

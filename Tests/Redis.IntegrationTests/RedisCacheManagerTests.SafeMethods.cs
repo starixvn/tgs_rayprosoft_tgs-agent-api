@@ -3,7 +3,7 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace TGS.Infrastructures.Redis.IntegrationTests
+namespace TGS.Tests.Redis.IntegrationTests
 {
     [TestFixture]
     [Category(Named.Integration)]
@@ -13,7 +13,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         public async Task Can_safely_get_data_when_no_exception()
         {
             var testQueries = Substitute.For<ITestQueries>();
-            await _cacheManager.CacheAsync(CacheType, _cacheKey, null, NewData);
+            await _cacheManager.SafeCacheAsync(CacheType, _cacheKey, null, NewData);
 
             var data = await _cacheManager.SafeGetAsync(CacheType, _cacheKey, () => testQueries.GetDataAsync());
 
@@ -77,7 +77,7 @@ namespace TGS.Infrastructures.Redis.IntegrationTests
         {
             var testQueries = Substitute.For<ITestQueries>();
 
-            await _cacheManager.CacheAsync(CacheType, _cacheKey, null, NewData);
+            await _cacheManager.SafeCacheAsync(CacheType, _cacheKey, null, NewData);
 
             var data = await _cacheManager.SafeGetAndCacheAsync(CacheType, _cacheKey, null, () => testQueries.GetDataAsync());
 
