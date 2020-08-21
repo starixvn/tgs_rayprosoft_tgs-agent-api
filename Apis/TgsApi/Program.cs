@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
 
 namespace TGS.Apis.TgsApi
 {
@@ -41,6 +42,8 @@ namespace TGS.Apis.TgsApi
                                    loggin.AddConsole();
                                    loggin.SetMinimumLevel(LogLevel.Error);
                                }
+
+                               loggin.AddConfiguration();
                            });
         }
 

@@ -28,8 +28,7 @@ namespace TGS.Apis.TgsApi
             services.AddRepositoriesAndExecuteMigrations(Configuration);
             services.AddRedis();
             services.AddNats(Configuration);
-            services.AddControllers(options =>
-                    options.Filters.Add(new HttpResponseExceptionFilter()))
+            services.AddControllers(options => options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     options.InvalidModelStateResponseFactory = context =>
