@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.Extensions;
 using TGS.Apis.LogApi.Filters;
 using TGS.Apis.LogApi.Services;
@@ -30,6 +31,9 @@ namespace TGS.Apis.LogApi
 
             services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
             services.AddLogDbContext(connectionString);
+
+            services.AddScoped<ILogRepository, LogRepository>();
+
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>

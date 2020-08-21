@@ -36,16 +36,16 @@ namespace TGS.Apis.LogApi
 
         private static void ProcessDbMigration()
         {
-            using var db = new LogDbContext(CreateDbOptionsBuilder().Options);
+            using var db = new LogRepository(CreateDbOptionsBuilder().Options);
             if (!db.Database.GetService<IRelationalDatabaseCreator>().Exists())
             {
                 db.Database.Migrate();
             }
         }
 
-        private static DbContextOptionsBuilder<LogDbContext> CreateDbOptionsBuilder()
+        private static DbContextOptionsBuilder<LogRepository> CreateDbOptionsBuilder()
         {
-            return new DbContextOptionsBuilder<LogDbContext>()
+            return new DbContextOptionsBuilder<LogRepository>()
                 .UseLoggerFactory(LoggerFactory.Create((builder) => builder.AddConsole()))
                 .UseSqlServer(_connectionString, serverOptions =>
                 {

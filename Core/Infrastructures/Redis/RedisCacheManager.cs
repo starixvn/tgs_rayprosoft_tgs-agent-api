@@ -8,19 +8,18 @@ using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Log;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
-
 namespace TGS.Infrastructures.Redis
 {
     public sealed class RedisCacheManager : IRedisCacheManager
     {
         internal static readonly TimeSpan MaxTimeSpan = TimeSpan.FromDays(1);
         private readonly IRedisCacheManager _interface;
-        private readonly IOsLog _osLog;
+        private readonly ITgsLog _osLog;
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
 
         public RedisCacheManager(IRedisRepository repository, IJsonSerializationProvider serializationProvider,
-            IOsLog osLog)
+            ITgsLog osLog)
         {
             _repository = repository;
             _serializationProvider = serializationProvider;

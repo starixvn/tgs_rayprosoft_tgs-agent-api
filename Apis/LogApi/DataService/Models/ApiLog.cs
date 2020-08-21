@@ -1,10 +1,13 @@
 ﻿using System;
+using TGS.Infrastructures.Extensions;
+using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.DataService.Models
 {
     public class ApiLog
     {
         public Guid Id { get; set; }
+        public Guid TrackingId { get; set; }
         public string Ip { get; set; }
         public string Path { get; set; }
         public string Method { get; set; }
@@ -18,5 +21,25 @@ namespace TGS.Apis.LogApi.DataService.Models
         public int ExecutionTimeMs { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
 
+        public static explicit operator ApiLog(ApiLogEvent a)
+        {
+            return new ApiLog
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                TrackingId = a.trackingid,
+                Ip = a.ip,
+                Path = a.path,
+                Method = a.method,
+                Prefix = a.prefix,
+                ServerName = a.servername,
+                RequestHeaders = a.requestheaders,
+                RequestContent = a.requestcontent,
+                ResponseHeaders = a.responseheaders,
+                ResponseContent = a.responsecontent,
+                ResponseCode = a.responsecode,
+                ExecutionTimeMs = a.executiontimems,
+                RecordedOn = a.recordedon
+            };
+        }
     }
 }

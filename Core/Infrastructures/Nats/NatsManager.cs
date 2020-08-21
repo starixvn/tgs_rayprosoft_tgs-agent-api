@@ -21,7 +21,7 @@ namespace TGS.Infrastructures.Nats
 
     public class NatsManager : INatsManager
     {
-        private readonly IOsLog _osLog;
+        private readonly ITgsLog _osLog;
         private Lazy<IConnection> _connectionFactory;
         private readonly IMessagePackProvider _messagePackProvider;
         private ConnState _state;
@@ -29,7 +29,7 @@ namespace TGS.Infrastructures.Nats
 
         public NatsManager(
             IMessagePackProvider messagePackProvider,
-            IOsLog osLog,
+            ITgsLog osLog,
             IOptions<NatsSetting> natsSetting)
         {
             _osLog = osLog;
