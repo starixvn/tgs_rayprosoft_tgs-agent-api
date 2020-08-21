@@ -13,7 +13,7 @@ namespace TGS.Infrastructures.Log.Events
         public Guid trackingid { get; set; }
         public DateTimeOffset recordedon { get; set; }
         public string servername { get; set; }
-        public UgsLogLevel level { get; set; }
+        public TgsLogLevel level { get; set; }
         public string logger { get; set; }
 
         [DataMember(EmitDefaultValue = false)]

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using TGS.Tests.TestsCommon;
 
 namespace TGS.Infrastructures.Redis.IntegrationTests
 {

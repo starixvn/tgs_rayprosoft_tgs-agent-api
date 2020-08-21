@@ -5,7 +5,7 @@ using TGS.Infrastructures.Log.Interfaces;
 
 namespace TGS.Infrastructures.Log
 {
-    internal sealed class TgsLog : IUgsLog
+    internal sealed class TgsLog : ITgsLog
     {
         internal const string LogPublisher = "LogPublisher";
         private string _loggerName;
@@ -32,50 +32,50 @@ namespace TGS.Infrastructures.Log
             }
         }
 
-        IUgsLog IUgsLog.SetLogger(string name)
+        ITgsLog ITgsLog.SetLogger(string name)
         {
             _loggerName = name;
             return this;
         }
 
-        void IUgsLog.LogInfo(string message, Exception exception, string file, string member, int line)
-            => SendLogRecord(UgsLogLevel.Info, message, exception, file, member, line);
+        void ITgsLog.LogInfo(string message, Exception exception, string file, string member, int line)
+            => SendLogRecord(TgsLogLevel.Info, message, exception, file, member, line);
 
-        void IUgsLog.LogDebug(string message, Exception exception, string file, string member, int line)
-            => SendLogRecord(UgsLogLevel.Debug, message, exception, file, member, line);
+        void ITgsLog.LogDebug(string message, Exception exception, string file, string member, int line)
+            => SendLogRecord(TgsLogLevel.Debug, message, exception, file, member, line);
 
-        void IUgsLog.LogWarning(string message, Exception exception, string file, string member, int line)
-            => SendLogRecord(UgsLogLevel.Warning, message, exception, file, member, line);
+        void ITgsLog.LogWarning(string message, Exception exception, string file, string member, int line)
+            => SendLogRecord(TgsLogLevel.Warning, message, exception, file, member, line);
 
-        void IUgsLog.LogError(string message, Exception exception, string file, string member, int line)
-            => SendLogRecord(UgsLogLevel.Error, message, exception, file, member, line);
+        void ITgsLog.LogError(string message, Exception exception, string file, string member, int line)
+            => SendLogRecord(TgsLogLevel.Error, message, exception, file, member, line);
 
-        void IUgsLog.LogFatal(string message, Exception exception, string file, string member, int line)
-            => SendLogRecord(UgsLogLevel.Fatal, message, exception, file, member, line);
+        void ITgsLog.LogFatal(string message, Exception exception, string file, string member, int line)
+            => SendLogRecord(TgsLogLevel.Fatal, message, exception, file, member, line);
 
-        void IUgsLog.LogTrackingData(string trackingData)
+        void ITgsLog.LogTrackingData(string trackingData)
             => _logPublisher(new LogRecordEvent
             {
                 trackingid = TrackingId,
                 recordedon = DateTimeOffset.UtcNow,
                 servername = Environment.MachineName,
-                level = UgsLogLevel.Info,
+                level = TgsLogLevel.Info,
                 logger = trackingData
             });
 
-        void IUgsLog.LogApi(ApiCallEvent apiCallEvent)
+        void ITgsLog.LogApi(ApiCallEvent apiCallEvent)
         {
             apiCallEvent.trackingid = TrackingId;
             _logPublisher(apiCallEvent);
         }
 
-        void IUgsLog.LogAdmin(AdminLogEvent adminEvent)
+        void ITgsLog.LogAdmin(AdminLogEvent adminEvent)
         {
             adminEvent.trackingid = TrackingId;
             _logPublisher(adminEvent);
         }
 
-        private void SendLogRecord(UgsLogLevel level, string message, Exception exception,
+        private void SendLogRecord(TgsLogLevel level, string message, Exception exception,
             string callerFile, string callerMember, int lineNumber)
         {
             _logPublisher(new LogRecordEvent

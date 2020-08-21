@@ -4,11 +4,11 @@ using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Infrastructures.Log.Interfaces
 {
-    public interface IUgsLog
+    public interface ITgsLog
     {
         Guid TrackingId { get; set; }
 
-        IUgsLog SetLogger(string name);
+        ITgsLog SetLogger(string name);
 
         void LogInfo(string message, Exception exception = null,
             [CallerFilePath] string file = "",
