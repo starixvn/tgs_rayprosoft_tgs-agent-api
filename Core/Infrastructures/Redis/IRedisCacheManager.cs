@@ -41,5 +41,10 @@ namespace TGS.Infrastructures.Redis
         Task<T> SafeGetAndCacheForeverAsync<T>(object cacheType, object key, Func<Task<T>> getData);
 
         Task SafeCacheForeverAsync<T>(object cacheType, object key, T data);
+
+        Task CacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields, TimeSpan? expiresIn,
+            bool fireAndForget = false);
+
+        Task<RedisValue[]> GetHashSetAsync(object cacheType, object key, RedisValue[] hashFields, bool fireAndForget = false);
     }
 }
