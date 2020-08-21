@@ -8,11 +8,11 @@ using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
 {
-    public sealed class OsLogWriter : ILoggerEventWriter
+    public sealed class EventLogWriter : ILoggerEventWriter
     {
         private readonly ILogRepository _logRepository;
 
-        public OsLogWriter(ILogRepository logRepository)
+        public EventLogWriter(ILogRepository logRepository)
         {
             _logRepository = logRepository;
         }
@@ -23,16 +23,16 @@ namespace TGS.Apis.LogApi.Loggers
                 .Select(Convert)
                 .ToList();
 
-            return _logRepository.AddOsLogsAsync(logs);
+            return _logRepository.AddEventLogsAsync(logs);
         }
 
         Task ILoggerEventWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
-            return _logRepository.AddOsLogAsync(log);
+            return _logRepository.AddEventLogAsync(log);
         }
 
-        private static OsLog Convert(LogBusEvent ent) => (OsLog)ent;
+        private static EventLog Convert(LogBusEvent ent) => (EventLog)ent;
 
         ValueTask IAsyncDisposable.DisposeAsync()
         {

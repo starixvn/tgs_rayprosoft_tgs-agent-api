@@ -1,11 +1,53 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using TGS.Infrastructures.Log.Enums;
 using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Interfaces;
 
 namespace TGS.Infrastructures.Log
 {
-    internal sealed class TgsLog : ITgsLog
+    public interface ITgsLog
+    {
+        Guid TrackingId { get; set; }
+
+        ITgsLog SetLogger(string name);
+
+        void LogInfo(string message, Exception exception = null,
+            [CallerFilePath] string file = "",
+            [CallerMemberName] string member = "",
+            [CallerLineNumber] int line = 0);
+
+        void LogDebug(string message, Exception exception = null,
+            [CallerFilePath] string file = "",
+            [CallerMemberName] string member = "",
+            [CallerLineNumber] int line = 0);
+
+        void LogWarning(string message, Exception exception = null,
+            [CallerFilePath] string file = "",
+            [CallerMemberName] string member = "",
+            [CallerLineNumber] int line = 0);
+
+        void LogError(string message, Exception exception = null,
+            [CallerFilePath] string file = "",
+            [CallerMemberName] string member = "",
+            [CallerLineNumber] int line = 0);
+
+        void LogFatal(string message, Exception exception = null,
+            [CallerFilePath] string file = "",
+            [CallerMemberName] string member = "",
+            [CallerLineNumber] int line = 0);
+
+        void WriteEventLogError(string errorMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+
+        void WriteEventLogWarning(string warningMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+
+        void WriteEventLogInfo(string infoMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+
+        void LogTrackingData(string trackingData);
+
+        void LogApi(ApiLogEvent apiCall);
+    }
+
+    public sealed class TgsLog : ITgsLog
     {
         internal const string LogPublisher = "LogPublisher";
         private string _loggerName;
@@ -20,18 +62,16 @@ namespace TGS.Infrastructures.Log
 
         public Guid TrackingId
         {
-            get => CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
+            get => Services.CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
             set
             {
-                var slot = CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
+                var slot = Services.CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
                 if (slot == Guid.Empty)
                 {
-                    CallContext<Guid>.SetData(TrackingIdCallContextSlotName, value);
+                    Services.CallContext<Guid>.SetData(TrackingIdCallContextSlotName, value);
                 }
             }
         }
-
-        Guid ITgsLog.TrackingId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         ITgsLog ITgsLog.SetLogger(string name)
         {
@@ -70,16 +110,6 @@ namespace TGS.Infrastructures.Log
             _logPublisher(apiLogEvent);
         }
 
-        void ITgsLog.LogOs(OsLogEvent logEvent)
-        {
-            logEvent.trackingid = TrackingId;
-            logEvent.servicename = logEvent.servicename;
-            logEvent.message = logEvent.message;
-            logEvent.exception = logEvent.exception;
-            logEvent.recordedon = DateTimeOffset.UtcNow;
-            _logPublisher(logEvent);
-        }
-
         private void SendLogRecord(TgsLogLevel level, string message, Exception exception,
             string callerFile, string callerMember, int lineNumber)
         {
@@ -96,6 +126,21 @@ namespace TGS.Infrastructures.Log
                 member = callerMember,
                 line = lineNumber
             });
+        }
+
+        void ITgsLog.WriteEventLogError(string errorMessage, string memberName, string sourceFilePath, int sourceLineNumber)
+        {
+
+        }
+
+        void ITgsLog.WriteEventLogWarning(string warningMessage, string memberName, string sourceFilePath, int sourceLineNumber)
+        {
+
+        }
+
+        void ITgsLog.WriteEventLogInfo(string infoMessage, string memberName, string sourceFilePath, int sourceLineNumber)
+        {
+            throw new NotImplementedException();
         }
     }
 }

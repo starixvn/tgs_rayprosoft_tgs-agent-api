@@ -4,7 +4,7 @@ namespace TGS.Infrastructures.Redis
 {
     public sealed class RedisCoreConnection : BaseRedisConnection
     {
-        public RedisCoreConnection(IRedisConfig config, RequestAnalyzer osLog)
+        public RedisCoreConnection(IRedisConfig config, ITgsLog osLog)
             : base(config.RedisConfigurationString, osLog)
         {
         }

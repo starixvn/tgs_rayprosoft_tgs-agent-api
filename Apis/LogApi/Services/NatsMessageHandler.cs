@@ -19,9 +19,7 @@ namespace TGS.Apis.LogApi.Services
     public interface IMessageHandler
     {
         void StartReceiveMessages();
-
         void StopReceiveMessages();
-
         DateTimeOffset LastStartUpTime { get; }
         DateTimeOffset LastReceivedEventTime { get; }
         DateTimeOffset LastLogInsertTime { get; }
@@ -33,7 +31,7 @@ namespace TGS.Apis.LogApi.Services
     public class NatsMessageHandler : IMessageHandler
     {
         private readonly Func<string, ILoggerEventWriter> _logWriterFactory;
-        private readonly RequestAnalyzer _osLog;
+        private readonly ITgsLog _osLog;
         private readonly INatsManager _natsManager;
         private IAsyncSubscription _osLogSubscription;
         private IAsyncSubscription _apiLogSubscription;
@@ -48,7 +46,7 @@ namespace TGS.Apis.LogApi.Services
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
         public NatsMessageHandler(
             Func<string, ILoggerEventWriter> logWriterFactory,
-            RequestAnalyzer osLog,
+            ITgsLog osLog,
             IOptions<LoggerServiceConfig> loggerServiceConfig,
             INatsManager natsManager)
         {
@@ -60,11 +58,11 @@ namespace TGS.Apis.LogApi.Services
 
         void IMessageHandler.StartReceiveMessages()
         {
-            SubscribeOsLogReceived();
+            SubscribeEventLogReceived();
             SubscribeApiLogReceived();
             SubscribeLogRecordReceived();
-            RegisterOsLogSubscriberClient();
-            RegisterApiCallLogSubscriberClient();
+            RegisterEventLogSubscriberClient();
+            RegisterApiLogSubscriberClient();
             RegisterLogRecordSubscriberClient();
             _startupTime = DateTimeOffset.UtcNow;
         }
@@ -73,14 +71,14 @@ namespace TGS.Apis.LogApi.Services
 
         public event Action<LogBusEvent> ApiLogReceived;
 
-        public event Action<LogBusEvent> OsLogReceived;
+        public event Action<LogBusEvent> EventLogReceived;
 
-        private void SubscribeOsLogReceived()
+        private void SubscribeEventLogReceived()
         {
             var query =
                 from logs in Observable.FromEvent<LogBusEvent>(
-                        ev => OsLogReceived += ev,
-                        ev => OsLogReceived -= ev)
+                        ev => EventLogReceived += ev,
+                        ev => EventLogReceived -= ev)
                     .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
                 where logs.Count > 0
                 select logs;
@@ -91,8 +89,8 @@ namespace TGS.Apis.LogApi.Services
                     async logs =>
                     {
                         var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(OsLogEvent), logs.Count);
-                        await WriteLogsAsync(nameof(OsLogEvent), logs);
+                        CountReceivedLogs(now, nameof(EventLogEvent), logs.Count);
+                        await WriteLogsAsync(nameof(EventLogEvent), logs);
                     },
                     ex => _osLog.WriteEventLogError("error occurred when RX executed:" + ex));
         }
@@ -162,20 +160,20 @@ namespace TGS.Apis.LogApi.Services
 
         ConcurrentDictionary<string, uint> IMessageHandler.LogReceivedCount => _logReceivedCount;
 
-        private void RegisterOsLogSubscriberClient()
+        private void RegisterEventLogSubscriberClient()
         {
-            _osLogSubscription = _natsManager.SubscribeAsync<OsLogEvent>(
-                nameof(OsLogEvent),
+            _osLogSubscription = _natsManager.SubscribeAsync<EventLogEvent>(
+                nameof(EventLogEvent),
                 Consts.NatsTgsLogQueueName,
                 message =>
                 {
                     _lastBusEvent = message.DataObject;
                     _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    OsLogReceived?.Invoke(message.DataObject);
+                    EventLogReceived?.Invoke(message.DataObject);
                 });
         }
 
-        private void RegisterApiCallLogSubscriberClient()
+        private void RegisterApiLogSubscriberClient()
         {
             _apiLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
                 nameof(ApiLogEvent),

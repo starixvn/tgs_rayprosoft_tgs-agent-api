@@ -2,14 +2,13 @@
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Log;
 
-
 namespace TGS.Infrastructures.Redis
 {
     public static class ServiceExtensions
     {
         public static IServiceCollection AddRedis(this IServiceCollection services)
         {
-            services.AddScoped<RequestAnalyzer, OsLog>();
+            services.AddScoped<ITgsLog, TgsLog>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
 
             services.AddScoped<IRedisConfig, RedisConfig>();

@@ -13,9 +13,9 @@ namespace TGS.Infrastructures.Nats
 
     public class MessagePackProvider : IMessagePackProvider
     {
-        private readonly RequestAnalyzer _osLog;
+        private readonly ITgsLog _osLog;
         private readonly MessagePackSerializerOptions _messagePackSerializerOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-        public MessagePackProvider(RequestAnalyzer osLog)
+        public MessagePackProvider(ITgsLog osLog)
         {
             _osLog = osLog;
         }

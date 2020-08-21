@@ -16,6 +16,7 @@ namespace TGS.Apis.LogApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    TrackingId = table.Column<Guid>(nullable: false),
                     Ip = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     Path = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Method = table.Column<string>(type: "nvarchar(256)", nullable: false),
@@ -40,7 +41,8 @@ namespace TGS.Apis.LogApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Module = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    ServerName = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    ServiceName = table.Column<string>(type: "nvarchar(64)", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(512)", nullable: false),
                     Exception = table.Column<string>(type: "nvarchar(4000)", nullable: false),
                     RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
@@ -48,6 +50,25 @@ namespace TGS.Apis.LogApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EventLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LogRecords",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    TrackingId = table.Column<Guid>(nullable: false),
+                    RecordedOn = table.Column<DateTimeOffset>(nullable: false),
+                    ServerName = table.Column<string>(nullable: true),
+                    Level = table.Column<int>(nullable: false),
+                    Logger = table.Column<string>(nullable: true),
+                    Message = table.Column<string>(nullable: true),
+                    Exception = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LogRecords", x => x.Id);
                 });
         }
 
@@ -59,6 +80,10 @@ namespace TGS.Apis.LogApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "EventLogs",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "LogRecords",
                 schema: "dbo");
         }
     }

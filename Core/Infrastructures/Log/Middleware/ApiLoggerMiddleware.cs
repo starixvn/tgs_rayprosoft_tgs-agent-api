@@ -9,7 +9,6 @@ using Microsoft.IO;
 using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Log.Attributes;
 using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Interfaces;
 using TGS.Infrastructures.Log.Services;
 
 namespace TGS.Infrastructures.Log.Middleware

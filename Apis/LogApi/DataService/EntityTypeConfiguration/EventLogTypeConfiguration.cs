@@ -4,11 +4,11 @@ using TGS.Apis.LogApi.DataService.Models;
 
 namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
-    public sealed class OsLogTypeConfiguration : IEntityTypeConfiguration<OsLog>
+    public sealed class EventLogTypeConfiguration : IEntityTypeConfiguration<EventLog>
     {
-        void IEntityTypeConfiguration<OsLog>.Configure(EntityTypeBuilder<OsLog> builder)
+        void IEntityTypeConfiguration<EventLog>.Configure(EntityTypeBuilder<EventLog> builder)
         {
-            builder.ToTable("OsLogs", "dbo");
+            builder.ToTable("EventLogs", "dbo");
 
             builder.HasKey(p => p.Id);
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 
-namespace TGS.Infrastructures.Log.Events
+namespace TGS.Infrastructures.Log.Services
 {
     internal static class CallContext<T>
     {

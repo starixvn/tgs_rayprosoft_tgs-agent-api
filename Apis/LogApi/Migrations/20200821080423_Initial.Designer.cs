@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TGS.Apis.LogApi.DataService;
 
 namespace TGS.Apis.LogApi.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    partial class LogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200821080423_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,6 +82,9 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("nvarchar(30)")
                         .IsUnicode(true);
 
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.ToTable("ApiLogs","dbo");
@@ -101,17 +106,54 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("nvarchar(512)")
                         .IsUnicode(true);
 
-                    b.Property<string>("Module")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
-
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ServerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)")
+                        .IsUnicode(true);
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)")
+                        .IsUnicode(true);
 
                     b.HasKey("Id");
 
                     b.ToTable("EventLogs","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.LogRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Exception")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Logger")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ServerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LogRecords");
                 });
 #pragma warning restore 612, 618
         }

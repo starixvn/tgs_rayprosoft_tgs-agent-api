@@ -15,9 +15,9 @@ namespace TGS.Infrastructures.Redis
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
         internal static readonly TimeSpan MaxTimeSpan = TimeSpan.FromDays(1);
-        private readonly RequestAnalyzer _osLog;
+        private readonly ITgsLog _osLog;
 
-        public RedisCacheManager(IRedisRepository repository, IJsonSerializationProvider serializationProvider, RequestAnalyzer osLog)
+        public RedisCacheManager(IRedisRepository repository, IJsonSerializationProvider serializationProvider, ITgsLog osLog)
         {
             _repository = repository;
             _serializationProvider = serializationProvider;

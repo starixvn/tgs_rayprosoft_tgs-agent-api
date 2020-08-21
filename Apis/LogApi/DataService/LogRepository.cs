@@ -15,9 +15,9 @@ namespace TGS.Apis.LogApi.DataService
 
         Task AddApiLogAsync(ApiLog log);
 
-        Task AddOsLogsAsync(IList<OsLog> logs);
+        Task AddEventLogsAsync(IList<EventLog> logs);
 
-        Task AddOsLogAsync(OsLog log);
+        Task AddEventLogAsync(EventLog log);
 
         Task AddLogRecordsAsync(IList<LogRecord> logs);
 
@@ -35,7 +35,7 @@ namespace TGS.Apis.LogApi.DataService
 
         DbSet<ApiLog> ApiLogs { get; set; }
 
-        DbSet<OsLog> OsLogs { get; set; }
+        DbSet<EventLog> EventLogs { get; set; }
 
         DbSet<LogRecord> LogRecords { get; set; }
 
@@ -63,7 +63,7 @@ namespace TGS.Apis.LogApi.DataService
         {
             modelBuilder.HasDefaultSchema("dbo");
 
-            modelBuilder.ApplyConfiguration(new OsLogTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new EventLogTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ApiLogTypeConfiguration());
         }
 
@@ -79,15 +79,15 @@ namespace TGS.Apis.LogApi.DataService
             await SaveChangesAsync();
         }
 
-        async Task ILogRepository.AddOsLogsAsync(IList<OsLog> logs)
+        async Task ILogRepository.AddEventLogsAsync(IList<EventLog> logs)
         {
-            await OsLogs.AddRangeAsync(logs);
+            await EventLogs.AddRangeAsync(logs);
             await SaveChangesAsync();
         }
 
-        async Task ILogRepository.AddOsLogAsync(OsLog log)
+        async Task ILogRepository.AddEventLogAsync(EventLog log)
         {
-            await OsLogs.AddAsync(log);
+            await EventLogs.AddAsync(log);
             await SaveChangesAsync();
         }
 

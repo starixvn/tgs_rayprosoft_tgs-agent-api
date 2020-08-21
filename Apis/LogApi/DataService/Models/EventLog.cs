@@ -4,7 +4,7 @@ using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.DataService.Models
 {
-    public class OsLog
+    public class EventLog
     {
         public Guid Id { get; set; }
         public string ServerName { get; set; }
@@ -14,9 +14,9 @@ namespace TGS.Apis.LogApi.DataService.Models
         public DateTimeOffset RecordedOn { get; set; }
 
 
-        public static explicit operator OsLog(OsLogEvent a)
+        public static explicit operator EventLog(EventLogEvent a)
         {
-            return new OsLog
+            return new EventLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 ServerName = a.servername,

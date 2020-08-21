@@ -15,7 +15,7 @@ namespace TGS.Tests.TestsCommon
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.AddScoped<RequestAnalyzer, OsLog>();
+            services.AddScoped<ITgsLog, TgsLog>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
             services.AddSingleton<IConfiguration>(configuration);
             return services;

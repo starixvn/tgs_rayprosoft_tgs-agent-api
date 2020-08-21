@@ -12,8 +12,5 @@ namespace TGS.Infrastructures.Redis
 
         string IRedisConfig.RedisConfigurationString =>
             _configuration.GetConnectionString("RedisConfigurationString");
-
-        string IRedisConfig.SignalRRedisConnectionString =>
-           _configuration.GetConnectionString("SignalRRedisConnectionString");
     }
 }

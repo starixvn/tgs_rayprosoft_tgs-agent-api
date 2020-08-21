@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Interfaces;
 
 namespace TGS.Infrastructures.Log
 {
