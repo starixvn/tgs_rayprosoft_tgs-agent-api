@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using TGS.Infrastructures.Redis;
 using TGS.Tests.TestsCommon;
 
-namespace TGS.Infrastructures.Redis.IntegrationTests
+namespace TGS.Tests.Redis.IntegrationTests
 {
     [TestFixture, Parallelizable]
     [Category(Named.Integration)]

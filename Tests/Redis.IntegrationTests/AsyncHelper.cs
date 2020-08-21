@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TGS.Infrastructures.Redis.IntegrationTests
+namespace TGS.Tests.Redis.IntegrationTests
 {
     public static class AsyncHelper
     {

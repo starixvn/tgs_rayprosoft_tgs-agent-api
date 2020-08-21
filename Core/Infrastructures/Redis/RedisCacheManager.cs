@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Log;
-using RedisValue = StackExchange.Redis.RedisValue;
 
+[assembly:InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
 namespace TGS.Infrastructures.Redis
 {
     public sealed class RedisCacheManager : IRedisCacheManager
@@ -23,72 +24,6 @@ namespace TGS.Infrastructures.Redis
             _serializationProvider = serializationProvider;
             _osLog = osLog;
             _interface = this;
-        }
-
-        async Task<T> IRedisCacheManager.GetAsync<T>(object cacheType, object key)
-        {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
-            var value = await db.StringGetAsync(cacheKey);
-            return value.IsNullOrEmpty ?
-                default(T) :
-                _serializationProvider.DeserializeFromString<T>(value);
-        }
-
-        async Task<T> IRedisCacheManager.GetAsync<T>(object cacheType, object key, Func<Task<T>> createFunc)
-        {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
-            var value = await db.StringGetAsync(cacheKey);
-            if (value.IsNullOrEmpty)
-            {
-                return await createFunc();
-            }
-
-            return _serializationProvider.DeserializeFromString<T>(value);
-        }
-
-        Task<T> IRedisCacheManager.GetAndCacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, Func<Task<T>> createFunc)
-        {
-            return GetAndCacheAsync(cacheType, key, CapExpiry(expiresIn), createFunc, false);
-        }
-
-        // This method presents as a temporary measure to check FireAndForget as Jeff suggested
-        // If this proves its good then this method should be merged back to IRedisCacheManager.CacheAsync
-        // and cacheWithFireAndForget replaced with just passing CommandFlags.FireAndForget
-        internal async Task<T> GetAndCacheAsync<T>(
-            object cacheType, object key, TimeSpan? expiresIn, Func<Task<T>> createFunc, bool cacheWithFireAndForget)
-        {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
-            var value = await db.StringGetAsync(cacheKey);
-            if (value.IsNullOrEmpty)
-            {
-                var createdValue = await createFunc();
-                var serializedValue = _serializationProvider.SerializeToString(createdValue);
-                var flags = cacheWithFireAndForget ? CommandFlags.None : CommandFlags.FireAndForget;
-                await db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
-                return createdValue;
-            }
-
-            return _serializationProvider.DeserializeFromString<T>(value);
-        }
-
-        Task IRedisCacheManager.CacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
-        {
-            return CacheAsync(cacheType, key, CapExpiry(expiresIn), data, false);
-        }
-
-        // This method presents as a temporary measure to check FireAndForget as Jeff suggested
-        // If this proves its good then this method should be merged back to IRedisCacheManager.CacheAsync
-        // and cacheWithFireAndForget replaced with just passing CommandFlags.FireAndForget
-        internal Task CacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data, bool cacheWithFireAndForget)
-        {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
-            var serializedValue = _serializationProvider.SerializeToString(data);
-            var flags = cacheWithFireAndForget ? CommandFlags.None : CommandFlags.FireAndForget;
-            return db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
         }
 
         async Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, List<T> data)
@@ -149,18 +84,6 @@ namespace TGS.Infrastructures.Redis
             return count;
         }
 
-        public static TimeSpan CapExpiry(TimeSpan? expiresIn)
-        {
-            if (expiresIn == null || expiresIn.Value > MaxTimeSpan)
-                return MaxTimeSpan;
-            return expiresIn.Value;
-        }
-
-        public static string FormCacheKey(object cacheType, object key)
-        {
-            return $"{cacheType}:{key}";
-        }
-
         async Task<T> IRedisCacheManager.SafeGetAndCacheAsync<T>(
             object cacheType,
             object key,
@@ -185,7 +108,7 @@ namespace TGS.Infrastructures.Redis
         {
             try
             {
-                return await _interface.GetAsync(cacheType, key, getData);
+                return await GetAsync(cacheType, key, getData);
             }
             catch (Exception ex)
             {
@@ -224,16 +147,6 @@ namespace TGS.Infrastructures.Redis
             return db.StringIncrementAsync(cacheKey, value);
         }
 
-        Task<T> IRedisCacheManager.GetAndCacheForeverAsync<T>(object cacheType, object key, Func<Task<T>> createFunc)
-        {
-            return GetAndCacheAsync(cacheType, key, null, createFunc, false);
-        }
-
-        Task IRedisCacheManager.CacheForeverAsync<T>(object cacheType, object key, T data)
-        {
-            return CacheAsync(cacheType, key, null, data, false);
-        }
-
         async Task<T> IRedisCacheManager.SafeGetAndCacheForeverAsync<T>(object cacheType, object key, Func<Task<T>> getData)
         {
             try
@@ -258,5 +171,63 @@ namespace TGS.Infrastructures.Redis
                 _osLog.WriteEventLogError($"redis error :{ex}");
             }
         }
+
+        #region Internal Methods
+
+        internal static string FormCacheKey(object cacheType, object key)
+        {
+            return $"{cacheType}:{key}";
+        }
+
+        internal static TimeSpan CapExpiry(TimeSpan? expiresIn)
+        {
+            return expiresIn == null || expiresIn.Value > MaxTimeSpan ? MaxTimeSpan : expiresIn.Value;
+        }
+
+        internal async Task<T> GetAsync<T>(object cacheType, object key, Func<Task<T>> createFunc = null)
+        {
+            var cacheKey = FormCacheKey(cacheType, key);
+            var db = _repository.GetDb();
+            var value = await db.StringGetAsync(cacheKey);
+
+            if (value.IsNullOrEmpty) 
+                return createFunc != null ? await createFunc() : default;
+
+            return _serializationProvider.DeserializeFromString<T>(value);
+        }
+
+        // This method presents as a temporary measure to check FireAndForget as Jeff suggested
+        // If this proves its good then this method should be merged back to IRedisCacheManager.CacheAsync
+        // and cacheWithFireAndForget replaced with just passing CommandFlags.FireAndForget
+        internal async Task<T> GetAndCacheAsync<T>(
+            object cacheType, object key, TimeSpan? expiresIn, Func<Task<T>> createFunc, bool cacheWithFireAndForget)
+        {
+            var cacheKey = FormCacheKey(cacheType, key);
+            var db = _repository.GetDb();
+            var value = await db.StringGetAsync(cacheKey);
+            
+            if (!value.IsNullOrEmpty) 
+                return _serializationProvider.DeserializeFromString<T>(value);
+
+            var createdValue = await createFunc();
+            var serializedValue = _serializationProvider.SerializeToString(createdValue);
+            var flags = cacheWithFireAndForget ? CommandFlags.None : CommandFlags.FireAndForget;
+            await db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
+            return createdValue;
+        }
+
+        // This method presents as a temporary measure to check FireAndForget as Jeff suggested
+        // If this proves its good then this method should be merged back to IRedisCacheManager.CacheAsync
+        // and cacheWithFireAndForget replaced with just passing CommandFlags.FireAndForget
+        internal Task CacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data, bool cacheWithFireAndForget)
+        {
+            var cacheKey = FormCacheKey(cacheType, key);
+            var db = _repository.GetDb();
+            var serializedValue = _serializationProvider.SerializeToString(data);
+            var flags = cacheWithFireAndForget ? CommandFlags.None : CommandFlags.FireAndForget;
+            return db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
+        }
+
+        #endregion
     }
 }

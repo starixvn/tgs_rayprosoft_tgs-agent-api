@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 
 namespace TGS.Infrastructures.Redis
 {
     public interface IRedisCacheManager
     {
-        Task<T> GetAsync<T>(object cacheType, object key);
-
-        Task<T> GetAsync<T>(object cacheType, object key, Func<Task<T>> createFunc);
-
-        Task<T> GetAndCacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, Func<Task<T>> createFunc);
-
-        Task CacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data);
-
         Task CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, List<T> data);
 
         Task CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data);
@@ -35,19 +28,15 @@ namespace TGS.Infrastructures.Redis
 
         Task<int> ClearCacheByPatternAsync(object cacheType, string pattern, bool fireAndForget = false);
 
-        Task<T> SafeGetAndCacheAsync<T>(object cacheType, object key, TimeSpan? exipresIn, Func<Task<T>> getData);
+        Task<T> SafeGetAndCacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, Func<Task<T>> getData);
 
         Task<T> SafeGetAsync<T>(object cacheType, object key, Func<Task<T>> getData);
 
-        Task SafeCacheAsync<T>(object cacheType, object key, TimeSpan? exipresIn, T data);
+        Task SafeCacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data);
 
         Task SetKeyExpirationInAsync(object cacheType, object key, TimeSpan expiresIn);
 
         Task<long> IncrementAsync(object cacheType, object key, long value = 1);
-
-        Task<T> GetAndCacheForeverAsync<T>(object cacheType, object key, Func<Task<T>> createFunc);
-
-        Task CacheForeverAsync<T>(object cacheType, object key, T data);
 
         Task<T> SafeGetAndCacheForeverAsync<T>(object cacheType, object key, Func<Task<T>> getData);
 
