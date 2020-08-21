@@ -15,7 +15,6 @@ BEGIN
 
     SELECT DISTINCT [CurrencyCode] AS [Key], [GameProviderCurrencyCode] AS [Value]
     FROM [dbo].[GameProviderCurrencies]
-    WITH (NOLOCK)
     WHERE [GameProviderId] = @gameProviderId
 END
 GO

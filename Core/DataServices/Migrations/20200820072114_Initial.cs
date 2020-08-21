@@ -818,7 +818,10 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetCurrenciesByInternalCode.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetCurrenciesByExternalCode.sql");
-
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Wallet_GetBalance.sql");
             #endregion
         }
 

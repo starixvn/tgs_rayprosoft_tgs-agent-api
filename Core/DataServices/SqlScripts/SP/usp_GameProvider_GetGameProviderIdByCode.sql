@@ -14,7 +14,6 @@ BEGIN
     SET NOCOUNT ON
 
     SELECT [Id] FROM [dbo].[GameProviders]
-    WITH (NOLOCK)
     WHERE [Code] = @gameProviderCode
 END
 GO
