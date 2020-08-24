@@ -8,6 +8,8 @@
         public string Environment { get; set; }
         public string OsVersion { get; set; }
         public int ProcessCount { get; set; }
-        public bool CanConnectDb { get; set; }
+        public bool CanConnectLogDb { get; set; }
+        public string RedisConnectionStatus { get; set; }
+        public string NatsConnectionStatus { get; set; }
     }
 }

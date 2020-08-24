@@ -10,8 +10,8 @@ using TGS.Apis.LogApi.DataService;
 namespace TGS.Apis.LogApi.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20200821080423_Initial")]
-    partial class Initial
+    [Migration("20200824014815_NewMigrationName")]
+    partial class NewMigrationName
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -88,40 +88,6 @@ namespace TGS.Apis.LogApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ApiLogs","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.EventLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Exception")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(512)")
-                        .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ServerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(64)")
-                        .IsUnicode(true);
-
-                    b.Property<string>("ServiceName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(64)")
-                        .IsUnicode(true);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EventLogs","dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.LogRecord", b =>

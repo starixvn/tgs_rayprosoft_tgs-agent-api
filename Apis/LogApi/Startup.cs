@@ -1,3 +1,4 @@
+using System;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -8,9 +9,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.LogApi.DataService;
-using TGS.Apis.LogApi.Extensions;
 using TGS.Apis.LogApi.Filters;
 using TGS.Apis.LogApi.Services;
+using TGS.Infrastructures.Log;
+using TGS.Infrastructures.Log.Events;
+using TGS.Infrastructures.Nats;
+using TGS.Infrastructures.Redis;
+using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.LogApi
 {
@@ -26,13 +31,13 @@ namespace TGS.Apis.LogApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = Configuration.GetConnectionString("Log");
-            services.AddEntityFrameworkSqlServer();
-
             services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
-            services.AddLogDbContext(connectionString);
+            services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
+            services.AddRedis();
+            services.AddNats(Configuration);
 
-            services.AddScoped<ILogRepository, LogRepository>();
+            services.AddTransient<Action<LogBusEvent>>();
+            services.AddScoped<ITgsLog, TgsLog>();
 
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
@@ -50,7 +55,7 @@ namespace TGS.Apis.LogApi
                     };
                 });
 
-            services.AddMvc(options =>
+            services.AddMvcCore(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()

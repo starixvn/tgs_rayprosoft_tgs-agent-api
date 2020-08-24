@@ -15,15 +15,10 @@ namespace TGS.Apis.LogApi.DataService
 
         Task AddApiLogAsync(ApiLog log);
 
-        Task AddEventLogsAsync(IList<EventLog> logs);
-
-        Task AddEventLogAsync(EventLog log);
-
         Task AddLogRecordsAsync(IList<LogRecord> logs);
 
         Task AddLogRecordAsync(LogRecord log);
 
-        void CreateDbIfNotExist();
         bool HasDatabaseConnection();
     }
 
@@ -34,8 +29,6 @@ namespace TGS.Apis.LogApi.DataService
         }
 
         DbSet<ApiLog> ApiLogs { get; set; }
-
-        DbSet<EventLog> EventLogs { get; set; }
 
         DbSet<LogRecord> LogRecords { get; set; }
 
@@ -62,8 +55,6 @@ namespace TGS.Apis.LogApi.DataService
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
-
-            modelBuilder.ApplyConfiguration(new EventLogTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ApiLogTypeConfiguration());
         }
 
@@ -77,23 +68,6 @@ namespace TGS.Apis.LogApi.DataService
         {
             await ApiLogs.AddAsync(log);
             await SaveChangesAsync();
-        }
-
-        async Task ILogRepository.AddEventLogsAsync(IList<EventLog> logs)
-        {
-            await EventLogs.AddRangeAsync(logs);
-            await SaveChangesAsync();
-        }
-
-        async Task ILogRepository.AddEventLogAsync(EventLog log)
-        {
-            await EventLogs.AddAsync(log);
-            await SaveChangesAsync();
-        }
-
-        void ILogRepository.CreateDbIfNotExist()
-        {
-            throw new System.NotImplementedException();
         }
 
         bool ILogRepository.HasDatabaseConnection()

@@ -49,7 +49,7 @@ namespace TGS.Infrastructures.Log
 
     public sealed class TgsLog : ITgsLog
     {
-        internal const string LogPublisher = "LogPublisher";
+        public const string LogPublisher = "LogPublisher";
         private string _loggerName;
         private readonly Action<LogBusEvent> _logPublisher;
 

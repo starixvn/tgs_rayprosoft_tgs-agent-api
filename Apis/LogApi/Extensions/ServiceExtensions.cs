@@ -1,34 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using TGS.Apis.LogApi.DataService;
+using TGS.Infrastructures.Helper;
+using TGS.Infrastructures.Log;
+using TGS.Infrastructures.Log.Events;
+using TGS.Infrastructures.Nats;
 
 namespace TGS.Apis.LogApi.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddLogDbContext(this IServiceCollection services,
-            string connectionString)
+        public static IServiceCollection AddTgsLog(this IServiceCollection services)
         {
-            services.AddDbContextPool<LogRepository>((option) =>
-            {
-                //#if DEBUG
-                option.UseLoggerFactory(LoggerFactory.Create(builder =>
-                {
-                    builder.AddConsole();
-                    builder.SetMinimumLevel(LogLevel.Information);
-                }));
-                option.EnableSensitiveDataLogging(true);
-                //#endif
-                option.UseSqlServer(connectionString, serverOption =>
-                {
-                    serverOption.CommandTimeout(180);
-                    serverOption.EnableRetryOnFailure(3);
-                    serverOption.MaxBatchSize(2000);
-                });
-            }, 128);
-
+            services.AddTransient<Action<LogBusEvent>>(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
+            services.AddTransient<ITgsLog, TgsLog>();
             return services;
+        }
+
+        public static Action<LogBusEvent> CreateLoggerPublisher(INatsManager natsManager)
+        {
+
+            var natsPublisher = CreateNatsPublisher(natsManager);
+
+            return log => AsyncHelper.RunAsync(async s => await natsPublisher(s), log);
+        }
+
+        private static Func<object, Task> CreateNatsPublisher(INatsManager natsManager)
+        {
+            return log => natsManager.PublishAsync(log.GetType().Name, log);
         }
     }
 }

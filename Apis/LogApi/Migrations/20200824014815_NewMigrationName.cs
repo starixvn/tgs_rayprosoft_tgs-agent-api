@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Apis.LogApi.Migrations
 {
-    public partial class Initial : Migration
+    public partial class NewMigrationName : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -36,23 +36,6 @@ namespace TGS.Apis.LogApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EventLogs",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    ServerName = table.Column<string>(type: "nvarchar(64)", nullable: false),
-                    ServiceName = table.Column<string>(type: "nvarchar(64)", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(512)", nullable: false),
-                    Exception = table.Column<string>(type: "nvarchar(4000)", nullable: false),
-                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EventLogs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "LogRecords",
                 schema: "dbo",
                 columns: table => new
@@ -76,10 +59,6 @@ namespace TGS.Apis.LogApi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ApiLogs",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "EventLogs",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

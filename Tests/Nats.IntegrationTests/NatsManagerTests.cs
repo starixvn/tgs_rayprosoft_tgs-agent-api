@@ -29,7 +29,7 @@ namespace TGS.Tests.Nats.IntegrationTests
         {
             var ev = new AutoResetEvent(false);
             var natsManager = _serviceProvider.GetService<INatsManager>();
-            natsManager.SubscribeAsync<string>(Topic, message =>
+            natsManager?.SubscribeAsync<string>(Topic, message =>
             {
                 message.Subject.Should().Be(Topic);
                 message.DataObject.Should().Be("Value");

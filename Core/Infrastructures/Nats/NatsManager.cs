@@ -131,7 +131,7 @@ namespace TGS.Infrastructures.Nats
                 args.Message.Reply,
                 args.Message.Data,
                 _messagePackProvider.Deserialize<T>(args.Message.Data),
-                args.Message.ArrivalSubcription
+                args.Message.ArrivalSubscription
             );
         }
 
