@@ -4,17 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.DataService.Models;
+using TGS.Apis.LogApi.Interfaces;
 using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
 {
-    public interface ILoggerEventWriter : IAsyncDisposable
-    {
-        Task SaveLogsAsync(IList<LogBusEvent> events);
-        Task SaveLogAsync(LogBusEvent @event);
-    }
-
-    public sealed class ApiLogWriter : ILoggerEventWriter
+    public sealed class ApiLogWriter : ILoggerWriter
     {
         private readonly ILogRepository _logRepository;
 
@@ -23,7 +18,7 @@ namespace TGS.Apis.LogApi.Loggers
             _logRepository = logRepository;
         }
 
-        Task ILoggerEventWriter.SaveLogsAsync(IList<LogBusEvent> events)
+        Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
         {
             var logs = events
                 .Select(Convert)
@@ -32,7 +27,7 @@ namespace TGS.Apis.LogApi.Loggers
             return _logRepository.AddApiLogsAsync(logs);
         }
 
-        Task ILoggerEventWriter.SaveLogAsync(LogBusEvent @event)
+        Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
             return _logRepository.AddApiLogAsync(log);

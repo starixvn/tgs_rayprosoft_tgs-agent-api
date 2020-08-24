@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
 
 namespace TGS.Infrastructures.Redis
 {
@@ -8,9 +7,7 @@ namespace TGS.Infrastructures.Redis
     {
         public static IServiceCollection AddRedis(this IServiceCollection services)
         {
-            services.AddScoped<ITgsLog, TgsLog>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
-
             services.AddScoped<IRedisConfig, RedisConfig>();
             services.AddScoped<IRedisConnection, RedisCoreConnection>();
             services.AddScoped<IRedisRepository, RedisRepository>();

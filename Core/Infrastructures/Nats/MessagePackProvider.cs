@@ -13,9 +13,9 @@ namespace TGS.Infrastructures.Nats
 
     public class MessagePackProvider : IMessagePackProvider
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<MessagePackProvider> _logger;
         private readonly MessagePackSerializerOptions _messagePackSerializerOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-        public MessagePackProvider(ILogger logger)
+        public MessagePackProvider(ILogger<MessagePackProvider> logger)
         {
             _logger = logger;
         }

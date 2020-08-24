@@ -1,11 +1,11 @@
-﻿using TGS.Infrastructures.Log;
+﻿using Microsoft.Extensions.Logging;
 
 namespace TGS.Infrastructures.Redis
 {
     public sealed class RedisCoreConnection : BaseRedisConnection
     {
-        public RedisCoreConnection(IRedisConfig config, ITgsLog osLog)
-            : base(config.RedisConfigurationString, osLog)
+        public RedisCoreConnection(IRedisConfig config, ILogger<BaseRedisConnection> logger)
+            : base(config.RedisConfigurationString, logger)
         {
         }
     }

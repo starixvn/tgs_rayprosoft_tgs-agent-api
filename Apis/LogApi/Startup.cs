@@ -15,11 +15,12 @@ using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Log.Events;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
+using TGS.Infrastructures.Unity;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.LogApi
 {
-    public class Startup
+    public class Startup : BaseWorkersStartup
     {
         public Startup(IConfiguration configuration)
         {
@@ -29,15 +30,19 @@ namespace TGS.Apis.LogApi
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public override void CustomConfigureServices(IServiceCollection services)
         {
             services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
             services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
             services.AddRedis();
             services.AddNats(Configuration);
-
+            services.AddTgsLog();
             services.AddTransient<Action<LogBusEvent>>();
             services.AddScoped<ITgsLog, TgsLog>();
+            services.AddScoped<IMessageHandler, NatsMessageHandler>();
+
+
+            services.AddLogging();
 
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
@@ -65,8 +70,20 @@ namespace TGS.Apis.LogApi
             });
         }
 
+        protected override void OnApplicationStarted(IServiceProvider serviceProvider)
+        {
+            //var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
+            //messageHandler.StartReceiveMessages();
+        }
+
+        protected override void OnApplicationStopped(IServiceProvider serviceProvider)
+        {
+            //var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
+            //messageHandler.StopReceiveMessages();
+        }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public override void ConfigureApp(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {

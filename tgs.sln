@@ -22,6 +22,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GameProvider", "GameProvider", "{5569948D-67E9-40AF-A87A-6989E84D4CFD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{36EC9563-7611-4B2C-944E-9A1C08589951}"
+	ProjectSection(SolutionItems) = preProject
+		Apis\TgsApi\Startup.cs = Apis\TgsApi\Startup.cs
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Operator", "Operator", "{351362BC-9D18-4A4A-86B3-42742C2C1EEA}"
 EndProject
@@ -49,7 +52,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Base", "Core\DataServices.Base\DataServices.Base.csproj", "{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestsCommon", "Tests\TestsCommon\TestsCommon.csproj", "{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestsCommon", "Tests\TestsCommon\TestsCommon.csproj", "{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

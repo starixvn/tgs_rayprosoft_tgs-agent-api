@@ -5,16 +5,17 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.DataService.Models;
+using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Services;
 using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
 {
-    public sealed class LogRecordEventWriter : ILoggerEventWriter
+    public sealed class LogRecordWriter : ILoggerWriter
     {
         private readonly ILogRepository _logRepository;
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
-        public LogRecordEventWriter(
+        public LogRecordWriter(
             ILogRepository ugsRepository,
             IOptions<LoggerServiceConfig> loggerServiceConfig)
         {
@@ -22,7 +23,7 @@ namespace TGS.Apis.LogApi.Loggers
             _loggerServiceConfig = loggerServiceConfig;
         }
 
-        Task ILoggerEventWriter.SaveLogsAsync(IList<LogBusEvent> events)
+        Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
         {
             var logs = events
                 .Select(Convert)
@@ -33,7 +34,7 @@ namespace TGS.Apis.LogApi.Loggers
             return _logRepository.AddLogRecordsAsync(logs);
         }
 
-        Task ILoggerEventWriter.SaveLogAsync(LogBusEvent @event)
+        Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
             return _logRepository.AddLogRecordAsync(log);

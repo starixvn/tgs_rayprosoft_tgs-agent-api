@@ -34,16 +34,16 @@ namespace TGS.Apis.TgsApi
                                    config.AddCommandLine(args);
                                }
                            })
-                           .ConfigureLogging((hostcontext, loggin) =>
+                           .ConfigureLogging((hostContext, logging) =>
                            {
-                               loggin.AddConfiguration(hostcontext.Configuration.GetSection("Logging"));
-                               if (hostcontext.HostingEnvironment.IsDevelopment())
+                               logging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
+                               if (hostContext.HostingEnvironment.IsDevelopment())
                                {
-                                   loggin.AddConsole();
-                                   loggin.SetMinimumLevel(LogLevel.Error);
+                                   logging.AddConsole();
+                                   logging.SetMinimumLevel(LogLevel.Error);
                                }
 
-                               loggin.AddConfiguration();
+                               logging.AddConfiguration();
                            });
         }
 

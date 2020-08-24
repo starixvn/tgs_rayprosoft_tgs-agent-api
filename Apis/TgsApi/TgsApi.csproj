@@ -25,8 +25,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
+    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
-    <ProjectReference Include="..\LogApi\LogApi.csproj" />
   </ItemGroup>
 
 

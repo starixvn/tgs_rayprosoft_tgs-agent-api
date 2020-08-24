@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
 namespace TGS.Infrastructures.Redis
@@ -14,16 +14,18 @@ namespace TGS.Infrastructures.Redis
     {
         internal static readonly TimeSpan MaxTimeSpan = TimeSpan.FromDays(1);
         private readonly IRedisCacheManager _interface;
-        private readonly ITgsLog _osLog;
+        private readonly ILogger<RedisCacheManager> _logger;
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
 
-        public RedisCacheManager(IRedisRepository repository, IJsonSerializationProvider serializationProvider,
-            ITgsLog osLog)
+        public RedisCacheManager(
+            IRedisRepository repository,
+            IJsonSerializationProvider serializationProvider,
+            ILogger<RedisCacheManager> logger)
         {
             _repository = repository;
             _serializationProvider = serializationProvider;
-            _osLog = osLog;
+            _logger = logger;
             _interface = this;
         }
 
@@ -32,7 +34,7 @@ namespace TGS.Infrastructures.Redis
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
             var existingKey = await db.KeyExistsAsync(cacheKey);
-            var serializedValues = data.Select(d => (RedisValue) _serializationProvider.SerializeToString(d)).ToArray();
+            var serializedValues = data.Select(d => (RedisValue)_serializationProvider.SerializeToString(d)).ToArray();
             await db.ListRightPushAsync(cacheKey, serializedValues);
 
             if (existingKey == false)
@@ -43,7 +45,7 @@ namespace TGS.Infrastructures.Redis
 
         Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
         {
-            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> {data});
+            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
         }
 
         async Task<List<T>> IRedisCacheManager.GetListAsync<T>(object cacheType, object key,
@@ -52,9 +54,9 @@ namespace TGS.Infrastructures.Redis
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
             var values = await db.ListRangeAsync(cacheKey);
-            if (values.Length == 0) 
+            if (values.Length == 0)
                 return await createFunc();
-            
+
             return values.Select(v => _serializationProvider.DeserializeFromString<T>(v)).ToList();
         }
 
@@ -102,7 +104,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _osLog.WriteEventLogError($"redis error :{ex}");
+                _logger.LogError($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -118,7 +120,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _osLog.WriteEventLogError($"redis error :{ex}");
+                _logger.LogError($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -135,7 +137,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _osLog.WriteEventLogError($"redis error :{ex}");
+                _logger.LogError($"redis error :{ex}");
             }
         }
 
@@ -162,7 +164,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _osLog.WriteEventLogError($"redis error :{ex}");
+                _logger.LogError($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -175,7 +177,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _osLog.WriteEventLogError($"redis error :{ex}");
+                _logger.LogError($"redis error :{ex}");
             }
         }
 

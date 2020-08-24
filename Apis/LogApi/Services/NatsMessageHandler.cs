@@ -30,7 +30,7 @@ namespace TGS.Apis.LogApi.Services
 
     public class NatsMessageHandler : IMessageHandler
     {
-        private readonly Func<string, ILoggerEventWriter> _logWriterFactory;
+        private readonly Func<string, ILoggerWriter> _logWriterFactory;
         private readonly ILogger _logger;
         private readonly INatsManager _natsManager;
         private IAsyncSubscription _osLogSubscription;
@@ -45,7 +45,7 @@ namespace TGS.Apis.LogApi.Services
         private readonly ConcurrentDictionary<string, uint> _logReceivedCount = new ConcurrentDictionary<string, uint>();
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
         public NatsMessageHandler(
-            Func<string, ILoggerEventWriter> logWriterFactory,
+            Func<string, ILoggerWriter> logWriterFactory,
             ILogger<NatsMessageHandler> logger,
             IOptions<LoggerServiceConfig> loggerServiceConfig,
             INatsManager natsManager)
@@ -58,10 +58,8 @@ namespace TGS.Apis.LogApi.Services
 
         void IMessageHandler.StartReceiveMessages()
         {
-            SubscribeEventLogReceived();
             SubscribeApiLogReceived();
             SubscribeLogRecordReceived();
-            RegisterEventLogSubscriberClient();
             RegisterApiLogSubscriberClient();
             RegisterLogRecordSubscriberClient();
             _startupTime = DateTimeOffset.UtcNow;
@@ -73,27 +71,6 @@ namespace TGS.Apis.LogApi.Services
 
         public event Action<LogBusEvent> EventLogReceived;
 
-        private void SubscribeEventLogReceived()
-        {
-            var query =
-                from logs in Observable.FromEvent<LogBusEvent>(
-                        ev => EventLogReceived += ev,
-                        ev => EventLogReceived -= ev)
-                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
-                where logs.Count > 0
-                select logs;
-
-            _subscription = query
-                .SubscribeOn(NewThreadScheduler.Default)
-                .Subscribe(
-                    async logs =>
-                    {
-                        var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(EventLogEvent), logs.Count);
-                        await WriteLogsAsync(nameof(EventLogEvent), logs);
-                    },
-                    ex => _logger.LogError("error occurred when RX executed:" + ex));
-        }
 
         private void SubscribeApiLogReceived()
         {
@@ -160,18 +137,6 @@ namespace TGS.Apis.LogApi.Services
 
         ConcurrentDictionary<string, uint> IMessageHandler.LogReceivedCount => _logReceivedCount;
 
-        private void RegisterEventLogSubscriberClient()
-        {
-            _osLogSubscription = _natsManager.SubscribeAsync<EventLogEvent>(
-                nameof(EventLogEvent),
-                Consts.NatsTgsLogQueueName,
-                message =>
-                {
-                    _lastBusEvent = message.DataObject;
-                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    EventLogReceived?.Invoke(message.DataObject);
-                });
-        }
 
         private void RegisterApiLogSubscriberClient()
         {
@@ -205,11 +170,10 @@ namespace TGS.Apis.LogApi.Services
                 await Task.FromResult(0);
             try
             {
-                using (var logger = _logWriterFactory(eventType))
-                {
-                    await logger.SaveLogEventsAsync(events);
-                    _lastInsertTime = DateTimeOffset.UtcNow;
-                }
+                var logger = _logWriterFactory(eventType);
+                await logger.SaveLogsAsync(events);
+                await logger.DisposeAsync();
+                _lastInsertTime = DateTimeOffset.UtcNow;
             }
             catch (Exception ex)
             {

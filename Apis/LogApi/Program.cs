@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using TGS.Apis.LogApi.Services;
+using TGS.Infrastructures.Unity;
 
 namespace TGS.Apis.LogApi
 {
@@ -7,7 +9,9 @@ namespace TGS.Apis.LogApi
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().RunAsync();
+            BaseWorkersStartup.CreateHostBuilder<Startup, LogApiFactory>(args)
+                .Build()
+                .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

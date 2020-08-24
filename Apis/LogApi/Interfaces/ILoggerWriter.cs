@@ -5,9 +5,9 @@ using TGS.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Interfaces
 {
-    public interface ILoggerEventWriter : IDisposable
+    public interface ILoggerWriter : IAsyncDisposable
     {
-        Task SaveLogEventsAsync(IList<LogBusEvent> events);
-        Task SaveLogEventAsync(LogBusEvent @event);
+        Task SaveLogsAsync(IList<LogBusEvent> events);
+        Task SaveLogAsync(LogBusEvent @event);
     }
 }

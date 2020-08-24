@@ -1,4 +1,3 @@
-using System;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -8,11 +7,8 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TGS.Apis.LogApi.Extensions;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Events;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
 
@@ -32,10 +28,7 @@ namespace TGS.Apis.TgsApi
             services.AddRepositoriesAndExecuteMigrations(Configuration);
             services.AddRedis();
             services.AddNats(Configuration);
-            services.AddTgsLog();
-
-            services.AddScoped<ITgsLog, TgsLog>();
-            services.AddTransient<Action<LogBusEvent>>();
+            //services.AddTgsLog();
 
             services.AddControllers(options => options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>
