@@ -151,7 +151,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     RoleMenuId = table.Column<Guid>(nullable: false),
                     PermissionId = table.Column<Guid>(nullable: false),
-                    Selected = table.Column<bool>(nullable: false),
+                    IsDisplay = table.Column<bool>(nullable: false),
                     DisplayOrder = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>

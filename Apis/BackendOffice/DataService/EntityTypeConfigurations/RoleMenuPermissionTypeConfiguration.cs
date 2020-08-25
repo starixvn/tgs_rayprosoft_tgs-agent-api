@@ -13,11 +13,14 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.Selected)
+            builder.Property(c => c.IsDisplay)
                 .IsRequired();
 
             builder.Property(c => c.DisplayOrder)
                 .HasColumnType(ColumnTypes.TinyInt)
+                .IsRequired();
+
+            builder.Property(c => c.IsDisplay)
                 .IsRequired();
         }
     }

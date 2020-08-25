@@ -211,7 +211,7 @@ VALUES
                             Id = GuidExtensions.NewSequentialGuid(),
                             RoleMenuId = subMenu.RoleMenuId,
                             PermissionId = permission,
-                            Selected = subMenu.Selected,
+                            IsDisplay = subMenu.IsDisplay,
                             DisplayOrder = index + 1
                         }).ToArray()
                     });
