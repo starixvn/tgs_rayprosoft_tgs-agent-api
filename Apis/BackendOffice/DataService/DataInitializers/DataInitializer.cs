@@ -4,14 +4,13 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Infrastructures.Extensions;
 using TGS.Services.Operations.Extensions;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
+namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public interface IDataInitializer
     {

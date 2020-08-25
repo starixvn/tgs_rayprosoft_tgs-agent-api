@@ -4,16 +4,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Queries;
-using TGS.Apis.TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication;
+using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Queries;
+using TGS.Apis.BackendOffice.Extensions;
 using TGS.Infrastructures.Security;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers
 {
     [AllowAnonymous]
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UserAuthenticationController : BackendOfficeControllerBase
     {

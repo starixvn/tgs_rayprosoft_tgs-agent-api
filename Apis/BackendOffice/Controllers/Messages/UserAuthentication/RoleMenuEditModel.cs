@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication
+namespace TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication
 {
     public class RoleMenuEditModel : BaseRoleMenuEditModel
     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Models;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
+namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
     public sealed class RoleMenuTypeConfiguration : IEntityTypeConfiguration<RoleMenu>
     {

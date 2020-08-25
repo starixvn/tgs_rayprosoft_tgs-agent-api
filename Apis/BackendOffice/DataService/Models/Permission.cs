@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.Models
+namespace TGS.Apis.BackendOffice.DataService.Models
 {
     public class Permission
     {

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
+using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService
+namespace TGS.Apis.BackendOffice.DataService
 {
     public class BackendOfficeRepository : DbContext, IBackendOfficeRepository
     {

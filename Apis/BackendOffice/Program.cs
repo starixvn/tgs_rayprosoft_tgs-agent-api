@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice
+namespace TGS.Apis.BackendOffice
 {
     public class Program
     {

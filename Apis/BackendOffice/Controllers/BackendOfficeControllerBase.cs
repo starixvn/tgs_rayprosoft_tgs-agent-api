@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers
 {
     public class BackendOfficeControllerBase : ControllerBase
     {

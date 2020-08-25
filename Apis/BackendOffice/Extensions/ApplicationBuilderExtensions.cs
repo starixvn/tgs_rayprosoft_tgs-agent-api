@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers;
+using TGS.Apis.BackendOffice.DataService.DataInitializers;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Extensions
+namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ApplicationBuilderExtensions
     {

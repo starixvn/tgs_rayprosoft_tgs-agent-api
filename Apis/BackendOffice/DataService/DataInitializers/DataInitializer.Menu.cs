@@ -1,6 +1,6 @@
 using System;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
+namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public partial class DataInitializer
     {

@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Apis.BackendOffice.DataService.Models;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.Queries
+namespace TGS.Apis.BackendOffice.DataService.Queries
 {
     public interface IUserQueries
     {

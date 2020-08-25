@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
+namespace TGS.Apis.BackendOffice.Migrations
 {
     public partial class Initial : Migration
     {

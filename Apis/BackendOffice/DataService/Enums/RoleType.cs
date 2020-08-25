@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums
+﻿namespace TGS.Apis.BackendOffice.DataService.Enums
 {
     public enum RoleType
     {

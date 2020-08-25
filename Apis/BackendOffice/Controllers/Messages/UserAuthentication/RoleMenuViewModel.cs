@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication
+namespace TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication
 {
     public class RoleMenuViewModel : BaseRoleMenuViewModel
     {

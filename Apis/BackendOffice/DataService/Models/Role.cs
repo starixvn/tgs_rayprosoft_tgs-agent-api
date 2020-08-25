@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Apis.BackendOffice.DataService.Enums;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.Models
+namespace TGS.Apis.BackendOffice.DataService.Models
 {
     // NB: Roles seeding uses explicit sql script to insert roles
     // because role Id uses Identity feature and EF prevents inserting it as a value

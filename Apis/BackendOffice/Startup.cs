@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Queries;
-using TGS.Apis.TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.DataService.DataInitializers;
+using TGS.Apis.BackendOffice.DataService.Queries;
+using TGS.Apis.BackendOffice.Extensions;
 using TGS.Infrastructures.Security;
 using TGS.Services.Operations.Extensions;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice
+namespace TGS.Apis.BackendOffice
 {
     public class Startup
     {

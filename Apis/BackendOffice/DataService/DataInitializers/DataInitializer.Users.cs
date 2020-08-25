@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Text;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Security;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
+namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public partial class DataInitializer
     {

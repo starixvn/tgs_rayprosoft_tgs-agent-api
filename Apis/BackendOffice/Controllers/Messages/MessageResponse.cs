@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages
 {
     public class MessageResponse
     {

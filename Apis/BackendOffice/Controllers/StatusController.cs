@@ -3,10 +3,10 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.DataService;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]

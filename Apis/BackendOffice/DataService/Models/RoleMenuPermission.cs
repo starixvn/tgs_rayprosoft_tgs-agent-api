@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.Models
+namespace TGS.Apis.BackendOffice.DataService.Models
 {
     public class RoleMenuPermission
     {

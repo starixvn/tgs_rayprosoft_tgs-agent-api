@@ -1,7 +1,7 @@
 ﻿using System;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Apis.BackendOffice.DataService.Enums;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
+namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public partial class DataInitializer
     {

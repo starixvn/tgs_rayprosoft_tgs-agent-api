@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication;
-using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication;
+using TGS.Apis.BackendOffice.DataService.Models;
 
-namespace TGS.Apis.TGS.Apis.BackendOffice.Extensions
+namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class RoleMenuExtensions
     {
