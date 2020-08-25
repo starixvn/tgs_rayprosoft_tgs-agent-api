@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.LogApi.Controllers.Messages;
+using TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.TGS.Apis.BackendOffice.DataService;
 
 namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers

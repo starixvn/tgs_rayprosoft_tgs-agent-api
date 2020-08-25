@@ -19,7 +19,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.Models
 
         public Guid? ParentId { get; set; }
 
-        public bool Selected { get; set; }
+        public bool IsDisplay { get; set; }
 
         public virtual ICollection<RoleMenuPermission> Permissions { get; set; }
 

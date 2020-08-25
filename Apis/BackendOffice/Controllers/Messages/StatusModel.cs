@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.LogApi.Controllers.Messages
+﻿namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers.Messages
 {
     public class StatusModel
     {

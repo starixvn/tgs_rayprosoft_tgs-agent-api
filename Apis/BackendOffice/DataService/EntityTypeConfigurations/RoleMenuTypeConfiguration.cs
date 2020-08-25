@@ -21,7 +21,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .WithOne(p => p.Parent)
                 .HasForeignKey(p => p.ParentId);
 
-            builder.Property(c => c.Selected)
+            builder.Property(c => c.IsDisplay)
                 .IsRequired();
         }
     }

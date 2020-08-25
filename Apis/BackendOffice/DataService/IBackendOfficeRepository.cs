@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
 
@@ -17,5 +20,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService
         DbSet<RoleMenu> RoleMenus { get; set; }
 
         DbSet<RoleMenuPermission> RoleMenuPermissions { get; set; }
+
+        void BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
     }
 }

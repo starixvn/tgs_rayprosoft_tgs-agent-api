@@ -1,5 +1,8 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
@@ -50,6 +53,11 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService
             modelBuilder.ApplyConfiguration(new MenuTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RoleMenuTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RoleMenuPermissionTypeConfiguration());
+        }
+
+        void IBackendOfficeRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        {
+            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
         }
     }
 }
