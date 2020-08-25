@@ -11,10 +11,12 @@ namespace TGS.Infrastructures.Log
     {
         public static IServiceCollection AddTgsLog(this IServiceCollection services)
         {
-            services.AddTransient<LogBusEvent>();
+            services.AddTransient<ApiLogEvent>();
+            services.AddTransient<LogRecordEvent>();
+            services.AddTransient<LogBusEvent>(sp => new ApiLogEvent());
+            services.AddTransient<LogBusEvent>(sp => new LogRecordEvent());
             services.AddTransient<Action<LogBusEvent>>();
-            //services.AddSingleton(provider => new Action<LogBusEvent>());
-            //services.AddSingleton(provider => new Func<LogBusEvent>(provider.GetService<LogBusEvent>));
+            services.AddSingleton(provider => new Func<LogBusEvent>(provider.GetService<LogBusEvent>));
             services.AddTransient(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
             services.AddScoped<ITgsLog, TgsLog>();
 

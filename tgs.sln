@@ -22,9 +22,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GameProvider", "GameProvider", "{5569948D-67E9-40AF-A87A-6989E84D4CFD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{36EC9563-7611-4B2C-944E-9A1C08589951}"
-	ProjectSection(SolutionItems) = preProject
-		Apis\TgsApi\Startup.cs = Apis\TgsApi\Startup.cs
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Operator", "Operator", "{351362BC-9D18-4A4A-86B3-42742C2C1EEA}"
 EndProject

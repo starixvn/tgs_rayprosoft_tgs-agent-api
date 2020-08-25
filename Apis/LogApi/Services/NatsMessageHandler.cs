@@ -33,7 +33,6 @@ namespace TGS.Apis.LogApi.Services
         private readonly Func<string, ILoggerWriter> _logWriterFactory;
         private readonly ILogger _logger;
         private readonly INatsManager _natsManager;
-        private IAsyncSubscription _osLogSubscription;
         private IAsyncSubscription _apiLogSubscription;
         private IAsyncSubscription _logRecordSubscription;
         private DateTimeOffset _lastReceivedEventTime;
@@ -68,9 +67,6 @@ namespace TGS.Apis.LogApi.Services
         public event Action<LogBusEvent> LogRecordReceived;
 
         public event Action<LogBusEvent> ApiLogReceived;
-
-        public event Action<LogBusEvent> EventLogReceived;
-
 
         private void SubscribeApiLogReceived()
         {
@@ -118,7 +114,6 @@ namespace TGS.Apis.LogApi.Services
 
         void IMessageHandler.StopReceiveMessages()
         {
-            _osLogSubscription?.Dispose();
             _apiLogSubscription?.Dispose();
             _logRecordSubscription?.Dispose();
             Task.WaitAll(Task.Delay(_loggerServiceConfig.Value.BatchInsertWaitingSeconds.Add(TimeSpan.FromSeconds(3))));

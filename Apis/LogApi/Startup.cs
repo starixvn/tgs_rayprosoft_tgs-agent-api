@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.Filters;
+using TGS.Apis.LogApi.Interfaces;
+using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Log.Events;
@@ -38,11 +41,30 @@ namespace TGS.Apis.LogApi
             services.AddNats(Configuration);
             services.AddTgsLog();
             services.AddTransient<Action<LogBusEvent>>();
-            services.AddScoped<ITgsLog, TgsLog>();
+            //services.AddScoped<ITgsLog, TgsLog>();
+
+            services.AddScoped<IMessagePackProvider, MessagePackProvider>();
             services.AddScoped<IMessageHandler, NatsMessageHandler>();
 
+            services.AddTransient<ILoggerWriter>();
+            services.AddTransient<ApiLogWriter>();
+            services.AddTransient<LogRecordWriter>();
 
-            services.AddLogging();
+            services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case "ApiLogEvent":
+                        return serviceProvider.GetService<ApiLogWriter>();
+                    case "LogRecordEvent":
+                        return serviceProvider.GetService<LogRecordWriter>();
+                    default:
+                        throw new KeyNotFoundException(); // or maybe return null, up to you
+                }
+            });
+
+
+            //services.AddLogging();
 
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
@@ -72,14 +94,14 @@ namespace TGS.Apis.LogApi
 
         protected override void OnApplicationStarted(IServiceProvider serviceProvider)
         {
-            //var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
-            //messageHandler.StartReceiveMessages();
+            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
+            messageHandler.StartReceiveMessages();
         }
 
         protected override void OnApplicationStopped(IServiceProvider serviceProvider)
         {
-            //var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
-            //messageHandler.StopReceiveMessages();
+            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
+            messageHandler.StopReceiveMessages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
