@@ -58,13 +58,11 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.Password)
-                .HasColumnType(ColumnTypes.Varbinary)
-                .HasMaxLength(128)
+                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.Salt)
-                .HasColumnType(ColumnTypes.Varbinary)
-                .HasMaxLength(128)
+                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)

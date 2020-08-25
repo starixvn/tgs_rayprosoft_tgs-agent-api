@@ -10,7 +10,7 @@ using TGS.Apis.TGS.Apis.BackendOffice.DataService;
 namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
 {
     [DbContext(typeof(BackendOfficeRepository))]
-    [Migration("20200825065745_Initial")]
+    [Migration("20200825091202_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -229,8 +229,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("VARBINARY")
-                        .HasMaxLength(128);
+                        .HasColumnType("VARBINARY(128)");
 
                     b.Property<Guid?>("ResellerId")
                         .HasColumnType("uniqueidentifier");
@@ -243,8 +242,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("VARBINARY")
-                        .HasMaxLength(128);
+                        .HasColumnType("VARBINARY(128)");
 
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");

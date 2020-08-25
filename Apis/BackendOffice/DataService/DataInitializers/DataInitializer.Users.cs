@@ -24,7 +24,8 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
             return new User
             {
                 Id = userId.Value,
-                RoleType = RoleType.Licensee,
+                RoleId = roleId,
+                RoleType = roleType,
                 Username = userName,
                 Password = passwordHash,
                 Salt = salt,

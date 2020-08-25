@@ -26,7 +26,6 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
         private const string DefaultTimeZone = "+0800";
         private const string AdminUsername = "admin.enabled";
         private const string UserPassword = "TgsP@ssw0rd";
-        private static readonly Guid AdminUserId = new Guid("5715ABBA-AF3C-4763-94EE-9F2714C3B5A8");
 
         public DataInitializer(IServiceScopeFactory scopeFactory)
         {
@@ -50,7 +49,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
             GeneratePermissions(repository);
             GenerateMenus(repository);
             GenerateRoles(repository);
-            GenerateAdminUsers(repository);
+            GenerateUsers(repository);
         }
 
         private void GenerateMenus(IBackendOfficeRepository repository)
@@ -205,8 +204,8 @@ VALUES
                         Id = subMenu.RoleMenuId,
                         RoleId = role.Id,
                         MenuId = roleMenu.Menu.MenuId,
-                        ParentId = roleMenu.ParentId,
-                        DisplayOrder = roleMenu.DisplayOrder,
+                        ParentId = subMenu.ParentId,
+                        DisplayOrder = subMenu.DisplayOrder,
                         Permissions = subMenu.Menu.Permissions.Select((permission, index) => new RoleMenuPermission
                         {
                             Id = GuidExtensions.NewSequentialGuid(),
@@ -224,7 +223,7 @@ VALUES
             return roleMenus.ToArray();
         }
 
-        private void GenerateAdminUsers(IBackendOfficeRepository repository)
+        private void GenerateUsers(IBackendOfficeRepository repository)
         {
             string[] usernames =
             {
@@ -233,34 +232,14 @@ VALUES
 
             var users = new List<User>
             {
-                // Administrator
                 CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin),
-                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, AdminUserId),
+                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin),
                 CreateUser("admin.archived", UserStatus.Archived, Roles.Admin),
-                CreateUser("admin.locked", UserStatus.Locked, Roles.Admin),
+                CreateUser("admin.locked", UserStatus.Locked, Roles.Admin)
             };
 
             users.AddRange(usernames.Select(username => CreateUser(username, UserStatus.Enabled, Roles.Admin)));
-
-            //var brandIds = UgsData.OureaLicensee.BrandIds
-            //    .Union(UgsData.Sc88Licensee.BrandIds)
-            //    .Union(UgsData.SunbetLicensee.BrandIds)
-            //    .Union(UgsData.TgpLicensee.BrandIds)
-            //    .ToArray();
-            //var userBrands = users
-            //    .Where(x =>
-            //    {
-            //        var role = _roles.First(r => r.Id == x.RoleId);
-            //        return role.RestrictionType.HasFlag(RestrictionType.Brand);
-            //    })
-            //    .SelectMany(user => brandIds.Select(id => new UserBrand
-            //    {
-            //        BrandId = id,
-            //        UserId = user.Id
-            //    })).ToArray();
-
-            //repository.BulkInsert(users.ToArray());
-            //repository.BulkInsert(userBrands);
+            repository.BulkInsert(users);
         }
     }
 }
