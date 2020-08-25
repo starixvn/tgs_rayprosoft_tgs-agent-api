@@ -68,7 +68,7 @@ namespace TGS.Services.Operations.Extensions
 
         public static int ExecuteSqlCommand(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
         {
-            using var conn = repository.GetDbConnection();
+            var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {

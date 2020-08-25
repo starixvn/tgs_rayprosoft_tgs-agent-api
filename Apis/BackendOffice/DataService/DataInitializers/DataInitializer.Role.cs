@@ -71,7 +71,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
                         rolesMenu, permissionMenu
                     });
 
-                return new IRoleMenuData[] { resellerMenu, logMenu, reportMenu, systemMenu, rolePermissionMenu };
+                return new IRoleMenuData[] { resellerMenu, gameMenu, logMenu, reportMenu, systemMenu, rolePermissionMenu };
             }
 
             protected IRoleMenuData[] GetBrandRoleMenus()

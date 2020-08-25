@@ -62,8 +62,6 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
         private void GenerateRoles(IBackendOfficeRepository repo)
         {
             var roles = CreateRoleWithMenus(_roles);
-            // Manual sql required because EF doesn't allow to insert Ids
-            // if database generated identity feature is being used
             var command = @"
 INSERT INTO [dbo].[Roles]
     ([Id]
