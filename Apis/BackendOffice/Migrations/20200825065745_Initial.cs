@@ -79,7 +79,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
                     MenuId = table.Column<Guid>(nullable: false),
                     DisplayOrder = table.Column<int>(nullable: false),
                     ParentId = table.Column<Guid>(nullable: true),
-                    Selected = table.Column<bool>(nullable: false)
+                    IsDisplay = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {

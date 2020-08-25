@@ -33,6 +33,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Controllers
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectBackendOfficeDb = await _repository.CanConnectionAsync(),
+                BackendOfficeDatabaseConnectionString = _repository.GetDbConnection().ConnectionString
             };
         }
     }

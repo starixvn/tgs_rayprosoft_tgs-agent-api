@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers;
+using TGS.Apis.TGS.Apis.BackendOffice.Extensions;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.TGS.Apis.BackendOffice
@@ -23,6 +25,8 @@ namespace TGS.Apis.TGS.Apis.BackendOffice
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(Configuration, "BackendOffice");
+
+            services.AddScoped<IDataInitializer, DataInitializer>();
 
             services.AddControllers();
 
@@ -54,6 +58,8 @@ namespace TGS.Apis.TGS.Apis.BackendOffice
             {
                 endpoints.MapControllers();
             });
+
+            app.SeedData();
         }
     }
 }

@@ -144,6 +144,9 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDisplay")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("MenuId")
                         .HasColumnType("uniqueidentifier");
 
@@ -152,9 +155,6 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Selected")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

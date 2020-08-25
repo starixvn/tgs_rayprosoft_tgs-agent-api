@@ -10,7 +10,7 @@ using TGS.Apis.TGS.Apis.BackendOffice.DataService;
 namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
 {
     [DbContext(typeof(BackendOfficeRepository))]
-    [Migration("20200825030052_Initial")]
+    [Migration("20200825065745_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -146,6 +146,9 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDisplay")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("MenuId")
                         .HasColumnType("uniqueidentifier");
 
@@ -154,9 +157,6 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.Migrations
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Selected")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

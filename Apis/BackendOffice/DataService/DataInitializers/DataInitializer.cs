@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Infrastructures.Extensions;
@@ -13,21 +13,35 @@ using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
 {
-    [ExcludeFromCodeCoverage]
-    public sealed partial class DataInitializer
+    public interface IDataInitializer
     {
+        void SetInitialData();
+    }
+
+    [ExcludeFromCodeCoverage]
+    public sealed partial class DataInitializer : IDataInitializer
+    {
+        private readonly IServiceScopeFactory _scopeFactory;
+
         private const string DefaultTimeZone = "+0800";
         private const string AdminUsername = "admin.enabled";
         private const string UserPassword = "TgsP@ssw0rd";
         private static readonly Guid AdminUserId = new Guid("5715ABBA-AF3C-4763-94EE-9F2714C3B5A8");
+
+        public DataInitializer(IServiceScopeFactory scopeFactory)
+        {
+            _scopeFactory = scopeFactory;
+        }
 
         private readonly IRole[] _roles =
         {
             new AdminRole(), new ResellerAdminRole()
         };
 
-        internal async Task SetInitialData(IBackendOfficeRepository repository, long version)
+        void IDataInitializer.SetInitialData()
         {
+            using var serviceScope = _scopeFactory.CreateScope();
+            var repository = serviceScope.ServiceProvider.GetRequiredService<IBackendOfficeRepository>();
             if (repository.Permissions.Any())
             {
                 return;
@@ -35,7 +49,7 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
 
             GeneratePermissions(repository);
             GenerateMenus(repository);
-            await GenerateRolesAsync(repository);
+            GenerateRoles(repository);
             GenerateAdminUsers(repository);
         }
 
@@ -45,13 +59,12 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
             repository.BulkInsert(menus);
         }
 
-        private async Task GenerateRolesAsync(IBackendOfficeRepository repo)
+        private void GenerateRoles(IBackendOfficeRepository repo)
         {
             var roles = CreateRoleWithMenus(_roles);
             // Manual sql required because EF doesn't allow to insert Ids
             // if database generated identity feature is being used
             var command = @"
-SET IDENTITY_INSERT [dbo].[Roles] ON
 INSERT INTO [dbo].[Roles]
     ([Id]
     ,[RoleType]
@@ -74,7 +87,6 @@ VALUES
     ,SYSDATETIMEOFFSET()
     ,@createdByUsername
     ,@updatedByUsername)
-SET IDENTITY_INSERT [dbo].[Roles] OFF
 ";
             foreach (var role in roles)
             {
@@ -89,7 +101,7 @@ SET IDENTITY_INSERT [dbo].[Roles] OFF
                     new SqlParameter { ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String }
                 };
-                await repo.ExecuteSqlCommandAsync(command, CommandType.Text, args);
+                repo.ExecuteSqlCommand(command, CommandType.Text, args);
             }
 
 
@@ -124,8 +136,6 @@ SET IDENTITY_INSERT [dbo].[Roles] OFF
 
             repository.BulkInsert(permissions);
         }
-
-
 
         private static Permission CreatePermission(Guid permissionId, string code, string name)
         {

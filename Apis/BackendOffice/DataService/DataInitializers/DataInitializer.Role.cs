@@ -76,12 +76,12 @@ namespace TGS.Apis.TGS.Apis.BackendOffice.DataService.DataInitializers
 
             protected IRoleMenuData[] GetBrandRoleMenus()
             {
-                return null;
+                return new IRoleMenuData[] { };
             }
 
             protected IRoleMenuData[] GetResellerAdminRoleMenus()
             {
-                return null;
+                return new IRoleMenuData[] { };
             }
         }
 

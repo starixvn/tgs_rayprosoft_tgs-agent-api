@@ -9,5 +9,6 @@
         public string OsVersion { get; set; }
         public int ProcessCount { get; set; }
         public bool CanConnectBackendOfficeDb { get; set; }
+        public string BackendOfficeDatabaseConnectionString { get; set; }
     }
 }
