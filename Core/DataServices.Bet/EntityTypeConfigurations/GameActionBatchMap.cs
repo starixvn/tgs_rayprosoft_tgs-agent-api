@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Bet.Models;
 
 namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
 {
-    public class GameActionBatchTypeConfiguration : IEntityTypeConfiguration<GameActionBatch>
+    internal class GameActionBatchMap : IEntityTypeConfiguration<GameActionBatch>
     {
         void IEntityTypeConfiguration<GameActionBatch>.Configure(EntityTypeBuilder<GameActionBatch> builder)
         {

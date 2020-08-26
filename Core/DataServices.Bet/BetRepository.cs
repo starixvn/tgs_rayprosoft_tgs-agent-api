@@ -44,10 +44,10 @@ namespace TGS.Core.DataServices.Bet
         {
             modelBuilder.HasDefaultSchema("dbo");
 
-            modelBuilder.ApplyConfiguration(new RoundTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoundDetailTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new GameActionTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new GameActionBatchTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RoundMap());
+            modelBuilder.ApplyConfiguration(new RoundDetailTypeMap());
+            modelBuilder.ApplyConfiguration(new GameActionTypeMap());
+            modelBuilder.ApplyConfiguration(new GameActionBatchMap());
         }
     }
 }

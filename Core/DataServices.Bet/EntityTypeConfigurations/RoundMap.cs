@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Bet.Models;
 
 namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
 {
-    public class RoundTypeConfiguration : IEntityTypeConfiguration<Round>
+    internal class RoundMap : IEntityTypeConfiguration<Round>
     {
         void IEntityTypeConfiguration<Round>.Configure(EntityTypeBuilder<Round> builder)
         {
