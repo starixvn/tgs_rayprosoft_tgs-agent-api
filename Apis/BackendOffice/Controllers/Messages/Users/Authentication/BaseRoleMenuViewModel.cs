@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
 {
     public class BaseRoleMenuViewModel
     {

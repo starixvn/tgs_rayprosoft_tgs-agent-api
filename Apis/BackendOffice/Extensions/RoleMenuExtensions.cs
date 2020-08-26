@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using TGS.Apis.BackendOffice.Controllers.Messages.UserAuthentication;
+using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.Extensions

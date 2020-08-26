@@ -8,6 +8,12 @@
             public const string TgsToGameProviderMap = "TgsToGameProviderMap";
         }
 
-        public const string NatsTgsLogQueueName = "TgsLogQueue";
+        public class Nats
+        {
+            public const string NatsTgsLogQueueName = "TgsLogQueue";
+        }
+
+
+        public const string CsrfTokenName = "X-XSRF-TOKEN";
     }
 }
