@@ -13,3 +13,10 @@ services:
       context: .
       dockerfile: Apis/TgsApi/Dockerfile
 
+
+  logapi:
+    image: ${DOCKER_REGISTRY-}logapi
+    build:
+      context: .
+      dockerfile: Apis/LogApi/Dockerfile
+

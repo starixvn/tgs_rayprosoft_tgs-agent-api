@@ -7,6 +7,7 @@
     <AssemblyName>TGS.Apis.LogApi</AssemblyName>
     <RootNamespace>TGS.Apis.LogApi</RootNamespace>
     <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
