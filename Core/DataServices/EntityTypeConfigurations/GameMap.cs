@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class GameTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<Game>
+    internal class GameMap : BaseConfiguration, IEntityTypeConfiguration<Game>
     {
         void IEntityTypeConfiguration<Game>.Configure(EntityTypeBuilder<Game> builder)
         {

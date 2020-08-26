@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class ResellerCurrencyTypeConfiguration : IEntityTypeConfiguration<ResellerCurrency>
+    internal class ResellerCurrencyMap : IEntityTypeConfiguration<ResellerCurrency>
     {
         void IEntityTypeConfiguration<ResellerCurrency>.Configure(EntityTypeBuilder<ResellerCurrency> builder)
         {

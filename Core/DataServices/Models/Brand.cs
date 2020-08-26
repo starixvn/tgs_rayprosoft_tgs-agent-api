@@ -16,10 +16,6 @@ namespace TGS.Core.DataServices.Models
 
         public Reseller Reseller { get; set; }
 
-        public Guid LicenseeId { get; set; }
-
-        public Licensee Licensee { get; set; }
-
         public string LoginUrl { get; set; }
 
         public string CashierUrl { get; set; }
@@ -41,5 +37,7 @@ namespace TGS.Core.DataServices.Models
         public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
 
         public virtual ICollection<BrandLanguage> BrandLanguages { get; set; }
+
+        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
     }
 }

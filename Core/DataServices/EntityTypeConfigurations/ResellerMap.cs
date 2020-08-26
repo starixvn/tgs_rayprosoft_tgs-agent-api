@@ -4,22 +4,23 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class ResellerTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<Reseller>
+    internal class ResellerMap : BaseConfiguration, IEntityTypeConfiguration<Reseller>
     {
         void IEntityTypeConfiguration<Reseller>.Configure(EntityTypeBuilder<Reseller> builder)
         {
             builder.ToTable("Resellers", "dbo");
             BaseConfigureProperties(builder);
+            
             builder.HasMany(c => c.Brands)
-                .WithOne(e => e.Reseller);
-
-            builder.HasMany(c => c.Licensees)
                 .WithOne(e => e.Reseller);
 
             builder.Property(c => c.Description)
                 .HasColumnType("nvarchar(256)")
                 .IsUnicode();
 
+            builder.Property(c => c.OperationalEmail)
+                .HasColumnType("nvarchar(128)")
+                .IsUnicode();
         }
     }
 }

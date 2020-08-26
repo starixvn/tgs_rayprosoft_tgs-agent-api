@@ -4,17 +4,12 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class BrandTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<Brand>
+    internal class BrandMap : BaseConfiguration, IEntityTypeConfiguration<Brand>
     {
         void IEntityTypeConfiguration<Brand>.Configure(EntityTypeBuilder<Brand> builder)
         {
             builder.ToTable("Brands", "dbo");
             BaseConfigureProperties(builder);
-
-            builder.HasOne(p => p.Licensee)
-                .WithMany(p => p.Brands)
-                .HasForeignKey(p => p.LicenseeId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(p => p.Reseller)
                 .WithMany(p => p.Brands)

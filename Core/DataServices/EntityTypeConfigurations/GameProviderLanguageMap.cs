@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class GameProviderLanguageTypeConfiguration : IEntityTypeConfiguration<GameProviderLanguage>
+    internal class GameProviderLanguageMap : IEntityTypeConfiguration<GameProviderLanguage>
     {
         void IEntityTypeConfiguration<GameProviderLanguage>.Configure(EntityTypeBuilder<GameProviderLanguage> builder)
         {

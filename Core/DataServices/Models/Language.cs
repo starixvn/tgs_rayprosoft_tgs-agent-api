@@ -13,8 +13,6 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<BrandLanguage> BrandLanguages { get; set; }
 
-        public virtual ICollection<LicenseeLanguage> LicenseeLanguages { get; set; }
-
         public virtual ICollection<ResellerLanguage> ResellerLanguages { get; set; }
 
         public virtual ICollection<GameProviderLanguage> GameProviderLanguages { get; set; }

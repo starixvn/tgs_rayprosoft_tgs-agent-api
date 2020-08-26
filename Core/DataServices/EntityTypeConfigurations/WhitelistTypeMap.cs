@@ -4,43 +4,43 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class LanguageTypeConfiguration : IEntityTypeConfiguration<Language>
+    internal class WhitelistTypeMap : IEntityTypeConfiguration<Whitelist>
     {
-        void IEntityTypeConfiguration<Language>.Configure(EntityTypeBuilder<Language> builder)
+        void IEntityTypeConfiguration<Whitelist>.Configure(EntityTypeBuilder<Whitelist> builder)
         {
-            builder.ToTable("Languages", "dbo");
-            builder.HasKey(l => l.CultureCode);
+            builder.ToTable("Whitelists", "dbo");
+            builder.HasKey(bc => bc.Id);
 
-            builder.Property(l => l.CultureCode)
-                .HasColumnType("nvarchar(6)")
+            builder.Property(c => c.IpAddress)
+                .HasColumnType("nvarchar(64)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(l => l.LanguageCode)
-                .HasColumnType("nvarchar(10)")
-                .IsRequired()
-                .IsUnicode();
-
-            builder.Property(l => l.Name)
-                .HasColumnType("nvarchar(30)")
-                .IsRequired()
-                .IsUnicode();
-
-            builder.Property(l => l.CreatedByUsername)
+            builder.Property(c => c.Description)
                 .HasColumnType("nvarchar(256)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(l => l.UpdatedByUsername)
+            builder.Property(c => c.InternalNote)
                 .HasColumnType("nvarchar(256)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(l => l.CreatedOn)
+            builder.Property(c => c.CreatedByUsername)
+                .HasColumnType("nvarchar(256)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.UpdatedByUsername)
+                .HasColumnType("nvarchar(256)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.CreatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
 
-            builder.Property(l => l.UpdatedOn)
+            builder.Property(c => c.UpdatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
         }

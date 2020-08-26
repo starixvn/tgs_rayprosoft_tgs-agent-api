@@ -6,6 +6,8 @@ namespace TGS.Core.DataServices
 {
     public interface ITgsRepository : IBaseRepository
     {
+        DbSet<Brand> Brands { get; set; }
+
         DbSet<Currency> Currencies { get; set; }
 
         DbSet<Language> Languages { get; set; }
@@ -13,10 +15,6 @@ namespace TGS.Core.DataServices
         DbSet<Reseller> Resellers { get; set; }
 
         DbSet<ResellerGameProvider> ResellerGameProviders { get; set; }
-
-        DbSet<LicenseeCurrency> LicenseeCurrencies { get; set; }
-
-        DbSet<LicenseeLanguage> LicenseeLanguages { get; set; }
 
         DbSet<ResellerCurrency> ResellerCurrencies { get; set; }
 
@@ -47,5 +45,7 @@ namespace TGS.Core.DataServices
         DbSet<BrandCurrency> BrandCurrencies { get; set; }
 
         DbSet<BrandLanguage> BrandBrandLanguages { get; set; }
+
+        DbSet<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
     }
 }

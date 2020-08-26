@@ -4,26 +4,23 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class SettingTypeConfiguration : IEntityTypeConfiguration<Setting>
+    internal class CurrencyMap : IEntityTypeConfiguration<Currency>
     {
-        void IEntityTypeConfiguration<Setting>.Configure(EntityTypeBuilder<Setting> builder)
+        void IEntityTypeConfiguration<Currency>.Configure(EntityTypeBuilder<Currency> builder)
         {
-            builder.ToTable("Settings", "dbo");
-            builder.HasKey(bc => bc.Key);
+            builder.ToTable("Currencies", "dbo");
+            builder.HasKey(p => p.Code);
 
-            //builder.Property(c => c.Key)
-            //    .HasColumnType("nvarchar(32)")
-            //    .IsRequired()
-            //    .IsUnicode();
-
-            builder.Property(c => c.Value)
-                .HasColumnType("nvarchar(4000)")
+            builder.Property(c => c.Code)
+                .HasColumnType("nvarchar(16)")
                 .IsRequired()
                 .IsUnicode();
 
-            builder.Property(c => c.Description)
-                .HasColumnType("nvarchar(256)")
-                .IsUnicode();
+            builder.Property(c => c.NativeName)
+                .HasColumnType("nvarchar(64)");
+
+            builder.Property(c => c.Symbol)
+                .HasColumnType("nvarchar(16)");
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType("nvarchar(256)")
@@ -42,7 +39,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
-
         }
     }
 }

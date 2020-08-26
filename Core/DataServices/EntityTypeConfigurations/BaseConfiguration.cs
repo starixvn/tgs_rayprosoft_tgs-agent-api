@@ -4,11 +4,11 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class BaseConfiguration
+    internal class BaseConfiguration
     {
         protected void BaseConfigureProperties<T>(EntityTypeBuilder<T> builder) where T : BaseEntity
         {
-            builder.HasKey(p => p.Id).IsClustered(false); ;
+            builder.HasKey(p => p.Id).IsClustered(false);
 
             builder.Property(c => c.Code)
                 .HasColumnType("nvarchar(255)")

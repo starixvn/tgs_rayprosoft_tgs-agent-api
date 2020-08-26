@@ -15,8 +15,6 @@ namespace TGS.Core.DataServices
         DbSet<GameProvider> ITgsRepository.GameProviders { get; set; }
         DbSet<GameProviderConfiguration> ITgsRepository.GameProviderConfigurations { get; set; }
         DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
-        DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
-        DbSet<LicenseeLanguage> ITgsRepository.LicenseeLanguages { get; set; }
         DbSet<ResellerCurrency> ITgsRepository.ResellerCurrencies { get; set; }
         DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
@@ -31,6 +29,8 @@ namespace TGS.Core.DataServices
         DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
         DbSet<BrandCurrency> ITgsRepository.BrandCurrencies { get; set; }
         DbSet<BrandLanguage> ITgsRepository.BrandBrandLanguages { get; set; }
+        DbSet<Brand> ITgsRepository.Brands { get; set; }
+        DbSet<BrandGameProviderConfiguration> ITgsRepository.BrandGameProviderConfigurations { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -61,33 +61,31 @@ namespace TGS.Core.DataServices
         {
             modelBuilder.HasDefaultSchema("dbo");
 
-            modelBuilder.ApplyConfiguration(new CurrencyTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LanguageTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new GameTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new GameProviderTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new GpcTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurrencyMap());
+            modelBuilder.ApplyConfiguration(new LanguageMap());
+            modelBuilder.ApplyConfiguration(new GameMap());
+            modelBuilder.ApplyConfiguration(new GameProviderMap());
+            modelBuilder.ApplyConfiguration(new GameProviderConfigurationMap());
 
-            modelBuilder.ApplyConfiguration(new ResellerTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ResellerGameProviderTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LicenseeCurrencyTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LicenseeLanguageTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ResellerCurrencyTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ResellerMap());
+            modelBuilder.ApplyConfiguration(new ResellerGameProviderMap());
+            modelBuilder.ApplyConfiguration(new ResellerCurrencyMap());
 
-            modelBuilder.ApplyConfiguration(new ResellerLanguageTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BrandTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BrandGameTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LicenseeTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new PlayerTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ResellerLanguageMap());
+            modelBuilder.ApplyConfiguration(new BrandMap());
+            modelBuilder.ApplyConfiguration(new BrandGameMap());
+            modelBuilder.ApplyConfiguration(new BrandGameProviderConfigurationMap());
+            modelBuilder.ApplyConfiguration(new PlayerMap());
 
-            modelBuilder.ApplyConfiguration(new WhitelistTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new WalletTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new SettingTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LocalizedStringTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BrandCurrencyTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BrandLanguageTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new WhitelistTypeMap());
+            modelBuilder.ApplyConfiguration(new WalletTypeMap());
+            modelBuilder.ApplyConfiguration(new SettingMap());
+            modelBuilder.ApplyConfiguration(new LocalizedStringMap());
+            modelBuilder.ApplyConfiguration(new BrandCurrencyMap());
+            modelBuilder.ApplyConfiguration(new BrandLanguageMap());
 
-            modelBuilder.ApplyConfiguration(new GameProviderCurrencyTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new GameProviderLanguageTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameProviderCurrencyMap());
+            modelBuilder.ApplyConfiguration(new GameProviderLanguageMap());
         }
     }
 }

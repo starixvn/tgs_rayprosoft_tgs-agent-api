@@ -8,8 +8,6 @@ namespace TGS.Core.DataServices.Models
 
         public string OperationalEmail { get; set; }
 
-        public virtual ICollection<Licensee> Licensees { get; set; }
-
         public virtual ICollection<Brand> Brands { get; set; }
 
         public virtual ICollection<ResellerGameProvider> GameProviders { get; set; }

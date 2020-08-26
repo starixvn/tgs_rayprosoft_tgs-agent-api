@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class ResellerGameProviderTypeConfiguration : IEntityTypeConfiguration<ResellerGameProvider>
+    internal class ResellerGameProviderMap : IEntityTypeConfiguration<ResellerGameProvider>
     {
         void IEntityTypeConfiguration<ResellerGameProvider>.Configure(EntityTypeBuilder<ResellerGameProvider> builder)
         {
