@@ -5,7 +5,7 @@ using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
-    public sealed class PermissionTypeConfiguration : IEntityTypeConfiguration<Permission>
+    public sealed class PermissionMap : IEntityTypeConfiguration<Permission>
     {
         void IEntityTypeConfiguration<Permission>.Configure(EntityTypeBuilder<Permission> builder)
         {

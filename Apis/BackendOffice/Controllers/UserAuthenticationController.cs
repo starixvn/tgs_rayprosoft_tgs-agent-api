@@ -20,7 +20,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
         private readonly IUserQueries _userQueries;
-        protected UserAuthenticationController(
+        public UserAuthenticationController(
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
             IUserQueries userQueries)
@@ -47,12 +47,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>("Invalid password.");
             }
 
-
-            var mainMenus = user.Role.Menus.Where(p => p.ParentId == null && p.SubMenus
-                    .Any(sm => sm.IsDisplay && sm.Permissions
-                        .Any(smp => smp.Permission.Name.Equals("View") && smp.IsDisplay)))
-                .OrderBy(r => r.DisplayOrder);
-
+            var mainMenus = user.Role.Menus.Where(p => p.ParentId == null)
+                .OrderBy(r => r.DisplayOrder)
+                .CreateViewMenus()
+                .ToArray();
 
             return new AuthenticateUserResponse
             {
@@ -61,7 +59,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Username = user.Username,
                 UserId = user.Id,
                 TimeZone = user.TimeZone,
-                Menus = mainMenus.CreateViewMenus().ToArray()
+                Menus = mainMenus
             };
         }
 

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
@@ -25,8 +24,11 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
             return _repository.Users
                 .Include(u => u.Role)
                 .Include(u => u.Role.Menus)
-                .Include(u => u.Role.Menus.Select(p => p.SubMenus))
-                .Include(u => u.Role.Menus.Select(p => p.SubMenus.Select(p => p.Permissions)))
+                .ThenInclude(p => p.Menu)
+                .Include(u => u.Role.Menus)
+                .ThenInclude(p => p.SubMenus)
+                .ThenInclude(p => p.Permissions)
+                .ThenInclude(p => p.Permission)
                 .FirstOrDefaultAsync(a => a.Username == username && a.Status == UserStatus.Enabled);
         }
     }

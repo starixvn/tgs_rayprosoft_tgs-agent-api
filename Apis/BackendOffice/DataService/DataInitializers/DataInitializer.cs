@@ -202,9 +202,10 @@ VALUES
                     {
                         Id = subMenu.RoleMenuId,
                         RoleId = role.Id,
-                        MenuId = roleMenu.Menu.MenuId,
+                        MenuId = subMenu.Menu.MenuId,
                         ParentId = subMenu.ParentId,
                         DisplayOrder = subMenu.DisplayOrder,
+                        IsDisplay = true,
                         Permissions = subMenu.Menu.Permissions.Select((permission, index) => new RoleMenuPermission
                         {
                             Id = GuidExtensions.NewSequentialGuid(),

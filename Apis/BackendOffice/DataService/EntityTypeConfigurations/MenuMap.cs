@@ -5,11 +5,11 @@ using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
-    public sealed class RoleTypeConfiguration : IEntityTypeConfiguration<Role>
+    public sealed class MenuMap : IEntityTypeConfiguration<Menu>
     {
-        void IEntityTypeConfiguration<Role>.Configure(EntityTypeBuilder<Role> builder)
+        void IEntityTypeConfiguration<Menu>.Configure(EntityTypeBuilder<Menu> builder)
         {
-            builder.ToTable("Roles", "dbo");
+            builder.ToTable("Menus", "dbo");
 
             builder.HasKey(p => p.Id);
 
@@ -17,29 +17,12 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
               .HasColumnType(ColumnTypes.Nvarchar(50))
               .IsRequired();
 
-            builder.Property(c => c.DisplayName)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
-                .IsRequired();
+            builder.HasMany(p => p.RoleMenus)
+                .WithOne(p => p.Menu)
+                .HasForeignKey(p => p.MenuId);
 
-            builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
-                .IsRequired();
-
-            builder.HasMany(p => p.Users)
-                .WithOne(p => p.Role)
-                .HasForeignKey(p => p.RoleId);
-
-            builder.HasMany(p => p.Menus)
-                .WithOne(p => p.Role)
-                .HasForeignKey(p => p.RoleId);
-
-
-            builder.Property(c => c.RoleType)
-                .HasColumnType(ColumnTypes.TinyInt)
-                .IsRequired();
-
-            builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+            builder.Property(c => c.Translation)
+                .HasColumnType(ColumnTypes.Nvarchar(256))
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
