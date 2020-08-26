@@ -137,7 +137,7 @@ namespace TGS.Apis.LogApi.Services
         {
             _apiLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
                 nameof(ApiLogEvent),
-                Consts.NatsTgsLogQueueName,
+                Consts.Nats.NatsTgsLogQueueName,
                 message =>
                 {
                     _lastBusEvent = message.DataObject;
@@ -150,7 +150,7 @@ namespace TGS.Apis.LogApi.Services
         {
             _logRecordSubscription = _natsManager.SubscribeAsync<LogRecordEvent>(
                 nameof(LogRecordEvent),
-                Consts.NatsTgsLogQueueName,
+                Consts.Nats.NatsTgsLogQueueName,
                 message =>
                 {
                     _lastBusEvent = message.DataObject;
