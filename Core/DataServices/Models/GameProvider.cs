@@ -7,14 +7,15 @@ namespace TGS.Core.DataServices.Models
     {
         public Status Status { get; set; }
         public string Description { get; set; }
+        public bool AutoCloseRound { get; set; }
+        public bool SupportTestPlayer { get; set; }
+        public int PlaceBetTimeout { get; set; }
+        public int SettleBetTimeout { get; set; }
         public virtual ICollection<Game> Games { get; set; }
         public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
         public virtual ICollection<GameProviderCurrency> Currencies { get; set; }
         public virtual ICollection<GameProviderLanguage> Languages { get; set; }
         public virtual ICollection<GameProviderConfiguration> GameProviderConfigurations { get; set; }
-        public bool AutoCloseRound { get; set; }
-        public bool SupportTestPlayer { get; set; }
-        public int PlaceBetTimeout { get; set; }
-        public int SettleBetTimeout { get; set; }
+        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
     }
 }

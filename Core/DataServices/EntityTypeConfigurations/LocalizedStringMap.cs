@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class LocalizedStringTypeConfiguration : IEntityTypeConfiguration<LocalizedString>
+    internal class LocalizedStringMap : IEntityTypeConfiguration<LocalizedString>
     {
         void IEntityTypeConfiguration<LocalizedString>.Configure(EntityTypeBuilder<LocalizedString> builder)
         {

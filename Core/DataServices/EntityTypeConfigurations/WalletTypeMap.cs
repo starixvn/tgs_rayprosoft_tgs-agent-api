@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class WalletTypeConfiguration : IEntityTypeConfiguration<Wallet>
+    internal class WalletTypeMap : IEntityTypeConfiguration<Wallet>
     {
         void IEntityTypeConfiguration<Wallet>.Configure(EntityTypeBuilder<Wallet> builder)
         {

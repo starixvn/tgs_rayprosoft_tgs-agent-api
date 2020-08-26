@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class GpcTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<GameProviderConfiguration>
+    internal class GameProviderConfigurationMap : BaseConfiguration, IEntityTypeConfiguration<GameProviderConfiguration>
     {
         void IEntityTypeConfiguration<GameProviderConfiguration>.Configure(EntityTypeBuilder<GameProviderConfiguration> builder)
         {
@@ -29,8 +29,12 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.MobileEndpoint)
                 .HasColumnType("nvarchar(1024)")
                 .IsRequired();
+            
             builder.Property(c => c.ConfigurationData)
                 .HasColumnType("nvarchar(4000)")
+                .IsRequired();
+
+            builder.Property(c => c.IsDefault)
                 .IsRequired();
         }
     }

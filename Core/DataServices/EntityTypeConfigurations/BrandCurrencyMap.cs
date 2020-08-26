@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class BrandCurrencyTypeConfiguration : IEntityTypeConfiguration<BrandCurrency>
+    internal class BrandCurrencyMap : IEntityTypeConfiguration<BrandCurrency>
     {
         void IEntityTypeConfiguration<BrandCurrency>.Configure(EntityTypeBuilder<BrandCurrency> builder)
         {

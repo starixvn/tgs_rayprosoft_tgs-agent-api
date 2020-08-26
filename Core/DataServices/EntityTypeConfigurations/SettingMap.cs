@@ -4,26 +4,25 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class WhitelistTypeConfiguration : IEntityTypeConfiguration<Whitelist>
+    internal class SettingMap : IEntityTypeConfiguration<Setting>
     {
-        void IEntityTypeConfiguration<Whitelist>.Configure(EntityTypeBuilder<Whitelist> builder)
+        void IEntityTypeConfiguration<Setting>.Configure(EntityTypeBuilder<Setting> builder)
         {
-            builder.ToTable("Whitelists", "dbo");
-            builder.HasKey(bc => bc.Id);
+            builder.ToTable("Settings", "dbo");
+            builder.HasKey(c => c.Key);
 
-            builder.Property(c => c.IpAddress)
-                .HasColumnType("nvarchar(64)")
+            builder.Property(c => c.Key)
+                .HasColumnType("nvarchar(32)")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Value)
+                .HasColumnType("nvarchar(4000)")
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Description)
                 .HasColumnType("nvarchar(256)")
-                .IsRequired()
-                .IsUnicode();
-
-            builder.Property(c => c.InternalNote)
-                .HasColumnType("nvarchar(256)")
-                .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.CreatedByUsername)
@@ -43,6 +42,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
+
         }
     }
 }

@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class ResellerLanguageTypeConfiguration : IEntityTypeConfiguration<ResellerLanguage>
+    internal class ResellerLanguageMap : IEntityTypeConfiguration<ResellerLanguage>
     {
         void IEntityTypeConfiguration<ResellerLanguage>.Configure(EntityTypeBuilder<ResellerLanguage> builder)
         {

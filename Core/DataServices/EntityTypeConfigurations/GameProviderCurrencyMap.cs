@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class GameProviderCurrencyTypeConfiguration : IEntityTypeConfiguration<GameProviderCurrency>
+    internal class GameProviderCurrencyMap : IEntityTypeConfiguration<GameProviderCurrency>
     {
         void IEntityTypeConfiguration<GameProviderCurrency>.Configure(EntityTypeBuilder<GameProviderCurrency> builder)
         {

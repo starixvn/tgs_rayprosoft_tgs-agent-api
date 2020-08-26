@@ -11,5 +11,6 @@ namespace TGS.Core.DataServices.Models
         public string DesktopEndpoint { get; set; }
         public string MobileEndpoint { get; set; }
         public string ConfigurationData { get; set; }
+        public bool IsDefault { get; set; }
     }
 }

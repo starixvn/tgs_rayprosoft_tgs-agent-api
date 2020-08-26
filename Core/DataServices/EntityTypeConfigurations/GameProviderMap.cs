@@ -4,28 +4,32 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class GameProviderTypeConfiguration : BaseConfiguration, IEntityTypeConfiguration<GameProvider>
+    internal class GameProviderMap : BaseConfiguration, IEntityTypeConfiguration<GameProvider>
     {
         void IEntityTypeConfiguration<GameProvider>.Configure(EntityTypeBuilder<GameProvider> builder)
         {
             builder.ToTable("GameProviders", "dbo");
             BaseConfigureProperties(builder);
 
-            builder.Property(c => c.Description)
+            builder.Property(p => p.Description)
                 .HasColumnType("nvarchar(128)");
 
-            builder.Property(c => c.Status)
+            builder.Property(p => p.Status)
                 .HasColumnType("smallint");
 
-            builder.Property(c => c.PlaceBetTimeout)
+            builder.Property(p => p.PlaceBetTimeout)
                 .HasColumnType("int");
 
-            builder.Property(c => c.SettleBetTimeout)
+            builder.Property(p => p.SettleBetTimeout)
                 .HasColumnType("int");
 
             builder.HasMany(p => p.Games)
                 .WithOne(p => p.GameProvider)
                 .HasForeignKey(p => p.GameProviderId);
+
+            builder.HasMany(p => p.BrandGameProviderConfigurations)
+                .WithOne(g => g.GameProvider)
+                .HasForeignKey(g => g.GameProviderId);
         }
     }
 }

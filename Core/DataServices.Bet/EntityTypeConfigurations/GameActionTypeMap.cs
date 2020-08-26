@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Bet.Models;
 
 namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
 {
-    public class GameActionTypeConfiguration : IEntityTypeConfiguration<GameAction>
+    internal class GameActionTypeMap : IEntityTypeConfiguration<GameAction>
     {
         void IEntityTypeConfiguration<GameAction>.Configure(EntityTypeBuilder<GameAction> builder)
         {
