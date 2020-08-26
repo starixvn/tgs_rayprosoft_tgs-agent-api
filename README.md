@@ -5,13 +5,13 @@ docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=1qaz2wsx!@#$" -p 1433:1433 --name 
 ## Migration Command 
 
 #TGS
-add-migration Initial -c TgsRepository -p DataServices -s TgsApi
+add-migration <MigrationName> -c TgsRepository -p DataServices -s TgsApi
 
 #Log
-add-migration Initial -c LogRepository -p LogApi -s LogApi
+add-migration <MigrationName> -c LogRepository -p LogApi -s LogApi
 
 #Backend Office
-add-migration Initial -c BackendOfficeRepository -p BackendOffice -s BackendOffice
+add-migration <MigrationName> -c BackendOfficeRepository -p BackendOffice -s BackendOffice
 
 
 ## Install Redis using Docker
