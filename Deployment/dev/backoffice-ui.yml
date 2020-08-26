@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backoffice-ui
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: backoffice-ui
+  template:
+    metadata:
+      labels:
+        app: backoffice-ui
+    spec:
+      containers:
+        - name: backoffice-ui
+          image: registry.gitlab.com/sam.chuang1/backoffice:0.0.2
+          ports:
+            - containerPort: 81
+          volumeMounts:
+            - name: site-data
+              mountPath: /data
+      volumes:
+        - name: site-data
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backoffice-ui
+spec:
+  ports:
+    - port: 81
+      targetPort: 81
+  selector:
+    app: backoffice-ui
+  type: LoadBalancer

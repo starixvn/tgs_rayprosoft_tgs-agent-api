@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-deployment-demo
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mssql-demo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mssql-demo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mssql2019-demo
+        image: mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+        ports:
+        - containerPort: 1433
+        env:
+        - name: MSSQL_PID
+          value: "Developer"
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: MSSQL_SA_PASSWORD
+          value: "Sa12345678"
+        volumeMounts:
+        - name: mssqldb-demo
+          mountPath: /var/opt/mssql
+      volumes:
+      - name: mssqldb-demo
+        persistentVolumeClaim:
+          claimName: pvc-mssqldemo-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-service-demo
+  namespace: default
+spec:
+  selector:
+    app: mssql-demo
+  ports:
+    - protocol: TCP
+      port: 1433
+      nodePort: 32274
+      targetPort: 1433
+  type: NodePort
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+    name: local-storage
+    annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-mssqldemo-data
+  labels:
+    type: local
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 15Gi #15GB容量大小
+  accessModes:
+    - ReadWriteOnce #只允許單一PVC獨佔
+  claimRef:
+    namespace: default
+    name: pvc-mssqldemo-data
+  hostPath:
+    path: "/var/opt/mssqldemo"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-mssqldemo-data
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi #只分配5GB容量大小
+  storageClassName: local-storage

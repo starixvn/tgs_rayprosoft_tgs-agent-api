@@ -55,6 +55,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice", "Apis\Backe
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C67967CB-D962-4C3D-AA6C-203B0CBCC233}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{EC4CC831-10A3-4E58-A994-D3493FC5C158}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{F352EBA9-FF0F-4D40-8229-835E2F1E6BC1}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\dev\backoffice-api.yml = Deployment\dev\backoffice-api.yml
+		Deployment\dev\backoffice-ui.yml = Deployment\dev\backoffice-ui.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +147,7 @@ Global
 		{EB47CAF6-6410-4F88-B220-41A1B61DBBE3} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{F314D974-6D5E-4CE6-9FB2-9DBCE74765B6} = {9DA0B3A3-C49F-4AFF-9CB7-FC96449E9E21}
+		{F352EBA9-FF0F-4D40-8229-835E2F1E6BC1} = {EC4CC831-10A3-4E58-A994-D3493FC5C158}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

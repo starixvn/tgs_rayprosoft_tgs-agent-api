@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backoffice-api
+  namespace: tgs-development
+  labels:
+    name: k8s-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: backoffice-api
+  template:
+    metadata:
+      labels:
+        name: backoffice-api
+    spec:
+      containers:
+      - name: backoffice-api
+        image: tgsapisbackendoffice
+        ports:
+        - containerPort: 81
+        imagePullPolicy: Always
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: backoffice-api
+  namespace: tgs-development
+spec:
+  type: NodePort
+  ports:
+    - port: 81
+      targetPort: 81
+  selector:
+    name: backoffice-api
