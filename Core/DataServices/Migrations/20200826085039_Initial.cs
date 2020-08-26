@@ -431,7 +431,7 @@ namespace TGS.Core.DataServices.Migrations
                         principalSchema: "dbo",
                         principalTable: "Brands",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BrandGameProviderConfigurations_Languages_DefaultLanguageCultureCode",
                         column: x => x.DefaultLanguageCultureCode,
@@ -440,19 +440,19 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "CultureCode",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_BrandGameProviderConfigurations_GameProviderConfigurations_GameProviderConfigurationId",
-                        column: x => x.GameProviderConfigurationId,
-                        principalSchema: "dbo",
-                        principalTable: "GameProviderConfigurations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_BrandGameProviderConfigurations_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BrandGameProviderConfigurations_GameProviderConfigurations_GameProviderId",
+                        column: x => x.GameProviderId,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviderConfigurations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -635,12 +635,6 @@ namespace TGS.Core.DataServices.Migrations
                 column: "DefaultLanguageCultureCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BrandGameProviderConfigurations_GameProviderConfigurationId",
-                schema: "dbo",
-                table: "BrandGameProviderConfigurations",
-                column: "GameProviderConfigurationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_BrandGameProviderConfigurations_GameProviderId",
                 schema: "dbo",
                 table: "BrandGameProviderConfigurations",
@@ -762,6 +756,9 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerForCache.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Wallet_GetBalance.sql");
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandForCache.sql");
+
             #endregion
         }
 

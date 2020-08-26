@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
@@ -9,7 +11,7 @@ namespace TGS.Services.GameServices
 {
     public interface IGamePlayActions
     {
-        Task ValidatePlayerAsync();
+        Task<PlayerValidationResult> ValidatePlayerAsync(PlayerValidationData data);
 
         Task<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode);
 
@@ -50,13 +52,9 @@ namespace TGS.Services.GameServices
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
 
-            var balance = await GetWalletBalanceAsync(gameProviderId, player, true);
+            var balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-            return new GetBalanceResult
-            {
-                Balance = balance,
-                CurrencyCode = cur
-            };
+            return new GetBalanceResult(balance, cur);
         }
 
         Task<BetResult> IGamePlayActions.LockAmountAsync(BetData data)
@@ -74,18 +72,17 @@ namespace TGS.Services.GameServices
             throw new NotImplementedException();
         }
 
-        Task IGamePlayActions.ValidatePlayerAsync()
+        async Task<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
         {
-            throw new NotImplementedException();
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            var status = ValidStatuses.GetStatus(player.Type);
+
+            return new PlayerValidationResult();
         }
 
-        private async Task<decimal> GetWalletBalanceAsync(Guid gameProviderId, CachedPlayer player, bool forceUpdate)
-        {
-            if (!player.HasProxyWallet)
-                return await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
+        #region Private Method
+        
 
-            // TODO: Implement get balance via proxy wallet 
-            return 0;
-        }
+        #endregion
     }
 }

@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200826030722_Initial")]
+    [Migration("20200826085039_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,8 +170,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasName("UK_BrandGameProviderConfigurations_BrandId_GameProviderId");
 
                     b.HasIndex("DefaultLanguageCultureCode");
-
-                    b.HasIndex("GameProviderConfigurationId");
 
                     b.HasIndex("GameProviderId");
 
@@ -882,23 +880,23 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.Brand", "Brand")
                         .WithMany("BrandGameProviderConfigurations")
                         .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Language", "DefaultLanguage")
                         .WithMany()
                         .HasForeignKey("DefaultLanguageCultureCode");
 
-                    b.HasOne("TGS.Core.DataServices.Models.GameProviderConfiguration", "GameProviderConfiguration")
-                        .WithMany()
-                        .HasForeignKey("GameProviderConfigurationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
                         .WithMany("BrandGameProviderConfigurations")
                         .HasForeignKey("GameProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.GameProviderConfiguration", "GameProviderConfiguration")
+                        .WithMany("BrandGameProviderConfigurations")
+                        .HasForeignKey("GameProviderId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

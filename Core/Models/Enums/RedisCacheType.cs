@@ -3,6 +3,7 @@
     public enum RedisCacheType
     {
         Player,
+        Brand,
         Currencies,
         Languages
     }

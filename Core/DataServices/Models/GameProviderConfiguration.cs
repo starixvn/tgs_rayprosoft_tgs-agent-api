@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Models
 {
@@ -12,5 +13,7 @@ namespace TGS.Core.DataServices.Models
         public string MobileEndpoint { get; set; }
         public string ConfigurationData { get; set; }
         public bool IsDefault { get; set; }
+
+        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
     }
 }

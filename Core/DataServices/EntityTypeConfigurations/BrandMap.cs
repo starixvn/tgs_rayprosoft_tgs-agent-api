@@ -49,6 +49,11 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.MobileTermsUrl)
                 .HasColumnType("nvarchar(512)");
+
+            builder.HasMany(c => c.BrandGameProviderConfigurations)
+                .WithOne(c => c.Brand)
+                .HasForeignKey(c => c.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

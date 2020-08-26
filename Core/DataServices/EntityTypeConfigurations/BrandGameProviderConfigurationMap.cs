@@ -24,14 +24,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.DefaultLanguageCode)
                 .HasColumnType("nvarchar(6)");
-
-            builder.HasOne(c => c.Brand)
-                .WithMany(c => c.BrandGameProviderConfigurations)
-                .HasForeignKey(c => c.BrandId);
-
-            builder.HasOne(c => c.GameProvider)
-                .WithMany(c => c.BrandGameProviderConfigurations)
-                .HasForeignKey(c => c.GameProviderId);
         }
     }
 }
