@@ -6,3 +6,10 @@ services:
     build:
       context: .
       dockerfile: Apis/BackendOffice/Dockerfile
+
+  tgsapi:
+    image: ${DOCKER_REGISTRY-}tgsapi
+    build:
+      context: .
+      dockerfile: Apis/TgsApi/Dockerfile
+

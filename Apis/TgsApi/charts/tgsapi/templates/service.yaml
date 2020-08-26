@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "tgsapi.fullname" . }}
+  labels:
+    app: {{ template "tgsapi.name" . }}
+    chart: {{ template "tgsapi.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "tgsapi.name" . }}
+    release: {{ .Release.Name }}
