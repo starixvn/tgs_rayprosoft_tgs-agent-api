@@ -5,7 +5,7 @@ using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
-    public sealed class UserTypeConfiguration : IEntityTypeConfiguration<User>
+    public sealed class UserMap : IEntityTypeConfiguration<User>
     {
         void IEntityTypeConfiguration<User>.Configure(EntityTypeBuilder<User> builder)
         {

@@ -5,7 +5,7 @@ using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
-    public sealed class RoleMenuPermissionTypeConfiguration : IEntityTypeConfiguration<RoleMenuPermission>
+    public sealed class RoleMenuPermissionMap : IEntityTypeConfiguration<RoleMenuPermission>
     {
         void IEntityTypeConfiguration<RoleMenuPermission>.Configure(EntityTypeBuilder<RoleMenuPermission> builder)
         {

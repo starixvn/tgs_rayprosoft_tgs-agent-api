@@ -29,8 +29,8 @@ namespace TGS.Apis.BackendOffice
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(Configuration, "BackendOffice");
 
             services.AddScoped<IDataInitializer, DataInitializer>();
-            services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
+            services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IUserQueries, UserQueries>();
 
             services.AddControllers();

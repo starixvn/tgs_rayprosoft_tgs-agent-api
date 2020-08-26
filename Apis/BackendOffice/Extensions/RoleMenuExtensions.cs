@@ -17,8 +17,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 Name = menu.Menu.Name,
                 Translation = menu.Menu.Translation,
                 DisplayOrder = menu.DisplayOrder,
-                SubMenus = menu.SubMenus?
-                    .Where(sm => sm.Permissions.Any(p => p.Permission.Name.Equals("View") && p.IsDisplay))
+                SubMenus = menu.SubMenus
+                    .Where(sm => sm.IsDisplay)
                     .CreateRoleSubMenuViewModels()
                     .ToList()
             }).OrderBy(m => m.DisplayOrder).ToArray();
@@ -26,7 +26,7 @@ namespace TGS.Apis.BackendOffice.Extensions
 
         private static IEnumerable<RoleSubMenuViewModel> CreateRoleSubMenuViewModels(this IEnumerable<RoleMenu> menus)
         {
-            return menus?.Where(m => m.IsDisplay).Select(menu => new RoleSubMenuViewModel
+            return menus.Select(menu => new RoleSubMenuViewModel
             {
                 Code = menu.Menu.Code,
                 Name = menu.Menu.Name,

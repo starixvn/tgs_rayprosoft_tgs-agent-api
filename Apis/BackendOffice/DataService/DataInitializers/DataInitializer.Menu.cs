@@ -34,9 +34,10 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         static readonly Guid[] ManageResellersPermissions = { PerViewId, PerCreateId, PerUpdateId, PerManageStatusId, PerCanEditCredentialId };
 
         static readonly IMenu AdminMenu = new Menu_(EmptyPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB259"), "fa-certificate", "Admin", "Admin", "Resources.UI.Partial.Menu.Menu.LinkAdmin");
-        static readonly IMenu AdminUsersMenu = new Menu_(ManageWithStatusPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB289"), string.Empty, "AdminUsers", "Admin Users", "Resources.UI.Partial.Menu.Menu.LinkUsers");
+        static readonly IMenu UsersMenu = new Menu_(ManageWithStatusPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB289"), string.Empty, "Users", "Users", "Resources.UI.Partial.Menu.Menu.LinkUsers");
         static readonly IMenu RolesMenu = new Menu_(ManageRolePermissions, new Guid("ADE95FB2-2348-41AC-B899-EF8A95D10103"), string.Empty, "Roles", "Roles", "Resources.UI.Partial.Menu.Menu.LinkRoles");
         static readonly IMenu PermissionMenu = new Menu_(ManagePermissionPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB389"), string.Empty, "Permission", "Permission", "Resources.UI.Partial.Menu.Menu.LinkPermission");
+        static readonly IMenu MenuMenu = new Menu_(ManagePermissionPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB390"), string.Empty, "Menu", "Menu", "Resources.UI.Partial.Menu.Menu.LinkMenu");
         static readonly IMenu RolePermissionMenu = new Menu_(EmptyPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB312"), "fa-certificate", "RolePermission", "Role And Permission", "Resources.UI.Partial.Menu.Menu.MenuTextRoleAndPermission");
 
         static readonly IMenu ResellersMenu = new Menu_(ManageResellersPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB261"), string.Empty, "Resellers", "Resellers", "Resources.UI.Partial.Menu.Menu.LinkResellers");
@@ -68,7 +69,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             GameMenu, GameProvidersMenu,
             LogMenu,AdminLogMenu,ApiLogMenu,SystemLogMenu,
             ReportMenu, OverallMenu, GameProviderMenu,
-            SystemMenu, AdminUsersMenu, CurrenciesMenu,LanguagesMenu,ConfigsMenu,WhiteListMenu,
+            SystemMenu, UsersMenu, CurrenciesMenu,LanguagesMenu,ConfigsMenu,WhiteListMenu,MenuMenu,PermissionMenu
         };
 
         internal interface IMenu

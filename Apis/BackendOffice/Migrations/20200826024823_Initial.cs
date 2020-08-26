@@ -83,7 +83,8 @@ namespace TGS.Apis.BackendOffice.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleMenus", x => x.Id);
+                    table.PrimaryKey("PK_RoleMenus", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
                         name: "FK_RoleMenus_Menus_MenuId",
                         column: x => x.MenuId,
@@ -198,10 +199,12 @@ namespace TGS.Apis.BackendOffice.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleMenus_RoleId",
+                name: "IX_RoleMenus_RoleId_MenuId",
                 schema: "dbo",
                 table: "RoleMenus",
-                column: "RoleId");
+                columns: new[] { "RoleId", "MenuId" },
+                unique: true)
+                .Annotation("SqlServer:Clustered", true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",

@@ -47,12 +47,12 @@ namespace TGS.Apis.BackendOffice.DataService
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.ApplyConfiguration(new UserTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoleTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new PermissionTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new MenuTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoleMenuTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoleMenuPermissionTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserMap());
+            modelBuilder.ApplyConfiguration(new RoleMap());
+            modelBuilder.ApplyConfiguration(new PermissionMap());
+            modelBuilder.ApplyConfiguration(new MenuMap());
+            modelBuilder.ApplyConfiguration(new RoleMenuMap());
+            modelBuilder.ApplyConfiguration(new RoleMenuPermissionMap());
         }
 
         void IBackendOfficeRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class

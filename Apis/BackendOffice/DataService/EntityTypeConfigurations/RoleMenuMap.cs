@@ -4,14 +4,18 @@ using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
-    public sealed class RoleMenuTypeConfiguration : IEntityTypeConfiguration<RoleMenu>
+    public sealed class RoleMenuMap : IEntityTypeConfiguration<RoleMenu>
     {
         void IEntityTypeConfiguration<RoleMenu>.Configure(EntityTypeBuilder<RoleMenu> builder)
         {
             builder.ToTable("RoleMenus", "dbo");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.Id)
+                .IsClustered(false);
 
+            builder.HasIndex(p => new { p.RoleId, p.MenuId })
+                .IsUnique()
+                .IsClustered();
 
             builder.HasMany(p => p.Permissions)
                 .WithOne(p => p.RoleMenu)
