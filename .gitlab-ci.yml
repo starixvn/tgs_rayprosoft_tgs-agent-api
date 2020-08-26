@@ -9,10 +9,10 @@ variables:
 services:
   - redis:latest
 
-connect:
-  image: redis
-  script:
-  - redis-cli -h redis PING
+#connect:
+#  image: redis
+#  script:
+#  - redis-cli -h redis PING
 
 before_script:
   - "dotnet restore $solution"
@@ -23,7 +23,7 @@ build:
   script:
     - "dotnet build $solution"
 
-tests:
-  stage: test
-  script:
-    - "dotnet test $solution"  
+#tests:
+#  stage: test
+#  script:
+#    - "dotnet test $solution"  
