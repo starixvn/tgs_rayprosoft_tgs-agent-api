@@ -53,6 +53,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestsCommon", "Tests\TestsC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice", "Apis\BackendOffice\BackendOffice.csproj", "{F314D974-6D5E-4CE6-9FB2-9DBCE74765B6}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C67967CB-D962-4C3D-AA6C-203B0CBCC233}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,10 @@ Global
 		{F314D974-6D5E-4CE6-9FB2-9DBCE74765B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F314D974-6D5E-4CE6-9FB2-9DBCE74765B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F314D974-6D5E-4CE6-9FB2-9DBCE74765B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C67967CB-D962-4C3D-AA6C-203B0CBCC233}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C67967CB-D962-4C3D-AA6C-203B0CBCC233}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C67967CB-D962-4C3D-AA6C-203B0CBCC233}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C67967CB-D962-4C3D-AA6C-203B0CBCC233}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

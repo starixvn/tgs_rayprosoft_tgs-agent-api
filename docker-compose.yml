@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  backendoffice:
+    image: ${DOCKER_REGISTRY-}backendoffice
+    build:
+      context: .
+      dockerfile: Apis/BackendOffice/Dockerfile
+
+  tgsapi:
+    image: ${DOCKER_REGISTRY-}tgsapi
+    build:
+      context: .
+      dockerfile: Apis/TgsApi/Dockerfile
+
+
+  logapi:
+    image: ${DOCKER_REGISTRY-}logapi
+    build:
+      context: .
+      dockerfile: Apis/LogApi/Dockerfile
+
