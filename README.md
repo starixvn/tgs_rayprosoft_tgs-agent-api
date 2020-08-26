@@ -31,7 +31,7 @@ docker run -d -p 4222:4222 -p 8222:8222 --name nats nats
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' comtainer_name
 
 
-#Install argo 
+##Install argo 
 
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
