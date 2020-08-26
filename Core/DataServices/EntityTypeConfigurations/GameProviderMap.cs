@@ -23,13 +23,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(p => p.SettleBetTimeout)
                 .HasColumnType("int");
 
-            builder.HasMany(p => p.Games)
-                .WithOne(p => p.GameProvider)
-                .HasForeignKey(p => p.GameProviderId);
-
             builder.HasMany(p => p.BrandGameProviderConfigurations)
-                .WithOne(g => g.GameProvider)
-                .HasForeignKey(g => g.GameProviderId);
+                .WithOne(p => p.GameProvider)
+                .HasForeignKey(bgpc => bgpc.GameProviderId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

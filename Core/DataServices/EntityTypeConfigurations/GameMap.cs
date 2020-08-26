@@ -34,6 +34,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.PlatformType)
                 .HasColumnType("smallint")
                 .IsRequired();
+            
+            builder.HasOne(p => p.GameProvider)
+                .WithMany(p => p.Games)
+                .HasForeignKey(p => p.GameProviderId);
         }
     }
 }

@@ -169,8 +169,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("DefaultLanguageCultureCode");
 
-                    b.HasIndex("GameProviderConfigurationId");
-
                     b.HasIndex("GameProviderId");
 
                     b.ToTable("BrandGameProviderConfigurations","dbo");
@@ -880,23 +878,23 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.Brand", "Brand")
                         .WithMany("BrandGameProviderConfigurations")
                         .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Language", "DefaultLanguage")
                         .WithMany()
                         .HasForeignKey("DefaultLanguageCultureCode");
 
-                    b.HasOne("TGS.Core.DataServices.Models.GameProviderConfiguration", "GameProviderConfiguration")
-                        .WithMany()
-                        .HasForeignKey("GameProviderConfigurationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
                         .WithMany("BrandGameProviderConfigurations")
                         .HasForeignKey("GameProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.GameProviderConfiguration", "GameProviderConfiguration")
+                        .WithMany("BrandGameProviderConfigurations")
+                        .HasForeignKey("GameProviderId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
