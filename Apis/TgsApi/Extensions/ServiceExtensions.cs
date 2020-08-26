@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Bet;
 using TGS.Infrastructures.Redis;
-using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.TgsApi.Extensions
 {

@@ -3,7 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
-using TGS.Services.Operations.Extensions;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Services.Operations.Queries
 {

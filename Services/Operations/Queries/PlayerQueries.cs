@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Services.Caches;
-using TGS.Services.Operations.Extensions;
 
 namespace TGS.Services.Operations.Queries
 {

@@ -7,8 +7,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Extensions;
-using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {

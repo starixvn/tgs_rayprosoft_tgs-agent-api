@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using TGS.Core.DataServices;
-using TGS.Services.Operations.Extensions;
 using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations

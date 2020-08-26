@@ -9,8 +9,8 @@ using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Security;
-using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.BackendOffice
 {

@@ -14,12 +14,12 @@ using TGS.Apis.LogApi.Filters;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Log.Events;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
 using TGS.Infrastructures.Unity;
-using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.LogApi
 {
