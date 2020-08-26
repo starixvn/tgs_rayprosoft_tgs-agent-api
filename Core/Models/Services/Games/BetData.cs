@@ -2,16 +2,15 @@
 
 namespace TGS.Core.Models.Services.Games
 {
-    public class BetData
+    public record BetData
     {
-        public Guid GameProviderConfigurationId { get; set; }
-        public Guid GameProviderId { get; set; }
-        public string GameProviderCode { get; set; }
-        public bool AutoCloseRound { get; set; }
-        public TransactionData[] Transactions { get; set; }
-        public bool HasCurrencyFromGameProvider { get; set; } = true;
-        public bool DeferProxyWalletRequest { get; set; }
-        public bool ForceGetPreviousActions { get; set; } = false;
+        public Guid GameProviderConfigurationId { get; init; }
+        public Guid GameProviderId { get; init; }
+        public string GameProviderCode { get; init; }
+        public bool AutoCloseRound { get; init; }
+        public TransactionData[] Transactions { get; init; }
+        public bool HasCurrencyFromGameProvider { get; init; } = true;
+        public bool ForceGetPreviousActions { get; init; } = false;
         //public Guid? PlaceBetGameActionId { get; set; }
         //public decimal? UnlockAmount { get; set; }
         //public bool AllowDuplicateTransactionIdAtDifferentRound { get; set; }

@@ -9,8 +9,6 @@ namespace TGS.Core.Models.Services.Caches
         public string PlayerCode { get; set; }
         public Guid BrandId { get; set; }
         public string BrandCode { get; set; }
-        public Guid? BrandProxyWalletConfigurationId { get; set; }
-        public bool HasProxyWallet => BrandProxyWalletConfigurationId.HasValue;
         public PlayerStatus Status { get; set; }
         public string Username { get; set; }
         public string ExternalId { get; set; }
