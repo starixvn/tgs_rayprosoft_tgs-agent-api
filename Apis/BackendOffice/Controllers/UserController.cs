@@ -27,17 +27,17 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
-        private readonly IAntiforgery _antiforgery;
+        private readonly IAntiforgery _antiForgery;
         private readonly IUserQueries _userQueries;
         public UserController(
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
-            IAntiforgery antiforgery,
+            IAntiforgery antiForgery,
             IUserQueries userQueries)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
-            _antiforgery = antiforgery;
+            _antiForgery = antiForgery;
             _userQueries = userQueries;
         }
 
@@ -88,7 +88,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private void SetCsrfToken()
         {
-            var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+            var tokens = _antiForgery.GetAndStoreTokens(HttpContext);
             Response.Cookies.Append(
                 Consts.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
