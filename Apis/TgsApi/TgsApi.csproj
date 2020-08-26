@@ -4,7 +4,6 @@
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>TGS.Apis.TgsApi</AssemblyName>
     <RootNamespace>TGS.Apis.TgsApi</RootNamespace>
-    <Nullable>enable</Nullable>
     <UserSecretsId>8becd8f5-1a79-4b6e-87c1-63da6719254c</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
