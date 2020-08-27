@@ -3,8 +3,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.DataService;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -13,16 +13,10 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class StatusController : ControllerBase
     {
-        //private readonly IBackendOfficeRepository _repository;
-        //public StatusController(IBackendOfficeRepository repository)
-        //{
-        //    _repository = repository;
-        //}
-
-        private readonly IConfiguration _configuration;
-        public StatusController(IConfiguration configuration)
+        private readonly IBackendOfficeRepository _repository;
+        public StatusController(IBackendOfficeRepository repository)
         {
-            _configuration = configuration;
+            _repository = repository;
         }
 
         [HttpGet]
@@ -38,8 +32,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
-                //CanConnectBackendOfficeDb = await _repository.CanConnectionAsync(),
-                BackendOfficeDatabaseConnectionString = _configuration.GetConnectionString("BackendOffice")
+                CanConnectBackendOfficeDb = await _repository.CanConnectionAsync(),
+                BackendOfficeDatabaseConnectionString = _repository.GetDbConnection().ConnectionString
             };
         }
     }

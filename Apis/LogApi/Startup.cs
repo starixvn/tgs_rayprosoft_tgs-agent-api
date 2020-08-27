@@ -41,7 +41,7 @@ namespace TGS.Apis.LogApi
             services.AddNats(Configuration);
             services.AddTgsLog();
             services.AddTransient<Action<LogBusEvent>>();
-            //services.AddScoped<ITgsLog, TgsLog>();
+            services.AddScoped<ITgsLog, TgsLog>();
 
             services.AddScoped<IMessagePackProvider, MessagePackProvider>();
             services.AddScoped<IMessageHandler, NatsMessageHandler>();
