@@ -5,6 +5,8 @@
         Player,
         Brand,
         Currencies,
-        Languages
+        Languages,
+        GameProvider,
+        GameProviderIdByCode,
     }
 }

@@ -17,6 +17,10 @@ namespace TGS.Services.Operations
         Task<string> GetBrandCodeByBrandIdAsync(Guid brandId);
 
         Task<Status?> GetBrandStatusByBrandIdAsync(Guid brandId);
+
+        Task<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
+
+        Task<Guid?> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -164,7 +168,7 @@ namespace TGS.Services.Operations
                     new HashEntry(CachedBrandFields.LoginUrl,r.LoginUrl ?? string.Empty),
                     new HashEntry(CachedBrandFields.MobileTermsUrl,r.MobileTermsUrl??string.Empty),
                     new HashEntry(CachedBrandFields.MobileCashierUrl,r.MobileCashierUrl??string.Empty),
-                    new HashEntry( CachedBrandFields.MobileHelpUrl,r.MobileHelpUrl??string.Empty),
+                    new HashEntry(CachedBrandFields.MobileHelpUrl,r.MobileHelpUrl??string.Empty),
                     new HashEntry(CachedBrandFields.MobileLoginUrl,r.MobileLoginUrl??string.Empty),
                 };
 
@@ -174,6 +178,16 @@ namespace TGS.Services.Operations
             {
                 //_log.LogError($"Failed to cache player for playerId: {playerCode}", e);
             }
+        }
+
+        Task<Guid?> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<CachedBrandGameProviderConfiguration> IBrandOperations.GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
+        {
+            throw new NotImplementedException();
         }
 
         private static class CachedBrandFields

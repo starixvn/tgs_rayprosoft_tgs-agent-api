@@ -77,5 +77,20 @@ namespace Tgs.UnitTests.Operations
 
             action.Should().NotThrow();
         }
+
+        [Test]
+        public void ThrowIfPlayerStatusIsDisabled_Throws_PlayerDisabledException()
+        {
+            var disabled = PlayerStatus.Disabled;
+            Action action = () => _statusValidator.ThrowIfPlayerDisabled(disabled);
+            action.Should().Throw<PlayerDisabledException>().And.DisabledStatus.Should().Be(disabled);
+        }
+
+        [Test]
+        public void ThrowIfPlayerStatusIsDisabled_Not_Throws_When_Ok()
+        {
+            Action action = () => _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
+            action.Should().NotThrow();
+        }
     }
 }

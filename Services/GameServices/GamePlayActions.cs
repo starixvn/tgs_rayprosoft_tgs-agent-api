@@ -29,15 +29,21 @@ namespace TGS.Services.GameServices
         private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IBrandOperations _brandOperations;
+        private readonly IStatusValidator _statusValidator;
 
         public GamePlayActions(
             IPlayerOperations playerOperations,
+            IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
-            IGameProviderCurrencyCodeMapper currencyMapper)
+            IGameProviderCurrencyCodeMapper currencyMapper,
+            IStatusValidator statusValidator)
         {
             _playerOperations = playerOperations;
+            _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _currencyMapper = currencyMapper;
+            _statusValidator = statusValidator;
         }
 
         Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
@@ -77,12 +83,15 @@ namespace TGS.Services.GameServices
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             var status = ValidStatuses.GetStatus(player.Type);
 
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(player.BrandId, status);
+
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
+            var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+            //await _statusValidator.ThrowIfGameProviderStatusIsNotOneOfAsync(data.GameProviderCode, status);
+
+            _statusValidator.ThrowIfPlayerDisabled(player.Status);
+
             return new PlayerValidationResult();
         }
-
-        #region Private Method
-        
-
-        #endregion
     }
 }
