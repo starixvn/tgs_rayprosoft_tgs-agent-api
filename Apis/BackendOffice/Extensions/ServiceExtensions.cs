@@ -7,10 +7,6 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Apis.BackendOffice.DataService;
-using TGS.Apis.BackendOffice.DataService.DataInitializers;
-using TGS.Apis.BackendOffice.DataService.Queries;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models;
 using TGS.Infrastructures.Security;
 
@@ -20,12 +16,12 @@ namespace TGS.Apis.BackendOffice.Extensions
     {
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
+            //services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
 
-            services.AddScoped<IDataInitializer, DataInitializer>();
+            //services.AddScoped<IDataInitializer, DataInitializer>();
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
-            services.AddScoped<IUserQueries, UserQueries>();
+            //services.AddScoped<IUserQueries, UserQueries>();
 
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
             services.AddControllers();

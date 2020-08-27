@@ -4,8 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.BackendOffice.Extensions;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -41,7 +39,7 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapControllers();
             });
 
-            app.SeedData();
+            //app.SeedData();
         }
     }
 }
