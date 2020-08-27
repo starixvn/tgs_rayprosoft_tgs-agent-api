@@ -16,14 +16,12 @@ using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Events;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
-using TGS.Infrastructures.Unity;
 
 namespace TGS.Apis.LogApi
 {
-    public class Startup : BaseWorkersStartup
+    public class Startup
     {
         public Startup(IConfiguration configuration)
         {
@@ -32,39 +30,29 @@ namespace TGS.Apis.LogApi
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public override void CustomConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
             services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
             services.AddRedis();
             services.AddNats(Configuration);
             services.AddTgsLog();
-            services.AddTransient<Action<LogBusEvent>>();
-            services.AddScoped<ITgsLog, TgsLog>();
 
             services.AddScoped<IMessagePackProvider, MessagePackProvider>();
             services.AddScoped<IMessageHandler, NatsMessageHandler>();
 
-            services.AddTransient<ILoggerWriter>();
-            services.AddTransient<ApiLogWriter>();
-            services.AddTransient<LogRecordWriter>();
+            services.AddScoped<ApiLogWriter>();
+            services.AddScoped<LogRecordWriter>();
 
             services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
             {
-                switch (key)
+                return key switch
                 {
-                    case "ApiLogEvent":
-                        return serviceProvider.GetService<ApiLogWriter>();
-                    case "LogRecordEvent":
-                        return serviceProvider.GetService<LogRecordWriter>();
-                    default:
-                        throw new KeyNotFoundException(); // or maybe return null, up to you
-                }
+                    "ApiLogEvent" => serviceProvider.GetService<ApiLogWriter>(),
+                    "LogRecordEvent" => serviceProvider.GetService<LogRecordWriter>(),
+                    _ => throw new KeyNotFoundException()
+                };
             });
-
-
-            //services.AddLogging();
 
             services.AddControllers(options =>
                     options.Filters.Add(new HttpResponseExceptionFilter()))
@@ -92,20 +80,28 @@ namespace TGS.Apis.LogApi
             });
         }
 
-        protected override void OnApplicationStarted(IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostApplicationLifetime appLifetime)
         {
-            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
+            appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
+            appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
+        }
+
+        protected void OnApplicationStarted(IServiceProvider serviceProvider)
+        {
+            var scope = serviceProvider.CreateScope();
+            var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StartReceiveMessages();
         }
 
-        protected override void OnApplicationStopped(IServiceProvider serviceProvider)
+        protected void OnApplicationStopped(IServiceProvider serviceProvider)
         {
-            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
+            var scope = serviceProvider.CreateScope();
+            var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StopReceiveMessages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public override void ConfigureApp(IApplicationBuilder app, IWebHostEnvironment env)
+        public void ConfigureApp(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
