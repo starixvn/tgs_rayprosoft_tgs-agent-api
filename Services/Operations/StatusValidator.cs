@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Infrastructures.Redis;
 
 namespace TGS.Services.Operations
@@ -10,48 +12,37 @@ namespace TGS.Services.Operations
         Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] status);
 
         Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderConfigurationId, params Status[] status);
-
     }
 
     public sealed class StatusValidator : IStatusValidator
     {
-        private static readonly TimeSpan CacheFor = TimeSpan.MaxValue;
+        private readonly IBrandOperations _brandOperations;
 
-        private readonly IRedisCacheManager _cacheManager;
-
-        public StatusValidator(IRedisCacheManager cacheManager)
+        public StatusValidator(IBrandOperations brandOperations)
         {
-            _cacheManager = cacheManager;
+            _brandOperations = brandOperations;
         }
 
         async Task IStatusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] status)
         {
             EnsureStatus(status);
 
-            //var cachedBrand = await _cacheManager.SafeGetAndCacheAsync(
-            //    RedisCacheType.Brand,
-            //    brandId,
-            //    CacheFor,
-            //    () =>
-            //    {
-            //        var bq = _brandQueriesFactory();
-            //        return bq.GetBrandAndLicenseeStatusesByIdAsync(brandId);
-            //    });
+            var brandStatus = await _brandOperations.GetBrandStatusByBrandIdAsync(brandId);
 
-            //if (currentStatus == null)
-            //{
-            //    throw new InvalidStatusException($"{Const.Brand} doesn't exist");
-            //}
+            if (brandStatus == null)
+            {
+                throw new InvalidStatusException($"Brand doesn't exist");
+            }
 
-            //if (!status.Contains(UgsStatus.Maintenance) && currentStatus.BrandStatus == UgsStatus.Maintenance)
-            //{
-            //    throw new BrandUnderMaintenanceException();
-            //}
+            if (!status.Contains(Status.Maintenance) && brandStatus == Status.Maintenance)
+            {
+                throw new BrandUnderMaintenanceException();
+            }
 
-            //if (!status.Contains(currentStatus.BrandStatus) || !status.Contains(currentStatus.LicenseeStatus))
-            //{
-            //    throw new InvalidStatusException($"{Const.Brand} doesn't exist or is not active");
-            //}
+            if (!status.Contains(brandStatus.Value))
+            {
+                throw new InvalidStatusException($"Brand doesn't exist or is not active");
+            }
         }
 
         Task IStatusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderConfigurationId, params Status[] status)

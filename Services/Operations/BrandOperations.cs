@@ -14,7 +14,9 @@ namespace TGS.Services.Operations
     {
         Task<CachedBrand> GetCachedBrandAsync(Guid brandId);
 
-        Task<Status> GetBrandStatusByBrandIdAsync(Guid brandId);
+        Task<string> GetBrandCodeByBrandIdAsync(Guid brandId);
+
+        Task<Status?> GetBrandStatusByBrandIdAsync(Guid brandId);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -69,10 +71,28 @@ namespace TGS.Services.Operations
             };
         }
 
-        async Task<Status> IBrandOperations.GetBrandStatusByBrandIdAsync(Guid brandId)
+        async Task<string> IBrandOperations.GetBrandCodeByBrandIdAsync(Guid brandId)
         {
+            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.BrandCode);
+            if (value.HasValue)
+            {
+                return value;
+            }
+
             var cachedBrand = await _interface.GetCachedBrandAsync(brandId);
-            return cachedBrand.Status;
+            return cachedBrand?.Code;
+        }
+
+        async Task<Status?> IBrandOperations.GetBrandStatusByBrandIdAsync(Guid brandId)
+        {
+            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.Status);
+            if (value.HasValue)
+            {
+                return (Status)(int)value;
+            }
+
+            var cachedBrand = await _interface.GetCachedBrandAsync(brandId);
+            return cachedBrand?.Status;
         }
 
         private async Task<CachedBrand> GetCachedBrandOrNullAsync(Guid brandId)

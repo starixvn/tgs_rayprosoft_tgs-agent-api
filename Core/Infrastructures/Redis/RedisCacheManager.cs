@@ -8,6 +8,7 @@ using StackExchange.Redis;
 using TGS.Infrastructures.Json;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
+
 namespace TGS.Infrastructures.Redis
 {
     public sealed class RedisCacheManager : IRedisCacheManager
@@ -203,6 +204,16 @@ namespace TGS.Infrastructures.Redis
             return db.HashGetAsync(cacheKey, hashFields, flags);
         }
 
+        Task<RedisValue> IRedisCacheManager.GetHashSetAsync(object cacheType, object key, RedisValue hashField,
+            bool fireAndForget)
+        {
+            var cacheKey = FormCacheKey(cacheType, key);
+            var db = _repository.GetDb();
+
+            var flags = GetCommandFlags(fireAndForget);
+            return db.HashGetAsync(cacheKey, hashField, flags);
+        }
+
         private static CommandFlags GetCommandFlags(bool fireAndForget)
         {
             return fireAndForget ? CommandFlags.FireAndForget : CommandFlags.None;
@@ -259,6 +270,6 @@ namespace TGS.Infrastructures.Redis
             return db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
         }
 
-        #endregion
+        #endregion Internal Methods
     }
 }

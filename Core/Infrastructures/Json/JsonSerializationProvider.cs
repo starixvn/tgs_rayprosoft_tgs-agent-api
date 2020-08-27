@@ -18,7 +18,7 @@ namespace TGS.Infrastructures.Json
 
         string IJsonSerializationProvider.SerializeToString<T>(T obj, JsonSerializerOptions options)
         {
-            return JsonSerializer.Serialize<T>(obj, options);
+            return JsonSerializer.Serialize(obj, options);
         }
     }
 }
