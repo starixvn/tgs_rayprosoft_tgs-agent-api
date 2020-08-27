@@ -23,12 +23,13 @@ export const useLogin = () => {
   let DefaultRedirectState = { from: { pathname: "/" } }
   let { from } = location.state ?? DefaultRedirectState
 
-  return ({ username, password }) =>
-    fetch("api/status", {
+  return (data = {}) =>
+    fetch("api/users/auth", {
+      method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Host: "backoffice"
-      }
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
     })
       .then((response) => {
         if (!response.ok) {
