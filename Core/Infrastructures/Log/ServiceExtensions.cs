@@ -15,8 +15,6 @@ namespace TGS.Infrastructures.Log
             services.AddTransient<LogRecordEvent>();
             services.AddTransient<LogBusEvent>(sp => new ApiLogEvent());
             services.AddTransient<LogBusEvent>(sp => new LogRecordEvent());
-            services.AddTransient<Action<LogBusEvent>>();
-            services.AddSingleton(provider => new Func<LogBusEvent>(provider.GetService<LogBusEvent>));
             services.AddTransient(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
             services.AddScoped<ITgsLog, TgsLog>();
 

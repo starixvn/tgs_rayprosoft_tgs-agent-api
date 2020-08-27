@@ -39,7 +39,7 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapControllers();
             });
 
-            //app.SeedData();
+            app.SeedData();
         }
     }
 }
