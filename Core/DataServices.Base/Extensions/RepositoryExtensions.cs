@@ -1,8 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,13 +36,13 @@ namespace TGS.Core.DataServices.Base.Extensions
                 var options = (DbContextOptions<TRepository>)option.Options;
                 using var db = (DbContext)Activator.CreateInstance(typeof(TRepository), options);
 
-                var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                                db.Database.GetPendingMigrations().Any();
+                //var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                //                db.Database.GetPendingMigrations().Any();
 
-                if (isMigrate)
-                {
-                    db.Database.Migrate();
-                }
+                //if (isMigrate)
+                //{
+                //    db.Database.Migrate();
+                //}
             }, 128);
 
             services.AddScoped<TInterface, TRepository>();
