@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
 {

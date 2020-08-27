@@ -3,6 +3,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using StackExchange.Redis;
 using TGS.Infrastructures.Redis;
+using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
 {
