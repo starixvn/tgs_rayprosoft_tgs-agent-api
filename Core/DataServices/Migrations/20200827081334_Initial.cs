@@ -756,6 +756,8 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Wallet_GetBalance.sql");
             migrationBuilder.SqlResource(assembly,
                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+               "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGameProviderConfigurationForCache.sql");
 
             #endregion Store Procedure
         }

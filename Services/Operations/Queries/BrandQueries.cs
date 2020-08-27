@@ -11,6 +11,8 @@ namespace TGS.Services.Operations.Queries
     public interface IBrandQueries
     {
         Task<GetCachedBrandResult> GetCachedBrandAsync(Guid brandId);
+
+        Task<GetCachedBrandGameProviderConfigurationResult> GetCachedBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
     }
 
     public sealed class BrandQueries : IBrandQueries
@@ -30,6 +32,27 @@ namespace TGS.Services.Operations.Queries
                 ParameterName = "@brandId",
                 Value = brandId,
                 DbType = DbType.Guid
+            });
+        }
+
+        Task<GetCachedBrandGameProviderConfigurationResult> IBrandQueries.GetCachedBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
+        {
+            const string spName = "usp_Brand_GetBrandGameProviderConfigurationForCache";
+            return _repository.SqlQuerySingleAsync<GetCachedBrandGameProviderConfigurationResult>(spName, parameters:
+            new SqlParameter[]
+            {
+                new()
+                {
+                    ParameterName = "@brandId",
+                    Value = brandId,
+                    DbType = DbType.Guid
+                },
+                new()
+                {
+                    ParameterName = "@gameProviderId",
+                    Value = gameProviderId,
+                    DbType = DbType.Guid
+                }
             });
         }
     }

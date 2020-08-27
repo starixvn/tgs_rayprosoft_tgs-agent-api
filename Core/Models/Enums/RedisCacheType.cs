@@ -8,5 +8,6 @@
         Languages,
         GameProvider,
         GameProviderIdByCode,
+        BrandGameProviderConfiguration
     }
 }

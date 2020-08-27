@@ -5,6 +5,7 @@ using StackExchange.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
 
@@ -27,14 +28,17 @@ namespace TGS.Services.Operations
     {
         private readonly IRedisCacheManager _cacheManager;
         private readonly Func<IBrandQueries> _brandQueriesFactory;
+        private readonly IJsonSerializationProvider _json;
         private readonly IBrandOperations _interface;
 
         public BrandOperations(
             IRedisCacheManager cacheManager,
-            Func<IBrandQueries> brandQueriesFactory)
+            Func<IBrandQueries> brandQueriesFactory,
+            IJsonSerializationProvider json)
         {
             _cacheManager = cacheManager;
             _brandQueriesFactory = brandQueriesFactory;
+            _json = json;
             _interface = this;
         }
 
@@ -99,6 +103,48 @@ namespace TGS.Services.Operations
             return cachedBrand?.Status;
         }
 
+        async Task<Guid?> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+        {
+            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
+            var bgpc = value.HasValue ?
+                 _json.DeserializeFromString<CachedBrandGameProviderConfiguration>(value) :
+                 await _interface.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+            return bgpc?.GameProviderConfigurationId;
+        }
+
+        async Task<CachedBrandGameProviderConfiguration> IBrandOperations.GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
+        {
+            var bgpc = await GetCachedBrandGameProviderConfigurationOrNullAsync(brandId, gameProviderId);
+            if (bgpc != null)
+            {
+                return bgpc;
+            }
+
+            var r = await _brandQueriesFactory().GetCachedBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+            if (r == null)
+            {
+                throw new InvalidOperationException($"BrandGameProviderConfiguration doesn't exist with brandId: {brandId} and gameProviderId: {gameProviderId}");
+            }
+
+            bgpc = new CachedBrandGameProviderConfiguration
+            {
+                GameProviderId = gameProviderId,
+                GameProviderConfigurationId = r.GameProviderConfigurationId,
+                DefaultLanguageCode = r.DefaultLanguageCode,
+                BrandLogoUrl = r.BrandLogoUrl,
+                QueryStrings = new QueryString
+                {
+                    Desktop = r.DesktopQueryString,
+                    Mobile = r.MobileQueryString
+                }
+            };
+
+            await CacheBrandGameProviderConfigurationAsync(brandId, gameProviderId, bgpc);
+
+            return bgpc;
+        }
+
         private async Task<CachedBrand> GetCachedBrandOrNullAsync(Guid brandId)
         {
             try
@@ -155,21 +201,21 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var fields = new[]
+                var fields = new HashEntry[]
                 {
-                    new HashEntry(CachedBrandFields.BrandCode, r.Code),
-                    new HashEntry(CachedBrandFields.TimeZoneId, r.TimeZoneId.ToString()),
-                    new HashEntry(CachedBrandFields.Status, (int)r.Status),
-                    new HashEntry(CachedBrandFields.ResellerId, r.ResellerId.ToString()),
-                    new HashEntry(CachedBrandFields.ResellerCode,r.ResellerCode),
-                    new HashEntry(CachedBrandFields.TermsUrl,r.TermsUrl ?? string.Empty),
-                    new HashEntry(CachedBrandFields.CashierUrl,r.CashierUrl ?? string.Empty),
-                    new HashEntry(CachedBrandFields.HelpUrl,r.HelpUrl??string.Empty),
-                    new HashEntry(CachedBrandFields.LoginUrl,r.LoginUrl ?? string.Empty),
-                    new HashEntry(CachedBrandFields.MobileTermsUrl,r.MobileTermsUrl??string.Empty),
-                    new HashEntry(CachedBrandFields.MobileCashierUrl,r.MobileCashierUrl??string.Empty),
-                    new HashEntry(CachedBrandFields.MobileHelpUrl,r.MobileHelpUrl??string.Empty),
-                    new HashEntry(CachedBrandFields.MobileLoginUrl,r.MobileLoginUrl??string.Empty),
+                    new (CachedBrandFields.BrandCode, r.Code),
+                    new (CachedBrandFields.TimeZoneId, r.TimeZoneId.ToString()),
+                    new (CachedBrandFields.Status, (int)r.Status),
+                    new (CachedBrandFields.ResellerId, r.ResellerId.ToString()),
+                    new (CachedBrandFields.ResellerCode,r.ResellerCode),
+                    new (CachedBrandFields.TermsUrl,r.TermsUrl ?? string.Empty),
+                    new (CachedBrandFields.CashierUrl,r.CashierUrl ?? string.Empty),
+                    new (CachedBrandFields.HelpUrl,r.HelpUrl??string.Empty),
+                    new (CachedBrandFields.LoginUrl,r.LoginUrl ?? string.Empty),
+                    new (CachedBrandFields.MobileTermsUrl,r.MobileTermsUrl??string.Empty),
+                    new (CachedBrandFields.MobileCashierUrl,r.MobileCashierUrl??string.Empty),
+                    new (CachedBrandFields.MobileHelpUrl,r.MobileHelpUrl??string.Empty),
+                    new (CachedBrandFields.MobileLoginUrl,r.MobileLoginUrl??string.Empty),
                 };
 
                 await _cacheManager.CacheHashSetAsync(RedisCacheType.Brand, brandId, fields, TimeSpan.FromHours(2), true);
@@ -180,14 +226,40 @@ namespace TGS.Services.Operations
             }
         }
 
-        Task<Guid?> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+        private async Task<CachedBrandGameProviderConfiguration> GetCachedBrandGameProviderConfigurationOrNullAsync(Guid brandId, Guid gameProviderId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var data = await _cacheManager.GetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
+
+                if (data.HasValue)
+                {
+                    return _json.DeserializeFromString<CachedBrandGameProviderConfiguration>(data);
+                }
+            }
+            catch (Exception e)
+            {
+                //_log.LogError($"Failed to get cached player for player code: {playerCode}", e);
+            }
+
+            return null;
         }
 
-        Task<CachedBrandGameProviderConfiguration> IBrandOperations.GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
+        private async Task CacheBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId, CachedBrandGameProviderConfiguration bgpc)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var fields = new HashEntry[]
+                {
+                    new(gameProviderId.ToString(), _json.SerializeToString(bgpc))
+                };
+
+                await _cacheManager.CacheHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, fields, TimeSpan.FromHours(2), true);
+            }
+            catch (Exception e)
+            {
+                //_log.LogError($"Failed to cache player for playerId: {playerCode}", e);
+            }
         }
 
         private static class CachedBrandFields
