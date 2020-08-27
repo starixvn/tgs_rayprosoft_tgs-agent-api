@@ -1,22 +1,29 @@
-version: '3.4'
+version: "3.8"
 
 services:
-  backendoffice:
-    image: ${DOCKER_REGISTRY-}backendoffice
+  backoffice-api:
     build:
       context: .
-      dockerfile: Apis/BackendOffice/Dockerfile
+      dockerfile: Dockerfile.BackofficeApi
+    image: backoffice-api
+    ports:
+      - 32667:80
+    networks:
+      tgs:
+    depends_on:
+      - sqlserver
 
-  tgsapi:
-    image: ${DOCKER_REGISTRY-}tgsapi
-    build:
-      context: .
-      dockerfile: Apis/TgsApi/Dockerfile
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-CU5-ubuntu-18.04
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "1qaz2wsx!@"
+      ACCEPT_EULA: "Y"
+    ports:
+      - 1433:1433
+    networks:
+      tgs:
 
-
-  logapi:
-    image: ${DOCKER_REGISTRY-}logapi
-    build:
-      context: .
-      dockerfile: Apis/LogApi/Dockerfile
-
+networks:
+  tgs:
+    driver: bridge
