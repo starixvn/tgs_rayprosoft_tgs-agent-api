@@ -83,7 +83,6 @@ namespace TGS.Apis.LogApi.DataService
 
         async Task ILogRepository.AddLogRecordAsync(LogRecord log)
         {
-
             await LogRecords.AddAsync(log);
             await SaveChangesAsync();
         }
