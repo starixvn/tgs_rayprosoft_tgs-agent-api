@@ -15,11 +15,20 @@ namespace Tgs.UnitTests.Operations
     {
         private IStatusValidator _statusValidator;
         private IBrandOperations _brandOperations;
+        private IGameProviderOperations _gameProviderOperations;
 
         protected override void InitializeBeforeEachTest()
         {
             _brandOperations = Substitute.For<IBrandOperations>();
-            _statusValidator = new StatusValidator(_brandOperations);
+            _gameProviderOperations = Substitute.For<IGameProviderOperations>();
+            _statusValidator = new StatusValidator(_brandOperations, _gameProviderOperations);
+        }
+
+        [Test]
+        public void ThrowIfBrandStatusIsNotOneOfAsync_Ensures_Status()
+        {
+            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid.NewGuid(), new Status[0]);
+            action.Should().Throw<ArgumentException>().WithMessage("No status provided");
         }
 
         [Test]
@@ -92,5 +101,20 @@ namespace Tgs.UnitTests.Operations
             Action action = () => _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
             action.Should().NotThrow();
         }
+
+        [Test]
+        public void ThrowIfGameProviderConfigurationStatusIsNotOneOfAsync_Ensures_Status()
+        {
+            Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid.NewGuid(), Guid.NewGuid(), new Status[0]);
+            action.Should().Throw<ArgumentException>().WithMessage("No status provided");
+        }
+
+        //[Test]
+        //public void ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync()
+        //{
+        //    var disabled = PlayerStatus.Disabled;
+        //    Action action = () => _statusValidator.ThrowIfPlayerDisabled(disabled);
+        //    action.Should().Throw<PlayerDisabledException>().And.DisabledStatus.Should().Be(disabled);
+        //}
     }
 }

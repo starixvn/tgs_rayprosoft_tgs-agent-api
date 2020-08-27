@@ -11,16 +11,22 @@ namespace TGS.Services.Operations
     {
         Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] status);
 
+        Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameProviderConfigurationId, params Status[] status);
+
         void ThrowIfPlayerDisabled(PlayerStatus playerStatus);
     }
 
     public sealed class StatusValidator : IStatusValidator
     {
         private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
-        public StatusValidator(IBrandOperations brandOperations)
+        public StatusValidator(
+            IBrandOperations brandOperations,
+            IGameProviderOperations gameProviderOperations)
         {
             _brandOperations = brandOperations;
+            _gameProviderOperations = gameProviderOperations;
         }
 
         async Task IStatusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] status)
@@ -45,10 +51,19 @@ namespace TGS.Services.Operations
             }
         }
 
+        Task IStatusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameProviderConfigurationId, params Status[] status)
+        {
+            EnsureStatus(status);
+
+            return Task.CompletedTask;
+        }
+
         void IStatusValidator.ThrowIfPlayerDisabled(PlayerStatus status)
         {
             EnsurePlayerStatus(status, PlayerStatus.Disabled);
         }
+
+        #region Private Methods
 
         private static void EnsureStatus(Status[] status)
         {
@@ -66,5 +81,7 @@ namespace TGS.Services.Operations
                 throw new PlayerDisabledException(playerStatus);
             }
         }
+
+        #endregion Private Methods
     }
 }

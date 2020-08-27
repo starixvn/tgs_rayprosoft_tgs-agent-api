@@ -21,7 +21,7 @@ namespace TGS.Services.Operations
 
         Task<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
 
-        Task<Guid?> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
+        Task<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -103,14 +103,14 @@ namespace TGS.Services.Operations
             return cachedBrand?.Status;
         }
 
-        async Task<Guid?> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+        async Task<Guid> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
         {
             var value = await _cacheManager.GetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
             var bgpc = value.HasValue ?
                  _json.DeserializeFromString<CachedBrandGameProviderConfiguration>(value) :
                  await _interface.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
-            return bgpc?.GameProviderConfigurationId;
+            return bgpc.GameProviderConfigurationId;
         }
 
         async Task<CachedBrandGameProviderConfiguration> IBrandOperations.GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)

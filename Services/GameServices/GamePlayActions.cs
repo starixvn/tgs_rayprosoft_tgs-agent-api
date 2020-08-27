@@ -87,7 +87,7 @@ namespace TGS.Services.GameServices
 
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
             var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
-            //await _statusValidator.ThrowIfGameProviderStatusIsNotOneOfAsync(data.GameProviderCode, status);
+            await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gameProviderId, gameProviderConfigurationId, status);
 
             _statusValidator.ThrowIfPlayerDisabled(player.Status);
 

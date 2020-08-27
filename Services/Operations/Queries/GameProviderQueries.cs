@@ -13,7 +13,9 @@ namespace TGS.Services.Operations.Queries
     public interface IGameProviderQueries
     {
         Task<Guid> GetGameProviderIdByCodeAsync(string gameProviderCode);
+
         Task<Dictionary<string, string>> GetGameProviderCurrenciesByExternalCodeAsync(Guid gameProviderId);
+
         Task<Dictionary<string, string>> GetGameProviderCurrenciesByInternalCodeAsync(Guid gameProviderId);
     }
 
