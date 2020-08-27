@@ -196,3 +196,9 @@ Partners/IceDemoWebsite/Content/css/.sass-cache/*
 *.edmx
 /Web/UgsFrontendWebsite/Content/css/shared/.sass-cache
 *.feature.cs
+
+# Frontend prj
+.build
+build
+web_modules
+node_modules

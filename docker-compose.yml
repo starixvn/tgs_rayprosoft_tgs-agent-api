@@ -1,6 +1,16 @@
 version: "3.8"
 
 services:
+  backoffice-site:
+    build: ./Web/backoffice
+    image: backoffice-site
+    ports:
+      - 80:80
+    networks:
+      tgs:
+    depends_on:
+      - backoffice-api
+
   backoffice-api:
     build:
       context: .
@@ -10,6 +20,8 @@ services:
       - 32667:80
     networks:
       tgs:
+        aliases:
+          - backoffice.api
     depends_on:
       - sqlserver
 
