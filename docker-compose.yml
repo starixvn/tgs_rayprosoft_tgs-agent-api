@@ -1,15 +1,29 @@
 version: "3.8"
 
 services:
+  backoffice-site:
+    build: ./Web/backoffice
+    image: backoffice-site
+    ports:
+      - 80:80
+    networks:
+      tgs:
+    depends_on:
+      - backoffice-api
+
   backoffice-api:
     build:
       context: .
       dockerfile: Dockerfile.BackofficeApi
     image: backoffice-api
+    # For crash debug
+    # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
       - 32667:80
     networks:
       tgs:
+        aliases:
+          - backoffice.api
     depends_on:
       - sqlserver
 

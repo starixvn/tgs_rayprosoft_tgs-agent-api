@@ -1,30 +1,55 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using TGS.Apis.LogApi.Services;
-using TGS.Infrastructures.Unity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
 
 namespace TGS.Apis.LogApi
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            BaseWorkersStartup.CreateHostBuilder<Startup, LogApiFactory>(args)
-                .Build()
-                .Run();
-        }
-
-
         //public static void Main(string[] args)
         //{
-        //    CreateHostBuilder(args).Build().RunAsync();
+        //    BaseWorkersStartup.CreateHostBuilder<Startup, LogApiFactory>(args)
+        //        .Build()
+        //        .Run();
         //}
 
-        //public static IHostBuilder CreateHostBuilder(string[] args) =>
-        //    Host.CreateDefaultBuilder(args)
-        //        .ConfigureWebHostDefaults(webBuilder =>
-        //        {
-        //            webBuilder.UseStartup<Startup>();
-        //        })
-        //;
+        public static Task Main(string[] args)
+        {
+            return CreateHostBuilder(args).Build().RunAsync();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureHostConfiguration((config) =>
+                {
+                    config.AddEnvironmentVariables();
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                })
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
+                    config.AddJsonFile("appsettings.json", false, true);
+                    if (args != null)
+                    {
+                        config.AddCommandLine(args);
+                    }
+                })
+                .ConfigureLogging((hostContext, logging) =>
+                {
+                    logging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
+                    if (hostContext.HostingEnvironment.IsDevelopment())
+                    {
+                        logging.AddConsole();
+                        logging.SetMinimumLevel(LogLevel.Error);
+                    }
+
+                    logging.AddConfiguration();
+                });
     }
 }

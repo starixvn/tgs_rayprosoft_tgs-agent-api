@@ -63,7 +63,9 @@ namespace TGS.Infrastructures.Nats
                 opts.DisconnectedEventHandler += DisconnectedEventHandler;
                 opts.ClosedEventHandler += ClosedEventHandler;
                 opts.AsyncErrorEventHandler += AsyncErrorEventHandler;
-                conn = new ConnectionFactory().CreateConnection(opts);
+
+                var connectionFactory = new ConnectionFactory();
+                conn = connectionFactory.CreateConnection(opts);
                 _state = ConnState.CONNECTED;
                 _logger.LogInformation($"Succeeded to create a NATS connection to {opts.Url}.");
             }
