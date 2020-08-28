@@ -2,7 +2,7 @@
 
 namespace TGS.Core.Models.Services.Caches
 {
-    public class CachedBrandGameProviderConfiguration
+    public record CachedBrandGameProviderConfiguration
     {
         public Guid GameProviderId { get; set; }
         public Guid GameProviderConfigurationId { get; set; }
@@ -11,7 +11,7 @@ namespace TGS.Core.Models.Services.Caches
         public QueryString QueryStrings { get; set; }
     }
 
-    public class QueryString
+    public record QueryString
     {
         public string Desktop { get; set; }
         public string Mobile { get; set; }

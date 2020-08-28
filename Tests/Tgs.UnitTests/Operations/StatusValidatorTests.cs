@@ -109,12 +109,19 @@ namespace Tgs.UnitTests.Operations
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
         }
 
-        //[Test]
-        //public void ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync()
-        //{
-        //    var disabled = PlayerStatus.Disabled;
-        //    Action action = () => _statusValidator.ThrowIfPlayerDisabled(disabled);
-        //    action.Should().Throw<PlayerDisabledException>().And.DisabledStatus.Should().Be(disabled);
-        //}
+        [Test]
+        public void ThrowIfGameProviderConfigurationStatusIsNotOneOfAsync_Throws_Exception_When_Status_Is_Not_One_Of()
+        {
+            var gpId = Guid.NewGuid();
+            var gpcId = Guid.NewGuid();
+
+            _gameProviderOperations.GetGameProviderStatusByIdAsync(gpId)
+                .Returns(Task.FromResult((Status?)Status.Inactive));
+            //_gameProviderOperations.GetGameProviderConfigurationStatusByIdAsync(gpId, gpcId)
+            //    .Returns(Task.FromResult((Status?)Status.Inactive));
+
+            Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
+            action.Should().Throw<InvalidStatusException>();
+        }
     }
 }

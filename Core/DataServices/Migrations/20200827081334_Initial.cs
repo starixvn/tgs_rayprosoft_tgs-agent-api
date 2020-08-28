@@ -758,6 +758,8 @@ namespace TGS.Core.DataServices.Migrations
                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandForCache.sql");
             migrationBuilder.SqlResource(assembly,
                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGameProviderConfigurationForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+               "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderForCache.sql");
 
             #endregion Store Procedure
         }

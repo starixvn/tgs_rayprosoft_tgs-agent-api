@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Generics;
+using TGS.Core.Models.Services.Data;
 
 namespace TGS.Services.Operations.Queries
 {
@@ -17,6 +18,8 @@ namespace TGS.Services.Operations.Queries
         Task<Dictionary<string, string>> GetGameProviderCurrenciesByExternalCodeAsync(Guid gameProviderId);
 
         Task<Dictionary<string, string>> GetGameProviderCurrenciesByInternalCodeAsync(Guid gameProviderId);
+
+        Task<GetCachedGameProviderResult> GetCachedGameProviderAsync(Guid gameProviderId);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -26,20 +29,6 @@ namespace TGS.Services.Operations.Queries
         public GameProviderQueries(ITgsRepository repository)
         {
             _repository = repository;
-        }
-
-        async Task<Dictionary<string, string>> IGameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(
-            Guid gameProviderId)
-        {
-            const string spName = "usp_GameProvider_GetCurrenciesByInternalCode";
-            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@gameProviderId",
-                Value = gameProviderId,
-                DbType = DbType.Guid
-            });
-
-            return r.ToDictionary(m => m.Key, m => m.Value);
         }
 
         Task<Guid> IGameProviderQueries.GetGameProviderIdByCodeAsync(string gameProviderCode)
@@ -65,6 +54,31 @@ namespace TGS.Services.Operations.Queries
             });
 
             return r.ToDictionary(m => m.Key, m => m.Value);
+        }
+
+        async Task<Dictionary<string, string>> IGameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(
+            Guid gameProviderId)
+        {
+            const string spName = "usp_GameProvider_GetCurrenciesByInternalCode";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@gameProviderId",
+                Value = gameProviderId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToDictionary(m => m.Key, m => m.Value);
+        }
+
+        Task<GetCachedGameProviderResult> IGameProviderQueries.GetCachedGameProviderAsync(Guid gameProviderId)
+        {
+            const string spName = "usp_GameProvider_GetGameProviderForCache";
+            return _repository.SqlQuerySingleAsync<GetCachedGameProviderResult>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@gameProviderId",
+                Value = gameProviderId,
+                DbType = DbType.Guid
+            });
         }
     }
 }
