@@ -37,7 +37,7 @@ namespace Tgs.UnitTests.Operations
         public void ThrowIfBrandStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Brand_Status_Is_Null()
         {
             var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusByBrandIdAsync(brandId)
+            _brandOperations.GetBrandStatusAsync(brandId)
                 .Returns(Task.FromResult((Status?)null));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
@@ -51,7 +51,7 @@ namespace Tgs.UnitTests.Operations
         public void ThrowIfBrandStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Brand_Status_Is_Not_One_Of()
         {
             var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusByBrandIdAsync(brandId)
+            _brandOperations.GetBrandStatusAsync(brandId)
                 .Returns(Task.FromResult((Status?)Status.Inactive));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
@@ -65,7 +65,7 @@ namespace Tgs.UnitTests.Operations
         public void ThrowIfBrandStatusIsNotOneOfAsync_Throws_BrandUnderMaintenanceException()
         {
             var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusByBrandIdAsync(brandId)
+            _brandOperations.GetBrandStatusAsync(brandId)
                 .Returns(Task.FromResult((Status?)Status.Maintenance));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
@@ -79,7 +79,7 @@ namespace Tgs.UnitTests.Operations
         public void ThrowIfBrandStatusIsNotOneOfAsync_Not_Throws_When_Ok()
         {
             var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusByBrandIdAsync(brandId)
+            _brandOperations.GetBrandStatusAsync(brandId)
                 .Returns(Task.FromResult((Status?)Status.Active));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(

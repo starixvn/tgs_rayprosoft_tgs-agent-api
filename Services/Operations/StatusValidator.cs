@@ -18,6 +18,7 @@ namespace TGS.Services.Operations
     public sealed class StatusValidator : IStatusValidator
     {
         private readonly IBrandOperations _brandOperations;
+
         private readonly IGameProviderOperations _gameProviderOperations;
 
         public StatusValidator(
@@ -32,7 +33,7 @@ namespace TGS.Services.Operations
         {
             EnsureStatus(status);
 
-            var brandStatus = await _brandOperations.GetBrandStatusByBrandIdAsync(brandId);
+            var brandStatus = await _brandOperations.GetBrandStatusAsync(brandId);
 
             if (brandStatus == null)
             {

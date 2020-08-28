@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
-using TGS.Core.Models.Services.Data;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
@@ -18,7 +16,7 @@ namespace TGS.Services.Operations
 
         Task<string> GetBrandCodeByBrandIdAsync(Guid brandId);
 
-        Task<Status?> GetBrandStatusByBrandIdAsync(Guid brandId);
+        Task<Status?> GetBrandStatusAsync(Guid brandId);
 
         Task<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
 
@@ -28,8 +26,11 @@ namespace TGS.Services.Operations
     public sealed class BrandOperations : IBrandOperations
     {
         private readonly IRedisCacheManager _cacheManager;
+
         private readonly Func<IBrandQueries> _brandQueriesFactory;
+
         private readonly IJsonSerializationProvider _json;
+
         private readonly IBrandOperations _interface;
 
         public BrandOperations(
@@ -57,9 +58,7 @@ namespace TGS.Services.Operations
                 throw new InvalidOperationException($"Brand not found with id: {brandId}");
             }
 
-            await CacheBrandAsync(brandId, r);
-
-            return new CachedBrand
+            cachedBrand = new()
             {
                 Code = r.Code,
                 TimeZoneId = r.TimeZoneId,
@@ -78,6 +77,10 @@ namespace TGS.Services.Operations
                     MobileLogin = r.MobileLoginUrl
                 }
             };
+
+            await CacheBrandAsync(brandId, cachedBrand);
+
+            return cachedBrand;
         }
 
         async Task<string> IBrandOperations.GetBrandCodeByBrandIdAsync(Guid brandId)
@@ -92,7 +95,7 @@ namespace TGS.Services.Operations
             return cachedBrand?.Code;
         }
 
-        async Task<Status?> IBrandOperations.GetBrandStatusByBrandIdAsync(Guid brandId)
+        async Task<Status?> IBrandOperations.GetBrandStatusAsync(Guid brandId)
         {
             var value = await _cacheManager.GetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.Status);
             if (value.HasValue)
@@ -198,25 +201,25 @@ namespace TGS.Services.Operations
             return null;
         }
 
-        private async Task CacheBrandAsync(Guid brandId, GetCachedBrandResult r)
+        private async Task CacheBrandAsync(Guid brandId, CachedBrand brand)
         {
             try
             {
                 var fields = new HashEntry[]
                 {
-                    new (CachedBrandFields.BrandCode, r.Code),
-                    new (CachedBrandFields.TimeZoneId, r.TimeZoneId.ToString()),
-                    new (CachedBrandFields.Status, (int)r.Status),
-                    new (CachedBrandFields.ResellerId, r.ResellerId.ToString()),
-                    new (CachedBrandFields.ResellerCode,r.ResellerCode),
-                    new (CachedBrandFields.TermsUrl,r.TermsUrl ?? string.Empty),
-                    new (CachedBrandFields.CashierUrl,r.CashierUrl ?? string.Empty),
-                    new (CachedBrandFields.HelpUrl,r.HelpUrl??string.Empty),
-                    new (CachedBrandFields.LoginUrl,r.LoginUrl ?? string.Empty),
-                    new (CachedBrandFields.MobileTermsUrl,r.MobileTermsUrl??string.Empty),
-                    new (CachedBrandFields.MobileCashierUrl,r.MobileCashierUrl??string.Empty),
-                    new (CachedBrandFields.MobileHelpUrl,r.MobileHelpUrl??string.Empty),
-                    new (CachedBrandFields.MobileLoginUrl,r.MobileLoginUrl??string.Empty),
+                    new (CachedBrandFields.BrandCode, brand.Code),
+                    new (CachedBrandFields.TimeZoneId, brand.TimeZoneId.ToString()),
+                    new (CachedBrandFields.Status, (int)brand.Status),
+                    new (CachedBrandFields.ResellerId, brand.ResellerId.ToString()),
+                    new (CachedBrandFields.ResellerCode, brand.ResellerCode),
+                    new (CachedBrandFields.TermsUrl, brand.Urls.Terms ?? string.Empty),
+                    new (CachedBrandFields.CashierUrl, brand.Urls.Cashier ?? string.Empty),
+                    new (CachedBrandFields.HelpUrl, brand.Urls.Help??string.Empty),
+                    new (CachedBrandFields.LoginUrl, brand.Urls.Login ?? string.Empty),
+                    new (CachedBrandFields.MobileTermsUrl, brand.Urls.MobileTerms ?? string.Empty),
+                    new (CachedBrandFields.MobileCashierUrl, brand.Urls.MobileCashier ?? string.Empty),
+                    new (CachedBrandFields.MobileHelpUrl, brand.Urls.MobileHelp ?? string.Empty),
+                    new (CachedBrandFields.MobileLoginUrl, brand.Urls.MobileLogin ?? string.Empty)
                 };
 
                 await _cacheManager.CacheHashSetAsync(RedisCacheType.Brand, brandId, fields, TimeSpan.FromHours(2), true);
