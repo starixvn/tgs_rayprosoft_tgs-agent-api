@@ -18,7 +18,7 @@ namespace TGS.Services.Operations
 
         Task<CachedGameProviderConfiguration> GetCachedGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId);
 
-        Task<Status?> GetGameProviderStatusByIdAsync(Guid gameProviderId);
+        Task<Status?> GetGameProviderStatusAsync(Guid gameProviderId);
 
         Task<Status?> GetGameProviderConfigurationStatusAsync(Guid gameProviderId, Guid gameProviderConfigurationId);
     }
@@ -26,8 +26,11 @@ namespace TGS.Services.Operations
     public sealed class GameProviderOperations : IGameProviderOperations
     {
         private readonly IRedisCacheManager _cacheManager;
+
         private readonly Func<IGameProviderQueries> _gameProviderQueriesFactory;
+
         private readonly IJsonSerializationProvider _json;
+
         private readonly IGameProviderOperations _interface;
 
         public GameProviderOperations(
@@ -80,7 +83,7 @@ namespace TGS.Services.Operations
                 throw new InvalidOperationException($"GameProviderConfiguration doesn't exist with gameProviderId: {gameProviderId} and gameProviderConfigurationId: {gameProviderConfigurationId}");
             }
 
-            gpc = new CachedGameProviderConfiguration()
+            gpc = new()
             {
                 Status = r.Status,
                 GameProviderId = gameProviderId,
@@ -112,7 +115,7 @@ namespace TGS.Services.Operations
                 () => _gameProviderQueriesFactory().GetGameProviderIdByCodeAsync(gameProviderCode));
         }
 
-        async Task<Status?> IGameProviderOperations.GetGameProviderStatusByIdAsync(Guid gameProviderId)
+        async Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId)
         {
             var value = await _cacheManager.GetHashSetAsync(RedisCacheType.GameProvider, gameProviderId, CachedGameProviderFields.Status);
             if (value.HasValue)
@@ -174,7 +177,7 @@ namespace TGS.Services.Operations
                     new (CachedGameProviderFields.SupportTestPlayer, gameProvider.SupportTestPlayer),
                     new (CachedGameProviderFields.PlaceBetTimeout, gameProvider.PlaceBetTimeout),
                     new (CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout)
-                  };
+                };
 
                 await _cacheManager.CacheHashSetAsync(RedisCacheType.GameProvider, gameProviderId, fields, TimeSpan.FromHours(2), true);
             }
@@ -223,11 +226,17 @@ namespace TGS.Services.Operations
         private static class CachedGameProviderFields
         {
             public const string GameProviderCode = "gameProviderCode";
+
             public const string Status = "status";
+
             public const string Decription = "description";
+
             public const string AutoClosedRound = "autoClosedRound";
+
             public const string SupportTestPlayer = "supportTestPlayer";
+
             public const string PlaceBetTimeout = "placeBetTimeout";
+
             public const string SettleBetTimeout = "settleBetTimeout";
         }
     }

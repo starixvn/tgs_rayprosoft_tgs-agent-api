@@ -50,11 +50,27 @@ namespace TGS.Services.Operations
             }
         }
 
-        Task IStatusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameProviderConfigurationId, params Status[] status)
+        async Task IStatusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameProviderConfigurationId, params Status[] status)
         {
             EnsureStatus(status);
 
-            return Task.CompletedTask;
+            var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId);
+            var configurationStatus = await _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gameProviderId, gameProviderConfigurationId);
+
+            if (gameProviderStatus == null || configurationStatus == null)
+            {
+                throw new InvalidStatusException("GameProvider or GameProviderConfiguration doesn't exist");
+            }
+
+            if (!status.Contains(Status.Maintenance) && gameProviderStatus == Status.Maintenance || configurationStatus == Status.Maintenance)
+            {
+                throw new GameProviderUnderMaintenanceException();
+            }
+
+            if (!status.Contains(gameProviderStatus.Value) || !status.Contains(configurationStatus.Value))
+            {
+                throw new InvalidStatusException($"GameProvider or GameProviderConfiguration doesn't exist or is not active");
+            }
         }
 
         void IStatusValidator.ThrowIfPlayerDisabled(PlayerStatus status)

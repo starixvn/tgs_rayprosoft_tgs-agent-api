@@ -14,7 +14,9 @@ namespace Tgs.UnitTests.Operations
     public sealed class StatusValidatorTests : NUnitTestsBase
     {
         private IStatusValidator _statusValidator;
+
         private IBrandOperations _brandOperations;
+
         private IGameProviderOperations _gameProviderOperations;
 
         protected override void InitializeBeforeEachTest()
@@ -109,19 +111,52 @@ namespace Tgs.UnitTests.Operations
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
         }
 
+        [TestCase(null, Status.Active)]
+        [TestCase(Status.Active, null)]
+        public void ThrowIfGameProviderConfigurationStatusIsNotOneOfAsync_Throws_Exception_When_Status_Is_Null(Status? gameProviderStatus, Status? gameProviderConfigurationStatus)
+        {
+            var gpId = Guid.NewGuid();
+            var gpcId = Guid.NewGuid();
+
+            _gameProviderOperations.GetGameProviderStatusAsync(gpId)
+                .Returns(Task.FromResult(gameProviderStatus));
+            _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gpId, gpcId)
+                .Returns(Task.FromResult(gameProviderConfigurationStatus));
+
+            Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
+            action.Should().Throw<InvalidStatusException>();
+        }
+
         [Test]
         public void ThrowIfGameProviderConfigurationStatusIsNotOneOfAsync_Throws_Exception_When_Status_Is_Not_One_Of()
         {
             var gpId = Guid.NewGuid();
             var gpcId = Guid.NewGuid();
 
-            _gameProviderOperations.GetGameProviderStatusByIdAsync(gpId)
+            _gameProviderOperations.GetGameProviderStatusAsync(gpId)
                 .Returns(Task.FromResult((Status?)Status.Inactive));
-            //_gameProviderOperations.GetGameProviderConfigurationStatusByIdAsync(gpId, gpcId)
-            //    .Returns(Task.FromResult((Status?)Status.Inactive));
+            _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gpId, gpcId)
+                .Returns(Task.FromResult((Status?)Status.Inactive));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
             action.Should().Throw<InvalidStatusException>();
+        }
+
+        [TestCase(Status.Maintenance, Status.Active)]
+        [TestCase(Status.Active, Status.Maintenance)]
+        public void ThrowIfGameProviderConfigurationStatusIsNotOneOfAsync_Throws_GameProviderUnderMaintenanceException(Status? gameProviderStatus, Status? gameProviderConfigurationStatus)
+        {
+            var gpId = Guid.NewGuid();
+            var gpcId = Guid.NewGuid();
+
+            _gameProviderOperations.GetGameProviderStatusAsync(gpId)
+               .Returns(Task.FromResult(gameProviderStatus));
+            _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gpId, gpcId)
+                .Returns(Task.FromResult(gameProviderConfigurationStatus));
+
+            Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
+
+            action.Should().Throw<GameProviderUnderMaintenanceException>();
         }
     }
 }
