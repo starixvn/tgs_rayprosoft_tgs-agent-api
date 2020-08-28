@@ -119,14 +119,10 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     SecretKey = table.Column<string>(type: "varchar(64)", nullable: false),
+                    Status = table.Column<int>(nullable: false),
                     GameProviderId = table.Column<Guid>(nullable: false),
                     DesktopEndpoint = table.Column<string>(type: "nvarchar(1024)", nullable: false),
                     MobileEndpoint = table.Column<string>(type: "nvarchar(1024)", nullable: false),
@@ -760,6 +756,8 @@ namespace TGS.Core.DataServices.Migrations
                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGameProviderConfigurationForCache.sql");
             migrationBuilder.SqlResource(assembly,
                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+               "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderConfigurationForCache.sql");
 
             #endregion Store Procedure
         }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
 
@@ -26,15 +27,17 @@ namespace TGS.Services.Operations
     {
         private readonly IRedisCacheManager _cacheManager;
         private readonly Func<IGameProviderQueries> _gameProviderQueriesFactory;
+        private readonly IJsonSerializationProvider _json;
         private readonly IGameProviderOperations _interface;
 
         public GameProviderOperations(
             IRedisCacheManager cacheManager,
-            Func<IGameProviderQueries> gameProviderQueriesFactory)
+            Func<IGameProviderQueries> gameProviderQueriesFactory,
+            IJsonSerializationProvider json)
         {
             _cacheManager = cacheManager;
             _gameProviderQueriesFactory = gameProviderQueriesFactory;
-
+            _json = json;
             _interface = this;
         }
 
@@ -63,14 +66,44 @@ namespace TGS.Services.Operations
             return cachedGameProvider;
         }
 
-        Task<CachedGameProviderConfiguration> IGameProviderOperations.GetCachedGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId)
+        async Task<CachedGameProviderConfiguration> IGameProviderOperations.GetCachedGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId)
         {
-            throw new NotImplementedException();
+            var gpc = await GetCachedGameProviderConfigurationOrNullAsync(gameProviderId, gameProviderConfigurationId);
+            if (gpc != null)
+            {
+                return gpc;
+            }
+
+            var r = await _gameProviderQueriesFactory().GetCachedGameProviderConfigurationAsync(gameProviderConfigurationId);
+            if (r == null)
+            {
+                throw new InvalidOperationException($"GameProviderConfiguration doesn't exist with gameProviderId: {gameProviderId} and gameProviderConfigurationId: {gameProviderConfigurationId}");
+            }
+
+            gpc = new CachedGameProviderConfiguration()
+            {
+                Status = r.Status,
+                GameProviderId = gameProviderId,
+                SecretKey = r.SecretKey,
+                DesktopEndpoint = r.DesktopEndpoint,
+                MobileEndpoint = r.MobileEndpoint,
+                ConfigurationData = r.ConfigurationData,
+                IsDefault = r.IsDefault
+            };
+
+            await CacheGameProviderConfigurationAsync(gameProviderId, gameProviderConfigurationId, gpc);
+
+            return gpc;
         }
 
-        Task<Status?> IGameProviderOperations.GetGameProviderConfigurationStatusAsync(Guid gameProviderId, Guid gameProviderConfigurationId)
+        async Task<Status?> IGameProviderOperations.GetGameProviderConfigurationStatusAsync(Guid gameProviderId, Guid gameProviderConfigurationId)
         {
-            throw new NotImplementedException();
+            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, gameProviderConfigurationId.ToString());
+            var gpc = value.HasValue ?
+                 _json.DeserializeFromString<CachedGameProviderConfiguration>(value) :
+                 await _interface.GetCachedGameProviderConfigurationAsync(gameProviderId, gameProviderConfigurationId);
+
+            return gpc.Status;
         }
 
         Task<Guid> IGameProviderOperations.GetGameProviderIdByCodeAsync(string gameProviderCode)
@@ -148,6 +181,42 @@ namespace TGS.Services.Operations
             catch (Exception e)
             {
                 //_log.LogError($"Failed to cache player for playerId: {playerCode}", e);
+            }
+        }
+
+        private async Task<CachedGameProviderConfiguration> GetCachedGameProviderConfigurationOrNullAsync(Guid gameProviderId, Guid gameProviderConfigurationId)
+        {
+            try
+            {
+                var data = await _cacheManager.GetHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, gameProviderConfigurationId.ToString());
+
+                if (data.HasValue)
+                {
+                    return _json.DeserializeFromString<CachedGameProviderConfiguration>(data);
+                }
+            }
+            catch (Exception e)
+            {
+                //_log.LogError($"Failed to get cached player for player code: {playerCode}", e);
+            }
+
+            return null;
+        }
+
+        private async Task CacheGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId, CachedGameProviderConfiguration gpc)
+        {
+            try
+            {
+                var fields = new HashEntry[]
+                {
+                    new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))
+                };
+
+                await _cacheManager.CacheHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, fields, TimeSpan.FromHours(2), true);
+            }
+            catch (Exception e)
+            {
+                //_log.LogError($"Failed to get cached player for player code: {playerCode}", e);
             }
         }
 

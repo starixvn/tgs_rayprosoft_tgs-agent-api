@@ -20,6 +20,8 @@ namespace TGS.Services.Operations.Queries
         Task<Dictionary<string, string>> GetGameProviderCurrenciesByInternalCodeAsync(Guid gameProviderId);
 
         Task<GetCachedGameProviderResult> GetCachedGameProviderAsync(Guid gameProviderId);
+
+        Task<GetCachedGameProviderConfigurationResult> GetCachedGameProviderConfigurationAsync(Guid gameProviderConfigurationId);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -77,6 +79,17 @@ namespace TGS.Services.Operations.Queries
             {
                 ParameterName = "@gameProviderId",
                 Value = gameProviderId,
+                DbType = DbType.Guid
+            });
+        }
+
+        Task<GetCachedGameProviderConfigurationResult> IGameProviderQueries.GetCachedGameProviderConfigurationAsync(Guid gameProviderConfigurationId)
+        {
+            const string spName = "usp_GameProvider_GetGameProviderConfigurationForCache";
+            return _repository.SqlQuerySingleAsync<GetCachedGameProviderConfigurationResult>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@gameProviderConfigurationId",
+                Value = gameProviderConfigurationId,
                 DbType = DbType.Guid
             });
         }

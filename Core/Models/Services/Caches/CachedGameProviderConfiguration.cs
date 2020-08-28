@@ -1,10 +1,11 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.Caches
 {
     public record CachedGameProviderConfiguration
     {
-        public string Description { get; set; }
+        public Status Status { get; set; }
         public string SecretKey { get; set; }
         public Guid GameProviderId { get; set; }
         public string DesktopEndpoint { get; set; }

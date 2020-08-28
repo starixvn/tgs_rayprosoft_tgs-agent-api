@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200827081334_Initial")]
+    [Migration("20200828061207_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -356,22 +356,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
-
                     b.Property<string>("ConfigurationData")
                         .IsRequired()
                         .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(256)");
@@ -391,21 +378,14 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(1024)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasColumnType("varchar(64)");
 
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", false);
