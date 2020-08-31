@@ -80,17 +80,12 @@ namespace TGS.Infrastructures.Redis
             var endpoint = multiplexer.GetEndPoints().First();
             var server = multiplexer.GetServer(endpoint);
 
-            var count = 0;
-            var keys = server.Keys(pattern: keyPattern, database: db.Database);
+            var keys = server.Keys(pattern: keyPattern, database: db.Database).ToArray();
             var flags = GetCommandFlags(fireAndForget);
 
-            foreach (var key in keys)
-            {
-                await db.KeyDeleteAsync(key, flags);
-                count++;
-            }
+            await db.KeyDeleteAsync(keys.ToArray(), flags);
 
-            return count;
+            return keys.Length;
         }
 
         async Task<T> IRedisCacheManager.SafeGetAndCacheAsync<T>(

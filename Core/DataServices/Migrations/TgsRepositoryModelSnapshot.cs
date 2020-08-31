@@ -147,9 +147,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("DefaultLanguageCode")
                         .HasColumnType("nvarchar(6)");
 
-                    b.Property<string>("DefaultLanguageCultureCode")
-                        .HasColumnType("nvarchar(6)");
-
                     b.Property<string>("DesktopQueryString")
                         .HasColumnType("nvarchar(512)");
 
@@ -167,7 +164,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasAlternateKey("BrandId", "GameProviderId")
                         .HasName("UK_BrandGameProviderConfigurations_BrandId_GameProviderId");
 
-                    b.HasIndex("DefaultLanguageCultureCode");
+                    b.HasIndex("DefaultLanguageCode");
 
                     b.HasIndex("GameProviderId");
 
@@ -357,22 +354,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
-
                     b.Property<string>("ConfigurationData")
                         .IsRequired()
                         .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(256)");
@@ -392,21 +376,14 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(1024)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasColumnType("varchar(64)");
 
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", false);
@@ -542,7 +519,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("CultureCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(10)")
+                        .HasColumnType("nvarchar(6)")
                         .IsUnicode(true);
 
                     b.Property<string>("DefaultWalletCurrencyCode")
@@ -562,9 +539,6 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(64)")
                         .IsUnicode(true);
-
-                    b.Property<string>("LanguageCultureCode")
-                        .HasColumnType("nvarchar(6)");
 
                     b.Property<DateTimeOffset>("LastActiveOn")
                         .HasColumnType("datetimeoffset")
@@ -601,7 +575,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("BrandId");
 
-                    b.HasIndex("LanguageCultureCode");
+                    b.HasIndex("CultureCode");
 
                     b.ToTable("Players","dbo");
                 });
@@ -882,8 +856,8 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Language", "DefaultLanguage")
-                        .WithMany()
-                        .HasForeignKey("DefaultLanguageCultureCode");
+                        .WithMany("BrandGameProviderConfigurations")
+                        .HasForeignKey("DefaultLanguageCode");
 
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
                         .WithMany("BrandGameProviderConfigurations")
@@ -978,7 +952,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
                         .WithMany("Players")
-                        .HasForeignKey("LanguageCultureCode");
+                        .HasForeignKey("CultureCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.ResellerCurrency", b =>

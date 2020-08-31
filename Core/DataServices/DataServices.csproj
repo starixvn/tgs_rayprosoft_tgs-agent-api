@@ -14,8 +14,11 @@
   <ItemGroup>
     <None Remove="appsettings.json" />
     <None Remove="SqlScripts\SP\usp_Brand_GetBrandForCache.sql" />
+    <None Remove="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
     <None Remove="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
     <None Remove="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
@@ -30,6 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandForCache.sql" />

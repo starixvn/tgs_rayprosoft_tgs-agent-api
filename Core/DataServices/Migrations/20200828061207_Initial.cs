@@ -119,14 +119,10 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     SecretKey = table.Column<string>(type: "varchar(64)", nullable: false),
+                    Status = table.Column<int>(nullable: false),
                     GameProviderId = table.Column<Guid>(nullable: false),
                     DesktopEndpoint = table.Column<string>(type: "nvarchar(1024)", nullable: false),
                     MobileEndpoint = table.Column<string>(type: "nvarchar(1024)", nullable: false),
@@ -414,7 +410,6 @@ namespace TGS.Core.DataServices.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     BrandId = table.Column<Guid>(nullable: false),
                     DefaultLanguageCode = table.Column<string>(type: "nvarchar(6)", nullable: true),
-                    DefaultLanguageCultureCode = table.Column<string>(nullable: true),
                     GameProviderId = table.Column<Guid>(nullable: false),
                     BrandLogoUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     DesktopQueryString = table.Column<string>(type: "nvarchar(512)", nullable: true),
@@ -433,8 +428,8 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_BrandGameProviderConfigurations_Languages_DefaultLanguageCultureCode",
-                        column: x => x.DefaultLanguageCultureCode,
+                        name: "FK_BrandGameProviderConfigurations_Languages_DefaultLanguageCode",
+                        column: x => x.DefaultLanguageCode,
                         principalSchema: "dbo",
                         principalTable: "Languages",
                         principalColumn: "CultureCode",
@@ -519,8 +514,7 @@ namespace TGS.Core.DataServices.Migrations
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     ExternalId = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     IpAddress = table.Column<string>(type: "nvarchar(64)", nullable: false),
-                    CultureCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
-                    LanguageCultureCode = table.Column<string>(nullable: true),
+                    CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     DefaultWalletId = table.Column<Guid>(nullable: false),
                     DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     BrandId = table.Column<Guid>(nullable: false),
@@ -545,12 +539,12 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Players_Languages_LanguageCultureCode",
-                        column: x => x.LanguageCultureCode,
+                        name: "FK_Players_Languages_CultureCode",
+                        column: x => x.CultureCode,
                         principalSchema: "dbo",
                         principalTable: "Languages",
                         principalColumn: "CultureCode",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -629,10 +623,10 @@ namespace TGS.Core.DataServices.Migrations
                 column: "CurrencyCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BrandGameProviderConfigurations_DefaultLanguageCultureCode",
+                name: "IX_BrandGameProviderConfigurations_DefaultLanguageCode",
                 schema: "dbo",
                 table: "BrandGameProviderConfigurations",
-                column: "DefaultLanguageCultureCode");
+                column: "DefaultLanguageCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BrandGameProviderConfigurations_GameProviderId",
@@ -695,10 +689,10 @@ namespace TGS.Core.DataServices.Migrations
                 column: "BrandId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Players_LanguageCultureCode",
+                name: "IX_Players_CultureCode",
                 schema: "dbo",
                 table: "Players",
-                column: "LanguageCultureCode");
+                column: "CultureCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ResellerCurrencies_CurrencyCode",
@@ -757,9 +751,15 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Wallet_GetBalance.sql");
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandForCache.sql");
+               "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+               "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGameProviderConfigurationForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+               "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+               "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderConfigurationForCache.sql");
 
-            #endregion
+            #endregion Store Procedure
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -4,12 +4,17 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    internal class GameProviderConfigurationMap : BaseConfiguration, IEntityTypeConfiguration<GameProviderConfiguration>
+    internal class GameProviderConfigurationMap : IEntityTypeConfiguration<GameProviderConfiguration>
     {
         void IEntityTypeConfiguration<GameProviderConfiguration>.Configure(EntityTypeBuilder<GameProviderConfiguration> builder)
         {
             builder.ToTable("GameProviderConfigurations", "dbo");
-            BaseConfigureProperties(builder);
+
+            builder.HasKey(p => p.Id)
+                .IsClustered(false);
+
+            builder.Property(p => p.Name)
+                .HasColumnType("nvarchar(255)");
 
             builder.HasOne(p => p.GameProvider)
                 .WithMany(p => p.GameProviderConfigurations)
@@ -29,7 +34,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.MobileEndpoint)
                 .HasColumnType("nvarchar(1024)")
                 .IsRequired();
-            
+
             builder.Property(c => c.ConfigurationData)
                 .HasColumnType("nvarchar(4000)")
                 .IsRequired();

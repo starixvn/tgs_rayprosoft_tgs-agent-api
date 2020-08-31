@@ -35,7 +35,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsUnicode();
 
             builder.Property(c => c.CultureCode)
-                .HasColumnType("nvarchar(10)")
+                .HasColumnType("nvarchar(6)")
                 .IsRequired()
                 .IsUnicode();
 
