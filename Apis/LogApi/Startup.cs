@@ -38,13 +38,13 @@ namespace TGS.Apis.LogApi
             services.AddNats(Configuration);
             services.AddTgsLog();
 
-            services.AddScoped<IMessagePackProvider, MessagePackProvider>();
+            services.AddSingleton<IMessagePackProvider, MessagePackProvider>();
             services.AddScoped<IMessageHandler, NatsMessageHandler>();
 
             services.AddScoped<ApiLogWriter>();
             services.AddScoped<LogRecordWriter>();
 
-            services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
+            services.AddScoped<Func<string, ILoggerWriter>>(serviceProvider => key =>
             {
                 return key switch
                 {
@@ -80,12 +80,6 @@ namespace TGS.Apis.LogApi
             });
         }
 
-        public void Configure(IApplicationBuilder app, IHostApplicationLifetime appLifetime)
-        {
-            appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
-            appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
-        }
-
         protected void OnApplicationStarted(IServiceProvider serviceProvider)
         {
             var scope = serviceProvider.CreateScope();
@@ -101,8 +95,11 @@ namespace TGS.Apis.LogApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void ConfigureApp(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
+            appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
+            appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

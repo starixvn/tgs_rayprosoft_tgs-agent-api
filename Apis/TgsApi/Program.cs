@@ -28,7 +28,9 @@ namespace TGS.Apis.TgsApi
                            .ConfigureAppConfiguration((hostContext, config) =>
                            {
                                config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
-                               config.AddJsonFile("appsettings.json", false, true);
+                               config.AddJsonFile("appsettings.json", false, true)
+                                   .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true)
+                                   .AddEnvironmentVariables();
                                if (args != null)
                                {
                                    config.AddCommandLine(args);
