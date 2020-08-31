@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.LogApi.DataService;
@@ -34,10 +33,5 @@ namespace TGS.Apis.LogApi.Loggers
         }
 
         private static ApiLog Convert(LogBusEvent ent) => (ApiLog)ent;
-
-        ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            return _logRepository.DisposeAsync();
-        }
     }
 }

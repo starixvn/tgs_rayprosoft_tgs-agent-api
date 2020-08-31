@@ -16,6 +16,7 @@ using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Log;
+using TGS.Infrastructures.Log.Events;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
 
@@ -38,7 +39,7 @@ namespace TGS.Apis.LogApi
             services.AddNats(Configuration);
             services.AddTgsLog();
 
-            services.AddSingleton<IMessagePackProvider, MessagePackProvider>();
+            services.AddScoped<IMessagePackProvider, MessagePackProvider>();
             services.AddScoped<IMessageHandler, NatsMessageHandler>();
 
             services.AddScoped<ApiLogWriter>();
@@ -48,8 +49,8 @@ namespace TGS.Apis.LogApi
             {
                 return key switch
                 {
-                    "ApiLogEvent" => serviceProvider.GetService<ApiLogWriter>(),
-                    "LogRecordEvent" => serviceProvider.GetService<LogRecordWriter>(),
+                    nameof(ApiLogEvent) => serviceProvider.GetService<ApiLogWriter>(),
+                    nameof(LogRecordEvent) => serviceProvider.GetService<LogRecordWriter>(),
                     _ => throw new KeyNotFoundException()
                 };
             });
@@ -94,7 +95,6 @@ namespace TGS.Apis.LogApi
             messageHandler.StopReceiveMessages();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));

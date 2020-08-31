@@ -11,19 +11,16 @@ namespace TGS.Infrastructures.Log
     {
         public static IServiceCollection AddTgsLog(this IServiceCollection services)
         {
-            services.AddTransient<ApiLogEvent>();
-            services.AddTransient<LogRecordEvent>();
-            services.AddTransient<LogBusEvent>(sp => new ApiLogEvent());
-            services.AddTransient<LogBusEvent>(sp => new LogRecordEvent());
-            services.AddTransient(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
-            services.AddTransient<ITgsLog, TgsLog>();
+            services.AddScoped<LogBusEvent>(sp => new ApiLogEvent());
+            services.AddScoped<LogBusEvent>(sp => new LogRecordEvent());
+            services.AddScoped(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
+            services.AddScoped<ITgsLog, TgsLog>();
 
             return services;
         }
 
         public static Action<LogBusEvent> CreateLoggerPublisher(INatsManager natsManager)
         {
-
             var natsPublisher = CreateNatsPublisher(natsManager);
 
             return log => AsyncHelper.RunAsync(async s => await natsPublisher(s), log);
