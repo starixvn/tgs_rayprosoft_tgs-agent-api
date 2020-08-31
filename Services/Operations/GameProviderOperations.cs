@@ -25,6 +25,8 @@ namespace TGS.Services.Operations
         Task<bool> GetGameProviderSupportTestPlayerAsync(Guid gameProviderId);
 
         Task<bool> LanguageSupportedAsync(Guid gameProviderId, string cultureCode);
+
+        Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -154,6 +156,10 @@ namespace TGS.Services.Operations
             return languages.Contains(cultureCode, StringComparer.OrdinalIgnoreCase);
         }
 
+        Task<string> IGameProviderOperations.GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId)
+        {
+            throw new NotImplementedException();
+        }
 
         #region Private Methods
 
