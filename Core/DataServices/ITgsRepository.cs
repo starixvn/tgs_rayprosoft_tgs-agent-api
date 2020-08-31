@@ -47,5 +47,11 @@ namespace TGS.Core.DataServices
         DbSet<BrandLanguage> BrandBrandLanguages { get; set; }
 
         DbSet<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
+
+        DbSet<BetLimitGroup> BetLimitGroups { get; set; }
+
+        DbSet<BrandBetLimit> BrandBetLimits { get; set; }
+
+        DbSet<GameProviderBetLimit> GameProviderBetLimits { get; set; }
     }
 }
