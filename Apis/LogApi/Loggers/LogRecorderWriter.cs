@@ -41,10 +41,5 @@ namespace TGS.Apis.LogApi.Loggers
         }
 
         private static LogRecord Convert(LogBusEvent ent) => (LogRecord)ent;
-
-        ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            return _logRepository.DisposeAsync();
-        }
     }
 }

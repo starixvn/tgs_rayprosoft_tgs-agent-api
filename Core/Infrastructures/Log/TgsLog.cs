@@ -140,7 +140,7 @@ namespace TGS.Infrastructures.Log
 
         void ITgsLog.WriteEventLogInfo(string infoMessage, string memberName, string sourceFilePath, int sourceLineNumber)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

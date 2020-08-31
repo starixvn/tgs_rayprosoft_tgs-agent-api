@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.LogApi.Controllers.Messages;
 using TGS.Apis.LogApi.DataService;
-using TGS.Infrastructures.Nats;
+using TGS.Apis.LogApi.Services;
+using TGS.Core.Models;
 using TGS.Infrastructures.Redis;
 
 namespace TGS.Apis.LogApi.Controllers
@@ -17,15 +18,15 @@ namespace TGS.Apis.LogApi.Controllers
     {
         private readonly ILogRepository _logRepository;
         private readonly IRedisRepository _redisRepository;
-        private readonly INatsManager _natsManager;
+        private readonly IMessageHandler _natsMessageHandler;
         public StatusController(
             ILogRepository logRepository,
             IRedisRepository redisRepository,
-            INatsManager natsManager)
+            IMessageHandler natsMessageHandler)
         {
             _logRepository = logRepository;
             _redisRepository = redisRepository;
-            _natsManager = natsManager;
+            _natsMessageHandler = natsMessageHandler;
         }
 
         [HttpGet]
@@ -38,12 +39,17 @@ namespace TGS.Apis.LogApi.Controllers
                 MachineName = Environment.MachineName,
                 HostName = hostName,
                 HostIp = hostIp.ToString(),
-                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+                Environment = Environment.GetEnvironmentVariable(Consts.Environment),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectLogDb = await _logRepository.CanConnectionAsync(),
                 RedisConnectionStatus = _redisRepository.GetConnectionStatus(),
-                NatsConnectionStatus = _natsManager.GetConnectStatus()
+                last_error = _natsMessageHandler.LastLogInsertError,
+                last_log_insert_time = _natsMessageHandler.LastLogInsertTime,
+                last_event = _natsMessageHandler.LastBusEvent?.GetType().Name,
+                last_received_event_time = _natsMessageHandler.LastReceivedEventTime,
+                last_startup_time = _natsMessageHandler.LastStartUpTime,
+                log_received_count = _natsMessageHandler.LogReceivedCount,
             };
         }
     }

@@ -63,7 +63,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{F352EBA9-FF0
 		Deployment\dev\backoffice-ui.yml = Deployment\dev\backoffice-ui.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.UnitTests", "Tests\Tgs.UnitTests\Tgs.UnitTests.csproj", "{B92347FB-E471-4185-9A87-1F608D74B52F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.UnitTests", "Tests\Tgs.UnitTests\Tgs.UnitTests.csproj", "{B92347FB-E471-4185-9A87-1F608D74B52F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
