@@ -43,6 +43,22 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(l => l.UpdatedOn)
                 .HasColumnType("datetimeoffset")
                 .IsRequired();
+
+            builder.HasMany(l => l.Players)
+                .WithOne(p => p.Language)
+                .HasForeignKey(p => p.CultureCode);
+
+            builder.HasMany(l => l.BrandLanguages)
+                .WithOne(bl => bl.Language)
+                .HasForeignKey(bl => bl.CultureCode);
+
+            builder.HasMany(l => l.GameProviderLanguages)
+                .WithOne(gpl => gpl.Language)
+                .HasForeignKey(gpl => gpl.CultureCode);
+
+            builder.HasMany(l => l.BrandGameProviderConfigurations)
+                .WithOne(bgpc => bgpc.DefaultLanguage)
+                .HasForeignKey(bgpc => bgpc.DefaultLanguageCode);
         }
     }
 }

@@ -17,6 +17,8 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<GameProviderLanguage> GameProviderLanguages { get; set; }
 
+        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
+
         public virtual ICollection<Player> Players { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
