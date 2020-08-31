@@ -9,6 +9,7 @@
         GameProvider,
         GameProviderIdByCode,
         BrandGameProviderConfiguration,
-        GameProviderConfiguration
+        GameProviderConfiguration,
+        GameProviderLanguages,
     }
 }
