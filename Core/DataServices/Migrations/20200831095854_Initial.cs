@@ -885,6 +885,8 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetLanguagesByInternalCode.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetLanguagesByExternalCode.sql");
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
 
             #endregion Store Procedure
         }

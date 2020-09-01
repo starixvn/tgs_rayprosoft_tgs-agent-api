@@ -85,7 +85,7 @@ namespace TGS.Services.Operations
 
         async Task<string> IBrandOperations.GetBrandCodeByBrandIdAsync(Guid brandId)
         {
-            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.BrandCode);
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.BrandCode);
             if (value.HasValue)
             {
                 return value;
@@ -97,7 +97,7 @@ namespace TGS.Services.Operations
 
         async Task<Status?> IBrandOperations.GetBrandStatusAsync(Guid brandId)
         {
-            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.Status);
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Brand, brandId, CachedBrandFields.Status);
             if (value.HasValue)
             {
                 return (Status)(int)value;
@@ -109,7 +109,7 @@ namespace TGS.Services.Operations
 
         async Task<Guid> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
         {
-            var value = await _cacheManager.GetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
             var bgpc = value.HasValue ?
                  _json.DeserializeFromString<CachedBrandGameProviderConfiguration>(value) :
                  await _interface.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
@@ -153,7 +153,7 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var values = await _cacheManager.GetHashSetAsync(RedisCacheType.Brand, brandId, new RedisValue[]
+                var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Brand, brandId, new RedisValue[]
                 {
                     CachedBrandFields.BrandCode,
                     CachedBrandFields.TimeZoneId,
@@ -222,7 +222,7 @@ namespace TGS.Services.Operations
                     new (CachedBrandFields.MobileLoginUrl, brand.Urls.MobileLogin ?? string.Empty)
                 };
 
-                await _cacheManager.CacheHashSetAsync(RedisCacheType.Brand, brandId, fields, TimeSpan.FromHours(2), true);
+                await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Brand, brandId, fields, TimeSpan.FromHours(2), true);
             }
             catch (Exception e)
             {
@@ -234,7 +234,7 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var data = await _cacheManager.GetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
+                var data = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, gameProviderId.ToString());
 
                 if (data.HasValue)
                 {
@@ -258,7 +258,7 @@ namespace TGS.Services.Operations
                     new(gameProviderId.ToString(), _json.SerializeToString(bgpc))
                 };
 
-                await _cacheManager.CacheHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, fields, TimeSpan.FromHours(2), true);
+                await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId, fields, TimeSpan.FromHours(2), true);
             }
             catch (Exception e)
             {

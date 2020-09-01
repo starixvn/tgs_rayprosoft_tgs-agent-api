@@ -16,7 +16,7 @@ namespace TGS.Tests.Redis.IntegrationTests
         [Test]
         public async Task Can_cache_hash_data_when_no_exception()
         {
-            await _cacheManager.CacheHashSetAsync(CacheType, _cacheKey, new HashEntry[]
+            await _cacheManager.SafeCacheHashSetAsync(CacheType, _cacheKey, new HashEntry[]
             {
                 new HashEntry(Field, NewData)
             }, null);
@@ -41,7 +41,7 @@ namespace TGS.Tests.Redis.IntegrationTests
                 new HashEntry(Field, NewData)
             });
 
-            var values = await _cacheManager.GetHashSetAsync(CacheType, _cacheKey, new RedisValue[] {Field});
+            var values = await _cacheManager.SafeGetHashSetAsync(CacheType, _cacheKey, new RedisValue[] {Field});
 
             values.Length.Should().Be(1);
             values[0].Should().Be(NewData);
