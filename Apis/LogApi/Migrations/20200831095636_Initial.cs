@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Apis.LogApi.Migrations
 {
-    public partial class NewMigrationName : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -42,16 +42,36 @@ namespace TGS.Apis.LogApi.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     TrackingId = table.Column<Guid>(nullable: false),
-                    RecordedOn = table.Column<DateTimeOffset>(nullable: false),
-                    ServerName = table.Column<string>(nullable: true),
-                    Level = table.Column<int>(nullable: false),
+                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ServerName = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false),
                     Logger = table.Column<string>(nullable: true),
-                    Message = table.Column<string>(nullable: true),
-                    Exception = table.Column<string>(nullable: true)
+                    Message = table.Column<string>(type: "nvarchar(512)", nullable: false),
+                    Exception = table.Column<string>(type: "nvarchar(4000)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LogRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ServiceLogs",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ServerName = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    Level = table.Column<byte>(type: "tinyint", nullable: false),
+                    Logger = table.Column<string>(nullable: true),
+                    Callsite = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(512)", nullable: false),
+                    Exception = table.Column<string>(type: "nvarchar(4000)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceLogs", x => x.Id);
                 });
         }
 
@@ -63,6 +83,10 @@ namespace TGS.Apis.LogApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "LogRecords",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "ServiceLogs",
                 schema: "dbo");
         }
     }

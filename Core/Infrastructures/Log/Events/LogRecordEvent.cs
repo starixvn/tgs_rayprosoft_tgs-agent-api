@@ -22,6 +22,7 @@ namespace TGS.Infrastructures.Log.Events
         [DataMember(EmitDefaultValue = false)]
         public string exception { get; set; }
 
+
         [DataMember(EmitDefaultValue = false)]
         public string file { get; set; }
 

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using NLog.Web;
 
 namespace TGS.Apis.TgsApi
 {
@@ -46,7 +47,8 @@ namespace TGS.Apis.TgsApi
                                }
 
                                logging.AddConfiguration();
-                           });
+                           })
+                           .UseNLog();
         }
 
 

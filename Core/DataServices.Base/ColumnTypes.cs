@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.BackendOffice.DataService.Enums
+﻿namespace TGS.Core.DataServices.Base
 {
     public static class ColumnTypes
     {

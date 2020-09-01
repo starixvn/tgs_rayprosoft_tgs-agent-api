@@ -95,29 +95,78 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Exception")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .IsUnicode(true);
 
                     b.Property<string>("Logger")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(512)")
+                        .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ServerName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)")
+                        .IsUnicode(true);
 
                     b.Property<Guid>("TrackingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("LogRecords");
+                    b.ToTable("LogRecords","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ServiceLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Callsite")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
+
+                    b.Property<string>("Exception")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
+
+                    b.Property<byte>("Level")
+                        .HasColumnType("tinyint")
+                        .IsUnicode(true);
+
+                    b.Property<string>("Logger")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(512)")
+                        .IsUnicode(true);
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ServerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)")
+                        .IsUnicode(true);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceLogs","dbo");
                 });
 #pragma warning restore 612, 618
         }
