@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Configuration;
 using NLog.Web;
 
 namespace TGS.Apis.TgsApi
@@ -12,6 +11,26 @@ namespace TGS.Apis.TgsApi
     {
         public static Task Main(string[] args)
         {
+            //var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            //try
+            //{
+            //    logger.Debug("init main");
+            //    //BuildWebHost(args).Build().Run();
+            //}
+            //catch (Exception ex)
+            //{
+            //    //NLog: catch setup errors
+            //    logger.Error(ex, "Stopped program because of exception");
+            //    throw;
+            //}
+            //finally
+            //{
+            //    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+            //    NLog.LogManager.Shutdown();
+            //}
+
+            //NLog
+
             return CreateHostBuilder(args).Build().RunAsync();
         }
 
@@ -22,6 +41,12 @@ namespace TGS.Apis.TgsApi
                            {
                                config.AddEnvironmentVariables();
                            })
+                           .ConfigureLogging((hostContext, logging) =>
+                           {
+                               logging.ClearProviders();
+                               logging.SetMinimumLevel(LogLevel.Trace);
+                           })
+                           .UseNLog()
                            .ConfigureWebHostDefaults(webBuilder =>
                            {
                                webBuilder.UseStartup<Startup>();
@@ -36,21 +61,9 @@ namespace TGS.Apis.TgsApi
                                {
                                    config.AddCommandLine(args);
                                }
-                           })
-                           .ConfigureLogging((hostContext, logging) =>
-                           {
-                               logging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
-                               if (hostContext.HostingEnvironment.IsDevelopment())
-                               {
-                                   logging.AddConsole();
-                                   logging.SetMinimumLevel(LogLevel.Error);
-                               }
-
-                               logging.AddConfiguration();
-                           })
-                           .UseNLog();
+                               var logFactory = NLog.LogManager.LoadConfiguration($"nlog.{hostContext.HostingEnvironment.EnvironmentName}.config");
+                               NLog.LogManager.Configuration = logFactory.Configuration;
+                           });
         }
-
-
     }
 }

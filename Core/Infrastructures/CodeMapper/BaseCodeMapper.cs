@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 using TGS.Core.Models.Enums;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
 
 namespace TGS.Infrastructures.CodeMapper
@@ -15,10 +17,14 @@ namespace TGS.Infrastructures.CodeMapper
     public abstract class BaseCodeMapper
     {
         private readonly IRedisCacheManager _cacheManager;
+        private readonly IJsonSerializationProvider _json;
 
-        protected BaseCodeMapper(IRedisCacheManager cacheManager)
+        protected BaseCodeMapper(
+            IRedisCacheManager cacheManager, 
+            IJsonSerializationProvider json)
         {
             _cacheManager = cacheManager;
+            _json = json;
         }
 
         protected virtual async Task<(bool Found, string Code)> GetMappedCodeAsync(
@@ -36,10 +42,22 @@ namespace TGS.Infrastructures.CodeMapper
                     $"Missing key for \'{cacheKeyPrefix}\' used for \'{usedFor}\' with filter id {filterId} (intended to be cached as {cacheType})");
             }
 
-            var dict =
-                await _cacheManager.SafeGetAndCacheAsync(
-                    cacheType, $"{cacheKeyPrefix}:{filterId}", TimeSpan.FromMinutes(cacheForMinutes),
-                    () => getDictionary(filterId));
+            Dictionary<string, string> dict;
+            var value = await _cacheManager.GetHashSetAsync(cacheType, filterId, cacheKeyPrefix);
+            
+            if (value.HasValue)
+            {
+                dict = _json.DeserializeFromString<Dictionary<string, string>>(value);
+            }
+            else
+            {
+                dict = await getDictionary(filterId);
+
+                await _cacheManager.CacheHashSetAsync(cacheType, filterId, new HashEntry[]
+                {
+                    new (cacheKeyPrefix, _json.SerializeToString(dict))
+                }, TimeSpan.FromMinutes(cacheForMinutes));
+            }
 
             return dict.TryGetValue(lookUpCode, out var foundCode) ? (true, foundCode) : (false, lookUpCode);
         }

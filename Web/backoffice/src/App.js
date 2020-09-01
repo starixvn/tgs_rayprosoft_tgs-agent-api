@@ -24,9 +24,28 @@ import {
   Button,
   Text
 } from "bumbag"
-import { Form } from "./auth/login"
+import { useIsAuthed as useUserIsAuthed } from "./user/context"
+import { Form as Login, Path as LoginPath } from "./user/login"
+import { Route as AuthRouter } from "./user/auth"
 
 function App() {
+  let isUserAuthed = useUserIsAuthed()
+  //return isUserAuthed ? <AuthedLayout>TODO</AuthedLayout> : <Login></Login>
+  return (
+    <Switch>
+      <Route path={LoginPath}>
+        <Login />
+      </Route>
+      <AuthRouter path="*">
+        <AuthedLayout>
+          <PageContent>TODO: routes</PageContent>
+        </AuthedLayout>
+      </AuthRouter>
+    </Switch>
+  )
+}
+
+const AuthedLayout = ({ children }) => {
   return (
     <PageWithHeader sticky header={<Header />}>
       <PageWithSidebar
@@ -35,9 +54,7 @@ function App() {
         sidebarWidth="270px"
         css={css``}
       >
-        <PageContent>
-          <Form></Form>
-        </PageContent>
+        {children}
         <PageContent>
           <Footer />
         </PageContent>

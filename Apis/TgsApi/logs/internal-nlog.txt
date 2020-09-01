@@ -1,0 +1,234 @@
+2020-09-01 14:53:04.7673 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 14:53:04.7879 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 14:53:04.7984 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 14:53:04.7984 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 14:53:04.8112 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 14:53:04.8112 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 14:53:04.8112 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 14:53:04.8112 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 14:53:04.8306 Info Message Template Auto Format enabled
+2020-09-01 14:53:04.8306 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 14:53:04.8562 Warn Error when setting property 'ConnectionString' on 'NLog.Targets.DatabaseTarget' Exception: System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+2020-09-01 14:53:04.8877 Warn Error when setting '${appsettings:name=ConnectionStrings.Log}' on attibute 'connectionString' Exception: NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+2020-09-01 14:53:04.8926 Error Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config.  Exception: NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+2020-09-01 14:53:04.8926 Warn Error has been raised. Exception: NLog.NLogConfigurationException: Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config. 
+ ---> NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   --- End of inner exception stack trace ---
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   at NLog.Config.XmlLoggingConfiguration..ctor(XmlReader reader, String fileName, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
+2020-09-01 14:53:04.8926 Error Failed loading from config file location: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config Exception: NLog.NLogConfigurationException: Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config. 
+ ---> NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   --- End of inner exception stack trace ---
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   at NLog.Config.XmlLoggingConfiguration..ctor(XmlReader reader, String fileName, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfigurationFile(LogFactory logFactory, String configFile)
+   at NLog.Config.LoggingConfigurationFileLoader.TryLoadLoggingConfiguration(LogFactory logFactory, String configFile, LoggingConfiguration& config)
+2020-09-01 14:54:49.4299 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 14:54:49.4427 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 14:54:49.4587 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 14:54:49.4718 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 14:54:49.4718 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 14:54:49.4718 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 14:54:49.4859 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 14:54:49.4859 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 14:54:49.4987 Info Message Template Auto Format enabled
+2020-09-01 14:54:49.4987 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 14:54:49.5308 Warn Error when setting property 'ConnectionString' on 'NLog.Targets.DatabaseTarget' Exception: System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+2020-09-01 14:54:49.5584 Warn Error when setting '${appsettings:name=ConnectionStrings.Log}' on attibute 'connectionString' Exception: NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+2020-09-01 14:54:49.5636 Error Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config.  Exception: NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+2020-09-01 14:54:49.5636 Warn Error has been raised. Exception: NLog.NLogConfigurationException: Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config. 
+ ---> NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   --- End of inner exception stack trace ---
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   at NLog.Config.XmlLoggingConfiguration..ctor(XmlReader reader, String fileName, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
+2020-09-01 14:54:49.5636 Error Failed loading from config file location: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config Exception: NLog.NLogConfigurationException: Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config. 
+ ---> NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   --- End of inner exception stack trace ---
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   at NLog.Config.XmlLoggingConfiguration..ctor(XmlReader reader, String fileName, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfigurationFile(LogFactory logFactory, String configFile)
+   at NLog.Config.LoggingConfigurationFileLoader.TryLoadLoggingConfiguration(LogFactory logFactory, String configFile, LoggingConfiguration& config)

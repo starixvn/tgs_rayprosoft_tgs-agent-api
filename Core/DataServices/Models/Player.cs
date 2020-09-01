@@ -20,6 +20,7 @@ namespace TGS.Core.DataServices.Models
         public DateTimeOffset LastActiveOn { get; set; }
         public PlayerStatus Status { get; set; }
         public int BetLimitGroupId { get; set; }
+        public BetLimitGroup BetLimitGroup { get; set; }
         public PlayerTypes Type { get; set; }
         public string LastLoginUrl { get; set; }
         public string LastCashierUrl { get; set; }

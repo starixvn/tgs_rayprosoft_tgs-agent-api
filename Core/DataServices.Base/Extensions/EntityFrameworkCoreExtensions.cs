@@ -23,5 +23,19 @@ namespace TGS.Core.DataServices.Base.Extensions
             string sql = reader.ReadToEnd();
             migrationBuilder.Sql(sql);
         }
+
+        public static void SqlResource(this MigrationBuilder migrationBuilder, string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+            {
+                return;
+            }
+
+            using var reader = new StreamReader(stream);
+            string sql = reader.ReadToEnd();
+            migrationBuilder.Sql(sql);
+        }
     }
 }

@@ -16,6 +16,8 @@ services:
       context: .
       dockerfile: Dockerfile.BackofficeApi
     image: backoffice-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
