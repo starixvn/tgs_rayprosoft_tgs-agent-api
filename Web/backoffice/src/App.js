@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Global, css } from "@emotion/core"
 import {
   BrowserRouter as Router,
@@ -22,11 +22,18 @@ import {
   Box,
   DropdownMenu,
   Button,
-  Text
+  Text,
+  Alert
 } from "bumbag"
-import { useIsAuthed as useUserIsAuthed } from "./user/context"
+import { useIsAuthed as useUserIsAuthed, useAuthCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
 import { Route as AuthRouter } from "./user/auth"
+import {
+  Code as SystemCode,
+  Menu as SystemMenu,
+  Content as SystemContent
+} from "./system"
+import PageNotFound from "./page/NotFound"
 
 function App() {
   let isUserAuthed = useUserIsAuthed()
@@ -37,17 +44,23 @@ function App() {
         <Login />
       </Route>
       <AuthRouter path="*">
-        <AuthedLayout>
-          <PageContent>TODO: routes</PageContent>
-        </AuthedLayout>
+        <Layout>
+          <AuthContens />
+        </Layout>
       </AuthRouter>
     </Switch>
   )
 }
 
-const AuthedLayout = ({ children }) => {
+const Layout = ({ children }) => {
   return (
-    <PageWithHeader sticky header={<Header />}>
+    <PageWithHeader
+      sticky
+      header={<Header />}
+      css={css`
+        min-height: 100%;
+      `}
+    >
       <PageWithSidebar
         sidebar={<Sidebar />}
         sidebarPlacement="left"
@@ -63,12 +76,42 @@ const AuthedLayout = ({ children }) => {
   )
 }
 
+const AuthContens = () => {
+  let codes = useAuthCodes()
+
+  return (
+    <Switch>
+      {codes.map((code) => {
+        let path = `/${code}`
+
+        return (
+          <AuthRouter key={code} path={path}>
+            <Content code={code} />
+          </AuthRouter>
+        )
+      })}
+      <AuthRouter path="*">
+        <PageContent>TODO: dashboard or redirect to?</PageContent>
+      </AuthRouter>
+    </Switch>
+  )
+}
+
+const Content = ({ code }) => {
+  switch (code) {
+    case SystemCode:
+      return <SystemContent />
+    default:
+      return <PageNotFound />
+  }
+}
+
 const Header = () => {
   return (
     <TopNav>
       <TopNav.Section>
         <TopNav.Item href="/" fontWeight="semibold">
-          App Name
+          TODO: App Name
         </TopNav.Item>
       </TopNav.Section>
       <TopNav.Section marginRight="major-2">
@@ -87,17 +130,36 @@ const Header = () => {
 }
 
 const Sidebar = () => {
+  let location = useLocation()
+  let codes = useAuthCodes()
+  //TODO: needed?
+  let [selectedId, setSelectedId] = useState(location.pathname)
+
+  //TODO: rm
+  codes = [SystemCode]
+  console.log("TODO: Sidebar rm ", [SystemCode])
+
+  useEffect(() => {
+    setSelectedId(location.pathname)
+    console.log("selectedId", selectedId)
+  }, [location])
+
   return (
     <Stack spacing="major-1" paddingY="major-2">
-      <SideNav>
-        <SideNav.Level title="System">
-          <SideNav.Item href="#" navId="menuItem">
-            TODO: sub menu
-          </SideNav.Item>
-        </SideNav.Level>
+      <SideNav selectedId={selectedId}>
+        {codes.map((code) => (
+          <MenuItem key={code} code={code} />
+        ))}
       </SideNav>
     </Stack>
   )
+}
+
+const MenuItem = ({ code }) => {
+  switch (code) {
+    case SystemCode:
+      return <SystemMenu />
+  }
 }
 
 const Footer = () => {
