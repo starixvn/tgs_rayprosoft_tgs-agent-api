@@ -140,6 +140,9 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<string>("Exception")
                         .HasColumnType("NVARCHAR(4000)");
 
+                    b.Property<string>("Https")
+                        .HasColumnType("NVARCHAR(255)");
+
                     b.Property<string>("Level")
                         .HasColumnType("NVARCHAR(10)");
 
@@ -165,6 +168,15 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("NVARCHAR(512)");
 
                     b.Property<string>("ServerAddress")
+                        .HasColumnType("NVARCHAR(512)");
+
+                    b.Property<string>("ServerName")
+                        .HasColumnType("NVARCHAR(512)");
+
+                    b.Property<string>("StackTrace")
+                        .HasColumnType("NVARCHAR(max)");
+
+                    b.Property<string>("Url")
                         .HasColumnType("NVARCHAR(512)");
 
                     b.HasKey("Id");

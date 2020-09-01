@@ -9,5 +9,6 @@
         public const string Int = "int";
         public static string Varbinary(int length) => $"VARBINARY({length})";
         public static string Nvarchar(int length) => $"NVARCHAR({length})";
+        public static string NvarcharMax => $"NVARCHAR(max)";
     }
 }

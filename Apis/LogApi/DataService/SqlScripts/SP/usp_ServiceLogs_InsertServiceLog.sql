@@ -18,7 +18,11 @@ ALTER PROCEDURE [dbo].[usp_ServiceLogs_InsertServiceLog]
       @properties nvarchar(512),
       @callsite nvarchar(512),
       @message nvarchar(512),
-      @exception nvarchar(4000)
+      @exception nvarchar(4000),
+      @serverName nvarchar(512),
+      @url nvarchar(512),
+      @https nvarchar(255),
+      @stackTrace nvarchar(max)
 AS 
 BEGIN
     SET NOCOUNT ON
@@ -34,7 +38,11 @@ BEGIN
         [Properties],
         [Callsite],
         [Message],
-        [Exception]
+        [Exception],
+        [ServerName],
+        [Url],
+        [Https],
+        [StackTrace]
     )
     VALUES
     (
@@ -48,7 +56,11 @@ BEGIN
         @properties,
         @callsite,
         @message,
-        @exception
+        @exception,
+        @serverName,
+        @url,
+        @https,
+        @stackTrace
     );
     
 END

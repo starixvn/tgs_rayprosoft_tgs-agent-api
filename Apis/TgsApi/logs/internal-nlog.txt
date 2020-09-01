@@ -232,3 +232,330 @@
    at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
    at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfigurationFile(LogFactory logFactory, String configFile)
    at NLog.Config.LoggingConfigurationFileLoader.TryLoadLoggingConfiguration(LogFactory logFactory, String configFile, LoggingConfiguration& config)
+2020-09-01 14:59:18.1378 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 14:59:18.1518 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 14:59:18.1716 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 14:59:18.1716 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 14:59:18.1887 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 14:59:18.1887 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 14:59:18.1887 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 14:59:18.2042 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 14:59:18.2042 Info Message Template Auto Format enabled
+2020-09-01 14:59:18.2173 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 14:59:18.2370 Warn Error when setting property 'ConnectionString' on 'NLog.Targets.DatabaseTarget' Exception: System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+2020-09-01 14:59:18.2630 Warn Error when setting '${appsettings:name=ConnectionStrings.Log}' on attibute 'connectionString' Exception: NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+2020-09-01 14:59:18.2681 Error Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config.  Exception: NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+2020-09-01 14:59:18.2681 Warn Error has been raised. Exception: NLog.NLogConfigurationException: Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config. 
+ ---> NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   --- End of inner exception stack trace ---
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   at NLog.Config.XmlLoggingConfiguration..ctor(XmlReader reader, String fileName, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
+2020-09-01 14:59:18.2681 Error Failed loading from config file location: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config Exception: NLog.NLogConfigurationException: Exception when parsing D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config. 
+ ---> NLog.NLogConfigurationException: Error when setting property 'ConnectionString' on DatabaseTarget
+ ---> System.ArgumentException: LayoutRenderer cannot be found: 'appsettings'
+   at NLog.Config.Factory`2.CreateInstance(String itemName)
+   at NLog.Layouts.LayoutParser.GetLayoutRenderer(ConfigurationItemFactory configurationItemFactory, String name, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.ParseLayoutRenderer(ConfigurationItemFactory configurationItemFactory, SimpleStringReader stringReader, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.LayoutParser.CompileLayout(ConfigurationItemFactory configurationItemFactory, SimpleStringReader sr, Nullable`1 throwConfigExceptions, Boolean isNested, String& text)
+   at NLog.Layouts.SimpleLayout.SetLayoutText(String value, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory, Nullable`1 throwConfigExceptions)
+   at NLog.Layouts.SimpleLayout..ctor(String txt, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryParseLayoutValue(String stringValue, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Internal.PropertyHelper.TryNLogSpecificConversion(Type propertyType, String value, ConfigurationItemFactory configurationItemFactory, Object& newValue)
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   --- End of inner exception stack trace ---
+   at NLog.Internal.PropertyHelper.SetPropertyFromString(Object obj, String propertyName, String value, ConfigurationItemFactory configurationItemFactory)
+   at NLog.Config.LoggingConfigurationParser.ConfigureObjectFromAttributes(Object targetObject, ILoggingConfigurationElement element, Boolean ignoreType)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetElement(Target target, ILoggingConfigurationElement targetElement, Dictionary`2 typeNameToDefaultTargetParameters)
+   at NLog.Config.LoggingConfigurationParser.ParseTargetsElement(ILoggingConfigurationElement targetsElement)
+   at NLog.Config.LoggingConfigurationParser.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogSection(ILoggingConfigurationElement configSection)
+   at NLog.Config.LoggingConfigurationParser.LoadConfig(ILoggingConfigurationElement nlogConfig, String basePath)
+   at NLog.Config.XmlLoggingConfiguration.ParseNLogElement(ILoggingConfigurationElement nlogElement, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.ParseTopLevel(NLogXmlElement content, String filePath, Boolean autoReloadDefault)
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   --- End of inner exception stack trace ---
+   at NLog.Config.XmlLoggingConfiguration.Initialize(XmlReader reader, String fileName, Boolean ignoreErrors)
+   at NLog.Config.XmlLoggingConfiguration..ctor(XmlReader reader, String fileName, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfiguration(XmlReader xmlReader, String configFile, LogFactory logFactory)
+   at NLog.Config.LoggingConfigurationFileLoader.LoadXmlLoggingConfigurationFile(LogFactory logFactory, String configFile)
+   at NLog.Config.LoggingConfigurationFileLoader.TryLoadLoggingConfiguration(LogFactory logFactory, String configFile, LoggingConfiguration& config)
+2020-09-01 15:13:49.0328 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:13:49.0459 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:13:49.0629 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:13:49.0778 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:13:49.0778 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:13:49.0778 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:13:49.0945 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:13:49.0945 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:13:49.0945 Info Message Template Auto Format enabled
+2020-09-01 15:13:49.1120 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:13:49.1399 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:13:49.1399 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:13:49.1619 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:13:49.1777 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:13:49.2650 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:13:49.2650 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:13:49.2895 Error DatabaseTarget(Name=SQLServer): Failed to create ConnectionType from DBProvider=sqlserver Exception: System.IO.FileNotFoundException: Could not load file or assembly 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'. 系統找不到指定的檔案。
+File name: 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(ObjectHandleOnStack assemblyName, ObjectHandleOnStack requestingAssembly, StackCrawlMarkHandle stackMark, Boolean throwOnFileNotFound, ObjectHandleOnStack assemblyLoadContext, ObjectHandleOnStack retAssembly)
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, RuntimeAssembly requestingAssembly, StackCrawlMark& stackMark, Boolean throwOnFileNotFound, AssemblyLoadContext assemblyLoadContext)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at NLog.Targets.DatabaseTarget.SetConnectionType()
+   at NLog.Targets.DatabaseTarget.InitializeTarget()
+2020-09-01 15:13:49.3330 Error Database Target[SQLServer]: Error initializing target Exception: System.IO.FileNotFoundException: Could not load file or assembly 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'. 系統找不到指定的檔案。
+File name: 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(ObjectHandleOnStack assemblyName, ObjectHandleOnStack requestingAssembly, StackCrawlMarkHandle stackMark, Boolean throwOnFileNotFound, ObjectHandleOnStack assemblyLoadContext, ObjectHandleOnStack retAssembly)
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, RuntimeAssembly requestingAssembly, StackCrawlMark& stackMark, Boolean throwOnFileNotFound, AssemblyLoadContext assemblyLoadContext)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at NLog.Targets.DatabaseTarget.SetConnectionType()
+   at NLog.Targets.DatabaseTarget.InitializeTarget()
+   at NLog.Targets.Target.Initialize(LoggingConfiguration configuration)
+2020-09-01 15:14:18.2111 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:14:18.2300 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:14:18.2593 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:14:18.2777 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:14:18.2898 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:14:18.3009 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:14:18.3120 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:14:18.3120 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:14:18.3385 Info Message Template Auto Format enabled
+2020-09-01 15:14:18.3534 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:14:18.3936 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:14:18.4127 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:14:18.4261 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:14:18.4481 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:14:18.4914 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:14:18.5066 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:14:18.5327 Error DatabaseTarget(Name=SQLServer): Failed to create ConnectionType from DBProvider=sqlserver Exception: System.IO.FileNotFoundException: Could not load file or assembly 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'. 系統找不到指定的檔案。
+File name: 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(ObjectHandleOnStack assemblyName, ObjectHandleOnStack requestingAssembly, StackCrawlMarkHandle stackMark, Boolean throwOnFileNotFound, ObjectHandleOnStack assemblyLoadContext, ObjectHandleOnStack retAssembly)
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, RuntimeAssembly requestingAssembly, StackCrawlMark& stackMark, Boolean throwOnFileNotFound, AssemblyLoadContext assemblyLoadContext)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at NLog.Targets.DatabaseTarget.SetConnectionType()
+   at NLog.Targets.DatabaseTarget.InitializeTarget()
+2020-09-01 15:14:18.5768 Error Database Target[SQLServer]: Error initializing target Exception: System.IO.FileNotFoundException: Could not load file or assembly 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'. 系統找不到指定的檔案。
+File name: 'System.Data.SqlClient, Culture=neutral, PublicKeyToken=null'
+   at System.Reflection.RuntimeAssembly.InternalLoad(ObjectHandleOnStack assemblyName, ObjectHandleOnStack requestingAssembly, StackCrawlMarkHandle stackMark, Boolean throwOnFileNotFound, ObjectHandleOnStack assemblyLoadContext, ObjectHandleOnStack retAssembly)
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, RuntimeAssembly requestingAssembly, StackCrawlMark& stackMark, Boolean throwOnFileNotFound, AssemblyLoadContext assemblyLoadContext)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at NLog.Targets.DatabaseTarget.SetConnectionType()
+   at NLog.Targets.DatabaseTarget.InitializeTarget()
+   at NLog.Targets.Target.Initialize(LoggingConfiguration configuration)
+2020-09-01 15:15:16.8888 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:15:16.9103 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:15:16.9336 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:15:16.9634 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:15:16.9755 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:15:16.9878 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:15:16.9998 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:15:16.9998 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:15:17.0265 Info Message Template Auto Format enabled
+2020-09-01 15:15:17.0427 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:15:17.0793 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:15:17.1002 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:15:17.1133 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:15:17.1352 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:15:17.1784 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:15:17.1940 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:15:17.2668 Info Closing old configuration.
+2020-09-01 15:15:17.3015 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:18:03.6675 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:18:03.7078 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:18:03.7377 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:18:03.7764 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:18:03.7908 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:18:03.8044 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:18:03.8188 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:18:03.8333 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:18:03.8492 Info Message Template Auto Format enabled
+2020-09-01 15:18:03.8654 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:18:03.9102 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:18:03.9102 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:18:03.9257 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:18:03.9409 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:18:03.9837 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:18:03.9837 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:18:04.0650 Info Closing old configuration.
+2020-09-01 15:18:04.0939 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:19:13.4263 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:19:13.4427 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:19:13.4636 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:19:13.4813 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:19:13.4866 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:19:13.4866 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:19:13.4984 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:19:13.4984 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:19:13.4984 Info Message Template Auto Format enabled
+2020-09-01 15:19:13.5182 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:19:13.5510 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:19:13.5647 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:19:13.5647 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:19:13.5871 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:19:13.6369 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:19:13.6471 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:19:13.6803 Info Closing old configuration.
+2020-09-01 15:19:13.7078 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:19:14.7587 Error DatabaseTarget(Name=SQLServer): Error when writing to database. Exception: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at NLog.Targets.DatabaseTarget.OpenConnection(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.EnsureConnectionOpen(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.WriteLogEventToDatabase(LogEventInfo logEvent, String connectionString)
+2020-09-01 15:21:21.3140 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:21:21.3259 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:21:21.3259 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:21:21.3553 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:21:21.3632 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:21:21.3632 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:21:21.3632 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:21:21.3765 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:21:21.3765 Info Message Template Auto Format enabled
+2020-09-01 15:21:21.3765 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:21:21.4224 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:21:21.4224 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:21:21.4387 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:21:21.4513 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:21:21.4869 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:21:21.4869 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:21:21.5263 Info Closing old configuration.
+2020-09-01 15:21:21.5666 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:21:22.3052 Error DatabaseTarget(Name=SQLServer): Error when writing to database. Exception: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at NLog.Targets.DatabaseTarget.OpenConnection(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.EnsureConnectionOpen(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.WriteLogEventToDatabase(LogEventInfo logEvent, String connectionString)
+2020-09-01 15:22:01.4291 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:22:01.4425 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:22:01.4642 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:22:01.4961 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:22:01.5014 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:22:01.5014 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:22:01.5014 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:22:01.5166 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:22:01.5166 Info Message Template Auto Format enabled
+2020-09-01 15:22:01.5295 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:22:01.5655 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:22:01.5655 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:22:01.5818 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:22:01.5998 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:22:01.6468 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:22:01.6559 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:22:01.7181 Info Closing old configuration.
+2020-09-01 15:22:02.4445 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:22:03.3344 Error DatabaseTarget(Name=SQLServer): Error when writing to database. Exception: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at NLog.Targets.DatabaseTarget.OpenConnection(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.EnsureConnectionOpen(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.WriteLogEventToDatabase(LogEventInfo logEvent, String connectionString)
+2020-09-01 15:22:37.6680 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:22:37.6812 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll
+2020-09-01 15:22:37.7015 Info NLog.Extensions.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 1.6.5.1409. Product version: 1.6.5+c05b105d8cd52581a50da2af91ebacf8d4bc8f0d. GlobalAssemblyCache: False
+2020-09-01 15:22:37.7015 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Extensions.Logging.dll succeeded!
+2020-09-01 15:22:37.7243 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:22:37.7243 Info Loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll
+2020-09-01 15:22:37.7332 Info NLog.Web.AspNetCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.9.3.1751. Product version: 4.9.3. GlobalAssemblyCache: False
+2020-09-01 15:22:37.7332 Info Auto loading assembly file: D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\NLog.Web.AspNetCore.dll succeeded!
+2020-09-01 15:22:37.7332 Info Message Template Auto Format enabled
+2020-09-01 15:22:37.7508 Info Loading assembly: NLog.Web.AspNetCore
+2020-09-01 15:22:37.7813 Warn Skipping unrecognized property 'serverVariable=SERVER_PORT` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:22:37.7813 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:22:37.7813 Warn Skipping unrecognized property 'serverVariable=HTTPS` for ${aspnet-request} (NLog.Web.LayoutRenderers.AspNetRequestValueLayoutRenderer)
+2020-09-01 15:22:37.8131 Info Adding target DatabaseTarget(Name=SQLServer)
+2020-09-01 15:22:37.8543 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2020-09-01 15:22:37.8658 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:22:37.8999 Info Closing old configuration.
+2020-09-01 15:22:37.9271 Info Validating config: TargetNames=SQLServer, ConfigItems=71, FilePath=D:\Code\tgs\Apis\TgsApi\bin\Debug\net5.0\nlog.Development.config
+2020-09-01 15:22:38.6736 Error DatabaseTarget(Name=SQLServer): Error when writing to database. Exception: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at NLog.Targets.DatabaseTarget.OpenConnection(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.EnsureConnectionOpen(String connectionString, LogEventInfo logEventInfo)
+   at NLog.Targets.DatabaseTarget.WriteLogEventToDatabase(LogEventInfo logEvent, String connectionString)

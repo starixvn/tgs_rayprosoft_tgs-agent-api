@@ -34,6 +34,16 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
             builder.Property(c => c.Port)
                 .HasColumnType(ColumnTypes.Nvarchar(255));
 
+            builder.Property(c => c.ServerName)
+                .HasColumnType(ColumnTypes.Nvarchar(512));
+
+            builder.Property(c => c.Url)
+                .HasColumnType(ColumnTypes.Nvarchar(512));
+
+            builder.Property(c => c.Https)
+                .HasColumnType(ColumnTypes.Nvarchar(255));
+
+
             builder.Property(c => c.Properties)
                 .HasColumnType(ColumnTypes.Nvarchar(512));
 
@@ -42,6 +52,9 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 
             builder.Property(c => c.Exception)
                 .HasColumnType(ColumnTypes.Nvarchar(4000));
+
+            builder.Property(c => c.StackTrace)
+                .HasColumnType(ColumnTypes.NvarcharMax);
 
             builder.Property(c => c.RecordedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset);

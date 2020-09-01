@@ -73,7 +73,11 @@ namespace TGS.Apis.LogApi.Migrations
                     Properties = table.Column<string>(type: "NVARCHAR(512)", nullable: true),
                     Callsite = table.Column<string>(type: "NVARCHAR(512)", nullable: true),
                     Message = table.Column<string>(type: "NVARCHAR(4000)", nullable: true),
-                    Exception = table.Column<string>(type: "NVARCHAR(4000)", nullable: true)
+                    Exception = table.Column<string>(type: "NVARCHAR(4000)", nullable: true),
+                    ServerName = table.Column<string>(type: "NVARCHAR(512)", nullable: true),
+                    Url = table.Column<string>(type: "NVARCHAR(512)", nullable: true),
+                    Https = table.Column<string>(type: "NVARCHAR(255)", nullable: true),
+                    StackTrace = table.Column<string>(type: "NVARCHAR(max)", nullable: true)
                 },
                 constraints: table =>
                 {

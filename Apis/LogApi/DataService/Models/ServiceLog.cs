@@ -16,6 +16,10 @@ namespace TGS.Apis.LogApi.DataService.Models
         public string Callsite { get; set; }
         public string Message { get; set; }
         public string Exception { get; set; }
+        public string ServerName { get; set; }
+        public string Url { get; set; }
+        public string Https { get; set; }
+        public string StackTrace { get; set; }
 
     }
 }
