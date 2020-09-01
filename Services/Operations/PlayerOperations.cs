@@ -60,7 +60,7 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var values = await _cacheManager.GetHashSetAsync(RedisCacheType.Player, playerCode, new RedisValue[]
+                var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, new RedisValue[]
                 {
                     CachedPlayerFields.BrandId,
                     CachedPlayerFields.ExternalId,
@@ -133,7 +133,7 @@ namespace TGS.Services.Operations
                     new HashEntry(CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
                 };
 
-                await _cacheManager.CacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2), true);
+                await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2), true);
             }
             catch (Exception e)
             {

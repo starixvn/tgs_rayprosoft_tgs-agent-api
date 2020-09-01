@@ -17,6 +17,7 @@
     <None Remove="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
@@ -37,6 +38,7 @@
   <ItemGroup>
     <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />

@@ -42,11 +42,11 @@ namespace TGS.Infrastructures.Redis
 
         Task SafeCacheForeverAsync<T>(object cacheType, object key, T data);
 
-        Task CacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields, TimeSpan? expiresIn,
+        Task SafeCacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields, TimeSpan? expiresIn,
             bool fireAndForget = false);
 
-        Task<RedisValue[]> GetHashSetAsync(object cacheType, object key, RedisValue[] hashFields, bool fireAndForget = false);
+        Task<RedisValue[]> SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields, bool fireAndForget = false);
 
-        Task<RedisValue> GetHashSetAsync(object cacheType, object key, RedisValue hashField, bool fireAndForget = false);
+        Task<RedisValue> SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField, bool fireAndForget = false);
     }
 }

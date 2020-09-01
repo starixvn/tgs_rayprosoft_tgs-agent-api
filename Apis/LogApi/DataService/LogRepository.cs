@@ -55,7 +55,9 @@ namespace TGS.Apis.LogApi.DataService
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.ApplyConfiguration(new ApiLogTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ApiLogMap());
+            modelBuilder.ApplyConfiguration(new LogRecordMap());
+            modelBuilder.ApplyConfiguration(new ServiceLogMap());
         }
 
         async Task ILogRepository.AddApiLogsAsync(IList<ApiLog> logs)

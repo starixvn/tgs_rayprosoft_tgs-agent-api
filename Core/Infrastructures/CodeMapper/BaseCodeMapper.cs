@@ -43,7 +43,7 @@ namespace TGS.Infrastructures.CodeMapper
             }
 
             Dictionary<string, string> dict;
-            var value = await _cacheManager.GetHashSetAsync(cacheType, filterId, cacheKeyPrefix);
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, filterId, cacheKeyPrefix);
             
             if (value.HasValue)
             {
@@ -53,7 +53,7 @@ namespace TGS.Infrastructures.CodeMapper
             {
                 dict = await getDictionary(filterId);
 
-                await _cacheManager.CacheHashSetAsync(cacheType, filterId, new HashEntry[]
+                await _cacheManager.SafeCacheHashSetAsync(cacheType, filterId, new HashEntry[]
                 {
                     new (cacheKeyPrefix, _json.SerializeToString(dict))
                 }, TimeSpan.FromMinutes(cacheForMinutes));

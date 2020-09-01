@@ -57,6 +57,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         static readonly IMenu GameProviderMenu = new Menu_(ReportGameProviderPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB283"), string.Empty, "ReportGameProvider", "GameProvider", "Resources.UI.Partial.Menu.Menu.LinkGameProvider");
 
         static readonly IMenu SystemMenu = new Menu_(EmptyPermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB288"), "fa-cog", "System", "System", "Resources.UI.Partial.Menu.Menu.MenuTextSystem");
+
         static readonly IMenu CurrenciesMenu = new Menu_(CreateAndUpdatePermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB291"), string.Empty, "Currencies", "Currencies", "Resources.UI.Partial.Menu.Menu.LinkCurrencies");
         static readonly IMenu LanguagesMenu = new Menu_(CreateAndUpdatePermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB292"), string.Empty, "Languages", "Languages", "Resources.UI.Partial.Menu.Menu.LinkLanguages");
         static readonly IMenu ConfigsMenu = new Menu_(ManagePermissions, new Guid("5F27A355-42EC-4E92-8F1C-3E3F5D6FB302"), string.Empty, "Configurations", "Configurations", "Resources.UI.Partial.Menu.Menu.LinkApplicationConfigurations");
