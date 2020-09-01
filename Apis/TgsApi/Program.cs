@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Configuration;
 using NLog.Web;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace TGS.Apis.TgsApi
 {
@@ -18,7 +18,7 @@ namespace TGS.Apis.TgsApi
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                           .ConfigureHostConfiguration((config) =>
+                           .ConfigureHostConfiguration(config =>
                            {
                                config.AddEnvironmentVariables();
                            })
@@ -26,6 +26,12 @@ namespace TGS.Apis.TgsApi
                            {
                                webBuilder.UseStartup<Startup>();
                            })
+                           .ConfigureLogging((hostContext, logging) =>
+                           {
+                               logging.ClearProviders();
+                               logging.SetMinimumLevel(LogLevel.Trace);
+                           })
+                           .UseNLog()
                            .ConfigureAppConfiguration((hostContext, config) =>
                            {
                                config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
@@ -36,21 +42,7 @@ namespace TGS.Apis.TgsApi
                                {
                                    config.AddCommandLine(args);
                                }
-                           })
-                           .ConfigureLogging((hostContext, logging) =>
-                           {
-                               logging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
-                               if (hostContext.HostingEnvironment.IsDevelopment())
-                               {
-                                   logging.AddConsole();
-                                   logging.SetMinimumLevel(LogLevel.Error);
-                               }
-
-                               logging.AddConfiguration();
-                           })
-                           .UseNLog();
+                           });
         }
-
-
     }
 }

@@ -18,6 +18,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
+    <None Remove="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLogs.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.7">
       <PrivateAssets>all</PrivateAssets>

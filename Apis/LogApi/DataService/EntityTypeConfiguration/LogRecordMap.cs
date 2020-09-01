@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Apis.LogApi.DataService.Models;
+using TGS.Core.DataServices.Base;
 
 namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
@@ -13,27 +14,27 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
             builder.HasKey(p => p.Id);
 
             builder.Property(c => c.ServerName)
-              .HasColumnType("nvarchar(64)")
+              .HasColumnType(ColumnTypes.Nvarchar(64))
               .IsRequired()
               .IsUnicode();
 
             builder.Property(c => c.Level)
-                .HasColumnType("int")
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Message)
-                .HasColumnType("nvarchar(512)")
+                .HasColumnType(ColumnTypes.Nvarchar(512))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Exception)
-                .HasColumnType("nvarchar(4000)")
+                .HasColumnType(ColumnTypes.Nvarchar(4000))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.RecordedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
         }
     }

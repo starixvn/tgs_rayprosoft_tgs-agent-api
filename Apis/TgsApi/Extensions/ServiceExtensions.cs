@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Bet;
-using TGS.Infrastructures.Redis;
 
 namespace TGS.Apis.TgsApi.Extensions
 {
@@ -12,8 +11,8 @@ namespace TGS.Apis.TgsApi.Extensions
         public static IServiceCollection AddRepositoriesAndExecuteMigrations(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddRepository<IBetRepository, BetRepository>(configuration, "BET");
-            services.AddRepository<ITgsRepository, TgsRepository>(configuration, "TGS");
+            services.AddRepository<IBetRepository, BetRepository>(configuration, "Bet");
+            services.AddRepository<ITgsRepository, TgsRepository>(configuration, "Tgs");
             return services;
         }
     }

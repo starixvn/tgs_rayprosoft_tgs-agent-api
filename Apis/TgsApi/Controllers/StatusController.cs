@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TGS.Apis.TgsApi.Controllers.Message;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
@@ -21,17 +22,20 @@ namespace TGS.Apis.TgsApi.Controllers
         private readonly IBetRepository _betRepository;
         private readonly IRedisRepository _redisRepository;
         private readonly ITgsLog _tgsLog;
+        private readonly ILogger<StatusController> _logger;
 
         public StatusController(
             ITgsRepository tgpRepository,
             IBetRepository betRepository,
             IRedisRepository redisRepository,
-            ITgsLog tgsLog)
+            ITgsLog tgsLog,
+            ILogger<StatusController> logger)
         {
             _tgpRepository = tgpRepository;
             _betRepository = betRepository;
             _redisRepository = redisRepository;
             _tgsLog = tgsLog;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -60,6 +64,16 @@ namespace TGS.Apis.TgsApi.Controllers
         {
             var message = DateTime.Now.ToString();
             _tgsLog.LogWarning(message);
+            return message;
+
+        }
+
+
+        [HttpGet("/nlog")]
+        public string WriteNLogAsync()
+        {
+            var message = DateTime.Now.ToString();
+            _logger.LogWarning(message);
             return message;
 
         }

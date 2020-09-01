@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NLog;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
 using TGS.Infrastructures.Log;
@@ -20,6 +21,7 @@ namespace TGS.Apis.TgsApi
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            LogManager.Configuration.Variables["connectionString"] = Configuration.GetConnectionString("Log");
         }
 
         public IConfiguration Configuration { get; }
@@ -37,8 +39,6 @@ namespace TGS.Apis.TgsApi
                     options.InvalidModelStateResponseFactory = context =>
                     {
                         var result = new BadRequestObjectResult(context.ModelState);
-
-                        // TODO: add `using System.Net.Mime;` to resolve MediaTypeNames
                         result.ContentTypes.Add(MediaTypeNames.Application.Json);
                         result.ContentTypes.Add(MediaTypeNames.Application.Xml);
 
