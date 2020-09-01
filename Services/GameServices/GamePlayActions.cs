@@ -14,7 +14,7 @@ namespace TGS.Services.GameServices
 
         Task<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode);
 
-        Task<BetResult> LockAmountAsync(BetData data);
+        //Task<BetResult> LockAmountAsync(BetData data);
 
         Task<BetResult> PlaceBetAsync(BetData data);
 
@@ -65,10 +65,10 @@ namespace TGS.Services.GameServices
             return new GetBalanceResult(balance, cur);
         }
 
-        Task<BetResult> IGamePlayActions.LockAmountAsync(BetData data)
-        {
-            throw new NotImplementedException();
-        }
+        //Task<BetResult> IGamePlayActions.LockAmountAsync(BetData data)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
         {
@@ -86,7 +86,9 @@ namespace TGS.Services.GameServices
             var status = ValidStatuses.GetStatus(player.Type);
 
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(player.BrandId, status);
-
+                        
+            // TODO: check player login time?
+            
             var brandId = player.BrandId;
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
             var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
@@ -98,7 +100,7 @@ namespace TGS.Services.GameServices
             var gameProviderBetLimitCode = await _gameProviderOperations.GetGameProviderBetLimitCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode, player.BetLimitGroupId);
 
             var cachedBrand = await _brandOperations.GetCachedBrandAsync(brandId);
-            
+                
             // TODO: check or get platform? how?
 
             return new PlayerValidationResult

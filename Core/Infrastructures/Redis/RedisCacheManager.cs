@@ -177,36 +177,61 @@ namespace TGS.Infrastructures.Redis
             }
         }
 
-        async Task IRedisCacheManager.CacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields,
+        async Task IRedisCacheManager.SafeCacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields,
             TimeSpan? expiresIn, bool fireAndForget)
         {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
+            try
+            {
+                var cacheKey = FormCacheKey(cacheType, key);
+                var db = _repository.GetDb();
 
-            await db.HashSetAsync(cacheKey, hashFields);
+                await db.HashSetAsync(cacheKey, hashFields);
 
-            var flags = GetCommandFlags(fireAndForget);
-            await db.KeyExpireAsync(cacheKey, expiresIn, flags);
+                var flags = GetCommandFlags(fireAndForget);
+                await db.KeyExpireAsync(cacheKey, expiresIn, flags);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"redis error :{ex}");
+            }
         }
 
-        Task<RedisValue[]> IRedisCacheManager.GetHashSetAsync(object cacheType, object key, RedisValue[] hashFields,
+       async Task<RedisValue[]> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields,
             bool fireAndForget)
         {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
+            try
+            {
+                var cacheKey = FormCacheKey(cacheType, key);
+                var db = _repository.GetDb();
 
-            var flags = GetCommandFlags(fireAndForget);
-            return db.HashGetAsync(cacheKey, hashFields, flags);
+                var flags = GetCommandFlags(fireAndForget);
+                return await db.HashGetAsync(cacheKey, hashFields, flags);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"redis error :{ex}");
+            }
+
+            return Array.Empty<RedisValue>();
         }
 
-        Task<RedisValue> IRedisCacheManager.GetHashSetAsync(object cacheType, object key, RedisValue hashField,
+        async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField,
             bool fireAndForget)
         {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
+            try
+            {
+                var cacheKey = FormCacheKey(cacheType, key);
+                var db = _repository.GetDb();
 
-            var flags = GetCommandFlags(fireAndForget);
-            return db.HashGetAsync(cacheKey, hashField, flags);
+                var flags = GetCommandFlags(fireAndForget);
+                return await db.HashGetAsync(cacheKey, hashField, flags);
+            } 
+            catch (Exception ex)
+            {
+                _logger.LogError($"redis error :{ex}");
+            }
+
+            return RedisValue.Null;
         }
 
         private static CommandFlags GetCommandFlags(bool fireAndForget)
