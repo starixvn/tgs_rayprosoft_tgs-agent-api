@@ -58,7 +58,6 @@ namespace TGS.Apis.TgsApi.Controllers
             };
         }
 
-
         [HttpGet("/log")]
         public string WriteLogAsync()
         {
@@ -67,7 +66,6 @@ namespace TGS.Apis.TgsApi.Controllers
             return message;
 
         }
-
 
         [HttpGet("/nlog")]
         public string WriteNLogAsync()
