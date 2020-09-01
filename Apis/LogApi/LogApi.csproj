@@ -43,5 +43,9 @@
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 
 </Project>

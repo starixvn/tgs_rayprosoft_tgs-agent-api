@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Core.DataServices.Base;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {

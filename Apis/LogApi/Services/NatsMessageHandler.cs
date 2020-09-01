@@ -130,38 +130,6 @@ namespace TGS.Apis.LogApi.Services
                     ex => _logger.LogError("error occurred when RX executed:" + ex));
         }
 
-        private void SubscribeReceived<T>(Action<LogBusEvent> busEvent) where T : LogBusEvent
-        {
-            _logRecordSubscription = _natsManager.SubscribeAsync<T>(
-                nameof(T),
-                Consts.Nats.NatsTgsLogQueueName,
-                message =>
-                {
-                    _lastBusEvent = message.DataObject;
-                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    busEvent?.Invoke(message.DataObject);
-                });
-
-            var query =
-                from logs in Observable.FromEvent<LogBusEvent>(
-                        ev => busEvent += ev,
-                        ev => busEvent -= ev)
-                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
-                where logs.Count > 0
-                select logs;
-
-            _subscription = query
-                .SubscribeOn(NewThreadScheduler.Default)
-                .Subscribe(
-                    async logs =>
-                    {
-                        var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(T), logs.Cast<T>().Count());
-                        await WriteLogsAsync(nameof(T), logs);
-                    },
-                    ex => _logger.LogError("error occurred when RX executed:" + ex));
-        }
-
         void IMessageHandler.StopReceiveMessages()
         {
             _apiLogSubscription?.Dispose();

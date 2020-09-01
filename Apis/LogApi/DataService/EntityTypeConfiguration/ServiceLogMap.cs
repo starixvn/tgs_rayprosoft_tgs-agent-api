@@ -4,11 +4,11 @@ using TGS.Apis.LogApi.DataService.Models;
 
 namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 {
-    public sealed class LogRecordTypeConfiguration : IEntityTypeConfiguration<LogRecord>
+    public sealed class ServiceLogMap : IEntityTypeConfiguration<ServiceLog>
     {
-        void IEntityTypeConfiguration<LogRecord>.Configure(EntityTypeBuilder<LogRecord> builder)
+        void IEntityTypeConfiguration<ServiceLog>.Configure(EntityTypeBuilder<ServiceLog> builder)
         {
-            builder.ToTable("LogRecords", "dbo");
+            builder.ToTable("ServiceLogs", "dbo");
 
             builder.HasKey(p => p.Id);
 
@@ -18,7 +18,12 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
               .IsUnicode();
 
             builder.Property(c => c.Level)
-                .HasColumnType("int")
+                .HasColumnType("tinyint")
+                .IsRequired()
+                .IsUnicode();
+
+            builder.Property(c => c.Callsite)
+                .HasColumnType("nvarchar(4000)")
                 .IsRequired()
                 .IsUnicode();
 
