@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -17,38 +18,38 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(c => c.Status)
-                .HasColumnType("smallint")
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType("nvarchar(256)");
+                .HasColumnType(ColumnTypes.Nvarchar(256));
 
             builder.Property(c => c.TimeZoneId)
-                .HasColumnType("nvarchar(256)");
+                .HasColumnType(ColumnTypes.Nvarchar(256));
 
             builder.Property(c => c.LoginUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.CashierUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.HelpUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.TermsUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.MobileLoginUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.MobileCashierUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.MobileHelpUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.MobileTermsUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.HasMany(c => c.BrandGameProviderConfigurations)
                 .WithOne(c => c.Brand)

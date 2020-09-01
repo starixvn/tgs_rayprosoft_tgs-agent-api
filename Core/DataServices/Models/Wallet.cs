@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Models
         public Currency Currency { get; set; }
         public string ExternalCurrencyCode { get; set; } = string.Empty;
         public decimal Balance { get; set; }
-        public string CreatedOn { get; set; }
-        public string LastModifiedOn { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
     }
 }

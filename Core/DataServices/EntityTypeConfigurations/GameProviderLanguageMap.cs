@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -22,12 +23,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasForeignKey(gpl => gpl.CultureCode);
 
             builder.Property(gpl => gpl.CultureCode)
-                .HasColumnType("nvarchar(6)")
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(6));
 
             builder.Property(gpl => gpl.GameProviderCultureCode)
-                .HasColumnType("nvarchar(6)")
-                .IsUnicode()
+                .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsRequired();
         }
     }
