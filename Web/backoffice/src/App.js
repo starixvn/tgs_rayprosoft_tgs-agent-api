@@ -146,7 +146,13 @@ const Sidebar = () => {
 
   return (
     <Stack spacing="major-1" paddingY="major-2">
-      <SideNav selectedId={selectedId}>
+      <SideNav
+        selectedId={selectedId}
+        onChange={(id) => {
+          setSelectedId(id)
+          console.log("onSideNav Change", id)
+        }}
+      >
         {codes.map((code) => (
           <MenuItem key={code} code={code} />
         ))}
