@@ -90,6 +90,7 @@ namespace TGS.Infrastructures.Nats
             {
                 if (_connectionFactory.IsValueCreated && _state != ConnState.CONNECTED) return;
                 var data = _messagePackProvider.Serialize(content);
+                
                 _connectionFactory.Value?.Publish(topic, data);
                 try
                 {

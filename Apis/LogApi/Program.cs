@@ -9,12 +9,6 @@ namespace TGS.Apis.LogApi
 {
     public class Program
     {
-        //public static void Main(string[] args)
-        //{
-        //    BaseWorkersStartup.CreateHostBuilder<Startup, LogApiFactory>(args)
-        //        .Build()
-        //        .Run();
-        //}
 
         public static Task Main(string[] args)
         {
@@ -34,7 +28,10 @@ namespace TGS.Apis.LogApi
                 .ConfigureAppConfiguration((hostContext, config) =>
                 {
                     config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
-                    config.AddJsonFile("appsettings.json", false, true);
+                    config.AddJsonFile("appsettings.json", false, true)
+                        .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true)
+                        .AddEnvironmentVariables();
+                    ;
                     if (args != null)
                     {
                         config.AddCommandLine(args);

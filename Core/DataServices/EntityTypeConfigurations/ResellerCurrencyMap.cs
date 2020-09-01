@@ -10,10 +10,12 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("ResellerCurrencies", "dbo");
             builder.HasKey(bc => new { bc.ResellerId, bc.CurrencyCode });
+
             builder
                 .HasOne(bc => bc.Reseller)
                 .WithMany(c => c.Currencies)
                 .HasForeignKey(bc => bc.ResellerId);
+
             builder
                 .HasOne(bc => bc.Currency)
                 .WithMany(c => c.ResellerCurrencies)

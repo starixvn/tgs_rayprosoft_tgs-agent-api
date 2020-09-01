@@ -59,8 +59,6 @@ namespace TGS.Apis.LogApi.Services
         {
             SubscribeApiLogReceived();
             SubscribeLogRecordReceived();
-            RegisterApiLogSubscriberClient();
-            RegisterLogRecordSubscriberClient();
             _startupTime = DateTimeOffset.UtcNow;
         }
 
@@ -70,6 +68,16 @@ namespace TGS.Apis.LogApi.Services
 
         private void SubscribeApiLogReceived()
         {
+            _apiLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
+                nameof(ApiLogEvent),
+                Consts.Nats.NatsTgsLogQueueName,
+                message =>
+                {
+                    _lastBusEvent = message.DataObject;
+                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
+                    ApiLogReceived?.Invoke(message.DataObject);
+                });
+
             var query =
                 from logs in Observable.FromEvent<LogBusEvent>(
                         ev => ApiLogReceived += ev,
@@ -79,19 +87,29 @@ namespace TGS.Apis.LogApi.Services
                 select logs;
 
             _subscription = query
-                .SubscribeOn(NewThreadScheduler.Default)
-                .Subscribe(
-                    async logs =>
-                    {
-                        var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(ApiLogEvent), logs.Count);
-                        await WriteLogsAsync(nameof(ApiLogEvent), logs);
-                    },
-                    ex => _logger.LogError("error occurred when RX executed:" + ex));
+            .SubscribeOn(NewThreadScheduler.Default)
+            .Subscribe(
+                async logs =>
+                {
+                    var now = DateTimeOffset.UtcNow;
+                    CountReceivedLogs(now, nameof(ApiLogEvent), logs.Count);
+                    await WriteLogsAsync(nameof(ApiLogEvent), logs);
+                },
+                ex => _logger.LogError("error occurred when RX executed:" + ex));
         }
 
         private void SubscribeLogRecordReceived()
         {
+            _logRecordSubscription = _natsManager.SubscribeAsync<LogRecordEvent>(
+                nameof(LogRecordEvent),
+                Consts.Nats.NatsTgsLogQueueName,
+                message =>
+                {
+                    _lastBusEvent = message.DataObject;
+                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
+                    LogRecordReceived?.Invoke(message.DataObject);
+                });
+
             var query =
                 from logs in Observable.FromEvent<LogBusEvent>(
                         ev => LogRecordReceived += ev,
@@ -108,6 +126,38 @@ namespace TGS.Apis.LogApi.Services
                         var now = DateTimeOffset.UtcNow;
                         CountReceivedLogs(now, nameof(LogRecordEvent), logs.Cast<LogRecordEvent>().Count(log => log.level >= _loggerServiceConfig.Value.LogLevel || _loggerServiceConfig.Value.UnrestrictedLoggers.Contains(log.logger)));
                         await WriteLogsAsync(nameof(LogRecordEvent), logs);
+                    },
+                    ex => _logger.LogError("error occurred when RX executed:" + ex));
+        }
+
+        private void SubscribeReceived<T>(Action<LogBusEvent> busEvent) where T : LogBusEvent
+        {
+            _logRecordSubscription = _natsManager.SubscribeAsync<T>(
+                nameof(T),
+                Consts.Nats.NatsTgsLogQueueName,
+                message =>
+                {
+                    _lastBusEvent = message.DataObject;
+                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
+                    busEvent?.Invoke(message.DataObject);
+                });
+
+            var query =
+                from logs in Observable.FromEvent<LogBusEvent>(
+                        ev => busEvent += ev,
+                        ev => busEvent -= ev)
+                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
+                where logs.Count > 0
+                select logs;
+
+            _subscription = query
+                .SubscribeOn(NewThreadScheduler.Default)
+                .Subscribe(
+                    async logs =>
+                    {
+                        var now = DateTimeOffset.UtcNow;
+                        CountReceivedLogs(now, nameof(T), logs.Cast<T>().Count());
+                        await WriteLogsAsync(nameof(T), logs);
                     },
                     ex => _logger.LogError("error occurred when RX executed:" + ex));
         }
@@ -132,33 +182,6 @@ namespace TGS.Apis.LogApi.Services
 
         ConcurrentDictionary<string, uint> IMessageHandler.LogReceivedCount => _logReceivedCount;
 
-
-        private void RegisterApiLogSubscriberClient()
-        {
-            _apiLogSubscription = _natsManager.SubscribeAsync<ApiLogEvent>(
-                nameof(ApiLogEvent),
-                Consts.Nats.NatsTgsLogQueueName,
-                message =>
-                {
-                    _lastBusEvent = message.DataObject;
-                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    ApiLogReceived?.Invoke(message.DataObject);
-                });
-        }
-
-        private void RegisterLogRecordSubscriberClient()
-        {
-            _logRecordSubscription = _natsManager.SubscribeAsync<LogRecordEvent>(
-                nameof(LogRecordEvent),
-                Consts.Nats.NatsTgsLogQueueName,
-                message =>
-                {
-                    _lastBusEvent = message.DataObject;
-                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
-                    LogRecordReceived?.Invoke(message.DataObject);
-                });
-        }
-
         private async Task WriteLogsAsync(string eventType, IList<LogBusEvent> events)
         {
             if (eventType.IsNullOrEmpty() || events == null)
@@ -167,7 +190,6 @@ namespace TGS.Apis.LogApi.Services
             {
                 var logger = _logWriterFactory(eventType);
                 await logger.SaveLogsAsync(events);
-                await logger.DisposeAsync();
                 _lastInsertTime = DateTimeOffset.UtcNow;
             }
             catch (Exception ex)

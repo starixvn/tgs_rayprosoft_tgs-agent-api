@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -49,6 +50,7 @@ namespace TGS.Core.DataServices.Base.Extensions
             }, 128);
 
             services.AddScoped<TInterface, TRepository>();
+            services.AddTransient<Func<TInterface>>(c => () => c.GetService<TInterface>());
 
             return services;
         }
