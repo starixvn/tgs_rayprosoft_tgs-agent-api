@@ -13,12 +13,6 @@ namespace TGS.Core.DataServices.Models
 
         public string Symbol { get; set; }
 
-        public virtual ICollection<ResellerCurrency> ResellerCurrencies { get; set; }
-
-        public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
-
-        public virtual ICollection<GameProviderCurrency> GameProviderCurrencies { get; set; }
-
         public DateTimeOffset CreatedOn { get; set; }
 
         public DateTimeOffset UpdatedOn { get; set; }
@@ -26,5 +20,13 @@ namespace TGS.Core.DataServices.Models
         public string CreatedByUsername { get; set; }
 
         public string UpdatedByUsername { get; set; }
+
+        public virtual ICollection<ResellerCurrency> ResellerCurrencies { get; set; }
+
+        public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
+
+        public virtual ICollection<GameProviderCurrency> GameProviderCurrencies { get; set; }
+
+        public virtual ICollection<GameProviderBetLimit> GameProviderBetLimits { get; set; }
     }
 }

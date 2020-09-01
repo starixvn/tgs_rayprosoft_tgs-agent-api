@@ -3,15 +3,18 @@ import ReactDOM from "react-dom"
 import App from "./App"
 import "./index.css"
 import { Provider as BumbagProvider } from "bumbag"
+import { Provider as UserProvider } from "./user/context"
 import { BrowserRouter as Router } from "react-router-dom"
 
 ReactDOM.render(
   <React.StrictMode>
-    <BumbagProvider collapseBelow="desktop">
-      <Router>
-        <App />
-      </Router>
-    </BumbagProvider>
+    <Router>
+      <BumbagProvider collapseBelow="desktop">
+        <UserProvider>
+          <App />
+        </UserProvider>
+      </BumbagProvider>
+    </Router>
   </React.StrictMode>,
   document.getElementById("root")
 )

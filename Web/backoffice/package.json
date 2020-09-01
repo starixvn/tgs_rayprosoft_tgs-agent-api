@@ -1,11 +1,11 @@
 {
   "name": "backoffice",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "config": {},
   "scripts": {
     "start": "npm-run-all --parallel start:*",
     "start:dev": "snowpack dev --reload",
-    "start:api": "docker-compose run --rm --service-port api",
+    "start:api": "docker-compose -f ../../docker-compose.yml run --rm -p 32667:80  backoffice-api",
     "build": "snowpack build",
     "login:docker": "docker login registry.gitlab.com",
     "build:docker": "cross-var docker build . -t registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",
@@ -35,6 +35,6 @@
     "prettier": "^2.0.5",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0",
-    "snowpack": "^2.9.0"
+    "snowpack": "^2.9.3"
   }
 }

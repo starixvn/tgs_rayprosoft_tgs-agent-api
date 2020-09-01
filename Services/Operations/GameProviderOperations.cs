@@ -21,6 +21,12 @@ namespace TGS.Services.Operations
         Task<Status?> GetGameProviderStatusAsync(Guid gameProviderId);
 
         Task<Status?> GetGameProviderConfigurationStatusAsync(Guid gameProviderId, Guid gameProviderConfigurationId);
+
+        Task<bool> GetGameProviderSupportTestPlayerAsync(Guid gameProviderId);
+
+        Task<bool> LanguageSupportedAsync(Guid gameProviderId, string cultureCode);
+
+        Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -126,6 +132,36 @@ namespace TGS.Services.Operations
             var cachedGameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
             return cachedGameProvider?.Status;
         }
+
+        async Task<bool> IGameProviderOperations.GetGameProviderSupportTestPlayerAsync(Guid gameProviderId)
+        {
+             var value = await _cacheManager.GetHashSetAsync(RedisCacheType.GameProvider, gameProviderId, CachedGameProviderFields.SupportTestPlayer);
+            if (value.HasValue)
+            {
+                return (bool)value;
+            }
+
+            var cachedGameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
+            return cachedGameProvider?.SupportTestPlayer ?? false;
+        }
+
+        async Task<bool> IGameProviderOperations.LanguageSupportedAsync(Guid gameProviderId, string cultureCode)
+        {
+            var languages = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderLanguages, gameProviderId, TimeSpan.FromHours(2),
+                async () => {
+                    var dict = await _gameProviderQueriesFactory().GetGameProviderLanguagesByInternalCodeAsync(gameProviderId);
+                    return dict.Keys.ToArray();
+                });
+
+            return languages.Contains(cultureCode, StringComparer.OrdinalIgnoreCase);
+        }
+
+        Task<string> IGameProviderOperations.GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region Private Methods
 
         private async Task<CachedGameProvider> GetCachedGameProviderOrNullAsync(Guid gameProviderId)
         {
@@ -239,5 +275,7 @@ namespace TGS.Services.Operations
 
             public const string SettleBetTimeout = "settleBetTimeout";
         }
+
+        #endregion
     }
 }

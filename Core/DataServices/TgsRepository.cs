@@ -31,6 +31,9 @@ namespace TGS.Core.DataServices
         DbSet<BrandLanguage> ITgsRepository.BrandBrandLanguages { get; set; }
         DbSet<Brand> ITgsRepository.Brands { get; set; }
         DbSet<BrandGameProviderConfiguration> ITgsRepository.BrandGameProviderConfigurations { get; set; }
+        DbSet<BetLimitGroup> ITgsRepository.BetLimitGroups { get; set; }
+        DbSet<BrandBetLimit> ITgsRepository.BrandBetLimits { get; set; }
+        DbSet<GameProviderBetLimit> ITgsRepository.GameProviderBetLimits { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -86,6 +89,10 @@ namespace TGS.Core.DataServices
 
             modelBuilder.ApplyConfiguration(new GameProviderCurrencyMap());
             modelBuilder.ApplyConfiguration(new GameProviderLanguageMap());
+
+            modelBuilder.ApplyConfiguration(new BetLimitGroupMap());
+            modelBuilder.ApplyConfiguration(new BrandBetLimitMap());
+            modelBuilder.ApplyConfiguration(new GameProviderBetLimitMap());
         }
     }
 }
