@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200901090241_Initial")]
+    [Migration("20200902052309_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,7 +71,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(16)")
                         .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")
@@ -285,7 +285,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(16)")
                         .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")
@@ -356,7 +356,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(16)")
                         .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")
@@ -584,7 +584,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("varchar(16)");
 
                     b.Property<int>("BetLimitGroupId")
-                        .HasColumnType("Int");
+                        .HasColumnType("int");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
@@ -655,7 +655,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(16)")
                         .IsUnicode(true);
 
                     b.Property<string>("CreatedByUsername")

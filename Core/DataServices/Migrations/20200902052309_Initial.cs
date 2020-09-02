@@ -58,7 +58,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -101,7 +101,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -235,7 +235,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -321,7 +321,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -608,7 +608,7 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastActiveOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    BetLimitGroupId = table.Column<int>(type: "Int", nullable: false),
+                    BetLimitGroupId = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<byte>(nullable: false),
                     LastLoginUrl = table.Column<string>(type: "nvarchar(1024)", nullable: true),
                     LastCashierUrl = table.Column<string>(type: "nvarchar(1024)", nullable: true),
@@ -890,6 +890,7 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
 
             #endregion Store Procedure
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
