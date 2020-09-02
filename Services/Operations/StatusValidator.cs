@@ -18,7 +18,6 @@ namespace TGS.Services.Operations
     public sealed class StatusValidator : IStatusValidator
     {
         private readonly IBrandOperations _brandOperations;
-
         private readonly IGameProviderOperations _gameProviderOperations;
 
         public StatusValidator(

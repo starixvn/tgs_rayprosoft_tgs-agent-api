@@ -14,7 +14,12 @@
         }
 
         public const string CsrfTokenName = "X-XSRF-TOKEN";
-        public const string Environment = "ASPNETCORE_ENVIRONMENT";     
+        public const string Environment = "ASPNETCORE_ENVIRONMENT";
         public const string DefualtCultureCode = "en-US";
+
+        public static class Player
+        {
+            public const int LoginExpirationSeconds = 3600 * 24; // 1d
+        }
     }
 }

@@ -933,6 +933,8 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetLanguagesByExternalCode.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLatestLoginRecord.sql");
 
             #endregion Store Procedure
 
