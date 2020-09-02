@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Bet.Models
         public int TransactionsCount { get; set; }
         public string ErrorsJson { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
-        public string GameProviderConfiguration { get; set; }
+        public Guid GameProviderConfigurationId { get; set; }
         public virtual ICollection<GameAction> GameActions { get; set; }
     }
 }
