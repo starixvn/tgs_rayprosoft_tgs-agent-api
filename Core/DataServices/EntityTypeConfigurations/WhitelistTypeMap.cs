@@ -28,12 +28,12 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsUnicode();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired()
                 .IsUnicode();
 

@@ -25,11 +25,11 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
