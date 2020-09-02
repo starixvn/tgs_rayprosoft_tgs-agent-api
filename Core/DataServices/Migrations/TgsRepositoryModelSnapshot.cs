@@ -249,7 +249,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -265,7 +265,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -645,6 +645,41 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("Players","dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerLoginRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("ExpiredOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<short>("PlatformType")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.HasKey("Id")
+                        .HasAnnotation("SqlServer:Clustered", false);
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("PlayerCode");
+
+                    b.ToTable("PlayerLoginRecords");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.Reseller", b =>
                 {
                     b.Property<Guid>("Id")
@@ -742,7 +777,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -752,7 +787,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -813,7 +848,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
+                        .HasColumnType("nvarchar(32)")
                         .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("CreatedOn")
@@ -845,7 +880,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
+                        .HasColumnType("nvarchar(32)")
                         .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("UpdatedOn")
@@ -1046,6 +1081,21 @@ namespace TGS.Core.DataServices.Migrations
                         .WithMany("Players")
                         .HasForeignKey("CultureCode")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerLoginRecord", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.Brand", "Brand")
+                        .WithMany("PlayerLoginRecords")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                        .WithMany("PlayerLoginRecords")
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

@@ -44,8 +44,8 @@ namespace TGS.Core.DataServices.Migrations
                     Symbol = table.Column<string>(type: "nvarchar(16)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -126,8 +126,8 @@ namespace TGS.Core.DataServices.Migrations
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -655,8 +655,8 @@ namespace TGS.Core.DataServices.Migrations
                     InternalNote = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     Type = table.Column<short>(nullable: false)
                 },
                 constraints: table =>
@@ -675,6 +675,39 @@ namespace TGS.Core.DataServices.Migrations
                         principalSchema: "dbo",
                         principalTable: "Resellers",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerLoginRecords",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
+                    BrandId = table.Column<Guid>(nullable: false),
+                    Status = table.Column<short>(type: "smallint", nullable: false),
+                    PlatformType = table.Column<short>(type: "smallint", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ExpiredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerLoginRecords", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
+                    table.ForeignKey(
+                        name: "FK_PlayerLoginRecords_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalSchema: "dbo",
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PlayerLoginRecords_Players_PlayerCode",
+                        column: x => x.PlayerCode,
+                        principalSchema: "dbo",
+                        principalTable: "Players",
+                        principalColumn: "PlayerCode",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -801,6 +834,18 @@ namespace TGS.Core.DataServices.Migrations
                 column: "LanguageCultureCode");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlayerLoginRecords_BrandId",
+                schema: "dbo",
+                table: "PlayerLoginRecords",
+                column: "BrandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerLoginRecords_PlayerCode",
+                schema: "dbo",
+                table: "PlayerLoginRecords",
+                column: "PlayerCode");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Players_BetLimitGroupId",
                 schema: "dbo",
                 table: "Players",
@@ -860,7 +905,7 @@ namespace TGS.Core.DataServices.Migrations
                 table: "Whitelists",
                 column: "ResellerId");
 
-            #region Store Procedure
+                        #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -929,6 +974,10 @@ namespace TGS.Core.DataServices.Migrations
 
             migrationBuilder.DropTable(
                 name: "LocalizedStrings",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "PlayerLoginRecords",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

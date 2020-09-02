@@ -53,5 +53,7 @@ namespace TGS.Core.DataServices
         DbSet<BrandBetLimit> BrandBetLimits { get; set; }
 
         DbSet<GameProviderBetLimit> GameProviderBetLimits { get; set; }
+
+        DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
     }
 }
