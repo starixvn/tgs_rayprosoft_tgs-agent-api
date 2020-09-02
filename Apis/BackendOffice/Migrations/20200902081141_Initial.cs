@@ -1,0 +1,112 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace TGS.Apis.BackendOffice.Migrations
+{
+    public partial class Initial : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.EnsureSchema(
+                name: "dbo");
+
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    RoleType = table.Column<byte>(type: "tinyint", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR(50)", nullable: false),
+                    DisplayName = table.Column<string>(type: "NVARCHAR(50)", nullable: false),
+                    Department = table.Column<string>(type: "NVARCHAR(128)", nullable: false),
+                    MenuSetting = table.Column<string>(type: "NVARCHAR(4000)", nullable: false),
+                    Description = table.Column<string>(type: "NVARCHAR(128)", nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "NVARCHAR(255)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "NVARCHAR(255)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Settings",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Key = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Settings", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    RoleId = table.Column<Guid>(nullable: false),
+                    RoleType = table.Column<byte>(type: "tinyint", nullable: false),
+                    ResellerId = table.Column<Guid>(nullable: true),
+                    LicenseeId = table.Column<Guid>(nullable: true),
+                    BrandId = table.Column<Guid>(nullable: true),
+                    Username = table.Column<string>(type: "NVARCHAR(50)", nullable: false),
+                    Firstname = table.Column<string>(type: "NVARCHAR(30)", nullable: false),
+                    Lastname = table.Column<string>(type: "NVARCHAR(30)", nullable: false),
+                    Email = table.Column<string>(type: "NVARCHAR(128)", nullable: false),
+                    TimeZone = table.Column<string>(type: "NVARCHAR(256)", nullable: false),
+                    Password = table.Column<byte[]>(type: "VARBINARY(128)", nullable: false),
+                    Salt = table.Column<byte[]>(type: "VARBINARY(128)", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "NVARCHAR(255)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "NVARCHAR(255)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "dbo",
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleId",
+                schema: "dbo",
+                table: "Users",
+                column: "RoleId");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Settings",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Users",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Roles",
+                schema: "dbo");
+        }
+    }
+}

@@ -23,12 +23,6 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
         {
             return _repository.Users
                 .Include(u => u.Role)
-                .Include(u => u.Role.Menus)
-                .ThenInclude(p => p.Menu)
-                .Include(u => u.Role.Menus)
-                .ThenInclude(p => p.SubMenus)
-                .ThenInclude(p => p.Permissions)
-                .ThenInclude(p => p.Permission)
                 .FirstOrDefaultAsync(a => a.Username == username && a.Status == UserStatus.Enabled);
         }
     }

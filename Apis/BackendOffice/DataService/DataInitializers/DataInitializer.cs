@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
@@ -40,21 +39,14 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         {
             using var serviceScope = _scopeFactory.CreateScope();
             var repository = serviceScope.ServiceProvider.GetRequiredService<IBackendOfficeRepository>();
-            if (repository.Permissions.Any())
+            if (repository.Users.Any())
             {
                 return;
             }
 
-            GeneratePermissions(repository);
-            GenerateMenus(repository);
             GenerateRoles(repository);
             GenerateUsers(repository);
-        }
-
-        private void GenerateMenus(IBackendOfficeRepository repository)
-        {
-            var menus = Menus.Select(CreateMenu).ToArray();
-            repository.BulkInsert(menus);
+            GenerateSettings(repository);
         }
 
         private void GenerateRoles(IBackendOfficeRepository repo)
@@ -65,6 +57,8 @@ INSERT INTO [dbo].[Roles]
     ([Id]
     ,[RoleType]
     ,[Name]
+    ,[Department]
+    ,[MenuSetting]
     ,[DisplayName]
     ,[Description]
     ,[Status]
@@ -76,6 +70,8 @@ VALUES
     (@id
     ,@roleType
     ,@name
+    ,@department
+    ,@menuSetting
     ,@displayName
     ,@description
     ,@status
@@ -91,7 +87,11 @@ VALUES
                     new SqlParameter { ParameterName = "@id", Value = role.Id, DbType = DbType.Guid },
                     new SqlParameter { ParameterName = "@roleType", Value = (int)role.RoleType, DbType = DbType.Int16 },
                     new SqlParameter { ParameterName = "@name", Value = role.Name, DbType = DbType.String },
+
+                    new SqlParameter { ParameterName = "@department", Value = role.Department, DbType = DbType.String },
+                    new SqlParameter { ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@displayName", Value = role.Name, DbType = DbType.String },
+
                     new SqlParameter { ParameterName = "@description", Value = role.DisplayName, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@status", Value = role.Status, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String },
@@ -100,70 +100,9 @@ VALUES
                 repo.ExecuteSqlCommand(command, CommandType.Text, args);
             }
 
-
-            var mainMenus = roles.SelectMany(p => p.Menus).ToArray();
-            repo.BulkInsert(mainMenus);
-            var subMenus = mainMenus.SelectMany(p => p.SubMenus).ToArray();
-            repo.BulkInsert(subMenus);
-            var permissions = subMenus.SelectMany(p => p.Permissions).ToArray();
-            repo.BulkInsert(permissions);
         }
 
-
-        private static void GeneratePermissions(IBackendOfficeRepository repository)
-        {
-            var permissions = new List<Permission>
-            {
-                CreatePermission(PerCreateId, "Create", "Create"),
-                CreatePermission(PerUpdateId, "Update", "Update"),
-                CreatePermission(PerDeleteId, "Delete", "Delete"),
-                CreatePermission(PerManageStatusId,"ManageStatus","Manage Status"),
-                CreatePermission(PerExportId,"Export","Export"),
-                CreatePermission(PerSubmitId,"Submit","Submit"),
-                CreatePermission(PerViewId,"View","View"),
-                CreatePermission(PerImportId,"Import","Import"),
-                CreatePermission(PerCanManageArchiveStatusId,"CanManageArchiveStatus","Can Manage Archive Status"),
-                CreatePermission(PerCanManageConfigStatusId,"CanManageConfigStatus","Can Manage Config Status"),
-                CreatePermission(PerCanViewGamesId,"CanViewGames","Can View Games"),
-                CreatePermission(PerCanViewBetHistoryId,"CanViewBetHistory","Can View Bet History"),
-                CreatePermission(PerCanEditCredentialId,"CanEditCredential","Can Edit Credential"),
-                CreatePermission(PerCanManageMenuId,"CanManageMenu","Can Manage Menu"),
-            };
-
-            repository.BulkInsert(permissions);
-        }
-
-        private static Permission CreatePermission(Guid permissionId, string code, string name)
-        {
-            return new Permission
-            {
-                Id = permissionId,
-                Code = code,
-                Name = name,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername
-            };
-        }
-
-        private static Menu CreateMenu(IMenu menu)
-        {
-            return new Menu
-            {
-                Id = menu.MenuId,
-                Code = menu.Code,
-                Name = menu.Name,
-                Icon = menu.Icon,
-                Translation = menu.Translation,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername
-            };
-        }
-
-        private static Role[] CreateRoleWithMenus(IRole[] roles)
+        private Role[] CreateRoleWithMenus(IRole[] roles)
         {
             return roles.Select(role => new Role
             {
@@ -171,63 +110,23 @@ VALUES
                 Name = role.Name,
                 DisplayName = role.Name,
                 Description = role.Description,
+                Department = "技術部門",
                 Status = RoleStatus.Enabled,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                Menus = GetRoleMenus(role),
+                MenuSetting = _jsonSerialization.SerializeToString(GetMenuSettings()),
                 RoleType = role.RoleType
             }).ToArray();
         }
 
-        private static RoleMenu[] GetRoleMenus(IRole role)
-        {
-            var roleMenus = new List<RoleMenu>();
-            foreach (var roleMenu in role.RoleMenus)
-            {
-                var roleMainMenu = new RoleMenu
-                {
-                    Id = roleMenu.RoleMenuId,
-                    RoleId = role.Id,
-                    MenuId = roleMenu.Menu.MenuId,
-                    DisplayOrder = roleMenu.DisplayOrder,
-                    IsDisplay = true
-                };
-
-                var roleSubMenus = new List<RoleMenu>();
-                foreach (var subMenu in roleMenu.SubMenus)
-                {
-                    roleSubMenus.Add(new RoleMenu
-                    {
-                        Id = subMenu.RoleMenuId,
-                        RoleId = role.Id,
-                        MenuId = subMenu.Menu.MenuId,
-                        ParentId = subMenu.ParentId,
-                        DisplayOrder = subMenu.DisplayOrder,
-                        IsDisplay = true,
-                        Permissions = subMenu.Menu.Permissions.Select((permission, index) => new RoleMenuPermission
-                        {
-                            Id = GuidExtensions.NewSequentialGuid(),
-                            RoleMenuId = subMenu.RoleMenuId,
-                            PermissionId = permission,
-                            IsDisplay = subMenu.IsDisplay,
-                            DisplayOrder = index + 1
-                        }).ToArray()
-                    });
-                }
-
-                roleMainMenu.SubMenus = roleSubMenus.ToArray();
-                roleMenus.Add(roleMainMenu);
-            }
-            return roleMenus.ToArray();
-        }
 
         private void GenerateUsers(IBackendOfficeRepository repository)
         {
             string[] usernames =
             {
-                "hank.wu", "lester.wei", "sam.chuang","houdini.sheng"
+                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng"
             };
 
             var users = new List<User>

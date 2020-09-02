@@ -25,11 +25,15 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
-            builder.HasMany(p => p.Users)
-                .WithOne(p => p.Role)
-                .HasForeignKey(p => p.RoleId);
+            builder.Property(c => c.Department)
+                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .IsRequired();
 
-            builder.HasMany(p => p.Menus)
+            builder.Property(c => c.MenuSetting)
+                .HasColumnType(ColumnTypes.Nvarchar(4000))
+                .IsRequired();
+
+            builder.HasMany(p => p.Users)
                 .WithOne(p => p.Role)
                 .HasForeignKey(p => p.RoleId);
 
