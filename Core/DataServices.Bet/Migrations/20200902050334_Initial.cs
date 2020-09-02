@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Core.DataServices.Bet.Migrations
 {
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -21,8 +21,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     ErrorDescription = table.Column<string>(type: "nvarchar(1024)", nullable: true),
                     TransactionsCount = table.Column<int>(type: "int", nullable: false),
                     ErrorsJson = table.Column<string>(type: "nvarchar(4000)", nullable: true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
-                    GameProviderConfiguration = table.Column<string>(type: "nvarchar(4000)", nullable: false)
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    GameProviderConfigurationId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,9 +36,9 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ExternalRoundId = table.Column<string>(type: "nvarchar(255)", nullable: true),
-                    WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExternalRoundId = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    WalletId = table.Column<Guid>(nullable: false),
+                    GameId = table.Column<Guid>(nullable: false),
                     GameName = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     GameCode = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     GameType = table.Column<short>(type: "smallint", nullable: false),
@@ -46,24 +46,21 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     GameProviderCode = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     PlayerTypes = table.Column<short>(type: "smallint", nullable: false),
-                    CurrencyCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
+                    CurrencyCode = table.Column<string>(type: "varchar(10)", nullable: false),
                     PlatformType = table.Column<short>(type: "smallint", nullable: false),
-                    RoundDetailId = table.Column<Guid>(nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
-                    GameProviderConfigurationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GameProviderConfiguration = table.Column<string>(type: "nvarchar(4000)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
-                    ClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ExternalCreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
-                    ExternalClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
-                    AggregatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
-                    ExternalAggregatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
-                    BetAmount = table.Column<decimal>(type: "decimal(18, 6)", nullable: true),
-                    Commission = table.Column<decimal>(type: "decimal(18, 6)", nullable: true),
-                    GrossGamingRevenue = table.Column<decimal>(type: "decimal(18, 6)", nullable: true),
-                    TiebetAdjustment = table.Column<decimal>(type: "decimal(18, 6)", nullable: true)
+                    GameProviderConfigurationId = table.Column<Guid>(nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    BrandId = table.Column<Guid>(nullable: false),
+                    ExternalCreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    ExternalClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    BetAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
+                    WinAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
+                    Commission = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
+                    WinLoss = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
+                    TiebetAdjustment = table.Column<decimal>(type: "decimal(18,6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -77,33 +74,31 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ExternalBetId = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    BetId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ExternalTransactionId = table.Column<string>(type: "nvarchar(128)", nullable: true),
+                    ExternalBetId = table.Column<string>(type: "nvarchar(64)", nullable: true),
+                    BetId = table.Column<Guid>(nullable: true),
+                    ExternalTransactionId = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     Type = table.Column<short>(type: "smallint", nullable: false),
-                    Turnover = table.Column<decimal>(type: "decimal(18, 6)", nullable: false),
-                    GrossGamingRevenue = table.Column<decimal>(type: "decimal(18, 6)", nullable: false),
-                    UnsettledBets = table.Column<decimal>(type: "decimal(18, 6)", nullable: false),
+                    Turnover = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    WinLoss = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    UnsettledBets = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     IsClosingRound = table.Column<bool>(nullable: false),
                     ClosingRoundExplicitRequest = table.Column<bool>(nullable: true),
-                    RoundId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TokenId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ReferencedGameActionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    GameActionBatchId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    GameProviderConfigurationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GameProviderConfiguration = table.Column<string>(type: "nvarchar(4000)", nullable: false),
-                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
-                    SentOn = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
-                    StoredOn = table.Column<DateTime>(type: "datetime", nullable: false),
+                    RoundId = table.Column<Guid>(nullable: false),
+                    WalletId = table.Column<Guid>(nullable: false),
+                    ReferencedGameActionId = table.Column<Guid>(nullable: true),
+                    GameActionBatchId = table.Column<Guid>(nullable: true),
+                    GameProviderConfigurationId = table.Column<Guid>(nullable: false),
+                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    SentOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     PlayerIp = table.Column<string>(type: "varchar(128)", nullable: false),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18, 6)", nullable: false),
-                    GameActionGroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BrandId = table.Column<Guid>(nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    GameActionGroupId = table.Column<Guid>(nullable: true),
                     ExternalGameActionGroupId = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18, 6)", nullable: true),
-                    BetType = table.Column<string>(type: "nvarchar(2000)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(4000)", nullable: false)
+                    Balance = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
+                    BetType = table.Column<string>(type: "nvarchar(128)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(4000)", nullable: true),
+                    StoredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()")
                 },
                 constraints: table =>
                 {
@@ -120,7 +115,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         column: x => x.ReferencedGameActionId,
                         principalSchema: "dbo",
                         principalTable: "GameActions",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_GameActions_Rounds_RoundId",
                         column: x => x.RoundId,
@@ -135,14 +131,13 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
                     RoundId = table.Column<Guid>(nullable: false),
                     AdditionalData = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoundDetails", x => x.Id)
-                        .Annotation("SqlServer:Clustered", false);
+                    table.PrimaryKey("PK_RoundDetails", x => x.RoundId)
+                        .Annotation("SqlServer:Clustered", true);
                     table.ForeignKey(
                         name: "FK_RoundDetails_Rounds_RoundId",
                         column: x => x.RoundId,
@@ -169,13 +164,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 schema: "dbo",
                 table: "GameActions",
                 column: "RoundId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoundDetails_RoundId",
-                schema: "dbo",
-                table: "RoundDetails",
-                column: "RoundId",
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

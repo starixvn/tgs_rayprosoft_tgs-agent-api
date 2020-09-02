@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -12,16 +13,16 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             BaseConfigureProperties(builder);
 
             builder.Property(p => p.Description)
-                .HasColumnType("nvarchar(128)");
+                .HasColumnType(ColumnTypes.Nvarchar(128));
 
             builder.Property(p => p.Status)
-                .HasColumnType("smallint");
+                .HasColumnType(ColumnTypes.SmallInt);
 
             builder.Property(p => p.PlaceBetTimeout)
-                .HasColumnType("int");
+                .HasColumnType(ColumnTypes.SmallInt);
 
             builder.Property(p => p.SettleBetTimeout)
-                .HasColumnType("int");
+                .HasColumnType(ColumnTypes.SmallInt);
 
             builder.HasMany(p => p.BrandGameProviderConfigurations)
                 .WithOne(p => p.GameProvider)

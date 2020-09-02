@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -14,29 +15,29 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsClustered(false);
 
             builder.Property(p => p.Name)
-                .HasColumnType("nvarchar(255)");
+                .HasColumnType(ColumnTypes.Nvarchar(255));
 
             builder.HasOne(p => p.GameProvider)
                 .WithMany(p => p.GameProviderConfigurations)
                 .HasForeignKey(p => p.GameProviderId);
 
             builder.Property(c => c.Description)
-                .HasColumnType("nvarchar(256)");
+                .HasColumnType(ColumnTypes.Nvarchar(256));
 
             builder.Property(c => c.SecretKey)
-                .HasColumnType("varchar(64)")
+                .HasColumnType(ColumnTypes.Varchar(64))
                 .IsRequired();
 
             builder.Property(c => c.DesktopEndpoint)
-                .HasColumnType("nvarchar(1024)")
+                .HasColumnType(ColumnTypes.Nvarchar(1024))
                 .IsRequired();
 
             builder.Property(c => c.MobileEndpoint)
-                .HasColumnType("nvarchar(1024)")
+                .HasColumnType(ColumnTypes.Nvarchar(1024))
                 .IsRequired();
 
             builder.Property(c => c.ConfigurationData)
-                .HasColumnType("nvarchar(4000)")
+                .HasColumnType(ColumnTypes.Nvarchar(4000))
                 .IsRequired();
 
             builder.Property(c => c.IsDefault)

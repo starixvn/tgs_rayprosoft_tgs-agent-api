@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -12,33 +13,28 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(bc => bc.Id);
 
             builder.Property(c => c.PlayerCode)
-                .HasColumnType("varchar(16)")
-                .IsRequired()
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Varchar(16))
+                .IsRequired();
 
             builder.Property(c => c.CurrencyCode)
-                .HasColumnType("nvarchar(16)")
-                .IsRequired()
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .IsRequired();
 
             builder.Property(c => c.ExternalCurrencyCode)
-                .HasColumnType("nvarchar(16)")
-                .IsRequired()
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .IsRequired();
 
             builder.Property(c => c.Balance)
-                .HasColumnType("decimal(18,6)")
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType("nvarchar(32)")
-                .IsRequired()
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired();
 
-            builder.Property(c => c.LastModifiedOn)
-                .HasColumnType("nvarchar(32)")
-                .IsRequired()
-                .IsUnicode();
+            builder.Property(c => c.UpdatedOn)
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired();
         }
     }
 }

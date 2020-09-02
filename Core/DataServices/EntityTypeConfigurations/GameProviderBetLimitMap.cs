@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -13,14 +14,14 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsClustered(false);
 
             builder.Property(b => b.Code)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(255))
                 .IsRequired();
 
             builder.Property(b => b.BetLimitGroupId)
                 .IsRequired();
 
             builder.Property(b => b.CurrencyCode)
-                .HasColumnType("nvarchar(16)");
+                .HasColumnType(ColumnTypes.Nvarchar(16));
 
             builder.HasOne(b => b.Currency)
                 .WithMany(b => b.GameProviderBetLimits)

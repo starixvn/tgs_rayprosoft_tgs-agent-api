@@ -24,6 +24,8 @@ namespace TGS.Core.DataServices.Models
 
         public PlatformType PlatformType { get; set; }
 
+        public bool SubGame { get; set; }
+
         public virtual ICollection<BrandGame> Brands { get; set; }
     }
 }

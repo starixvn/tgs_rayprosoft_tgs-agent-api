@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm-run-all --parallel start:*",
     "start:dev": "snowpack dev --reload",
-    "pause:start:api": "docker-compose -f ../../docker-compose.yml run --rm -p 32667:80  backoffice-api",
+    "start:api": "docker-compose -f ../../docker-compose.yml run --rm -p 32667:80  backoffice-api",
     "build": "snowpack build",
     "login:docker": "docker login registry.gitlab.com",
     "build:docker": "cross-var docker build . -t registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",

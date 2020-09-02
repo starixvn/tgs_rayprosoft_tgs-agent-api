@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -12,36 +13,35 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(l => l.CultureCode);
 
             builder.Property(l => l.CultureCode)
-                .HasColumnType("nvarchar(6)")
+                .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(l => l.LanguageCode)
-                .HasColumnType("nvarchar(10)")
+                .HasColumnType(ColumnTypes.Nvarchar(10))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(l => l.Name)
-                .HasColumnType("nvarchar(30)")
+                .HasColumnType(ColumnTypes.Nvarchar(30))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(l => l.CreatedByUsername)
-                .HasColumnType("nvarchar(256)")
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(l => l.UpdatedByUsername)
-                .HasColumnType("nvarchar(256)")
-                .IsRequired()
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
 
             builder.Property(l => l.CreatedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(l => l.UpdatedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.HasMany(l => l.Players)

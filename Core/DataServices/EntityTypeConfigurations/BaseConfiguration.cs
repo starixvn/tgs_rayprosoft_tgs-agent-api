@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -11,31 +12,31 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(p => p.Id).IsClustered(false);
 
             builder.Property(c => c.Code)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Name)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(255))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
         }
     }
