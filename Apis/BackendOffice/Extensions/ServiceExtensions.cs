@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Core.DataServices.Base.Extensions;
@@ -30,7 +32,9 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IUserQueries, UserQueries>();
+            services.AddScoped<IUserCommands, UserCommands>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

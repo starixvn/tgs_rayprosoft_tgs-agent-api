@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
@@ -8,6 +9,8 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
     public interface IUserQueries
     {
         Task<User> GetUserByUsernameAsync(string username);
+
+        IQueryable<User> GetUseQueries();
     }
 
     public class UserQueries : IUserQueries
@@ -17,6 +20,11 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
         public UserQueries(IBackendOfficeRepository repository)
         {
             _repository = repository;
+        }
+
+        IQueryable<User> IUserQueries.GetUseQueries()
+        {
+            return _repository.Users.Where(p => p.Status == UserStatus.Archived);
         }
 
         Task<User> IUserQueries.GetUserByUsernameAsync(string username)

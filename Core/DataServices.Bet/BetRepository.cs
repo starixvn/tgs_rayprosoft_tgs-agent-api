@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Bet
         {
             return Database.GetDbConnection();
         }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
@@ -48,6 +48,11 @@ namespace TGS.Core.DataServices.Bet
             modelBuilder.ApplyConfiguration(new RoundDetailMap());
             modelBuilder.ApplyConfiguration(new GameActionMap());
             modelBuilder.ApplyConfiguration(new GameActionBatchMap());
+        }
+
+        Task IBaseRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
         }
     }
 }

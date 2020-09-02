@@ -53,5 +53,10 @@ namespace TGS.Apis.BackendOffice.DataService
         {
             this.BulkInsertOrUpdate(entities, bulkConfig, progress);
         }
+
+        Task IBaseRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
+        }
     }
 }

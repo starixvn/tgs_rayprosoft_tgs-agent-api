@@ -14,5 +14,7 @@ namespace TGS.Core.DataServices.Base.Interfaces
         Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level);
 
         IDbConnection GetDbConnection();
+
+        Task SaveChangesAsync();
     }
 }
