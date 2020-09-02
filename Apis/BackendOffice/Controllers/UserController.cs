@@ -14,8 +14,9 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Queries;
-using TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Models;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -29,16 +30,19 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsHashConfig _tgsHashConfig;
         private readonly IAntiforgery _antiForgery;
         private readonly IUserQueries _userQueries;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         public UserController(
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
             IAntiforgery antiForgery,
-            IUserQueries userQueries)
+            IUserQueries userQueries,
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
             _antiForgery = antiForgery;
             _userQueries = userQueries;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
@@ -58,12 +62,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>("Invalid password.");
             }
 
-            var mainMenus = user.Role.Menus.Where(p => p.ParentId == null)
-                .OrderBy(r => r.DisplayOrder)
-                .CreateViewMenus()
-                .ToArray();
 
-            SetCsrfToken();
             await SignInAsync(user.Username, user.Role.Name);
 
             return new AuthenticateUserResponse
@@ -75,7 +74,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Username = user.Username,
                     UserId = user.Id,
                     TimeZone = user.TimeZone,
-                    Menus = mainMenus
+                    Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(user.Role.MenuSetting)
                 }
             };
         }
@@ -104,6 +103,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private async Task SignInAsync(string username, string role)
         {
+            SetCsrfToken();
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),

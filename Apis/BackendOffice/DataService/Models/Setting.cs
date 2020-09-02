@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace TGS.Apis.BackendOffice.DataService.Models
 {
-    public class Permission
+    public class Setting
     {
-        public Guid Id { get; set; }
+        public string Key { get; set; }
 
-        public string Name { get; set; }
+        public string Value { get; set; }
 
-        public string Code { get; set; }
+        public string Description { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
 
@@ -18,7 +17,5 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public string CreatedByUsername { get; set; }
 
         public string UpdatedByUsername { get; set; }
-
-        public virtual ICollection<RoleMenuPermission> RoleMenuPermissions { get; set; }
     }
 }

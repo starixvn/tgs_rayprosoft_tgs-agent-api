@@ -1,0 +1,222 @@
+using System;
+using System.Text.Json;
+using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.Services;
+using TGS.Infrastructures.Json;
+
+namespace TGS.Apis.BackendOffice.DataService.DataInitializers
+{
+    public partial class DataInitializer
+    {
+        readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        private void GenerateSettings(IBackendOfficeRepository repository)
+        {
+            var configurations = new[]
+            {
+                CreateSetting(SettingConst.Menus, _jsonSerialization.SerializeToString(GetMenuSettings(), _jsonSerializerOptions), "For menus used"),
+                CreateSetting(SettingConst.Vip, _jsonSerialization.SerializeToString(GetVipSettings(), _jsonSerializerOptions), "For players used."),
+                CreateSetting(SettingConst.Department, _jsonSerialization.SerializeToString(GetDepartmentSettings(), _jsonSerializerOptions), "For users used."),
+            };
+            repository.BulkInsert(configurations);
+        }
+
+        private readonly IJsonSerializationProvider _jsonSerialization = new JsonSerializationProvider();
+
+
+        private MenuSetting[] GetMenuSettings()
+        {
+            var menus = new[]
+            {
+                new MenuSetting("System")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "Admins")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Delete")
+                            }
+                        },
+                        new MenuSetting( "Groups")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Delete")
+                            }
+                        },
+                    }
+                },
+                new MenuSetting("PlayerManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "PlayerList")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("SendMessage")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("AdminMenagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "Currency")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting( "Language")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting( "Whitelist")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("View")
+                            }
+                        },
+                    }
+                },
+                new MenuSetting("Log")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "AdminLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting( "ServiceLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting( "ApiLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                    }
+                },
+                new MenuSetting("Report")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "OverReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting( "GameProviderReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Game")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "GameProviders")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Agent")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "Resellers")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Brands")
+                            }
+                        }
+                    }
+                }
+            };
+
+            return menus;
+        }
+
+        private string[] GetVipSettings()
+        {
+            return new[]
+            {
+                "VIP1",
+                "VIP2",
+                "VIP3",
+                "VIP4",
+                "VIP5"
+            };
+        }
+
+        private string[] GetDepartmentSettings()
+        {
+            return new[]
+            {
+                "市場部門",
+                "技術部門",
+                "客服部門",
+            };
+        }
+
+        private static Setting CreateSetting(string key, string value, string description)
+        {
+            return new Setting
+            {
+                Key = key,
+                Value = value,
+                Description = description,
+                CreatedOn = DateTimeOffset.Now,
+                CreatedByUsername = AdminUsername,
+                UpdatedOn = DateTimeOffset.Now,
+                UpdatedByUsername = AdminUsername
+            };
+        }
+    }
+}

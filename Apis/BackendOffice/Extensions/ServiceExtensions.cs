@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -12,6 +16,7 @@ using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Extensions
@@ -25,6 +30,10 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IUserQueries, UserQueries>();
+            services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
             services.AddControllers();
@@ -41,6 +50,25 @@ namespace TGS.Apis.BackendOffice.Extensions
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);//沒給預設14天
                 });
 
+
+            string enUSCulture = "en-US";
+            string zhCNCulture = "zh-CN";
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo(enUSCulture),
+                    new CultureInfo(zhCNCulture)
+                };
+
+                options.DefaultRequestCulture = new RequestCulture(culture: zhCNCulture, uiCulture: zhCNCulture);
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+
+                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context => await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
+            });
+
             services.AddMvc(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
@@ -49,7 +77,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 options.Filters.Add(new AuthorizeFilter(policy));
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
                 //options.Filters.Add(new HttpResponseExceptionFilter());
-            });
+            }).AddDataAnnotationsLocalization(); ;
             return services;
         }
     }

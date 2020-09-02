@@ -17,6 +17,10 @@ namespace TGS.Apis.BackendOffice.DataService.Models
 
         public string DisplayName { get; set; }
 
+        public string Department { get; set; }
+
+        public string MenuSetting { get; set; }
+
         public string Description { get; set; }
 
         public RoleStatus Status { get; set; }
@@ -28,8 +32,6 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public string CreatedByUsername { get; set; }
 
         public string UpdatedByUsername { get; set; }
-
-        public virtual ICollection<RoleMenu> Menus { get; set; }
 
         public ICollection<User> Users { get; set; }
     }

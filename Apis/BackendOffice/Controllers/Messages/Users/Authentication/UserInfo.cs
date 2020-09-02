@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Apis.BackendOffice.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
 {
@@ -8,6 +9,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
         public string Username { get; set; }
         public string TimeZone { get; set; }
         public string Role { get; set; }
-        public RoleMenuViewModel[] Menus { get; set; }
+        public MenuSetting[] Menus { get; set; }
     }
 }
