@@ -62,7 +62,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>("Invalid password.");
             }
 
-
             await SignInAsync(user.Username, user.Role.Name);
 
             return new AuthenticateUserResponse

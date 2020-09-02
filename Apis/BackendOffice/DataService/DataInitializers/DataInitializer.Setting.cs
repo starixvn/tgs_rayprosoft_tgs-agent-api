@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Infrastructures.Json;
@@ -8,14 +7,13 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public partial class DataInitializer
     {
-        readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         private void GenerateSettings(IBackendOfficeRepository repository)
         {
             var configurations = new[]
             {
-                CreateSetting(SettingConst.Menus, _jsonSerialization.SerializeToString(GetMenuSettings(), _jsonSerializerOptions), "For menus used"),
-                CreateSetting(SettingConst.Vip, _jsonSerialization.SerializeToString(GetVipSettings(), _jsonSerializerOptions), "For players used."),
-                CreateSetting(SettingConst.Department, _jsonSerialization.SerializeToString(GetDepartmentSettings(), _jsonSerializerOptions), "For users used."),
+                CreateSetting(SettingConst.Menus, _jsonSerialization.SerializeToString(GetMenuSettings()), "For menus used"),
+                CreateSetting(SettingConst.Vip, _jsonSerialization.SerializeToString(GetVipSettings()), "For players used."),
+                CreateSetting(SettingConst.Department, _jsonSerialization.SerializeToString(GetDepartmentSettings()), "For users used."),
             };
             repository.BulkInsert(configurations);
         }

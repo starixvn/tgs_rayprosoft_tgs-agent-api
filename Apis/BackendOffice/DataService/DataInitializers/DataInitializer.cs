@@ -116,7 +116,7 @@ VALUES
                 UpdatedOn = DateTimeOffset.Now,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                MenuSetting = _jsonSerialization.SerializeToString(GetMenuSettings(), _jsonSerializerOptions),
+                MenuSetting = _jsonSerialization.SerializeToString(GetMenuSettings()),
                 RoleType = role.RoleType
             }).ToArray();
         }
