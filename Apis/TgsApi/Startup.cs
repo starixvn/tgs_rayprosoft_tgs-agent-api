@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
+using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
@@ -63,6 +64,8 @@ namespace TGS.Apis.TgsApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseApiLogger();
 
             app.UseHttpsRedirection();
 
