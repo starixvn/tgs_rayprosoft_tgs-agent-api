@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -15,12 +16,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithOne(e => e.Reseller);
 
             builder.Property(c => c.Description)
-                .HasColumnType("nvarchar(256)")
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(256));
 
             builder.Property(c => c.OperationalEmail)
-                .HasColumnType("nvarchar(128)")
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(128));
         }
     }
 }

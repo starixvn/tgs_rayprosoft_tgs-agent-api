@@ -34,6 +34,7 @@ namespace TGS.Core.DataServices
         DbSet<BetLimitGroup> ITgsRepository.BetLimitGroups { get; set; }
         DbSet<BrandBetLimit> ITgsRepository.BrandBetLimits { get; set; }
         DbSet<GameProviderBetLimit> ITgsRepository.GameProviderBetLimits { get; set; }
+        DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -49,7 +50,7 @@ namespace TGS.Core.DataServices
         {
             Database.SetCommandTimeout(seconds);
         }
-        
+
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
             return Database.BeginTransactionAsync(level);
@@ -59,7 +60,10 @@ namespace TGS.Core.DataServices
         {
             return Database.GetDbConnection();
         }
-
+        Task IBaseRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
@@ -93,6 +97,8 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new BetLimitGroupMap());
             modelBuilder.ApplyConfiguration(new BrandBetLimitMap());
             modelBuilder.ApplyConfiguration(new GameProviderBetLimitMap());
+
+            modelBuilder.ApplyConfiguration(new PlayerLoginRecordMap());
         }
     }
 }

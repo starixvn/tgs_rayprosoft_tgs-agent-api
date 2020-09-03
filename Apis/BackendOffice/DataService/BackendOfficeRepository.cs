@@ -19,10 +19,8 @@ namespace TGS.Apis.BackendOffice.DataService
 
         DbSet<User> IBackendOfficeRepository.Users { get; set; }
         DbSet<Role> IBackendOfficeRepository.Roles { get; set; }
-        DbSet<Menu> IBackendOfficeRepository.Menus { get; set; }
-        DbSet<Permission> IBackendOfficeRepository.Permissions { get; set; }
-        DbSet<RoleMenu> IBackendOfficeRepository.RoleMenus { get; set; }
-        DbSet<RoleMenuPermission> IBackendOfficeRepository.RoleMenuPermissions { get; set; }
+        DbSet<Setting> IBackendOfficeRepository.Settings { get; set; }
+        DbSet<Department> IBackendOfficeRepository.Departments { get; set; }
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
@@ -49,15 +47,18 @@ namespace TGS.Apis.BackendOffice.DataService
             modelBuilder.HasDefaultSchema("dbo");
             modelBuilder.ApplyConfiguration(new UserMap());
             modelBuilder.ApplyConfiguration(new RoleMap());
-            modelBuilder.ApplyConfiguration(new PermissionMap());
-            modelBuilder.ApplyConfiguration(new MenuMap());
-            modelBuilder.ApplyConfiguration(new RoleMenuMap());
-            modelBuilder.ApplyConfiguration(new RoleMenuPermissionMap());
+            modelBuilder.ApplyConfiguration(new SettingMap());
+            modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
 
         void IBackendOfficeRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
         {
             this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        }
+
+        Task IBaseRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Extensions;
 
 namespace TGS.Apis.BackendOffice
@@ -40,6 +41,18 @@ namespace TGS.Apis.BackendOffice
             });
 
             app.SeedData();
+
+            //var supportedCultures = new[] { "en-US", "zh-CN" };
+            //var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+            //    .AddSupportedCultures(supportedCultures)
+            //    .AddSupportedUICultures(supportedCultures);
+            //app.UseRequestLocalization(localizationOptions);
+
+
+            var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+            app.UseRequestLocalization(requestLocalizationOptions);
+
+
         }
     }
 }

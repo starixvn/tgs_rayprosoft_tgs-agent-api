@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -12,31 +13,34 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(b => b.Id)
                 .IsClustered(false);
 
+            builder.Property(b => b.Id)
+                .ValueGeneratedOnAdd();
+
             builder.Property(b => b.Code)
-                .HasColumnType("nvarchar(20)")
+                .HasColumnType(ColumnTypes.Nvarchar(20))
                 .IsRequired();
 
             builder.Property(b => b.Name)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(255))
                 .IsRequired();
 
             builder.Property(b => b.Description)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(b => b.CreatedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(b => b.UpdatedOn)
-                .HasColumnType("datetimeoffset")
+                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
              builder.Property(b => b.CreatedByUsername)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
             builder.Property(b => b.UpdatedByUsername)
-                .HasColumnType("nvarchar(255)")
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
             builder.HasMany(b => b.Players)

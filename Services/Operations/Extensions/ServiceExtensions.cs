@@ -33,6 +33,7 @@ namespace TGS.Services.Operations.Extensions
             #endregion
 
             services.AddSingleton<IStatusValidator, StatusValidator>();
+            services.AddSingleton<IExpirationValidator, ExpirationValidator>();
 
             return services;
         }

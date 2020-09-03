@@ -31,6 +31,7 @@ namespace TGS.Services.GameServices
         private readonly IPlayerOperations _playerOperations;
         private readonly IBrandOperations _brandOperations;
         private readonly IStatusValidator _statusValidator;
+        private readonly IExpirationValidator _expirationValidator;
 
         public GamePlayActions(
             IPlayerOperations playerOperations,
@@ -38,7 +39,8 @@ namespace TGS.Services.GameServices
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOpertaions,
             IGameProviderCurrencyCodeMapper currencyMapper,
-            IStatusValidator statusValidator)
+            IStatusValidator statusValidator,
+            IExpirationValidator expirationValidator)
         {
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
@@ -46,6 +48,7 @@ namespace TGS.Services.GameServices
             _brandGameProviderOpertaions = brandGameProviderOpertaions;
             _currencyMapper = currencyMapper;
             _statusValidator = statusValidator;
+            _expirationValidator = expirationValidator;
         }
 
         Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
@@ -82,14 +85,14 @@ namespace TGS.Services.GameServices
 
         async Task<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
         {
-            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
-            var status = ValidStatuses.GetStatus(player.Type);
+            var playerCode = data.PlayerCode;
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);                                  
+            await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode);
 
-            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(player.BrandId, status);
-                        
-            // TODO: check player login time?
-            
             var brandId = player.BrandId;
+            var status = ValidStatuses.GetStatus(player.Type);
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
+
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
             var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
             await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gameProviderId, gameProviderConfigurationId, status);
@@ -100,11 +103,9 @@ namespace TGS.Services.GameServices
             var gameProviderBetLimitCode = await _gameProviderOperations.GetGameProviderBetLimitCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode, player.BetLimitGroupId);
 
             var cachedBrand = await _brandOperations.GetCachedBrandAsync(brandId);
-                
-            // TODO: check or get platform? how?
 
             return new PlayerValidationResult
-            { 
+            {
                 Balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false),
                 VipLevelId = gameProviderBetLimitCode,
                 GameProviderCurrency = cur,
@@ -125,7 +126,7 @@ namespace TGS.Services.GameServices
             {
                 return;
             }
-          
+
             var gameProviderSupportTestPlayer = await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId);
             if (!gameProviderSupportTestPlayer)
             {

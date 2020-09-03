@@ -24,6 +24,7 @@
     <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
+    <None Remove="SqlScripts\SP\usp_Player_GetPlayerLatestEnabledLoginRecord.sql" />
     <None Remove="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
   </ItemGroup>
 
@@ -42,6 +43,7 @@
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerLatestEnabledLoginRecord.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandForCache.sql" />

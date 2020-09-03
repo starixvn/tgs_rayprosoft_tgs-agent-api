@@ -20,76 +20,37 @@ namespace TGS.Apis.BackendOffice.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Menu", b =>
+            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Department", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Icon")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
-
-                    b.Property<string>("Translation")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(256)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Menus","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Permission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Permissions","dbo");
+                    b.ToTable("Departments","dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Role", b =>
@@ -100,22 +61,30 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(128)");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MenuSetting")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<byte>("RoleType")
                         .HasColumnType("tinyint");
@@ -125,7 +94,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -135,66 +104,40 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.ToTable("Roles","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.RoleMenu", b =>
+            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Setting", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(32)")
+                        .IsUnicode(true);
 
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)")
+                        .IsUnicode(true);
 
-                    b.Property<bool>("IsDisplay")
-                        .HasColumnType("bit");
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("MenuId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)")
+                        .IsUnicode(true);
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
-                    b.HasIndex("MenuId");
+                    b.HasKey("Key");
 
-                    b.HasIndex("ParentId");
-
-                    b.HasIndex("RoleId", "MenuId")
-                        .IsUnique()
-                        .HasAnnotation("SqlServer:Clustered", true);
-
-                    b.ToTable("RoleMenus","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.RoleMenuPermission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("DisplayOrder")
-                        .HasColumnType("tinyint");
-
-                    b.Property<bool>("IsDisplay")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleMenuId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PermissionId");
-
-                    b.HasIndex("RoleMenuId");
-
-                    b.ToTable("RoleMenuPermissions","dbo");
+                    b.ToTable("Settings","dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.User", b =>
@@ -208,29 +151,31 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(128)");
+                        .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("Firstname")
+                    b.Property<string>("LastLoginIp")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset?>("LastLoginTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(30)");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(30)");
-
-                    b.Property<Guid?>("LicenseeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("VARBINARY(128)");
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<Guid?>("ResellerId")
                         .HasColumnType("uniqueidentifier");
@@ -243,69 +188,43 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("VARBINARY(128)");
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
 
                     b.Property<string>("TimeZone")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(256)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.RoleMenu", b =>
-                {
-                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Menu", "Menu")
-                        .WithMany("RoleMenus")
-                        .HasForeignKey("MenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.RoleMenu", "Parent")
-                        .WithMany("SubMenus")
-                        .HasForeignKey("ParentId");
-
-                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Role", "Role")
-                        .WithMany("Menus")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.RoleMenuPermission", b =>
-                {
-                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Permission", "Permission")
-                        .WithMany("RoleMenuPermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.RoleMenu", "RoleMenu")
-                        .WithMany("Permissions")
-                        .HasForeignKey("RoleMenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.User", b =>
                 {
+                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Department", "Department")
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")

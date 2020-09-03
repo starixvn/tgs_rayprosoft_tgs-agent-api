@@ -22,9 +22,6 @@ _publish/
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
 
-# Eable "build" folder in Daily Surprise Fronend content since it is the final codes
-!Web/UgsDailySurpriseWebsite/Content/dailySurprise/build/
-
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
@@ -102,8 +99,6 @@ DocProject/Help/*.hhp
 DocProject/Help/Html2
 DocProject/Help/html
 
-# do not include common code dll
-Builds/UgsScripts/Scripts/Deployment/lib/UgsToolsCommonCode.dll
 
 # Click-Once directory
 publish/
@@ -178,27 +173,9 @@ $RECYCLE.BIN/
 
 
 .vs
-Web/UgsBackendWebsite/.vscode/settings.json
-
-Web/UgsFrontendWebsite/Content/css/.sass-cache/
-Web/UgsBackendWebsite/Assets/css/.sass-cache/
-Web/UgsBackendWebsite/Assets/css/components.css.map
-Web/UgsFrontendWebsite/Content/css/D3-Template.css.map
-Web/UgsFrontendWebsite/gulpfile.coffee
-Web/UgsFrontendWebsite/package.json
-Web/UgsFrontendWebsite/node_modules
-Web/Widgets/.vscode
-Web/Widgets/node_modules
-
-Partners/IceDemoWebsite/Content/css/.sass-cache
-Partners/IceDemoWebsite/Content/css/.sass-cache/*
 *.view.xml
 *.edmx
-/Web/UgsFrontendWebsite/Content/css/shared/.sass-cache
 *.feature.cs
 
-# Frontend prj
-.build
-build
-web_modules
-node_modules
+#NLog
+logs/

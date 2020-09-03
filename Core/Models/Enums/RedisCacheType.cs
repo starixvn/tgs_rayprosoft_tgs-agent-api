@@ -11,6 +11,7 @@
         BrandGameProviderConfiguration,
         GameProviderConfiguration,
         GameProviderLanguages,
-        GameProviderBetLimitCode
+        GameProviderBetLimitCode,
+        PlayerLoginRecord
     }
 }

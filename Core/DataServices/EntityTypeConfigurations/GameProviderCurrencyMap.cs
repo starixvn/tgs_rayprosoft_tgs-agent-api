@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -22,11 +23,11 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasForeignKey(gpc => gpc.CurrencyCode);
 
             builder.Property(gpc => gpc.CurrencyCode)
-                .HasColumnType("nvarchar(16)")
+                .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsUnicode();
 
             builder.Property(gpc => gpc.GameProviderCurrencyCode)
-                .HasColumnType("nvarchar(16)")
+                .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsUnicode()
                 .IsRequired();
         }

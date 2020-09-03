@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -14,16 +15,16 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasName("UK_BrandGameProviderConfigurations_BrandId_GameProviderId");
 
             builder.Property(c => c.BrandLogoUrl)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.DesktopQueryString)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.MobileQueryString)
-                .HasColumnType("nvarchar(512)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.DefaultLanguageCode)
-                .HasColumnType("nvarchar(6)");
+                .HasColumnType(ColumnTypes.Nvarchar(6));
         }
     }
 }

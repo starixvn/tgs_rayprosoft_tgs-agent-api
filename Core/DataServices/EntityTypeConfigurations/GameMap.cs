@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -12,27 +13,31 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             BaseConfigureProperties(builder);
 
             builder.Property(c => c.Status)
-                .HasColumnType("smallint")
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.ExternalId)
-                .HasColumnType("nvarchar(32)");
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType("nvarchar(128)");
+                .HasColumnType(ColumnTypes.Nvarchar(128));
 
             builder.Property(c => c.EndpointPath)
-                .HasColumnType("nvarchar(1024)");
+                .HasColumnType(ColumnTypes.Nvarchar(2048));
 
             builder.Property(c => c.RuleUrl)
-                .HasColumnType("nvarchar(1024)");
+                .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.GameType)
-                .HasColumnType("smallint")
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.PlatformType)
-                .HasColumnType("smallint")
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
+            builder.Property(c => c.SubGame)
                 .IsRequired();
             
             builder.HasOne(p => p.GameProvider)

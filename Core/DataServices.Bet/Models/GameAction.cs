@@ -12,24 +12,21 @@ namespace TGS.Core.DataServices.Bet.Models
         public string ExternalTransactionId { get; set; }
         public GameActionType Type { get; set; }
         public decimal Turnover { get; set; }
-        public decimal GrossGamingRevenue { get; set; }
+        public decimal WinLoss { get; set; }
         public decimal UnsettledBets { get; set; }
         public bool IsClosingRound { get; set; }
         public bool? ClosingRoundExplicitRequest { get; set; }
         public Guid RoundId { get; set; }
         public Round Round { get; set; }
         public Guid WalletId { get; set; }
-        public Guid? TokenId { get; set; }
         public Guid? ReferencedGameActionId { get; set; }
         public GameAction ReferencedGameAction { get; set; }
         public Guid? GameActionBatchId { get; set; }
         public GameActionBatch GameActionBatch { get; set; }
         public Guid GameProviderConfigurationId { get; set; }
-        public string GameProviderConfiguration { get; set; }
         public virtual ICollection<GameAction> FollowUpGameActions { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
         public DateTimeOffset? SentOn { get; set; }
-        public DateTime? StoredOn { get; set; }
         public string PlayerIp { get; set; }
         public Guid? BrandId { get; set; }
         public decimal? Amount { get; set; }

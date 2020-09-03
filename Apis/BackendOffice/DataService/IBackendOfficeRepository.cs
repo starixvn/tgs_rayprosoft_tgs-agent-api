@@ -13,13 +13,9 @@ namespace TGS.Apis.BackendOffice.DataService
 
         DbSet<Role> Roles { get; set; }
 
-        DbSet<Menu> Menus { get; set; }
+        DbSet<Setting> Settings { get; set; }
 
-        DbSet<Permission> Permissions { get; set; }
-
-        DbSet<RoleMenu> RoleMenus { get; set; }
-
-        DbSet<RoleMenuPermission> RoleMenuPermissions { get; set; }
+        DbSet<Department> Departments { get; set; }
 
         void BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
     }

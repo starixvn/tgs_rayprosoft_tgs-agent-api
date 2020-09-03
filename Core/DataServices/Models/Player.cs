@@ -27,5 +27,6 @@ namespace TGS.Core.DataServices.Models
         public string LastHelpUrl { get; set; }
         public string LastTermsUrl { get; set; }
         public virtual ICollection<Wallet> Wallets { get; set; }
+        public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
     }
 }
