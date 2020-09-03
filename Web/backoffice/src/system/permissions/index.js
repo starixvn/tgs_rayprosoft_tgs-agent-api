@@ -1,7 +1,6 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import { css } from "@emotion/core"
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
   Link,
@@ -51,16 +50,51 @@ export const Menu = ({
   return (
     <SideNav.Level title={title}>
       <SideNav.Level>
-        {codes.map((code) => {
-          return (
-            <SideNav.Item key={code} navId={`${url}/${code}`}>
-              <Link to={`${url}/${code}`}>{label(code)}</Link>
-            </SideNav.Item>
-          )
-        })}
+        {codes.map((code) => (
+          <MenuItem key={code} code={code} url={url} />
+        ))}
       </SideNav.Level>
     </SideNav.Level>
   )
+}
+
+const MenuItem = ({ code, url, ...props }) => {
+  let ref = useRef()
+  let path = `${url}/${code}`
+
+  useEffect(() => {
+    console.log("TODO: blur?")
+    ref?.current.blur()
+  })
+
+  return (
+    <SideNav.Item navId={path}>
+      <Link ref={ref} to={path}>
+        {label(code)}
+      </Link>
+    </SideNav.Item>
+  )
+
+  //TODO: seems cause loop on debug mode
+  /*
+  let ref = useRef()
+  let { pathname } = useLocation()
+  let path = `${url}/${code}`
+  let isActive = path == pathname
+  useEffect(() => {
+    if (isActive) {
+      ref?.current.focus()
+    }
+  }, [isActive])
+
+  return (
+    <SideNav.Item navId={path} isActive={isActive}>
+      <Link ref={ref} to={path}>
+        {label(code)}
+      </Link>
+    </SideNav.Item>
+  )
+  */
 }
 
 export const Content = ({ codes, codePaths }) => {

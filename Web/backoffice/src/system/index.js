@@ -23,11 +23,17 @@ export const Code = "system"
 
 export const DefaultUrl = `/${Code}`
 
+const DefaultCodePath = [Code]
 //TODO: i18n
 const name = () => "系统设置"
 
-export const Menu = ({ title = name(), url = DefaultUrl, codes, ...props }) => {
-  let codePaths = [Code]
+export const Menu = ({
+  title = name(),
+  url = DefaultUrl,
+  codes,
+  codePaths = DefaultCodePath,
+  ...props
+}) => {
   let authCodes = useAuthCodes(codePaths)
   codes = codes ?? authCodes
 
@@ -48,8 +54,8 @@ export const Content = ({ codes, ...props }) => {
   let route = useRouteMatch()
 
   let codePaths = [Code]
-  let authedCodes = useAuthCodes(codePaths)
-  codes = codes ?? authedCodes
+  let authCodes = useAuthCodes(codePaths)
+  codes = codes ?? authCodes
 
   //TODO: not auth content?
   codes = [PermissionCode]

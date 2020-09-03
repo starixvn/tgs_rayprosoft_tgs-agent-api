@@ -130,29 +130,17 @@ const Header = () => {
 }
 
 const Sidebar = () => {
-  let location = useLocation()
+  //TODO: useLocation seems cause dev mode looping
+  let { pathname: selectedId } = useLocation()
   let codes = useAuthCodes()
-  //TODO: needed?
-  let [selectedId, setSelectedId] = useState(location.pathname)
 
   //TODO: rm
   codes = [SystemCode]
   console.log("TODO: Sidebar rm ", [SystemCode])
 
-  useEffect(() => {
-    setSelectedId(location.pathname)
-    console.log("selectedId", selectedId)
-  }, [location])
-
   return (
     <Stack spacing="major-1" paddingY="major-2">
-      <SideNav
-        selectedId={selectedId}
-        onChange={(id) => {
-          setSelectedId(id)
-          console.log("onSideNav Change", id)
-        }}
-      >
+      <SideNav selectedId={selectedId}>
         {codes.map((code) => (
           <MenuItem key={code} code={code} />
         ))}
