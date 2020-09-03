@@ -24,7 +24,8 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
 
         IQueryable<User> IUserQueries.GetUseQueries()
         {
-            return _repository.Users.Where(p => p.Status == UserStatus.Archived);
+            return _repository.Users
+                .Where(p => p.Status != UserStatus.Archived);
         }
 
         Task<User> IUserQueries.GetUserByUsernameAsync(string username)

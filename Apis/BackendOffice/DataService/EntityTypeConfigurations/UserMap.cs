@@ -63,11 +63,11 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
             builder.Property(c => c.LastLoginTime)

@@ -13,8 +13,8 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             string userName,
             UserStatus status,
             Guid roleId,
+            Guid departmentId,
             Guid? userId = null,
-            Guid? licenseeId = null,
             Guid? resellerId = null,
             RoleType roleType = RoleType.Admin)
         {
@@ -26,6 +26,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                 Id = userId.Value,
                 RoleId = roleId,
                 RoleType = roleType,
+                DepartmentId = departmentId,
                 Username = userName,
                 Password = passwordHash,
                 Salt = salt,

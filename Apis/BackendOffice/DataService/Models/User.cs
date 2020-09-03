@@ -11,6 +11,9 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public Role Role { get; set; }
         public RoleType RoleType { get; set; }
 
+        public Guid DepartmentId { get; set; }
+        public Department Department { get; set; }
+
         public Guid? ResellerId { get; set; }
         public Guid? BrandId { get; set; }
 
