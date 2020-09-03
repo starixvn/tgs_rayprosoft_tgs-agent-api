@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
 import {
   BrowserRouter as Router,
@@ -11,11 +11,12 @@ import {
   useRouteMatch
 } from "react-router-dom"
 import { useAuthCodes } from "../user/context"
+import { Code as AdminCode, Content as AdminContent } from "./admins"
+import { Code as GroupCode, Content as GroupContent } from "./groups"
 import {
-  Code as PermissionCode,
-  Menu as PermissionsMenu,
-  Content as PermissionContent
-} from "./permissions"
+  Code as DepartmentCode,
+  Content as DepartmentContent
+} from "./departments"
 import { SideNav } from "bumbag"
 import PageNotFound from "../page/NotFound"
 
@@ -37,17 +38,68 @@ export const Menu = ({
   let authCodes = useAuthCodes(codePaths)
   codes = codes ?? authCodes
 
-  //TODO: rm
-  codes = [PermissionCode]
-  console.log("TODO: rm system menu codes", [PermissionCode])
-
   return (
     <SideNav.Level title={title}>
-      {codes.map((code) => (
-        <Item key={code} code={code} codePaths={codePaths} />
-      ))}
+      <SideNav.Level>
+        {codes.map((code) => (
+          <MenuItem key={code} code={code} url={url} />
+        ))}
+      </SideNav.Level>
     </SideNav.Level>
   )
+}
+
+const MenuItem = ({ code, url, ...props }) => {
+  let ref = useRef()
+  let path = `${url}/${code}`
+
+  useEffect(() => {
+    console.log("TODO: blur?")
+    ref?.current.blur()
+  })
+
+  return (
+    <SideNav.Item navId={path}>
+      <Link ref={ref} to={path}>
+        {label(code)}
+      </Link>
+    </SideNav.Item>
+  )
+
+  //TODO: seems cause loop on debug mode
+  /*
+  let ref = useRef()
+  let { pathname } = useLocation()
+  let path = `${url}/${code}`
+  let isActive = path == pathname
+  useEffect(() => {
+    if (isActive) {
+      ref?.current.focus()
+    }
+  }, [isActive])
+
+  return (
+    <SideNav.Item navId={path} isActive={isActive}>
+      <Link ref={ref} to={path}>
+        {label(code)}
+      </Link>
+    </SideNav.Item>
+  )
+  */
+}
+
+//TODO: i18n
+const label = (code = "") => {
+  switch (code) {
+    case AdminCode:
+      return "管理员列表"
+    case GroupCode:
+      return "权限组管理"
+    case DepartmentCode:
+      return "部门管理"
+    default:
+      return ""
+  }
 }
 
 export const Content = ({ codes, ...props }) => {
@@ -56,10 +108,6 @@ export const Content = ({ codes, ...props }) => {
   let codePaths = [Code]
   let authCodes = useAuthCodes(codePaths)
   codes = codes ?? authCodes
-
-  //TODO: not auth content?
-  codes = [PermissionCode]
-  console.log("TODO: rm system content codes ", [PermissionCode])
 
   return (
     <Switch>
@@ -81,8 +129,12 @@ export const Content = ({ codes, ...props }) => {
 
 const Body = ({ code }) => {
   switch (code) {
-    case PermissionCode:
-      return <PermissionContent />
+    case AdminCode:
+      return <AdminContent />
+    case GroupCode:
+      return <GroupContent />
+    case DepartmentCode:
+      return <DepartmentContent />
     default:
       return <PageNotFound />
   }

@@ -26,7 +26,7 @@ import {
   InputField,
   Set
 } from "bumbag"
-import client from "../../../client"
+import client from "../../client"
 import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
 export const Code = "admins"
@@ -36,8 +36,11 @@ export const Content = () => {
 
   return (
     <PageContent css={css``}>
+      <Heading use="h3" spacing="major-3">
+        {title()}
+      </Heading>
+
       <Set orientation="vertical">
-        <Heading use="h3">{title()}</Heading>
         <SearchForm table={table} />
         <AsyncDataTable table={table}>
           {({ async, data = {}, ...props }) => {
