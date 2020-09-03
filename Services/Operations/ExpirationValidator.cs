@@ -21,7 +21,7 @@ namespace TGS.Services.Operations
 
         async Task IExpirationValidator.ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform)
         {
-            var loginRecord = await _playerOpertions.GetPlayerLatestLoginRecordAsync(playerCode, platform);
+            var loginRecord = await _playerOpertions.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform);
             if (loginRecord == null || loginRecord.ExpiredOn < DateTimeOffset.UtcNow)
             {
                 throw new PlayerLoginExpiredException(playerCode);

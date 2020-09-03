@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -18,12 +19,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 return await conn.QueryAsync<TEntity>(sql, commandType: commandType);
             }
 
-            var param = new DynamicParameters();
-
-            foreach (var p in parameters)
-            {
-                param.Add(p.ParameterName, p.Value, p.DbType);
-            }
+            var param = GetDynamicParameters(parameters);
 
             return await conn.QueryAsync<TEntity>(sql, param, commandType: commandType);
         }
@@ -37,12 +33,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, commandType: commandType);
             }
 
-            var param = new DynamicParameters();
-
-            foreach (var p in parameters)
-            {
-                param.Add(p.ParameterName, p.Value, p.DbType);
-            }
+            var param = GetDynamicParameters(parameters);
 
             return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, param, commandType: commandType);
         }
@@ -56,12 +47,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 return await conn.ExecuteAsync(sql, commandType: commandType);
             }
 
-            var param = new DynamicParameters();
-
-            foreach (var p in parameters)
-            {
-                param.Add(p.ParameterName, p.Value, p.DbType);
-            }
+            var param = GetDynamicParameters(parameters);
 
             return await conn.ExecuteAsync(sql, param, commandType: commandType);
         }
@@ -75,14 +61,32 @@ namespace TGS.Core.DataServices.Base.Extensions
                 return conn.Execute(sql, commandType: commandType);
             }
 
+            var param = GetDynamicParameters(parameters);
+
+            return conn.Execute(sql, param, commandType: commandType);
+        }
+
+        private static DynamicParameters GetDynamicParameters(IEnumerable<SqlParameter> parameters)
+        {
             var param = new DynamicParameters();
 
             foreach (var p in parameters)
             {
-                param.Add(p.ParameterName, p.Value, p.DbType);
+                if (p.SqlDbType != SqlDbType.Structured)
+                {
+                    param.Add(p.ParameterName, p.Value, p.DbType);
+                    continue;
+                }
+
+                if (p.Value is not DataTable)
+                {
+                    throw new ArgumentException($"Parameter({p.ParameterName}): DataTable is expected for Structured SqlDbType but is {p.Value.GetType()} ");
+                }
+
+                param.Add(p.ParameterName, ((DataTable)p.Value).AsTableValuedParameter());
             }
 
-            return conn.Execute(sql, param, commandType: commandType);
+            return param;
         }
     }
 }

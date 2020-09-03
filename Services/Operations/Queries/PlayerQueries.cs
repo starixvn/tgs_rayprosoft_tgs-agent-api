@@ -13,7 +13,7 @@ namespace TGS.Services.Operations.Queries
     {
         Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);
 
-        Task<GetPlayerLoginRecordResult> GetPlayerLatestLoginRecordAsync(string playerCode, PlatformType? platform);
+        Task<GetPlayerLoginRecordResult> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform);
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -36,9 +36,9 @@ namespace TGS.Services.Operations.Queries
             });
         }
 
-        Task<GetPlayerLoginRecordResult> IPlayerQueries.GetPlayerLatestLoginRecordAsync(string playerCode, PlatformType? platform)
+        Task<GetPlayerLoginRecordResult> IPlayerQueries.GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform)
         {
-            const string spName = "usp_Player_GetPlayerLatestLoginRecord";
+            const string spName = "usp_Player_GetPlayerLatestEnabledLoginRecord";
             return _repository.SqlQuerySingleAsync<GetPlayerLoginRecordResult>(spName, parameters:
                 new SqlParameter[]
                 {
