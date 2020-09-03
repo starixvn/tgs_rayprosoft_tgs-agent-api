@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -36,7 +35,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>("Invalid password.");
             }
 
-            user.LastLoginIp = HttpContext.Connection.RemoteIpAddress.ToString();
+            if (_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress != null)
+                user.LastLoginIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+
             user.LastLoginTime = DateTimeOffset.Now;
 
             await _userCommands.UpdateUserAsync(user);
@@ -56,18 +57,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [AllowAnonymous]
+        [HttpPost("user")]
+        public Dictionary<string, string> GetUser()
+        {
+            var user = HttpContext.User;
+            return HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
+        }
+
         [HttpPost, Route("logout")]
         public Task LogoutAsync()
         {
-            return HttpContext.SignOutAsync();
-        }
-
-
-        [HttpPost, Route("logout2")]
-        public Task Logout2Async()
-        {
-            return HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return _httpContextAccessor.HttpContext?.SignOutAsync();
         }
 
         private void SetCsrfToken()
@@ -92,8 +92,10 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, role),
+                new Claim(Consts.UserInfo.UsernameKey, username),
+                new Claim(Consts.UserInfo.RolenameKey, role),
+                new Claim(Consts.UserInfo.ResellerKey, Guid.NewGuid().ToString()),
+                new Claim(Consts.UserInfo.BrandKey, Guid.NewGuid().ToString()),
             };
 
             var authProperties = new AuthenticationProperties
@@ -103,7 +105,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+            await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
         protected bool PasswordMismatch(User user, string password)

@@ -1,0 +1,16 @@
+﻿namespace TGS.Apis.BackendOffice
+{
+    public class Consts
+    {
+
+        public const string CsrfTokenName = "X-XSRF-TOKEN";
+
+        public static class UserInfo
+        {
+            public static string UsernameKey = "Usernme";
+            public static string RolenameKey = "Rolename";
+            public static string ResellerKey = "Reseller";
+            public static string BrandKey = "Brand";
+        }
+    }
+}

@@ -13,7 +13,6 @@
             public const string NatsTgsLogQueueName = "TgsLogQueue";
         }
 
-        public const string CsrfTokenName = "X-XSRF-TOKEN";
         public const string Environment = "ASPNETCORE_ENVIRONMENT";
         public const string DefualtCultureCode = "en-US";
 

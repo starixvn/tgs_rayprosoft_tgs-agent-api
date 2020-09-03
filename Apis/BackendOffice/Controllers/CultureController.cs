@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Threading;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -12,7 +13,10 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class CultureController : BackendOfficeControllerBase
     {
         private readonly IStringLocalizer _localizer;
-        public CultureController(IStringLocalizer<CultureController> localizer)
+        public CultureController(
+            IStringLocalizer<CultureController> localizer,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _localizer = localizer;
         }

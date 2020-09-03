@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
@@ -25,6 +26,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly IUserQueries _userQueries;
         private readonly IUserCommands _userCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserController(
             IHashProvider hashProvider,
@@ -32,7 +34,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             IAntiforgery antiForgery,
             IUserQueries userQueries,
             IUserCommands userCommands,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IJsonSerializationProvider jsonSerializationProvider,
+            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
@@ -40,6 +43,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _userQueries = userQueries;
             _userCommands = userCommands;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [Route("")]
@@ -56,7 +60,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     DepartmentName = user.Department.Name,
                     LastLoginIp = user.LastLoginIp,
                     LastLoginTime = user.LastLoginTime,
-                    Status = user.Status,
+                    Status = user.Status.ToString(),
                     CreatedOn = user.CreatedOn
 
                 })

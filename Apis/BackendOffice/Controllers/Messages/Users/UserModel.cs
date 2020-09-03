@@ -1,5 +1,4 @@
 ﻿using System;
-using TGS.Apis.BackendOffice.DataService.Enums;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
 {
@@ -12,6 +11,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
         public string LastLoginIp { get; set; }
         public DateTimeOffset? LastLoginTime { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
-        public UserStatus Status { get; set; }
+        public string Status { get; set; }
     }
 }
