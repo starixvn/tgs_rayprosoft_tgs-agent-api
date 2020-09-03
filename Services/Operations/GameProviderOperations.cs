@@ -27,7 +27,10 @@ namespace TGS.Services.Operations
 
         Task<bool> LanguageSupportedAsync(Guid gameProviderId, string cultureCode);
 
+        Task<bool> CurrencySupportedAsync(Guid gameProviderId, string currencyCode);
+
         Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
+        
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -156,6 +159,18 @@ namespace TGS.Services.Operations
                 });
 
             return languages.Contains(cultureCode, StringComparer.OrdinalIgnoreCase);
+        }
+                
+        async Task<bool> IGameProviderOperations.CurrencySupportedAsync(Guid gameProviderId, string currencyCode)
+        {
+            var currencies = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderCurrencies, gameProviderId, TimeSpan.FromHours(2),
+                async () =>
+                {
+                    var dict = await _gameProviderQueriesFactory().GetGameProviderCurrenciesByInternalCodeAsync(gameProviderId);
+                    return dict.Keys.ToArray();
+                });
+
+            return currencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase);
         }
 
         async Task<string> IGameProviderOperations.GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId)
