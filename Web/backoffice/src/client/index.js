@@ -1,5 +1,22 @@
 import { toDataOrError } from "./response"
 
+export const get = (url = "", { searchParams = {}, ...options }) => {
+  let urlSearchParams = Object.entries(searchParams).reduce(
+    (searchParams, [key, value]) => {
+      if (typeof value == "string" && !value) {
+        return searchParams
+      }
+
+      return searchParams
+        ? `${searchParams}&${key}=${value}`
+        : `${key}=${value}`
+    },
+    ""
+  )
+  url = `${url}?${urlSearchParams}`
+  return fetch(url, options).then(toDataOrError)
+}
+
 export const post = (
   url,
   { body, data = {}, headers = {}, ...options } = {}
@@ -16,5 +33,6 @@ export const post = (
 }
 
 export default {
+  get,
   post
 }

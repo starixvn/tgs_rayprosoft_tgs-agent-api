@@ -20,6 +20,39 @@ namespace TGS.Apis.BackendOffice.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Department", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments","dbo");
+                });
+
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -28,7 +61,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -61,7 +94,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -79,7 +112,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
+                        .HasColumnType("nvarchar(32)")
                         .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("CreatedOn")
@@ -91,7 +124,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
+                        .HasColumnType("nvarchar(32)")
                         .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("UpdatedOn")
@@ -118,10 +151,13 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -163,7 +199,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -174,6 +210,8 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users","dbo");
@@ -181,6 +219,12 @@ namespace TGS.Apis.BackendOffice.Migrations
 
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.User", b =>
                 {
+                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Department", "Department")
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TGS.Apis.BackendOffice.DataService.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")

@@ -15,6 +15,8 @@ namespace TGS.Apis.BackendOffice.DataService
 
         DbSet<Setting> Settings { get; set; }
 
+        DbSet<Department> Departments { get; set; }
+
         void BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
     }
 }

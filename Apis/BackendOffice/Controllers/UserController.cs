@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
@@ -15,7 +14,7 @@ using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-    [AllowAnonymous]
+
     [Route("api/users")]
     [ApiController]
     public partial class UserController : BackendOfficeControllerBase
@@ -44,14 +43,24 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("")]
-        [HttpPost, Description("Get user list")]
-        public Task<PagedResponse<UserModel>> GetUserAsync(GetUsersRequest request)
+        [HttpGet, Description("Get user list")]
+        public Task<PagedResponse<UserModel>> GetUserAsync([FromQuery] GetUsersRequest request)
         {
             return _userQueries.GetUseQueries()
                 .Where(request.Username, p => p.Username.Contains(request.Username))
-                .Select(p => new UserModel())
-                .CreatePagedResponseAsync(request);
+                .Select(user => new UserModel
+                {
+                    Username = user.Username,
+                    Name = user.Name,
+                    Role = user.Role.Name,
+                    DepartmentName = user.Department.Name,
+                    LastLoginIp = user.LastLoginIp,
+                    LastLoginTime = user.LastLoginTime,
+                    Status = user.Status,
+                    CreatedOn = user.CreatedOn
 
+                })
+                .CreatePagedResponseAsync(request);
         }
         protected (byte[], byte[]) GenerateCredential(string password)
 

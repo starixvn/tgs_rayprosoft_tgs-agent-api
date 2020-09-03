@@ -19,15 +19,23 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : IDataInitializer
     {
-        private readonly IServiceScopeFactory _scopeFactory;
-
         private const string DefaultTimeZone = "+0800";
         private const string AdminUsername = "admin.enabled";
         private const string UserPassword = "TgsP@ssw0rd";
+        private const string MarketDepartment = "市場";
+        private const string ProductDepartment = "產品";
+        private IBackendOfficeRepository _repository;
+
+        private static Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
+        {
+            { MarketDepartment , new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB") },
+            { ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA") }
+        };
 
         public DataInitializer(IServiceScopeFactory scopeFactory)
         {
-            _scopeFactory = scopeFactory;
+            var serviceScope = scopeFactory.CreateScope();
+            _repository = serviceScope.ServiceProvider.GetRequiredService<IBackendOfficeRepository>();
         }
 
         private readonly IRole[] _roles =
@@ -37,19 +45,33 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 
         void IDataInitializer.SetInitialData()
         {
-            using var serviceScope = _scopeFactory.CreateScope();
-            var repository = serviceScope.ServiceProvider.GetRequiredService<IBackendOfficeRepository>();
-            if (repository.Users.Any())
+            if (_repository.Users.Any())
             {
                 return;
             }
 
-            GenerateRoles(repository);
-            GenerateUsers(repository);
-            GenerateSettings(repository);
+            GenerateDepartments();
+            GenerateRoles();
+            GenerateUsers();
+            GenerateSettings();
         }
 
-        private void GenerateRoles(IBackendOfficeRepository repo)
+        private void GenerateDepartments()
+        {
+            var departments = Departments.Select(p => new Department
+            {
+                Id = p.Value,
+                Name = p.Key,
+                Description = p.Key,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            });
+            _repository.BulkInsert(departments.ToArray());
+        }
+
+        private void GenerateRoles()
         {
             var roles = CreateRoleWithMenus(_roles);
             var command = @"
@@ -97,9 +119,8 @@ VALUES
                     new SqlParameter { ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String }
                 };
-                repo.ExecuteSqlCommand(command, CommandType.Text, args);
+                _repository.ExecuteSqlCommand(command, CommandType.Text, args);
             }
-
         }
 
         private Role[] CreateRoleWithMenus(IRole[] roles)
@@ -122,7 +143,7 @@ VALUES
         }
 
 
-        private void GenerateUsers(IBackendOfficeRepository repository)
+        private void GenerateUsers()
         {
             string[] usernames =
             {
@@ -131,14 +152,14 @@ VALUES
 
             var users = new List<User>
             {
-                CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin),
-                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin),
-                CreateUser("admin.archived", UserStatus.Archived, Roles.Admin),
-                CreateUser("admin.locked", UserStatus.Locked, Roles.Admin)
+                CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin, Departments[MarketDepartment]),
+                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment]),
+                CreateUser("admin.archived", UserStatus.Archived, Roles.Admin, Departments[MarketDepartment]),
+                CreateUser("admin.locked", UserStatus.Locked, Roles.Admin, Departments[ProductDepartment])
             };
 
-            users.AddRange(usernames.Select(username => CreateUser(username, UserStatus.Enabled, Roles.Admin)));
-            repository.BulkInsert(users);
+            users.AddRange(usernames.Select(username => CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
+            _repository.BulkInsert(users);
         }
     }
 }

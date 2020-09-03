@@ -7,15 +7,13 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public partial class DataInitializer
     {
-        private void GenerateSettings(IBackendOfficeRepository repository)
+        private void GenerateSettings()
         {
             var configurations = new[]
             {
-                CreateSetting(SettingConst.Menus, _jsonSerialization.SerializeToString(GetMenuSettings()), "For menus used"),
-                CreateSetting(SettingConst.Vip, _jsonSerialization.SerializeToString(GetVipSettings()), "For players used."),
-                CreateSetting(SettingConst.Department, _jsonSerialization.SerializeToString(GetDepartmentSettings()), "For users used."),
+                CreateSetting(SettingConst.Menus, _jsonSerialization.SerializeToString(GetMenuSettings()), "For menus used")
             };
-            repository.BulkInsert(configurations);
+            _repository.BulkInsert(configurations);
         }
 
         private readonly IJsonSerializationProvider _jsonSerialization = new JsonSerializationProvider();
@@ -179,28 +177,6 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             };
 
             return menus;
-        }
-
-        private string[] GetVipSettings()
-        {
-            return new[]
-            {
-                "VIP1",
-                "VIP2",
-                "VIP3",
-                "VIP4",
-                "VIP5"
-            };
-        }
-
-        private string[] GetDepartmentSettings()
-        {
-            return new[]
-            {
-                "市場部門",
-                "技術部門",
-                "客服部門",
-            };
         }
 
         private static Setting CreateSetting(string key, string value, string description)

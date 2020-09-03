@@ -33,7 +33,7 @@ namespace TGS.Apis.BackendOffice
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
@@ -42,17 +42,8 @@ namespace TGS.Apis.BackendOffice
 
             app.SeedData();
 
-            //var supportedCultures = new[] { "en-US", "zh-CN" };
-            //var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
-            //    .AddSupportedCultures(supportedCultures)
-            //    .AddSupportedUICultures(supportedCultures);
-            //app.UseRequestLocalization(localizationOptions);
-
-
             var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
-
-
         }
     }
 }

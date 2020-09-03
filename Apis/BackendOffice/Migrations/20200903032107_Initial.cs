@@ -11,6 +11,24 @@ namespace TGS.Apis.BackendOffice.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
+                name: "Departments",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(128)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Departments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 schema: "dbo",
                 columns: table => new
@@ -25,8 +43,8 @@ namespace TGS.Apis.BackendOffice.Migrations
                     Status = table.Column<byte>(type: "tinyint", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false)
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,8 +61,8 @@ namespace TGS.Apis.BackendOffice.Migrations
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,6 +78,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     Status = table.Column<byte>(type: "tinyint", nullable: false),
                     RoleId = table.Column<Guid>(nullable: false),
                     RoleType = table.Column<byte>(type: "tinyint", nullable: false),
+                    DepartmentId = table.Column<Guid>(nullable: false),
                     ResellerId = table.Column<Guid>(nullable: true),
                     BrandId = table.Column<Guid>(nullable: true),
                     Username = table.Column<string>(type: "nvarchar(50)", nullable: false),
@@ -70,14 +89,21 @@ namespace TGS.Apis.BackendOffice.Migrations
                     TimeZone = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalSchema: "dbo",
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Users_Roles_RoleId",
                         column: x => x.RoleId,
@@ -86,6 +112,12 @@ namespace TGS.Apis.BackendOffice.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_DepartmentId",
+                schema: "dbo",
+                table: "Users",
+                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
@@ -102,6 +134,10 @@ namespace TGS.Apis.BackendOffice.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Departments",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

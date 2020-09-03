@@ -20,6 +20,7 @@ namespace TGS.Apis.BackendOffice.DataService
         DbSet<User> IBackendOfficeRepository.Users { get; set; }
         DbSet<Role> IBackendOfficeRepository.Roles { get; set; }
         DbSet<Setting> IBackendOfficeRepository.Settings { get; set; }
+        DbSet<Department> IBackendOfficeRepository.Departments { get; set; }
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
@@ -47,6 +48,7 @@ namespace TGS.Apis.BackendOffice.DataService
             modelBuilder.ApplyConfiguration(new UserMap());
             modelBuilder.ApplyConfiguration(new RoleMap());
             modelBuilder.ApplyConfiguration(new SettingMap());
+            modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
 
         void IBackendOfficeRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class

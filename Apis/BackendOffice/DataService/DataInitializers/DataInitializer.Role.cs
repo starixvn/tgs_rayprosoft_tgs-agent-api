@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         internal class AdminRole : IRole
         {
             Guid IRole.Id => new Guid("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44E");
-            string IRole.Name => "Admin";
+            string IRole.Name => "超級管理員";
             string IRole.Description => "It is used for admin users.";
             RoleType IRole.RoleType => RoleType.Admin;
         }
@@ -31,7 +31,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         internal class ResellerAdminRole : IRole
         {
             Guid IRole.Id => new Guid("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44A");
-            string IRole.Name => "Reseller Admin";
+            string IRole.Name => "管理員";
             string IRole.Description => "It is used for reseller admin.";
             RoleType IRole.RoleType => RoleType.Reseller;
         }
@@ -39,9 +39,9 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         internal class BrandRole : IRole
         {
             Guid IRole.Id => new Guid("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44B");
-            string IRole.Name => "Brand";
+            string IRole.Name => "產品經理";
             string IRole.Description => "It is used for brands.";
-            RoleType IRole.RoleType => RoleType.Licensee;
+            RoleType IRole.RoleType => RoleType.Brand;
         }
     }
 }
