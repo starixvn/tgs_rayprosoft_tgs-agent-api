@@ -56,10 +56,18 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPost("logout")]
+        [AllowAnonymous]
+        [HttpPost, Route("logout")]
         public Task LogoutAsync()
         {
             return HttpContext.SignOutAsync();
+        }
+
+
+        [HttpPost, Route("logout2")]
+        public Task Logout2Async()
+        {
+            return HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         private void SetCsrfToken()
