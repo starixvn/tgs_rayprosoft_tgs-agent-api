@@ -905,7 +905,7 @@ namespace TGS.Core.DataServices.Migrations
                 table: "Whitelists",
                 column: "ResellerId");
 
-                        #region Store Procedure
+            #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -934,10 +934,9 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLatestLoginRecord.sql");
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLatestEnabledLoginRecord.sql");
 
             #endregion Store Procedure
-
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

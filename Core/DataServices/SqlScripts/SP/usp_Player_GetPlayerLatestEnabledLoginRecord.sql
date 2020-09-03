@@ -3,11 +3,11 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Player_GetPlayerLatestLoginRecord') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Player_GetPlayerLatestLoginRecord AS');
+IF OBJECT_ID('usp_Player_GetPlayerLatestEnabledLoginRecord') IS NULL
+    EXEC('CREATE PROCEDURE dbo.usp_Player_GetPlayerLatestEnabledLoginRecord AS');
 GO
 
-ALTER PROCEDURE [dbo].[usp_Player_GetPlayerLatestLoginRecord]
+ALTER PROCEDURE [dbo].[usp_Player_GetPlayerLatestEnabledLoginRecord]
       @playerCode    NVARCHAR(16),
 	  @platformType  SMALLINT
 AS 
@@ -24,7 +24,7 @@ BEGIN
     AND [CreatedOn] >= @from
     AND [ExpiredOn] >= @now
     AND	([PlatformType] = @platformType OR @platformType IS NULL)
-    AND [Status] = '0' -- Enabled
+    AND [Status] = 0
     ORDER BY [ExpiredON] DESC
 
 END

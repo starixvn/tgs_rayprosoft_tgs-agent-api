@@ -4,11 +4,9 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
-using TGS.Core.Models.Services.Data;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
-using UGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operations
 {
@@ -18,7 +16,7 @@ namespace TGS.Services.Operations
 
         Task<decimal> GetPlayerBalanceAsync(Guid defaultWalletId, bool dirtyRead);
 
-        Task<CachedPlayerLoginRecord> GetPlayerLatestLoginRecordAsync(string playerCode, PlatformType? platform);
+        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -136,29 +134,29 @@ namespace TGS.Services.Operations
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2), true);
         }
 
-        async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestLoginRecordAsync(string playerCode, PlatformType? platform)
+        async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform)
         {
-            var field = platform == null ? "latest" : platform.ToString();
+            var field = platform == null ? "latest:enabled" : $"{platform}:enabled";
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecord, playerCode, field);
-            if (value.HasValue) 
+            if (value.HasValue)
             {
                 return _json.DeserializeFromString<CachedPlayerLoginRecord>(value);
             }
 
-            var r = await _playerQueriesFactory().GetPlayerLatestLoginRecordAsync(playerCode, platform);
-            if (r == null) 
-            { 
+            var r = await _playerQueriesFactory().GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform);
+            if (r == null)
+            {
                 return null;
             }
 
             var cache = new CachedPlayerLoginRecord
-            { 
+            {
                 PlatformType = r.PlatformType,
                 ExpiredOn = r.ExpiredOn
             };
 
             var expiresIn = cache.ExpiredOn - DateTimeOffset.UtcNow;
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecord, playerCode, new HashEntry[] { 
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecord, playerCode, new HashEntry[] {
                 new (field, _json.SerializeToString(cache))
             }, expiresIn);
 
