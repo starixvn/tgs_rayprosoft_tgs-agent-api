@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
@@ -6,6 +8,7 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
+using TGS.Infrastructures.Extensions;
 
 namespace TGS.Services.Operations.Queries
 {
@@ -13,7 +16,7 @@ namespace TGS.Services.Operations.Queries
     {
         Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);
 
-        Task<GetPlayerLoginRecordResult> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform);
+        Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(string playerCode, params LoginStatus[] statuses);
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -36,10 +39,10 @@ namespace TGS.Services.Operations.Queries
             });
         }
 
-        Task<GetPlayerLoginRecordResult> IPlayerQueries.GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform)
+        async Task<GetPlayerLoginRecordResult[]> IPlayerQueries.GetPlayerLoginsRecordsInOneDayAsync(string playerCode, LoginStatus[] statuses)
         {
-            const string spName = "usp_Player_GetPlayerLatestEnabledLoginRecord";
-            return _repository.SqlQuerySingleAsync<GetPlayerLoginRecordResult>(spName, parameters:
+            const string spName = "usp_Player_GetPlayerLoginRecords";
+            var results = await _repository.SqlQueryMultipleAsync<GetPlayerLoginRecordResult>(spName, parameters:
                 new SqlParameter[]
                 {
                     new()
@@ -50,11 +53,19 @@ namespace TGS.Services.Operations.Queries
                     },
                     new()
                     {
-                        ParameterName = "@platform",
-                        Value = platform,
-                        DbType = DbType.Int16
-                    }
+                        ParameterName = "@statuses",
+                        Value = statuses.Select(s => (int)s).ToDataTable(),
+                        SqlDbType = SqlDbType.Structured,
+                    },
+                    new()
+                    {
+                        ParameterName = "@from",
+                        Value = DateTimeOffset.UtcNow.AddDays(-1),
+                        DbType = DbType.DateTimeOffset
+                    },
                 });
+
+            return results.ToArray();
         }
     }
 }

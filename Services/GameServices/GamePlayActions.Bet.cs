@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
-using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
 
 namespace TGS.Services.GameServices
 {
@@ -35,9 +33,12 @@ namespace TGS.Services.GameServices
             return new GetBalanceResult(balance, cur);
         }
 
-        Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
+        async Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
         {
-            throw new NotImplementedException();
+            var player =await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
+            await ThrowIfGameIsNotTakenByBrandAsync(player, data.GameProviderId, data.GameProviderCode);
+            return null;
         }
 
         Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data)
@@ -49,5 +50,24 @@ namespace TGS.Services.GameServices
         {
             throw new NotImplementedException();
         }
+
+        private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, Guid gameProviderId, string gameProviderCode, GameActionType type = GameActionType.PlaceBet)
+        {
+            if (type != GameActionType.PlaceBet)
+                return;
+
+            var supported = await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, player.DefaultWalletCurrencyCode);
+            if (!supported) 
+            { 
+                throw new InvalidOperationException($"gameProvider {gameProviderId} doesn't support currency '{player.DefaultWalletCurrencyCode}'");
+            }
+
+            //var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(player.PlayerCode);
+            //var validGameStatus = _validGameStatus.GetStatus(player.Type, type);
+            //var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId);
+
+
+        }
+
     }
 }

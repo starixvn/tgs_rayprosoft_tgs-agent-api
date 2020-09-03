@@ -934,7 +934,10 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLatestEnabledLoginRecord.sql");
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLoginRecords.sql");
+
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.TYPE.IntValuesType.sql");
 
             #endregion Store Procedure
         }

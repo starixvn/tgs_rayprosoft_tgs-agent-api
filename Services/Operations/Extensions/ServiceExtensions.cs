@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
 
@@ -32,6 +34,8 @@ namespace TGS.Services.Operations.Extensions
             
             #endregion
 
+            services.AddSingleton<IValidStatus<Status>, ValidStatus>();
+            services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
             services.AddSingleton<IStatusValidator, StatusValidator>();
             services.AddSingleton<IExpirationValidator, ExpirationValidator>();
 

@@ -3,13 +3,14 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Player_GetPlayerLatestEnabledLoginRecord') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Player_GetPlayerLatestEnabledLoginRecord AS');
+IF OBJECT_ID('usp_Player_GetPlayerLoginRecords') IS NULL
+    EXEC('CREATE PROCEDURE dbo.usp_Player_GetPlayerLoginRecords AS');
 GO
 
-ALTER PROCEDURE [dbo].[usp_Player_GetPlayerLatestEnabledLoginRecord]
+ALTER PROCEDURE [dbo].[usp_Player_GetPlayerLoginRecords]
       @playerCode    NVARCHAR(16),
-	  @platformType  SMALLINT
+	  @statuses      IntValuesType,
+      @from          DATETIMEOFFSET
 AS 
 BEGIN
     SET NOCOUNT ON
@@ -22,10 +23,6 @@ BEGIN
     FROM dbo.[PlayerLoginRecords]
     WHERE [PlayerCode] = @playerCode
     AND [CreatedOn] >= @from
-    AND [ExpiredOn] >= @now
-    AND	([PlatformType] = @platformType OR @platformType IS NULL)
-    AND [Status] = 0
-    ORDER BY [ExpiredON] DESC
-
+    AND [Status] IN (SELECT [Value] FROM @statuses)
 END
 GO
