@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
@@ -43,7 +42,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        [AllowAnonymous]
         [Route("")]
         [HttpGet, Description("Get user list")]
         public Task<PagedResponse<UserModel>> GetUserAsync([FromQuery] GetUsersRequest request)

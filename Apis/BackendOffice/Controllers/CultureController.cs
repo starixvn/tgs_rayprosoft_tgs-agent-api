@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Threading;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -8,7 +7,6 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class CultureController : BackendOfficeControllerBase
@@ -19,7 +17,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             _localizer = localizer;
         }
 
-        [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("")]
         [HttpPost, Description("Change culture")]
         public MessageResponse ChangeCultureAsync(string culture)
