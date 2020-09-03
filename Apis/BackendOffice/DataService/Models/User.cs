@@ -12,12 +12,12 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public RoleType RoleType { get; set; }
 
         public Guid? ResellerId { get; set; }
-        public Guid? LicenseeId { get; set; }
         public Guid? BrandId { get; set; }
 
         public string Username { get; set; }
-        public string Firstname { get; set; }
-        public string Lastname { get; set; }
+        public string LastLoginIp { get; set; }
+        public DateTimeOffset? LastLoginTime { get; set; }
+        public string Name { get; set; }
         public string Email { get; set; }
         public string TimeZone { get; set; }
         public byte[] Password { get; set; }

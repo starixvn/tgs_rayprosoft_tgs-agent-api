@@ -50,7 +50,7 @@ namespace TGS.Core.DataServices
         {
             Database.SetCommandTimeout(seconds);
         }
-        
+
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
             return Database.BeginTransactionAsync(level);
@@ -60,7 +60,10 @@ namespace TGS.Core.DataServices
         {
             return Database.GetDbConnection();
         }
-
+        Task IBaseRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");

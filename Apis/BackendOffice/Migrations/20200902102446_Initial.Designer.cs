@@ -10,7 +10,7 @@ using TGS.Apis.BackendOffice.DataService;
 namespace TGS.Apis.BackendOffice.Migrations
 {
     [DbContext(typeof(BackendOfficeRepository))]
-    [Migration("20200902081141_Initial")]
+    [Migration("20200902102446_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,30 +30,30 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Department")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(128)");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(128)");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(4000)");
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<byte>("RoleType")
                         .HasColumnType("tinyint");
@@ -63,7 +63,7 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -120,29 +120,28 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(128)");
+                        .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("Firstname")
+                    b.Property<string>("LastLoginIp")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset?>("LastLoginTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(30)");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(30)");
-
-                    b.Property<Guid?>("LicenseeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("VARBINARY(128)");
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<Guid?>("ResellerId")
                         .HasColumnType("uniqueidentifier");
@@ -155,25 +154,25 @@ namespace TGS.Apis.BackendOffice.Migrations
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("VARBINARY(128)");
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
 
                     b.Property<string>("TimeZone")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(256)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 

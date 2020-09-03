@@ -31,9 +31,6 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
             builder.Property(c => c.ResellerId)
                 .IsRequired(false);
 
-            builder.Property(c => c.LicenseeId)
-                .IsRequired(false);
-
             builder.Property(c => c.BrandId)
                 .IsRequired(false);
 
@@ -41,11 +38,7 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
-            builder.Property(c => c.Firstname)
-                .HasColumnType(ColumnTypes.Nvarchar(30))
-                .IsRequired();
-
-            builder.Property(c => c.Lastname)
+            builder.Property(c => c.Name)
                 .HasColumnType(ColumnTypes.Nvarchar(30))
                 .IsRequired();
 
@@ -61,6 +54,10 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
+            builder.Property(c => c.LastLoginIp)
+                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .IsRequired(false);
+
             builder.Property(c => c.Salt)
                 .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
@@ -72,6 +69,10 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
             builder.Property(c => c.UpdatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(255))
                 .IsRequired();
+
+            builder.Property(c => c.LastLoginTime)
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired(false);
 
             builder.Property(c => c.CreatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
