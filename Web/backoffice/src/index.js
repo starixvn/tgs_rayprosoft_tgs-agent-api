@@ -1,15 +1,24 @@
 import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App"
+import "./reset.css"
 import "./index.css"
 import { Provider as BumbagProvider } from "bumbag"
 import { Provider as UserProvider } from "./user/context"
 import { BrowserRouter as Router } from "react-router-dom"
 
+const theme = {
+  PageContent: {
+    defaultProps: {
+      breakpoint: "desktop"
+    }
+  }
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <BumbagProvider collapseBelow="desktop">
+      <BumbagProvider theme={theme}>
         <UserProvider>
           <App />
         </UserProvider>
