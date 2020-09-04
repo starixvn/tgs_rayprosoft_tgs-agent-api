@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +14,7 @@ using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
+using TGS.Apis.BackendOffice.Filters;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
@@ -45,7 +44,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             services.AddHttpContextAccessor();
-            services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
+            // services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
             services.AddControllers();
             services.AddAntiforgery(options =>
             {
@@ -85,8 +84,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                     .RequireAuthenticatedUser()
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
-                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-                //options.Filters.Add(new HttpResponseExceptionFilter());
+                // options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                options.Filters.Add(new HttpResponseExceptionFilter());
             }).AddDataAnnotationsLocalization(); ;
             return services;
         }
