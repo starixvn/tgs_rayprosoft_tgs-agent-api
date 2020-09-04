@@ -227,7 +227,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
             }
 
             return Array.Empty<HashEntry>();
