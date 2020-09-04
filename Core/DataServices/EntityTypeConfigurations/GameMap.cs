@@ -29,7 +29,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.RuleUrl)
                 .HasColumnType(ColumnTypes.Nvarchar(512));
 
-            builder.Property(c => c.GameType)
+            builder.Property(c => c.Type)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -38,7 +38,12 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.SubGame)
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            builder.Property(c => c.HasTurnoverOnTieBet)
+                .IsRequired()
+                .HasDefaultValue(false);
             
             builder.HasOne(p => p.GameProvider)
                 .WithMany(p => p.Games)

@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Generics;
+using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 
 namespace TGS.Services.Operations.Queries
@@ -28,6 +29,8 @@ namespace TGS.Services.Operations.Queries
         Task<Dictionary<string, string>> GetGameProviderLanguagesByInternalCodeAsync(Guid gameProviderId);
 
         Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
+
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -151,6 +154,19 @@ namespace TGS.Services.Operations.Queries
                     DbType = DbType.Int32
                 }
             });
+        }
+
+        async Task<CachedGame[]> IGameProviderQueries.GetCachedGamesAsync(Guid gameProviderId)
+        {
+            const string spName = "usp_GameProvider_GetGamesForCache";
+            var r = await _repository.SqlQueryMultipleAsync<CachedGame>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@gameProviderId",
+                Value = gameProviderId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToArray();
         }
     }
 }

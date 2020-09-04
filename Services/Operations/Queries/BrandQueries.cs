@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 
 namespace TGS.Services.Operations.Queries
@@ -13,6 +15,8 @@ namespace TGS.Services.Operations.Queries
         Task<GetCachedBrandResult> GetCachedBrandAsync(Guid brandId);
 
         Task<GetCachedBrandGameProviderConfigurationResult> GetCachedBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
+
+        Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId);
     }
 
     public sealed class BrandQueries : IBrandQueries
@@ -55,5 +59,19 @@ namespace TGS.Services.Operations.Queries
                 }
             });
         }
+
+        async Task<CachedBrandGame[]> IBrandQueries.GetBrandGamesAsync(Guid brandId)
+        {
+            const string spName = "usp_Brand_GetBrandGamesForCache";
+            var r = await _repository.SqlQueryMultipleAsync<CachedBrandGame>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@brandId",
+                Value = brandId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToArray();
+        }
+
     }
 }

@@ -21,6 +21,8 @@ namespace TGS.Services.Operations
         Task<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
 
         Task<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
+
+        Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, Guid gameProviderId, PlatformType? platformType = null);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -148,6 +150,17 @@ namespace TGS.Services.Operations
 
             return bgpc;
         }
+
+        async Task<CachedBrandGame[]> IBrandOperations.GetBrandGamesAsync(Guid brandId, Guid gameProviderId, PlatformType? platformType)
+        {
+            var brandGames = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.BrandGames, brandId, TimeSpan.FromHours(2),
+                () => _brandQueriesFactory().GetBrandGamesAsync(brandId));
+
+            return brandGames.Where(g => g.GameProviderId == gameProviderId && 
+                                    (platformType == null || g.PlatformType == platformType))
+                             .ToArray();
+        }
+
 
         private async Task<CachedBrand> GetCachedBrandOrNullAsync(Guid brandId)
         {

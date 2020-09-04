@@ -48,5 +48,7 @@ namespace TGS.Infrastructures.Redis
         Task<RedisValue[]> SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields, bool fireAndForget = false);
 
         Task<RedisValue> SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField, bool fireAndForget = false);
+
+        Task<HashEntry[]> SafeGetAllHashSetAsync(object cacheType, object key, bool fireAndForget = false);
     }
 }

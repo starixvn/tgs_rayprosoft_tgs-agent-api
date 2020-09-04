@@ -15,12 +15,14 @@
     <None Remove="appsettings.json" />
     <None Remove="SqlScripts\SP\usp_Brand_GetBrandForCache.sql" />
     <None Remove="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
+    <None Remove="SqlScripts\SP\usp_Brand_GetBrandGamesForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
+    <None Remove="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
@@ -37,6 +39,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />

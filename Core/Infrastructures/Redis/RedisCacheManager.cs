@@ -215,6 +215,24 @@ namespace TGS.Infrastructures.Redis
             return Array.Empty<RedisValue>();
         }
 
+        async Task<HashEntry[]> IRedisCacheManager.SafeGetAllHashSetAsync(object cacheType, object key, bool fireAndForget)
+        {
+            try
+            {
+                var cacheKey = FormCacheKey(cacheType, key);
+                var db = _repository.GetDb();
+
+                var flags = GetCommandFlags(fireAndForget);
+                return await db.HashGetAllAsync(cacheKey, flags);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"redis error :{ex}");
+            }
+
+            return Array.Empty<HashEntry>();
+        }
+
         async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField,
             bool fireAndForget)
         {
