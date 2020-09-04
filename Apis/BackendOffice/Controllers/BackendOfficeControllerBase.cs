@@ -1,11 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
     public class BackendOfficeControllerBase : ControllerBase
     {
-        protected string MsHttpContext = "MS_HttpContext";
+        private readonly Dictionary<string, string> UserInfoMap;
+        public BackendOfficeControllerBase(IHttpContextAccessor httpContextAccessor)
+        {
+            UserInfoMap = httpContextAccessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
+        }
+
+        protected string Username => UserInfoMap[Consts.UserInfo.UsernameKey];
+
+        protected string RoleName => UserInfoMap[Consts.UserInfo.RolenameKey];
+
+        protected Guid? ResellerId => UserInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(UserInfoMap[Consts.UserInfo.ResellerKey]);
+
+        protected Guid? BrandId => UserInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(UserInfoMap[Consts.UserInfo.BrandKey]);
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
         {

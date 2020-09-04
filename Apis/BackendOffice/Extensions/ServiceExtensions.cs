@@ -17,7 +17,6 @@ using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 
@@ -25,20 +24,27 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
+        public static IServiceCollection AddCommandsAndQueries(this IServiceCollection services)
+        {
+            services.AddScoped<IUserQueries, UserQueries>();
+            services.AddScoped<ISettingQueries, SettingQueries>();
+            services.AddScoped<IUserCommands, UserCommands>();
+            services.AddScoped<ISettingCommands, SettingCommands>();
+            return services;
+        }
+
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
             services.AddScoped<IDataInitializer, DataInitializer>();
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
-            services.AddScoped<IUserQueries, UserQueries>();
-            services.AddScoped<IUserCommands, UserCommands>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-
+            services.AddHttpContextAccessor();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
             services.AddControllers();
             services.AddAntiforgery(options =>

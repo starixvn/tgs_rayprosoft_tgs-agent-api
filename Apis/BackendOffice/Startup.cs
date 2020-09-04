@@ -20,6 +20,7 @@ namespace TGS.Apis.BackendOffice
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddBackendOfficeServices(Configuration);
+            services.AddCommandsAndQueries();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
