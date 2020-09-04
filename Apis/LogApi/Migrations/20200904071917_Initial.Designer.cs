@@ -10,7 +10,7 @@ using TGS.Apis.LogApi.DataService;
 namespace TGS.Apis.LogApi.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20200901075514_Initial")]
+    [Migration("20200904071917_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,56 @@ namespace TGS.Apis.LogApi.Migrations
                 .HasAnnotation("ProductVersion", "3.1.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.AdminLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Exception")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ExecutionTimeMs")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ip")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Method")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Path")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RequestContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestHeaders")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ResponseCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ResponseContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponseHeaders")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AdminLogs");
+                });
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ApiLog", b =>
                 {
@@ -33,22 +83,22 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("Ip")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(50)")
+                        .HasColumnType("nvarchar(50)")
                         .IsUnicode(true);
 
                     b.Property<string>("Method")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(256)")
+                        .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(256)")
+                        .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
 
                     b.Property<string>("Prefix")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(256)")
+                        .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("RecordedOn")
@@ -56,12 +106,12 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("RequestContent")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(4000)")
+                        .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 
                     b.Property<string>("RequestHeaders")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(4000)")
+                        .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 
                     b.Property<short>("ResponseCode")
@@ -69,17 +119,17 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("ResponseContent")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(4000)")
+                        .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 
                     b.Property<string>("ResponseHeaders")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(4000)")
+                        .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(30)")
+                        .HasColumnType("nvarchar(30)")
                         .IsUnicode(true);
 
                     b.Property<Guid>("TrackingId")
@@ -98,7 +148,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("Exception")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(4000)")
+                        .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 
                     b.Property<byte>("Level")
@@ -110,7 +160,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(512)")
+                        .HasColumnType("nvarchar(512)")
                         .IsUnicode(true);
 
                     b.Property<DateTimeOffset>("RecordedOn")
@@ -118,7 +168,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(64)")
+                        .HasColumnType("nvarchar(64)")
                         .IsUnicode(true);
 
                     b.Property<Guid>("TrackingId")
@@ -137,49 +187,49 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Callsite")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Exception")
-                        .HasColumnType("NVARCHAR(4000)");
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("Https")
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Level")
-                        .HasColumnType("NVARCHAR(10)");
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("Logger")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("MachineName")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Message")
-                        .HasColumnType("NVARCHAR(4000)");
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("Port")
-                        .HasColumnType("NVARCHAR(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Properties")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("RemoteAddress")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("ServerAddress")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("ServerName")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("StackTrace")
-                        .HasColumnType("NVARCHAR(max)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
-                        .HasColumnType("NVARCHAR(512)");
+                        .HasColumnType("nvarchar(512)");
 
                     b.HasKey("Id");
 

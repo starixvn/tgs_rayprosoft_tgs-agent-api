@@ -31,7 +31,7 @@ namespace TGS.Apis.BackendOffice
                 app.UseDeveloperExceptionPage();
             }
 
-            app.ConfigureExceptionHandler();
+
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();

@@ -83,12 +83,6 @@ namespace TGS.Infrastructures.Log.Middleware
                 $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
         }
 
-        private static string GetPrefix(string path)
-        {
-            var arr = path.Split('/');
-            return arr.Length < 3 ? arr[arr.Length - 1] : arr[2];
-        }
-
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var requestPath = context.Request.Path.Value;
@@ -121,9 +115,6 @@ namespace TGS.Infrastructures.Log.Middleware
                     ip = _requestAnalyzer.GetIp(context).NoLongerThan(256),
                     path = path.NoLongerThan(512),
                     method = context.Request.Method.NoLongerThan(8),
-                    //prefix = PrefixFunc == null || PrefixFunc().IsNullOrEmpty()
-                    //    ? GetPrefix(path).NoLongerThan(128)
-                    //    : PrefixFunc(),
                     prefix = path = path.NoLongerThan(512),
                     servername = Environment.MachineName.NoLongerThan(128),
                     requestheaders = context.Request.Headers.ToDetailString(),

@@ -12,6 +12,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
 using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Log;
+using TGS.Infrastructures.Log.Middleware;
 using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Redis;
 
@@ -33,6 +34,8 @@ namespace TGS.Apis.TgsApi
             services.AddRedis();
             services.AddNats(Configuration);
             services.AddTgsLog();
+
+            services.AddScoped<ApiLoggerMiddleware>();
 
             services.AddControllers(options => options.Filters.Add(new HttpResponseExceptionFilter()))
                 .ConfigureApiBehaviorOptions(options =>

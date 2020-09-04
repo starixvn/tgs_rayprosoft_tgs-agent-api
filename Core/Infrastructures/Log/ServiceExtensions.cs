@@ -15,13 +15,13 @@ namespace TGS.Infrastructures.Log
         {
             services.AddScoped<LogBusEvent>(sp => new ApiLogEvent());
             services.AddScoped<LogBusEvent>(sp => new LogRecordEvent());
+            services.AddScoped<LogBusEvent>(sp => new AdminLogEvent());
             services.AddScoped(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
             services.AddScoped<ITgsLog, TgsLog>();
 
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScoped<ILocalIpFinder, LocalIpFinder>();
-            services.AddScoped<ApiLoggerMiddleware>();
-
+           
             return services;
         }
 

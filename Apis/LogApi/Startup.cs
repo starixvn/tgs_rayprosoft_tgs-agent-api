@@ -44,6 +44,7 @@ namespace TGS.Apis.LogApi
 
             services.AddScoped<ApiLogWriter>();
             services.AddScoped<LogRecordWriter>();
+            services.AddScoped<AdminLogWriter>();
 
             services.AddScoped<Func<string, ILoggerWriter>>(serviceProvider => key =>
             {
@@ -51,6 +52,7 @@ namespace TGS.Apis.LogApi
                 {
                     nameof(ApiLogEvent) => serviceProvider.GetService<ApiLogWriter>(),
                     nameof(LogRecordEvent) => serviceProvider.GetService<LogRecordWriter>(),
+                    nameof(AdminLogEvent) => serviceProvider.GetService<AdminLogWriter>(),
                     _ => throw new KeyNotFoundException()
                 };
             });
