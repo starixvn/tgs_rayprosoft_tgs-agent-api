@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Apis.LogApi.Migrations
 {
@@ -106,6 +108,9 @@ namespace TGS.Apis.LogApi.Migrations
                 {
                     table.PrimaryKey("PK_ServiceLogs", x => x.Id);
                 });
+
+            var assembly = Assembly.GetExecutingAssembly();
+            migrationBuilder.SqlResource(assembly, "TGS.Apis.LogApi.DataService.SqlScripts.SP.usp_ServiceLogs_InsertServiceLog.sql");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
