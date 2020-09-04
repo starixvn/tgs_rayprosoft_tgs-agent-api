@@ -45,6 +45,8 @@ namespace TGS.Infrastructures.Log
         void LogTrackingData(string trackingData);
 
         void LogApi(ApiLogEvent apiCall);
+
+        void LogAdmin(AdminLogEvent adminEvent);
     }
 
     public sealed class TgsLog : ITgsLog
@@ -141,6 +143,12 @@ namespace TGS.Infrastructures.Log
         void ITgsLog.WriteEventLogInfo(string infoMessage, string memberName, string sourceFilePath, int sourceLineNumber)
         {
 
+        }
+
+
+        void ITgsLog.LogAdmin(AdminLogEvent adminEvent)
+        {
+            _logPublisher(adminEvent);
         }
     }
 }

@@ -19,6 +19,10 @@ namespace TGS.Apis.LogApi.DataService
 
         Task AddLogRecordAsync(LogRecord log);
 
+        Task AddAdminLogsAsync(IList<AdminLog> logs);
+
+        Task AddAdminLogAsync(AdminLog log);
+
         bool HasDatabaseConnection();
     }
 
@@ -31,6 +35,8 @@ namespace TGS.Apis.LogApi.DataService
         DbSet<ApiLog> ApiLogs { get; set; }
 
         DbSet<LogRecord> LogRecords { get; set; }
+
+        DbSet<AdminLog> AdminLogs { get; set; }
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
@@ -91,6 +97,18 @@ namespace TGS.Apis.LogApi.DataService
         Task IBaseRepository.SaveChangesAsync()
         {
             return SaveChangesAsync();
+        }
+
+        async Task ILogRepository.AddAdminLogsAsync(IList<AdminLog> logs)
+        {
+            await AdminLogs.AddRangeAsync(logs);
+            await SaveChangesAsync();
+        }
+
+        async Task ILogRepository.AddAdminLogAsync(AdminLog log)
+        {
+            await AdminLogs.AddAsync(log);
+            await SaveChangesAsync();
         }
     }
 }

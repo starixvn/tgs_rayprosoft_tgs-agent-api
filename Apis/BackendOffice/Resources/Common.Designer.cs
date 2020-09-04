@@ -61,11 +61,29 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The format of value is invalid..
+        /// </summary>
+        internal static string InvalidFormat {
+            get {
+                return ResourceManager.GetString("InvalidFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to not found..
         /// </summary>
         internal static string NotFound {
             get {
                 return ResourceManager.GetString("NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The setting is required..
+        /// </summary>
+        internal static string RequiredSetting {
+            get {
+                return ResourceManager.GetString("RequiredSetting", resourceCulture);
             }
         }
     }

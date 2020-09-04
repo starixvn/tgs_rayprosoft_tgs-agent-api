@@ -59,12 +59,15 @@ namespace TGS.Apis.LogApi.Services
         {
             SubscribeApiLogReceived();
             SubscribeLogRecordReceived();
+            SubscribeAdminLogReceived();
             _startupTime = DateTimeOffset.UtcNow;
         }
 
         public event Action<LogBusEvent> LogRecordReceived;
 
         public event Action<LogBusEvent> ApiLogReceived;
+
+        public event Action<LogBusEvent> AdminLogReceived;
 
         private void SubscribeApiLogReceived()
         {
@@ -97,6 +100,39 @@ namespace TGS.Apis.LogApi.Services
                 },
                 ex => _logger.LogError("error occurred when RX executed:" + ex));
         }
+
+        private void SubscribeAdminLogReceived()
+        {
+            _apiLogSubscription = _natsManager.SubscribeAsync<AdminLogEvent>(
+                nameof(AdminLogEvent),
+                Consts.Nats.NatsTgsLogQueueName,
+                message =>
+                {
+                    _lastBusEvent = message.DataObject;
+                    _lastReceivedEventTime = DateTimeOffset.UtcNow;
+                    AdminLogReceived?.Invoke(message.DataObject);
+                });
+
+            var query =
+                from logs in Observable.FromEvent<LogBusEvent>(
+                        ev => AdminLogReceived += ev,
+                        ev => AdminLogReceived -= ev)
+                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
+                where logs.Count > 0
+                select logs;
+
+            _subscription = query
+                .SubscribeOn(NewThreadScheduler.Default)
+                .Subscribe(
+                    async logs =>
+                    {
+                        var now = DateTimeOffset.UtcNow;
+                        CountReceivedLogs(now, nameof(AdminLogEvent), logs.Count);
+                        await WriteLogsAsync(nameof(AdminLogEvent), logs);
+                    },
+                    ex => _logger.LogError("error occurred when RX executed:" + ex));
+        }
+
 
         private void SubscribeLogRecordReceived()
         {

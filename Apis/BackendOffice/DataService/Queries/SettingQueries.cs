@@ -8,7 +8,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
     public interface ISettingQueries
     {
         IQueryable<Setting> GetSettingQueries();
-        Task<Setting> GetSettingByKey(string key);
+        Task<Setting> GetSettingByKeyAsync(string key);
     }
 
     public class SettingQueries : ISettingQueries
@@ -20,7 +20,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
             _repository = repository;
         }
 
-        Task<Setting> ISettingQueries.GetSettingByKey(string key)
+        Task<Setting> ISettingQueries.GetSettingByKeyAsync(string key)
         {
             return _repository.Settings.FirstOrDefaultAsync(p => p.Key == key);
         }
