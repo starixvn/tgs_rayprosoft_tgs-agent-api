@@ -12,7 +12,7 @@ namespace TGS.Core.Models.Services.Caches
         public string ExternalId;
         public bool SubGame;
         public string RuleUrl;
-        public string Endpoint;
+        public string EndpointPath;
         public GameType Type;
         public PlatformType PlatformType;
         public bool HasTurnoverOnTieBet;

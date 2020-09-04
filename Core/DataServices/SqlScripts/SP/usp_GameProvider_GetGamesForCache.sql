@@ -21,7 +21,7 @@ BEGIN
         [ExternalId],
         [SubGame],
         [RuleUrl],
-        [Endpoint],
+        [EndpointPath],
         [Type],
         [PlatformType],
         [HasTurnoverOnTieBet]

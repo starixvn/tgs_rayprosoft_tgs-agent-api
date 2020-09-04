@@ -32,7 +32,11 @@ namespace TGS.Services.GameServices
 
             var balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-            return new GetBalanceResult(balance, cur);
+            return new GetBalanceResult
+            {
+                Balance = balance,
+                CurrencyCode = cur
+            };
         }
 
         async Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
@@ -40,6 +44,7 @@ namespace TGS.Services.GameServices
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
             await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+
             return null;
         }
 
@@ -82,10 +87,15 @@ namespace TGS.Services.GameServices
 
             var validGameStatus = _validGameStatus.GetStatus(player.Type, type);
             foreach (var id in gameIds)
-            { 
+            {
                 var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, id);
-                if (validGameStatus.All(s => s != cachedGame.Status)) 
-                { 
+                if (cachedGame == null)
+                {
+                    throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game with id '{id}'");
+                }
+
+                if (validGameStatus.All(s => s != cachedGame.Status))
+                {
                     throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}'");
                 }
             }

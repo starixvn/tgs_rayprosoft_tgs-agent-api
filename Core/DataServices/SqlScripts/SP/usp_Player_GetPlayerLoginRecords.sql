@@ -9,17 +9,14 @@ GO
 
 ALTER PROCEDURE [dbo].[usp_Player_GetPlayerLoginRecords]
       @playerCode    NVARCHAR(16),
-	  @statuses      IntValuesType,
+	  @statuses      IntValuesType READONLY,
       @from          DATETIMEOFFSET
 AS 
 BEGIN
     SET NOCOUNT ON
 
-    DECLARE @from DATETIMEOFFSET = DATEADD(day, -1, SYSDATETIMEOFFSET())
-    DECLARE @now DATETIMEOFFSET = SYSDATETIMEOFFSET()
-    
     SELECT 
-        TOP 1 [BrandId], [PlatformType], [CreatedOn], [ExpiredOn]
+        [BrandId], [PlatformType], [CreatedOn], [ExpiredOn]
     FROM dbo.[PlayerLoginRecords]
     WHERE [PlayerCode] = @playerCode
     AND [CreatedOn] >= @from

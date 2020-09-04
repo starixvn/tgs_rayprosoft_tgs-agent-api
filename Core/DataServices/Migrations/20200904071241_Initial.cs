@@ -909,7 +909,12 @@ namespace TGS.Core.DataServices.Migrations
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
+            
+            // TYPE
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.TYPE.IntValuesType.sql");
 
+            // SP
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderIdByCode.sql");
             migrationBuilder.SqlResource(assembly,
@@ -940,9 +945,6 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGamesForCache.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGamesForCache.sql");
-
-            migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.TYPE.IntValuesType.sql");
 
             #endregion Store Procedure
         }
