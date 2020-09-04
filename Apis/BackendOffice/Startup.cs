@@ -49,6 +49,7 @@ namespace TGS.Apis.BackendOffice
 
             var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
+
         }
     }
 }

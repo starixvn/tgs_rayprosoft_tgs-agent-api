@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Infrastructures.Helper;
 using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Middleware;
 using TGS.Infrastructures.Log.Services;
 using TGS.Infrastructures.Nats;
 
@@ -21,7 +20,8 @@ namespace TGS.Infrastructures.Log
 
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScoped<ILocalIpFinder, LocalIpFinder>();
-           
+            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
+
             return services;
         }
 

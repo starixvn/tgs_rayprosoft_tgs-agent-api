@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NATS.Client;
+using TGS.Infrastructures.Log;
 
 namespace TGS.Infrastructures.Nats
 {
@@ -21,7 +21,7 @@ namespace TGS.Infrastructures.Nats
 
     public class NatsManager : INatsManager
     {
-        private readonly ILogger _logger;
+        private readonly IServiceLog<NatsManager> _serviceLog;
         private Lazy<IConnection> _connectionFactory;
         private readonly IMessagePackProvider _messagePackProvider;
         private ConnState _state;
@@ -29,10 +29,10 @@ namespace TGS.Infrastructures.Nats
 
         public NatsManager(
             IMessagePackProvider messagePackProvider,
-            ILogger<NatsManager> logger,
+            IServiceLog<NatsManager> serviceLog,
             IOptions<NatsSetting> natsSetting)
         {
-            _logger = logger;
+            _serviceLog = serviceLog;
             _messagePackProvider = messagePackProvider;
             _natsSetting = natsSetting;
             CreateConnection();
@@ -67,11 +67,11 @@ namespace TGS.Infrastructures.Nats
                 var connectionFactory = new ConnectionFactory();
                 conn = connectionFactory.CreateConnection(opts);
                 _state = ConnState.CONNECTED;
-                _logger.LogInformation($"Succeeded to create a NATS connection to {opts.Url}.");
+                _serviceLog.LogInformation($"Succeeded to create a NATS connection to {opts.Url}.");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to connect to NATS. {ex}");
+                _serviceLog.LogError($"Failed to connect to NATS. {ex}");
                 CreateConnection();
             }
             return conn;
@@ -90,7 +90,7 @@ namespace TGS.Infrastructures.Nats
             {
                 if (_connectionFactory.IsValueCreated && _state != ConnState.CONNECTED) return;
                 var data = _messagePackProvider.Serialize(content);
-                
+
                 _connectionFactory.Value?.Publish(topic, data);
                 try
                 {
@@ -98,7 +98,7 @@ namespace TGS.Infrastructures.Nats
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Flush failed. Subject:{topic} Error:{ex}");
+                    _serviceLog.LogError($"Flush failed. Subject:{topic} Error:{ex}");
                 }
             });
         }
@@ -141,24 +141,24 @@ namespace TGS.Infrastructures.Nats
         private void ReconnectedEventHandler(object sender, ConnEventArgs e)
         {
             _state = ConnState.CONNECTED;
-            _logger.LogWarning($"Reconnected to NATS. {e.Conn.Opts.Url}");
+            _serviceLog.LogWarning($"Reconnected to NATS. {e.Conn.Opts.Url}");
         }
 
         private void DisconnectedEventHandler(object sender, ConnEventArgs e)
         {
             _state = ConnState.DISCONNECTED;
-            _logger.LogError($"Disconnected to NATS. {e.Conn.Opts.Url}");
+            _serviceLog.LogError($"Disconnected to NATS. {e.Conn.Opts.Url}");
         }
 
         private void ClosedEventHandler(object sender, ConnEventArgs e)
         {
             _state = ConnState.DISCONNECTED;
-            _logger.LogWarning($"NATS connection closed. {e.Conn.Opts.Url}");
+            _serviceLog.LogWarning($"NATS connection closed. {e.Conn.Opts.Url}");
         }
 
         private void AsyncErrorEventHandler(object sender, ErrEventArgs e)
         {
-            _logger.LogError($"Error occurred. Subject:{e.Subscription.Subject} Error:{e.Error}");
+            _serviceLog.LogError($"Error occurred. Subject:{e.Subscription.Subject} Error:{e.Error}");
         }
 
         void IDisposable.Dispose()
