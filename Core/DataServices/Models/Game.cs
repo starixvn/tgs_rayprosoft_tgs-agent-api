@@ -20,11 +20,13 @@ namespace TGS.Core.DataServices.Models
 
         public GameProvider GameProvider { get; set; }
 
-        public GameType GameType { get; set; }
+        public GameType Type { get; set; }
 
         public PlatformType PlatformType { get; set; }
 
         public bool SubGame { get; set; }
+
+        public bool HasTurnoverOnTieBet { get; set; }
 
         public virtual ICollection<BrandGame> Brands { get; set; }
     }

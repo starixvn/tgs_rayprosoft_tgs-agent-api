@@ -13,6 +13,12 @@
             public const string NatsTgsLogQueueName = "TgsLogQueue";
         }
 
+        public static class Db
+        {
+            public const string MigrationsHistoryTable = "_MigrationsHistory";
+            public const string Schema = "dbo";
+        }
+
         public const string Environment = "ASPNETCORE_ENVIRONMENT";
         public const string DefualtCultureCode = "en-US";
 

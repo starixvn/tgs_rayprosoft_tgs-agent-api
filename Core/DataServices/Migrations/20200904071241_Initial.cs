@@ -247,9 +247,10 @@ namespace TGS.Core.DataServices.Migrations
                     EndpointPath = table.Column<string>(type: "nvarchar(2048)", nullable: true),
                     RuleUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     GameProviderId = table.Column<Guid>(nullable: false),
-                    GameType = table.Column<short>(type: "smallint", nullable: false),
+                    Type = table.Column<short>(type: "smallint", nullable: false),
                     PlatformType = table.Column<short>(type: "smallint", nullable: false),
-                    SubGame = table.Column<bool>(nullable: false)
+                    SubGame = table.Column<bool>(nullable: false, defaultValue: false),
+                    HasTurnoverOnTieBet = table.Column<bool>(nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -908,7 +909,12 @@ namespace TGS.Core.DataServices.Migrations
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
+            
+            // TYPE
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.TYPE.IntValuesType.sql");
 
+            // SP
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderIdByCode.sql");
             migrationBuilder.SqlResource(assembly,
@@ -935,9 +941,10 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLoginRecords.sql");
-
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.TYPE.IntValuesType.sql");
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGamesForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGamesForCache.sql");
 
             #endregion Store Procedure
         }

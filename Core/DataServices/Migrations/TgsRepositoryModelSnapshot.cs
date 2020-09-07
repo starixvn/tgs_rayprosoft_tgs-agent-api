@@ -307,8 +307,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<short>("GameType")
-                        .HasColumnType("smallint");
+                    b.Property<bool>("HasTurnoverOnTieBet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -325,7 +327,12 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("smallint");
 
                     b.Property<bool>("SubGame")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()

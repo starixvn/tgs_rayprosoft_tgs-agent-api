@@ -4,7 +4,7 @@ using TGS.Core.Models.Extensions;
 
 namespace TGS.Core.Models.Services.Caches
 {
-    public class CachedPlayer
+    public record CachedPlayer
     {
         public string PlayerCode { get; set; }
         public Guid BrandId { get; set; }

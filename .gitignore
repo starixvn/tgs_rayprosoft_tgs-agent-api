@@ -178,4 +178,4 @@ $RECYCLE.BIN/
 *.feature.cs
 
 #NLog
-logs/
+**/logs/

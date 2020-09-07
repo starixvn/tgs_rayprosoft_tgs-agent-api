@@ -117,7 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>The format of value is invalid.</value>
+  </data>
   <data name="NotFound" xml:space="preserve">
     <value>not found.</value>
+  </data>
+  <data name="RequiredSetting" xml:space="preserve">
+    <value>The setting is required.</value>
   </data>
 </root>

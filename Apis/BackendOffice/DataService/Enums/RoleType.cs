@@ -2,8 +2,8 @@
 {
     public enum RoleType
     {
-        Admin = 1,
-        Reseller = 2,
-        Brand = 3
+        Admin = 0,
+        Reseller = 1,
+        Brand = 2
     }
 }

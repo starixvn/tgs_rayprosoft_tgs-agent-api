@@ -1,4 +1,8 @@
 ﻿namespace TGS.Core.Models.Services.Games
 {
-    public record GetBalanceResult(decimal Balance, string CurrencyCode);
+    public record GetBalanceResult
+    { 
+        public decimal Balance;
+        public string CurrencyCode;
+    }
 }

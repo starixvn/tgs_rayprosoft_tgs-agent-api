@@ -16,7 +16,7 @@ namespace TGS.Infrastructures.Log.Middleware
     public sealed class ApiLoggerMiddleware : IMiddleware
     {
         private readonly IRequestAnalyzer _requestAnalyzer;
-        private readonly ITgsLog _logger;
+        private readonly ITgsLog _tgsLog;
 
         private const int ResMessageSizeLimit = 1000012;
 
@@ -29,10 +29,10 @@ namespace TGS.Infrastructures.Log.Middleware
 
         public ApiLoggerMiddleware(
             IRequestAnalyzer requestAnalyzer,
-            ITgsLog logger)
+            ITgsLog tgsLog)
         {
             _requestAnalyzer = requestAnalyzer;
-            _logger = logger;
+            _tgsLog = tgsLog;
 
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
@@ -83,12 +83,6 @@ namespace TGS.Infrastructures.Log.Middleware
                 $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
         }
 
-        private static string GetPrefix(string path)
-        {
-            var arr = path.Split('/');
-            return arr.Length < 3 ? arr[arr.Length - 1] : arr[2];
-        }
-
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var requestPath = context.Request.Path.Value;
@@ -106,7 +100,7 @@ namespace TGS.Infrastructures.Log.Middleware
                 return;
             }
 
-            _logger.TrackingId = GuidExtensions.NewSequentialGuid();
+            _tgsLog.TrackingId = GuidExtensions.NewSequentialGuid();
 
             var requestTime = DateTimeOffset.UtcNow;
 
@@ -121,10 +115,7 @@ namespace TGS.Infrastructures.Log.Middleware
                     ip = _requestAnalyzer.GetIp(context).NoLongerThan(256),
                     path = path.NoLongerThan(512),
                     method = context.Request.Method.NoLongerThan(8),
-                    //prefix = PrefixFunc == null || PrefixFunc().IsNullOrEmpty()
-                    //    ? GetPrefix(path).NoLongerThan(128)
-                    //    : PrefixFunc(),
-                    prefix = path = path.NoLongerThan(512),
+                    prefix = path.NoLongerThan(512),
                     servername = Environment.MachineName.NoLongerThan(128),
                     requestheaders = context.Request.Headers.ToDetailString(),
                     requestcontent = reqMessage,
@@ -137,7 +128,7 @@ namespace TGS.Infrastructures.Log.Middleware
                     recordedon = requestTime
                 };
 
-            _logger.LogApi(apiLogEvent);
+            _tgsLog.LogApi(apiLogEvent);
         }
     }
 }

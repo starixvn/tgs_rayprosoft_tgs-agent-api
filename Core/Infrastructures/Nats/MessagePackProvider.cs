@@ -1,6 +1,6 @@
 using System;
 using MessagePack;
-using Microsoft.Extensions.Logging;
+using TGS.Infrastructures.Log;
 
 namespace TGS.Infrastructures.Nats
 {
@@ -13,11 +13,11 @@ namespace TGS.Infrastructures.Nats
 
     public class MessagePackProvider : IMessagePackProvider
     {
-        private readonly ILogger<MessagePackProvider> _logger;
+        private readonly IServiceLog<MessagePackProvider> _serviceLog;
         private readonly MessagePackSerializerOptions _messagePackSerializerOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-        public MessagePackProvider(ILogger<MessagePackProvider> logger)
+        public MessagePackProvider(IServiceLog<MessagePackProvider> serviceLog)
         {
-            _logger = logger;
+            _serviceLog = serviceLog;
         }
 
         T IMessagePackProvider.Deserialize<T>(byte[] arrayToDeserialize)
@@ -28,7 +28,7 @@ namespace TGS.Infrastructures.Nats
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to deserialize. {ex}");
+                _serviceLog.LogError($"Failed to deserialize. {ex}");
                 throw;
             }
         }
@@ -41,7 +41,7 @@ namespace TGS.Infrastructures.Nats
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to serialize. {ex}");
+                _serviceLog.LogError($"Failed to serialize. {ex}");
                 throw;
             }
         }

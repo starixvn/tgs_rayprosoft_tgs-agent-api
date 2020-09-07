@@ -16,8 +16,11 @@ using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
+using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Json;
+using TGS.Infrastructures.Log;
+using TGS.Infrastructures.Nats;
 using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Extensions
@@ -27,9 +30,13 @@ namespace TGS.Apis.BackendOffice.Extensions
         public static IServiceCollection AddCommandsAndQueries(this IServiceCollection services)
         {
             services.AddScoped<IUserQueries, UserQueries>();
+            services.AddScoped<IRoleQueries, RoleQueries>();
             services.AddScoped<ISettingQueries, SettingQueries>();
+
+
             services.AddScoped<IUserCommands, UserCommands>();
             services.AddScoped<ISettingCommands, SettingCommands>();
+            services.AddScoped<IRoleCommands, RoleCommands>();
             return services;
         }
 
@@ -40,7 +47,12 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddNats(configuration);
+            services.AddTgsLog();
+            services.AddScoped<ExceptionMiddleware>();
+
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -85,8 +97,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                     .RequireAuthenticatedUser()
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
-                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-                //options.Filters.Add(new HttpResponseExceptionFilter());
+                //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
+                //// we need to implement it on our self if not done before deployment
+                //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             }).AddDataAnnotationsLocalization(); ;
             return services;
         }

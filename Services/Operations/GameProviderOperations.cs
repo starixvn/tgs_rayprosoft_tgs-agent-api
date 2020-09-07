@@ -30,7 +30,10 @@ namespace TGS.Services.Operations
         Task<bool> CurrencySupportedAsync(Guid gameProviderId, string currencyCode);
 
         Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
-        
+
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
+
+        Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, Guid gameId);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -160,7 +163,7 @@ namespace TGS.Services.Operations
 
             return languages.Contains(cultureCode, StringComparer.OrdinalIgnoreCase);
         }
-                
+
         async Task<bool> IGameProviderOperations.CurrencySupportedAsync(Guid gameProviderId, string currencyCode)
         {
             var currencies = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderCurrencies, gameProviderId, TimeSpan.FromHours(2),
@@ -189,6 +192,29 @@ namespace TGS.Services.Operations
                 }, TimeSpan.FromHours(2));
 
             return betLimitCode;
+        }
+
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId)
+        {
+            var sets = await _cacheManager.SafeGetAllHashSetAsync(RedisCacheType.Games, gameProviderId);
+            if (sets.Length > 0)
+            {
+                return sets.Select(s => _json.DeserializeFromString<CachedGame>(s.Value)).ToArray();
+            }
+
+            return await GetAndCacheGamesAsync(gameProviderId);
+        }
+
+        async Task<CachedGame> IGameProviderOperations.GetCachedGameAsync(Guid gameProviderId, Guid gameId)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Games, gameProviderId, gameId.ToString());
+            if (value.HasValue)
+            {
+                return _json.DeserializeFromString<CachedGame>(value);
+            }
+
+            var games = await GetAndCacheGamesAsync(gameProviderId);
+            return games.FirstOrDefault(g => g.Id == gameId);
         }
 
         #region Private Methods
@@ -255,10 +281,21 @@ namespace TGS.Services.Operations
         {
             var fields = new HashEntry[]
             {
-                    new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))
+                new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))
             };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, fields, TimeSpan.FromHours(2), true);
+        }
+
+        private async Task<CachedGame[]> GetAndCacheGamesAsync(Guid gameProviderId)
+        {
+            var games = await _gameProviderQueriesFactory().GetCachedGamesAsync(gameProviderId);
+
+            var fields = games.Select(g => new HashEntry(g.Id.ToString(), _json.SerializeToString(g)))
+                              .ToArray();
+
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Games, gameProviderId, fields, TimeSpan.FromHours(2));
+            return games;
         }
 
         private static class CachedGameProviderFields

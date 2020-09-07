@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.Middlewares;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -15,7 +16,7 @@ namespace TGS.Apis.BackendOffice
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; set; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -30,11 +31,16 @@ namespace TGS.Apis.BackendOffice
                 app.UseDeveloperExceptionPage();
             }
 
+
+            app.UseMiddleware<ExceptionMiddleware>();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthentication();
+
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -45,6 +51,7 @@ namespace TGS.Apis.BackendOffice
 
             var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
+
         }
     }
 }

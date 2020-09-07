@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ISettingQueries _settingQueries;
         private readonly ISettingCommands _settingCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly Dictionary<string, Func<string, bool>> _validateSettingMap;
+        private readonly string[] _requiredSettings = { "Menus" };
         public SettingController(
             ISettingQueries settingQueries,
             ISettingCommands settingCommands,
@@ -30,6 +33,10 @@ namespace TGS.Apis.BackendOffice.Controllers
             _settingQueries = settingQueries;
             _settingCommands = settingCommands;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _validateSettingMap = new Dictionary<string, Func<string, bool>>
+            {
+                { "Menus", ValidateValueByKey<MenuSetting[]> }
+            };
         }
 
         [Route("")]
@@ -54,7 +61,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpGet, Description("Get setting by key")]
         public async Task<GetSettingResponse> GetSettingByKeyAsync(string key)
         {
-            var setting = await _settingQueries.GetSettingByKey(key);
+            var setting = await _settingQueries.GetSettingByKeyAsync(key);
             if (setting == null)
             {
                 return CreateInvalidResponse<GetSettingResponse>(Resources.Common.NotFound);
@@ -76,20 +83,24 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [Route("{key}")]
-        [HttpPut, Description("Update setting by key")]
+        [HttpPut("{key}"), Description("Update setting by key")]
         public async Task<MessageResponse> UpdateSettingAsync(string key, [FromBody] UpdateSettingRequest request)
         {
-            var setting = await _settingQueries.GetSettingByKey(key);
+            var setting = await _settingQueries.GetSettingByKeyAsync(key);
             if (setting == null)
             {
                 return CreateInvalidResponse<MessageResponse>($"{key} {Resources.Common.NotFound}");
             }
 
+            if (_validateSettingMap[key] != null)
+            {
+                if (_validateSettingMap[key](request.Value) == false)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Resources.Common.InvalidFormat);
+                }
+            }
+
             setting.Value = request.Value;
-
-
-            ValidateValueByKey(key, request.Value);
             setting.Description = request.Description;
             setting.UpdatedOn = DateTimeOffset.Now;
             setting.UpdatedByUsername = Username;
@@ -102,34 +113,34 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpDelete, Description("Delete setting by key")]
         public async Task<MessageResponse> DeleteSettingAsync(string key)
         {
-            var setting = await _settingQueries.GetSettingByKey(key);
+            if (_requiredSettings.Contains(key))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Common.RequiredSetting);
+            }
+
+            var setting = await _settingQueries.GetSettingByKeyAsync(key);
             if (setting == null)
             {
                 return CreateInvalidResponse<MessageResponse>($"{key} {Resources.Common.NotFound}");
             }
 
-
             await _settingCommands.DeleteSettingAsync(setting);
             return CreateValidResponse<MessageResponse>();
         }
 
-        private bool ValidateValueByKey(string key, string value)
-        {
-            if (key == "Menus")
-            {
-                try
-                {
-                    var s = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(value);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
 
+        private bool ValidateValueByKey<T>(string value)
+        {
+            try
+            {
+                _jsonSerializationProvider.DeserializeFromString<T>(value);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
 
-            return false;
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
+using TGS.Infrastructures.Extensions;
 
 namespace TGS.Services.GameServices
 {
@@ -20,7 +22,7 @@ namespace TGS.Services.GameServices
     }
 
     public sealed partial class GamePlayActions : IGamePlayActions
-    {    
+    {
         async Task<GetBalanceResult> IGamePlayActions.GetBalanceAsync(string gameProviderCode, string playerCode)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
@@ -30,14 +32,19 @@ namespace TGS.Services.GameServices
 
             var balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-            return new GetBalanceResult(balance, cur);
+            return new GetBalanceResult
+            {
+                Balance = balance,
+                CurrencyCode = cur
+            };
         }
 
         async Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
         {
-            var player =await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
-            await ThrowIfGameIsNotTakenByBrandAsync(player, data.GameProviderId, data.GameProviderCode);
+            await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+
             return null;
         }
 
@@ -45,29 +52,64 @@ namespace TGS.Services.GameServices
         {
             throw new NotImplementedException();
         }
-           
+
         Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
         {
             throw new NotImplementedException();
         }
 
-        private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, Guid gameProviderId, string gameProviderCode, GameActionType type = GameActionType.PlaceBet)
+        private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, BetData data, GameActionType type = GameActionType.PlaceBet)
         {
             if (type != GameActionType.PlaceBet)
                 return;
 
+            var placeBetExternalGameIds = data.Transactions.Select(t => t.ExternalGameId).Distinct().ToArray();
+
+            var gameProviderId = data.GameProviderId;
             var supported = await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, player.DefaultWalletCurrencyCode);
-            if (!supported) 
-            { 
-                throw new InvalidOperationException($"gameProvider {gameProviderId} doesn't support currency '{player.DefaultWalletCurrencyCode}'");
+            if (!supported)
+            {
+                throw new InvalidOperationException($"gameProvider {data.GameProviderCode} doesn't support currency '{player.DefaultWalletCurrencyCode}'");
             }
 
-            //var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(player.PlayerCode);
-            //var validGameStatus = _validGameStatus.GetStatus(player.Type, type);
-            //var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId);
+            var platformTypes = await GetPlatformTypes(player.PlayerCode, data.PlatformType);
+            var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId);
 
+            var gameIds = brandGames.Where(g => placeBetExternalGameIds.IgnoreCaseContains(g.ExternalGameId) &&
+                                            platformTypes.Contains(g.PlatformType))
+                                    .Select(g => g.GameId)
+                                    .ToArray();
 
+            if (gameIds.Length == 0)
+            {
+                throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have games '{placeBetExternalGameIds.JoinAsStringByComma()}'");
+            }
+
+            var validGameStatus = _validGameStatus.GetStatus(player.Type, type);
+            foreach (var id in gameIds)
+            {
+                var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, id);
+                if (cachedGame == null)
+                {
+                    throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game with id '{id}'");
+                }
+
+                if (validGameStatus.All(s => s != cachedGame.Status))
+                {
+                    throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}'");
+                }
+            }
         }
 
+        private async Task<PlatformType[]> GetPlatformTypes(string playerCode, PlatformType? platformType)
+        {
+            if (platformType.HasValue)
+            {
+                return new[] { platformType.Value };
+            }
+
+            var loginRecords = await _playerOperations.GetPlayerEnabledLoginRecordsAsync(playerCode);
+            return loginRecords.Select(r => r.PlatformType).ToArray();
+        }
     }
 }

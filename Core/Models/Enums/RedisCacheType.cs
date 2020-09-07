@@ -13,6 +13,8 @@
         GameProviderLanguages,
         GameProviderCurrencies,
         GameProviderBetLimitCode,
-        PlayerLoginRecords
+        PlayerLoginRecords,
+        BrandGames,
+        Games
     }
 }

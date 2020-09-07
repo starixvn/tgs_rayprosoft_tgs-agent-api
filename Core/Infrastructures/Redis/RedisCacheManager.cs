@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using TGS.Infrastructures.Json;
+using TGS.Infrastructures.Log;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
 
@@ -15,18 +15,18 @@ namespace TGS.Infrastructures.Redis
     {
         internal static readonly TimeSpan MaxTimeSpan = TimeSpan.FromDays(1);
         private readonly IRedisCacheManager _interface;
-        private readonly ILogger<RedisCacheManager> _logger;
+        private readonly IServiceLog<RedisCacheManager> _serviceLog;
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
 
         public RedisCacheManager(
             IRedisRepository repository,
             IJsonSerializationProvider serializationProvider,
-            ILogger<RedisCacheManager> logger)
+            IServiceLog<RedisCacheManager> serviceLog)
         {
             _repository = repository;
             _serializationProvider = serializationProvider;
-            _logger = logger;
+            _serviceLog = serviceLog;
             _interface = this;
         }
 
@@ -100,7 +100,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -116,7 +116,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -133,7 +133,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
             }
         }
 
@@ -160,7 +160,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -173,7 +173,7 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
             }
         }
 
@@ -192,12 +192,12 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
             }
         }
 
-       async Task<RedisValue[]> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields,
-            bool fireAndForget)
+        async Task<RedisValue[]> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields,
+             bool fireAndForget)
         {
             try
             {
@@ -209,10 +209,28 @@ namespace TGS.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
             }
 
             return Array.Empty<RedisValue>();
+        }
+
+        async Task<HashEntry[]> IRedisCacheManager.SafeGetAllHashSetAsync(object cacheType, object key, bool fireAndForget)
+        {
+            try
+            {
+                var cacheKey = FormCacheKey(cacheType, key);
+                var db = _repository.GetDb();
+
+                var flags = GetCommandFlags(fireAndForget);
+                return await db.HashGetAllAsync(cacheKey, flags);
+            }
+            catch (Exception ex)
+            {
+                _serviceLog.LogError($"redis error :{ex}");
+            }
+
+            return Array.Empty<HashEntry>();
         }
 
         async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField,
@@ -225,10 +243,10 @@ namespace TGS.Infrastructures.Redis
 
                 var flags = GetCommandFlags(fireAndForget);
                 return await db.HashGetAsync(cacheKey, hashField, flags);
-            } 
+            }
             catch (Exception ex)
             {
-                _logger.LogError($"redis error :{ex}");
+                _serviceLog.LogError($"redis error :{ex}");
             }
 
             return RedisValue.Null;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TGS.Infrastructures.Json;
+using TGS.Infrastructures.Log;
 
 namespace TGS.Infrastructures.Redis
 {
@@ -17,6 +18,8 @@ namespace TGS.Infrastructures.Redis
             services.AddTransient(typeof(IRedisSortedSet<>), typeof(RedisSortedSet<>));
             services.AddScoped<IRedisPublisher, RedisPublisher>();
             services.AddScoped<IRedisSubscriber, RedisSubscriber>();
+            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
+            services.AddLogging();
 
             return services;
         }
