@@ -65,6 +65,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\Messages\Roles\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
