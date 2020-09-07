@@ -22,8 +22,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ISettingQueries _settingQueries;
         private readonly ISettingCommands _settingCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly Dictionary<string, Func<string, bool>> ValidateSettingMap;
-        private readonly string[] RequiredSettings = { "Menus" };
+        private readonly Dictionary<string, Func<string, bool>> _validateSettingMap;
+        private readonly string[] _requiredSettings = { "Menus" };
         public SettingController(
             ISettingQueries settingQueries,
             ISettingCommands settingCommands,
@@ -33,7 +33,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _settingQueries = settingQueries;
             _settingCommands = settingCommands;
             _jsonSerializationProvider = jsonSerializationProvider;
-            ValidateSettingMap = new Dictionary<string, Func<string, bool>>
+            _validateSettingMap = new Dictionary<string, Func<string, bool>>
             {
                 { "Menus", ValidateValueByKey<MenuSetting[]> }
             };
@@ -92,9 +92,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>($"{key} {Resources.Common.NotFound}");
             }
 
-            if (ValidateSettingMap[key] != null)
+            if (_validateSettingMap[key] != null)
             {
-                if (ValidateSettingMap[key](request.Value) == false)
+                if (_validateSettingMap[key](request.Value) == false)
                 {
                     return CreateInvalidResponse<MessageResponse>(Resources.Common.InvalidFormat);
                 }
@@ -113,7 +113,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpDelete, Description("Delete setting by key")]
         public async Task<MessageResponse> DeleteSettingAsync(string key)
         {
-            if (RequiredSettings.Contains(key))
+            if (_requiredSettings.Contains(key))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Common.RequiredSetting);
             }

@@ -30,9 +30,13 @@ namespace TGS.Apis.BackendOffice.Extensions
         public static IServiceCollection AddCommandsAndQueries(this IServiceCollection services)
         {
             services.AddScoped<IUserQueries, UserQueries>();
+            services.AddScoped<IRoleQueries, RoleQueries>();
             services.AddScoped<ISettingQueries, SettingQueries>();
+
+
             services.AddScoped<IUserCommands, UserCommands>();
             services.AddScoped<ISettingCommands, SettingCommands>();
+            services.AddScoped<IRoleCommands, RoleCommands>();
             return services;
         }
 

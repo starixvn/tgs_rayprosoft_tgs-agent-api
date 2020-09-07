@@ -37,7 +37,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                     RoleType = table.Column<byte>(type: "tinyint", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    Department = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     MenuSetting = table.Column<string>(type: "nvarchar(4000)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     Status = table.Column<byte>(type: "tinyint", nullable: false),

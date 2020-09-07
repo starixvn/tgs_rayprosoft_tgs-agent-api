@@ -4,9 +4,6 @@ using TGS.Apis.BackendOffice.DataService.Enums;
 
 namespace TGS.Apis.BackendOffice.DataService.Models
 {
-    // NB: Roles seeding uses explicit sql script to insert roles
-    // because role Id uses Identity feature and EF prevents inserting it as a value
-    // so if properties changed seeding script should be changed accordingly
     public class Role
     {
         public Guid Id { get; set; }
@@ -16,8 +13,6 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public string Name { get; set; }
 
         public string DisplayName { get; set; }
-
-        public string Department { get; set; }
 
         public string MenuSetting { get; set; }
 

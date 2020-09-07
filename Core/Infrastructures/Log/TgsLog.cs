@@ -51,7 +51,6 @@ namespace TGS.Infrastructures.Log
 
     public sealed class TgsLog : ITgsLog
     {
-        public const string LogPublisher = "LogPublisher";
         private string _loggerName;
         private readonly Action<LogBusEvent> _logPublisher;
 

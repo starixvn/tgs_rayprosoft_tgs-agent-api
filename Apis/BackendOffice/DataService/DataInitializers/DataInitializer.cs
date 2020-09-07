@@ -79,7 +79,6 @@ INSERT INTO [dbo].[Roles]
     ([Id]
     ,[RoleType]
     ,[Name]
-    ,[Department]
     ,[MenuSetting]
     ,[DisplayName]
     ,[Description]
@@ -92,7 +91,6 @@ VALUES
     (@id
     ,@roleType
     ,@name
-    ,@department
     ,@menuSetting
     ,@displayName
     ,@description
@@ -109,8 +107,6 @@ VALUES
                     new SqlParameter { ParameterName = "@id", Value = role.Id, DbType = DbType.Guid },
                     new SqlParameter { ParameterName = "@roleType", Value = (int)role.RoleType, DbType = DbType.Int16 },
                     new SqlParameter { ParameterName = "@name", Value = role.Name, DbType = DbType.String },
-
-                    new SqlParameter { ParameterName = "@department", Value = role.Department, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@displayName", Value = role.Name, DbType = DbType.String },
 
@@ -131,7 +127,6 @@ VALUES
                 Name = role.Name,
                 DisplayName = role.Name,
                 Description = role.Description,
-                Department = "技術部門",
                 Status = RoleStatus.Enabled,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
