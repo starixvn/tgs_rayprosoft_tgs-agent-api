@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using StackExchange.Redis;
@@ -45,6 +46,25 @@ namespace TGS.Tests.Redis.IntegrationTests
 
             values.Length.Should().Be(1);
             values[0].Should().Be(NewData);
+        }
+
+        [Test]
+        public async Task Can_get_all_cached_hash_data_when_no_exception()
+        {
+            var cacheKey = RedisCacheManager.FormCacheKey(CacheType, _cacheKey);
+            var db = _redisRepository.GetDb();
+
+            var fields = Enumerable.Range(1, 5).Select(i => new HashEntry($"{Field}{i}", $"{NewData}_{i}")).ToArray();
+
+            await db.HashSetAsync(cacheKey, fields);
+
+            var values = await _cacheManager.SafeGetAllHashSetAsync(CacheType, _cacheKey);
+
+            values.Length.Should().Be(fields.Length);
+            foreach(var v in values)
+            {
+                fields.Should().Contain(v);
+            }
         }
     }
 }
