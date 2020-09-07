@@ -47,7 +47,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("")]
-        [HttpGet, Description("Get user list")]
+        [HttpGet, Description("Get users")]
         public Task<PagedResponse<UserModel>> GetUserAsync([FromQuery] GetUsersRequest request)
         {
             return _userQueries.GetUseQueries()
