@@ -25,10 +25,6 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
-            builder.Property(c => c.Department)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
-                .IsRequired();
-
             builder.Property(c => c.MenuSetting)
                 .HasColumnType(ColumnTypes.Nvarchar(4000))
                 .IsRequired();

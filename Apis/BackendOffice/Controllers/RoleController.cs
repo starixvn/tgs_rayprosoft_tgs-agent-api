@@ -1,17 +1,16 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Apis.BackendOffice.Controllers.Messages.Users;
+using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -20,61 +19,92 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public partial class RoleController : BackendOfficeControllerBase
     {
-        private readonly IHashProvider _hashProvider;
-        private readonly ITgsHashConfig _tgsHashConfig;
-        private readonly IAntiforgery _antiForgery;
-        private readonly IUserQueries _userQueries;
-        private readonly IUserCommands _userCommands;
+        private readonly IRoleQueries _roleQueries;
+        private readonly ISettingQueries _settingQueries;
+        private readonly IRoleCommands _roleCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RoleController(
-            IHashProvider hashProvider,
-            ITgsHashConfig tgsHashConfig,
-            IAntiforgery antiForgery,
-            IUserQueries userQueries,
-            IUserCommands userCommands,
+            IRoleQueries roleQueries,
+            ISettingQueries settingQueries,
+            IRoleCommands roleCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _hashProvider = hashProvider;
-            _tgsHashConfig = tgsHashConfig;
-            _antiForgery = antiForgery;
-            _userQueries = userQueries;
-            _userCommands = userCommands;
+            _roleQueries = roleQueries;
+            _roleCommands = roleCommands;
+            _settingQueries = settingQueries;
             _jsonSerializationProvider = jsonSerializationProvider;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [Route("")]
         [HttpGet, Description("Get roles")]
-        public Task<PagedResponse<UserModel>> GetRolesAsync([FromQuery] GetUsersRequest request)
+        public Task<PagedResponse<RoleModel>> GetRolesAsync([FromQuery] GetRolesRequest request)
         {
-            return _userQueries.GetUseQueries()
-                .Where(request.Username, p => p.Username.Contains(request.Username))
-                .Select(user => new UserModel
+            return _roleQueries.GetRoleQueries()
+                .Where(request.Name, p => p.Name.Contains(request.Name))
+                .Select(role => new RoleModel
                 {
-                    Username = user.Username,
-                    Name = user.Name,
-                    Role = user.Role.Name,
-                    DepartmentName = user.Department.Name,
-                    LastLoginIp = user.LastLoginIp,
-                    LastLoginTime = user.LastLoginTime,
-                    Status = user.Status.ToString(),
-                    CreatedOn = user.CreatedOn
+                    Id = role.Id,
+                    Name = role.Name,
+                    DisplayName = role.DisplayName,
+                    Description = role.Description,
+                    CreatedOn = role.CreatedOn,
+                    UpdatedOn = role.UpdatedOn,
+                    CreatedByUsername = role.CreatedByUsername,
+                    UpdatedByUsername = role.CreatedByUsername
 
                 })
                 .CreatePagedResponseAsync(request);
         }
-        protected (byte[], byte[]) GenerateCredential(string password)
 
+
+        [Route("{roleId}")]
+        [HttpGet, Description("Get role")]
+        public async Task<GetRoleResponse> GetRoleAsync(Guid roleId)
         {
-            var salt = _hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                _hashProvider.Hash(salt),
-                _tgsHashConfig.HashAlgorithm);
-            return (salt, hashedPassword);
+            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            if (role == null)
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Common.NotFound}");
+            }
+
+            return new GetRoleResponse
+            {
+                Valid = true,
+                MenuSettings = await GetMenuSettingAsync(role.MenuSetting)
+            };
+        }
+
+        private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting)
+        {
+            var setting = await _settingQueries.GetSettingByKeyAsync("Menus");
+            var menuSettingTemplate = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting.Value);
+            var roleMenus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(menuSetting);
+
+            foreach (var menu in menuSettingTemplate)
+            {
+                var roleMenuLevel1 = SetMenuDisplay(menu, roleMenus);
+
+                foreach (var subMenu in menu.SubMenus)
+                {
+                    var roleMenuLevel2 = SetMenuDisplay(subMenu, roleMenuLevel1?.SubMenus);
+
+                    foreach (var permission in subMenu.SubMenus)
+                    {
+                        SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
+                    }
+                }
+            }
+
+            return menuSettingTemplate;
+        }
+
+        private MenuSetting SetMenuDisplay(MenuSetting menuTemplate, MenuSetting[] roleMenus)
+        {
+            var roleMenuLevel1 = roleMenus?.FirstOrDefault(p => p.Code == menuTemplate.Code);
+            menuTemplate.IsDisplay = roleMenuLevel1?.IsDisplay ?? false;
+            return roleMenuLevel1;
         }
     }
 }
