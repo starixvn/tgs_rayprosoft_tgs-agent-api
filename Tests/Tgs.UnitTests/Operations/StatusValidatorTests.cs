@@ -6,6 +6,7 @@ using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Validators;
 using TGS.Tests.TestsCommon;
 
 namespace Tgs.UnitTests.Operations

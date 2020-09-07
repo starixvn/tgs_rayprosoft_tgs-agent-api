@@ -35,8 +35,4 @@
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
 </Project>
