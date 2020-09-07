@@ -93,7 +93,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                     .RequireAuthenticatedUser()
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
-                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
+                //// we need to implement it on our self if not done before deployment
+                //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             }).AddDataAnnotationsLocalization(); ;
             return services;
         }

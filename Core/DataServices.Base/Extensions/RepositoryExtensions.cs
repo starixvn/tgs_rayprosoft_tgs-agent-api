@@ -2,11 +2,11 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.Base.Extensions
 {
@@ -34,7 +34,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 {
                     serverOption.CommandTimeout(commandTimeout);
                     serverOption.EnableRetryOnFailure(maxRetryCount);
-                    serverOption.MigrationsHistoryTable("_MigrationsHistory", "dbo");
+                    serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                 });
 
                 var options = (DbContextOptions<TRepository>)option.Options;
