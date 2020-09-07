@@ -7,6 +7,31 @@ const DefaultDateFormat = "YYYY/MM/DD"
 const DefaultTimeFormat = "HH/mm/ss"
 
 export default ({
+  Header,
+  accessor,
+  dateFormat = DefaultDateFormat,
+  timeFormat = DefaultTimeFormat
+}) => {
+  return {
+    Header,
+    accessor,
+    Cell: ({ value = "" } = {}) => {
+      let date = dayjs(value)
+      if (!date.isValid()) {
+        //empty
+        return ""
+      }
+
+      let dateString = dateFormat ? date.format(dateFormat) : ""
+      let timeString = timeFormat ? date.format(timeFormat) : ""
+
+      return `${dateString} ${timeString}`
+    }
+  }
+}
+
+/*
+export default ({
   value,
   dateFormat = DefaultDateFormat,
   timeFormat = DefaultTimeFormat,
@@ -24,3 +49,4 @@ export default ({
     </Table.Cell>
   )
 }
+*/

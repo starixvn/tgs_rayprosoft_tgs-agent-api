@@ -14,14 +14,14 @@ import {
   InputField,
   Set
 } from "bumbag"
-import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
+import { Ascending, of as normalize } from "./order"
 
 const DefaultState = {
   page: 1,
   /* page size */
   rows: 10,
   sortby: "",
-  orderby: "",
+  orderby: Ascending,
   search: [
     /* [field, value] */
   ],
@@ -45,9 +45,9 @@ export const useTable = ({ initialState = DefaultState, ...props } = {}) => {
       }),
     sortby,
     orderby,
-    setSortOrder: ({ sortby = "", orderby = "" }) =>
+    setSortOrder: ({ sortby = "", orderby }) =>
       set((prevState) => {
-        return { ...prevState, sortby, orderby }
+        return { ...prevState, sortby, orderby: normalize(orderby) }
       }),
     promise,
     setPromise: (promise) =>
