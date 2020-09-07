@@ -16,22 +16,29 @@ namespace TGS.Services.Operations
         private readonly Func<ITgsRepository> _tgsRepoFactory;
         private readonly ITransactionManager _transactionManager;
         private readonly IRedisCacheManager _cacheManager;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly ITransactionSettingsGenerator _transactionSettingsGenerator;
 
         public GameActionDataOperations(
             Func<ITgsRepository> tgsRepoFactory,
-            //Func<IBetRepository> betRepoFactory,
             ITransactionManager transactionManager,
-            IRedisCacheManager cacheManager)
+            IRedisCacheManager cacheManager,
+            IPlayerOperations playerOperations,
+            IGameProviderOperations gameProviderOperations,
+            ITransactionSettingsGenerator transactionSettingsGenerator)
         {
             _tgsRepoFactory = tgsRepoFactory;
-            //_betRepoFactory = betRepoFactory;
             _transactionManager = transactionManager;
             _cacheManager = cacheManager;
+            _playerOperations = playerOperations;
+            _gameProviderOperations = gameProviderOperations;
+            _transactionSettingsGenerator = transactionSettingsGenerator;
         }
 
         Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
         {
-            return null;
+            return ExecuteGameActionAsync(data);
         }
     }
 }

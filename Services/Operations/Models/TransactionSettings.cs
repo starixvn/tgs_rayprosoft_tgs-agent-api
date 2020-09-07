@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 
 namespace TGS.Services.Operations.Models
 {
-    internal record TransactionSettings
+    public struct TransactionSettings
     {
         public GameActionType GameActionType;
         public Func<TransactionData, Action<decimal>> ValidateAmount;
