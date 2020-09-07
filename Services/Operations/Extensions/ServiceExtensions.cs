@@ -31,6 +31,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IBrandOperations, BrandOperations>();
             services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
             services.AddSingleton<IPlayerOperations, PlayerOperations>();
+
+            services.AddScoped<GameActionDataOperations, GameActionDataOperations>();
             
             #endregion
 

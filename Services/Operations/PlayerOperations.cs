@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
@@ -55,7 +56,7 @@ namespace TGS.Services.Operations
 
             if (cachedPlayer == null)
             {
-                //throw new PlayerNotFoundException($"Player not found with code: {playerCode}");
+                throw new PlayerNotFoundException($"Player not found with code: {playerCode}");
             }
 
             await CachePlayerAsync(playerCode, cachedPlayer);
@@ -82,8 +83,8 @@ namespace TGS.Services.Operations
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, field);
 
             return value.HasValue ?
-                _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value) :
-                    await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
+                   _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value) :
+                   await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
         }
 
 

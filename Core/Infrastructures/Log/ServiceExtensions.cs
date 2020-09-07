@@ -17,6 +17,7 @@ namespace TGS.Infrastructures.Log
             services.AddScoped<LogBusEvent>(sp => new AdminLogEvent());
             services.AddScoped(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
             services.AddScoped<ITgsLog, TgsLog>();
+            services.AddTransient<Func<ITgsLog>>(c => () => c.GetService<ITgsLog>());
 
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScoped<ILocalIpFinder, LocalIpFinder>();
@@ -25,7 +26,7 @@ namespace TGS.Infrastructures.Log
             return services;
         }
 
-        public static Action<LogBusEvent> CreateLoggerPublisher(INatsManager natsManager)
+        private static Action<LogBusEvent> CreateLoggerPublisher(INatsManager natsManager)
         {
             var natsPublisher = CreateNatsPublisher(natsManager);
 

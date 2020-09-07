@@ -20,7 +20,8 @@ namespace TGS.Services.GameServices
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IBrandGameProviderOperations _brandGameProviderOpertaions;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IBrandOperations _brandOperations;
+        private readonly IBrandOperations _brandOperations;        
+        private readonly IGameActionDataOperations _operations;
         private readonly IStatusValidator _statusValidator;
         private readonly IExpirationValidator _expirationValidator;
         private readonly IValidStatus<Status> _validStatus;
@@ -31,6 +32,7 @@ namespace TGS.Services.GameServices
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOpertaions,
+            IGameActionDataOperations operations,
             IGameProviderCurrencyCodeMapper currencyMapper,
             IStatusValidator statusValidator,
             IExpirationValidator expirationValidator,
@@ -46,6 +48,7 @@ namespace TGS.Services.GameServices
             _expirationValidator = expirationValidator;
             _validStatus = validStatus;
             _validGameStatus = validGameStatus;
+            _operations = operations;
         }
 
         async Task<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
