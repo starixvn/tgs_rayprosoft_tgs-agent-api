@@ -945,6 +945,8 @@ namespace TGS.Core.DataServices.Migrations
                 "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGamesForCache.sql");
             migrationBuilder.SqlResource(assembly,
                 "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGamesForCache.sql");
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.SqlScripts.SP.usp_Round_GetRoundByExternalRoundId.sql");
 
             #endregion Store Procedure
         }

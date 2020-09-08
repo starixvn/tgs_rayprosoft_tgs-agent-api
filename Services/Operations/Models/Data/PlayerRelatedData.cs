@@ -5,15 +5,15 @@ namespace TGS.Services.Operations.Models.Data
 {
     internal record PlayerRelatedData
     {
-        public Guid BrandId;        
-        public string BrandCode;
-        public string PlayerCode;
-        public PlayerStatus Status;
-        public WalletData Wallet;
-        public string PlayerUsername;
-        public string PlayerExternalId;
-        public PlayerTypes PlayerType;
-        public string ExternalCurrencyCode;
-        public string PlayerIp;
+        internal Guid BrandId { get; init; }
+        public string BrandCode { get; init; }
+        public string PlayerCode { get; init; }
+        public PlayerStatus Status { get; init; }
+        public WalletData Wallet { get; init; }
+        public string PlayerUsername { get; init; }
+        public string PlayerExternalId { get; init; }
+        public PlayerTypes PlayerType { get; init; }
+        public string ExternalCurrencyCode { get; init; }
+        public string PlayerIp { get; init; }
     }
 }

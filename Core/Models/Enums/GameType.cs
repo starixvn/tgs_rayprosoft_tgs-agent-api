@@ -8,10 +8,10 @@
         Lobby = 3,
         Instant = 4,
         Lottery = 5,
-        Sports = 9,
-        CardGame = 10,
-        CardGameLobby = 11,
-        Fishing = 12,
-        FishingLobby = 13
+        Sports = 6,
+        CardGame = 7,
+        CardGameLobby = 8,
+        Fishing = 9,
+        FishingLobby = 10
     }
 }

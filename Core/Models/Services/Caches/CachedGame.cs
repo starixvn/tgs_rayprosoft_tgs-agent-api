@@ -5,16 +5,16 @@ namespace TGS.Core.Models.Services.Caches
 {
     public record CachedGame
     {
-        public Guid Id;
-        public string Code;
-        public string Name;
-        public GameStatus Status;
-        public string ExternalId;
-        public bool SubGame;
-        public string RuleUrl;
-        public string EndpointPath;
-        public GameType Type;
-        public PlatformType PlatformType;
-        public bool HasTurnoverOnTieBet;
+        public Guid Id { get; init; }
+        public string Code { get; init; }
+        public string Name { get; init; }
+        public GameStatus Status { get; init; }
+        public string ExternalId { get; init; }
+        public bool SubGame { get; init; }
+        public string RuleUrl { get; init; }
+        public string EndpointPath { get; init; }
+        public GameType Type { get; init; }
+        public PlatformType PlatformType { get; init; }
+        public bool HasTurnoverOnTieBet { get; init; }
     }
 }

@@ -4,31 +4,31 @@ namespace TGS.Services.Operations.Validators
 {
     public interface IAmountValidator
     {
-        void ThrowIfAmountIsNotPositive(decimal amount);
-        void ThrowIfAmountIsNegative(decimal amount);
-        void IgnoreAmount(decimal amount);
+        void ThrowIfAmountIsNotPositive(string name, decimal amount);
+        void ThrowIfAmountIsNegative(string name, decimal amount);
+        void IgnoreAmount(string name, decimal amount);
     }
 
     public sealed class AmountValidator : IAmountValidator
     {
-        void IAmountValidator.IgnoreAmount(decimal amount)
+        void IAmountValidator.IgnoreAmount(string name, decimal amount)
         {
             
         }
 
-        void IAmountValidator.ThrowIfAmountIsNegative(decimal amount)
+        void IAmountValidator.ThrowIfAmountIsNegative(string name, decimal amount)
         {            
             if (amount < 0)
             {
-                throw new InvalidAmountException($"The amount {amount} must be zero or positive");
+                throw new InvalidAmountException($"The {name} must be zero or positive but is {amount}");
             }
         }
 
-        void IAmountValidator.ThrowIfAmountIsNotPositive(decimal amount)
+        void IAmountValidator.ThrowIfAmountIsNotPositive(string name, decimal amount)
         {
             if (amount <= 0)
             {
-                throw new InvalidAmountException($"The amount {amount} must be positive");
+                throw new InvalidAmountException($"The {name} must be positive but is {amount}");
             }
         }
     }

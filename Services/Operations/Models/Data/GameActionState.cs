@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TGS.Core.DataServices;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
@@ -8,9 +9,9 @@ using TGS.Services.Operations.Models.Data;
 
 namespace TGS.Services.Operations.Models
 {
-    internal class ExecuteGameActionTransactionState
+    internal record GameActionState
     {
-        public ExecuteGameActionTransactionState(TransactionData td)
+        internal GameActionState(TransactionData td)
         {
             if (td == null)
                 throw new ArgumentException("TransactionData passed to ExecuteGameActionTransactionState must not be NULL");
@@ -34,9 +35,9 @@ namespace TGS.Services.Operations.Models
         }
 
         public ITgsRepository Repo { get; init; }
-        public GameActionType GameActionType { get; }
+        public GameActionType GameActionType { get; init; }
         public PlatformType PlatformType { get; init; }
-        public Action<decimal> ValidateAmount { get; init; }
+        public Action<string, decimal> ValidateAmount { get; init; }
         public string BrandCode { get; init; }
         public Func<decimal, decimal> PrepareAmount { get; init; }
         public bool HasWalletUpdate { get; init; }
@@ -47,25 +48,26 @@ namespace TGS.Services.Operations.Models
         public Guid GameProviderConfigurationId { get; init; }
         public bool AutoCloseRound { get; init; }
 
-        public PlayerRelatedData PlayerData { get; set; }
-        public CachedGame[] GameProviderGames { get; set; }
-        public string BrandTimeZoneId { get; set; }
+        public PlayerRelatedData PlayerData { get; init; }
+        public CachedGame[] GameProviderGames { get; init; }
+        public string BrandTimeZoneId { get; init; }
 
         public Guid? BatchId { get; init; }
         //public bool AllowSettlementWithDifferentGameProviderConfiguration { get; set; }
 
-        public DateTimeOffset BrandNow { get; set; }
+        public DateTimeOffset BrandNow { get; init; }
 
-        //public List<BetActionData> PreviousActions { get; set; }
-        //public BetActionData RefGameAction { get; set; }
+        public IList<BetActionData> PreviousActions { get; init; }
+        public BetActionData ReferenceGameAction { get; init; }
         //public BetValuesResult BetValueResult { get; set; }
-        public Guid GameId { get; set; }
+        public Guid GameId { get; init; }
+        public CachedGame Game { get; init; }
 
-        public Guid? BetId { get; set; }
-        public Guid? InternalRoundId { get; set; }
-        public Guid? RefGameActionInternalId { get; set; }
-        public RoundStatus OldRoundStatus { get; set; }
-        public RoundStatus NewRoundStatus { get; set; }
+        public Guid? BetId { get; init; }
+        public Guid? InternalRoundId { get; init; }
+        public Guid? RefGameActionInternalId { get; init; }
+        public RoundStatus OldRoundStatus { get; init; }
+        public RoundStatus NewRoundStatus { get; init; }
 
         //public DateTimeOffset RoundCreatedOn =>
         //    PreviousActions?.FirstOrDefault()?.RecordedOn ?? BrandNow;
@@ -78,23 +80,24 @@ namespace TGS.Services.Operations.Models
             (DateTimeOffset?)null;
 
         // set from TransactionData
-        public DateTimeOffset Timestamp { get; }
+        public DateTimeOffset Timestamp { get; init; }
 
-        public string Description { get; }
-        public string ExternalBetId { get; }
-        public string ExternalRoundId { get; set; }
-        public string ExternalTransactionId { get; }
-        public string ExternalTransactionReferenceId { get; set; }
-        public string ExternalGameId { get; }
-        public string ExternalGameActionGroupId { get; }
-        public decimal Amount { get; set; }
-        public decimal? Commission { get; }
-        public string RoundDetail { get; }
-        public bool? RoundClosed { get; }
-        public string BetType { get; }
+        public string Description { get; init; }
+        public string ExternalBetId { get; init; }
+        public string ExternalRoundId { get; init; }
+        public string ExternalTransactionId { get; init; }
+        public string ExternalTransactionReferenceId { get; init; }
+        public string ExternalGameId { get; init; }
+        public string ExternalGameActionGroupId { get; init; }
+        public decimal Amount { get; init; }
+        public decimal? Commission { get; init; }
+        public string RoundDetail { get; init; }
+        public bool? RoundClosed { get; init; }
+        public string BetType { get; init; }
 
         public bool HasExtRoundId => ExternalRoundId.IsNotNullOrEmpty();
         public bool HasExtRefTransactionId => ExternalTransactionReferenceId.IsNotNullOrEmpty();
+        public bool HasExtGameId => ExternalGameId.IsNotNullOrEmpty();
 
         public bool ForceGetPreviousActions { get; init; }
         public bool FreeBetAsSingleRound { get; init; }
