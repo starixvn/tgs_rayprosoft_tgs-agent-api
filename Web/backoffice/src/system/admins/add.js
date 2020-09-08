@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
+import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import {
   Flex,
@@ -20,6 +21,10 @@ import {
 export default ({}) => {
   //const dialog = Modal.useState()
 
+  const onSubmit = (data) => {
+    console.log("submit", data)
+  }
+
   return (
     <Modal.State>
       <Modal.Disclosure use={Button}>{add()}</Modal.Disclosure>
@@ -33,64 +38,49 @@ export default ({}) => {
 //TODO:
 // 1. submit
 // 2. error handling
-const AddDialog = ({ dialog }) => {
+const Form = ({ dialog, onSubmit }) => {
   return (
-    <Dialog.Modal
-      title={title()}
-      showActionButtons
-      footer={(props) => (
-        <Flex
-          alignX="right"
-          css={css`
-            width: 100%;
-          `}
-        >
-          <Modal.Disclosure use={ButtonBase} {...dialog}>
-            Close
-          </Modal.Disclosure>
-        </Flex>
-      )}
-      {...dialog}
-    >
-      <Box>
-        <Formik
-          initialValues={{ username: "", password: "" }}
-          onSubmit={(data) => {
-            //TODO: submit error
-          }}
-        >
-          {(formProps) => {
-            ;<form
-              onReset={formProps.handleReset}
-              onSubmit={formProps.handleSubmit}
-            >
-              <Set>
-                <Field
-                  component={InputField.Formik}
-                  name="username"
-                  label={username()}
-                  autocomplete="off"
-                />
-                <Field component={SelectField.Formik} name="departmentName" />
-                <Field component={SelectField.Formik} name="role" />
-                <Field
-                  component={InputField.Formik}
-                  name="password"
-                  type="password"
-                  label={password()}
-                />
-                <Field
-                  component={InputField.Formik}
-                  name="confirmPassword"
-                  type="password"
-                  label={confirmPassword()}
-                />
-              </Set>
-            </form>
-          }}
-        </Formik>
-      </Box>
-    </Dialog.Modal>
+    <Box>
+      <Formik
+        initialValues={{
+          username: "",
+          departmentName: "",
+          role: "",
+          password: ""
+        }}
+        onSubmit={onSubmit}
+      >
+        {(formProps) => {
+          ;<form
+            onReset={formProps.handleReset}
+            onSubmit={formProps.handleSubmit}
+          >
+            <Set>
+              <Field
+                component={InputField.Formik}
+                name="username"
+                label={username()}
+                autocomplete="off"
+              />
+              <Field component={SelectField.Formik} name="departmentName" />
+              <Field component={SelectField.Formik} name="role" />
+              <Field
+                component={InputField.Formik}
+                name="password"
+                type="password"
+                label={password()}
+              />
+              <Field
+                component={InputField.Formik}
+                name="confirmPassword"
+                type="password"
+                label={confirmPassword()}
+              />
+            </Set>
+          </form>
+        }}
+      </Formik>
+    </Box>
   )
 }
 
