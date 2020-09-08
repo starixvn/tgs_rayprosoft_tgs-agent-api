@@ -15,135 +15,62 @@ import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import { Box, Stack, Table, Button, InputField, Set, Pagination } from "bumbag"
 import PageContent from "../../page/Content"
-import AsyncTable, { useAsyncTable } from "../../table/async"
+import AsyncTable, { useTableState } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 
 export const Code = "groups"
 
-const defaultState = {
-  pageIndex: 0,
-  pageSize: 10,
-  username: ""
-}
-
 export const Content = ({}) => {
-  let [state = {}, setState] = useState(defaultState)
-  let { pageIndex, pageSize, username = "" } = state
+  let columns = useMemo(tableColumns)
+  let { state, setState, headSortBy, headOrderBy } = useTableState({ name: "" })
+  let { pageIndex, pageSize, name = "", sortBy = [], request } = state
 
-  const onStateChange = (state) => {
-    setState((oldState) => ({
-      ...oldState,
-      ...state
-    }))
-  }
+  let async = useAsync({ promise: request })
+  let { isPending } = async
+
+  useEffect(() => {
+    let promise = getRoles({
+      page: pageIndex + 1,
+      rows: pageSize,
+      name,
+      sortby: headSortBy(),
+      orderby: headOrderBy()
+    })
+    setState({ ...state, request: promise })
+  }, [pageIndex, pageSize, name, sortBy])
 
   return (
-    <Async
-      deferFn={() =>
-        getUsers({ page: pageIndex + 1, rows: pageSize, username })
+    <PageContent
+      title={title()}
+      actionBar={
+        <>
+          <SearchForm search={setState} isPending={isPending} />
+          <Button
+            css={css`
+              flex: 0;
+            `}
+          >
+            TODO: 新增
+          </Button>
+        </>
       }
     >
-      {({ run: fetchData, promise, isPending }) => {
-        return (
-          <PageContent
-            title={title()}
-            actionBar={
-              <>
-                <SearchForm
-                  search={(data) => {
-                    onStateChange(data)
-                    fetchData()
-                  }}
-                  isPending={isPending}
-                />
-                <Button
-                  css={css`
-                    flex: 0;
-                  `}
-                >
-                  TODO: 新增
-                </Button>
-              </>
-            }
-          >
-            <AsyncGroupTable
-              state={state}
-              onStateChange={onStateChange}
-              fetchData={fetchData}
-              promise={promise}
-            />
-          </PageContent>
-        )
-      }}
-    </Async>
-  )
-}
-
-const AsyncGroupTable = ({ state, onStateChange, fetchData, promise }) => {
-  let columns = useMemo(tableColumns)
-
-  return (
-    <AsyncTable
-      state={state}
-      onStateChange={onStateChange}
-      fetchData={fetchData}
-      promise={promise}
-      columns={columns}
-    >
-      <TableHead />
-      <TableBody />
-    </AsyncTable>
-  )
-}
-
-const TableHead = ({}) => {
-  let { table, async } = useAsyncTable()
-  let { isPending } = async
-  let { headerGroups } = table
-  return (
-    <Table.Head>
-      {headerGroups.map((headerGroup) => (
-        <Table.Row {...headerGroup.getHeaderGroupProps()}>
-          {headerGroup.headers.map((column) => (
-            <Table.HeadCell {...column.getHeaderProps()}>
-              {column.render("Header")}
-            </Table.HeadCell>
-          ))}
-        </Table.Row>
-      ))}
-    </Table.Head>
-  )
-}
-
-const TableBody = ({}) => {
-  let { table, async } = useAsyncTable()
-  let { isPending } = async
-  let { headerGroups, rows, getTableBodyProps, prepareRow } = table
-
-  return (
-    <Table.Body {...getTableBodyProps()}>
-      {rows.map((row, i) => {
-        prepareRow(row)
-        return (
-          <Table.Row {...row.getRowProps()}>
-            {row.cells.map((cell) => {
-              return (
-                <Table.Cell {...cell.getCellProps()}>
-                  {cell.render("Cell")}
-                </Table.Cell>
-              )
-            })}
-          </Table.Row>
-        )
-      })}
-    </Table.Body>
+      <AsyncTable
+        state={state}
+        onStateChange={setState}
+        promise={request}
+        head
+        body
+        columns={columns}
+      />
+    </PageContent>
   )
 }
 
 const SearchForm = ({ search, isPending, ...props }) => {
   return (
     <Formik
-      initialValues={{ username: "" }}
+      initialValues={{ name: "" }}
       onSubmit={(data) => {
         search(data)
       }}
@@ -153,9 +80,9 @@ const SearchForm = ({ search, isPending, ...props }) => {
           <Set>
             <Field
               component={InputField.Formik}
-              name="username"
+              name="name"
               addonAfter={
-                <Button onClick={() => formProps.setFieldValue("username", "")}>
+                <Button onClick={() => formProps.setFieldValue("name", "")}>
                   X
                 </Button>
               }
@@ -172,8 +99,8 @@ const SearchForm = ({ search, isPending, ...props }) => {
   )
 }
 
-const getUsers = (searchParams = {}) => {
-  return client.get("/api/users", { searchParams })
+const getRoles = (searchParams = {}) => {
+  return client.get("/api/role", { searchParams })
 }
 
 //TODO: i18n
@@ -188,10 +115,25 @@ const tableColumns = () => [
   sequenceColumn(),
   {
     Header: "权限组名称",
-    accessor: "name"
+    id: "name",
+    canSort: true,
+    accessor: "name",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    },
+    width: 400
   },
   {
     Header: "操作",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    },
     Cell: () => {
       return (
         <Set>
