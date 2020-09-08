@@ -19,20 +19,19 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class UserController
     {
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [Route("auth")]
-        [HttpPost, Description("Authenticate user login")]
+        [HttpPost("auth"), Description("Authenticate user login")]
         public async Task<AuthenticateUserResponse> AuthenticateAsync(AuthenticateUserRequest request)
         {
             var user = await _userQueries.GetUserByUsernameAsync(request.Username);
 
             if (user == null)
             {
-                return CreateInvalidResponse<AuthenticateUserResponse>("User not found.");
+                return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.NotFound);
             }
 
             if (PasswordMismatch(user, request.Password))
             {
-                return CreateInvalidResponse<AuthenticateUserResponse>("Invalid password.");
+                return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.InvalidPassword);
             }
 
             if (_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress != null)

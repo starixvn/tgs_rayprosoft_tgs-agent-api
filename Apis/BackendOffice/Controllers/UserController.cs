@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,8 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 
@@ -66,8 +69,76 @@ namespace TGS.Apis.BackendOffice.Controllers
                 })
                 .CreatePagedResponseAsync(request);
         }
-        protected (byte[], byte[]) GenerateCredential(string password)
 
+        [Route("")]
+        [HttpPost, Description("Create a user")]
+        public async Task<MessageResponse> CreateUserAsync([FromBody] CreateUserRequest request)
+        {
+            if (await _userQueries.UsernameExistsAsync(request.Username))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.User.UsernameExistedAlready);
+            }
+
+            var (salt, password) = GenerateCredential(request.Password);
+            var user = new User
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                Name = request.Name,
+                Password = password,
+                Salt = salt,
+                RoleId = request.RoleId,
+                DepartmentId = request.DepartmentId,
+                CreatedByUsername = Username,
+                UpdatedByUsername = Username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            await _userCommands.CreateUserAsync(user);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut("{userId}"), Description("Update a user")]
+        public async Task<MessageResponse> UpdateUserAsync(Guid userId, [FromBody] UpdateUserRequest request)
+        {
+            var user = await _userQueries.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
+            }
+
+            user.Name = request.Name;
+            user.RoleId = request.RoleId;
+            user.DepartmentId = request.DepartmentId;
+            user.UpdatedByUsername = Username;
+            user.UpdatedOn = DateTimeOffset.Now;
+
+            await _userCommands.UpdateUserAsync(user);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut("{userId}/password"), Description("Update user password")]
+        public async Task<MessageResponse> UpdateUserPasswordAsync(Guid userId, [FromBody] UpdatePasswordRequest request)
+        {
+            var user = await _userQueries.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
+            }
+
+            var (salt, password) = GenerateCredential(request.Password);
+            user.Password = password;
+            user.Salt = salt;
+            user.UpdatedByUsername = Username;
+            user.UpdatedOn = DateTimeOffset.Now;
+
+            await _userCommands.UpdateUserAsync(user);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        protected (byte[], byte[]) GenerateCredential(string password)
         {
             var salt = _hashProvider.GenerateRandomSalt(32);
             var hashedPassword = _hashProvider.Hash(

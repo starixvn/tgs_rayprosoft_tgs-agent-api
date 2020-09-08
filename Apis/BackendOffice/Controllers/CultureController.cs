@@ -26,7 +26,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public MessageResponse ChangeCultureAsync(string culture)
         {
             SetCulture(culture);
-            var sss = Resources.Controllers.CultureController.test;
+
 
             var s = _localizer.GetAllStrings();
             return new MessageResponse

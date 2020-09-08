@@ -42,20 +42,15 @@ export const equalsDescending = (value) => {
   )
 }
 
-//Ascending => Descending => unset(null)
-export const toggle = (value) => {
-  if (equalsAscending(value)) {
-    return Descending
-  }
-
-  if (equalsDescending(value)) {
-    return null
-  }
-
-  return Ascending
-}
-
 const isString = (value) => typeof value === "string"
 
 const isDescendingString = (value) =>
   isString(value) && value.toLowerCase() === Descending
+
+export const fromIsDescending = (isDescending) => {
+  if (isDescending == null || isDescending === undefined) {
+    return ""
+  }
+
+  return isDescending ? Descending : Ascending
+}

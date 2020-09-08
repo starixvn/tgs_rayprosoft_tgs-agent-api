@@ -6,6 +6,7 @@ namespace TGS.Apis.BackendOffice.DataService.Commands
     public interface IUserCommands
     {
         Task UpdateUserAsync(User user);
+        Task CreateUserAsync(User user);
     }
 
     public class UserCommands : IUserCommands
@@ -15,6 +16,12 @@ namespace TGS.Apis.BackendOffice.DataService.Commands
         public UserCommands(IBackendOfficeRepository repository)
         {
             _repository = repository;
+        }
+
+        async Task IUserCommands.CreateUserAsync(User user)
+        {
+            await _repository.Users.AddAsync(user);
+            await _repository.SaveChangesAsync();
         }
 
         Task IUserCommands.UpdateUserAsync(User user)

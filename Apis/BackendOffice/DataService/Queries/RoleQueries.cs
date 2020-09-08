@@ -10,7 +10,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
     {
         IQueryable<Role> GetRoleQueries();
         Task<Role> GetRoleByIdAsync(Guid roleId);
-
+        Task<bool> NameExistsAsync(string name);
     }
 
     public sealed class RoleQueries : IRoleQueries
@@ -30,7 +30,14 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
         Task<Role> IRoleQueries.GetRoleByIdAsync(Guid roleId)
         {
             return _repository.Roles
+                .Include(p => p.Users)
                 .FirstOrDefaultAsync(a => a.Id == roleId);
+        }
+
+        Task<bool> IRoleQueries.NameExistsAsync(string name)
+        {
+            return _repository.Roles
+                .AnyAsync(a => a.Name == name);
         }
     }
 }

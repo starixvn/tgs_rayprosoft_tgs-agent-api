@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
@@ -31,6 +32,13 @@ namespace TGS.Apis.BackendOffice.DataService
         {
             return Database.CanConnectAsync();
         }
+
+
+        EntityEntry<T> IBackendOfficeRepository.Entry<T>(T entity)
+        {
+            return base.Entry(entity);
+        }
+
 
         IDbConnection IBaseRepository.GetDbConnection()
         {

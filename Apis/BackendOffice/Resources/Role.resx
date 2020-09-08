@@ -117,7 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="test" xml:space="preserve">
-    <value>test2222</value>
+  <data name="CannotDeleteRole" xml:space="preserve">
+    <value>The role cannot be deleted owing to user used already.</value>
+  </data>
+  <data name="NameExistd" xml:space="preserve">
+    <value>The name has existed already.</value>
+  </data>
+  <data name="NameLengthLimit" xml:space="preserve">
+    <value>Name's length must be shoter than 50.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>Name is requred.</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Role not found.</value>
   </data>
 </root>

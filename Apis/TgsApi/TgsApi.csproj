@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="nlog - Copy.Development.config">
+    <Content Update="nlog.Development.config">
       <DependentUpon>nlog.Development.config</DependentUpon>
     </Content>
   </ItemGroup>

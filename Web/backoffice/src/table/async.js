@@ -6,11 +6,56 @@ import React, {
   useContext
 } from "react"
 import { css, Global } from "@emotion/core"
-import { Set, Button, Table, Pagination } from "bumbag"
+import { Set, Button, Table, Pagination, Icon } from "bumbag"
 import Async, { useAsync } from "react-async"
-import { useTable, useFlexLayout, usePagination, useSortBy } from "react-table"
+import {
+  useTable,
+  useFlexLayout,
+  usePagination,
+  useSortBy,
+  useFilters
+} from "react-table"
+import { fromIsDescending } from "./order"
+import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
 const Context = createContext({})
+
+const defaultState = {
+  pageIndex: 0,
+  pageSize: 10,
+  sortBy: [],
+  request: Promise.resolve()
+}
+
+let HeadIndex = 0
+
+export const useTableState = (value = initialState) => {
+  let [state, set] = useState({ ...defaultState, ...value })
+  //let async = useAsync(request ?? Promise.resolve())
+
+  const setState = (state) =>
+    set((oldState) => ({
+      ...oldState,
+      ...state
+    }))
+
+  const headSortBy = () => {
+    let { id = "" } = state?.sortBy?.[HeadIndex] ?? {}
+    return id
+  }
+
+  const headOrderBy = () => {
+    let sortBy = headSortBy()
+    return sortBy && fromIsDescending(state?.sortBy?.[HeadIndex]?.desc)
+  }
+
+  return {
+    state,
+    setState,
+    headSortBy,
+    headOrderBy
+  }
+}
 
 export default ({
   promise,
@@ -18,8 +63,9 @@ export default ({
   mapNumberOfPages = defaultMapNumberOfPages,
   state,
   onStateChange,
-  fetchData,
+  head,
   columns,
+  body,
   children,
   ...props
 }) => {
@@ -31,30 +77,34 @@ export default ({
       columns,
       data: mapDataItems(data) ?? [],
       initialState: state,
+      manualSortBy: true,
+      disableMultiSort: true,
       manualPagination: true,
+      manualFilters: true,
       pageCount: mapNumberOfPages({ data, pageSize: state?.pageSize })
     },
-    /*
+    useFilters,
     useSortBy,
-    */
     useFlexLayout,
     usePagination
   )
   let { getTableProps, rows, gotoPage, state: tableState } = table
-  let { pageIndex, pageSize } = tableState
+  let { pageIndex, pageSize, sortBy } = tableState
 
   const getPage = () => pageIndex + 1
 
   useEffect(() => {
-    onStateChange({ ...tableState })
-    fetchData()
-  }, [pageIndex, pageSize])
+    onStateChange({ pageIndex, pageSize, sortBy })
+  }, [pageIndex, pageSize, sortBy])
 
-  //TODO: isPending
+  let tableProps = getTableProps()
+  console.log("tableProps", tableProps)
   return (
     <Context.Provider value={{ table, async, getPage }}>
       <Set orientation="vertical">
-        <Table {...getTableProps()} {...props}>
+        <Table width="100%" overflowX="auto" {...tableProps} {...props}>
+          {head === true && <Head table={table} async={async} />}
+          {body === true && <Body table={table} async={async} />}
           {children}
         </Table>
         {mapNumberOfPages && (
@@ -70,6 +120,59 @@ export default ({
       </Set>
       {isPending && <div>TODO: loading indicator</div>}
     </Context.Provider>
+  )
+}
+
+const Head = ({ table }) => {
+  let { headerGroups } = table
+  return (
+    <Table.Head>
+      {headerGroups.map((headerGroup) => (
+        <Table.Row {...headerGroup.getHeaderGroupProps()}>
+          {headerGroup.headers.map((column) => {
+            let props = column.getHeaderProps({
+              ...column?.headCell,
+              ...column?.getSortByToggleProps()
+            })
+            return (
+              <Table.HeadCell {...props}>
+                {column.render("Header")}
+                {column.isSorted ? (
+                  column.isSortedDesc ? (
+                    <Icon icon={faCaretDown} type="font-awesome" />
+                  ) : (
+                    <Icon icon={faCaretUp} type="font-awesome" />
+                  )
+                ) : (
+                  ""
+                )}
+              </Table.HeadCell>
+            )
+          })}
+        </Table.Row>
+      ))}
+    </Table.Head>
+  )
+}
+
+const Body = ({ table }) => {
+  //let { isPending } = async
+  let { rows, getTableBodyProps, prepareRow } = table
+
+  return (
+    <Table.Body {...getTableBodyProps()}>
+      {rows.map((row, i) => {
+        prepareRow(row)
+        return (
+          <Table.Row {...row.getRowProps()}>
+            {row.cells.map((cell) => {
+              let props = cell.getCellProps({ ...cell?.column?.cell })
+              return <Table.Cell {...props}>{cell.render("Cell")}</Table.Cell>
+            })}
+          </Table.Row>
+        )
+      })}
+    </Table.Body>
   )
 }
 
