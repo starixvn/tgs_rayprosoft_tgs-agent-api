@@ -40,6 +40,9 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<IUserCommands, UserCommands>();
             services.AddScoped<ISettingCommands, SettingCommands>();
             services.AddScoped<IRoleCommands, RoleCommands>();
+
+            services.AddTransient(typeof(IGenericCommands<>), typeof(GenericCommands<>));
+
             return services;
         }
 

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
+using TGS.Apis.BackendOffice.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Validator.User
 {
@@ -16,7 +17,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validator.User
                 .NotNull()
                 .WithMessage(Resources.User.PasswordRequired)
                 .Equal(p => p.ConfirmPassword)
-                .WithMessage(Resources.User.PasswordNotMatched);
+                .WithMessage(Resources.User.PasswordNotMatched)
+                .Password(); ;
         }
     }
 }

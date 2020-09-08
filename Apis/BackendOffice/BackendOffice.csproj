@@ -48,6 +48,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Common.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Department.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Department.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Menu - Copy.Designer.cs">
       <DependentUpon>Menu.Designer.cs</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -58,10 +63,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Role.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\User.Designer.cs">
+    <Compile Update="Resources\User - Copy.Designer.cs">
+      <DependentUpon>User.Designer.cs</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>User.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -77,6 +82,10 @@
     <EmbeddedResource Update="Resources\Common.zh-CN.resx">
       <Generator></Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Department.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Department.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Role.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Role.Designer.cs</LastGenOutput>
@@ -86,7 +95,7 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\User.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>User.Designer.cs</LastGenOutput>
+      <LastGenOutput>Department.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\User.zh-CN.resx">
       <Generator></Generator>
