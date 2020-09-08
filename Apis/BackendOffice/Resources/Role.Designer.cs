@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TGS.Apis.BackendOffice.Resources.Controllers {
+namespace TGS.Apis.BackendOffice.Resources {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace TGS.Apis.BackendOffice.Resources.Controllers {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class CultureController {
+    internal class Role {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal CultureController() {
+        internal Role() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace TGS.Apis.BackendOffice.Resources.Controllers {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TGS.Apis.BackendOffice.Resources.Controllers.CultureController", typeof(CultureController).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TGS.Apis.BackendOffice.Resources.Role", typeof(Role).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,38 @@ namespace TGS.Apis.BackendOffice.Resources.Controllers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to test2222.
+        ///   Looks up a localized string similar to The name has existed already..
         /// </summary>
-        internal static string test {
+        internal static string NameExistd {
             get {
-                return ResourceManager.GetString("test", resourceCulture);
+                return ResourceManager.GetString("NameExistd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name&apos;s length must be shoter than 50..
+        /// </summary>
+        internal static string NameLengthLimit {
+            get {
+                return ResourceManager.GetString("NameLengthLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name is requred..
+        /// </summary>
+        internal static string NameRequired {
+            get {
+                return ResourceManager.GetString("NameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role not found..
+        /// </summary>
+        internal static string NotFound {
+            get {
+                return ResourceManager.GetString("NotFound", resourceCulture);
             }
         }
     }

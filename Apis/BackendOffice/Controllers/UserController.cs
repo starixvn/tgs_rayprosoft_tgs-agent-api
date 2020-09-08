@@ -66,6 +66,28 @@ namespace TGS.Apis.BackendOffice.Controllers
                 })
                 .CreatePagedResponseAsync(request);
         }
+
+        [Route("")]
+        [HttpPost, Description("Create users")]
+        public Task<PagedResponse<UserModel>> CreateUserAsync([FromBody] GetUsersRequest request)
+        {
+            return _userQueries.GetUseQueries()
+                .Where(request.Username, p => p.Username.Contains(request.Username))
+                .Select(user => new UserModel
+                {
+                    Username = user.Username,
+                    Name = user.Name,
+                    Role = user.Role.Name,
+                    DepartmentName = user.Department.Name,
+                    LastLoginIp = user.LastLoginIp,
+                    LastLoginTime = user.LastLoginTime,
+                    Status = user.Status.ToString(),
+                    CreatedOn = user.CreatedOn
+
+                })
+                .CreatePagedResponseAsync(request);
+        }
+
         protected (byte[], byte[]) GenerateCredential(string password)
 
         {

@@ -28,6 +28,26 @@ services:
           - backoffice.api
     depends_on:
       - sqlserver
+      - nats
+
+  log-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.LogApi
+    image: log-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    # For crash debug
+    # entrypoint: ["sh", "-c", "sleep infinity"]
+    ports:
+      - 32668:80
+    networks:
+      tgs:
+        aliases:
+          - log.api
+    depends_on:
+      - sqlserver
+      - nats
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-CU5-ubuntu-18.04
@@ -37,6 +57,18 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - 1433:1433
+    networks:
+      tgs:
+
+  nats:
+    image: nats
+    container_name: nats
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    expose:
+      - "4222"
+    ports:
+      - "8222:8222"
     networks:
       tgs:
 
