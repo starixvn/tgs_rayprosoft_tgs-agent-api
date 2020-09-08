@@ -54,7 +54,6 @@ const MenuItem = ({ code, url, ...props }) => {
   let path = `${url}/${code}`
 
   useEffect(() => {
-    console.log("TODO: blur?")
     ref?.current.blur()
   })
 

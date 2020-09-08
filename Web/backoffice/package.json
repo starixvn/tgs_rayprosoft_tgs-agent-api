@@ -39,6 +39,7 @@
     "prettier": "^2.0.5",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0",
+    "react-table": "^7.5.0",
     "snowpack": "^2.10.1"
   }
 }

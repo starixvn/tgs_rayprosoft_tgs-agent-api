@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import { useAsync } from "react-async"
+import client from "../../client"
+import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import {
   BrowserRouter as Router,
@@ -12,159 +13,157 @@ import {
   useLocation,
   useRouteMatch
 } from "react-router-dom"
-import {
-  Heading,
-  PageContent,
-  Stack,
-  Table,
-  Button,
-  InputField,
-  Set
-} from "bumbag"
-import client from "../../client"
-import DataTable, { useTable } from "../../table"
-import SequenceCell, {
-  Head as SequenceHeadCell
-} from "../../table/cell/Sequence"
-import DateTimeCell from "../../table/cell/DateTime"
-import { Head as StatusHeadCell } from "../../table/cell/Status"
-import { Head as ActionHeadCell } from "../../table/cell/Action"
+import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
+import PageContent from "../../page/Content"
+import AsyncTable, { useAsyncTable } from "../../table/async"
+import sequenceColumn from "../../table/column/sequence"
+import dateTimeColumn from "../../table/column/dateTime"
+//TODO: move to table.js?
+import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
 export const Code = "admins"
 
+const defaultState = {
+  pageIndex: 0,
+  pageSize: 10,
+  username: ""
+}
+
 export const Content = () => {
-  let table = useTable()
-  let { page, setPage, rows, sortby, orderby, setPromise } = table
-  let [username, setUsername] = useState("")
-  let [trigger, setTrigger] = useState(false)
+  let [state = {}, setState] = useState(defaultState)
+  let { pageIndex, pageSize, username = "" } = state
 
-  const cleanup = () => {
-    setTrigger(false)
+  const onStateChange = (state) => {
+    setState((oldState) => ({
+      ...oldState,
+      ...state
+    }))
   }
-
-  const search = ({ username } = {}) => {
-    setUsername(username)
-    setPage(1)
-    setTrigger(true)
-  }
-
-  useEffect(() => {
-    let promise = getUsers({ page, rows, sortby, orderby, username })
-    setPromise(promise)
-
-    promise.then(cleanup)
-  }, [page, rows, sortby, orderby, username, trigger])
 
   return (
-    <PageContent css={css``}>
-      <Stack orientation="vertical" spacing="major-2">
-        <Heading use="h3">{title()}</Heading>
-        <Stack orientation="horizontal">
-          <SearchForm table={table} search={search} />
-          <Button
-            css={css`
-              flex: 0;
-            `}
+    <Async
+      deferFn={() =>
+        getUsers({ page: pageIndex + 1, rows: pageSize, username })
+      }
+    >
+      {({ run: fetchData, promise, isPending }) => {
+        return (
+          <PageContent
+            title={title()}
+            actionBar={
+              <>
+                <SearchForm
+                  search={(data) => {
+                    onStateChange(data)
+                    fetchData()
+                  }}
+                  isPending={isPending}
+                />
+                <Button
+                  css={css`
+                    flex: 0;
+                  `}
+                >
+                  TODO: 新增
+                </Button>
+              </>
+            }
           >
-            TODO: 新增
-          </Button>
-        </Stack>
-        <DataTable table={table}>
-          {({ async, data = {}, ...props }) => {
-            let { items = [] } = data
-
-            //TODO: empty table body?
-            //TODO: loading?
-            return (
-              <Table>
-                <Table.Head>
-                  <Table.Row>
-                    <SequenceHeadCell />
-                    <Account.HeadCell />
-                    <Name.HeadCell />
-                    <Department.HeadCell />
-                    <PermissionGroup.HeadCell />
-                    <Ip.HeadCell />
-                    <LoggedAtHeadCell />
-                    <CreatedAtHeadCell />
-                    <StatusHeadCell />
-                    <ActionHeadCell />
-                  </Table.Row>
-                </Table.Head>
-                <Table.Body>
-                  {items.map((row, index, list) => (
-                    <Table.Row key={index}>
-                      <SequenceCell index={index} page={page} rows={rows} />
-                      <Account.Cell row={row} />
-                      <Name.Cell row={row} />
-                      <Department.Cell row={row} />
-                      <PermissionGroup.Cell
-                        row={row}
-                        index={index}
-                        list={list}
-                      />
-                      <Ip.Cell row={row} />
-                      <DateTimeCell value={row.lastLoginTime} />
-                      <DateTimeCell value={row.createdOn} />
-                      <StatusCell row={row} />
-                      <ActionCell row={row} />
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
-            )
-          }}
-        </DataTable>
-      </Stack>
-    </PageContent>
+            <AsyncAdminTable
+              state={state}
+              onStateChange={onStateChange}
+              fetchData={fetchData}
+              promise={promise}
+            />
+          </PageContent>
+        )
+      }}
+    </Async>
   )
 }
 
-//TODO: i18n
-const Account = {
-  HeadCell: () => <Table.HeadCell>用户名</Table.HeadCell>,
-  Cell: ({ row }) => <Table.Cell>{row.username}</Table.Cell>
-}
-const Name = {
-  HeadCell: () => <Table.HeadCell>姓名</Table.HeadCell>,
-  Cell: ({ row }) => <Table.Cell>{row.name}</Table.Cell>
-}
-const Department = {
-  HeadCell: () => <Table.HeadCell>部门</Table.HeadCell>,
-  Cell: ({ row }) => <Table.Cell>{row.departmentName}</Table.Cell>
-}
-const PermissionGroup = {
-  HeadCell: () => <Table.HeadCell>权限组</Table.HeadCell>,
-  Cell: ({ row }) => <Table.Cell>{row.role}</Table.Cell>
-}
-const Ip = {
-  HeadCell: () => <Table.HeadCell>最近登入IP</Table.HeadCell>,
-  Cell: ({ row }) => <Table.Cell>{row.lastLoginIp}</Table.Cell>
-}
-const LoggedAtHeadCell = () => <Table.HeadCell>最近登入时间</Table.HeadCell>
-const CreatedAtHeadCell = () => <Table.HeadCell>最近登入时间</Table.HeadCell>
-//TODO: status mapping
-const StatusCell = ({ row, index, list }) => (
-  <Table.Cell>{row.status}</Table.Cell>
-)
-const ActionCell = ({ row, index, list }) => (
-  <Table.Cell>
-    <Set>
-      <Button>TODO: 修改</Button>
-      <Button>TODO: 修改密码</Button>
-    </Set>
-  </Table.Cell>
-)
+const AsyncAdminTable = ({ state, onStateChange, fetchData, promise }) => {
+  let columns = useMemo(tableColumns)
 
-const SearchForm = ({ search, table, ...props }) => {
-  let { promise } = table
-  let { isPending } = useAsync({ promise })
+  return (
+    <AsyncTable
+      state={state}
+      onStateChange={onStateChange}
+      fetchData={fetchData}
+      promise={promise}
+      columns={columns}
+    >
+      <TableHead />
+      <TableBody />
+    </AsyncTable>
+  )
+}
 
+const TableHead = ({}) => {
+  let { table, async } = useAsyncTable()
+  let { isPending } = async
+  let { headerGroups } = table
+  return (
+    <Table.Head>
+      {headerGroups.map((headerGroup) => (
+        <Table.Row {...headerGroup.getHeaderGroupProps()}>
+          {headerGroup.headers.map((column) => (
+            <Table.HeadCell {...column.getHeaderProps()}>
+              <div
+                css={css`
+                  display: inline-flex;
+                  align-items: center;
+                `}
+              >
+                {column.render("Header")}
+                {column.isSorted ? (
+                  column.isSortedDesc ? (
+                    <Icon icon={faCaretDown} type="font-awesome" />
+                  ) : (
+                    <Icon icon={faCaretUp} type="font-awesome" />
+                  )
+                ) : (
+                  ""
+                )}
+              </div>
+            </Table.HeadCell>
+          ))}
+        </Table.Row>
+      ))}
+    </Table.Head>
+  )
+}
+
+const TableBody = ({}) => {
+  let { table, async } = useAsyncTable()
+  let { isPending } = async
+  let { headerGroups, rows, getTableBodyProps, prepareRow } = table
+
+  return (
+    <Table.Body {...getTableBodyProps()}>
+      {rows.map((row, i) => {
+        prepareRow(row)
+        return (
+          <Table.Row {...row.getRowProps()}>
+            {row.cells.map((cell) => {
+              return (
+                <Table.Cell {...cell.getCellProps()}>
+                  {cell.render("Cell")}
+                </Table.Cell>
+              )
+            })}
+          </Table.Row>
+        )
+      })}
+    </Table.Body>
+  )
+}
+
+const SearchForm = ({ search, isPending, ...props }) => {
   return (
     <Formik
       initialValues={{ username: "" }}
       onSubmit={(data) => {
-        //let params = Object.entries(data)
         search(data)
       }}
     >
@@ -204,3 +203,51 @@ const searchInputPlaceHolder = () => "管理员用户名输入框"
 
 //TODO: i18n
 const title = () => "管理员列表"
+
+const tableColumns = () => [
+  sequenceColumn(),
+  {
+    Header: "用户名",
+    accessor: "username",
+    canSort: true
+  },
+  {
+    Header: "姓名",
+    accessor: "name"
+  },
+  {
+    Header: "部门",
+    accessor: "departmentName"
+  },
+  {
+    Header: "权限组",
+    accessor: "role"
+  },
+  {
+    Header: "最近登入IP",
+    accessor: "lastLoginIp"
+  },
+  dateTimeColumn({
+    Header: "最近登入时间",
+    accessor: "lastLoginTime"
+  }),
+  dateTimeColumn({
+    Header: "创建时间",
+    accessor: "createdOn"
+  }),
+  {
+    Header: "状态",
+    accessor: "status"
+  },
+  {
+    Header: "操作",
+    Cell: () => {
+      return (
+        <Set>
+          <Button>TODO: 修改</Button>
+          <Button>TODO: 修改密码</Button>
+        </Set>
+      )
+    }
+  }
+]
