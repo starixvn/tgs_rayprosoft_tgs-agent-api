@@ -129,8 +129,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<GetRoleResponse>();
         }
 
-        [Route("{roleId}/copy")]
-        [HttpPost, Description("Copy role")]
+        [HttpPost("{roleId}/copy"), Description("Copy role")]
         public async Task<GetRoleResponse> CopyRoleAsync(Guid roleId, [FromBody] CopyRoleRequest request)
         {
             var role = await _roleQueries.GetRoleByIdAsync(roleId);
@@ -154,7 +153,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<GetRoleResponse>();
         }
 
-        [HttpPost, Route(""), Description("Create a role")]
+        [HttpPost, Description("Create a role")]
         public async Task<GetRoleResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
         {
             if (await _roleQueries.NameExistsAsync(request.Name))
