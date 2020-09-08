@@ -61,6 +61,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The role cannot be deleted owing to user used already..
+        /// </summary>
+        internal static string CannotDeleteRole {
+            get {
+                return ResourceManager.GetString("CannotDeleteRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The name has existed already..
         /// </summary>
         internal static string NameExistd {

@@ -30,6 +30,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
         Task<Role> IRoleQueries.GetRoleByIdAsync(Guid roleId)
         {
             return _repository.Roles
+                .Include(p => p.Users)
                 .FirstOrDefaultAsync(a => a.Id == roleId);
         }
 
