@@ -28,7 +28,7 @@ services:
           - backoffice.api
     depends_on:
       - sqlserver
-      - nats
+      - log-api
 
   log-api:
     build:
@@ -46,8 +46,8 @@ services:
         aliases:
           - log.api
     depends_on:
-      - sqlserver
       - nats
+      - redis
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-CU5-ubuntu-18.04
@@ -69,6 +69,20 @@ services:
       - "4222"
     ports:
       - "8222:8222"
+    networks:
+      tgs:
+
+  redis:
+    image: "redis:alpine"
+    ports:
+     - "6379:6379"
+    volumes:
+     - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+
+    environment:
+     - REDIS_REPLICATION_MODE=master
+
     networks:
       tgs:
 
