@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +18,7 @@ using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Queries;
+using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Infrastructures.Json;
@@ -58,7 +61,11 @@ namespace TGS.Apis.BackendOffice.Extensions
 
             services.AddHttpContextAccessor();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
-            services.AddControllers();
+            services.AddControllers()
+                .AddFluentValidation(opt =>
+                {
+                    opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                });
             services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
@@ -97,6 +104,10 @@ namespace TGS.Apis.BackendOffice.Extensions
                     .RequireAuthenticatedUser()
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
+                options.Filters.Add(new ValidationFilter());
+
+
+
                 //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
                 //// we need to implement it on our self if not done before deployment
                 //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());

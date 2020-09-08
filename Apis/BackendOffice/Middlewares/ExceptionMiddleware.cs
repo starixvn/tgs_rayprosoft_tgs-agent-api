@@ -32,18 +32,15 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
             try
             {
-                var endpoint = httpContext.GetEndpoint();
-                var descriptionAttribute = endpoint?.Metadata.GetMetadata<DescriptionAttribute>();
-                var description = string.Empty;
-
-                if (descriptionAttribute != null)
-                {
-                    description = descriptionAttribute.Description;
-                }
-
                 var reqMessage = await GetRequestBodyAsync(httpContext);
                 var (resMessage, ms) = await GetResponseMessageAsync(httpContext, next);
 
+                var descriptionAttribute = httpContext.GetEndpoint()?.Metadata.GetMetadata<DescriptionAttribute>();
+
+                if (descriptionAttribute != null)
+                {
+                    adminLogEvent.description = descriptionAttribute.Description;
+                }
 
                 adminLogEvent.ipaddress = _requestAnalyzer.GetIp(httpContext).NoLongerThan(256);
                 adminLogEvent.path = httpContext.Request.Path.Value;
@@ -59,7 +56,6 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 adminLogEvent.responsecode = httpContext.Response.StatusCode;
                 adminLogEvent.executiontimems = ms;
-                adminLogEvent.description = description;
                 adminLogEvent.recordedon = DateTimeOffset.Now;
             }
             catch (Exception ex)

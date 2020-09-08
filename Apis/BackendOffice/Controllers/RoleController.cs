@@ -2,14 +2,18 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
+using TGS.Apis.BackendOffice.Controllers.Messages.Validator.Role;
 using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Services;
+using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Json;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -45,7 +49,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(request.Name, p => p.Name.Contains(request.Name))
                 .Select(role => new RoleModel
                 {
-                    Id = role.Id,
                     Name = role.Name,
                     DisplayName = role.DisplayName,
                     Description = role.Description,
@@ -66,21 +69,136 @@ namespace TGS.Apis.BackendOffice.Controllers
             var role = await _roleQueries.GetRoleByIdAsync(roleId);
             if (role == null)
             {
-                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Common.NotFound}");
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
             }
+            var roleModel = new RoleModel
+            {
+                Id = role.Id,
+                Name = role.Name,
+                DisplayName = role.DisplayName,
+                Description = role.Description,
+                Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(role.MenuSetting),
+                CreatedOn = role.CreatedOn,
+                UpdatedOn = role.UpdatedOn,
+                CreatedByUsername = role.CreatedByUsername,
+                UpdatedByUsername = role.CreatedByUsername
+            };
 
             return new GetRoleResponse
             {
                 Valid = true,
-                MenuSettings = await GetMenuSettingAsync(role.MenuSetting)
+                Role = roleModel
+            };
+        }
+
+
+        [Route("{roleId}")]
+        [HttpPut, Description("Update role")]
+        public async Task<GetRoleResponse> UpdateRoleAsync(Guid roleId,
+            [FromQuery] UpdateRoleRequest request)
+        {
+            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            if (role == null)
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
+            }
+
+            if (request.Name != role.Name && await _roleQueries.NameExistsAsync(request.Name))
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExistd}");
+            }
+
+            role.Name = request.Name;
+            role.MenuSetting = _jsonSerializationProvider.SerializeToString(request.Menus);
+            role.UpdatedByUsername = Username;
+            role.UpdatedOn = DateTimeOffset.Now;
+
+            await _roleCommands.UpdateRoleAsync(role);
+            return CreateValidResponse<GetRoleResponse>();
+        }
+
+        [Route("{roleId}")]
+        [HttpDelete, Description("Delete role")]
+        public async Task<GetRoleResponse> DeleteRoleAsync(Guid roleId)
+        {
+            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            if (role == null)
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
+            }
+
+            await _roleCommands.DeleteRoleAsync(role);
+            return CreateValidResponse<GetRoleResponse>();
+        }
+
+        [Route("{roleId}/copy")]
+        [HttpPost, Description("Copy role")]
+        public async Task<GetRoleResponse> CopyRoleAsync(
+            Guid roleId,
+            [CustomizeValidator(Interceptor = typeof(CopyRoleRequestValidator))][FromQuery] CopyRoleRequest request)
+        {
+            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            if (role == null)
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
+            }
+
+            if (request.Name != role.Name && await _roleQueries.NameExistsAsync(request.Name))
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExistd}");
+            }
+
+            var newRole = CreateRole(
+                request.Name,
+                role.DisplayName,
+                role.Description,
+                role.MenuSetting);
+
+            await _roleCommands.CreateRoleAsync(newRole);
+            return CreateValidResponse<GetRoleResponse>();
+        }
+
+        [Route("")]
+        [HttpPost, Description("Create role")]
+        public async Task<GetRoleResponse> CreateRoleAsync(Guid roleId,
+            [CustomizeValidator(Interceptor = typeof(CreateRoleRequestValidator))][FromQuery] CreateRoleRequest request)
+        {
+            if (await _roleQueries.NameExistsAsync(request.Name))
+            {
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExistd}");
+            }
+
+            var role = CreateRole(
+                request.Name,
+                request.DisplayName,
+                request.Description,
+                _jsonSerializationProvider.SerializeToString(request.Menus));
+
+            await _roleCommands.CreateRoleAsync(role);
+            return CreateValidResponse<GetRoleResponse>();
+        }
+
+        private Role CreateRole(string name, string displayName, string description, string menuSetting)
+        {
+            return new Role
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                Name = name,
+                Description = description,
+                DisplayName = displayName,
+                MenuSetting = menuSetting,
+                CreatedByUsername = Username,
+                UpdatedByUsername = Username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
             };
         }
 
         private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting)
         {
             var setting = await _settingQueries.GetSettingByKeyAsync("Menus");
-            var menuSettingTemplate = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting.Value);
-            var roleMenus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(menuSetting);
+            var menuSettingTemplate = GetMenuSettingByString(setting.Value);
+            var roleMenus = GetMenuSettingByString(menuSetting);
 
             foreach (var menu in menuSettingTemplate)
             {
@@ -98,6 +216,11 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             return menuSettingTemplate;
+        }
+
+        private MenuSetting[] GetMenuSettingByString(string setting)
+        {
+            return _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
         }
 
         private MenuSetting SetMenuDisplay(MenuSetting menuTemplate, MenuSetting[] roleMenus)
