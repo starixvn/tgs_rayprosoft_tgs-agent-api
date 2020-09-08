@@ -2,7 +2,7 @@
 
 namespace TGS.Core.Models.Exceptions
 {
-    public class BrandUnderMaintenanceException : Exception
+    public sealed class BrandUnderMaintenanceException : Exception
     {
         public BrandUnderMaintenanceException() : base("Brand is put into maintenance")
         {

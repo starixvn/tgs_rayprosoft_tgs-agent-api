@@ -56,7 +56,7 @@ namespace TGS.Services.Operations
 
             if (cachedPlayer == null)
             {
-                throw new PlayerNotFoundException($"Player not found with code: {playerCode}");
+                throw new PlayerNotFoundException(playerCode);
             }
 
             await CachePlayerAsync(playerCode, cachedPlayer);
