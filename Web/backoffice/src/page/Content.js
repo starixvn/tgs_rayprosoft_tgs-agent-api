@@ -3,11 +3,14 @@ import { css, Global } from "@emotion/core"
 import {
   Heading,
   PageContent,
+  Box,
   Stack,
   Table,
+  Card,
   Button,
   InputField,
-  Set
+  Set,
+  Divider
 } from "bumbag"
 
 export default ({ title, actionBar, children, ...props }) => {
@@ -15,10 +18,14 @@ export default ({ title, actionBar, children, ...props }) => {
   return (
     <PageContent css={css``}>
       <Stack orientation="vertical" spacing="major-2">
-        {title && <Heading use="h3">{title}</Heading>}
+        {title && (
+          <Box marginBottom="major-3">
+            <Heading use="h3">{title}</Heading>
+          </Box>
+        )}
         {actionBar && <Stack orientation="horizontal">{actionBar}</Stack>}
+        {children}
       </Stack>
-      {children}
     </PageContent>
   )
 }

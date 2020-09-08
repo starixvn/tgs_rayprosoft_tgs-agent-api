@@ -16,141 +16,52 @@ import {
 import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
 import AddAdminButton from "./add"
-import AsyncTable, { useAsyncTable } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-//TODO: move to table.js?
-import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
+import AsyncTable, { useTableState } from "../../table/async"
 
 export const Code = "admins"
 
-const defaultState = {
-  pageIndex: 0,
-  pageSize: 10,
-  username: ""
-}
-
 export const Content = () => {
-  let [state = {}, setState] = useState(defaultState)
-  let { pageIndex, pageSize, username = "" } = state
+  let columns = useMemo(tableColumns)
+  let { state, setState, headSortBy, headOrderBy } = useTableState({
+    username: ""
+  })
+  let { pageIndex, pageSize, username = "", sortBy = [], request } = state
 
-  const onStateChange = (state) => {
-    setState((oldState) => ({
-      ...oldState,
-      ...state
-    }))
-  }
+  let async = useAsync({ promise: request })
+  let { isPending } = async
+
+  useEffect(() => {
+    let promise = getUsers({
+      page: pageIndex + 1,
+      rows: pageSize,
+      username,
+      sortby: headSortBy(),
+      orderby: headOrderBy()
+    })
+    setState({ ...state, request: promise })
+  }, [pageIndex, pageSize, username, sortBy])
 
   return (
-    <Async
-      deferFn={() =>
-        getUsers({ page: pageIndex + 1, rows: pageSize, username })
+    <PageContent
+      title={title()}
+      actionBar={
+        <>
+          <SearchForm search={setState} isPending={isPending} />
+          <AddAdminButton />
+        </>
       }
     >
-      {({ run: fetchData, promise, isPending }) => {
-        return (
-          <PageContent
-            title={title()}
-            actionBar={
-              <>
-                <SearchForm
-                  search={(data) => {
-                    onStateChange(data)
-                    fetchData()
-                  }}
-                  isPending={isPending}
-                />
-                <AddAdminButton />
-              </>
-            }
-          >
-            <AsyncAdminTable
-              state={state}
-              onStateChange={onStateChange}
-              fetchData={fetchData}
-              promise={promise}
-            />
-          </PageContent>
-        )
-      }}
-    </Async>
-  )
-}
-
-const AsyncAdminTable = ({ state, onStateChange, fetchData, promise }) => {
-  let columns = useMemo(tableColumns)
-
-  return (
-    <AsyncTable
-      state={state}
-      onStateChange={onStateChange}
-      fetchData={fetchData}
-      promise={promise}
-      columns={columns}
-    >
-      <TableHead />
-      <TableBody />
-    </AsyncTable>
-  )
-}
-
-const TableHead = ({}) => {
-  let { table, async } = useAsyncTable()
-  let { isPending } = async
-  let { headerGroups } = table
-  return (
-    <Table.Head>
-      {headerGroups.map((headerGroup) => (
-        <Table.Row {...headerGroup.getHeaderGroupProps()}>
-          {headerGroup.headers.map((column) => (
-            <Table.HeadCell {...column.getHeaderProps()}>
-              <div
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                `}
-              >
-                {column.render("Header")}
-                {column.isSorted ? (
-                  column.isSortedDesc ? (
-                    <Icon icon={faCaretDown} type="font-awesome" />
-                  ) : (
-                    <Icon icon={faCaretUp} type="font-awesome" />
-                  )
-                ) : (
-                  ""
-                )}
-              </div>
-            </Table.HeadCell>
-          ))}
-        </Table.Row>
-      ))}
-    </Table.Head>
-  )
-}
-
-const TableBody = ({}) => {
-  let { table, async } = useAsyncTable()
-  let { isPending } = async
-  let { headerGroups, rows, getTableBodyProps, prepareRow } = table
-
-  return (
-    <Table.Body {...getTableBodyProps()}>
-      {rows.map((row, i) => {
-        prepareRow(row)
-        return (
-          <Table.Row {...row.getRowProps()}>
-            {row.cells.map((cell) => {
-              return (
-                <Table.Cell {...cell.getCellProps()}>
-                  {cell.render("Cell")}
-                </Table.Cell>
-              )
-            })}
-          </Table.Row>
-        )
-      })}
-    </Table.Body>
+      <AsyncTable
+        state={state}
+        onStateChange={setState}
+        promise={request}
+        head
+        body
+        columns={columns}
+      />
+    </PageContent>
   )
 }
 
