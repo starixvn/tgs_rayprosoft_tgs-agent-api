@@ -15,6 +15,7 @@ import {
 } from "react-router-dom"
 import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
+import AddAdminButton from "./add"
 import AsyncTable, { useAsyncTable } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -59,13 +60,7 @@ export const Content = () => {
                   }}
                   isPending={isPending}
                 />
-                <Button
-                  css={css`
-                    flex: 0;
-                  `}
-                >
-                  TODO: 新增
-                </Button>
+                <AddAdminButton />
               </>
             }
           >
