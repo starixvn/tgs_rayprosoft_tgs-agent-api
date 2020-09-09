@@ -154,7 +154,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost, Description("Create a role")]
-        public async Task<GetRoleResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
+        public async Task<MessageResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
         {
             if (await _roleQueries.NameExistsAsync(request.Name))
             {
@@ -168,7 +168,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 _jsonSerializationProvider.SerializeToString(request.Menus));
 
             await _roleCommands.CreateRoleAsync(role);
-            return CreateValidResponse<GetRoleResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
 
         private Role CreateRole(string name, string displayName, string description, string menuSetting)

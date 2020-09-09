@@ -87,7 +87,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
 
         [HttpPost, Description("Create a department")]
-        public async Task<GetRoleResponse> CreateRoleAsync([FromBody] DepartmentRequest request)
+        public async Task<MessageResponse> CreateRoleAsync([FromBody] DepartmentRequest request)
         {
             if (await _queries.NameExistsAsync(request.Name))
             {
@@ -98,6 +98,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 Name = request.Name,
+                Description = request.Name,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
@@ -105,7 +106,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             await _commands.CreateAsync(department);
-            return CreateValidResponse<GetRoleResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }

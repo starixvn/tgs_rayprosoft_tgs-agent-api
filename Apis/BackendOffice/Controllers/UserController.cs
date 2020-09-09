@@ -27,6 +27,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsHashConfig _tgsHashConfig;
         private readonly IAntiforgery _antiForgery;
         private readonly IUserQueries _userQueries;
+        private readonly IDepartmentQueries _departmentQueries;
+        private readonly IRoleQueries _roleQueries;
         private readonly IUserCommands _userCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -36,6 +38,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsHashConfig tgsHashConfig,
             IAntiforgery antiForgery,
             IUserQueries userQueries,
+            IDepartmentQueries departmentQueries,
+            IRoleQueries roleQueries,
             IUserCommands userCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
@@ -44,6 +48,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             _tgsHashConfig = tgsHashConfig;
             _antiForgery = antiForgery;
             _userQueries = userQueries;
+            _departmentQueries = departmentQueries;
+            _roleQueries = roleQueries;
             _userCommands = userCommands;
             _jsonSerializationProvider = jsonSerializationProvider;
             _httpContextAccessor = httpContextAccessor;
@@ -57,6 +63,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(request.Username, p => p.Username.Contains(request.Username))
                 .Select(user => new UserModel
                 {
+                    Id = user.Id,
                     Username = user.Username,
                     Name = user.Name,
                     Role = user.Role.Name,
@@ -79,15 +86,27 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.User.UsernameExistedAlready);
             }
 
+            if (await _roleQueries.GetRoleByIdAsync(request.RoleId) == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
+            }
+
+            if (await _departmentQueries.GetDepartmentByIdAsync(request.DepartmentId) == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
+            }
+
             var (salt, password) = GenerateCredential(request.Password);
             var user = new User
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                Username = request.Username,
                 Name = request.Name,
                 Password = password,
                 Salt = salt,
                 RoleId = request.RoleId,
                 DepartmentId = request.DepartmentId,
+                TimeZone = request.TimeZone,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
@@ -106,6 +125,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             if (user == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
+            }
+            if (await _roleQueries.GetRoleByIdAsync(request.RoleId) == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
+            }
+            if (await _departmentQueries.GetDepartmentByIdAsync(request.DepartmentId) == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
             user.Name = request.Name;
