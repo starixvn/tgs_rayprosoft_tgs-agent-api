@@ -20,7 +20,7 @@ namespace TGS.Services.Operations.Extensions
 
             #region Queries
                         
-            services.AddFactory<IBrandQueries, BrandQueries>();
+            services.AddFactory<ILicenseeQueries, LicenseeQueries>();
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
@@ -29,7 +29,7 @@ namespace TGS.Services.Operations.Extensions
 
             #region Operations
 
-            services.AddSingleton<IBrandOperations, BrandOperations>();
+            services.AddSingleton<ILicenseeOperations, LicenseeOperations>();
             services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
             services.AddSingleton<IPlayerOperations, PlayerOperations>();
 

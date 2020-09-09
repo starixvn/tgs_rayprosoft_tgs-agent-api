@@ -5,27 +5,27 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    internal class BrandCurrencyMap : IEntityTypeConfiguration<BrandCurrency>
+    internal class LicenseeCurrencyMap : IEntityTypeConfiguration<LicenseeCurrency>
     {
-        void IEntityTypeConfiguration<BrandCurrency>.Configure(EntityTypeBuilder<BrandCurrency> builder)
+        void IEntityTypeConfiguration<LicenseeCurrency>.Configure(EntityTypeBuilder<LicenseeCurrency> builder)
         {
-            builder.ToTable("BrandCurrencies", "dbo");
-            builder.HasKey(bc => new {bc.BrandId, bc.CurrencyCode});
+            builder.ToTable("LicenseeCurrencies", "dbo");
+            builder.HasKey(bc => new {bc.LicenseeId, bc.CurrencyCode});
             builder
-                .HasOne(bc => bc.Brand)
-                .WithMany(c => c.BrandCurrencies)
-                .HasForeignKey(bc => bc.BrandId);
+                .HasOne(bc => bc.Licensee)
+                .WithMany(c => c.LicenseeCurrencies)
+                .HasForeignKey(bc => bc.LicenseeId);
 
             builder
                 .HasOne(bc => bc.Currency)
-                .WithMany(c => c.BrandCurrencies)
+                .WithMany(c => c.LicenseeCurrencies)
                 .HasForeignKey(bc => bc.CurrencyCode);
 
             builder.Property(c => c.CurrencyCode)
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
-            builder.Property(c => c.BrandCurrencyCode)
+            builder.Property(c => c.LicenseeCurrencyCode)
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
         }

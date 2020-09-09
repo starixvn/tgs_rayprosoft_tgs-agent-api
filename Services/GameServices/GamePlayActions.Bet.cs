@@ -44,7 +44,7 @@ namespace TGS.Services.GameServices
         {
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
-            await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+            await ThrowIfGameIsNotTakenByLicenseeAsync(player, data);
             await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
             var res = await _operations.PlaceBetAsync(data);
 
@@ -61,7 +61,7 @@ namespace TGS.Services.GameServices
             throw new NotImplementedException();
         }
 
-        private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, BetData data, GameActionType type = GameActionType.PlaceBet)
+        private async Task ThrowIfGameIsNotTakenByLicenseeAsync(CachedPlayer player, BetData data, GameActionType type = GameActionType.PlaceBet)
         {
             if (type != GameActionType.PlaceBet)
                 return;
@@ -76,16 +76,16 @@ namespace TGS.Services.GameServices
             }
 
             var platformTypes = await GetPlatformTypes(player.PlayerCode, data.PlatformType);
-            var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId);
+            var licenseeGames = await _licenseeOperations.GetLicenseeGamesAsync(player.LicenseeId, gameProviderId);
 
-            var gameIds = brandGames.Where(g => placeBetExternalGameIds.IgnoreCaseContains(g.ExternalGameId) &&
+            var gameIds = licenseeGames.Where(g => placeBetExternalGameIds.IgnoreCaseContains(g.ExternalGameId) &&
                                             platformTypes.Contains(g.PlatformType))
                                     .Select(g => g.GameId)
                                     .ToArray();
 
             if (gameIds.Length == 0)
             {
-                throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have games '{placeBetExternalGameIds.JoinAsStringByComma()}'");
+                throw new InvalidOperationException($"Licensee {player.LicenseeCode} doesn't have games '{placeBetExternalGameIds.JoinAsStringByComma()}'");
             }
 
             var validGameStatus = _validGameStatus.GetStatus(player.Type, type);
@@ -94,12 +94,12 @@ namespace TGS.Services.GameServices
                 var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, id);
                 if (cachedGame == null)
                 {
-                    throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game with id '{id}'");
+                    throw new InvalidOperationException($"Licensee {player.LicenseeCode} doesn't have game with id '{id}'");
                 }
 
                 if (validGameStatus.All(s => s != cachedGame.Status))
                 {
-                    throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}'");
+                    throw new InvalidOperationException($"Licensee {player.LicenseeCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}'");
                 }
             }
         }

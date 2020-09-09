@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Models
         public virtual ICollection<GameProviderCurrency> Currencies { get; set; }
         public virtual ICollection<GameProviderLanguage> Languages { get; set; }
         public virtual ICollection<GameProviderConfiguration> GameProviderConfigurations { get; set; }
-        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
+        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
         public virtual ICollection<GameProviderBetLimit> GameProviderBetLimits { get; set; }
     }
 }

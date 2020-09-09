@@ -3,17 +3,17 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.Caches
 {
-    public record CachedBrand
+    public record CachedLicensee
     {
         public string Code { get; init; }        
         public string TimeZoneId { get; init; }
         public Guid ResellerId { get; init; }
         public string ResellerCode { get; init; }
         public Status Status { get; init; }
-        public BrandUrls Urls { get; init; }
+        public LicenseeUrls Urls { get; init; }
     }
 
-    public record BrandUrls
+    public record LicenseeUrls
     {
         public string Login { get; init; }
         public string Cashier { get; init; }

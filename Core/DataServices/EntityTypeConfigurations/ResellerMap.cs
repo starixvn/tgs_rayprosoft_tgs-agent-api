@@ -12,7 +12,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.ToTable("Resellers", "dbo");
             BaseConfigureProperties(builder);
             
-            builder.HasMany(c => c.Brands)
+            builder.HasMany(c => c.Licensees)
                 .WithOne(e => e.Reseller);
 
             builder.Property(c => c.Description)

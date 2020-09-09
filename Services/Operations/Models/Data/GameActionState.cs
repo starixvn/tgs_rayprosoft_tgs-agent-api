@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TGS.Core.DataServices;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
@@ -38,7 +39,7 @@ namespace TGS.Services.Operations.Models
         public GameActionType GameActionType { get; init; }
         public PlatformType PlatformType { get; init; }
         public Action<string, decimal> ValidateAmount { get; init; }
-        public string BrandCode { get; init; }
+        public string LicenseeCode { get; init; }
         public Func<decimal, decimal> PrepareAmount { get; init; }
         public bool HasWalletUpdate { get; init; }
         public bool MustHaveExistingRound { get; init; }
@@ -50,12 +51,12 @@ namespace TGS.Services.Operations.Models
 
         public PlayerRelatedData PlayerData { get; init; }
         public CachedGame[] GameProviderGames { get; init; }
-        public string BrandTimeZoneId { get; init; }
+        public string LicenseeTimeZoneId { get; init; }
 
         public Guid? BatchId { get; init; }
         //public bool AllowSettlementWithDifferentGameProviderConfiguration { get; set; }
 
-        public DateTimeOffset BrandNow { get; set; }
+        public DateTimeOffset LicenseeNow { get; set; }
 
         public IList<BetActionData> PreviousActions { get; set; }
         public BetActionData ReferenceGameAction { get; set; }
@@ -69,14 +70,14 @@ namespace TGS.Services.Operations.Models
         public RoundStatus OldRoundStatus { get; set; }
         public RoundStatus NewRoundStatus { get; set; }
 
-        //public DateTimeOffset RoundCreatedOn =>
-        //    PreviousActions?.FirstOrDefault()?.RecordedOn ?? BrandNow;
+        public DateTimeOffset RoundCreatedOn =>
+            PreviousActions?.FirstOrDefault()?.RecordedOn ?? LicenseeNow;
 
-        //public DateTimeOffset ExternalRoundCreatedOn =>
-        //    PreviousActions?.FirstOrDefault()?.SentOn ?? BrandNow;
+        public DateTimeOffset ExternalRoundCreatedOn =>
+            PreviousActions?.FirstOrDefault()?.SentOn ?? LicenseeNow;
 
         public DateTimeOffset? RoundClosedOn => NewRoundStatus == RoundStatus.Closed ?
-            BrandNow :
+            LicenseeNow :
             (DateTimeOffset?)null;
 
         // set from TransactionData

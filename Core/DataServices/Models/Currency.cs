@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<ResellerCurrency> ResellerCurrencies { get; set; }
 
-        public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
+        public virtual ICollection<LicenseeCurrency> LicenseeCurrencies { get; set; }
 
         public virtual ICollection<GameProviderCurrency> GameProviderCurrencies { get; set; }
 

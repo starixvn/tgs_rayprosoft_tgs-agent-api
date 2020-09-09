@@ -37,8 +37,8 @@ namespace TGS.Services.Operations
                     ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode
                 },
                 PlayerCode = data.PlayerCode,
-                BrandId = cachedPlayer.BrandId,
-                BrandCode = cachedPlayer.BrandCode,
+                LicenseeId = cachedPlayer.LicenseeId,
+                LicenseeCode = cachedPlayer.LicenseeCode,
                 Status = cachedPlayer.Status,
                 PlayerType = cachedPlayer.Type,
                 PlayerUsername = cachedPlayer.Username,

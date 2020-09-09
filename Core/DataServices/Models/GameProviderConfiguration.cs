@@ -18,6 +18,6 @@ namespace TGS.Core.DataServices.Models
         public string ConfigurationData { get; set; }
         public bool IsDefault { get; set; }
 
-        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
+        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
     }
 }

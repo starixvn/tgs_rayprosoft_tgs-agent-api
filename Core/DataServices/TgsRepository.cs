@@ -19,7 +19,7 @@ namespace TGS.Core.DataServices
         DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
         DbSet<Language> ITgsRepository.Languages { get; set; }
-        DbSet<BrandGame> ITgsRepository.BrandGames { get; set; }
+        DbSet<LicenseeGame> ITgsRepository.LicenseeGames { get; set; }
         DbSet<LocalizedString> ITgsRepository.LocalizedStrings { get; set; }
         DbSet<Player> ITgsRepository.Players { get; set; }
         DbSet<Wallet> ITgsRepository.Wallets { get; set; }
@@ -27,12 +27,12 @@ namespace TGS.Core.DataServices
         DbSet<Whitelist> ITgsRepository.Whitelists { get; set; }
         DbSet<GameProviderCurrency> ITgsRepository.GameProviderCurrencies { get; set; }
         DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
-        DbSet<BrandCurrency> ITgsRepository.BrandCurrencies { get; set; }
-        DbSet<BrandLanguage> ITgsRepository.BrandBrandLanguages { get; set; }
-        DbSet<Brand> ITgsRepository.Brands { get; set; }
-        DbSet<BrandGameProviderConfiguration> ITgsRepository.BrandGameProviderConfigurations { get; set; }
+        DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
+        DbSet<LicenseeLanguage> ITgsRepository.LicenseeLicenseeLanguages { get; set; }
+        DbSet<Licensee> ITgsRepository.Licensees { get; set; }
+        DbSet<LicenseeGameProviderConfiguration> ITgsRepository.LicenseeGameProviderConfigurations { get; set; }
         DbSet<BetLimitGroup> ITgsRepository.BetLimitGroups { get; set; }
-        DbSet<BrandBetLimit> ITgsRepository.BrandBetLimits { get; set; }
+        DbSet<LicenseeBetLimit> ITgsRepository.LicenseeBetLimits { get; set; }
         DbSet<GameProviderBetLimit> ITgsRepository.GameProviderBetLimits { get; set; }
         DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
 
@@ -79,23 +79,23 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new ResellerCurrencyMap());
 
             modelBuilder.ApplyConfiguration(new ResellerLanguageMap());
-            modelBuilder.ApplyConfiguration(new BrandMap());
-            modelBuilder.ApplyConfiguration(new BrandGameMap());
-            modelBuilder.ApplyConfiguration(new BrandGameProviderConfigurationMap());
+            modelBuilder.ApplyConfiguration(new LicenseeMap());
+            modelBuilder.ApplyConfiguration(new LicenseeGameMap());
+            modelBuilder.ApplyConfiguration(new LicenseeGameProviderConfigurationMap());
             modelBuilder.ApplyConfiguration(new PlayerMap());
 
             modelBuilder.ApplyConfiguration(new WhitelistTypeMap());
             modelBuilder.ApplyConfiguration(new WalletTypeMap());
             modelBuilder.ApplyConfiguration(new SettingMap());
             modelBuilder.ApplyConfiguration(new LocalizedStringMap());
-            modelBuilder.ApplyConfiguration(new BrandCurrencyMap());
-            modelBuilder.ApplyConfiguration(new BrandLanguageMap());
+            modelBuilder.ApplyConfiguration(new LicenseeCurrencyMap());
+            modelBuilder.ApplyConfiguration(new LicenseeLanguageMap());
 
             modelBuilder.ApplyConfiguration(new GameProviderCurrencyMap());
             modelBuilder.ApplyConfiguration(new GameProviderLanguageMap());
 
             modelBuilder.ApplyConfiguration(new BetLimitGroupMap());
-            modelBuilder.ApplyConfiguration(new BrandBetLimitMap());
+            modelBuilder.ApplyConfiguration(new LicenseeBetLimitMap());
             modelBuilder.ApplyConfiguration(new GameProviderBetLimitMap());
 
             modelBuilder.ApplyConfiguration(new PlayerLoginRecordMap());

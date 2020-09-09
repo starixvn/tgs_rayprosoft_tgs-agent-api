@@ -28,6 +28,6 @@ namespace TGS.Core.DataServices.Models
 
         public bool HasTurnoverOnTieBet { get; set; }
 
-        public virtual ICollection<BrandGame> Brands { get; set; }
+        public virtual ICollection<LicenseeGame> Licensees { get; set; }
     }
 }

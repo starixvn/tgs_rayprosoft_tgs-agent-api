@@ -2,13 +2,13 @@
 
 namespace TGS.Core.DataServices.Models
 {
-    public class BrandGameProviderConfiguration
+    public class LicenseeGameProviderConfiguration
     {
         public Guid Id { get; set; }
 
-        public Guid BrandId { get; set; }
+        public Guid LicenseeId { get; set; }
 
-        public Brand Brand { get; set; }
+        public Licensee Licensee { get; set; }
         
         public string DefaultLanguageCode { get; set; }
 
@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Models
 
         public GameProvider GameProvider { get; set; }
 
-        public string BrandLogoUrl { get; set; }
+        public string LicenseeLogoUrl { get; set; }
 
         public string DesktopQueryString { get; set; }
 

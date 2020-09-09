@@ -3,18 +3,18 @@
     public enum RedisCacheType
     {
         Player,
-        Brand,
+        Licensee,
         Currencies,
         Languages,
         GameProvider,
         GameProviderIdByCode,
-        BrandGameProviderConfiguration,
+        LicenseeGameProviderConfiguration,
         GameProviderConfiguration,
         GameProviderLanguages,
         GameProviderCurrencies,
         GameProviderBetLimitCode,
         PlayerLoginRecords,
-        BrandGames,
+        LicenseeGames,
         Games
     }
 }

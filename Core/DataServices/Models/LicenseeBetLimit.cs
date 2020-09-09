@@ -2,14 +2,14 @@
 
 namespace TGS.Core.DataServices.Models
 {
-    public class BrandBetLimit
+    public class LicenseeBetLimit
     {
         public int BetLimitGroupId { get; set; }
 
         public BetLimitGroup BetLimitGroup { get; set; }
 
-        public Guid BrandId { get; set; }
+        public Guid LicenseeId { get; set; }
 
-        public Brand Brand { get; set; }
+        public Licensee Licensee { get; set; }
     }
 }
