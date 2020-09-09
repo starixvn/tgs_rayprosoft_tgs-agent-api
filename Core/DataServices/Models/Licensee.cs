@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class Brand : BaseEntity
+    public class Licensee : BaseEntity
     {
         public Status Status { get; set; }
 
@@ -32,15 +32,17 @@ namespace TGS.Core.DataServices.Models
 
         public string MobileTermsUrl { get; set; }
 
-        public virtual ICollection<BrandGame> Games { get; set; }
+        public virtual ICollection<Player> Players { get; set; }
 
-        public virtual ICollection<BrandCurrency> BrandCurrencies { get; set; }
+        public virtual ICollection<LicenseeGame> Games { get; set; }
 
-        public virtual ICollection<BrandLanguage> BrandLanguages { get; set; }
+        public virtual ICollection<LicenseeCurrency> LicenseeCurrencies { get; set; }
 
-        public virtual ICollection<BrandGameProviderConfiguration> BrandGameProviderConfigurations { get; set; }
+        public virtual ICollection<LicenseeLanguage> LicenseeLanguages { get; set; }
 
-        public virtual ICollection<BrandBetLimit> BetLimitGroups { get; set; }
+        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
+
+        public virtual ICollection<LicenseeBetLimit> BetLimitGroups { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
     }

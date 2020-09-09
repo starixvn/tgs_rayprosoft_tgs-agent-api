@@ -5,15 +5,15 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    internal class BrandMap : BaseConfiguration, IEntityTypeConfiguration<Brand>
+    internal class LicenseeMap : BaseConfiguration, IEntityTypeConfiguration<Licensee>
     {
-        void IEntityTypeConfiguration<Brand>.Configure(EntityTypeBuilder<Brand> builder)
+        void IEntityTypeConfiguration<Licensee>.Configure(EntityTypeBuilder<Licensee> builder)
         {
-            builder.ToTable("Brands", "dbo");
+            builder.ToTable("Licensees", "dbo");
             BaseConfigureProperties(builder);
 
             builder.HasOne(p => p.Reseller)
-                .WithMany(p => p.Brands)
+                .WithMany(p => p.Licensees)
                 .HasForeignKey(p => p.ResellerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -51,10 +51,15 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.MobileTermsUrl)
                 .HasColumnType(ColumnTypes.Nvarchar(512));
 
-            builder.HasMany(c => c.BrandGameProviderConfigurations)
-                .WithOne(c => c.Brand)
-                .HasForeignKey(c => c.BrandId)
+            builder.HasMany(c => c.LicenseeGameProviderConfigurations)
+                .WithOne(c => c.Licensee)
+                .HasForeignKey(c => c.LicenseeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Players)
+                .WithOne(c => c.Licensee)
+                .HasForeignKey(c => c.LicenseeId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

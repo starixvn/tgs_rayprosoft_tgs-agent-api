@@ -317,7 +317,7 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Brands",
+                name: "Licensees",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -343,10 +343,10 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Brands", x => x.Id)
+                    table.PrimaryKey("PK_Licensees", x => x.Id)
                         .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
-                        name: "FK_Brands_Resellers_ResellerId",
+                        name: "FK_Licensees_Resellers_ResellerId",
                         column: x => x.ResellerId,
                         principalSchema: "dbo",
                         principalTable: "Resellers",
@@ -436,160 +436,160 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandBetLimits",
+                name: "LicenseeBetLimits",
                 schema: "dbo",
                 columns: table => new
                 {
                     BetLimitGroupId = table.Column<int>(nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false)
+                    LicenseeId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandBetLimits", x => new { x.BrandId, x.BetLimitGroupId });
+                    table.PrimaryKey("PK_LicenseeBetLimits", x => new { x.LicenseeId, x.BetLimitGroupId });
                     table.ForeignKey(
-                        name: "FK_BrandBetLimits_BetLimitGroups_BetLimitGroupId",
+                        name: "FK_LicenseeBetLimits_BetLimitGroups_BetLimitGroupId",
                         column: x => x.BetLimitGroupId,
                         principalSchema: "dbo",
                         principalTable: "BetLimitGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BrandBetLimits_Brands_BrandId",
-                        column: x => x.BrandId,
+                        name: "FK_LicenseeBetLimits_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "Brands",
+                        principalTable: "Licensees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandCurrencies",
+                name: "LicenseeCurrencies",
                 schema: "dbo",
                 columns: table => new
                 {
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     CurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
-                    BrandCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false)
+                    LicenseeCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandCurrencies", x => new { x.BrandId, x.CurrencyCode });
+                    table.PrimaryKey("PK_LicenseeCurrencies", x => new { x.LicenseeId, x.CurrencyCode });
                     table.ForeignKey(
-                        name: "FK_BrandCurrencies_Brands_BrandId",
-                        column: x => x.BrandId,
-                        principalSchema: "dbo",
-                        principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BrandCurrencies_Currencies_CurrencyCode",
+                        name: "FK_LicenseeCurrencies_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
                         principalSchema: "dbo",
                         principalTable: "Currencies",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LicenseeCurrencies_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
+                        principalSchema: "dbo",
+                        principalTable: "Licensees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandGameProviderConfigurations",
+                name: "LicenseeGameProviderConfigurations",
                 schema: "dbo",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     DefaultLanguageCode = table.Column<string>(type: "nvarchar(6)", nullable: true),
                     GameProviderId = table.Column<Guid>(nullable: false),
-                    BrandLogoUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
+                    LicenseeLogoUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     DesktopQueryString = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     MobileQueryString = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     GameProviderConfigurationId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandGameProviderConfigurations", x => x.Id);
-                    table.UniqueConstraint("UK_BrandGameProviderConfigurations_BrandId_GameProviderId", x => new { x.BrandId, x.GameProviderId });
+                    table.PrimaryKey("PK_LicenseeGameProviderConfigurations", x => x.Id);
+                    table.UniqueConstraint("UK_LicenseeGameProviderConfigurations_LicenseeId_GameProviderId", x => new { x.LicenseeId, x.GameProviderId });
                     table.ForeignKey(
-                        name: "FK_BrandGameProviderConfigurations_Brands_BrandId",
-                        column: x => x.BrandId,
-                        principalSchema: "dbo",
-                        principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_BrandGameProviderConfigurations_Languages_DefaultLanguageCode",
+                        name: "FK_LicenseeGameProviderConfigurations_Languages_DefaultLanguageCode",
                         column: x => x.DefaultLanguageCode,
                         principalSchema: "dbo",
                         principalTable: "Languages",
                         principalColumn: "CultureCode",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_BrandGameProviderConfigurations_GameProviders_GameProviderId",
+                        name: "FK_LicenseeGameProviderConfigurations_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_BrandGameProviderConfigurations_GameProviderConfigurations_GameProviderId",
+                        name: "FK_LicenseeGameProviderConfigurations_GameProviderConfigurations_GameProviderId",
                         column: x => x.GameProviderId,
                         principalSchema: "dbo",
                         principalTable: "GameProviderConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_LicenseeGameProviderConfigurations_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
+                        principalSchema: "dbo",
+                        principalTable: "Licensees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandGames",
+                name: "LicenseeGames",
                 schema: "dbo",
                 columns: table => new
                 {
                     GameId = table.Column<Guid>(nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false)
+                    LicenseeId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandGames", x => new { x.BrandId, x.GameId });
+                    table.PrimaryKey("PK_LicenseeGames", x => new { x.LicenseeId, x.GameId });
                     table.ForeignKey(
-                        name: "FK_BrandGames_Brands_BrandId",
-                        column: x => x.BrandId,
-                        principalSchema: "dbo",
-                        principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BrandGames_Games_GameId",
+                        name: "FK_LicenseeGames_Games_GameId",
                         column: x => x.GameId,
                         principalSchema: "dbo",
                         principalTable: "Games",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LicenseeGames_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
+                        principalSchema: "dbo",
+                        principalTable: "Licensees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandLanguages",
+                name: "LicenseeLanguages",
                 schema: "dbo",
                 columns: table => new
                 {
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
-                    BrandLanguageCode = table.Column<string>(type: "nvarchar(6)", nullable: false)
+                    LicenseeLanguageCode = table.Column<string>(type: "nvarchar(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandLanguages", x => new { x.BrandId, x.CultureCode });
+                    table.PrimaryKey("PK_LicenseeLanguages", x => new { x.LicenseeId, x.CultureCode });
                     table.ForeignKey(
-                        name: "FK_BrandLanguages_Brands_BrandId",
-                        column: x => x.BrandId,
-                        principalSchema: "dbo",
-                        principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BrandLanguages_Languages_CultureCode",
+                        name: "FK_LicenseeLanguages_Languages_CultureCode",
                         column: x => x.CultureCode,
                         principalSchema: "dbo",
                         principalTable: "Languages",
                         principalColumn: "CultureCode",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LicenseeLanguages_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
+                        principalSchema: "dbo",
+                        principalTable: "Licensees",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -601,11 +601,10 @@ namespace TGS.Core.DataServices.Migrations
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     ExternalId = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    IpAddress = table.Column<string>(type: "nvarchar(64)", nullable: false),
                     CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     DefaultWalletId = table.Column<Guid>(nullable: false),
                     DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastActiveOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Status = table.Column<int>(nullable: false),
@@ -627,18 +626,18 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Players_Brands_BrandId",
-                        column: x => x.BrandId,
-                        principalSchema: "dbo",
-                        principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Players_Languages_CultureCode",
                         column: x => x.CultureCode,
                         principalSchema: "dbo",
                         principalTable: "Languages",
                         principalColumn: "CultureCode",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Players_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
+                        principalSchema: "dbo",
+                        principalTable: "Licensees",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -648,7 +647,6 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    BrandId = table.Column<Guid>(nullable: true),
                     LicenseeId = table.Column<Guid>(nullable: true),
                     ResellerId = table.Column<Guid>(nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(64)", nullable: false),
@@ -664,10 +662,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_Whitelists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Whitelists_Brands_BrandId",
-                        column: x => x.BrandId,
+                        name: "FK_Whitelists_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "Brands",
+                        principalTable: "Licensees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -686,9 +684,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
                     PlatformType = table.Column<short>(type: "smallint", nullable: false),
+                    IpAddress = table.Column<string>(nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ExpiredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
@@ -697,10 +696,10 @@ namespace TGS.Core.DataServices.Migrations
                     table.PrimaryKey("PK_PlayerLoginRecords", x => x.Id)
                         .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
-                        name: "FK_PlayerLoginRecords_Brands_BrandId",
-                        column: x => x.BrandId,
+                        name: "FK_PlayerLoginRecords_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "Brands",
+                        principalTable: "Licensees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -745,48 +744,6 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BrandBetLimits_BetLimitGroupId",
-                schema: "dbo",
-                table: "BrandBetLimits",
-                column: "BetLimitGroupId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BrandCurrencies_CurrencyCode",
-                schema: "dbo",
-                table: "BrandCurrencies",
-                column: "CurrencyCode");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BrandGameProviderConfigurations_DefaultLanguageCode",
-                schema: "dbo",
-                table: "BrandGameProviderConfigurations",
-                column: "DefaultLanguageCode");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BrandGameProviderConfigurations_GameProviderId",
-                schema: "dbo",
-                table: "BrandGameProviderConfigurations",
-                column: "GameProviderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BrandGames_GameId",
-                schema: "dbo",
-                table: "BrandGames",
-                column: "GameId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BrandLanguages_CultureCode",
-                schema: "dbo",
-                table: "BrandLanguages",
-                column: "CultureCode");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Brands_ResellerId",
-                schema: "dbo",
-                table: "Brands",
-                column: "ResellerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GameProviderBetLimits_BetLimitGroupId",
                 schema: "dbo",
                 table: "GameProviderBetLimits",
@@ -829,16 +786,58 @@ namespace TGS.Core.DataServices.Migrations
                 column: "GameProviderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LicenseeBetLimits_BetLimitGroupId",
+                schema: "dbo",
+                table: "LicenseeBetLimits",
+                column: "BetLimitGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LicenseeCurrencies_CurrencyCode",
+                schema: "dbo",
+                table: "LicenseeCurrencies",
+                column: "CurrencyCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LicenseeGameProviderConfigurations_DefaultLanguageCode",
+                schema: "dbo",
+                table: "LicenseeGameProviderConfigurations",
+                column: "DefaultLanguageCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LicenseeGameProviderConfigurations_GameProviderId",
+                schema: "dbo",
+                table: "LicenseeGameProviderConfigurations",
+                column: "GameProviderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LicenseeGames_GameId",
+                schema: "dbo",
+                table: "LicenseeGames",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LicenseeLanguages_CultureCode",
+                schema: "dbo",
+                table: "LicenseeLanguages",
+                column: "CultureCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Licensees_ResellerId",
+                schema: "dbo",
+                table: "Licensees",
+                column: "ResellerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LocalizedStrings_LanguageCultureCode",
                 schema: "dbo",
                 table: "LocalizedStrings",
                 column: "LanguageCultureCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerLoginRecords_BrandId",
+                name: "IX_PlayerLoginRecords_LicenseeId",
                 schema: "dbo",
                 table: "PlayerLoginRecords",
-                column: "BrandId");
+                column: "LicenseeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerLoginRecords_PlayerCode",
@@ -853,16 +852,16 @@ namespace TGS.Core.DataServices.Migrations
                 column: "BetLimitGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Players_BrandId",
-                schema: "dbo",
-                table: "Players",
-                column: "BrandId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Players_CultureCode",
                 schema: "dbo",
                 table: "Players",
                 column: "CultureCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Players_LicenseeId",
+                schema: "dbo",
+                table: "Players",
+                column: "LicenseeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ResellerCurrencies_CurrencyCode",
@@ -895,10 +894,10 @@ namespace TGS.Core.DataServices.Migrations
                 column: "PlayerCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Whitelists_BrandId",
+                name: "IX_Whitelists_LicenseeId",
                 schema: "dbo",
                 table: "Whitelists",
-                column: "BrandId");
+                column: "LicenseeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Whitelists_ResellerId",
@@ -906,73 +905,56 @@ namespace TGS.Core.DataServices.Migrations
                 table: "Whitelists",
                 column: "ResellerId");
 
+            
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
             
             // TYPE
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.TYPE.IntValuesType.sql");
+                string.Format(Consts.TypeSqlForamt, "IntValuesType"));
 
             // SP
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderIdByCode.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderIdByCode"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetCurrenciesByInternalCode.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetCurrenciesByInternalCode"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetCurrenciesByExternalCode.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetCurrenciesByExternalCode"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_GetPlayerForCache"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Wallet_GetBalance.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_GetBalance"));
             migrationBuilder.SqlResource(assembly,
-               "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeForCache"));
             migrationBuilder.SqlResource(assembly,
-               "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGameProviderConfigurationForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeGameProviderConfigurationForCache"));
             migrationBuilder.SqlResource(assembly,
-               "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderForCache"));
             migrationBuilder.SqlResource(assembly,
-               "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderConfigurationForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderConfigurationForCache"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetLanguagesByInternalCode.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetLanguagesByInternalCode"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetLanguagesByExternalCode.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetLanguagesByExternalCode"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGameProviderBetLimitCode.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderBetLimitCode"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Player_GetPlayerLoginRecords.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_GetPlayerLoginRecords"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Brand_GetBrandGamesForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeGamesForCache"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_GameProvider_GetGamesForCache.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetRoundByExternalRoundId"));
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.SqlScripts.SP.usp_Round_GetRoundByExternalRoundId.sql");
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));    
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionsInSameRound"));
 
             #endregion Store Procedure
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "BrandBetLimits",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BrandCurrencies",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BrandGameProviderConfigurations",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BrandGames",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BrandLanguages",
-                schema: "dbo");
-
             migrationBuilder.DropTable(
                 name: "GameProviderBetLimits",
                 schema: "dbo");
@@ -983,6 +965,26 @@ namespace TGS.Core.DataServices.Migrations
 
             migrationBuilder.DropTable(
                 name: "GameProviderLanguages",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "LicenseeBetLimits",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "LicenseeCurrencies",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "LicenseeGameProviderConfigurations",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "LicenseeGames",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "LicenseeLanguages",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -1042,11 +1044,11 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Brands",
+                name: "Languages",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Languages",
+                name: "Licensees",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

@@ -48,7 +48,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithOne(p => p.Language)
                 .HasForeignKey(p => p.CultureCode);
 
-            builder.HasMany(l => l.BrandLanguages)
+            builder.HasMany(l => l.LicenseeLanguages)
                 .WithOne(bl => bl.Language)
                 .HasForeignKey(bl => bl.CultureCode);
 
@@ -56,7 +56,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithOne(gpl => gpl.Language)
                 .HasForeignKey(gpl => gpl.CultureCode);
 
-            builder.HasMany(l => l.BrandGameProviderConfigurations)
+            builder.HasMany(l => l.LicenseeGameProviderConfigurations)
                 .WithOne(bgpc => bgpc.DefaultLanguage)
                 .HasForeignKey(bgpc => bgpc.DefaultLanguageCode);
         }

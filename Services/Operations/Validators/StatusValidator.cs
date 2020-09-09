@@ -8,7 +8,7 @@ namespace TGS.Services.Operations.Validators
 {
     public interface IStatusValidator
     {
-        Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] status);
+        Task ThrowIfLicenseeStatusIsNotOneOfAsync(Guid licenseeId, params Status[] status);
 
         Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameProviderConfigurationId, params Status[] status);
 
@@ -17,36 +17,36 @@ namespace TGS.Services.Operations.Validators
 
     public sealed class StatusValidator : IStatusValidator
     {
-        private readonly IBrandOperations _brandOperations;
+        private readonly ILicenseeOperations _licenseeOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
 
         public StatusValidator(
-            IBrandOperations brandOperations,
+            ILicenseeOperations licenseeOperations,
             IGameProviderOperations gameProviderOperations)
         {
-            _brandOperations = brandOperations;
+            _licenseeOperations = licenseeOperations;
             _gameProviderOperations = gameProviderOperations;
         }
 
-        async Task IStatusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] status)
+        async Task IStatusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(Guid LicenseeId, params Status[] status)
         {
             EnsureStatus(status);
 
-            var brandStatus = await _brandOperations.GetBrandStatusAsync(brandId);
+            var licenseeStatus = await _licenseeOperations.GetLicenseeStatusAsync(LicenseeId);
 
-            if (brandStatus == null)
+            if (licenseeStatus == null)
             {
-                throw new InvalidStatusException($"Brand doesn't exist");
+                throw new InvalidStatusException($"Licensee doesn't exist");
             }
 
-            if (!status.Contains(Status.Maintenance) && brandStatus == Status.Maintenance)
+            if (!status.Contains(Status.Maintenance) && licenseeStatus == Status.Maintenance)
             {
-                throw new BrandUnderMaintenanceException();
+                throw new LicenseeUnderMaintenanceException();
             }
 
-            if (!status.Contains(brandStatus.Value))
+            if (!status.Contains(licenseeStatus.Value))
             {
-                throw new InvalidStatusException($"Brand doesn't exist or is not active");
+                throw new InvalidStatusException($"Licensee doesn't exist or is not active");
             }
         }
 

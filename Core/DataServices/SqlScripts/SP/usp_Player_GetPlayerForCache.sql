@@ -17,7 +17,7 @@ BEGIN
     as
     (
         SELECT 
-            p.BrandId,
+            p.LicenseeId,
 	        p.ExternalId,
 	        p.Type,
 	        p.Username,
@@ -34,13 +34,12 @@ BEGIN
         WHERE p.PlayerCode = @playerCode
     )
     SELECT 
-        player.*,
-        --brand.ProxyWalletConfigurationId as [BrandProxyWalletConfigurationId],
-	    brand.Code as [BrandCode],
-	    wallet.CurrencyCode as [DefaultWalletCurrencyCode],
-	    wallet.ExternalCurrencyCode
-    FROM player 
-	JOIN dbo.[Brands] brand on player.BrandId=brand.Id 
-	JOIN dbo.[Wallets] wallet on player.DefaultWalletId=wallet.Id
+        p.*,
+	    l.Code as [LicenseeCode],
+	    w.CurrencyCode as [DefaultWalletCurrencyCode],
+	    w.ExternalCurrencyCode
+    FROM player p
+	JOIN dbo.[Licensees] l on p.LicenseeId = l.Id 
+	JOIN dbo.[Wallets] w on p.DefaultWalletId = w.Id
 END
 GO

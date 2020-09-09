@@ -55,7 +55,7 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     ExternalCreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     ExternalClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     BetAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
@@ -93,11 +93,11 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     SentOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     PlayerIp = table.Column<string>(type: "varchar(128)", nullable: false),
-                    BrandId = table.Column<Guid>(nullable: false),
+                    LicenseeId = table.Column<Guid>(nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     GameActionGroupId = table.Column<Guid>(nullable: true),
                     ExternalGameActionGroupId = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
+                    Balance = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     BetType = table.Column<string>(type: "nvarchar(128)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(4000)", nullable: true),
                     StoredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()")
@@ -173,13 +173,13 @@ namespace TGS.Core.DataServices.Bet.Migrations
             
             // SP
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.Bet.SqlScripts.SP.usp_Round_GetRoundByExternalRoundId.sql");
-
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetRoundByExternalRoundId"));       
             migrationBuilder.SqlResource(assembly,
-                "TGS.Core.DataServices.Bet.SqlScripts.SP.usp_GameAction_GetGameActionsInSameRound.sql");
-            
-            #endregion
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));      
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionsInSameRound"));
 
+            #endregion
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

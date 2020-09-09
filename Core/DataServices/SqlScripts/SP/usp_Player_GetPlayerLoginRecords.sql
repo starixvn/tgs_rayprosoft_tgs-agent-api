@@ -16,7 +16,7 @@ BEGIN
     SET NOCOUNT ON
 
     SELECT 
-        [BrandId], [PlatformType], [CreatedOn], [ExpiredOn]
+        [LicenseeId], [PlatformType], [CreatedOn], [ExpiredOn]
     FROM dbo.[PlayerLoginRecords]
     WHERE [PlayerCode] = @playerCode
     AND [CreatedOn] >= @from

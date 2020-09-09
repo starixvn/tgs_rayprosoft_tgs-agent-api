@@ -5,8 +5,8 @@ namespace TGS.Services.Operations.Models.Data
 {
     internal record PlayerRelatedData
     {
-        internal Guid BrandId { get; init; }
-        public string BrandCode { get; init; }
+        internal Guid LicenseeId { get; init; }
+        public string LicenseeCode { get; init; }
         public string PlayerCode { get; init; }
         public PlayerStatus Status { get; init; }
         public WalletData Wallet { get; init; }

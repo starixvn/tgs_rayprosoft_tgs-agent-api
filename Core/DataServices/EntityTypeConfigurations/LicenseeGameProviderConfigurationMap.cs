@@ -5,16 +5,16 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    internal class BrandGameProviderConfigurationMap : IEntityTypeConfiguration<BrandGameProviderConfiguration>
+    internal class LicenseeGameProviderConfigurationMap : IEntityTypeConfiguration<LicenseeGameProviderConfiguration>
     {
-        void IEntityTypeConfiguration<BrandGameProviderConfiguration>.Configure(EntityTypeBuilder<BrandGameProviderConfiguration> builder)
+        void IEntityTypeConfiguration<LicenseeGameProviderConfiguration>.Configure(EntityTypeBuilder<LicenseeGameProviderConfiguration> builder)
         {
-            builder.ToTable("BrandGameProviderConfigurations", "dbo");
+            builder.ToTable("LicenseeGameProviderConfigurations", "dbo");
             builder.HasKey(c => c.Id);
-            builder.HasAlternateKey(c => new {c.BrandId, c.GameProviderId})
-                .HasName("UK_BrandGameProviderConfigurations_BrandId_GameProviderId");
+            builder.HasAlternateKey(c => new {c.LicenseeId, c.GameProviderId})
+                .HasName("UK_LicenseeGameProviderConfigurations_LicenseeId_GameProviderId");
 
-            builder.Property(c => c.BrandLogoUrl)
+            builder.Property(c => c.LicenseeLogoUrl)
                 .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.DesktopQueryString)

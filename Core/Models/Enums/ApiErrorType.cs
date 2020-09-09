@@ -3,9 +3,7 @@
     public enum ApiErrorType
     {
         None = 0,
-        InvalidOrExpiredGameProviderToken = 10,
-        InvalidOrExpiredPlayerToken = 11,
-        InvalidOrExpiredBrandToken = 12,
+        InvalidOrExpiredLicenseeToken = 12,
         InvalidOrExpiredResellerToken = 16,
         InvalidOrExpiredJwtToken = 17,
         InvalidTokenScope = 19,

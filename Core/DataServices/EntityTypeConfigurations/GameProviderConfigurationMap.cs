@@ -43,7 +43,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.IsDefault)
                 .IsRequired();
 
-            builder.HasMany(c => c.BrandGameProviderConfigurations)
+            builder.HasMany(c => c.LicenseeGameProviderConfigurations)
                 .WithOne(c => c.GameProviderConfiguration)
                 .HasForeignKey(c => c.GameProviderId)
                 .OnDelete(DeleteBehavior.Restrict);

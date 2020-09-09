@@ -28,11 +28,11 @@ namespace TGS.Core.DataServices.Bet.Models
         public DateTimeOffset RecordedOn { get; set; }
         public DateTimeOffset? SentOn { get; set; }
         public string PlayerIp { get; set; }
-        public Guid? BrandId { get; set; }
-        public decimal? Amount { get; set; }
+        public Guid LicenseeId { get; set; }
+        public decimal Amount { get; set; }
         public Guid? GameActionGroupId { get; set; }
         public string ExternalGameActionGroupId { get; set; }
-        public decimal? Balance { get; set; }
+        public decimal Balance { get; set; }
         public string BetType { get; set; }
         public string Description { get; set; }
     }

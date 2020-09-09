@@ -1,38 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.HttpOverrides;
 using TGS.Core.Models;
 using TGS.Infrastructures.Extensions;
 using TGS.Services.Operations.CodeMappers;
 
 namespace TGS.Services.Operations
 {
-    public interface IBrandGameProviderOperations
+    public interface ILicenseeGameProviderOperations
     {
-        Task<string> MapCultureAsync(Guid gameProviderId, Guid brandId, string cultureCode);
+        Task<string> MapCultureAsync(Guid gameProviderId, Guid licenseeId, string cultureCode);
     }
 
-    public sealed class BrandGameProviderOperations : IBrandGameProviderOperations
+    public sealed class LicenseeGameProviderOperations : ILicenseeGameProviderOperations
     {
-        private readonly IBrandOperations _brandOperations;
+        private readonly ILicenseeOperations _licenseeOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderLanguageCodeMapper _languageCodeMapper;
 
-        public BrandGameProviderOperations(
-            IBrandOperations brandOperations,
+        public LicenseeGameProviderOperations(
+            ILicenseeOperations licenseeOperations,
             IGameProviderOperations gameProviderOperations,
             IGameProviderLanguageCodeMapper languageCodeMapper)
         {
-            _brandOperations = brandOperations;
+            _licenseeOperations = licenseeOperations;
             _gameProviderOperations = gameProviderOperations;
             _languageCodeMapper = languageCodeMapper;
         }
 
-        async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId, string cultureCode)
+        async Task<string> ILicenseeGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid LicenseeId, string cultureCode)
         {
             var internalCode = cultureCode;
 
@@ -41,7 +36,7 @@ namespace TGS.Services.Operations
                 var supported = await _gameProviderOperations.LanguageSupportedAsync(gameProviderId, cultureCode);
                 if (!supported)
                 {
-                    var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                    var bgpc = await _licenseeOperations.GetLicenseeGameProviderConfigurationAsync(LicenseeId, gameProviderId);
                     internalCode = bgpc?.DefaultLanguageCode;
                 }
             }
