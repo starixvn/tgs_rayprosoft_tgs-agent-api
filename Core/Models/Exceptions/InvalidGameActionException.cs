@@ -7,13 +7,13 @@ namespace TGS.Core.Models.Exceptions
     {
         public InvalidGameActionErrorCode ErrorCode { get; } = InvalidGameActionErrorCode.None;
 
-        public InvalidGameActionException(string message, InvalidGameActionErrorCode errorCode = InvalidGameActionErrorCode.None) : base($"Invalid game action: {message}")
+        public InvalidGameActionException(string message, InvalidGameActionErrorCode errorCode = InvalidGameActionErrorCode.None) : base(message)
         {
             ErrorCode = errorCode;
         }
 
         public InvalidGameActionException(string message, Exception ex, InvalidGameActionErrorCode errorCode = InvalidGameActionErrorCode.None) : 
-            base($"Invalid game action: {message}", ex)
+            base(message, ex)
         {
             ErrorCode = errorCode;
         }

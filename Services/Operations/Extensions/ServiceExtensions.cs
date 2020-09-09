@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Services.Operations.Bets;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
@@ -10,8 +11,11 @@ namespace TGS.Services.Operations.Extensions
 {
     public static class ServiceExtensions
     {
+        /// <summary>
+        /// Dependency Injection of Operations, need to add dependency by using AddInfrastructures in Infrastructures project
+        /// </summary>
         public static IServiceCollection AddOperations(this IServiceCollection services)
-        {
+        {            
             #region Code Mappers
 
             services.AddSingleton<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();

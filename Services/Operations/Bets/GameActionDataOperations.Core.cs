@@ -13,7 +13,7 @@ using TGS.Infrastructures.Extensions;
 using TGS.Services.Operations.Models;
 using TGS.Services.Operations.Models.Data;
 
-namespace TGS.Services.Operations
+namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
@@ -27,6 +27,8 @@ namespace TGS.Services.Operations
             var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
 
             // TODO: validate if place bet cap amount is exceed
+
+            var licenseeTimeZoneId = await _licenseeOperations.GetTimeZoneByBrandIdAsync(cachedPlayer.LicenseeId);
 
             var playerRelatedData = new PlayerRelatedData
             {
@@ -44,6 +46,7 @@ namespace TGS.Services.Operations
                 PlayerUsername = cachedPlayer.Username,
                 PlayerExternalId = cachedPlayer.ExternalId,
                 ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode,
+                LicenseeTimeZoneId = licenseeTimeZoneId
                 //PlayerIp = data..Ip
             };
 
@@ -96,12 +99,21 @@ namespace TGS.Services.Operations
             ThrowIfHaveNoRequiredIds(s);
             ValidateAmounts(s);
 
+            //s.BrandNow = _timeZoneManager.ToLocal(s.BrandTimeZoneId, DateTimeOffset.UtcNow);
+
             s = await FillRoundDataAsync(s);
             s = GetGame(s);
-            s = await GetPreviousGameActionsAsync(s);
+            var (st, r) = await GetAndValidatePreviousActionsAsync(s);
+            if (r != null)
+                return r;
+
+            s = st;
+
+            ThrowIfReferenceGameActionOrRoundIsNotFound(s);
+
+            s = await FillEmptyDataAsync(s);
 
             //var ga = await SaveDatabaseRecordsAsync(s);
-
 
             return null;
         }
@@ -111,7 +123,9 @@ namespace TGS.Services.Operations
             var roundData = await GetRoundByExternalRoundIdAsync(s.Repo, s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId);
             if (s.MustHaveExistingRound && roundData == null)
             {
-                throw new InvalidGameActionException($"Cannot find expected round with id={s.ExternalRoundId}");
+                throw new InvalidGameActionException(
+                    $"Cannot find expected round with id = {s.ExternalRoundId}",
+                    InvalidGameActionErrorCode.RoundNotFound);
             }
 
             s.InternalRoundId = roundData.RoundId;
@@ -140,10 +154,12 @@ namespace TGS.Services.Operations
             return s;
         }
 
-        private async Task<GameActionState> GetPreviousGameActionsAsync(GameActionState s)
+        private async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(GameActionState s)
         {
             if (!ShouldGetPreviousActions(s))
-                return s;
+            {
+                return (s, null);
+            }
 
             var repo = s.Repo;
             var gameProviderConfigurationId = s.GameProviderConfigurationId;
@@ -156,11 +172,10 @@ namespace TGS.Services.Operations
             if (actionsData.Length == 0 && s.HasExtRefTransactionId)
             {
                 await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repo, externalRoundId, s.ExternalTransactionReferenceId);
-                return s;
+                return (s, null);
             }
 
             var (refData, refGameActionInternalId, amount) = GetReferencedActionAndActualAmount(s, actionsData);
-            var game = GetGameViaReferencedGameAction(s, refData);
 
             var dict = actionsData
                             .Select(act => new BetActionData
@@ -179,7 +194,7 @@ namespace TGS.Services.Operations
                                 Type = act.Type,
                                 RecordedOn = act.GameActionRecordedOn,
                                 SentOn = act.GameActionSentOn,
-                                GameName = game.Name,
+                                GameName = s.Game.Name,
                                 GameProviderCode = s.GameProviderCode,
                                 BetType = act.BetType,
                                 BetId = act.BetId,
@@ -193,14 +208,20 @@ namespace TGS.Services.Operations
             s.Amount = amount;
             s.RefGameActionInternalId = refGameActionInternalId;
             s.ReferenceGameAction = refGameAction;
-            s.GameId = refData.GameId;
-            s.Game = game;
-            s.InternalRoundId = refData.RoundId;
             s.BetId = refData.BetId;
-            s.OldRoundStatus = refData.RoundStatus;
             s.PreviousActions = actions;
 
-            return s;
+            if (s.InternalRoundId == null)
+            {
+                s.InternalRoundId = refData.RoundId;
+                s.OldRoundStatus = refData.RoundStatus;
+            }
+
+            var r = ValidateReferenceAction(s);
+
+            s.ValidPreviousActions = GetValidatePreviousActions(actions);
+
+            return (s, r);
         }
 
         private static (IList<BetActionData>, BetActionData) GetPreviousActions(Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
@@ -229,6 +250,15 @@ namespace TGS.Services.Operations
             }
 
             return (actions.AsReadOnly(), refGameAction);
+        }
+
+        private IList<BetActionData> GetValidatePreviousActions(IList<BetActionData> actions)
+        {
+            var allCancelledIdsInTheRound = actions
+                .Where(r => r.Type == GameActionType.CancelTransaction && r.Reference != null)
+                .Select(r => r.Reference.Id).ToHashSet();
+
+            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToList().AsReadOnly(); 
         }
 
         private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(GameActionState s, SameRoundActionData[] actionsData)
@@ -277,12 +307,7 @@ namespace TGS.Services.Operations
                    s.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.PlaceBet) ||
                    !BypassPreviousActionGameTypes.Contains(s.Game.Type);
         }
-
-        private static CachedGame GetGameViaReferencedGameAction(GameActionState s, SameRoundActionData refData)
-        {
-            return s.Game ?? s.GameProviderGames.FirstOrDefault(g => g.Id == refData.GameId);
-        }
-
+                
         private static bool GetGameActionIsCancelled(GameActionType type, bool isReference)
         {
             if (type != GameActionType.CancelTransaction)
@@ -297,6 +322,30 @@ namespace TGS.Services.Operations
             }
 
             return true;
+        }
+
+        private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId)
+        {
+            return new()
+            {
+                TransactionResult = new()
+                {
+                    ExternalTransactionId = externalTransactionId,
+                    InternalTransactionId = gameActionId,
+                    IsDuplicate = true
+                }
+            };
+        }
+
+        private async Task<GameActionState> FillEmptyDataAsync(GameActionState s)
+        {
+            s.LicenseeNow = _timeZoneManager.ToLocal(s.PlayerData.LicenseeTimeZoneId, DateTimeOffset.UtcNow);
+            //s.NewRoundStatus = _roundStatusManager.GetStatus(
+            //    s.AutoCloseRound, s.RoundClosed, s.InternalRoundId ?? Guid.Empty, s.OldRoundStatus, s.GameActionType, s.RefGameAction, s.PreviousActions, validPreviousActions);
+
+            
+
+            return s;
         }
     }
 }

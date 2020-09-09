@@ -51,14 +51,21 @@ namespace TGS.Services.Operations.Models
 
         public PlayerRelatedData PlayerData { get; init; }
         public CachedGame[] GameProviderGames { get; init; }
-        public string LicenseeTimeZoneId { get; init; }
 
         public Guid? BatchId { get; init; }
         //public bool AllowSettlementWithDifferentGameProviderConfiguration { get; set; }
 
         public DateTimeOffset LicenseeNow { get; set; }
 
+        /// <summary>
+        /// all game actions in the same round
+        /// </summary>
         public IList<BetActionData> PreviousActions { get; set; }
+
+        /// <summary>
+        /// game actions except that is cancelled in the same round
+        /// </summary>
+        public IList<BetActionData> ValidPreviousActions { get; set; }       
         public BetActionData ReferenceGameAction { get; set; }
         //public BetValuesResult BetValueResult { get; set; }
         public Guid GameId { get; set; }
@@ -103,11 +110,9 @@ namespace TGS.Services.Operations.Models
         public bool ForceGetPreviousActions { get; init; }
         public bool FreeBetAsSingleRound { get; init; }
 
-        //public bool SkipExistingGameActionCheck { get; set; }
         //public string[] ForceCalculateTurnoverOnTieBetTypes { get; }
         //internal OppositeBetPatterns OppositeBetPatterns { get; set; }
         //internal bool AllowDuplicateTransactionIdAtDifferentRound { get; set; }
-        //internal bool FreeBetAsSingleRound { get; set; }
         //internal List<BusEvent> Events { get; set; }
     }
 }

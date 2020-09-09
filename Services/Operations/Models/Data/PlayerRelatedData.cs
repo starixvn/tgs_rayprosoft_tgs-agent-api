@@ -15,5 +15,6 @@ namespace TGS.Services.Operations.Models.Data
         public PlayerTypes PlayerType { get; init; }
         public string ExternalCurrencyCode { get; init; }
         public string PlayerIp { get; init; }
+        public string LicenseeTimeZoneId { get; init; }
     }
 }
