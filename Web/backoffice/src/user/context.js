@@ -34,7 +34,8 @@ export const Provider = ({ value = initState(), children }) => {
 }
 
 export const useAuth = () => {
-  let { set } = useContext(Store)
+  let context = useContext(Store)
+  let { set } = context
   let history = useHistory()
   let location = useLocation()
   let DefaultRedirectState = { from: { pathname: "/" } }
