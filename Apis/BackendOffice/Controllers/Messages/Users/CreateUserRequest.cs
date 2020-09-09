@@ -9,6 +9,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
         public string Name { get; set; }
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
+        public string TimeZone { get; set; }
         public Guid RoleId { get; set; }
         public Guid DepartmentId { get; set; }
         public UserStatus Status { get; set; }

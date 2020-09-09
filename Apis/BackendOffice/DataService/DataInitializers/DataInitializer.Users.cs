@@ -31,7 +31,6 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                 Password = passwordHash,
                 Salt = salt,
                 Name = userName,
-                Email = $"{userName}@rayprosoft.tw",
                 ResellerId = resellerId,
                 Status = status,
                 TimeZone = DefaultTimeZone,

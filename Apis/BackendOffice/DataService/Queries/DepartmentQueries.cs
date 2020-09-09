@@ -30,6 +30,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
         Task<Department> IDepartmentQueries.GetDepartmentByIdAsync(Guid departmentId)
         {
             return _repository.Departments
+                .Include(p => p.Users)
                 .FirstOrDefaultAsync(a => a.Id == departmentId);
         }
 

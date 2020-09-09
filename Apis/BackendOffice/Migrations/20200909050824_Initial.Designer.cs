@@ -10,7 +10,7 @@ using TGS.Apis.BackendOffice.DataService;
 namespace TGS.Apis.BackendOffice.Migrations
 {
     [DbContext(typeof(BackendOfficeRepository))]
-    [Migration("20200907035123_Initial")]
+    [Migration("20200909050824_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -144,9 +144,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("BrandId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -157,15 +154,14 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<Guid>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
-
                     b.Property<string>("LastLoginIp")
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<DateTimeOffset?>("LastLoginTime")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("LicenseeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
