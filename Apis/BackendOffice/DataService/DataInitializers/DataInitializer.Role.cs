@@ -41,7 +41,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             Guid IRole.Id => new Guid("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44B");
             string IRole.Name => "產品經理";
             string IRole.Description => "It is used for brands.";
-            RoleType IRole.RoleType => RoleType.Brand;
+            RoleType IRole.RoleType => RoleType.Licensee;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
     {
         Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByIdAsync(Guid userId);
-        IQueryable<User> GetUseQueries();
+        IQueryable<User> GetUserQueries();
         Task<bool> UsernameExistsAsync(string username);
     }
 
@@ -24,7 +24,7 @@ namespace TGS.Apis.BackendOffice.DataService.Queries
             _repository = repository;
         }
 
-        IQueryable<User> IUserQueries.GetUseQueries()
+        IQueryable<User> IUserQueries.GetUserQueries()
         {
             return _repository.Users
                 .Where(p => p.Status != UserStatus.Archived);

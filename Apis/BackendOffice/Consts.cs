@@ -10,7 +10,8 @@
             public static string UsernameKey = "Usernme";
             public static string RolenameKey = "Rolename";
             public static string ResellerKey = "Reseller";
-            public static string BrandKey = "Brand";
+            public static string LicenseeKey = "Licensee";
+            public static string PortalKey = "Portal";
         }
     }
 }
