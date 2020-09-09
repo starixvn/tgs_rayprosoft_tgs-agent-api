@@ -112,19 +112,18 @@ namespace BackendOffice.UnitTests.Controllers
                 ConfirmPassword = password
             };
 
-            _userQueriesMock.Setup(p => p.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
+            _userQueriesMock.Setup(s => s.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
                 .Returns(Task.FromResult(false));
 
-            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
                 .Returns(Task.FromResult(new Role()));
 
-            _departmentQueriesMock.Setup(p => p.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+            _departmentQueriesMock.Setup(s => s.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
                 .Returns(Task.FromResult(new Department()));
-
 
             var response = await _controller.CreateUserAsync(request);
             response.Valid.Should().BeTrue();
-            _userCommandsMock.Verify(p => p.CreateUserAsync(It.Is<User>(p =>
+            _userCommandsMock.Verify(s => s.CreateUserAsync(It.Is<User>(p =>
                 p.Name == request.Name &&
                 p.Username == request.Username &&
                 p.RoleId == request.RoleId &&
@@ -145,19 +144,19 @@ namespace BackendOffice.UnitTests.Controllers
                 Status = UserStatus.Enabled
             };
 
-            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+            _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
 
-            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
                 .Returns(Task.FromResult(new Role()));
 
-            _departmentQueriesMock.Setup(p => p.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+            _departmentQueriesMock.Setup(s => s.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
                 .Returns(Task.FromResult(new Department()));
 
             var response = await _controller.UpdateUserAsync(user.Id, request);
 
             response.Valid.Should().BeTrue();
-            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userQueriesMock.Verify(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
             _userCommandsMock.Verify(p => p.UpdateUserAsync(user));
         }
 
@@ -175,7 +174,7 @@ namespace BackendOffice.UnitTests.Controllers
                 Status = UserStatus.Enabled
             };
 
-            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+            _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult<User>(null));
 
             var response = await _controller.UpdateUserAsync(user.Id, request);
@@ -183,7 +182,7 @@ namespace BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.User.NotFound);
 
-            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userQueriesMock.Verify(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
             _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
         }
 
@@ -201,10 +200,10 @@ namespace BackendOffice.UnitTests.Controllers
                 Status = UserStatus.Enabled
             };
 
-            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+            _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
 
-            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
                 .Returns(Task.FromResult<Role>(null));
 
             var response = await _controller.UpdateUserAsync(user.Id, request);
@@ -212,7 +211,7 @@ namespace BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NotFound);
 
-            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userQueriesMock.Verify(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
             _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
         }
 
@@ -230,13 +229,13 @@ namespace BackendOffice.UnitTests.Controllers
                 Status = UserStatus.Enabled
             };
 
-            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+            _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
 
-            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
                 .Returns(Task.FromResult(new Role()));
 
-            _departmentQueriesMock.Setup(p => p.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+            _departmentQueriesMock.Setup(s => s.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
                 .Returns(Task.FromResult<Department>(null));
 
             var response = await _controller.UpdateUserAsync(user.Id, request);
@@ -244,7 +243,7 @@ namespace BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Department.NotFound);
 
-            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userQueriesMock.Verify(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
             _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
         }
 
@@ -260,14 +259,14 @@ namespace BackendOffice.UnitTests.Controllers
                 ConfirmPassword = password
             };
 
-            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+            _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
 
             var response = await _controller.UpdateUserPasswordAsync(user.Id, request);
 
             response.Valid.Should().BeTrue();
 
-            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userQueriesMock.Verify(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
             _userCommandsMock.Verify(p => p.UpdateUserAsync(user));
         }
 
@@ -283,28 +282,22 @@ namespace BackendOffice.UnitTests.Controllers
                 ConfirmPassword = password
             };
 
-            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+            _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult<User>(null));
 
             var response = await _controller.UpdateUserPasswordAsync(user.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.User.NotFound);
-            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userQueriesMock.Verify(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
             _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
-        }
-
-        [Test]
-        public async Task Can_Authenticate_User()
-        {
-
         }
 
         private Fixture CreateUserFixture()
         {
             var fixture = new Fixture();
             fixture.Customize<User>(u => u
-                .With(p => p.Role, new Role { Name = Generator.RandomString(5) })
+                .With(s => s.Role, new Role { Name = Generator.RandomString(5) })
                 .With(p => p.Department, new Department { Name = Generator.RandomString(5) }));
             return fixture;
         }
