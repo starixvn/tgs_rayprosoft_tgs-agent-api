@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
@@ -10,10 +11,12 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
+using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
 {
@@ -29,7 +32,6 @@ namespace BackendOffice.UnitTests.Controllers
         private readonly Mock<IRoleQueries> _roleQueriesMock = new Mock<IRoleQueries>();
         private readonly Mock<IUserCommands> _userCommandsMock = new Mock<IUserCommands>();
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
-
 
         [SetUp]
         public override void Setup()
@@ -90,6 +92,212 @@ namespace BackendOffice.UnitTests.Controllers
                 response.Items[i].Status.Should().Be(expectedUsers[i].Status.ToString());
                 response.Items[i].CreatedOn.Should().Be(expectedUsers[i].CreatedOn);
             }
+
+            _userQueriesMock.Verify(p => p.GetUserQueries());
+        }
+
+        [Test]
+        public async Task Can_Create_User()
+        {
+            var password = Generator.RandomString(8);
+            var request = new CreateUserRequest
+            {
+                Name = Generator.RandomString(6),
+                Username = Generator.RandomString(6),
+                RoleId = Guid.NewGuid(),
+                DepartmentId = Guid.NewGuid(),
+                TimeZone = "+0800",
+                Status = UserStatus.Enabled,
+                Password = password,
+                ConfirmPassword = password
+            };
+
+            _userQueriesMock.Setup(p => p.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+                .Returns(Task.FromResult(new Role()));
+
+            _departmentQueriesMock.Setup(p => p.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+                .Returns(Task.FromResult(new Department()));
+
+
+            var response = await _controller.CreateUserAsync(request);
+            response.Valid.Should().BeTrue();
+            _userCommandsMock.Verify(p => p.CreateUserAsync(It.Is<User>(p =>
+                p.Name == request.Name &&
+                p.Username == request.Username &&
+                p.RoleId == request.RoleId &&
+                p.DepartmentId == request.DepartmentId)));
+        }
+
+        [Test]
+        public async Task Can_Update_User()
+        {
+            var user = CreateUserFixture().Create<User>();
+            user.Id = Guid.NewGuid();
+
+            var request = new UpdateUserRequest
+            {
+                Name = Generator.RandomString(6),
+                RoleId = Guid.NewGuid(),
+                DepartmentId = Guid.NewGuid(),
+                Status = UserStatus.Enabled
+            };
+
+            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+                .Returns(Task.FromResult(user));
+
+            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+                .Returns(Task.FromResult(new Role()));
+
+            _departmentQueriesMock.Setup(p => p.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+                .Returns(Task.FromResult(new Department()));
+
+            var response = await _controller.UpdateUserAsync(user.Id, request);
+
+            response.Valid.Should().BeTrue();
+            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userCommandsMock.Verify(p => p.UpdateUserAsync(user));
+        }
+
+        [Test]
+        public async Task Cannot_Update_User_Not_Found()
+        {
+            var user = CreateUserFixture().Create<User>();
+            user.Id = Guid.NewGuid();
+
+            var request = new UpdateUserRequest
+            {
+                Name = Generator.RandomString(6),
+                RoleId = Guid.NewGuid(),
+                DepartmentId = Guid.NewGuid(),
+                Status = UserStatus.Enabled
+            };
+
+            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+                .Returns(Task.FromResult<User>(null));
+
+            var response = await _controller.UpdateUserAsync(user.Id, request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.User.NotFound);
+
+            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
+        }
+
+        [Test]
+        public async Task Cannot_Update_User_With_Role_Not_Found()
+        {
+            var user = CreateUserFixture().Create<User>();
+            user.Id = Guid.NewGuid();
+
+            var request = new UpdateUserRequest
+            {
+                Name = Generator.RandomString(6),
+                RoleId = Guid.NewGuid(),
+                DepartmentId = Guid.NewGuid(),
+                Status = UserStatus.Enabled
+            };
+
+            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+                .Returns(Task.FromResult(user));
+
+            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+                .Returns(Task.FromResult<Role>(null));
+
+            var response = await _controller.UpdateUserAsync(user.Id, request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Role.NotFound);
+
+            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
+        }
+
+        [Test]
+        public async Task Cannot_Update_User_With_Department_Not_Found()
+        {
+            var user = CreateUserFixture().Create<User>();
+            user.Id = Guid.NewGuid();
+
+            var request = new UpdateUserRequest
+            {
+                Name = Generator.RandomString(6),
+                RoleId = Guid.NewGuid(),
+                DepartmentId = Guid.NewGuid(),
+                Status = UserStatus.Enabled
+            };
+
+            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+                .Returns(Task.FromResult(user));
+
+            _roleQueriesMock.Setup(p => p.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+                .Returns(Task.FromResult(new Role()));
+
+            _departmentQueriesMock.Setup(p => p.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+                .Returns(Task.FromResult<Department>(null));
+
+            var response = await _controller.UpdateUserAsync(user.Id, request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Department.NotFound);
+
+            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
+        }
+
+        [Test]
+        public async Task Can_Update_User_Password()
+        {
+            var user = CreateUserFixture().Create<User>();
+            user.Id = Guid.NewGuid();
+            var password = Generator.RandomString(6);
+            var request = new UpdatePasswordRequest
+            {
+                Password = password,
+                ConfirmPassword = password
+            };
+
+            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+                .Returns(Task.FromResult(user));
+
+            var response = await _controller.UpdateUserPasswordAsync(user.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userCommandsMock.Verify(p => p.UpdateUserAsync(user));
+        }
+
+        [Test]
+        public async Task Cannot_Update_User_Password_With_User_Not_Found()
+        {
+            var user = CreateUserFixture().Create<User>();
+            user.Id = Guid.NewGuid();
+            var password = Generator.RandomString(6);
+            var request = new UpdatePasswordRequest
+            {
+                Password = password,
+                ConfirmPassword = password
+            };
+
+            _userQueriesMock.Setup(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
+                .Returns(Task.FromResult<User>(null));
+
+            var response = await _controller.UpdateUserPasswordAsync(user.Id, request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.User.NotFound);
+            _userQueriesMock.Verify(p => p.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)));
+            _userCommandsMock.Verify(p => p.UpdateUserAsync(user), Times.Never);
+        }
+
+        [Test]
+        public async Task Can_Authenticate_User()
+        {
+
         }
 
         private Fixture CreateUserFixture()

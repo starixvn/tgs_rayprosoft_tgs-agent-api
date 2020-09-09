@@ -56,13 +56,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPost("user")]
-        public Dictionary<string, string> GetUser()
-        {
-            var user = HttpContext.User;
-            return HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-        }
-
         [HttpPost, Route("logout")]
         public Task LogoutAsync()
         {
