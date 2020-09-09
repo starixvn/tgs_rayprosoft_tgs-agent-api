@@ -40,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.LastLoginTime = DateTimeOffset.Now;
 
             await _userCommands.UpdateUserAsync(user);
-            await SignInAsync(user.Username, user.Role.Name);
+            await SignInAsync(user);
 
             return new AuthenticateUserResponse
             {
@@ -85,16 +85,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             );
         }
 
-        private async Task SignInAsync(string username, string role)
+        private async Task SignInAsync(User user)
         {
             SetCsrfToken();
 
             var claims = new List<Claim>
             {
-                new Claim(Consts.UserInfo.UsernameKey, username),
-                new Claim(Consts.UserInfo.RolenameKey, role),
-                new Claim(Consts.UserInfo.ResellerKey, Guid.NewGuid().ToString()),
-                new Claim(Consts.UserInfo.BrandKey, Guid.NewGuid().ToString()),
+                new Claim(Consts.UserInfo.UsernameKey, user.Username),
+                new Claim(Consts.UserInfo.RolenameKey, user.Role.Name),
+                new Claim(Consts.UserInfo.ResellerKey, user.ResellerId.ToString()),
+                new Claim(Consts.UserInfo.LicenseeKey, user.LicenseeId.ToString()),
+                new Claim(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString()),
             };
 
             var authProperties = new AuthenticationProperties

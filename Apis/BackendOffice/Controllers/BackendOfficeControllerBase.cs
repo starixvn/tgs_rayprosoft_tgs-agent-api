@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         protected Guid? ResellerId => UserInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(UserInfoMap[Consts.UserInfo.ResellerKey]);
 
-        protected Guid? BrandId => UserInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(UserInfoMap[Consts.UserInfo.BrandKey]);
+        protected Guid? BrandId => UserInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(UserInfoMap[Consts.UserInfo.LicenseeKey]);
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
         {

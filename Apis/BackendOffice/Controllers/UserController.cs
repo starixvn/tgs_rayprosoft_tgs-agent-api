@@ -57,9 +57,9 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [Route("")]
         [HttpGet, Description("Get users")]
-        public Task<PagedResponse<UserModel>> GetUserAsync([FromQuery] GetUsersRequest request)
+        public Task<PagedResponse<UserModel>> GetUsersAsync([FromQuery] GetUsersRequest request)
         {
-            return _userQueries.GetUseQueries()
+            return _userQueries.GetUserQueries()
                 .Where(request.Username, p => p.Username.Contains(request.Username))
                 .Select(user => new UserModel
                 {
