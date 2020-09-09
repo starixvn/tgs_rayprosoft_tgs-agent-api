@@ -1,0 +1,34 @@
+﻿using System;
+using TGS.Core.Models.Enums;
+
+namespace TGS.Services.Operations.Models.Data
+{
+    public class BetActionData
+    {
+        public Guid Id { get; init; }
+        public Guid? ReferenceId { get; init; }
+        public string ExternalId { get; init; }
+        public string ExternalRoundId { get; init; }
+        public BetActionData Reference { get; set; }
+        public decimal Amount { get; init; }
+        public decimal UnsettledBets { get; init; }
+        public decimal Turnover { get; init; }
+        public decimal WinLoss { get; init; }
+        public bool IsClosingRound { get; init; }
+        public GameActionType Type { get; init; }
+        public DateTimeOffset RecordedOn { get; init; }
+        public DateTimeOffset SentOn { get; init; }
+        public string GameName { get; init; }
+        public string GameProviderCode { get; init; }
+        public string BetType { get; init; }
+        public Guid? BetId { get; init; }
+        public Guid WalletId { get; init; }
+        public bool IsCancelled { get; set; }
+
+        // those are used only for the current action
+        // no record is kept if the previous we explicitly closed or not
+        // (except in ApiCallLogs)
+        public bool IsExplicitlyClosingRound { get; init; }
+        public bool IsExplicitlyNotClosingRound { get; init; }
+    }
+}

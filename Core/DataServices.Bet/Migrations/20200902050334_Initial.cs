@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Bet.Migrations
 {
@@ -164,6 +166,20 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 schema: "dbo",
                 table: "GameActions",
                 column: "RoundId");
+
+            #region Store Procedure
+
+            var assembly = Assembly.GetExecutingAssembly();
+            
+            // SP
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.Bet.SqlScripts.SP.usp_Round_GetRoundByExternalRoundId.sql");
+
+            migrationBuilder.SqlResource(assembly,
+                "TGS.Core.DataServices.Bet.SqlScripts.SP.usp_GameAction_GetGameActionsInSameRound.sql");
+            
+            #endregion
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

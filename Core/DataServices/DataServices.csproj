@@ -27,6 +27,7 @@
     <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
     <None Remove="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />
+    <None Remove="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
     <None Remove="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
     <None Remove="SqlScripts\TYPE\IntValuesType.sql" />
   </ItemGroup>
@@ -50,6 +51,7 @@
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />

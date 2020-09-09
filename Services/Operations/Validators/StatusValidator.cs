@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 
-namespace TGS.Services.Operations
+namespace TGS.Services.Operations.Validators
 {
     public interface IStatusValidator
     {

@@ -4,6 +4,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
+using TGS.Services.Operations.Validators;
 
 namespace TGS.Services.Operations.Extensions
 {
@@ -31,6 +32,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IBrandOperations, BrandOperations>();
             services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
             services.AddSingleton<IPlayerOperations, PlayerOperations>();
+
+            services.AddScoped<GameActionDataOperations, GameActionDataOperations>();
             
             #endregion
 
@@ -38,6 +41,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
             services.AddSingleton<IStatusValidator, StatusValidator>();
             services.AddSingleton<IExpirationValidator, ExpirationValidator>();
+            services.AddSingleton<IAmountValidator, AmountValidator>();
+            services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
 
             return services;
         }

@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Exceptions
 {
-    public class PlayerDisabledException : Exception
+    public sealed class PlayerDisabledException : Exception
     {
         public PlayerStatus DisabledStatus { get; }
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures.Extensions;
@@ -44,6 +45,8 @@ namespace TGS.Services.GameServices
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
             await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+            await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
+            var res = await _operations.PlaceBetAsync(data);
 
             return null;
         }
@@ -97,6 +100,24 @@ namespace TGS.Services.GameServices
                 if (validGameStatus.All(s => s != cachedGame.Status))
                 {
                     throw new InvalidOperationException($"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}'");
+                }
+            }
+        }
+
+        private async Task EnsureMappingsAsync(BetData data, string playerCurrencyCode)
+        {
+            if (!data.HasCurrencyFromGameProvider)
+                return;
+
+            foreach (var t in data.Transactions)
+            {
+                if (t.GameActionType != GameActionType.PlaceBet)
+                    continue;
+
+                var internalCurrency = await _currencyMapper.ExternalToInternalAsync(t.CurrencyCode, data.GameProviderId);
+                if (internalCurrency.IgnoreCaseNotEquals(playerCurrencyCode))
+                {
+                    throw new CurrencyNotMatchingException(playerCurrencyCode, internalCurrency);
                 }
             }
         }
