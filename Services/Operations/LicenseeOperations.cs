@@ -23,16 +23,15 @@ namespace TGS.Services.Operations
         Task<Guid> GetLicenseeGameProviderConfigurationIdAsync(Guid licenseeId, Guid gameProviderId);
 
         Task<CachedLicenseeGame[]> GetLicenseeGamesAsync(Guid licenseeId, Guid gameProviderId, PlatformType? platformType = null);
+
+        Task<string> GetTimeZoneByBrandIdAsync(Guid licenseeId);
     }
 
     public sealed class LicenseeOperations : ILicenseeOperations
     {
         private readonly IRedisCacheManager _cacheManager;
-
         private readonly Func<ILicenseeQueries> _licenseeQueriesFactory;
-
         private readonly IJsonSerializationProvider _json;
-
         private readonly ILicenseeOperations _interface;
 
         public LicenseeOperations(
@@ -112,13 +111,13 @@ namespace TGS.Services.Operations
         async Task<Guid> ILicenseeOperations.GetLicenseeGameProviderConfigurationIdAsync(Guid licenseeId, Guid gameProviderId)
         {
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.LicenseeGameProviderConfiguration, licenseeId, gameProviderId.ToString());
-            var bgpc = value.HasValue ?
+            var lgpc = value.HasValue ?
                  _json.DeserializeFromString<CachedLicenseeGameProviderConfiguration>(value) :
                  await _interface.GetLicenseeGameProviderConfigurationAsync(licenseeId, gameProviderId);
 
-            return bgpc.GameProviderConfigurationId;
+            return lgpc.GameProviderConfigurationId;
         }
-
+       
         async Task<CachedLicenseeGameProviderConfiguration> ILicenseeOperations.GetLicenseeGameProviderConfigurationAsync(Guid licenseeId, Guid gameProviderId)
         {
             var lgpc = await GetCachedLicenseeGameProviderConfigurationOrNullAsync(licenseeId, gameProviderId);
@@ -156,11 +155,22 @@ namespace TGS.Services.Operations
             var games = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.LicenseeGames, licenseeId, TimeSpan.FromHours(2),
                 () => _licenseeQueriesFactory().GetLicenseeGamesAsync(licenseeId));
 
-            return games.Where(g => g.GameProviderId == gameProviderId && 
+            return games.Where(g => g.GameProviderId == gameProviderId &&
                                     (platformType == null || g.PlatformType == platformType))
                              .ToArray();
         }
 
+        async Task<string> ILicenseeOperations.GetTimeZoneByBrandIdAsync(Guid licenseeId)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Licensee, licenseeId, CachedLicenseeFields.TimeZoneId);
+            if (value.HasValue)
+            {
+                return value;
+            }
+
+            var cachedLicensee = await _interface.GetCachedLicenseeAsync(licenseeId);
+            return cachedLicensee?.TimeZoneId;
+        }
 
         private async Task<CachedLicensee> GetCachedLicenseeOrNullAsync(Guid licenseeId)
         {
@@ -221,7 +231,7 @@ namespace TGS.Services.Operations
                 var fields = new HashEntry[]
                 {
                     new (CachedLicenseeFields.LicenseeCode, Licensee.Code),
-                    new (CachedLicenseeFields.TimeZoneId, Licensee.TimeZoneId.ToString()),
+                    new (CachedLicenseeFields.TimeZoneId, Licensee.TimeZoneId),
                     new (CachedLicenseeFields.Status, (int)Licensee.Status),
                     new (CachedLicenseeFields.ResellerId, Licensee.ResellerId.ToString()),
                     new (CachedLicenseeFields.ResellerCode, Licensee.ResellerCode),

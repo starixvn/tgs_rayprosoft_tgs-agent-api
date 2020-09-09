@@ -7,6 +7,9 @@
         Cancelled,
         Settled,
         TransactionNotFound,
-        GameNotFound
+        TransactionBeingCancelledNotFound,
+        TransactionBeingReferencedNotFound,
+        RoundNotFound,
+        GameNotFound,
     }
 }

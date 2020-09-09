@@ -7,7 +7,7 @@ using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.Operations.Models.Data;
 
-namespace TGS.Services.Operations
+namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
