@@ -9,7 +9,7 @@ using TGS.Services.Operations.Models.Data;
 
 namespace TGS.Services.Operations.Models
 {
-    internal record GameActionState
+    internal class GameActionState
     {
         internal GameActionState(TransactionData td)
         {
@@ -55,19 +55,19 @@ namespace TGS.Services.Operations.Models
         public Guid? BatchId { get; init; }
         //public bool AllowSettlementWithDifferentGameProviderConfiguration { get; set; }
 
-        public DateTimeOffset BrandNow { get; init; }
+        public DateTimeOffset BrandNow { get; set; }
 
-        public IList<BetActionData> PreviousActions { get; init; }
-        public BetActionData ReferenceGameAction { get; init; }
+        public IList<BetActionData> PreviousActions { get; set; }
+        public BetActionData ReferenceGameAction { get; set; }
         //public BetValuesResult BetValueResult { get; set; }
-        public Guid GameId { get; init; }
-        public CachedGame Game { get; init; }
+        public Guid GameId { get; set; }
+        public CachedGame Game { get; set; }
 
-        public Guid? BetId { get; init; }
-        public Guid? InternalRoundId { get; init; }
-        public Guid? RefGameActionInternalId { get; init; }
-        public RoundStatus OldRoundStatus { get; init; }
-        public RoundStatus NewRoundStatus { get; init; }
+        public Guid? BetId { get; set; }
+        public Guid? InternalRoundId { get; set; }
+        public Guid? RefGameActionInternalId { get; set; }
+        public RoundStatus OldRoundStatus { get; set; }
+        public RoundStatus NewRoundStatus { get; set; }
 
         //public DateTimeOffset RoundCreatedOn =>
         //    PreviousActions?.FirstOrDefault()?.RecordedOn ?? BrandNow;
@@ -89,7 +89,7 @@ namespace TGS.Services.Operations.Models
         public string ExternalTransactionReferenceId { get; init; }
         public string ExternalGameId { get; init; }
         public string ExternalGameActionGroupId { get; init; }
-        public decimal Amount { get; init; }
+        public decimal Amount { get; set; }
         public decimal? Commission { get; init; }
         public string RoundDetail { get; init; }
         public bool? RoundClosed { get; init; }

@@ -3,13 +3,13 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operations.Models.Data
 {
-    public record BetActionData
+    public class BetActionData
     {
         public Guid Id { get; init; }
         public Guid? ReferenceId { get; init; }
         public string ExternalId { get; init; }
         public string ExternalRoundId { get; init; }
-        public BetActionData Reference { get; init; }
+        public BetActionData Reference { get; set; }
         public decimal Amount { get; init; }
         public decimal UnsettledBets { get; init; }
         public decimal Turnover { get; init; }
@@ -23,7 +23,7 @@ namespace TGS.Services.Operations.Models.Data
         public string BetType { get; init; }
         public Guid? BetId { get; init; }
         public Guid WalletId { get; init; }
-        public bool IsCancelled { get; init; }
+        public bool IsCancelled { get; set; }
 
         // those are used only for the current action
         // no record is kept if the previous we explicitly closed or not

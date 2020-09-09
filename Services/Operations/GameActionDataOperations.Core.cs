@@ -100,6 +100,9 @@ namespace TGS.Services.Operations
             s = GetGame(s);
             s = await GetPreviousGameActionsAsync(s);
 
+            //var ga = await SaveDatabaseRecordsAsync(s);
+
+
             return null;
         }
 
@@ -111,7 +114,10 @@ namespace TGS.Services.Operations
                 throw new InvalidGameActionException($"Cannot find expected round with id={s.ExternalRoundId}");
             }
 
-            return s with { InternalRoundId = roundData.RoundId, OldRoundStatus = roundData.Status };
+            s.InternalRoundId = roundData.RoundId;
+            s.OldRoundStatus = roundData.Status;
+
+            return s;
         }
 
         private GameActionState GetGame(GameActionState s)
@@ -128,7 +134,10 @@ namespace TGS.Services.Operations
                       InvalidGameActionErrorCode.GameNotFound);
             }
 
-            return s with { GameId = game.Id, Game = game };
+            s.GameId = game.Id;
+            s.Game = game;
+
+            return s;
         }
 
         private async Task<GameActionState> GetPreviousGameActionsAsync(GameActionState s)
@@ -179,49 +188,50 @@ namespace TGS.Services.Operations
                             })
                             .ToDictionary(e => e.Id);
 
-            BetActionData refGameAction = default;
-            List<BetActionData> previousActions = new();
+            var (actions, refGameAction) = GetPreviousActions(refGameActionInternalId, dict);
 
-            foreach (var act in dict.Values)
+            s.Amount = amount;
+            s.RefGameActionInternalId = refGameActionInternalId;
+            s.ReferenceGameAction = refGameAction;
+            s.GameId = refData.GameId;
+            s.Game = game;
+            s.InternalRoundId = refData.RoundId;
+            s.BetId = refData.BetId;
+            s.OldRoundStatus = refData.RoundStatus;
+            s.PreviousActions = actions;
+
+            return s;
+        }
+
+        private static (IList<BetActionData>, BetActionData) GetPreviousActions(Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
+        {
+            BetActionData refGameAction = default;
+            List<BetActionData> actions = new();
+
+            foreach (var act in actionMap.Values)
             {
-                BetActionData data = act;
-                if (act.ReferenceId.HasValue && dict.TryGetValue(act.ReferenceId.Value, out var refBet))
+                if (act.ReferenceId.HasValue && actionMap.TryGetValue(act.ReferenceId.Value, out var refBet))
                 {
                     var isCancelled = GetGameActionIsCancelled(act.Type, false);
-                    data = data with
-                    {
-                        Reference = refBet with { IsCancelled = isCancelled }
-                    };
+                    act.Reference = refBet;
+                    act.Reference.IsCancelled = isCancelled;
                 }
 
                 if (act.Id == refGameActionInternalId)
                 {
                     var isCancelled = GetGameActionIsCancelled(act.Type, true);
-                    data = data with
-                    {
-                        Reference = data.Reference with { IsCancelled = isCancelled }
-                    };
+                    act.Reference.Reference.IsCancelled = isCancelled;
 
-                    refGameAction = data;
+                    refGameAction = act;
                 }
 
-                previousActions.Add(data);
+                actions.Add(act);
             }
 
-            return s with
-            {
-                Amount = amount,
-                RefGameActionInternalId = refGameActionInternalId,
-                GameId = refData.GameId,
-                Game = game,
-                InternalRoundId = refData.RoundId,
-                BetId = refData.BetId,
-                OldRoundStatus = refData.RoundStatus,
-                PreviousActions = previousActions.AsReadOnly()
-            };
+            return (actions.AsReadOnly(), refGameAction);
         }
 
-        private static (SameRoundActionData refData, Guid? refGameActionInternalId, decimal amount) GetReferencedActionAndActualAmount(GameActionState s, SameRoundActionData[] actionsData)
+        private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(GameActionState s, SameRoundActionData[] actionsData)
         {
             var amount = s.PrepareAmount(s.Amount);
             Guid? refGameActionInternalId = null;
