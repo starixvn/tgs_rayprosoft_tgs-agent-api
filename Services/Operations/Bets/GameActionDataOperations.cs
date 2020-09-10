@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.DataServices;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures;
@@ -27,9 +28,11 @@ namespace TGS.Services.Operations.Bets
         private readonly IStatusValidator _statusValidator;
         private readonly ITimeZoneManager _timeZoneManager;
         private readonly IRoundStatusManager _roundStatusManager;
+        private readonly IValidStatus<Status> _validStatus;
+        private readonly IValidStatus<GameStatus> _validGameStatus;
 
         private static readonly GameType[] BypassPreviousActionGameTypes = { GameType.Slot };
-
+        
         public GameActionDataOperations(
             Func<ITgsRepository> tgsRepoFactory,
             ITransactionManager transactionManager,
@@ -41,7 +44,9 @@ namespace TGS.Services.Operations.Bets
             IAmountValidator amountValidator,
             IStatusValidator statusValidator,
             ITimeZoneManager timeZoneManager,
-            IRoundStatusManager roundStatusManager)
+            IRoundStatusManager roundStatusManager,
+            IValidStatus<Status> validStatus,
+            IValidStatus<GameStatus> validGameStatus)
         {
             _tgsRepoFactory = tgsRepoFactory;
             _transactionManager = transactionManager;
@@ -54,6 +59,8 @@ namespace TGS.Services.Operations.Bets
             _statusValidator = statusValidator;
             _timeZoneManager = timeZoneManager;
             _roundStatusManager = roundStatusManager;
+            _validStatus = validStatus;
+            _validGameStatus = validGameStatus;
         }
 
         Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)

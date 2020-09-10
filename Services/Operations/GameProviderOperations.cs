@@ -34,6 +34,8 @@ namespace TGS.Services.Operations
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, Guid gameId);
+
+        Task<GameStatus?> GetGameStatusAsync(Guid gameProviderId, Guid gameId);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -216,6 +218,13 @@ namespace TGS.Services.Operations
             var games = await GetAndCacheGamesAsync(gameProviderId);
             return games.FirstOrDefault(g => g.Id == gameId);
         }
+
+        async Task<GameStatus?> IGameProviderOperations.GetGameStatusAsync(Guid gameProviderId, Guid gameId)
+        {
+            var game = await _interface.GetCachedGameAsync(gameProviderId, gameId);
+            return game?.Status;
+        }
+
 
         #region Private Methods
 
