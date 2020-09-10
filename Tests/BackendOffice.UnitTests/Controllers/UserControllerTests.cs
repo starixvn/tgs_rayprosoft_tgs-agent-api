@@ -110,7 +110,7 @@ namespace BackendOffice.UnitTests.Controllers
                 .Returns(Task.FromResult(new Department()));
 
             var response = await _controller.CreateUserAsync(request);
-            response.Valid.Should().BeTrue();
+            response.Valid.Should().BeFalse();
             _userCommandsMock.Verify(s => s.CreateUserAsync(It.Is<User>(p =>
                 p.Name == request.Name &&
                 p.Username == request.Username &&
