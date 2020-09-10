@@ -22,62 +22,83 @@ namespace TGS.Apis.LogApi.Migrations
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.AdminLog", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<string>("Exception")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
                     b.Property<int>("ExecutionTimeMs")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Ip")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .IsUnicode(true);
 
                     b.Property<string>("Method")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<string>("Path")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
 
                     b.Property<string>("RequestContent")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
                     b.Property<string>("RequestHeaders")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
-                    b.Property<int>("ResponseCode")
-                        .HasColumnType("int");
+                    b.Property<short>("ResponseCode")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("ResponseContent")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
                     b.Property<string>("ResponseHeaders")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
 
                     b.Property<string>("ServerName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(true);
 
-                    b.HasKey("Id");
+                    b.HasKey("RecordedOn");
 
-                    b.ToTable("AdminLogs");
+                    b.ToTable("AdminLogs","dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ApiLog", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("ExecutionTimeMs")
                         .HasColumnType("int");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Ip")
                         .IsRequired()
@@ -98,9 +119,6 @@ namespace TGS.Apis.LogApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("RequestContent")
                         .IsRequired()
@@ -133,21 +151,23 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<Guid>("TrackingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("RecordedOn");
 
                     b.ToTable("ApiLogs","dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.LogRecord", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Exception")
                         .IsRequired()
                         .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("Level")
                         .HasColumnType("tinyint")
@@ -161,9 +181,6 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("nvarchar(512)")
                         .IsUnicode(true);
 
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("ServerName")
                         .IsRequired()
                         .HasColumnType("nvarchar(64)")
@@ -172,17 +189,15 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<Guid>("TrackingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("RecordedOn");
 
                     b.ToTable("LogRecords","dbo");
                 });
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ServiceLog", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Callsite")
                         .HasColumnType("nvarchar(512)");
@@ -192,6 +207,9 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("Https")
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Level")
                         .HasColumnType("nvarchar(10)");
@@ -211,9 +229,6 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<string>("Properties")
                         .HasColumnType("nvarchar(512)");
 
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("RemoteAddress")
                         .HasColumnType("nvarchar(512)");
 
@@ -229,7 +244,7 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(512)");
 
-                    b.HasKey("Id");
+                    b.HasKey("RecordedOn");
 
                     b.ToTable("ServiceLogs","dbo");
                 });

@@ -11,7 +11,7 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
         {
             builder.ToTable("ApiLogs", "dbo");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.RecordedOn);
 
             builder.Property(c => c.Ip)
               .HasColumnType(ColumnTypes.Nvarchar(50))
