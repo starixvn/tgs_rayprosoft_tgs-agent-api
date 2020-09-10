@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm-run-all --parallel start:*",
     "start:dev": "snowpack dev --reload",
-    "start:docker": "docker-compose -f ../../docker-compose.yml up --build --always-recreate-deps --remove-orphans traefik",
+    "start:docker": "docker-compose -f ../../docker-compose.yml up --build --always-recreate-deps --remove-orphans",
     "build": "snowpack build",
     "login:docker": "docker login registry.gitlab.com",
     "build:docker": "cross-var docker build . -t registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",
