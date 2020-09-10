@@ -1,11 +1,66 @@
 version: "3.8"
 
 services:
-  backoffice-site:
-    build: ./Web/backoffice
-    image: backoffice-site
+  traefik:
+    image: traefik:v2.2
+    command:
+      - --api.dashboard=true
+      - --api.insecure=true # Debug router
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      # Tracing
+      - --tracing.jaeger=true
+      - --tracing.serviceName=traefik
+      - --tracing.jaeger.samplingServerURL=http://localhost:5778/sampling
+      - --tracing.jaeger.localAgentHostPort=127.0.0.1:6831
+      - --tracing.jaeger.collector.endpoint=http://127.0.0.1:14268/api/traces?format=jaeger.thrift
     ports:
+      # The Web UI (enabled by --api.insecure=true) -> http://localhost:9090/dashboard#/
+      - 9090:8080
       - 80:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      tgs:
+    depends_on:
+      - backoffice-api
+      - backoffice-site
+
+  # Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.19.2
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
+    labels:
+      traefik.http.routers.jaeger.rule: Host(`jaeger.localhost`)
+      traefik.http.routers.jaeger.entrypoints: web
+      traefik.http.routers.jaeger.service: jaeger
+      traefik.http.services.jaeger.loadbalancer.server.port: 16686
+    networks:
+      tgs:
+
+  backoffice-site:
+    build:
+      context: ./Web/backoffice
+      dockerfile: Dockerfile
+    image: backoffice-site
+    container_name: backoffice-site
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backoffice-site.rule=Host(`backoffice.localhost`)
+      - traefik.http.routers.backoffice-site.entrypoints=web
+    # ports:
+    #   - 8080:80
     networks:
       tgs:
     depends_on:
@@ -16,6 +71,10 @@ services:
       context: .
       dockerfile: Dockerfile.BackofficeApi
     image: backoffice-api
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backoffice-api.rule=Host(`backoffice.localhost`) && PathPrefix(`/api`)
+      - traefik.http.routers.backoffice-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
     # For crash debug
@@ -75,7 +134,7 @@ services:
   redis:
     image: "redis:alpine"
     ports:
-     - "6379:6379"
+      - "6379:6379"
     networks:
       tgs:
 

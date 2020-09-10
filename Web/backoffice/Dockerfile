@@ -21,14 +21,13 @@ FROM caddy:2.1.1-alpine
 # RUN apk --no-cache add curl
 
 COPY --from=build /src/caddy/Caddyfile /etc/caddy/Caddyfile
-COPY --from=build /src/build /site
+COPY --from=build /src/build /usr/share/caddy
 
-HEALTHCHECK --start-period=5s\
-    CMD curl -fs http://localhost/healthcheck || exit 1
+# HEALTHCHECK --start-period=5s\
+#     CMD curl -fs http://localhost/healthcheck || exit 1
 
-EXPOSE 80
-EXPOSE 443
-EXPOSE 2019
 
 # Start caddy server
-CMD caddy run --config /etc/caddy/Caddyfile
+# CMD caddy run --config /etc/caddy/Caddyfile
+# ENTRYPOINT ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
+# EXPOSE 80
