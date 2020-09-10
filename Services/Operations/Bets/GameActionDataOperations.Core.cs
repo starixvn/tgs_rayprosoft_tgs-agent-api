@@ -17,6 +17,8 @@ namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
+        public IList<BetActionData> ValidPreviousActions { get; private set; }
+
         private async Task<BetResult> ExecuteGameActionAsync(BetData data)
         {
             if (data?.Transactions == null || data.Transactions.Length == 0)
@@ -207,7 +209,7 @@ namespace TGS.Services.Operations.Bets
 
             s.Amount = amount;
             s.RefGameActionInternalId = refGameActionInternalId;
-            s.ReferenceGameAction = refGameAction;
+            s.ReferencedGameAction = refGameAction;
             s.BetId = refData.BetId;
             s.PreviousActions = actions;
 
@@ -258,7 +260,7 @@ namespace TGS.Services.Operations.Bets
                 .Where(r => r.Type == GameActionType.CancelTransaction && r.Reference != null)
                 .Select(r => r.Reference.Id).ToHashSet();
 
-            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToList().AsReadOnly(); 
+            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToList().AsReadOnly();
         }
 
         private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(GameActionState s, SameRoundActionData[] actionsData)
@@ -307,7 +309,7 @@ namespace TGS.Services.Operations.Bets
                    s.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.PlaceBet) ||
                    !BypassPreviousActionGameTypes.Contains(s.Game.Type);
         }
-                
+
         private static bool GetGameActionIsCancelled(GameActionType type, bool isReference)
         {
             if (type != GameActionType.CancelTransaction)
@@ -340,10 +342,18 @@ namespace TGS.Services.Operations.Bets
         private async Task<GameActionState> FillEmptyDataAsync(GameActionState s)
         {
             s.LicenseeNow = _timeZoneManager.ToLocal(s.PlayerData.LicenseeTimeZoneId, DateTimeOffset.UtcNow);
-            //s.NewRoundStatus = _roundStatusManager.GetStatus(
-            //    s.AutoCloseRound, s.RoundClosed, s.InternalRoundId ?? Guid.Empty, s.OldRoundStatus, s.GameActionType, s.RefGameAction, s.PreviousActions, validPreviousActions);
+            s.NewRoundStatus = _roundStatusManager.GetStatus(new()
+            {
+                AutoCloseRound = s.AutoCloseRound,
+                RequestToCloseRound = s.RoundClosed,
+                RoundId = s.InternalRoundId ?? Guid.Empty,
+                OldStatus = s.OldRoundStatus,
+                GameActionType = s.GameActionType,
+                ReferencedGameAction = s.ReferencedGameAction,
+                PreviousActions = s.PreviousActions,
+                ValidPreviousActions = s.ValidPreviousActions
+            });
 
-            
 
             return s;
         }
