@@ -26,11 +26,10 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("Amount")
-                        .IsRequired()
+                    b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,6)");
 
-                    b.Property<decimal?>("Balance")
+                    b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<Guid?>("BetId")
@@ -38,10 +37,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<string>("BetType")
                         .HasColumnType("nvarchar(128)");
-
-                    b.Property<Guid?>("BrandId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("ClosingRoundExplicitRequest")
                         .HasColumnType("bit");
@@ -71,6 +66,9 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<bool>("IsClosingRound")
                         .HasColumnType("bit");
+
+                    b.Property<Guid>("LicenseeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PlayerIp")
                         .IsRequired()
@@ -163,10 +161,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<decimal?>("BetAmount")
                         .HasColumnType("decimal(18,6)");
 
-                    b.Property<Guid?>("BrandId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("datetimeoffset");
 
@@ -214,6 +208,10 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<short>("GameType")
                         .HasColumnType("smallint");
+
+                    b.Property<Guid?>("LicenseeId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<short>("PlatformType")
                         .HasColumnType("smallint");

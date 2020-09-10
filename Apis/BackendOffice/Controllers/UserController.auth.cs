@@ -19,20 +19,19 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class UserController
     {
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [Route("auth")]
-        [HttpPost, Description("Authenticate user login")]
+        [HttpPost("auth"), Description("Authenticate user login")]
         public async Task<AuthenticateUserResponse> AuthenticateAsync(AuthenticateUserRequest request)
         {
             var user = await _userQueries.GetUserByUsernameAsync(request.Username);
 
             if (user == null)
             {
-                return CreateInvalidResponse<AuthenticateUserResponse>("User not found.");
+                return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.NotFound);
             }
 
             if (PasswordMismatch(user, request.Password))
             {
-                return CreateInvalidResponse<AuthenticateUserResponse>("Invalid password.");
+                return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.InvalidPassword);
             }
 
             if (_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress != null)
@@ -41,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.LastLoginTime = DateTimeOffset.Now;
 
             await _userCommands.UpdateUserAsync(user);
-            await SignInAsync(user.Username, user.Role.Name);
+            await SignInAsync(user);
 
             return new AuthenticateUserResponse
             {
@@ -55,13 +54,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(user.Role.MenuSetting)
                 }
             };
-        }
-
-        [HttpPost("user")]
-        public Dictionary<string, string> GetUser()
-        {
-            var user = HttpContext.User;
-            return HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
         }
 
         [HttpPost, Route("logout")]
@@ -86,16 +78,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             );
         }
 
-        private async Task SignInAsync(string username, string role)
+        private async Task SignInAsync(User user)
         {
             SetCsrfToken();
 
             var claims = new List<Claim>
             {
-                new Claim(Consts.UserInfo.UsernameKey, username),
-                new Claim(Consts.UserInfo.RolenameKey, role),
-                new Claim(Consts.UserInfo.ResellerKey, Guid.NewGuid().ToString()),
-                new Claim(Consts.UserInfo.BrandKey, Guid.NewGuid().ToString()),
+                new Claim(Consts.UserInfo.UsernameKey, user.Username),
+                new Claim(Consts.UserInfo.RolenameKey, user.Role.Name),
+                new Claim(Consts.UserInfo.ResellerKey, user.ResellerId.ToString()),
+                new Claim(Consts.UserInfo.LicenseeKey, user.LicenseeId.ToString()),
+                new Claim(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString()),
             };
 
             var authProperties = new AuthenticationProperties

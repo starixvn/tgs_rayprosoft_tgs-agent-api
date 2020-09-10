@@ -31,7 +31,7 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
             builder.Property(c => c.ResellerId)
                 .IsRequired(false);
 
-            builder.Property(c => c.BrandId)
+            builder.Property(c => c.LicenseeId)
                 .IsRequired(false);
 
             builder.Property(c => c.Status)
@@ -40,10 +40,6 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 
             builder.Property(c => c.Name)
                 .HasColumnType(ColumnTypes.Nvarchar(30))
-                .IsRequired();
-
-            builder.Property(c => c.Email)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
             builder.Property(c => c.TimeZone)

@@ -35,11 +35,14 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<IUserQueries, UserQueries>();
             services.AddScoped<IRoleQueries, RoleQueries>();
             services.AddScoped<ISettingQueries, SettingQueries>();
-
+            services.AddScoped<IDepartmentQueries, DepartmentQueries>();
 
             services.AddScoped<IUserCommands, UserCommands>();
             services.AddScoped<ISettingCommands, SettingCommands>();
             services.AddScoped<IRoleCommands, RoleCommands>();
+
+            services.AddTransient(typeof(IGenericCommands<>), typeof(GenericCommands<>));
+
             return services;
         }
 
@@ -55,7 +58,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddNats(configuration);
             services.AddTgsLog();
             services.AddScoped<ExceptionMiddleware>();
-
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -75,13 +77,19 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new PathString("/api/auth");
+                    options.LoginPath = new PathString("/api/users/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);//沒給預設14天
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        context.Response.Headers["Location"] = context.RedirectUri;
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    };
                 });
 
 
-            string enUSCulture = "en-US";
-            string zhCNCulture = "zh-CN";
+            var enUSCulture = "en-US";
+            var zhCNCulture = "zh-CN";
 
             services.Configure<RequestLocalizationOptions>(options =>
             {
@@ -105,8 +113,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
                 options.Filters.Add(new ValidationFilter());
-
-
 
                 //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
                 //// we need to implement it on our self if not done before deployment

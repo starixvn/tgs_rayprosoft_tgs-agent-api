@@ -6,6 +6,7 @@ using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Validators;
 using TGS.Tests.TestsCommon;
 
 namespace Tgs.UnitTests.Operations
@@ -14,76 +15,74 @@ namespace Tgs.UnitTests.Operations
     public sealed class StatusValidatorTests : NUnitTestsBase
     {
         private IStatusValidator _statusValidator;
-
-        private IBrandOperations _brandOperations;
-
+        private ILicenseeOperations _licenseeOperations;
         private IGameProviderOperations _gameProviderOperations;
 
         protected override void InitializeBeforeEachTest()
         {
-            _brandOperations = Substitute.For<IBrandOperations>();
+            _licenseeOperations = Substitute.For<ILicenseeOperations>();
             _gameProviderOperations = Substitute.For<IGameProviderOperations>();
-            _statusValidator = new StatusValidator(_brandOperations, _gameProviderOperations);
+            _statusValidator = new StatusValidator(_licenseeOperations, _gameProviderOperations);
         }
 
         [Test]
-        public void ThrowIfBrandStatusIsNotOneOfAsync_Ensures_Status()
+        public void ThrowIfLicenseeStatusIsNotOneOfAsync_Ensures_Status()
         {
-            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid.NewGuid(), new Status[0]);
+            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(Guid.NewGuid(), new Status[0]);
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
         }
 
         [Test]
-        public void ThrowIfBrandStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Brand_Status_Is_Null()
+        public void ThrowIfLicenseeStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Licensee_Status_Is_Null()
         {
-            var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusAsync(brandId)
+            var LicenseeId = Guid.NewGuid();
+            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
                 .Returns(Task.FromResult((Status?)null));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
-                brandId,
+            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+                LicenseeId,
                 Status.Active);
 
             action.Should().Throw<InvalidStatusException>();
         }
 
         [Test]
-        public void ThrowIfBrandStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Brand_Status_Is_Not_One_Of()
+        public void ThrowIfLicenseeStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Licensee_Status_Is_Not_One_Of()
         {
-            var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusAsync(brandId)
+            var LicenseeId = Guid.NewGuid();
+            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
                 .Returns(Task.FromResult((Status?)Status.Inactive));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
-                brandId,
+            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+                LicenseeId,
                 Status.Active);
 
             action.Should().Throw<InvalidStatusException>();
         }
 
         [Test]
-        public void ThrowIfBrandStatusIsNotOneOfAsync_Throws_BrandUnderMaintenanceException()
+        public void ThrowIfLicenseeStatusIsNotOneOfAsync_Throws_LicenseeUnderMaintenanceException()
         {
-            var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusAsync(brandId)
+            var LicenseeId = Guid.NewGuid();
+            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
                 .Returns(Task.FromResult((Status?)Status.Maintenance));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
-                brandId,
+            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+                LicenseeId,
                 Status.Active);
 
-            action.Should().Throw<BrandUnderMaintenanceException>();
+            action.Should().Throw<LicenseeUnderMaintenanceException>();
         }
 
         [Test]
-        public void ThrowIfBrandStatusIsNotOneOfAsync_Not_Throws_When_Ok()
+        public void ThrowIfLicenseeStatusIsNotOneOfAsync_Not_Throws_When_Ok()
         {
-            var brandId = Guid.NewGuid();
-            _brandOperations.GetBrandStatusAsync(brandId)
+            var LicenseeId = Guid.NewGuid();
+            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
                 .Returns(Task.FromResult((Status?)Status.Active));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
-                brandId,
+            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+                LicenseeId,
                 Status.Active);
 
             action.Should().NotThrow();

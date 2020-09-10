@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Role {
+    public class Role {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TGS.Apis.BackendOffice.Resources.Role", typeof(Role).Assembly);
@@ -51,7 +51,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The role cannot be deleted owing to user used already..
         /// </summary>
-        internal static string CannotDeleteRole {
+        public static string CannotDeleteRole {
             get {
                 return ResourceManager.GetString("CannotDeleteRole", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The name has existed already..
         /// </summary>
-        internal static string NameExistd {
+        public static string NameExistd {
             get {
                 return ResourceManager.GetString("NameExistd", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Name&apos;s length must be shoter than 50..
         /// </summary>
-        internal static string NameLengthLimit {
+        public static string NameLengthLimit {
             get {
                 return ResourceManager.GetString("NameLengthLimit", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Name is requred..
         /// </summary>
-        internal static string NameRequired {
+        public static string NameRequired {
             get {
                 return ResourceManager.GetString("NameRequired", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Role not found..
         /// </summary>
-        internal static string NotFound {
+        public static string NotFound {
             get {
                 return ResourceManager.GetString("NotFound", resourceCulture);
             }

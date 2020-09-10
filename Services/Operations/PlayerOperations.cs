@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Redis;
@@ -55,7 +56,7 @@ namespace TGS.Services.Operations
 
             if (cachedPlayer == null)
             {
-                //throw new PlayerNotFoundException($"Player not found with code: {playerCode}");
+                throw new PlayerNotFoundException(playerCode);
             }
 
             await CachePlayerAsync(playerCode, cachedPlayer);
@@ -82,8 +83,8 @@ namespace TGS.Services.Operations
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, field);
 
             return value.HasValue ?
-                _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value) :
-                    await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
+                   _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value) :
+                   await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
         }
 
 
@@ -91,7 +92,7 @@ namespace TGS.Services.Operations
         {
             var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, new RedisValue[]
             {
-                CachedPlayerFields.BrandId,
+                CachedPlayerFields.LicenseeId,
                 CachedPlayerFields.ExternalId,
                 CachedPlayerFields.Status,
                 CachedPlayerFields.Type,
@@ -99,7 +100,7 @@ namespace TGS.Services.Operations
                 CachedPlayerFields.DefaultWalletId,
                 CachedPlayerFields.CultureCode,
                 CachedPlayerFields.BetLimitGroupId,
-                CachedPlayerFields.BrandCode,
+                CachedPlayerFields.LicenseeCode,
                 CachedPlayerFields.DefaultWalletCurrencyCode,
                 CachedPlayerFields.LastTermsUrl,
                 CachedPlayerFields.LastCashierUrl,
@@ -113,7 +114,7 @@ namespace TGS.Services.Operations
                 return new CachedPlayer
                 {
                     PlayerCode = playerCode,
-                    BrandId = Guid.Parse(values[0]),
+                    LicenseeId = Guid.Parse(values[0]),
                     ExternalId = values[1],
                     Status = (PlayerStatus)(int)values[2],
                     Type = (PlayerTypes)(int)values[3],
@@ -121,7 +122,7 @@ namespace TGS.Services.Operations
                     DefaultWalletId = Guid.Parse(values[5]),
                     CultureCode = values[6],
                     BetLimitGroupId = (int)values[7],
-                    BrandCode = values[8],
+                    LicenseeCode = values[8],
                     DefaultWalletCurrencyCode = values[9],
                     LastTermsUrl = values[10],
                     LastCashierUrl = values[11],
@@ -138,8 +139,8 @@ namespace TGS.Services.Operations
         {
             var fields = new HashEntry[]
             {
-                new (CachedPlayerFields.BrandId, player.BrandId.ToString()),
-                new (CachedPlayerFields.BrandCode, player.BrandCode),
+                new (CachedPlayerFields.LicenseeId, player.LicenseeId.ToString()),
+                new (CachedPlayerFields.LicenseeCode, player.LicenseeCode),
                 new (CachedPlayerFields.ExternalId, player.ExternalId),
                 new (CachedPlayerFields.Type, (int) player.Type),
                 new (CachedPlayerFields.Username, player.Username),
@@ -182,8 +183,8 @@ namespace TGS.Services.Operations
 
         private static class CachedPlayerFields
         {
-            public const string BrandId = "brandId";
-            public const string BrandCode = "brandCode";
+            public const string LicenseeId = "LicenseeId";
+            public const string LicenseeCode = "LicenseeCode";
             public const string ExternalId = "externalId";
             public const string Type = "type";
             public const string Username = "username";

@@ -17,7 +17,7 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<GameProviderBetLimit> GameProviderBetLimits { get; set; }
 
-        public virtual ICollection<BrandBetLimit> Brands { get; set; }
+        public virtual ICollection<LicenseeBetLimit> Licensees { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
 

@@ -28,10 +28,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
-            builder.Property(c => c.IpAddress)
-                .HasColumnType(ColumnTypes.Nvarchar(64))
-                .IsRequired();
-
             builder.Property(c => c.CultureCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsRequired();

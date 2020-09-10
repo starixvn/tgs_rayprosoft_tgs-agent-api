@@ -6,23 +6,23 @@ namespace TGS.Core.Models.Services.Caches
 {
     public record CachedPlayer
     {
-        public string PlayerCode { get; set; }
-        public Guid BrandId { get; set; }
-        public string BrandCode { get; set; }
-        public PlayerStatus Status { get; set; }
-        public string Username { get; set; }
-        public string ExternalId { get; set; }
-        public string ExternalCurrencyCode { get; set; }
-        public PlayerTypes Type { get; set; }
+        public string PlayerCode { get; init; }
+        public Guid LicenseeId { get; init; }
+        public string LicenseeCode { get; init; }
+        public PlayerStatus Status { get; init; }
+        public string Username { get; init; }
+        public string ExternalId { get; init; }
+        public string ExternalCurrencyCode { get; init; }
+        public PlayerTypes Type { get; init; }
         public bool IsTestPlayer => Type.IsTestPlayer();
-        public Guid DefaultWalletId { get; set; }
-        public string DefaultWalletCurrencyCode { get; set; }
-        public string CultureCode { get; set; }
-        public int BetLimitGroupId { get; set; }
+        public Guid DefaultWalletId { get; init; }
+        public string DefaultWalletCurrencyCode { get; init; }
+        public string CultureCode { get; init; }
+        public int BetLimitGroupId { get; init; }
 
-        public string LastLoginUrl { get; set; }
-        public string LastCashierUrl { get; set; }
-        public string LastHelpUrl { get; set; }
-        public string LastTermsUrl { get; set; }
+        public string LastLoginUrl { get; init; }
+        public string LastCashierUrl { get; init; }
+        public string LastHelpUrl { get; init; }
+        public string LastTermsUrl { get; init; }
     }
 }

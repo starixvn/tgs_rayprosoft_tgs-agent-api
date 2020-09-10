@@ -15,13 +15,12 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public Department Department { get; set; }
 
         public Guid? ResellerId { get; set; }
-        public Guid? BrandId { get; set; }
+        public Guid? LicenseeId { get; set; }
 
         public string Username { get; set; }
         public string LastLoginIp { get; set; }
         public DateTimeOffset? LastLoginTime { get; set; }
         public string Name { get; set; }
-        public string Email { get; set; }
         public string TimeZone { get; set; }
         public byte[] Password { get; set; }
         public byte[] Salt { get; set; }

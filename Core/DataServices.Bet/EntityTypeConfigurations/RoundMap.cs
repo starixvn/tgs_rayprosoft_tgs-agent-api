@@ -73,7 +73,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.GameId)
                 .IsRequired();
 
-            builder.Property(c => c.BrandId)
+            builder.Property(c => c.LicenseeId)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)

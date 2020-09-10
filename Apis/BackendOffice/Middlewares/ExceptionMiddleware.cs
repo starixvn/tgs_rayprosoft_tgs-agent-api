@@ -2,9 +2,12 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Log.Events;
@@ -61,6 +64,19 @@ namespace TGS.Apis.BackendOffice.Middlewares
             catch (Exception ex)
             {
                 adminLogEvent.exception = ex.Message;
+
+                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                httpContext.Response.ContentType = "application/json";
+                var contextFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
+                if (contextFeature != null)
+                {
+                    await httpContext.Response.WriteAsync(new ErrorDetails
+                    {
+                        StatusCode = httpContext.Response.StatusCode,
+                        Message = "Internal Server Error."
+                    }.ToString() ?? string.Empty);
+                }
+
             }
 
             _tgsLog.LogAdmin(adminLogEvent);

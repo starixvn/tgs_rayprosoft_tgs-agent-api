@@ -2,15 +2,20 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Services.Operations.Bets;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
+using TGS.Services.Operations.Validators;
 
 namespace TGS.Services.Operations.Extensions
 {
     public static class ServiceExtensions
     {
+        /// <summary>
+        /// Dependency Injection of Operations, need to add dependency by using AddInfrastructures in Infrastructures project
+        /// </summary>
         public static IServiceCollection AddOperations(this IServiceCollection services)
-        {
+        {            
             #region Code Mappers
 
             services.AddSingleton<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
@@ -19,7 +24,7 @@ namespace TGS.Services.Operations.Extensions
 
             #region Queries
                         
-            services.AddFactory<IBrandQueries, BrandQueries>();
+            services.AddFactory<ILicenseeQueries, LicenseeQueries>();
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
@@ -28,9 +33,11 @@ namespace TGS.Services.Operations.Extensions
 
             #region Operations
 
-            services.AddSingleton<IBrandOperations, BrandOperations>();
+            services.AddSingleton<ILicenseeOperations, LicenseeOperations>();
             services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
             services.AddSingleton<IPlayerOperations, PlayerOperations>();
+
+            services.AddScoped<GameActionDataOperations, GameActionDataOperations>();
             
             #endregion
 
@@ -38,6 +45,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
             services.AddSingleton<IStatusValidator, StatusValidator>();
             services.AddSingleton<IExpirationValidator, ExpirationValidator>();
+            services.AddSingleton<IAmountValidator, AmountValidator>();
+            services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
 
             return services;
         }

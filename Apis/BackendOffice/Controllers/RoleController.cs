@@ -88,7 +88,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPut("{roleId}"), Description("Update role")]
-        public async Task<GetRoleResponse> UpdateRoleAsync(Guid roleId,
+        public async Task<MessageResponse> UpdateRoleAsync(Guid roleId,
             [FromQuery] UpdateRoleRequest request)
         {
             var role = await _roleQueries.GetRoleByIdAsync(roleId);
@@ -108,11 +108,11 @@ namespace TGS.Apis.BackendOffice.Controllers
             role.UpdatedOn = DateTimeOffset.Now;
 
             await _roleCommands.UpdateRoleAsync(role);
-            return CreateValidResponse<GetRoleResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
 
         [HttpDelete("{roleId}"), Description("Delete a role")]
-        public async Task<GetRoleResponse> DeleteRoleAsync(Guid roleId)
+        public async Task<MessageResponse> DeleteRoleAsync(Guid roleId)
         {
             var role = await _roleQueries.GetRoleByIdAsync(roleId);
             if (role == null)
@@ -126,12 +126,11 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             await _roleCommands.DeleteRoleAsync(role);
-            return CreateValidResponse<GetRoleResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
 
-        [Route("{roleId}/copy")]
-        [HttpPost, Description("Copy role")]
-        public async Task<GetRoleResponse> CopyRoleAsync(Guid roleId, [FromBody] CopyRoleRequest request)
+        [HttpPost("{roleId}/copy"), Description("Copy role")]
+        public async Task<MessageResponse> CopyRoleAsync(Guid roleId, [FromBody] CopyRoleRequest request)
         {
             var role = await _roleQueries.GetRoleByIdAsync(roleId);
             if (role == null)
@@ -151,11 +150,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                 role.MenuSetting);
 
             await _roleCommands.CreateRoleAsync(newRole);
-            return CreateValidResponse<GetRoleResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost, Route(""), Description("Create a role")]
-        public async Task<GetRoleResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
+        [HttpPost, Description("Create a role")]
+        public async Task<MessageResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
         {
             if (await _roleQueries.NameExistsAsync(request.Name))
             {
@@ -169,7 +168,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 _jsonSerializationProvider.SerializeToString(request.Menus));
 
             await _roleCommands.CreateRoleAsync(role);
-            return CreateValidResponse<GetRoleResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
 
         private Role CreateRole(string name, string displayName, string description, string menuSetting)

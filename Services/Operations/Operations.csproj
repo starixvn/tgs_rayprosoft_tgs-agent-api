@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Commands\**" />
     <Compile Remove="Extensions\**" />
+    <EmbeddedResource Remove="Commands\**" />
     <EmbeddedResource Remove="Extensions\**" />
+    <None Remove="Commands\**" />
     <None Remove="Extensions\**" />
   </ItemGroup>
 
@@ -29,10 +32,6 @@
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\" />
   </ItemGroup>
 
 </Project>

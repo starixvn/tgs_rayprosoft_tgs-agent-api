@@ -5,7 +5,7 @@ namespace TGS.Core.Models.Services.Caches
 {
     public record CachedPlayerLoginRecord
     {
-        public PlatformType PlatformType { get; set; }
-        public DateTimeOffset ExpiredOn { get; set; }
+        public PlatformType PlatformType { get; init; }
+        public DateTimeOffset ExpiredOn { get; init; }
     }
 }
