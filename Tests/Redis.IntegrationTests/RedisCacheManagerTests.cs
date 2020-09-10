@@ -11,7 +11,7 @@ namespace TGS.Tests.Redis.IntegrationTests
 {
     [TestFixture]
     [Parallelizable]
-    [Category(Named.Integration), Ignore("Redis not work")]
+    [Category(Named.Integration)]
     public partial class RedisCacheManagerTests
     {
         private const string CacheType = "DataByGuid";

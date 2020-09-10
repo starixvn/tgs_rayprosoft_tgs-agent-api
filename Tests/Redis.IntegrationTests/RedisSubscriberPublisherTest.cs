@@ -8,8 +8,9 @@ using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
 {
-    [TestFixture, Parallelizable]
-    [Category(Named.Integration), Ignore("Redis not work")]
+    //[TestFixture, Parallelizable]
+    [TestFixture]
+    [Category(Named.Integration)]
     public class RedisSubscriberPublisherTest
     {
         private IRedisPublisher _redisPublisher;
@@ -119,7 +120,7 @@ namespace TGS.Tests.Redis.IntegrationTests
         [Test]
         public async Task Exception_does_not_break_subscription_using_real_async()
         {
-            var result = new TestValue();
+           var result = new TestValue();
             var messagesProcessed = 0;
 
             await _redisSubscriber.SubscribeAsync<TestValue>(async message =>
@@ -152,7 +153,7 @@ namespace TGS.Tests.Redis.IntegrationTests
             result.Name.Should().Be(item.Name);
         }
 
-        private static Task ThrowExceptionAsync()
+        private Task ThrowExceptionAsync()
         {
             throw new ArgumentException("Some test exception");
         }

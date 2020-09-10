@@ -11,7 +11,7 @@ using TGS.Tests.TestsCommon;
 namespace TGS.Tests.Redis.IntegrationTests
 {
     [TestFixture]
-    [Category(Named.Integration), Ignore("Redis not work")]
+    [Category(Named.Integration)]
     public class RedisLockTests
     {
         private IRedisLock _redisLock;
