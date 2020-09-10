@@ -10,7 +10,7 @@ Scenario: 01.a - If I place 1 bet, I win the bet, the round should be closed wit
 		And a sequence of game actions
 			| Action Type | ID | Referencing Action ID |
 			| PlaceBet    | 1  |                       |
-		 And the round is "Open"
+		And the round is "Open"
 	When I perform action
 		| Action Type | Referencing Action ID | 
 		| WinBet      | 1                     |
@@ -18,10 +18,10 @@ Scenario: 01.a - If I place 1 bet, I win the bet, the round should be closed wit
 
 Scenario: 01.b - If I place 1 bet, then I win the bet, the round should be open with AutoCloseRound = true and RequestToCloseRound = NO
 	Given AutoCloseRound set to "True"
-	 And a sequence of game actions
+		And a sequence of game actions
 		| Action Type | ID | Referencing Action ID |
 		| PlaceBet    | 1  |                       |
-	 And the round is "Open"
+		And the round is "Open"
 	When I perform action
 		| Action Type | Referencing Action ID | RequestToCloseRound |
 		| WinBet      | 1                     | NO                  |
@@ -29,10 +29,10 @@ Scenario: 01.b - If I place 1 bet, then I win the bet, the round should be open 
 
 Scenario: 01.c - If I place 1 bet, then I cancel the bet, the round should be closed with AutoCloseRound = true and RequestToCloseRound = YES
 	Given AutoCloseRound set to "True"
-	 And a sequence of game actions
+		And a sequence of game actions
 		| Action Type | ID | Referencing Action ID |
 		| PlaceBet    | 1  |                       |
-	 And the round is "Open"
+		And the round is "Open"
 	When I perform action
 		| Action Type       | Referencing Action ID | RequestToCloseRound |
 		| CancelTransaction | 1                     | YES                 |                 
@@ -40,10 +40,10 @@ Scenario: 01.c - If I place 1 bet, then I cancel the bet, the round should be cl
 
 Scenario: 01.d - If I place 1 bet, then I win the bet, the round should be open with AutoCloseRound = false
 	Given AutoCloseRound set to "False"
-	 And a sequence of game actions
+		And a sequence of game actions
 		| Action Type | ID | Referencing Action ID |
 		| PlaceBet    | 1  |                       |
-	 And the round is "Open"
+		And the round is "Open"
 	When I perform action
 		| Action Type | Referencing Action ID | 
 		| WinBet      | 1                     |
@@ -51,10 +51,10 @@ Scenario: 01.d - If I place 1 bet, then I win the bet, the round should be open 
 
 Scenario: 01.e - If I place 1 bet, then I win the bet, round should be open with AutoCloseRound = false and RequestToCloseRound = YES
 	Given AutoCloseRound set to "False"
-	 And a sequence of game actions
+		And a sequence of game actions
 		| Action Type | ID | Referencing Action ID |
 		| PlaceBet    | 1  |                       |
-	 And the round is "Open"
+		And the round is "Open"
 	When I perform action
 		| Action Type | Referencing Action ID | RequestToCloseRound |
 		| WinBet      | 1                     | YES                 |

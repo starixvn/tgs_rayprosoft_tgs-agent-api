@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using NSubstitute;
+using Moq;
 using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -15,14 +15,14 @@ namespace Tgs.UnitTests.Operations
     public sealed class StatusValidatorTests : NUnitTestsBase
     {
         private IStatusValidator _statusValidator;
-        private ILicenseeOperations _licenseeOperations;
-        private IGameProviderOperations _gameProviderOperations;
+        private Mock<ILicenseeOperations> _licenseeOperationsMock;
+        private Mock<IGameProviderOperations> _gameProviderOperationsMock;
 
         protected override void InitializeBeforeEachTest()
         {
-            _licenseeOperations = Substitute.For<ILicenseeOperations>();
-            _gameProviderOperations = Substitute.For<IGameProviderOperations>();
-            _statusValidator = new StatusValidator(_licenseeOperations, _gameProviderOperations);
+            _licenseeOperationsMock = new Mock<ILicenseeOperations>();
+            _gameProviderOperationsMock = new Mock<IGameProviderOperations>();
+            _statusValidator = new StatusValidator(_licenseeOperationsMock.Object, _gameProviderOperationsMock.Object);
         }
 
         [Test]
@@ -35,12 +35,12 @@ namespace Tgs.UnitTests.Operations
         [Test]
         public void ThrowIfLicenseeStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Licensee_Status_Is_Null()
         {
-            var LicenseeId = Guid.NewGuid();
-            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
+            var licenseeId = Guid.NewGuid();
+            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?)null));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
-                LicenseeId,
+                licenseeId,
                 Status.Active);
 
             action.Should().Throw<InvalidStatusException>();
@@ -49,12 +49,12 @@ namespace Tgs.UnitTests.Operations
         [Test]
         public void ThrowIfLicenseeStatusIsNotOneOfAsync_Throws_InvalidStatusException_When_Licensee_Status_Is_Not_One_Of()
         {
-            var LicenseeId = Guid.NewGuid();
-            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
+            var licenseeId = Guid.NewGuid();
+            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?)Status.Inactive));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
-                LicenseeId,
+                licenseeId,
                 Status.Active);
 
             action.Should().Throw<InvalidStatusException>();
@@ -63,12 +63,12 @@ namespace Tgs.UnitTests.Operations
         [Test]
         public void ThrowIfLicenseeStatusIsNotOneOfAsync_Throws_LicenseeUnderMaintenanceException()
         {
-            var LicenseeId = Guid.NewGuid();
-            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
+            var licenseeId = Guid.NewGuid();
+            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?)Status.Maintenance));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
-                LicenseeId,
+                licenseeId,
                 Status.Active);
 
             action.Should().Throw<LicenseeUnderMaintenanceException>();
@@ -77,12 +77,12 @@ namespace Tgs.UnitTests.Operations
         [Test]
         public void ThrowIfLicenseeStatusIsNotOneOfAsync_Not_Throws_When_Ok()
         {
-            var LicenseeId = Guid.NewGuid();
-            _licenseeOperations.GetLicenseeStatusAsync(LicenseeId)
+            var licenseeId = Guid.NewGuid();
+            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?)Status.Active));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
-                LicenseeId,
+                licenseeId,
                 Status.Active);
 
             action.Should().NotThrow();
@@ -117,9 +117,9 @@ namespace Tgs.UnitTests.Operations
             var gpId = Guid.NewGuid();
             var gpcId = Guid.NewGuid();
 
-            _gameProviderOperations.GetGameProviderStatusAsync(gpId)
+            _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
                 .Returns(Task.FromResult(gameProviderStatus));
-            _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gpId, gpcId)
+            _gameProviderOperationsMock.Setup(x => x.GetGameProviderConfigurationStatusAsync(gpId, gpcId))
                 .Returns(Task.FromResult(gameProviderConfigurationStatus));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
@@ -132,9 +132,9 @@ namespace Tgs.UnitTests.Operations
             var gpId = Guid.NewGuid();
             var gpcId = Guid.NewGuid();
 
-            _gameProviderOperations.GetGameProviderStatusAsync(gpId)
+            _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
                 .Returns(Task.FromResult((Status?)Status.Inactive));
-            _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gpId, gpcId)
+            _gameProviderOperationsMock.Setup(x => x.GetGameProviderConfigurationStatusAsync(gpId, gpcId))
                 .Returns(Task.FromResult((Status?)Status.Inactive));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
@@ -148,9 +148,9 @@ namespace Tgs.UnitTests.Operations
             var gpId = Guid.NewGuid();
             var gpcId = Guid.NewGuid();
 
-            _gameProviderOperations.GetGameProviderStatusAsync(gpId)
+            _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
                .Returns(Task.FromResult(gameProviderStatus));
-            _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gpId, gpcId)
+            _gameProviderOperationsMock.Setup(x => x.GetGameProviderConfigurationStatusAsync(gpId, gpcId))
                 .Returns(Task.FromResult(gameProviderConfigurationStatus));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gpId, gpcId, Status.Active);
