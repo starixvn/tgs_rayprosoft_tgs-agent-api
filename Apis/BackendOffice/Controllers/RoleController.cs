@@ -53,7 +53,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = role.CreatedOn,
                     UpdatedOn = role.UpdatedOn,
                     CreatedByUsername = role.CreatedByUsername,
-                    UpdatedByUsername = role.CreatedByUsername
+                    UpdatedByUsername = role.UpdatedByUsername
 
                 })
                 .CreatePagedResponseAsync(request);
@@ -77,7 +77,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
-                UpdatedByUsername = role.CreatedByUsername
+                UpdatedByUsername = role.UpdatedByUsername
             };
 
             return new GetRoleResponse
@@ -99,7 +99,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (request.Name != role.Name && await _roleQueries.NameExistsAsync(request.Name))
             {
-                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExistd}");
+                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExists}");
             }
 
             role.Name = request.Name;
@@ -140,7 +140,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (request.Name == role.Name || await _roleQueries.NameExistsAsync(request.Name))
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExistd);
+                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
             var newRole = CreateRole(
@@ -158,7 +158,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             if (await _roleQueries.NameExistsAsync(request.Name))
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExistd);
+                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
             var role = CreateRole(

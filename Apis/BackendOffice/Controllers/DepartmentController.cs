@@ -91,7 +91,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             if (await _queries.NameExistsAsync(request.Name))
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExistd);
+                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
             var department = new Department
