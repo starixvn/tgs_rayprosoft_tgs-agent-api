@@ -11,7 +11,6 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Apis.BackendOffice.DataService.Commands;
-using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Infrastructures.Json;
@@ -99,18 +98,7 @@ namespace BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Create_User()
         {
-            var password = Generator.RandomString(8);
-            var request = new CreateUserRequest
-            {
-                Name = Generator.RandomString(6),
-                Username = Generator.RandomString(6),
-                RoleId = Guid.NewGuid(),
-                DepartmentId = Guid.NewGuid(),
-                TimeZone = "+0800",
-                Status = UserStatus.Enabled,
-                Password = password,
-                ConfirmPassword = password
-            };
+            var request = new Fixture().Create<CreateUserRequest>();
 
             _userQueriesMock.Setup(s => s.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
                 .Returns(Task.FromResult(false));
@@ -131,18 +119,57 @@ namespace BackendOffice.UnitTests.Controllers
         }
 
         [Test]
+        public async Task Cannot_Create_User_With_Name_Exists()
+        {
+            var request = new Fixture().Create<CreateUserRequest>();
+
+            _userQueriesMock.Setup(s => s.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
+                .Returns(Task.FromResult(true));
+
+            var response = await _controller.CreateUserAsync(request);
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.User.UsernameExistedAlready);
+        }
+
+        [Test]
+        public async Task Cannot_Create_User_With_Role_Not_Found()
+        {
+            var request = new Fixture().Create<CreateUserRequest>();
+
+            _userQueriesMock.Setup(s => s.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
+                .Returns(Task.FromResult(false));
+            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+                .Returns(Task.FromResult<Role>(null));
+
+            var response = await _controller.CreateUserAsync(request);
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Role.NotFound);
+        }
+
+        [Test]
+        public async Task Cannot_Create_User_With_Department_Not_Found()
+        {
+            var request = new Fixture().Create<CreateUserRequest>();
+
+            _userQueriesMock.Setup(s => s.UsernameExistsAsync(It.Is<string>(p => p == request.Username)))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == request.RoleId)))
+                .Returns(Task.FromResult(new Role()));
+
+            _departmentQueriesMock.Setup(s => s.GetDepartmentByIdAsync(It.Is<Guid>(p => p == request.DepartmentId)))
+                .Returns(Task.FromResult<Department>(null));
+
+            var response = await _controller.CreateUserAsync(request);
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Department.NotFound);
+        }
+
+        [Test]
         public async Task Can_Update_User()
         {
             var user = CreateUserFixture().Create<User>();
-            user.Id = Guid.NewGuid();
-
-            var request = new UpdateUserRequest
-            {
-                Name = Generator.RandomString(6),
-                RoleId = Guid.NewGuid(),
-                DepartmentId = Guid.NewGuid(),
-                Status = UserStatus.Enabled
-            };
+            var request = new Fixture().Create<UpdateUserRequest>();
 
             _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
@@ -164,15 +191,7 @@ namespace BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_User_Not_Found()
         {
             var user = CreateUserFixture().Create<User>();
-            user.Id = Guid.NewGuid();
-
-            var request = new UpdateUserRequest
-            {
-                Name = Generator.RandomString(6),
-                RoleId = Guid.NewGuid(),
-                DepartmentId = Guid.NewGuid(),
-                Status = UserStatus.Enabled
-            };
+            var request = new Fixture().Create<UpdateUserRequest>();
 
             _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult<User>(null));
@@ -190,15 +209,7 @@ namespace BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_User_With_Role_Not_Found()
         {
             var user = CreateUserFixture().Create<User>();
-            user.Id = Guid.NewGuid();
-
-            var request = new UpdateUserRequest
-            {
-                Name = Generator.RandomString(6),
-                RoleId = Guid.NewGuid(),
-                DepartmentId = Guid.NewGuid(),
-                Status = UserStatus.Enabled
-            };
+            var request = new Fixture().Create<UpdateUserRequest>();
 
             _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
@@ -219,15 +230,7 @@ namespace BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_User_With_Department_Not_Found()
         {
             var user = CreateUserFixture().Create<User>();
-            user.Id = Guid.NewGuid();
-
-            var request = new UpdateUserRequest
-            {
-                Name = Generator.RandomString(6),
-                RoleId = Guid.NewGuid(),
-                DepartmentId = Guid.NewGuid(),
-                Status = UserStatus.Enabled
-            };
+            var request = new Fixture().Create<UpdateUserRequest>();
 
             _userQueriesMock.Setup(s => s.GetUserByIdAsync(It.Is<Guid>(p => p == user.Id)))
                 .Returns(Task.FromResult(user));
@@ -251,7 +254,6 @@ namespace BackendOffice.UnitTests.Controllers
         public async Task Can_Update_User_Password()
         {
             var user = CreateUserFixture().Create<User>();
-            user.Id = Guid.NewGuid();
             var password = Generator.RandomString(6);
             var request = new UpdatePasswordRequest
             {
@@ -274,7 +276,6 @@ namespace BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_User_Password_With_User_Not_Found()
         {
             var user = CreateUserFixture().Create<User>();
-            user.Id = Guid.NewGuid();
             var password = Generator.RandomString(6);
             var request = new UpdatePasswordRequest
             {

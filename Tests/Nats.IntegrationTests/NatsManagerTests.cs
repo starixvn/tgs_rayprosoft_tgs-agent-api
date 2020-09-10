@@ -10,6 +10,8 @@ using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Nats.IntegrationTests
 {
+    [TestFixture]
+    [Category(Named.Integration), Ignore("Nats not work")]
     public class NatsManagerTests
     {
         private const string Topic = "NatsTopicTest";

@@ -8,7 +8,7 @@ using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
 {
-    [TestFixture, Parallelizable]
+    [TestFixture, Parallelizable, Ignore("Redis not work")]
     [Category(Named.Manual)]
     [Explicit(reason: Named.NotToBeContinuouslyTested)]
     public class ManualTests
