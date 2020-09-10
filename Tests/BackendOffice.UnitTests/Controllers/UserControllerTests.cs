@@ -20,7 +20,7 @@ using Resources = TGS.Apis.BackendOffice.Resources;
 namespace BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
-    public class UserControllerTests : BaseTests
+    public partial class UserControllerTests : BaseTests
     {
         private UserController _controller;
         private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
@@ -110,7 +110,7 @@ namespace BackendOffice.UnitTests.Controllers
                 .Returns(Task.FromResult(new Department()));
 
             var response = await _controller.CreateUserAsync(request);
-            response.Valid.Should().BeFalse();
+            response.Valid.Should().BeTrue();
             _userCommandsMock.Verify(s => s.CreateUserAsync(It.Is<User>(p =>
                 p.Name == request.Name &&
                 p.Username == request.Username &&

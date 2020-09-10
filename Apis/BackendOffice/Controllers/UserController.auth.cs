@@ -65,7 +65,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private void SetCsrfToken()
         {
             var tokens = _antiForgery.GetAndStoreTokens(HttpContext);
-            Response.Cookies.Append(
+            _httpContextAccessor.HttpContext.Response.Cookies.Append(
                 Consts.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
                 new CookieOptions
@@ -101,7 +101,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
-        protected bool PasswordMismatch(User user, string password)
+        private bool PasswordMismatch(User user, string password)
         {
             var salt = _hashProvider.Hash(user.Salt);
 
