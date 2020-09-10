@@ -23,7 +23,7 @@ build:
   script:
     - "dotnet build $solution"
 
-#tests:
-#  stage: test
-#  script:
-#    - "dotnet test $solution"  
+tests:
+  stage: test
+  script:
+    - "dotnet test $solution"  

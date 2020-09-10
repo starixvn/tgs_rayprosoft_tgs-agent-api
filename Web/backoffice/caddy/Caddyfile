@@ -10,12 +10,16 @@
 :80
 
 # Set this path to your site's directory.
-root * /site
+root * /usr/share/caddy
 
 # Enable the static file server.
 file_server
 
 respond /healthcheck 200
 
-# TODO: from env var?
-reverse_proxy /api/* backoffice.api:80
+# api proxy
+# reverse_proxy /api/* backoffice.api:80
+route /proxy/* {
+    uri strip_prefix /proxy
+    reverse_proxy backoffice.api:80
+}

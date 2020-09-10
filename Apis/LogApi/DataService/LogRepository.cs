@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using TGS.Apis.LogApi.DataService.EntityTypeConfiguration;
 using TGS.Apis.LogApi.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
 
@@ -32,11 +33,11 @@ namespace TGS.Apis.LogApi.DataService
         {
         }
 
-        DbSet<ApiLog> ApiLogs { get; set; }
+        private DbSet<ApiLog> ApiLogs { get; }
 
-        DbSet<LogRecord> LogRecords { get; set; }
+        private DbSet<LogRecord> LogRecords { get; }
 
-        DbSet<AdminLog> AdminLogs { get; set; }
+        private DbSet<AdminLog> AdminLogs { get; }
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
@@ -61,15 +62,12 @@ namespace TGS.Apis.LogApi.DataService
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.ApplyConfiguration(new ApiLogMap());
-            modelBuilder.ApplyConfiguration(new LogRecordMap());
-            modelBuilder.ApplyConfiguration(new ServiceLogMap());
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
-        async Task ILogRepository.AddApiLogsAsync(IList<ApiLog> logs)
+        Task ILogRepository.AddApiLogsAsync(IList<ApiLog> logs)
         {
-            await ApiLogs.AddRangeAsync(logs);
-            await SaveChangesAsync();
+            return this.BulkInsertAsync(logs);
         }
 
         async Task ILogRepository.AddApiLogAsync(ApiLog log)
@@ -83,10 +81,9 @@ namespace TGS.Apis.LogApi.DataService
             return Database.CanConnect();
         }
 
-        async Task ILogRepository.AddLogRecordsAsync(IList<LogRecord> logs)
+        Task ILogRepository.AddLogRecordsAsync(IList<LogRecord> logs)
         {
-            await LogRecords.AddRangeAsync(logs);
-            await SaveChangesAsync();
+            return this.BulkInsertAsync(logs);
         }
 
         async Task ILogRepository.AddLogRecordAsync(LogRecord log)
@@ -99,10 +96,9 @@ namespace TGS.Apis.LogApi.DataService
             return SaveChangesAsync();
         }
 
-        async Task ILogRepository.AddAdminLogsAsync(IList<AdminLog> logs)
+        Task ILogRepository.AddAdminLogsAsync(IList<AdminLog> logs)
         {
-            await AdminLogs.AddRangeAsync(logs);
-            await SaveChangesAsync();
+            return this.BulkInsertAsync(logs);
         }
 
         async Task ILogRepository.AddAdminLogAsync(AdminLog log)

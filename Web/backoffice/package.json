@@ -5,12 +5,11 @@
   "scripts": {
     "start": "npm-run-all --parallel start:*",
     "start:dev": "snowpack dev --reload",
-    "start:api": "docker-compose -f ../../docker-compose.yml run --rm -p 32667:80  backoffice-api",
+    "start:docker": "docker-compose -f ../../docker-compose.yml up --build --always-recreate-deps --remove-orphans",
     "build": "snowpack build",
     "login:docker": "docker login registry.gitlab.com",
     "build:docker": "cross-var docker build . -t registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",
     "push:docker": "cross-var docker push registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",
-    "prepare:docker": "docker-compose -f ../../docker-compose.yml up --force-recreate --always-recreate-deps",
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx}\""
   },

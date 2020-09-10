@@ -98,7 +98,6 @@ export default ({
   }, [pageIndex, pageSize, sortBy])
 
   let tableProps = getTableProps()
-  console.log("tableProps", tableProps)
   return (
     <Context.Provider value={{ table, async, getPage }}>
       <Set orientation="vertical">

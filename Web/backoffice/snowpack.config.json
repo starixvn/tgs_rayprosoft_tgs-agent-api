@@ -2,6 +2,9 @@
   "extends": "@snowpack/app-scripts-react",
   "install": [],
   "plugins": [],
+  "devOptions": {
+    "port": 3000
+  },
   "mount": {
     "public": "/",
     "src": "/dist"
