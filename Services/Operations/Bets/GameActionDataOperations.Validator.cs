@@ -81,7 +81,7 @@ namespace TGS.Services.Operations.Bets
 
         private void ThrowIfReferenceGameActionOrRoundIsNotFound(GameActionState s)
         {
-            if (s.HasExtRefTransactionId && s.ReferenceGameAction == null)
+            if (s.HasExtRefTransactionId && s.ReferencedGameAction == null)
             {
                 if (s.GameActionType == GameActionType.CancelTransaction)
                 {

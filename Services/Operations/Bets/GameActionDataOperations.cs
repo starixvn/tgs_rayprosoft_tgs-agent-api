@@ -26,6 +26,8 @@ namespace TGS.Services.Operations.Bets
         private readonly IAmountValidator _amountValidator;
         private readonly IStatusValidator _statusValidator;
         private readonly ITimeZoneManager _timeZoneManager;
+        private readonly IRoundStatusManager _roundStatusManager;
+
         private static readonly GameType[] BypassPreviousActionGameTypes = { GameType.Slot };
 
         public GameActionDataOperations(
@@ -38,7 +40,8 @@ namespace TGS.Services.Operations.Bets
             ITransactionSettingsGenerator transactionSettingsGenerator,
             IAmountValidator amountValidator,
             IStatusValidator statusValidator,
-            ITimeZoneManager timeZoneManager)
+            ITimeZoneManager timeZoneManager,
+            IRoundStatusManager roundStatusManager)
         {
             _tgsRepoFactory = tgsRepoFactory;
             _transactionManager = transactionManager;
@@ -50,6 +53,7 @@ namespace TGS.Services.Operations.Bets
             _amountValidator = amountValidator;
             _statusValidator = statusValidator;
             _timeZoneManager = timeZoneManager;
+            _roundStatusManager = roundStatusManager;
         }
 
         Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
