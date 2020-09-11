@@ -108,22 +108,8 @@ namespace BackendOffice.UnitTests.Controllers
             mockHttpContext.Setup(p => p.User)
                 .Returns(GetUserClaimsPrincipal());
 
-            _authServiceMock = new Mock<IAuthenticationService>();
-            _authServiceMock
-                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
-                .Returns(Task.FromResult(default(object)));
-
-            _authServiceMock
-                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
-                .Returns(Task.FromResult(default(object)));
-
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock
-                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
-                .Returns(_authServiceMock.Object);
-
             mockHttpContext.Setup(p => p.RequestServices)
-                .Returns(serviceProviderMock.Object);
+                .Returns(SetupServiceProviderMock().Object);
 
             mockHttpContext.Setup(p => p.Connection)
                 .Returns(new Mock<ConnectionInfo>().Object);
@@ -137,6 +123,24 @@ namespace BackendOffice.UnitTests.Controllers
 
             _httpContextAccessorMock.Setup(p => p.HttpContext)
                 .Returns(mockHttpContext.Object);
+        }
+
+        private Mock<IServiceProvider> SetupServiceProviderMock()
+        {
+            _authServiceMock = new Mock<IAuthenticationService>();
+            _authServiceMock
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.FromResult(default(object)));
+
+            _authServiceMock
+                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.FromResult(default(object)));
+
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            serviceProviderMock
+                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
+                .Returns(_authServiceMock.Object);
+            return serviceProviderMock;
         }
     }
 }

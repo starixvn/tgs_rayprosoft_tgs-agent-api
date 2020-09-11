@@ -31,7 +31,7 @@ namespace TGS.Apis.LogApi
                     config.AddJsonFile("appsettings.json", false, true)
                         .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true)
                         .AddEnvironmentVariables();
-                    ;
+
                     if (args != null)
                     {
                         config.AddCommandLine(args);

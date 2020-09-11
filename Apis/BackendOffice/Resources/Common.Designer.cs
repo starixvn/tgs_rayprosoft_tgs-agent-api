@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Common {
+    public class Common {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TGS.Apis.BackendOffice.Resources.Common", typeof(Common).Assembly);
@@ -51,7 +51,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The format of value is invalid..
         /// </summary>
-        internal static string InvalidFormat {
+        public static string InvalidFormat {
             get {
                 return ResourceManager.GetString("InvalidFormat", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to not found..
         /// </summary>
-        internal static string NotFound {
+        public static string NotFound {
             get {
                 return ResourceManager.GetString("NotFound", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The setting is required..
         /// </summary>
-        internal static string RequiredSetting {
+        public static string RequiredSetting {
             get {
                 return ResourceManager.GetString("RequiredSetting", resourceCulture);
             }

@@ -34,14 +34,13 @@ namespace TGS.Apis.BackendOffice.Extensions
         {
             services.AddScoped<IUserQueries, UserQueries>();
             services.AddScoped<IRoleQueries, RoleQueries>();
-            services.AddScoped<ISettingQueries, SettingQueries>();
             services.AddScoped<IDepartmentQueries, DepartmentQueries>();
 
             services.AddScoped<IUserCommands, UserCommands>();
-            services.AddScoped<ISettingCommands, SettingCommands>();
             services.AddScoped<IRoleCommands, RoleCommands>();
 
             services.AddTransient(typeof(IGenericCommands<>), typeof(GenericCommands<>));
+            services.AddTransient(typeof(IGenericQueries<>), typeof(GenericQueries<>));
 
             return services;
         }
@@ -117,7 +116,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
                 //// we need to implement it on our self if not done before deployment
                 //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-            }).AddDataAnnotationsLocalization(); ;
+            }).AddDataAnnotationsLocalization();
             return services;
         }
     }
