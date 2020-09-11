@@ -55,7 +55,7 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
             var actions = table.CreateList(ParseActionShortInfo());
             var actionList =
                 actions.Select(
-                    action => 
+                    action =>
                     {
                         Func<BetActionData, decimal> getAmount = action.Type == GameActionType.CancelTransaction
                                                         ? new Func<BetActionData, decimal>(r => r.Amount)
@@ -91,7 +91,7 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
                 var validActions = GetValidPreviousActions(Actions);
                 status = manager.GetStatus(new RoundStatusData
                 {
-                    RoundId  = roundId,
+                    RoundId = roundId,
                     AutoCloseRound = autoCloseRound,
                     RequestToCloseRound = requestToCloseRound,
                     OldStatus = previousRoundStatus,
@@ -184,21 +184,16 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
             AddAction(id, action);
         }
 
-        private int _lastId = 999999;
-
         private void AddAction(int id, BetActionData action)
         {
             Actions.Add(action);
             ActionsById[id] = action;
         }
 
-        int NewActionId => ActionsById.Count == 0 ? ++_lastId : ActionsById.Keys.Max() + 1;
-
-        List<BetActionData> Actions =>
-            GetOrCreate(SR.Actions, () => new List<BetActionData>());
-
-        Dictionary<int, BetActionData> ActionsById =>
-            GetOrCreate(SR.ActionsById, () => new Dictionary<int, BetActionData>());
+        private int _lastId = 999999;
+        private int NewActionId => ActionsById.Count == 0 ? ++_lastId : ActionsById.Keys.Max() + 1;
+        private List<BetActionData> Actions => GetOrCreate(SR.Actions, () => new List<BetActionData>());
+        private Dictionary<int, BetActionData> ActionsById => GetOrCreate(SR.ActionsById, () => new Dictionary<int, BetActionData>());
 
         private class ActionShortInfo
         {

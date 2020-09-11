@@ -23,8 +23,4 @@
     <ProjectReference Include="..\TestsCommon\TestsCommon.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Operations\Bets\Features\" />
-  </ItemGroup>
-
 </Project>
