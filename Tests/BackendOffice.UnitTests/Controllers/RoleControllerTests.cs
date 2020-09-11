@@ -369,6 +369,53 @@ namespace BackendOffice.UnitTests.Controllers
                 r.Description == role.Description)), Times.Never);
         }
 
+        [Test]
+        public async Task Can_Get_Menus()
+        {
+            var role = CreateRoleFixture().Create<Role>();
+
+            role.Users = new List<User> { new User() };
+
+            _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+                .Returns(Task.FromResult(new Setting()));
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p => p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            var response = await _controller.GetMenuAsync();
+            response.Valid.Should().BeTrue();
+
+            for (var i = 0; i < response.Menus.Length; i++)
+            {
+                response.Menus[i].Code.Should().Be(menuSettings[i].Code);
+                response.Menus[i].IsDisplay.Should().Be(menuSettings[i].IsDisplay);
+
+                for (var j = 0; j < response.Menus[i].SubMenus.Length; j++)
+                {
+                    var actualMenu = response.Menus[i].SubMenus[j];
+                    var expectedMenu = menuSettings[i].SubMenus[j];
+                    actualMenu.Code.Should().Be(expectedMenu.Code);
+                    actualMenu.IsDisplay.Should().Be(expectedMenu.IsDisplay);
+                }
+            }
+        }
+
+        [Test]
+        public async Task Cannot_Get_Menus()
+        {
+            var role = CreateRoleFixture().Create<Role>();
+
+            role.Users = new List<User> { new User() };
+
+            _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+                .Returns(Task.FromResult<Setting>(null));
+
+            var response = await _controller.GetMenuAsync();
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Role.MenuNotFound);
+        }
 
         private Fixture CreateRoleFixture()
         {
