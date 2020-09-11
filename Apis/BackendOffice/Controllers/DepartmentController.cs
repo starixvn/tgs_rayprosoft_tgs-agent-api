@@ -50,7 +50,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var department = await _queries.GetSingleAsync(p => p.Id == id);
             if (department == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Common.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
             if (request.Name != department.Name && await _queries.ExistsAsync(p => p.Name == request.Name))
@@ -72,7 +72,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var department = await _queries.GetSingleAsync(p => p.Id == id, d => d.Include(x => x.Users));
             if (department == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Common.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
             if (department.Users.Any())

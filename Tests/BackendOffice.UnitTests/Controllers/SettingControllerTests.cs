@@ -143,7 +143,7 @@ namespace BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be($"{request.Key} {Resources.Setting.KeyExists}");
+            response.Message.Should().Be(Resources.Setting.KeyExists);
 
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
             _commandsMock.Verify(p => p.CreateAsync(It.Is<Setting>(d =>
