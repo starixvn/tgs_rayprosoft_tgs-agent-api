@@ -1,6 +1,6 @@
 import { toDataOrError } from "./response"
 
-export const get = (url = "", { searchParams = {}, ...options }) => {
+export const get = (url = "", { searchParams = {}, ...options } = {}) => {
   let urlSearchParams = Object.entries(searchParams).reduce(
     (searchParams, [key, value]) => {
       if (typeof value == "string" && !value) {

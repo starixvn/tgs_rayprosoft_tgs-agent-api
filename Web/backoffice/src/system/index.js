@@ -26,7 +26,7 @@ export const DefaultUrl = `/${Code}`
 
 const DefaultCodePath = [Code]
 //TODO: i18n
-const name = () => "系统设置"
+export const name = () => "系统设置"
 
 export const Menu = ({
   title = name(),
@@ -88,7 +88,7 @@ const MenuItem = ({ code, url, ...props }) => {
 }
 
 //TODO: i18n
-const label = (code = "") => {
+export const label = (code = "") => {
   switch (code) {
     case AdminCode:
       return "管理员列表"
@@ -103,7 +103,6 @@ const label = (code = "") => {
 
 export const Content = ({ codes, ...props }) => {
   let route = useRouteMatch()
-
   let codePaths = [Code]
   let authCodes = useAuthCodes(codePaths)
   codes = codes ?? authCodes
@@ -136,13 +135,6 @@ const Body = ({ code }) => {
       return <DepartmentContent />
     default:
       return <PageNotFound />
-  }
-}
-
-const Item = ({ code, codePaths }) => {
-  switch (code) {
-    case PermissionCode:
-      return <PermissionsMenu url={DefaultUrl} codePaths={codePaths} />
   }
 }
 
