@@ -19,11 +19,11 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 
             builder.Property(c => c.DisplayName)
                 .HasColumnType(ColumnTypes.Nvarchar(50))
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(c => c.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(128))
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(c => c.MenuSetting)
                 .HasColumnType(ColumnTypes.Nvarchar(4000))
@@ -32,7 +32,6 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
             builder.HasMany(p => p.Users)
                 .WithOne(p => p.Role)
                 .HasForeignKey(p => p.RoleId);
-
 
             builder.Property(c => c.RoleType)
                 .HasColumnType(ColumnTypes.TinyInt)

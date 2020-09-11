@@ -10,7 +10,7 @@ using TGS.Apis.BackendOffice.DataService;
 namespace TGS.Apis.BackendOffice.Migrations
 {
     [DbContext(typeof(BackendOfficeRepository))]
-    [Migration("20200909050824_Initial")]
+    [Migration("20200911093038_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,11 +69,9 @@ namespace TGS.Apis.BackendOffice.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MenuSetting")
