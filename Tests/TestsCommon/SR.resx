@@ -126,6 +126,9 @@
   <data name="AutoCloseRound" xml:space="preserve">
     <value>AutoCloseRound</value>
   </data>
+  <data name="ErrorResponse" xml:space="preserve">
+    <value>ErrorResponse</value>
+  </data>
   <data name="RoundClosed" xml:space="preserve">
     <value>RoundClosed</value>
   </data>

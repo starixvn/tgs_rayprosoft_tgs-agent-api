@@ -25,6 +25,7 @@ namespace TGS.Services.Operations.Bets
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ITransactionSettingsGenerator _transactionSettingsGenerator;
         private readonly IAmountValidator _amountValidator;
+        private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IStatusValidator _statusValidator;
         private readonly ITimeZoneManager _timeZoneManager;
         private readonly IRoundStatusManager _roundStatusManager;
@@ -43,6 +44,7 @@ namespace TGS.Services.Operations.Bets
             ITransactionSettingsGenerator transactionSettingsGenerator,
             IAmountValidator amountValidator,
             IStatusValidator statusValidator,
+            IActionWithinRoundValidator actionWithinRoundValidator,
             ITimeZoneManager timeZoneManager,
             IRoundStatusManager roundStatusManager,
             IValidStatus<Status> validStatus,
@@ -56,6 +58,7 @@ namespace TGS.Services.Operations.Bets
             _gameProviderOperations = gameProviderOperations;
             _transactionSettingsGenerator = transactionSettingsGenerator;
             _amountValidator = amountValidator;
+            _actionWithinRoundValidator = actionWithinRoundValidator;
             _statusValidator = statusValidator;
             _timeZoneManager = timeZoneManager;
             _roundStatusManager = roundStatusManager;

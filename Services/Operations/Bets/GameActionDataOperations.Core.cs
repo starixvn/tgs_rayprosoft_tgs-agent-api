@@ -210,7 +210,7 @@ namespace TGS.Services.Operations.Bets
             var (actions, refGameAction) = GetPreviousActions(refGameActionInternalId, dict);
 
             s.Amount = amount;
-            s.RefGameActionInternalId = refGameActionInternalId;
+            s.ReferencedGameActionInternalId = refGameActionInternalId;
             s.ReferencedGameAction = refGameAction;
             s.BetId = refData.BetId;
             s.PreviousActions = actions;
@@ -366,6 +366,32 @@ namespace TGS.Services.Operations.Bets
             }
 
             return s;
+        }
+
+        private async Task SaveDatabaseRecordsAsync(GameActionState s)
+        {
+            var current = new BetActionData
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                ExternalId = s.ExternalTransactionId,
+                ExternalRoundId = s.ExternalRoundId,
+                ReferenceId = s.ReferencedGameActionInternalId,
+                Reference = s.ReferencedGameAction,
+                Amount = s.Amount,
+                Type = s.GameActionType,
+                IsClosingRound = s.NewRoundStatus == RoundStatus.Closed,
+                IsExplicitlyClosingRound = s.RoundClosed == true,
+                IsExplicitlyNotClosingRound = s.RoundClosed == false,
+                GameName = s.Game.Name,
+                GameProviderCode = s.GameProviderCode,
+                BetType = s.BetType,
+                BetId = s.BetId
+            };
+
+            var error =  _actionWithinRoundValidator.FindError(current, s.PreviousActions);
+            if (error != null)
+                throw error;
+
         }
     }
 }

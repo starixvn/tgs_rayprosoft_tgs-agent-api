@@ -88,6 +88,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ErrorResponse.
+        /// </summary>
+        public static string ErrorResponse {
+            get {
+                return ResourceManager.GetString("ErrorResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RoundClosed.
         /// </summary>
         public static string RoundClosed {
