@@ -171,6 +171,24 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
+        [HttpPost("menus"), Description("Get menus")]
+        public async Task<GetMenuResponse> GetMenuAsync()
+        {
+            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
+            if (setting == null)
+            {
+                return CreateInvalidResponse<GetMenuResponse>(Resources.Role.MenuNotFound);
+            }
+
+            var menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting.Value);
+
+            return new GetMenuResponse
+            {
+                Valid = true,
+                Menus = menus
+            };
+        }
+
         private Role CreateRole(string name, string displayName, string description, string menuSetting)
         {
             return new Role

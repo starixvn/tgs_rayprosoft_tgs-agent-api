@@ -120,6 +120,9 @@
   <data name="CannotDeleteRole" xml:space="preserve">
     <value>The role cannot be deleted owing to user used already.</value>
   </data>
+  <data name="MenuNotFound" xml:space="preserve">
+    <value>Menu not found.</value>
+  </data>
   <data name="NameExists" xml:space="preserve">
     <value>The name has existed already.</value>
   </data>

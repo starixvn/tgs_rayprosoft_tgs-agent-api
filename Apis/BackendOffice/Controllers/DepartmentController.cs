@@ -43,7 +43,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .CreatePagedResponseAsync(request);
         }
 
-
         [HttpPut("{id}"), Description("Update a department")]
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] DepartmentRequest request)
         {
