@@ -4,68 +4,248 @@ import Async, { useAsync } from "react-async"
 import client from "../../client"
 import { Formik, Field, useFormik } from "formik"
 import {
+  Stack,
   Flex,
   Box,
   Card,
   Set,
   Button,
   Text,
+  Label,
+  Input,
   InputField,
+  Checkbox,
+  FieldStack,
   SelectField,
   Dialog,
-  Modal
+  Modal,
+  Table,
+  useClassName
 } from "bumbag"
+//import { roles as fetchRoles } from "../../client/role"
+import { getMenus } from "../../client/setting"
+import {
+  label as systemSubMenuLabel,
+  Code as SystemCode,
+  name as systemModuleLabel
+} from "../index"
+import { label as menuLabel, find as findMenu } from "../../menu"
 
-const DefaultState = {
-  name: ""
-}
-
-const useFormState = (initialValues = DefaultState) => {
-  let state = useFormik({
-    initialValues,
-    onSubmit: (data) => {
-      console.log("submit", data)
-    }
+export const AddButton = ({}) => {
+  let { data, run: fetchMenus, ...asyncRoles } = useAsync({
+    deferFn: getMenus
   })
 
-  return state
-}
+  let [menus = [], setMenus] = useState(data)
 
-const Form = ({ state }) => {
+  const setChecked = (path = [], checked) => {
+    let item = findMenu(path, menus)
+    item.IsDisplay = checked
+    setMenus(menus)
+  }
+
+  let [promise, setSubmit] = useState(Promise.resolve())
+  let async = useAsync({ promise })
+
+  useEffect(() => {
+    setMenus(data)
+  }, [data])
+
+  //TODO: dialog loading status
   return (
-    <form onReset={state.handleReset} onSubmit={state.handleSubmit}>
-      <Set>
-        <Field
-          component={InputField.Formik}
-          name="name"
-          label={name()}
-          autocomplete="off"
-        />
-      </Set>
-    </form>
+    <Formik
+      initialValues={{ name: "" }}
+      onSubmit={(form) => {
+        let data = {
+          ...form,
+          menus
+        }
+
+        let promise = client.post("/api/role", { data })
+        setSubmit(promise)
+      }}
+    >
+      {(formProps) => {
+        return (
+          <Modal.State>
+            <Modal.Disclosure
+              use={Button}
+              onClick={fetchMenus}
+              css={css`
+                flex: unset;
+              `}
+            >
+              {add()}
+            </Modal.Disclosure>
+            <Dialog.Modal
+              title={title()}
+              showActionButtons
+              actionButtonsProps={{
+                onClickSubmit: formProps.submitForm,
+                onClickCancel: formProps.resetForm
+              }}
+            >
+              <form
+                onReset={formProps.handleReset}
+                onSubmit={formProps.handleSubmit}
+              >
+                <div
+                  css={css`
+                    display: grid;
+                    grid-template-rows: auto;
+                    grid-template-areas:
+                      "name input"
+                      "group table";
+                  `}
+                >
+                  <Box
+                    css={css`
+                      grid-area: name;
+                    `}
+                    margin="major-1"
+                  >
+                    <Label
+                      htmlFor="name"
+                      marginTop="major-1"
+                      css={css`
+                        line-height: unset;
+                      `}
+                    >
+                      {name()}
+                    </Label>
+                  </Box>
+
+                  <Box
+                    css={css`
+                      grid-area: input;
+                    `}
+                    margin="major-1"
+                  >
+                    <Field name="name">
+                      {({ field, form, meta }) => (
+                        <Input id="name" {...field} />
+                      )}
+                    </Field>
+                  </Box>
+                  <Box
+                    css={css`
+                      grid-area: group;
+                    `}
+                    margin="major-1"
+                  >
+                    <Label
+                      htmlFor="name"
+                      marginTop="major-1"
+                      css={css`
+                        line-height: unset;
+                      `}
+                    >
+                      {control()}
+                    </Label>
+                  </Box>
+                  <Box
+                    css={css`
+                      grid-area: table;
+                    `}
+                    margin="major-1"
+                  >
+                    <MenuTable menus={menus} setChecked={setChecked} />
+                  </Box>
+                </div>
+              </form>
+            </Dialog.Modal>
+          </Modal.State>
+        )
+      }}
+    </Formik>
   )
 }
 
-export const AddButton = ({}) => {
-  let [promise, setPromise] = useState(Promise.resolve())
-  let form = useFormState()
-  let async = useAsync({ promise })
+const MenuTable = ({ menus = [], setChecked }) => {
+  return (
+    <Table>
+      {menus.map((menu, index) => {
+        return (
+          <MenuTableContent key={index} menu={menu} setChecked={setChecked} />
+        )
+      })}
+    </Table>
+  )
+}
+
+const MenuTableContent = ({ menu = {}, setChecked }) => {
+  let { Code: moduleCode, SubMenus = [] } = menu
+  let label = menuLabel([moduleCode])
+  if (label === "") {
+    return null
+  }
 
   return (
-    <Modal.State>
-      <Modal.Disclosure use={Button}>{add()}</Modal.Disclosure>
-      <Dialog.Modal
-        title={title()}
-        showActionButtons
-        actionButtonsProps={{
-          onClickSubmit: (data) => {
-            console.log("actionButtons onClickSubmit", data)
-          }
-        }}
-      >
-        <Form state={form} />
-      </Dialog.Modal>
-    </Modal.State>
+    <>
+      <Table.Head>
+        <Table.Row>
+          <Table.HeadCell colSpan="2">
+            <MenuCheckbox menu={menu} setChecked={setChecked} />
+          </Table.HeadCell>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {SubMenus.map((menu) => {
+          let { Code: subMenuCode, SubMenus: SubMenuItems = [] } = menu
+          return (
+            <Table.Row key={subMenuCode}>
+              <Table.Cell>
+                <MenuCheckbox
+                  path={[moduleCode]}
+                  menu={menu}
+                  setChecked={setChecked}
+                />
+              </Table.Cell>
+              <Table.Cell>
+                <div>
+                  {SubMenuItems.map((subMenuItem, index) => {
+                    return (
+                      <MenuCheckbox
+                        key={index}
+                        path={[moduleCode, subMenuCode]}
+                        menu={subMenuItem}
+                        setChecked={setChecked}
+                      />
+                    )
+                  })}
+                </div>
+              </Table.Cell>
+            </Table.Row>
+          )
+        })}
+      </Table.Body>
+    </>
+  )
+}
+
+const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
+  let [checked, set] = useState(menu.IsDisplay)
+
+  let code = menu?.Code
+  let menuPath = [...path, code]
+  let label = menuLabel(menuPath)
+  if (!label) {
+    return null
+  }
+
+  return (
+    <Checkbox
+      label={label}
+      checked={checked}
+      onChange={(event) => {
+        let isChecked = event.target.checked
+        set(isChecked)
+        setChecked(menuPath, isChecked)
+      }}
+      css={css`
+        white-space: nowrap;
+      `}
+    ></Checkbox>
   )
 }
 
@@ -77,3 +257,5 @@ const add = () => "新增"
 const title = () => "新增权限组"
 
 const name = () => "权限组名称"
+
+const control = () => "权限管理"

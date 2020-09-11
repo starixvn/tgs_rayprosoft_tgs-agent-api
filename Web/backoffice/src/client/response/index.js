@@ -1,7 +1,10 @@
-//
 export const toDataOrError = (response) => {
   if (!response?.ok) {
-    throw new Error(response.statusText)
+    if (response.statusText === "Unauthorized") {
+      location.href = "/login"
+    } else {
+      throw new Error(response.statusText)
+    }
   }
 
   let promise = response?.json() ?? Promise.resolve({})
@@ -13,5 +16,3 @@ export const toDataOrError = (response) => {
     return data
   })
 }
-
-const defaultMap = (data) => data

@@ -9,6 +9,8 @@ services:
       - --providers.docker=true
       # - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
+      # Log
+      - --log.level=INFO
       # Monitoring
       - --metrics=true
       - --metrics.prometheus=true
@@ -17,9 +19,11 @@ services:
       # Tracing
       - --tracing.jaeger=true
       - --tracing.serviceName=traefik
-      - --tracing.jaeger.samplingServerURL=http://jaeger.localhost:5778/sampling
-      - --tracing.jaeger.localAgentHostPort=jaeger.localhost:6831
-      - --tracing.jaeger.collector.endpoint=http://jaeger.localhost:14268/api/traces?format=jaeger.thrift
+      - --tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling
+      - --tracing.jaeger.localAgentHostPort=jaeger:6831
+      - --tracing.jaeger.gen128Bit
+      - --tracing.jaeger.traceContextHeaderName=traefik-trace-id
+      # - --tracing.jaeger.collector.endpoint=http://jaeger:14268/api/traces?format=jaeger.thrift
     ports:
       # The Web UI (enabled by --api.insecure=true) -> http://localhost:18080/dashboard#/
       - 18080:8080
