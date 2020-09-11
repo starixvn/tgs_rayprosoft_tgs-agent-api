@@ -63,9 +63,9 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The department cannot be deleted owing to user used already..
         /// </summary>
-        public static string CannotDeleteRole {
+        public static string CannotBeDeleted {
             get {
-                return ResourceManager.GetString("CannotDeleteRole", resourceCulture);
+                return ResourceManager.GetString("CannotBeDeleted", resourceCulture);
             }
         }
         

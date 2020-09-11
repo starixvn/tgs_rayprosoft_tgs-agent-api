@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
-using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Apis.LogApi.Migrations
 {
@@ -17,24 +15,24 @@ namespace TGS.Apis.LogApi.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
+                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Id = table.Column<Guid>(nullable: false),
-                    Ip = table.Column<string>(nullable: true),
-                    Path = table.Column<string>(nullable: true),
-                    Method = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    Exception = table.Column<string>(nullable: true),
-                    ServerName = table.Column<string>(nullable: true),
-                    RequestHeaders = table.Column<string>(nullable: true),
-                    RequestContent = table.Column<string>(nullable: true),
-                    ResponseHeaders = table.Column<string>(nullable: true),
-                    ResponseContent = table.Column<string>(nullable: true),
-                    ResponseCode = table.Column<int>(nullable: false),
-                    ExecutionTimeMs = table.Column<int>(nullable: false),
-                    RecordedOn = table.Column<DateTimeOffset>(nullable: false)
+                    Ip = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Path = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    Method = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    Exception = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    ServerName = table.Column<string>(type: "nvarchar(30)", nullable: false),
+                    RequestHeaders = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    RequestContent = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    ResponseHeaders = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    ResponseContent = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    ResponseCode = table.Column<short>(type: "smallint", nullable: false),
+                    ExecutionTimeMs = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AdminLogs", x => x.Id);
+                    table.PrimaryKey("PK_AdminLogs", x => x.RecordedOn);
                 });
 
             migrationBuilder.CreateTable(
@@ -42,6 +40,7 @@ namespace TGS.Apis.LogApi.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
+                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Id = table.Column<Guid>(nullable: false),
                     TrackingId = table.Column<Guid>(nullable: false),
                     Ip = table.Column<string>(type: "nvarchar(50)", nullable: false),
@@ -54,12 +53,11 @@ namespace TGS.Apis.LogApi.Migrations
                     ResponseHeaders = table.Column<string>(type: "nvarchar(4000)", nullable: false),
                     ResponseContent = table.Column<string>(type: "nvarchar(4000)", nullable: false),
                     ResponseCode = table.Column<short>(type: "smallint", nullable: false),
-                    ExecutionTimeMs = table.Column<int>(type: "int", nullable: false),
-                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    ExecutionTimeMs = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApiLogs", x => x.Id);
+                    table.PrimaryKey("PK_ApiLogs", x => x.RecordedOn);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,9 +65,9 @@ namespace TGS.Apis.LogApi.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
+                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Id = table.Column<Guid>(nullable: false),
                     TrackingId = table.Column<Guid>(nullable: false),
-                    RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ServerName = table.Column<string>(type: "nvarchar(64)", nullable: false),
                     Level = table.Column<byte>(type: "tinyint", nullable: false),
                     Logger = table.Column<string>(nullable: true),
@@ -78,7 +76,7 @@ namespace TGS.Apis.LogApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LogRecords", x => x.Id);
+                    table.PrimaryKey("PK_LogRecords", x => x.RecordedOn);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,9 +84,8 @@ namespace TGS.Apis.LogApi.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Id = table.Column<long>(nullable: false),
                     MachineName = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     Level = table.Column<string>(type: "nvarchar(10)", nullable: true),
                     ServerAddress = table.Column<string>(type: "nvarchar(512)", nullable: true),
@@ -106,11 +103,22 @@ namespace TGS.Apis.LogApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ServiceLogs", x => x.Id);
+                    table.PrimaryKey("PK_ServiceLogs", x => x.RecordedOn);
                 });
 
-            var assembly = Assembly.GetExecutingAssembly();
-            migrationBuilder.SqlResource(assembly, "TGS.Apis.LogApi.DataService.SqlScripts.SP.usp_ServiceLogs_InsertServiceLog.sql");
+            migrationBuilder.Sql(@"
+  ALTER TABLE [dbo].[AdminLogs] DROP CONSTRAINT PK_AdminLogs;
+  ALTER TABLE [dbo].[AdminLogs] ADD CONSTRAINT PK_AdminLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
+
+  ALTER TABLE [dbo].[ApiLogs] DROP CONSTRAINT PK_ApiLogs;
+  ALTER TABLE [dbo].[ApiLogs] ADD CONSTRAINT PK_ApiLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
+
+  ALTER TABLE [dbo].[LogRecords] DROP CONSTRAINT PK_LogRecords;
+  ALTER TABLE [dbo].[LogRecords] ADD CONSTRAINT PK_LogRecords PRIMARY KEY CLUSTERED (RecordedOn desc);
+
+  ALTER TABLE [dbo].[ServiceLogs] DROP CONSTRAINT PK_ServiceLogs;
+  ALTER TABLE [dbo].[ServiceLogs] ADD CONSTRAINT PK_ServiceLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
+");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

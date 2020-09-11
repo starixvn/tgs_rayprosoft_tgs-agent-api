@@ -65,15 +65,16 @@ namespace TGS.Services.Operations.Models
         /// <summary>
         /// game actions except that is cancelled in the same round
         /// </summary>
-        public IList<BetActionData> ValidPreviousActions { get; set; }       
-        public BetActionData ReferenceGameAction { get; set; }
-        //public BetValuesResult BetValueResult { get; set; }
+        public IList<BetActionData> ValidPreviousActions { get; set; } 
+        
+        public Guid? ReferencedGameActionInternalId { get; set; }
+        public BetActionData ReferencedGameAction { get; set; }
+                //public BetValuesResult BetValueResult { get; set; }
         public Guid GameId { get; set; }
         public CachedGame Game { get; set; }
 
         public Guid? BetId { get; set; }
         public Guid? InternalRoundId { get; set; }
-        public Guid? RefGameActionInternalId { get; set; }
         public RoundStatus OldRoundStatus { get; set; }
         public RoundStatus NewRoundStatus { get; set; }
 

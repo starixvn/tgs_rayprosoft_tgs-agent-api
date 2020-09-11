@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using NSubstitute;
+using Moq;
 using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
@@ -16,13 +16,13 @@ namespace Tgs.UnitTests.Operations
     [TestFixture, Category(Named.Unit), Parallelizable]
     public sealed class ExpirationValidatorTests : NUnitTestsBase
     {
-        private IPlayerOperations _playerOperations;
+        private Mock<IPlayerOperations> _playerOperationsMock;
         private IExpirationValidator _expirationValidator;
 
         protected override void InitializeBeforeEachTest()
         {
-            _playerOperations = Substitute.For<IPlayerOperations>();
-            _expirationValidator = new ExpirationValidator(_playerOperations);
+            _playerOperationsMock = new Mock<IPlayerOperations>();
+            _expirationValidator = new ExpirationValidator(_playerOperationsMock.Object);
         }
 
         [TestCase(null)]
@@ -37,7 +37,7 @@ namespace Tgs.UnitTests.Operations
                 ExpiredOn = DateTimeOffset.UtcNow.AddHours(1)
             };
 
-            _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform)
+            _playerOperationsMock.Setup(x => x.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform))
                 .Returns(Task.FromResult(loginRecord));
 
             Func<Task> action = async () => await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
@@ -52,7 +52,7 @@ namespace Tgs.UnitTests.Operations
             var fixture = new Fixture();
             var playerCode = fixture.Create<string>();
 
-            _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform)
+            _playerOperationsMock.Setup(x => x.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform))
                 .Returns(Task.FromResult((CachedPlayerLoginRecord)null));
 
             Func<Task> action = async () => await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
@@ -72,7 +72,7 @@ namespace Tgs.UnitTests.Operations
                 ExpiredOn = DateTimeOffset.UtcNow.AddHours(-1)
             };
 
-            _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform)
+            _playerOperationsMock.Setup(x => x.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform))
                 .Returns(Task.FromResult(loginRecord));
 
             Func<Task> action = async () => await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);

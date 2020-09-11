@@ -11,5 +11,6 @@
         TransactionBeingReferencedNotFound,
         RoundNotFound,
         GameNotFound,
+        ActionProhibited        
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,11 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
-using TGS.Apis.BackendOffice.DataService.Commands;
-using TGS.Apis.BackendOffice.DataService.Queries;
+using TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Extensions;
-using TGS.Apis.BackendOffice.Services;
-using TGS.Infrastructures.Json;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -19,31 +16,23 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class SettingController : BackendOfficeControllerBase
     {
-        private readonly ISettingQueries _settingQueries;
-        private readonly ISettingCommands _settingCommands;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly Dictionary<string, Func<string, bool>> _validateSettingMap;
-        private readonly string[] _requiredSettings = { "Menus" };
+        private readonly IGenericQueries<Setting> _queries;
+        private readonly IGenericCommands<Setting> _commands;
+
         public SettingController(
-            ISettingQueries settingQueries,
-            ISettingCommands settingCommands,
-            IJsonSerializationProvider jsonSerializationProvider,
+            IGenericQueries<Setting> queries,
+            IGenericCommands<Setting> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _settingQueries = settingQueries;
-            _settingCommands = settingCommands;
-            _jsonSerializationProvider = jsonSerializationProvider;
-            _validateSettingMap = new Dictionary<string, Func<string, bool>>
-            {
-                { "Menus", ValidateValueByKey<MenuSetting[]> }
-            };
+            _queries = queries;
+            _commands = commands;
         }
 
         [Route("")]
         [HttpGet, Description("Get setting list")]
-        public Task<PagedResponse<SettingModel>> GetSettingsAsync([FromQuery] GetSettingsRequest request)
+        public Task<PagedResponse<SettingModel>> GetListAsync([FromQuery] GetSettingsRequest request)
         {
-            return _settingQueries.GetSettingQueries()
+            return _queries.GetQueries()
                 .Where(request.Key, p => p.Key.Contains(request.Key))
                 .Select(setting => new SettingModel
                 {
@@ -59,9 +48,9 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [Route("{key}")]
         [HttpGet, Description("Get setting by key")]
-        public async Task<GetSettingResponse> GetSettingByKeyAsync(string key)
+        public async Task<GetSettingResponse> GetSingleAsync(string key)
         {
-            var setting = await _settingQueries.GetSettingByKeyAsync(key);
+            var setting = await _queries.GetSingleAsync(p => p.Key == key);
             if (setting == null)
             {
                 return CreateInvalidResponse<GetSettingResponse>(Resources.Common.NotFound);
@@ -83,21 +72,35 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPut("{key}"), Description("Update setting by key")]
-        public async Task<MessageResponse> UpdateSettingAsync(string key, [FromBody] UpdateSettingRequest request)
+        [HttpPost(""), Description("Create a setting")]
+        public async Task<MessageResponse> CreateAsync([FromBody] CreateSettingRequest request)
         {
-            var setting = await _settingQueries.GetSettingByKeyAsync(key);
-            if (setting == null)
+            var settingExisted = await _queries.GetSingleAsync(p => p.Key == request.Key);
+            if (settingExisted != null)
             {
-                return CreateInvalidResponse<MessageResponse>($"{key} {Resources.Common.NotFound}");
+                return CreateInvalidResponse<MessageResponse>(Resources.Setting.KeyExists);
             }
 
-            if (_validateSettingMap[key] != null)
+            var setting = new Setting
             {
-                if (_validateSettingMap[key](request.Value) == false)
-                {
-                    return CreateInvalidResponse<MessageResponse>(Resources.Common.InvalidFormat);
-                }
+                Key = request.Key,
+                Value = request.Value,
+                Description = request.Description,
+                UpdatedOn = DateTimeOffset.Now,
+                UpdatedByUsername = Username
+            };
+
+            await _commands.CreateAsync(setting);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut("{key}"), Description("Update setting by key")]
+        public async Task<MessageResponse> UpdateAsync(string key, [FromBody] UpdateSettingRequest request)
+        {
+            var setting = await _queries.GetSingleAsync(p => p.Key == key);
+            if (setting == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Common.NotFound);
             }
 
             setting.Value = request.Value;
@@ -105,42 +108,22 @@ namespace TGS.Apis.BackendOffice.Controllers
             setting.UpdatedOn = DateTimeOffset.Now;
             setting.UpdatedByUsername = Username;
 
-            await _settingCommands.UpdateSettingAsync(setting);
+            await _commands.UpdateAsync(setting);
             return CreateValidResponse<MessageResponse>();
         }
 
         [Route("{key}")]
         [HttpDelete, Description("Delete setting by key")]
-        public async Task<MessageResponse> DeleteSettingAsync(string key)
+        public async Task<MessageResponse> DeleteAsync(string key)
         {
-            if (_requiredSettings.Contains(key))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Common.RequiredSetting);
-            }
-
-            var setting = await _settingQueries.GetSettingByKeyAsync(key);
+            var setting = await _queries.GetSingleAsync(p => p.Key == key);
             if (setting == null)
             {
-                return CreateInvalidResponse<MessageResponse>($"{key} {Resources.Common.NotFound}");
+                return CreateInvalidResponse<MessageResponse>(Resources.Common.NotFound);
             }
 
-            await _settingCommands.DeleteSettingAsync(setting);
+            await _commands.DeleteAsync(setting);
             return CreateValidResponse<MessageResponse>();
-        }
-
-
-        private bool ValidateValueByKey<T>(string value)
-        {
-            try
-            {
-                _jsonSerializationProvider.DeserializeFromString<T>(value);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-
         }
     }
 }

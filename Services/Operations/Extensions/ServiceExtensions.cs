@@ -46,6 +46,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IStatusValidator, StatusValidator>();
             services.AddSingleton<IExpirationValidator, ExpirationValidator>();
             services.AddSingleton<IAmountValidator, AmountValidator>();
+            services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
             services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
 
             return services;

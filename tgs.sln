@@ -30,8 +30,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{897541B7-3AE6-4AEE-9D3E-51221088F2CC}"
 	ProjectSection(SolutionItems) = preProject
 		.gitlab-ci.yml = .gitlab-ci.yml
-		README.md = README.md
-		RedisCache.md = RedisCache.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Base", "Core\DataServices.Base\DataServices.Base.csproj", "{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}"
@@ -57,6 +55,18 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TgsApi", "Apis\TgsApi\TgsApi.csproj", "{94BB3B92-E24B-4C66-AD2C-037185F13F77}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice.UnitTests", "Tests\BackendOffice.UnitTests\BackendOffice.UnitTests.csproj", "{6D52C16E-873A-48C7-918E-443E440382B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}"
+	ProjectSection(SolutionItems) = preProject
+		Readme\README.md = Readme\README.md
+		Readme\RedisCache.md = Readme\RedisCache.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessLogic", "BusinessLogic", "{BA86765F-9423-46BA-A60A-C55A9D26458C}"
+	ProjectSection(SolutionItems) = preProject
+		Readme\BusinessLogic\ReferencedActionsRules.md = Readme\BusinessLogic\ReferencedActionsRules.md
+		Readme\BusinessLogic\TurnoverGgrSqlQuery.md = Readme\BusinessLogic\TurnoverGgrSqlQuery.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -149,6 +159,8 @@ Global
 		{2772E9A0-F8AB-43DB-9612-BB750F85E4FA} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 		{94BB3B92-E24B-4C66-AD2C-037185F13F77} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 		{6D52C16E-873A-48C7-918E-443E440382B8} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
+		{A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB} = {897541B7-3AE6-4AEE-9D3E-51221088F2CC}
+		{BA86765F-9423-46BA-A60A-C55A9D26458C} = {A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

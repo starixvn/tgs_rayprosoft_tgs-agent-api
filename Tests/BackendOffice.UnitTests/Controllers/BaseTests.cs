@@ -21,20 +21,29 @@ namespace BackendOffice.UnitTests.Controllers
             string rolename = "Admin",
             RoleType roleType = RoleType.Admin)
         {
-            var s = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new[]
-                {
-                    new ClaimsIdentity(new[]
-                    {
-                        new Claim(Consts.UserInfo.UsernameKey, username),
-                        new Claim(Consts.UserInfo.RolenameKey, rolename),
-                        new Claim(Consts.UserInfo.PortalKey, roleType.ToString())
-                    }),
-                })
-            };
+            var mockHttpContext = new Mock<HttpContext>();
+
+            mockHttpContext.Setup(p => p.User)
+                .Returns(GetUserClaimsPrincipal(username, rolename, roleType));
+
             _httpContextAccessorMock.Setup(p => p.HttpContext)
-                .Returns(s);
+                .Returns(mockHttpContext.Object);
+        }
+
+        protected ClaimsPrincipal GetUserClaimsPrincipal(
+            string username = "admin.enabled",
+            string rolename = "Admin",
+            RoleType roleType = RoleType.Admin)
+        {
+            return new ClaimsPrincipal(new[]
+            {
+                new ClaimsIdentity(new[]
+                {
+                    new Claim(Consts.UserInfo.UsernameKey, username),
+                    new Claim(Consts.UserInfo.RolenameKey, rolename),
+                    new Claim(Consts.UserInfo.PortalKey, roleType.ToString())
+                }),
+            });
         }
 
         protected (int, int) GetPage(PageableRequest request)

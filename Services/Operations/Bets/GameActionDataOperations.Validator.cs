@@ -4,17 +4,27 @@ using TGS.Core.DataServices;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
+using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures.Extensions;
 using TGS.Services.Operations.Models;
 using TGS.Services.Operations.Models.Data;
+using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
-    {
+    {        
+        private void ThrowIfPlayerDisableToPlaceBet(TransactionData[] transactions, PlayerStatus playerStatus)
+        {
+            if (transactions.Any(t => t.GameActionType.IsOneOf(LockAmount, PlaceBet)))
+            {
+                _statusValidator.ThrowIfPlayerDisabledToPlaceBet(playerStatus);
+            }
+        }
+
         private void ValidateAmounts(GameActionState s)
         {
-            s.ValidateAmount("Amount", s.Amount);
+            s.ValidateAmount(nameof(s.Amount), s.Amount);
 
             if (s.Commission.HasValue)
             {
@@ -43,7 +53,7 @@ namespace TGS.Services.Operations.Bets
                     InvalidGameActionErrorCode.GameNotFound);
             }
 
-            if (s.GameActionType.IsNotAllOf(GameActionType.PlaceBet) && s.ExternalBetId.IsNullOrEmpty())
+            if (s.GameActionType.IsNotAllOf(PlaceBet) && s.ExternalBetId.IsNullOrEmpty())
             {
                 throw new InvalidGameActionException("Missing external bet ID.");
             }
@@ -81,9 +91,9 @@ namespace TGS.Services.Operations.Bets
 
         private void ThrowIfReferenceGameActionOrRoundIsNotFound(GameActionState s)
         {
-            if (s.HasExtRefTransactionId && s.ReferenceGameAction == null)
+            if (s.HasExtRefTransactionId && s.ReferencedGameAction == null)
             {
-                if (s.GameActionType == GameActionType.CancelTransaction)
+                if (s.GameActionType == CancelTransaction)
                 {
                     throw new InvalidGameActionException(
                         $"Transaction being cancelled not found, external transaction ID: {s.ExternalTransactionReferenceId}",
@@ -101,6 +111,20 @@ namespace TGS.Services.Operations.Bets
                     $"Cannot find expected round with id={s.ExternalRoundId}",
                     InvalidGameActionErrorCode.RoundNotFound);
             }
+        }
+
+        private async Task ThrowIfStatusesIsInvalidAsync(GameActionState s)
+        {
+            var playerType = s.PlayerData.PlayerType;
+            var gameActionType = s.GameActionType;
+            var gameProviderId = s.GameProviderId;
+            var gameId = s.GameId;
+
+            var status = _validStatus.GetStatus(playerType, gameActionType);
+            var gameStatus = _validGameStatus.GetStatus(playerType, gameActionType);
+
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(s.PlayerData.LicenseeId, status);
+            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(gameProviderId, gameId, s.ExternalGameId, status, gameStatus);
         }
     }
 }

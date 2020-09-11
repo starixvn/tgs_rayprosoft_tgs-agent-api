@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
@@ -22,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPost("auth"), Description("Authenticate user login")]
         public async Task<AuthenticateUserResponse> AuthenticateAsync(AuthenticateUserRequest request)
         {
-            var user = await _userQueries.GetUserByUsernameAsync(request.Username);
+            var user = await _userQueries.GetSingleAsync(p => p.Username == request.Username, u => u.Include(p => p.Role));
 
             if (user == null)
             {
@@ -39,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             user.LastLoginTime = DateTimeOffset.Now;
 
-            await _userCommands.UpdateUserAsync(user);
+            await _userCommands.UpdateAsync(user);
             await SignInAsync(user);
 
             return new AuthenticateUserResponse
@@ -65,7 +66,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private void SetCsrfToken()
         {
             var tokens = _antiForgery.GetAndStoreTokens(HttpContext);
-            Response.Cookies.Append(
+            _httpContextAccessor.HttpContext.Response.Cookies.Append(
                 Consts.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
                 new CookieOptions
@@ -101,7 +102,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
-        protected bool PasswordMismatch(User user, string password)
+        private bool PasswordMismatch(User user, string password)
         {
             var salt = _hashProvider.Hash(user.Salt);
 

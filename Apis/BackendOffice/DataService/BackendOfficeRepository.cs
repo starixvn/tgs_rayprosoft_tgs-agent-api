@@ -33,7 +33,6 @@ namespace TGS.Apis.BackendOffice.DataService
             return Database.CanConnectAsync();
         }
 
-
         EntityEntry<T> IBackendOfficeRepository.Entry<T>(T entity)
         {
             return base.Entry(entity);
@@ -61,7 +60,13 @@ namespace TGS.Apis.BackendOffice.DataService
 
         void IBackendOfficeRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
         {
+
             this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        }
+
+        DbSet<T> IBackendOfficeRepository.Set<T>()
+        {
+            return Set<T>();
         }
 
         Task IBaseRepository.SaveChangesAsync()

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace TGS.Apis.BackendOffice.DataService.Commands
+namespace TGS.Apis.BackendOffice.DataService
 {
     public interface IGenericCommands<TEntity> where TEntity : class
     {

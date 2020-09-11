@@ -12,11 +12,14 @@ using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures.Extensions;
 using TGS.Services.Operations.Models;
 using TGS.Services.Operations.Models.Data;
+using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
+        public IList<BetActionData> ValidPreviousActions { get; private set; }
+
         private async Task<BetResult> ExecuteGameActionAsync(BetData data)
         {
             if (data?.Transactions == null || data.Transactions.Length == 0)
@@ -25,6 +28,7 @@ namespace TGS.Services.Operations.Bets
             }
 
             var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            ThrowIfPlayerDisableToPlaceBet(data.Transactions, cachedPlayer.Status);
 
             // TODO: validate if place bet cap amount is exceed
 
@@ -99,8 +103,6 @@ namespace TGS.Services.Operations.Bets
             ThrowIfHaveNoRequiredIds(s);
             ValidateAmounts(s);
 
-            //s.BrandNow = _timeZoneManager.ToLocal(s.BrandTimeZoneId, DateTimeOffset.UtcNow);
-
             s = await FillRoundDataAsync(s);
             s = GetGame(s);
             var (st, r) = await GetAndValidatePreviousActionsAsync(s);
@@ -111,7 +113,9 @@ namespace TGS.Services.Operations.Bets
 
             ThrowIfReferenceGameActionOrRoundIsNotFound(s);
 
-            s = await FillEmptyDataAsync(s);
+            s = FillEmptyData(s);
+
+            await ThrowIfStatusesIsInvalidAsync(s);
 
             //var ga = await SaveDatabaseRecordsAsync(s);
 
@@ -206,8 +210,8 @@ namespace TGS.Services.Operations.Bets
             var (actions, refGameAction) = GetPreviousActions(refGameActionInternalId, dict);
 
             s.Amount = amount;
-            s.RefGameActionInternalId = refGameActionInternalId;
-            s.ReferenceGameAction = refGameAction;
+            s.ReferencedGameActionInternalId = refGameActionInternalId;
+            s.ReferencedGameAction = refGameAction;
             s.BetId = refData.BetId;
             s.PreviousActions = actions;
 
@@ -255,10 +259,10 @@ namespace TGS.Services.Operations.Bets
         private IList<BetActionData> GetValidatePreviousActions(IList<BetActionData> actions)
         {
             var allCancelledIdsInTheRound = actions
-                .Where(r => r.Type == GameActionType.CancelTransaction && r.Reference != null)
+                .Where(r => r.Type == CancelTransaction && r.Reference != null)
                 .Select(r => r.Reference.Id).ToHashSet();
 
-            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToList().AsReadOnly(); 
+            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToList().AsReadOnly();
         }
 
         private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(GameActionState s, SameRoundActionData[] actionsData)
@@ -281,7 +285,7 @@ namespace TGS.Services.Operations.Bets
                     refGameActionInternalId = refData.GameActionId;
 
                     // if this is cancel action, get the amount from the referenced action
-                    if (s.GameActionType == GameActionType.CancelTransaction)
+                    if (s.GameActionType == CancelTransaction)
                     {
                         amount = s.PrepareAmount(refData.Amount);
                     }
@@ -304,13 +308,13 @@ namespace TGS.Services.Operations.Bets
             // 3. place bet is not slot games
             // 4. not lock amount action
             return s.ForceGetPreviousActions ||
-                   s.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.PlaceBet) ||
+                   s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
                    !BypassPreviousActionGameTypes.Contains(s.Game.Type);
         }
-                
+
         private static bool GetGameActionIsCancelled(GameActionType type, bool isReference)
         {
-            if (type != GameActionType.CancelTransaction)
+            if (type != CancelTransaction)
             {
                 return false;
             }
@@ -337,15 +341,57 @@ namespace TGS.Services.Operations.Bets
             };
         }
 
-        private async Task<GameActionState> FillEmptyDataAsync(GameActionState s)
+        private GameActionState FillEmptyData(GameActionState s)
         {
             s.LicenseeNow = _timeZoneManager.ToLocal(s.PlayerData.LicenseeTimeZoneId, DateTimeOffset.UtcNow);
-            //s.NewRoundStatus = _roundStatusManager.GetStatus(
-            //    s.AutoCloseRound, s.RoundClosed, s.InternalRoundId ?? Guid.Empty, s.OldRoundStatus, s.GameActionType, s.RefGameAction, s.PreviousActions, validPreviousActions);
+            s.NewRoundStatus = _roundStatusManager.GetStatus(new()
+            {
+                AutoCloseRound = s.AutoCloseRound,
+                RequestToCloseRound = s.RoundClosed,
+                RoundId = s.InternalRoundId ?? Guid.Empty,
+                OldStatus = s.OldRoundStatus,
+                GameActionType = s.GameActionType,
+                ReferencedGameAction = s.ReferencedGameAction,
+                PreviousActions = s.PreviousActions,
+                ValidPreviousActions = s.ValidPreviousActions
+            });
 
-            
+            // if the current action is "place bet then create new bet id"
+            // if there are no referenced IDs and the current action is
+            // "lock amount", "free bet" then create new bet id
+            if (s.GameActionType == PlaceBet ||
+                (s.BetId == null && s.GameActionType.IsOneOf(FreeBet, LockAmount)))
+            {
+                s.BetId = Guid.NewGuid();
+            }
 
             return s;
+        }
+
+        private async Task SaveDatabaseRecordsAsync(GameActionState s)
+        {
+            var current = new BetActionData
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                ExternalId = s.ExternalTransactionId,
+                ExternalRoundId = s.ExternalRoundId,
+                ReferenceId = s.ReferencedGameActionInternalId,
+                Reference = s.ReferencedGameAction,
+                Amount = s.Amount,
+                Type = s.GameActionType,
+                IsClosingRound = s.NewRoundStatus == RoundStatus.Closed,
+                IsExplicitlyClosingRound = s.RoundClosed == true,
+                IsExplicitlyNotClosingRound = s.RoundClosed == false,
+                GameName = s.Game.Name,
+                GameProviderCode = s.GameProviderCode,
+                BetType = s.BetType,
+                BetId = s.BetId
+            };
+
+            var error =  _actionWithinRoundValidator.FindError(current, s.PreviousActions);
+            if (error != null)
+                throw error;
+
         }
     }
 }

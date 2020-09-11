@@ -70,11 +70,20 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Menu not found..
+        /// </summary>
+        public static string MenuNotFound {
+            get {
+                return ResourceManager.GetString("MenuNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The name has existed already..
         /// </summary>
-        public static string NameExistd {
+        public static string NameExists {
             get {
-                return ResourceManager.GetString("NameExistd", resourceCulture);
+                return ResourceManager.GetString("NameExists", resourceCulture);
             }
         }
         

@@ -1,15 +1,16 @@
-﻿using TGS.Core.Models.Enums;
+﻿using System.Linq;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operations.Models.Data;
 
 namespace TGS.Services.Operations
 {
-    internal interface IRoundStatusManager
+    public interface IRoundStatusManager
     {
         RoundStatus GetStatus(RoundStatusData data);
     }
 
-    internal sealed class RoundStatusManager : IRoundStatusManager
+    public sealed class RoundStatusManager : IRoundStatusManager
     {
         RoundStatus IRoundStatusManager.GetStatus(RoundStatusData data)
         {
@@ -46,24 +47,28 @@ namespace TGS.Services.Operations
             }
 
             // AutoCloseRound=true and if all bets are settled, then close the round
-            
-            //if (gameActionType.IsOneOf(GameActionType.WinBet, GameActionType.LoseBet, GameActionType.TieBet, GameActionType.CancelTransaction))
-            //{
-            //    var allBetIdsInTheRound = validPreviousActions.Where(r => r.Reference != null && r.Reference.Type == GameActionType.PlaceBet).Select(r => r.Reference.Id);
-            //    var unsettledBetIds =
-            //        data.PreviousActions.Where(
-            //            b => b.Reference == null && b.Type.IsNotAllOf(GameActionType.FreeBet) &&
-            //            !allBetIdsInTheRound.Contains(b.Id)).Select(r => r.Id);
 
-            //    // filter out current reference bet as well
-            //    unsettledBetIds = unsettledBetIds.Except(new[] { data.ReferencedGameAction.Id });
+            if (gameActionType.IsOneOf(GameActionType.WinBet, GameActionType.LoseBet, GameActionType.TieBet, GameActionType.CancelTransaction))
+            {
+                var allBetIdsInTheRound = data.ValidPreviousActions
+                    .Where(r => r.Reference?.Type == GameActionType.PlaceBet)
+                    .Select(r => r.Reference.Id).ToHashSet();
 
-            //    // can close the round if no bets left
-            //    if (!unsettledBetIds.Any())
-            //    {
-            //        return RoundStatus.Closed;
-            //    }
-            //}
+                var unsettledBetIds = data.PreviousActions
+                    .Where(b => b.Reference == null && 
+                                b.Type.IsNotAllOf(GameActionType.FreeBet) &&
+                                !allBetIdsInTheRound.Contains(b.Id))
+                    .Select(r => r.Id);
+
+                // filter out current reference bet as well
+                unsettledBetIds = unsettledBetIds.Except(new[] { data.ReferencedGameAction.Id });
+
+                // can close the round if no bets left
+                if (!unsettledBetIds.Any())
+                {
+                    return RoundStatus.Closed;
+                }
+            }
 
             return oldStatus;
         }
