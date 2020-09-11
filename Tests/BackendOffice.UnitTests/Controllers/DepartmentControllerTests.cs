@@ -11,9 +11,8 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
@@ -63,7 +62,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
 
-            var response = await _controller.GetDepartmentsAsync(request);
+            var response = await _controller.GetListAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
@@ -83,7 +82,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.CreateDepartmentAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Department.NameExists);
         }
@@ -96,7 +95,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreateDepartmentAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
 
             _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()));
@@ -115,7 +114,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateDepartmentAsync(department.Id, request);
+            var response = await _controller.UpdateAsync(department.Id, request);
 
             response.Valid.Should().BeTrue();
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
@@ -135,7 +134,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateDepartmentAsync(department.Id, request);
+            var response = await _controller.UpdateAsync(department.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Department.NotFound);
@@ -156,7 +155,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.UpdateDepartmentAsync(department.Id, request);
+            var response = await _controller.UpdateAsync(department.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Department.NameExists);
@@ -174,7 +173,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
-            var response = await _controller.DeleteDepartmentAsync(departmentId);
+            var response = await _controller.DeleteAsync(departmentId);
 
             response.Valid.Should().BeTrue();
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
@@ -192,7 +191,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult<Department>(null));
 
-            var response = await _controller.DeleteDepartmentAsync(departmentId);
+            var response = await _controller.DeleteAsync(departmentId);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Department.NotFound);
@@ -211,7 +210,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
-            var response = await _controller.DeleteDepartmentAsync(departmentId);
+            var response = await _controller.DeleteAsync(departmentId);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Department.CannotBeDeleted);
@@ -219,7 +218,6 @@ namespace BackendOffice.UnitTests.Controllers
             _commandsMock.Verify(p => p.DeleteAsync(It.Is<Department>(r =>
                 r.Name == department.Name)), Times.Never);
         }
-
 
         private Fixture CreateDepartmentFixture()
         {

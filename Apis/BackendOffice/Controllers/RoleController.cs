@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Infrastructures.Extensions;
@@ -41,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet, Description("Get roles")]
-        public Task<PagedResponse<RoleModel>> GetRolesAsync([FromQuery] GetRolesRequest request)
+        public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
         {
             return _roleQueries.GetQueries()
                 .Where(request.Name, p => p.Name.Contains(request.Name))
@@ -61,7 +60,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("{roleId}"), Description("Get a role")]
-        public async Task<GetRoleResponse> GetRoleAsync(Guid roleId)
+        public async Task<GetRoleResponse> GetSingleAsync(Guid roleId)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
@@ -89,7 +88,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPut("{roleId}"), Description("Update role")]
-        public async Task<MessageResponse> UpdateRoleAsync(Guid roleId,
+        public async Task<MessageResponse> UpdateAsync(Guid roleId,
             [FromQuery] UpdateRoleRequest request)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
@@ -113,7 +112,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpDelete("{roleId}"), Description("Delete a role")]
-        public async Task<MessageResponse> DeleteRoleAsync(Guid roleId)
+        public async Task<MessageResponse> DeleteAsync(Guid roleId)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, s => s.Include(x => x.Users));
             if (role == null)
@@ -131,7 +130,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost("{roleId}/copy"), Description("Copy role")]
-        public async Task<MessageResponse> CopyRoleAsync(Guid roleId, [FromBody] CopyRoleRequest request)
+        public async Task<MessageResponse> CopyAsync(Guid roleId, [FromBody] CopyRoleRequest request)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
@@ -155,7 +154,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost, Description("Create a role")]
-        public async Task<MessageResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
+        public async Task<MessageResponse> CreateAsync([FromBody] CreateRoleRequest request)
         {
             if (await _roleQueries.ExistsAsync(p => p.Name == request.Name))
             {

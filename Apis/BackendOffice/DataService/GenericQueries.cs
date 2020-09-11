@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace TGS.Apis.BackendOffice.DataService.Queries
+namespace TGS.Apis.BackendOffice.DataService
 {
     public interface IGenericQueries<T>
     {

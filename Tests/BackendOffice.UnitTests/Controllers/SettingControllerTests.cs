@@ -10,9 +10,8 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
@@ -62,7 +61,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
 
-            var response = await _controller.GetSettingsAsync(request);
+            var response = await _controller.GetListAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
@@ -89,7 +88,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
-            var response = await _controller.GetSettingAsync(key);
+            var response = await _controller.GetSingleAsync(key);
             response.Valid.Should().BeTrue();
 
             response.Setting.Key.Should().Be(setting.Key);
@@ -111,7 +110,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult<Setting>(null));
 
-            var response = await _controller.GetSettingAsync(key);
+            var response = await _controller.GetSingleAsync(key);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Common.NotFound);
         }
@@ -124,7 +123,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult<Setting>(null));
 
-            var response = await _controller.CreateSettingAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
 
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
@@ -142,7 +141,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(new Setting()));
 
-            var response = await _controller.CreateSettingAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be($"{request.Key} {Resources.Setting.KeyExists}");
 
@@ -163,7 +162,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
-            var response = await _controller.UpdateSettingAsync(key, request);
+            var response = await _controller.UpdateAsync(key, request);
             response.Valid.Should().BeTrue();
 
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
@@ -182,7 +181,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
-            var response = await _controller.UpdateSettingAsync(key, request);
+            var response = await _controller.UpdateAsync(key, request);
             response.Valid.Should().BeTrue();
 
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
@@ -201,7 +200,7 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
-            var response = await _controller.DeleteSettingAsync(key);
+            var response = await _controller.DeleteAsync(key);
             response.Valid.Should().BeTrue();
 
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));

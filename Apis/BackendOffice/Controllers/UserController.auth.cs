@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
@@ -22,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPost("auth"), Description("Authenticate user login")]
         public async Task<AuthenticateUserResponse> AuthenticateAsync(AuthenticateUserRequest request)
         {
-            var user = await _userQueries.GetUserByUsernameAsync(request.Username);
+            var user = await _userQueries.GetSingleAsync(p => p.Username == request.Username, u => u.Include(p => p.Role));
 
             if (user == null)
             {
@@ -39,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             user.LastLoginTime = DateTimeOffset.Now;
 
-            await _userCommands.UpdateUserAsync(user);
+            await _userCommands.UpdateAsync(user);
             await SignInAsync(user);
 
             return new AuthenticateUserResponse
