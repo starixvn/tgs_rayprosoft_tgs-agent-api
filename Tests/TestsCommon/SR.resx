@@ -138,4 +138,10 @@
   <data name="RoundStatus" xml:space="preserve">
     <value>RoundStatus</value>
   </data>
+  <data name="TurnoverOnTieBet" xml:space="preserve">
+    <value>TurnoverOnTieBet</value>
+  </data>
+  <data name="UserBalance" xml:space="preserve">
+    <value>UserBalance</value>
+  </data>
 </root>

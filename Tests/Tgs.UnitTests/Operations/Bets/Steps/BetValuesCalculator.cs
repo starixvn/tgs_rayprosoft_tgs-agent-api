@@ -1,0 +1,232 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using FluentAssertions;
+using TechTalk.SpecFlow;
+using TGS.Core.Models.Enums;
+using TGS.Services.Operations.Calculators;
+using TGS.Services.Operations.Models.Data;
+using TGS.Tests.TestsCommon;
+using TGS.Tests.TestsCommon.Extensions;
+
+using Calculators = TGS.Services.Operations.Calculators;
+
+namespace Tgs.UnitTests.Operations.Bets.Steps
+{
+    [Binding, Scope(Tag = "BetValuesCalculator")]
+    public sealed class BetValuesCalculator : SpecFlowUnitTestBase
+    {
+        public BetValuesCalculator(ScenarioContext context)
+            : base(context)
+        {
+        }
+
+        [Given(@"initial balance of \$(.*)")]
+        public void GivenInitialBalanceOf(decimal amount)
+        {
+            Set(SR.UserBalance, amount);
+        }
+
+        [Given(@"game with no turnover on tie bet")]
+        public void GivenGameWithNoTurnoverOnTieBet()
+        {
+            Set(SR.TurnoverOnTieBet, false);
+        }
+
+        [Given(@"game with turnover on tie bet")]
+        public void GivenGameWithTurnoverOnTieBet()
+        {
+            Set(SR.TurnoverOnTieBet, true);
+        }
+
+        [When(@"I perform the following actions I will see the expected results")]
+        public void WhenIPerformTheFollowingActionsIWillSeeTheExpectedResults(Table table)
+        {
+            var rows = table.CreateList(CreateBetValuesCalculatorRowInstance);
+            var dupRowId = rows.GroupBy(r => r.Id).FirstOrDefault(g => g.Count() > 1);
+            if (dupRowId != null)
+            {
+                throw new ArgumentException("Test definition error: Duplicate row ID=" + dupRowId.Key.ToString().TrimStart(new[] { '0', '-' }));
+            }
+
+            var hasTurnoverOnTieBet = Get(SR.TurnoverOnTieBet, true);
+
+            var actionById = rows
+                .Select((bvcr, i) => new BetActionData
+                {
+                    Id = bvcr.Id,
+                    ReferenceId = bvcr.RefId,
+                    Amount = bvcr.Amount,
+                    Type = bvcr.ActionType,
+                    IsClosingRound = bvcr.RoundClosed.HasValue && bvcr.RoundClosed.Value,
+                    IsExplicitlyClosingRound = bvcr.RoundClosed.HasValue && bvcr.RoundClosed.Value,
+                    IsExplicitlyNotClosingRound = bvcr.RoundClosed.HasValue && !bvcr.RoundClosed.Value,
+                    GameProviderCode = "Test",
+                    GameName = "Test",
+                    BetType = bvcr.BetType
+                }).ToDictionary(a => a.Id, a => a);
+
+            foreach (var a in actionById.Values)
+            {
+                if (a.ReferenceId != null && actionById.TryGetValue(a.ReferenceId.Value, out var val))
+                {
+                    a.Reference = val;
+                }
+            }
+
+            var previousInput = new List<BetActionData>();
+            var previousOutput = new List<BetValuesResult>();
+            var calculator = (IBetValuesCalculator)new Calculators.BetValuesCalculator();
+
+            foreach (var current in rows)
+            {
+                var action = actionById[current.Id];
+                if (current.Type != BetValuesCalculatorRowName.Totals)
+                {
+                    if (action.Type == GameActionType.CancelTransaction)
+                    {
+                        action.Reference.IsCancelled = true;
+                        if (action.Reference.Type == GameActionType.CancelTransaction)
+                        {
+                            action.Reference.Reference.IsCancelled = false;
+                        }
+                    }
+
+                    // Act
+                    var result =
+                        calculator.Calculate(
+                            hasTurnoverOnTieBet,
+                            action,
+                            previousInput);
+
+                    previousOutput.Add(result);
+
+                    // Assert
+                    ValidateBetResult(current, result);
+
+                    action.WinLoss = result.WinLoss;
+                    action.Turnover = result.Turnover;
+                    action.UnsettledBets = result.UnsettledBets;
+                }
+                else
+                {
+                    // Assert
+                    ValidateTotals(previousInput, previousOutput, current);
+                }
+
+                previousInput.Add(action);
+            }
+        }
+
+        #region Private Methods and Properties
+
+        private static BetValuesCalculatorRow CreateBetValuesCalculatorRowInstance(TableRow row)
+        {
+            return new BetValuesCalculatorRow
+            {
+                Id = ParseGuid(row, "Id") ?? Guid.Empty,
+                RefId = ParseGuid(row, "Ref Id"),
+                Type = ParseRowName(row, "Type"),
+                Amount = ParseDecimal(row, "Amount"),
+                PostBalance = ParseDecimal(row, "Post Balance"),
+                Turnover = ParseDecimal(row, "Turnover"),
+                TieBetAdjustment = ParseDecimal(row, "TieBetAdjustment"),
+                WinLoss = ParseDecimal(row, "WinLoss"),
+                UnsettledBets = ParseDecimal(row, "Unsettled Bets"),
+                RoundClosed = ParseNullableBool(row, "Is Closing Round"),
+                BetType = row["Bet Type"]
+            };
+        }
+
+        private static Guid? ParseGuid(TableRow row, string name)
+        {
+            return Guid.TryParse((row[name] ?? string.Empty).PadLeft(32, '0'), out var id) ? id : (Guid?)null;
+        }
+
+        private static decimal ParseDecimal(TableRow row, string name)
+        {
+            return decimal.Parse(row[name].Replace("$", string.Empty));
+        }
+
+        private static BetValuesCalculatorRowName ParseRowName(TableRow row, string name)
+        {
+            return (BetValuesCalculatorRowName)Enum.Parse(typeof(BetValuesCalculatorRowName), row[name], true);
+        }
+
+        private static bool? ParseNullableBool(TableRow row, string name)
+        {
+            var s = row[name].ToLowerInvariant().Trim();
+            if (s == "yes" || s == "true") return true;
+            if (s == "no" || s == "false") return false;
+            return null;
+        }
+
+        private static void ValidateTotals(IList<BetActionData> previousInput, IList<BetValuesResult> previousOutput, BetValuesCalculatorRow current)
+        {
+            var amount = previousInput.Sum(e => e.Amount);
+
+            amount.Should()
+                .Be(current.Amount, because: "Amount");
+
+            previousOutput
+                .Sum(e => e.Turnover)
+                .Should()
+                .Be(current.Turnover, because: "Turnover");
+
+            previousOutput
+                .Sum(e => e.WinLoss)
+                .Should()
+                .Be(current.WinLoss, because: "WinLoss");
+
+            var tieBetAdjustment = previousOutput
+                .Sum(e => e.TieBetAdjustment);
+
+            tieBetAdjustment.Should()
+                .Be(current.TieBetAdjustment, because: "TieBetAdjustment");
+
+            previousOutput
+                .Sum(e => e.UnsettledBets)
+                .Should()
+                .Be(current.UnsettledBets, because: "Unsettled Bets");
+        }
+
+        private static void ValidateBetResult(BetValuesCalculatorRow current, BetValuesResult result)
+        {
+            var idAsInt = current.Id.ToString("N").TrimStart('0');
+
+            result.Turnover.Should().Be(current.Turnover, because: $" that is Turnover [for row:{current.Type} ID={idAsInt}]");
+            result.WinLoss.Should().Be(current.WinLoss, because: $" that is WinLoss [for row:{ current.Type } ID={idAsInt}]");
+            result.UnsettledBets.Should().Be(current.UnsettledBets, because: $" that is Unsettled Bets [for row:{current.Type} ID={idAsInt}]");
+            result.TieBetAdjustment.Should().Be(current.TieBetAdjustment, because: $" that is TieBetAdjustment Bets [for row:{current.Type} ID={idAsInt}]");
+        }
+
+        #endregion Private Methods and Properties
+    }
+
+    internal enum BetValuesCalculatorRowName
+    {
+        PlaceBet = GameActionType.PlaceBet,
+        WinBet = GameActionType.WinBet,
+        CancelTransaction = GameActionType.CancelTransaction,
+        LoseBet = GameActionType.LoseBet,
+        FreeBet = GameActionType.FreeBet,
+        TieBet = GameActionType.TieBet,
+        Totals = short.MaxValue,
+    }
+
+    internal class BetValuesCalculatorRow
+    {
+        public Guid Id { get; set; }
+        public Guid? RefId { get; set; }
+        public BetValuesCalculatorRowName Type { get; set; }
+        public GameActionType ActionType => (GameActionType)Type;
+        public decimal Amount { get; set; }
+        public decimal PostBalance { get; set; }
+        public decimal Turnover { get; set; }
+        public decimal WinLoss { get; set; }
+        public decimal TieBetAdjustment { get; set; }
+        public decimal UnsettledBets { get; set; }
+        public string BetType { get; set; }
+        public bool? RoundClosed { get; set; }
+    }
+}
