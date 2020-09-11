@@ -19,7 +19,3 @@ respond /healthcheck 200
 
 # api proxy
 # reverse_proxy /api/* backoffice.api:80
-route /proxy/* {
-    uri strip_prefix /proxy
-    reverse_proxy backoffice.api:80
-}
