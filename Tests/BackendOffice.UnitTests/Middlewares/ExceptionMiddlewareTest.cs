@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Diagnostics;
@@ -58,8 +59,12 @@ namespace BackendOffice.UnitTests.Middlewares
 
         private Mock<HttpContext> SetupHttpContext(bool hasNoException = true)
         {
-            var streamRequest = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(_requestString));
-            var streamResponse = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(_responseString));
+            //https://andrewcampey.com/2017/12/07/c-memory-stream-is-not-expandable/
+            // This CANNOT be extended   for error : memory stream is not expandable
+            var streamRequest = new MemoryStream(Encoding.UTF8.GetBytes(_requestString));
+            var streamResponse = new MemoryStream(); // // This CAN be extended
+            var responseStringByteArray = Encoding.UTF8.GetBytes(_responseString);
+            streamResponse.Write(responseStringByteArray, 0, responseStringByteArray.Length);
 
             var mockHttpContext = new Mock<HttpContext>();
 
@@ -70,6 +75,7 @@ namespace BackendOffice.UnitTests.Middlewares
             mockHttpResponse.Setup(p => p.Cookies)
                 .Returns(new Mock<IResponseCookies>().Object);
             mockHttpResponse.Setup(p => p.Body).Returns(streamResponse);
+
 
             if (hasNoException)
             {
