@@ -40,7 +40,7 @@ export const AddButton = ({}) => {
 
   const setChecked = (path = [], checked) => {
     let item = findMenu(path, menus)
-    item.IsDisplay = checked
+    item.isDisplay = checked
     setMenus(menus)
   }
 
@@ -174,7 +174,7 @@ const MenuTable = ({ menus = [], setChecked }) => {
 }
 
 const MenuTableContent = ({ menu = {}, setChecked }) => {
-  let { Code: moduleCode, SubMenus = [] } = menu
+  let { code: moduleCode, subMenus = [] } = menu
   let label = menuLabel([moduleCode])
   if (label === "") {
     return null
@@ -190,8 +190,8 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        {SubMenus.map((menu) => {
-          let { Code: subMenuCode, SubMenus: SubMenuItems = [] } = menu
+        {subMenus.map((menu) => {
+          let { code: subMenuCode, subMenus: subMenuItems = [] } = menu
           return (
             <Table.Row key={subMenuCode}>
               <Table.Cell>
@@ -203,7 +203,7 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
               </Table.Cell>
               <Table.Cell>
                 <div>
-                  {SubMenuItems.map((subMenuItem, index) => {
+                  {subMenuItems.map((subMenuItem, index) => {
                     return (
                       <MenuCheckbox
                         key={index}
@@ -224,9 +224,9 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
 }
 
 const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
-  let [checked, set] = useState(menu.IsDisplay)
+  let [checked, set] = useState(menu.isDisplay)
 
-  let code = menu?.Code
+  let { code } = menu
   let menuPath = [...path, code]
   let label = menuLabel(menuPath)
   if (!label) {

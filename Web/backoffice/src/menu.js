@@ -5,25 +5,13 @@ import { label as systemLabel } from "./system/menu"
 export const find = (path = [], list = []) => {
   let [code, ...restPath] = path
   code = code.toLowerCase()
-  let menu = list.find((item) => item?.Code?.toLowerCase() === code) ?? {}
+  let menu = list.find((item) => item?.code?.toLowerCase() === code) ?? {}
 
   if (restPath.length === 0) {
     return menu
   }
 
-  return find(restPath, menu?.SubMenus)
-  /*
-  let items = path.reduce((list, code, index, list) => {
-    code = code.toLowerCase()
-    list =
-      list.find((item) => item?.code?.toLowerCase() === code)?.subMenus ?? []
-
-    return list
-  }, list)
-
-  let result = items.find((item) => item.code.toLowerCase()) ?? {}
-  return result
-  */
+  return find(restPath, menu?.subMenus)
 }
 
 const isLast = (index, list = []) => list.length - 1 === index
