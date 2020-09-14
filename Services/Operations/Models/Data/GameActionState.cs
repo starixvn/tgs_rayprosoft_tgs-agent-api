@@ -44,8 +44,7 @@ namespace TGS.Services.Operations.Models
         public bool HasWalletUpdate { get; init; }
         public bool MustHaveExistingRound { get; init; }
         public bool MustHaveReferencedTransaction { get; init; }
-        public Guid GameProviderId { get; init; }
-        public string GameProviderCode { get; init; }
+        public CachedGameProvider GameProvider { get; init; }
         public Guid GameProviderConfigurationId { get; init; }
         public bool AutoCloseRound { get; init; }
 
@@ -53,7 +52,6 @@ namespace TGS.Services.Operations.Models
         public CachedGame[] GameProviderGames { get; init; }
 
         public Guid? BatchId { get; init; }
-        //public bool AllowSettlementWithDifferentGameProviderConfiguration { get; set; }
 
         public DateTimeOffset LicenseeNow { get; set; }
 
@@ -65,11 +63,11 @@ namespace TGS.Services.Operations.Models
         /// <summary>
         /// game actions except that is cancelled in the same round
         /// </summary>
-        public IList<BetActionData> ValidPreviousActions { get; set; } 
-        
+        public IList<BetActionData> ValidPreviousActions { get; set; }
+
         public Guid? ReferencedGameActionInternalId { get; set; }
         public BetActionData ReferencedGameAction { get; set; }
-                //public BetValuesResult BetValueResult { get; set; }
+        public BetValuesResult BetValueResult { get; set; }
         public Guid GameId { get; set; }
         public CachedGame Game { get; set; }
 

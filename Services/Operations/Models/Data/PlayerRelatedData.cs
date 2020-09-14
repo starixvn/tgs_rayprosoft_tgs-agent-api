@@ -5,8 +5,9 @@ namespace TGS.Services.Operations.Models.Data
 {
     internal record PlayerRelatedData
     {
-        internal Guid LicenseeId { get; init; }
+        public Guid LicenseeId { get; init; }
         public string LicenseeCode { get; init; }
+        public string LicenseeName { get; init; }
         public string PlayerCode { get; init; }
         public PlayerStatus Status { get; init; }
         public WalletData Wallet { get; init; }
@@ -15,6 +16,6 @@ namespace TGS.Services.Operations.Models.Data
         public PlayerTypes PlayerType { get; init; }
         public string ExternalCurrencyCode { get; init; }        
         public string LicenseeTimeZoneId { get; init; }
-        public string PlayerIp { get; init; } = string.Empty;
+        public string PlayerIp { get; init; } = string.Empty;        
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Models.Enums;
@@ -70,7 +69,9 @@ namespace TGS.Services.Operations
             var r = await _gameProviderQueriesFactory().GetCachedGameProviderAsync(gameProviderId);
             cachedGameProvider = new()
             {
+                Id = gameProviderId,
                 Code = r.Code,
+                Name = r.Name,
                 Description = r.Description,
                 Status = r.Status,
                 AutoClosedRound = r.AutoClosedRound,
@@ -225,33 +226,36 @@ namespace TGS.Services.Operations
             return game?.Status;
         }
 
-
         #region Private Methods
 
         private async Task<CachedGameProvider> GetCachedGameProviderOrNullAsync(Guid gameProviderId)
         {
             var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId, new RedisValue[]
             {
-                    CachedGameProviderFields.GameProviderCode,
-                    CachedGameProviderFields.Decription,
-                    CachedGameProviderFields.Status,
-                    CachedGameProviderFields.AutoClosedRound,
-                    CachedGameProviderFields.SupportTestPlayer,
-                    CachedGameProviderFields.PlaceBetTimeout,
-                    CachedGameProviderFields.SettleBetTimeout
+                CachedGameProviderFields.GameProviderId,       
+                CachedGameProviderFields.GameProviderCode,
+                CachedGameProviderFields.GameProviderName,
+                CachedGameProviderFields.Decription,
+                CachedGameProviderFields.Status,
+                CachedGameProviderFields.AutoClosedRound,
+                CachedGameProviderFields.SupportTestPlayer,
+                CachedGameProviderFields.PlaceBetTimeout,
+                CachedGameProviderFields.SettleBetTimeout
             });
 
             if (values.All(a => !a.IsNull))
             {
                 return new CachedGameProvider
                 {
-                    Code = values[0],
-                    Status = (Status)(int)values[1],
-                    Description = values[2],
-                    AutoClosedRound = (bool)values[3],
-                    SupportTestPlayer = (bool)values[4],
-                    PlaceBetTimeout = (int)values[5],
-                    SettleBetTimeout = (int)values[6]
+                    Id = Guid.Parse(values[0]),
+                    Code = values[1],
+                    Name = values[2],
+                    Status = (Status)(int)values[3],
+                    Description = values[4],
+                    AutoClosedRound = (bool)values[5],
+                    SupportTestPlayer = (bool)values[6],
+                    PlaceBetTimeout = (int)values[7],
+                    SettleBetTimeout = (int)values[8]
                 };
             }
 
@@ -262,7 +266,9 @@ namespace TGS.Services.Operations
         {
             var fields = new HashEntry[]
             {
+                new (CachedGameProviderFields.GameProviderId, gameProvider.Id.ToString()),
                 new (CachedGameProviderFields.GameProviderCode, gameProvider.Code),
+                new (CachedGameProviderFields.GameProviderName, gameProvider.Name),
                 new (CachedGameProviderFields.Status, (int)gameProvider.Status),
                 new (CachedGameProviderFields.Decription, gameProvider.Description),
                 new (CachedGameProviderFields.AutoClosedRound, gameProvider.AutoClosedRound),
@@ -309,21 +315,17 @@ namespace TGS.Services.Operations
 
         private static class CachedGameProviderFields
         {
+            public const string GameProviderId = "gameProviderId";
             public const string GameProviderCode = "gameProviderCode";
-
+            public const string GameProviderName = "gameProviderName";
             public const string Status = "status";
-
             public const string Decription = "description";
-
             public const string AutoClosedRound = "autoClosedRound";
-
             public const string SupportTestPlayer = "supportTestPlayer";
-
             public const string PlaceBetTimeout = "placeBetTimeout";
-
             public const string SettleBetTimeout = "settleBetTimeout";
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

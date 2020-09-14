@@ -11,12 +11,12 @@ namespace TGS.Core.DataServices.Bet.Models
         public Guid WalletId { get; set; }
         public Guid GameId { get; set; }
         public string GameName { get; set; }
-        public string GameCode { get; set; }
         public GameType GameType { get; set; }
+        public Guid GameProviderId { get; set; }
         public string GameProviderName { get; set; }
         public string GameProviderCode { get; set; }
         public string PlayerCode { get; set; }
-        public PlayerTypes PlayerTypes { get; set; }
+        public PlayerTypes PlayerType { get; set; }
         public string CurrencyCode { get; set; }
         public PlatformType PlatformType { get; set; }
         public RoundStatus Status { get; set; }
@@ -26,13 +26,15 @@ namespace TGS.Core.DataServices.Bet.Models
         public DateTimeOffset? ClosedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public Guid? LicenseeId { get; set; }
+        public string LicenseeCode { get; set; }
+        public string LicenseeName { get; set; }
         public DateTimeOffset? ExternalCreatedOn { get; set; }
         public DateTimeOffset? ExternalClosedOn { get; set; }
         public decimal? BetAmount { get; set; }
         public decimal? WinAmount { get; set; }
         public decimal? Commission { get; set; }
         public decimal? WinLoss { get; set; }
-        public decimal? TiebetAdjustment { get; set; }
+        public decimal? TieBetAdjustment { get; set; }
 
         public RoundDetail RoundDetail { get; set; }
     }

@@ -42,12 +42,12 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     WalletId = table.Column<Guid>(nullable: false),
                     GameId = table.Column<Guid>(nullable: false),
                     GameName = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    GameCode = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     GameType = table.Column<short>(type: "smallint", nullable: false),
+                    GameProviderId = table.Column<Guid>(nullable: false),
                     GameProviderName = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    GameProviderCode = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    GameProviderCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
-                    PlayerTypes = table.Column<short>(type: "smallint", nullable: false),
+                    PlayerType = table.Column<short>(type: "smallint", nullable: false),
                     CurrencyCode = table.Column<string>(type: "varchar(10)", nullable: false),
                     PlatformType = table.Column<short>(type: "smallint", nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
@@ -56,13 +56,15 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     ClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LicenseeId = table.Column<Guid>(nullable: false),
+                    LicenseeCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
+                    LicenseeName = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     ExternalCreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     ExternalClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     BetAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
                     WinAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
                     Commission = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
                     WinLoss = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
-                    TiebetAdjustment = table.Column<decimal>(type: "decimal(18,6)", nullable: true)
+                    TieBetAdjustment = table.Column<decimal>(type: "decimal(18,6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -170,16 +172,20 @@ namespace TGS.Core.DataServices.Bet.Migrations
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
-            
+
             // SP
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetRoundByExternalRoundId"));       
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetRoundByExternalRoundId"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));      
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionsInSameRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_InsertRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
 
-            #endregion
+            #endregion Store Procedure
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -17,25 +17,27 @@ BEGIN
 	AS
 	(
 		SELECT 
-			ResellerId,
-			Id,
-			TimeZoneId,
-			Code,
+			[ResellerId],
+			[Id],
+			[TimeZoneId],
+			[Code],
+			[Name],
 			[Status],
-			CashierUrl,
-			HelpUrl,
-			LoginUrl,
-			TermsUrl,
-			MobileCashierUrl,
-			MobileHelpUrl,
-			MobileLoginUrl,
-			MobileTermsUrl
+			[CashierUrl],
+			[HelpUrl],
+			[LoginUrl],
+			[TermsUrl],
+			[MobileCashierUrl],
+			[MobileHelpUrl],
+			[MobileLoginUrl],
+			[MobileTermsUrl]
 		FROM dbo.[Licensees]
 		WHERE [Id] = @licenseeId
 	)
 	SELECT 
 		l.[Id],
 		l.[Code],
+		l.[Name],
 		l.[TimeZoneId],
 		l.[Status],
 		l.[CashierUrl],
@@ -46,8 +48,8 @@ BEGIN
 		l.[MobileHelpUrl],
 		l.[MobileLoginUrl],
 		l.[MobileTermsUrl],
-		r.Id AS [ResellerId],
-		r.Code AS [ResellerCode]		
+		r.[Id] AS [ResellerId],
+		r.[Code] AS [ResellerCode]		
 	FROM [Licensee] l
 	JOIN dbo.[Resellers] r 
 	ON r.[Id] = l.[ResellerId]    
