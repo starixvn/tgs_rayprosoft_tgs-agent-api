@@ -204,114 +204,12 @@ namespace TGS.Services.Operations.Bets
                     ParameterName = "@id",
                     Value = roundData.Id,
                     DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@externalRoundId",
-                    Value = roundData.ExternalRoundId,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@walletId",
-                    Value = roundData.WalletId,
-                    DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@gameId",
-                    Value = roundData.GameId,
-                    DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@gameName",
-                    Value = roundData.GameName,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@gameType",
-                    Value = roundData.GameType,
-                    DbType = DbType.Int16
-                },
-                new()
-                {
-                    ParameterName = "@gameProviderId",
-                    Value = roundData.GameProviderId,
-                    DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@gameProviderCode",
-                    Value = roundData.GameProviderCode,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@gameProviderName",
-                    Value = roundData.GameProviderName,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@playerCode",
-                    Value = roundData.PlayerCode,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@playerType",
-                    Value = roundData.PlayerType,
-                    DbType = DbType.Int16
-                },
-                new()
-                {
-                    ParameterName = "@currencyCode",
-                    Value = roundData.CurrencyCode,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@platformType",
-                    Value = roundData.PlatformType,
-                    DbType = DbType.Int16
-                },
+                },               
                 new()
                 {
                     ParameterName = "@status",
                     Value = roundData.Status,
                     DbType = DbType.Int16
-                },
-                new()
-                {
-                    ParameterName = "@gameProviderConfigurationId",
-                    Value = roundData.GameProviderConfigurationId,
-                    DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@licenseeId",
-                    Value = roundData.LicenseeId,
-                    DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@licenseeCode",
-                    Value = roundData.LicenseeCode,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@licenseeName",
-                    Value = roundData.LicenseeName,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@createdOn",
-                    Value = roundData.CreatedOn,
-                    DbType = DbType.DateTimeOffset
                 },
                 new()
                 {
@@ -327,12 +225,6 @@ namespace TGS.Services.Operations.Bets
                 },
                 new()
                 {
-                    ParameterName = "@externalCreatedOn",
-                    Value = roundData.ExternalCreatedOn,
-                    DbType = DbType.DateTimeOffset
-                },
-                new()
-                {
                     ParameterName = "@externalClosedOn",
                     Value = roundData.ExternalClosedOn,
                     DbType = DbType.DateTimeOffset
@@ -342,6 +234,48 @@ namespace TGS.Services.Operations.Bets
                     ParameterName = "@roundDetail",
                     Value = roundData.RoundDetail,
                     DbType = DbType.String
+                },
+                new()
+                {
+                    ParameterName = "@betAmount",
+                    Value = roundData.BetAmount,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@betAmount",
+                    Value = roundData.BetAmount,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@winAmount",
+                    Value = roundData.WinAmount,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@tieBetAdjustment",
+                    Value = roundData.TieBetAdjustment,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@commssion",
+                    Value = roundData.Commission,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@isReopen",
+                    Value = roundData.IsReopen,
+                    DbType = DbType.Boolean
+                },
+                new()
+                {
+                    ParameterName = "@isClosed",
+                    Value = roundData.IsClosed,
+                    DbType = DbType.Boolean
                 },
             });
         }
