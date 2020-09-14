@@ -9,7 +9,7 @@ namespace BackendOffice.UnitTests.Controllers
 {
     public class BaseTests
     {
-        protected readonly Mock<IHttpContextAccessor> _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        protected readonly Mock<IHttpContextAccessor> HttpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
         public virtual void Setup()
         {
@@ -26,7 +26,7 @@ namespace BackendOffice.UnitTests.Controllers
             mockHttpContext.Setup(p => p.User)
                 .Returns(GetUserClaimsPrincipal(username, rolename, roleType));
 
-            _httpContextAccessorMock.Setup(p => p.HttpContext)
+            HttpContextAccessorMock.Setup(p => p.HttpContext)
                 .Returns(mockHttpContext.Object);
         }
 

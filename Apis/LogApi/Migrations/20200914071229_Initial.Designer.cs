@@ -10,7 +10,7 @@ using TGS.Apis.LogApi.DataService;
 namespace TGS.Apis.LogApi.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20200910035004_Initial")]
+    [Migration("20200914071229_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,6 @@ namespace TGS.Apis.LogApi.Migrations
                         .IsUnicode(true);
 
                     b.Property<string>("Exception")
-                        .IsRequired()
                         .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 

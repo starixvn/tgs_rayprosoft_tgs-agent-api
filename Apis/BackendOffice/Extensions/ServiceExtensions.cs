@@ -47,6 +47,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddHttpContextAccessor();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
             services.AddControllers()
+                .AddControllersAsServices()
                 .AddFluentValidation(opt =>
                 {
                     opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());

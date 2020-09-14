@@ -30,7 +30,7 @@ namespace BackendOffice.UnitTests.Controllers
             _controller = new SettingController(
                 _queriesMock.Object,
                 _commandsMock.Object,
-                _httpContextAccessorMock.Object);
+                HttpContextAccessorMock.Object);
         }
 
         [TestCase(true)]

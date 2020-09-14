@@ -37,7 +37,7 @@ namespace BackendOffice.UnitTests.Controllers
                 _settingQueriesMock.Object,
                 _roleCommandsMock.Object,
                 _jsonSerializationProviderMock.Object,
-                _httpContextAccessorMock.Object);
+                HttpContextAccessorMock.Object);
         }
 
         [TestCase(true)]
