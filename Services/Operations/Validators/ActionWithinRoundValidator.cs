@@ -18,6 +18,8 @@ namespace TGS.Services.Operations.Validators
     {
         Exception IActionWithinRoundValidator.FindError(BetActionData current, IList<BetActionData> previousActions)
         {
+            previousActions ??= Array.Empty<BetActionData>();
+
             if (IsClosingRoundOnPlaceBet(current, out var error))
                 return error;
 
@@ -177,7 +179,7 @@ namespace TGS.Services.Operations.Validators
 
         private static BetActionData FindPreviouslyClosed(IList<BetActionData> actions)
         {
-            if (actions == null)
+            if (actions.Count == 0)
                 return null;
 
             BetActionData closingAction = null;

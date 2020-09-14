@@ -388,10 +388,11 @@ namespace TGS.Services.Operations.Bets
                 BetId = s.BetId
             };
 
-            var error =  _actionWithinRoundValidator.FindError(current, s.PreviousActions);
+            var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
             if (error != null)
                 throw error;
 
+            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current, s.PreviousActions);
         }
     }
 }

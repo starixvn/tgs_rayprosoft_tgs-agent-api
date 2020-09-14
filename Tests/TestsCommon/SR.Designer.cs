@@ -122,5 +122,23 @@ namespace TGS.Tests.TestsCommon {
                 return ResourceManager.GetString("RoundStatus", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TurnoverOnTieBet.
+        /// </summary>
+        public static string TurnoverOnTieBet {
+            get {
+                return ResourceManager.GetString("TurnoverOnTieBet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UserBalance.
+        /// </summary>
+        public static string UserBalance {
+            get {
+                return ResourceManager.GetString("UserBalance", resourceCulture);
+            }
+        }
     }
 }

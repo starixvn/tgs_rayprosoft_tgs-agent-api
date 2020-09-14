@@ -11,9 +11,9 @@ namespace TGS.Services.Operations.Models.Data
         public string ExternalRoundId { get; init; }
         public BetActionData Reference { get; set; }
         public decimal Amount { get; init; }
-        public decimal UnsettledBets { get; init; }
-        public decimal Turnover { get; init; }
-        public decimal WinLoss { get; init; }
+        public decimal UnsettledBets { get; set; }
+        public decimal Turnover { get; set; }
+        public decimal WinLoss { get; set; }
         public bool IsClosingRound { get; init; }
         public GameActionType Type { get; init; }
         public DateTimeOffset RecordedOn { get; init; }
