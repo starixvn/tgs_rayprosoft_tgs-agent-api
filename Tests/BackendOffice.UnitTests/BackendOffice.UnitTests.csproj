@@ -21,4 +21,8 @@
     <ProjectReference Include="..\..\Apis\BackendOffice\BackendOffice.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Filters\" />
+  </ItemGroup>
+
 </Project>
