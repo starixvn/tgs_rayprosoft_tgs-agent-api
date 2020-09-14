@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -11,9 +12,8 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Infrastructures.Json;
 using Resources = TGS.Apis.BackendOffice.Resources;
@@ -24,9 +24,9 @@ namespace BackendOffice.UnitTests.Controllers
     public class RoleControllerTests : BaseTests
     {
         private RoleController _controller;
-        private readonly Mock<IRoleQueries> _roleQueriesMock = new Mock<IRoleQueries>();
-        private readonly Mock<ISettingQueries> _settingQueriesMock = new Mock<ISettingQueries>();
-        private readonly Mock<IRoleCommands> _roleCommandsMock = new Mock<IRoleCommands>();
+        private readonly Mock<IGenericQueries<Role>> _roleQueriesMock = new Mock<IGenericQueries<Role>>();
+        private readonly Mock<IGenericQueries<Setting>> _settingQueriesMock = new Mock<IGenericQueries<Setting>>();
+        private readonly Mock<IGenericCommands<Role>> _roleCommandsMock = new Mock<IGenericCommands<Role>>();
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
         [SetUp]
         public override void Setup()
@@ -65,10 +65,10 @@ namespace BackendOffice.UnitTests.Controllers
                 orderedRoles.ToArray() :
                 orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _roleQueriesMock.Setup(x => x.GetRoleQueries())
+            _roleQueriesMock.Setup(x => x.GetQueries())
                 .Returns(roles);
 
-            var response = await _controller.GetRolesAsync(request);
+            var response = await _controller.GetListAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
@@ -83,17 +83,17 @@ namespace BackendOffice.UnitTests.Controllers
                 response.Items[i].UpdatedByUsername.Should().Be(expectedRoles[i].UpdatedByUsername);
             }
 
-            _roleQueriesMock.Verify(p => p.GetRoleQueries());
+            _roleQueriesMock.Verify(p => p.GetQueries());
         }
 
         [Test]
         public async Task Can_Get_Role()
         {
             var role = CreateRoleFixture().Create<Role>();
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            _settingQueriesMock.Setup(p => p.GetSettingByKeyAsync("Menus"))
+            _settingQueriesMock.Setup(s => s.GetSingleAsync(p => p.Key == "Menus", null))
                 .Returns(Task.FromResult(new Fixture().Create<Setting>()));
 
             var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
@@ -101,7 +101,7 @@ namespace BackendOffice.UnitTests.Controllers
                 .Returns(menuSettings)
                 .Returns(menuSettings);
 
-            var response = await _controller.GetRoleAsync(role.Id);
+            var response = await _controller.GetSingleAsync(role.Id);
             response.Valid.Should().BeTrue();
             response.Role.Id.Should().Be(role.Id);
             response.Role.Name.Should().Be(role.Name);
@@ -125,19 +125,17 @@ namespace BackendOffice.UnitTests.Controllers
                     actualMenu.IsDisplay.Should().Be(expectedMenu.IsDisplay);
                 }
             }
-
         }
-
 
         [Test]
         public async Task Cannot_Get_Role()
         {
             var roleId = Guid.NewGuid();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == roleId)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult<Role>(null));
 
-            var response = await _controller.GetRoleAsync(roleId);
+            var response = await _controller.GetSingleAsync(roleId);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NotFound);
         }
@@ -147,12 +145,12 @@ namespace BackendOffice.UnitTests.Controllers
         {
             var request = CreateRoleRequestFixture().Create<CreateRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreateRoleAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
-            _roleCommandsMock.Verify(s => s.CreateRoleAsync(It.Is<Role>(p =>
+            _roleCommandsMock.Verify(s => s.CreateAsync(It.Is<Role>(p =>
                 p.Name == request.Name &&
                 p.DisplayName == request.DisplayName &&
                 p.Description == request.Description)));
@@ -163,10 +161,10 @@ namespace BackendOffice.UnitTests.Controllers
         {
             var request = CreateRoleRequestFixture().Create<CreateRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.CreateRoleAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NameExists);
         }
@@ -177,17 +175,17 @@ namespace BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateRoleAsync(role.Id, request);
+            var response = await _controller.UpdateAsync(role.Id, request);
 
             response.Valid.Should().BeTrue();
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleCommandsMock.Verify(p => p.UpdateRoleAsync(It.Is<Role>(r =>
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)));
@@ -199,21 +197,19 @@ namespace BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult<Role>(null));
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
 
 
-            var response = await _controller.UpdateRoleAsync(role.Id, request);
+            var response = await _controller.UpdateAsync(role.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NotFound);
 
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleQueriesMock.Verify(s => s.NameExistsAsync(It.Is<string>(p => p == role.Name)), Times.Never);
-            _roleCommandsMock.Verify(p => p.UpdateRoleAsync(It.Is<Role>(r =>
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)), Times.Never);
@@ -225,20 +221,18 @@ namespace BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.UpdateRoleAsync(role.Id, request);
+            var response = await _controller.UpdateAsync(role.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NameExists);
 
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleQueriesMock.Verify(s => s.NameExistsAsync(It.Is<string>(p => p == role.Name)), Times.Never);
-            _roleCommandsMock.Verify(p => p.UpdateRoleAsync(It.Is<Role>(r =>
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)), Times.Never);
@@ -251,17 +245,17 @@ namespace BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = new Fixture().Create<CopyRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CopyRoleAsync(role.Id, request);
+            var response = await _controller.CopyAsync(role.Id, request);
 
             response.Valid.Should().BeTrue();
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleCommandsMock.Verify(p => p.CreateRoleAsync(It.Is<Role>(r =>
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+            _roleCommandsMock.Verify(p => p.CreateAsync(It.Is<Role>(r =>
                 r.Name == request.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)));
@@ -273,21 +267,18 @@ namespace BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = new Fixture().Create<CopyRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult<Role>(null));
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-
-            var response = await _controller.CopyRoleAsync(role.Id, request);
+            var response = await _controller.CopyAsync(role.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NotFound);
 
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleQueriesMock.Verify(s => s.NameExistsAsync(It.Is<string>(p => p == role.Name)), Times.Never);
-            _roleCommandsMock.Verify(p => p.UpdateRoleAsync(It.Is<Role>(r =>
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)), Times.Never);
@@ -299,20 +290,20 @@ namespace BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<CopyRoleRequest>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            _roleQueriesMock.Setup(s => s.NameExistsAsync(It.Is<string>(p => p == request.Name)))
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.CopyRoleAsync(role.Id, request);
+            var response = await _controller.CopyAsync(role.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NameExists);
 
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleQueriesMock.Verify(s => s.NameExistsAsync(It.Is<string>(p => p == role.Name)), Times.Never);
-            _roleCommandsMock.Verify(p => p.UpdateRoleAsync(It.Is<Role>(r =>
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+            _roleQueriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()));
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)), Times.Never);
@@ -323,14 +314,14 @@ namespace BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            var response = await _controller.DeleteRoleAsync(role.Id);
+            var response = await _controller.DeleteAsync(role.Id);
 
             response.Valid.Should().BeTrue();
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleCommandsMock.Verify(p => p.DeleteRoleAsync(It.Is<Role>(r =>
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+            _roleCommandsMock.Verify(p => p.DeleteAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)));
@@ -341,16 +332,16 @@ namespace BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult<Role>(null));
 
-            var response = await _controller.DeleteRoleAsync(role.Id);
+            var response = await _controller.DeleteAsync(role.Id);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.NotFound);
 
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleCommandsMock.Verify(p => p.DeleteRoleAsync(It.Is<Role>(r =>
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+            _roleCommandsMock.Verify(p => p.DeleteAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)), Times.Never);
@@ -363,22 +354,68 @@ namespace BackendOffice.UnitTests.Controllers
 
             role.Users = new List<User> { new User() };
 
-            _roleQueriesMock.Setup(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)))
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
 
-            var response = await _controller.DeleteRoleAsync(role.Id);
+            var response = await _controller.DeleteAsync(role.Id);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.Role.CannotDeleteRole);
 
-            _roleQueriesMock.Verify(s => s.GetRoleByIdAsync(It.Is<Guid>(p => p == role.Id)));
-            _roleQueriesMock.Verify(s => s.NameExistsAsync(It.Is<string>(p => p == role.Name)), Times.Never);
-            _roleCommandsMock.Verify(p => p.DeleteRoleAsync(It.Is<Role>(r =>
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+            _roleCommandsMock.Verify(p => p.DeleteAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)), Times.Never);
         }
 
+        [Test]
+        public async Task Can_Get_Menus()
+        {
+            var role = CreateRoleFixture().Create<Role>();
+
+            role.Users = new List<User> { new User() };
+
+            _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+                .Returns(Task.FromResult(new Setting()));
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p => p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            var response = await _controller.GetMenuAsync();
+            response.Valid.Should().BeTrue();
+
+            for (var i = 0; i < response.Menus.Length; i++)
+            {
+                response.Menus[i].Code.Should().Be(menuSettings[i].Code);
+                response.Menus[i].IsDisplay.Should().Be(menuSettings[i].IsDisplay);
+
+                for (var j = 0; j < response.Menus[i].SubMenus.Length; j++)
+                {
+                    var actualMenu = response.Menus[i].SubMenus[j];
+                    var expectedMenu = menuSettings[i].SubMenus[j];
+                    actualMenu.Code.Should().Be(expectedMenu.Code);
+                    actualMenu.IsDisplay.Should().Be(expectedMenu.IsDisplay);
+                }
+            }
+        }
+
+        [Test]
+        public async Task Cannot_Get_Menus()
+        {
+            var role = CreateRoleFixture().Create<Role>();
+
+            role.Users = new List<User> { new User() };
+
+            _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+                .Returns(Task.FromResult<Setting>(null));
+
+            var response = await _controller.GetMenuAsync();
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Role.MenuNotFound);
+        }
 
         private Fixture CreateRoleFixture()
         {

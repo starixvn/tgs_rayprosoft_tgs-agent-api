@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Json;
@@ -26,10 +25,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
         private readonly IAntiforgery _antiForgery;
-        private readonly IUserQueries _userQueries;
-        private readonly IDepartmentQueries _departmentQueries;
-        private readonly IRoleQueries _roleQueries;
-        private readonly IUserCommands _userCommands;
+        private readonly IGenericQueries<User> _userQueries;
+        private readonly IGenericQueries<Department> _departmentQueries;
+        private readonly IGenericQueries<Role> _roleQueries;
+        private readonly IGenericCommands<User> _userCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -37,10 +36,10 @@ namespace TGS.Apis.BackendOffice.Controllers
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
             IAntiforgery antiForgery,
-            IUserQueries userQueries,
-            IDepartmentQueries departmentQueries,
-            IRoleQueries roleQueries,
-            IUserCommands userCommands,
+            IGenericQueries<User> userQueries,
+            IGenericQueries<Department> departmentQueries,
+            IGenericQueries<Role> roleQueries,
+            IGenericCommands<User> userCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
@@ -57,9 +56,9 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [Route("")]
         [HttpGet, Description("Get users")]
-        public Task<PagedResponse<UserModel>> GetUsersAsync([FromQuery] GetUsersRequest request)
+        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request)
         {
-            return _userQueries.GetUserQueries()
+            return _userQueries.GetQueries()
                 .Where(request.Username, p => p.Username.Contains(request.Username))
                 .Select(user => new UserModel
                 {
@@ -79,19 +78,19 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [Route("")]
         [HttpPost, Description("Create a user")]
-        public async Task<MessageResponse> CreateUserAsync([FromBody] CreateUserRequest request)
+        public async Task<MessageResponse> CreateAsync([FromBody] CreateUserRequest request)
         {
-            if (await _userQueries.UsernameExistsAsync(request.Username))
+            if (await _userQueries.ExistsAsync(p => p.Username == request.Username))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.User.UsernameExistedAlready);
             }
 
-            if (await _roleQueries.GetRoleByIdAsync(request.RoleId) == null)
+            if (await _roleQueries.GetSingleAsync(p => p.Id == request.RoleId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
 
-            if (await _departmentQueries.GetDepartmentByIdAsync(request.DepartmentId) == null)
+            if (await _departmentQueries.GetSingleAsync(p => p.Id == request.DepartmentId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
@@ -113,24 +112,24 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            await _userCommands.CreateUserAsync(user);
+            await _userCommands.CreateAsync(user);
             return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPut("{userId}"), Description("Update a user")]
-        public async Task<MessageResponse> UpdateUserAsync(Guid userId, [FromBody] UpdateUserRequest request)
+        public async Task<MessageResponse> UpdateAsync(Guid userId, [FromBody] UpdateUserRequest request)
         {
-            var user = await _userQueries.GetUserByIdAsync(userId);
+            var user = await _userQueries.GetSingleAsync(p => p.Id == userId);
 
             if (user == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
             }
-            if (await _roleQueries.GetRoleByIdAsync(request.RoleId) == null)
+            if (await _roleQueries.GetSingleAsync(r => r.Id == request.RoleId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
-            if (await _departmentQueries.GetDepartmentByIdAsync(request.DepartmentId) == null)
+            if (await _departmentQueries.GetSingleAsync(p => p.Id == request.DepartmentId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
@@ -141,14 +140,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.UpdatedByUsername = Username;
             user.UpdatedOn = DateTimeOffset.Now;
 
-            await _userCommands.UpdateUserAsync(user);
+            await _userCommands.UpdateAsync(user);
             return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPut("{userId}/password"), Description("Update user password")]
-        public async Task<MessageResponse> UpdateUserPasswordAsync(Guid userId, [FromBody] UpdatePasswordRequest request)
+        public async Task<MessageResponse> UpdatePasswordAsync(Guid userId, [FromBody] UpdatePasswordRequest request)
         {
-            var user = await _userQueries.GetUserByIdAsync(userId);
+            var user = await _userQueries.GetSingleAsync(p => p.Id == userId);
 
             if (user == null)
             {
@@ -161,7 +160,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.UpdatedByUsername = Username;
             user.UpdatedOn = DateTimeOffset.Now;
 
-            await _userCommands.UpdateUserAsync(user);
+            await _userCommands.UpdateAsync(user);
             return CreateValidResponse<MessageResponse>();
         }
 

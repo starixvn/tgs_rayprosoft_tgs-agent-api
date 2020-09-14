@@ -22,6 +22,17 @@ import AsyncTable, { useTableState } from "../../table/async"
 
 export const Code = "admins"
 
+//TODO: i18n
+export const label = (code = "") => {
+  code = code.toLowerCase()
+  switch (code) {
+    case "create":
+      return "新增管理员"
+    case "update":
+      return "编辑管理员"
+  }
+}
+
 export const Content = () => {
   let columns = useMemo(tableColumns)
   let { state, setState, headSortBy, headOrderBy } = useTableState({

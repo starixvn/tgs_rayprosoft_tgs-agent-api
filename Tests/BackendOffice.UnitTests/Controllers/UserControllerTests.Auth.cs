@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -26,7 +28,7 @@ namespace BackendOffice.UnitTests.Controllers
                 Password = Generator.RandomString(6)
             };
 
-            _userQueriesMock.Setup(u => u.GetUserByUsernameAsync(It.Is<string>(p => p == request.Username)))
+            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult<User>(null));
 
             var response = await _controller.AuthenticateAsync(request);
@@ -45,7 +47,7 @@ namespace BackendOffice.UnitTests.Controllers
 
             var user = CreateUserFixture().Create<User>();
 
-            _userQueriesMock.Setup(u => u.GetUserByUsernameAsync(It.Is<string>(p => p == request.Username)))
+            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
             _hashProviderMock.Setup(p => p.Hash(It.IsAny<byte[]>()))
@@ -71,7 +73,7 @@ namespace BackendOffice.UnitTests.Controllers
 
             var user = CreateUserFixture().Create<User>();
 
-            _userQueriesMock.Setup(u => u.GetUserByUsernameAsync(It.Is<string>(p => p == request.Username)))
+            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
             _hashProviderMock.Setup(p => p.Hash(It.IsAny<byte[]>()))
@@ -88,7 +90,7 @@ namespace BackendOffice.UnitTests.Controllers
             var response = await _controller.AuthenticateAsync(request);
             response.Valid.Should().BeTrue();
             response.UserInfo.Should().NotBeNull();
-            _userCommandsMock.Verify(p => p.UpdateUserAsync(It.Is<User>(u => u.Username == user.Username)));
+            _userCommandsMock.Verify(p => p.UpdateAsync(It.Is<User>(u => u.Username == user.Username)));
         }
 
         private Mock<IAuthenticationService> _authServiceMock;
@@ -108,22 +110,8 @@ namespace BackendOffice.UnitTests.Controllers
             mockHttpContext.Setup(p => p.User)
                 .Returns(GetUserClaimsPrincipal());
 
-            _authServiceMock = new Mock<IAuthenticationService>();
-            _authServiceMock
-                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
-                .Returns(Task.FromResult(default(object)));
-
-            _authServiceMock
-                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
-                .Returns(Task.FromResult(default(object)));
-
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock
-                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
-                .Returns(_authServiceMock.Object);
-
             mockHttpContext.Setup(p => p.RequestServices)
-                .Returns(serviceProviderMock.Object);
+                .Returns(SetupServiceProviderMock().Object);
 
             mockHttpContext.Setup(p => p.Connection)
                 .Returns(new Mock<ConnectionInfo>().Object);
@@ -137,6 +125,24 @@ namespace BackendOffice.UnitTests.Controllers
 
             _httpContextAccessorMock.Setup(p => p.HttpContext)
                 .Returns(mockHttpContext.Object);
+        }
+
+        private Mock<IServiceProvider> SetupServiceProviderMock()
+        {
+            _authServiceMock = new Mock<IAuthenticationService>();
+            _authServiceMock
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.FromResult(default(object)));
+
+            _authServiceMock
+                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.FromResult(default(object)));
+
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            serviceProviderMock
+                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
+                .Returns(_authServiceMock.Object);
+            return serviceProviderMock;
         }
     }
 }

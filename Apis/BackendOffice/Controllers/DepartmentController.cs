@@ -4,12 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
-using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Infrastructures.Extensions;
 
@@ -20,11 +19,11 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class DepartmentController : BackendOfficeControllerBase
     {
-        private readonly IDepartmentQueries _queries;
+        private readonly IGenericQueries<Department> _queries;
         private readonly IGenericCommands<Department> _commands;
 
         public DepartmentController(
-            IDepartmentQueries queries,
+            IGenericQueries<Department> queries,
             IGenericCommands<Department> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
@@ -33,9 +32,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet, Description("Get departments")]
-        public Task<PagedResponse<DepartmentModel>> GetDepartmentsAsync([FromQuery] PageableRequest request)
+        public Task<PagedResponse<DepartmentModel>> GetListAsync([FromQuery] PageableRequest request)
         {
-            return _queries.GetDepartmentQueries()
+            return _queries.GetQueries()
                 .Select(d => new DepartmentModel
                 {
                     Id = d.Id,
@@ -44,19 +43,18 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .CreatePagedResponseAsync(request);
         }
 
-
-        [HttpPut("{departmentId}"), Description("Update a department")]
-        public async Task<MessageResponse> UpdateDepartmentAsync(Guid departmentId, [FromBody] DepartmentRequest request)
+        [HttpPut("{id}"), Description("Update a department")]
+        public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] DepartmentRequest request)
         {
-            var department = await _queries.GetDepartmentByIdAsync(departmentId);
+            var department = await _queries.GetSingleAsync(p => p.Id == id);
             if (department == null)
             {
-                return CreateInvalidResponse<MessageResponse>($"{Resources.Department.NotFound}");
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
-            if (request.Name != department.Name && await _queries.NameExistsAsync(request.Name))
+            if (request.Name != department.Name && await _queries.ExistsAsync(p => p.Name == request.Name))
             {
-                return CreateInvalidResponse<MessageResponse>($"{Resources.Department.NameExists}");
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NameExists);
             }
 
             department.Name = request.Name;
@@ -67,10 +65,10 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpDelete("{departmentId}"), Description("Delete a department")]
-        public async Task<MessageResponse> DeleteDepartmentAsync(Guid departmentId)
+        [HttpDelete("{id}"), Description("Delete a department")]
+        public async Task<MessageResponse> DeleteAsync(Guid id)
         {
-            var department = await _queries.GetDepartmentByIdAsync(departmentId);
+            var department = await _queries.GetSingleAsync(p => p.Id == id, d => d.Include(x => x.Users));
             if (department == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
@@ -78,7 +76,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (department.Users.Any())
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Department.CannotDeleteRole);
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.CannotBeDeleted);
             }
 
             await _commands.DeleteAsync(department);
@@ -87,11 +85,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
 
         [HttpPost, Description("Create a department")]
-        public async Task<MessageResponse> CreateRoleAsync([FromBody] DepartmentRequest request)
+        public async Task<MessageResponse> CreateAsync([FromBody] DepartmentRequest request)
         {
-            if (await _queries.NameExistsAsync(request.Name))
+            if (await _queries.ExistsAsync(p => p.Name == request.Name))
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
+                return CreateInvalidResponse<MessageResponse>(Resources.Department.NameExists);
             }
 
             var department = new Department

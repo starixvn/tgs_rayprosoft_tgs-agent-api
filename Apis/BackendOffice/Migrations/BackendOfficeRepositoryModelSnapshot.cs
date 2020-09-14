@@ -67,11 +67,9 @@ namespace TGS.Apis.BackendOffice.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MenuSetting")

@@ -15,9 +15,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice.DataService;
-using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.DataServices.Base.Extensions;
@@ -30,22 +28,6 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddCommandsAndQueries(this IServiceCollection services)
-        {
-            services.AddScoped<IUserQueries, UserQueries>();
-            services.AddScoped<IRoleQueries, RoleQueries>();
-            services.AddScoped<ISettingQueries, SettingQueries>();
-            services.AddScoped<IDepartmentQueries, DepartmentQueries>();
-
-            services.AddScoped<IUserCommands, UserCommands>();
-            services.AddScoped<ISettingCommands, SettingCommands>();
-            services.AddScoped<IRoleCommands, RoleCommands>();
-
-            services.AddTransient(typeof(IGenericCommands<>), typeof(GenericCommands<>));
-
-            return services;
-        }
-
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
@@ -53,7 +35,8 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
-
+            services.AddTransient(typeof(IGenericCommands<>), typeof(GenericCommands<>));
+            services.AddTransient(typeof(IGenericQueries<>), typeof(GenericQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddNats(configuration);
             services.AddTgsLog();
@@ -117,7 +100,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
                 //// we need to implement it on our self if not done before deployment
                 //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-            }).AddDataAnnotationsLocalization(); ;
+            }).AddDataAnnotationsLocalization();
             return services;
         }
     }

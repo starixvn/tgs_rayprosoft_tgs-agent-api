@@ -17,6 +17,7 @@ import { Box, Stack, Table, Button, InputField, Set, Pagination } from "bumbag"
 import PageContent from "../../page/Content"
 import AsyncTable, { useTableState } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
+import { AddButton, EditButton } from "./edit"
 
 export const Code = "groups"
 
@@ -45,13 +46,7 @@ export const Content = ({}) => {
       actionBar={
         <>
           <SearchForm search={setState} isPending={isPending} />
-          <Button
-            css={css`
-              flex: 0;
-            `}
-          >
-            TODO: 新增
-          </Button>
+          <AddButton />
         </>
       }
     >

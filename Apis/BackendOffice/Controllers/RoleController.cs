@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Queries;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Infrastructures.Extensions;
@@ -21,15 +21,15 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class RoleController : BackendOfficeControllerBase
     {
-        private readonly IRoleQueries _roleQueries;
-        private readonly ISettingQueries _settingQueries;
-        private readonly IRoleCommands _roleCommands;
+        private readonly IGenericQueries<Role> _roleQueries;
+        private readonly IGenericQueries<Setting> _settingQueries;
+        private readonly IGenericCommands<Role> _roleCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
         public RoleController(
-            IRoleQueries roleQueries,
-            ISettingQueries settingQueries,
-            IRoleCommands roleCommands,
+            IGenericQueries<Role> roleQueries,
+            IGenericQueries<Setting> settingQueries,
+            IGenericCommands<Role> roleCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
@@ -40,9 +40,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet, Description("Get roles")]
-        public Task<PagedResponse<RoleModel>> GetRolesAsync([FromQuery] GetRolesRequest request)
+        public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
         {
-            return _roleQueries.GetRoleQueries()
+            return _roleQueries.GetQueries()
                 .Where(request.Name, p => p.Name.Contains(request.Name))
                 .Select(role => new RoleModel
                 {
@@ -60,9 +60,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("{roleId}"), Description("Get a role")]
-        public async Task<GetRoleResponse> GetRoleAsync(Guid roleId)
+        public async Task<GetRoleResponse> GetSingleAsync(Guid roleId)
         {
-            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
@@ -88,16 +88,16 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPut("{roleId}"), Description("Update role")]
-        public async Task<MessageResponse> UpdateRoleAsync(Guid roleId,
+        public async Task<MessageResponse> UpdateAsync(Guid roleId,
             [FromQuery] UpdateRoleRequest request)
         {
-            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
             }
 
-            if (request.Name != role.Name && await _roleQueries.NameExistsAsync(request.Name))
+            if (request.Name != role.Name && await _roleQueries.ExistsAsync(p => p.Name == request.Name))
             {
                 return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExists}");
             }
@@ -107,38 +107,38 @@ namespace TGS.Apis.BackendOffice.Controllers
             role.UpdatedByUsername = Username;
             role.UpdatedOn = DateTimeOffset.Now;
 
-            await _roleCommands.UpdateRoleAsync(role);
+            await _roleCommands.UpdateAsync(role);
             return CreateValidResponse<MessageResponse>();
         }
 
         [HttpDelete("{roleId}"), Description("Delete a role")]
-        public async Task<MessageResponse> DeleteRoleAsync(Guid roleId)
+        public async Task<MessageResponse> DeleteAsync(Guid roleId)
         {
-            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, s => s.Include(x => x.Users));
             if (role == null)
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
 
             if (role.Users.Any())
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.CannotDeleteRole);
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRole);
             }
 
-            await _roleCommands.DeleteRoleAsync(role);
+            await _roleCommands.DeleteAsync(role);
             return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPost("{roleId}/copy"), Description("Copy role")]
-        public async Task<MessageResponse> CopyRoleAsync(Guid roleId, [FromBody] CopyRoleRequest request)
+        public async Task<MessageResponse> CopyAsync(Guid roleId, [FromBody] CopyRoleRequest request)
         {
-            var role = await _roleQueries.GetRoleByIdAsync(roleId);
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
             }
 
-            if (request.Name == role.Name || await _roleQueries.NameExistsAsync(request.Name))
+            if (request.Name == role.Name || await _roleQueries.ExistsAsync(p => p.Name == request.Name))
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
@@ -149,14 +149,14 @@ namespace TGS.Apis.BackendOffice.Controllers
                 role.Description,
                 role.MenuSetting);
 
-            await _roleCommands.CreateRoleAsync(newRole);
+            await _roleCommands.CreateAsync(newRole);
             return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPost, Description("Create a role")]
-        public async Task<MessageResponse> CreateRoleAsync([FromBody] CreateRoleRequest request)
+        public async Task<MessageResponse> CreateAsync([FromBody] CreateRoleRequest request)
         {
-            if (await _roleQueries.NameExistsAsync(request.Name))
+            if (await _roleQueries.ExistsAsync(p => p.Name == request.Name))
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
@@ -167,8 +167,26 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.Description,
                 _jsonSerializationProvider.SerializeToString(request.Menus));
 
-            await _roleCommands.CreateRoleAsync(role);
+            await _roleCommands.CreateAsync(role);
             return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost("menus"), Description("Get menus")]
+        public async Task<GetMenuResponse> GetMenuAsync()
+        {
+            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
+            if (setting == null)
+            {
+                return CreateInvalidResponse<GetMenuResponse>(Resources.Role.MenuNotFound);
+            }
+
+            var menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting.Value);
+
+            return new GetMenuResponse
+            {
+                Valid = true,
+                Menus = menus
+            };
         }
 
         private Role CreateRole(string name, string displayName, string description, string menuSetting)
@@ -189,7 +207,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting)
         {
-            var setting = await _settingQueries.GetSettingByKeyAsync("Menus");
+            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
             var menuSettingTemplate = GetMenuSettingByString(setting.Value);
             var roleMenus = GetMenuSettingByString(menuSetting);
 
