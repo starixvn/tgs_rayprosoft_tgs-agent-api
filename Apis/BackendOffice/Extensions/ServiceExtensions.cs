@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.Filters;
@@ -52,6 +53,13 @@ namespace TGS.Apis.BackendOffice.Extensions
                 {
                     opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                 });
+
+            services.AddLogging(config =>
+            {
+                config.AddDebug();
+                config.AddConsole();
+            });
+
             services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
@@ -61,7 +69,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new PathString("/api/users/auth");
+                    options.LoginPath = new PathString("/api/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);//沒給預設14天
                     options.Events.OnRedirectToLogin = context =>
                     {

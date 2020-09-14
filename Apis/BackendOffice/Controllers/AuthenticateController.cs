@@ -22,7 +22,7 @@ using TGS.Infrastructures.Security;
 namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api")]
-    public class AuthenticateController : BaseUserContextController
+    public class AuthenticateController : BaseMessageController
     {
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
@@ -39,7 +39,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             IGenericQueries<User> userQueries,
             IGenericCommands<User> userCommands,
             IJsonSerializationProvider jsonSerializationProvider,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
