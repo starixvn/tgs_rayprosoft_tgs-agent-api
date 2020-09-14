@@ -21,7 +21,7 @@ namespace TGS.Apis.LogApi.Migrations
                     Path = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Method = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    Exception = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    Exception = table.Column<string>(type: "nvarchar(4000)", nullable: true),
                     ServerName = table.Column<string>(type: "nvarchar(30)", nullable: false),
                     RequestHeaders = table.Column<string>(type: "nvarchar(4000)", nullable: false),
                     RequestContent = table.Column<string>(type: "nvarchar(4000)", nullable: false),
@@ -105,20 +105,6 @@ namespace TGS.Apis.LogApi.Migrations
                 {
                     table.PrimaryKey("PK_ServiceLogs", x => x.RecordedOn);
                 });
-
-            migrationBuilder.Sql(@"
-  ALTER TABLE [dbo].[AdminLogs] DROP CONSTRAINT PK_AdminLogs;
-  ALTER TABLE [dbo].[AdminLogs] ADD CONSTRAINT PK_AdminLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
-
-  ALTER TABLE [dbo].[ApiLogs] DROP CONSTRAINT PK_ApiLogs;
-  ALTER TABLE [dbo].[ApiLogs] ADD CONSTRAINT PK_ApiLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
-
-  ALTER TABLE [dbo].[LogRecords] DROP CONSTRAINT PK_LogRecords;
-  ALTER TABLE [dbo].[LogRecords] ADD CONSTRAINT PK_LogRecords PRIMARY KEY CLUSTERED (RecordedOn desc);
-
-  ALTER TABLE [dbo].[ServiceLogs] DROP CONSTRAINT PK_ServiceLogs;
-  ALTER TABLE [dbo].[ServiceLogs] ADD CONSTRAINT PK_ServiceLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
-");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +20,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _repository = repository;
         }
 
-        [HttpGet]
+        [HttpGet, Description("Get status")]
         public async Task<StatusModel> GetStatusAsync()
         {
             var hostName = Dns.GetHostName();

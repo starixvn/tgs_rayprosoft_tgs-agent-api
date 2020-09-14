@@ -99,8 +99,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 using var sr = new StreamReader(context.Response.Body);
                 var message = await sr.ReadToEndAsync();
-                //context.Response.Body.Seek(0, SeekOrigin.Begin);
-                //await context.Response.Body.CopyToAsync(originalBodyStream);
+                context.Response.Body.Seek(0, SeekOrigin.Begin);
+                await context.Response.Body.CopyToAsync(originalBodyStream);
                 return (message, ms);
             }
             finally

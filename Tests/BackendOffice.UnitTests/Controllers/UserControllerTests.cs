@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Data.SqlClient;
 using MockQueryable.Moq;
 using Moq;
@@ -13,24 +12,21 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
-    public partial class UserControllerTests : BaseTests
+    public class UserControllerTests : BaseTests
     {
         private UserController _controller;
         private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
         private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
-        private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
         private readonly Mock<IGenericQueries<User>> _userQueriesMock = new Mock<IGenericQueries<User>>();
         private readonly Mock<IGenericQueries<Department>> _departmentQueriesMock = new Mock<IGenericQueries<Department>>();
         private readonly Mock<IGenericQueries<Role>> _roleQueriesMock = new Mock<IGenericQueries<Role>>();
         private readonly Mock<IGenericCommands<User>> _userCommandsMock = new Mock<IGenericCommands<User>>();
-        private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
 
         [SetUp]
         public override void Setup()
@@ -39,13 +35,11 @@ namespace BackendOffice.UnitTests.Controllers
             _controller = new UserController(
                 _hashProviderMock.Object,
                 _tgsHashConfigMock.Object,
-                _antiForgeryMock.Object,
                 _userQueriesMock.Object,
                 _departmentQueriesMock.Object,
                 _roleQueriesMock.Object,
                 _userCommandsMock.Object,
-                _jsonSerializationProviderMock.Object,
-                _httpContextAccessorMock.Object);
+                HttpContextAccessorMock.Object);
         }
 
         [TestCase(true)]

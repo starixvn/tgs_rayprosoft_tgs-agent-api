@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
@@ -12,7 +11,6 @@ using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -20,38 +18,30 @@ namespace TGS.Apis.BackendOffice.Controllers
 
     [Route("api/users")]
     [ApiController]
-    public partial class UserController : BackendOfficeControllerBase
+    public class UserController : BaseUserContextController
     {
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
-        private readonly IAntiforgery _antiForgery;
         private readonly IGenericQueries<User> _userQueries;
         private readonly IGenericQueries<Department> _departmentQueries;
         private readonly IGenericQueries<Role> _roleQueries;
         private readonly IGenericCommands<User> _userCommands;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserController(
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
-            IAntiforgery antiForgery,
             IGenericQueries<User> userQueries,
             IGenericQueries<Department> departmentQueries,
             IGenericQueries<Role> roleQueries,
             IGenericCommands<User> userCommands,
-            IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
-            _antiForgery = antiForgery;
             _userQueries = userQueries;
             _departmentQueries = departmentQueries;
             _roleQueries = roleQueries;
             _userCommands = userCommands;
-            _jsonSerializationProvider = jsonSerializationProvider;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [Route("")]

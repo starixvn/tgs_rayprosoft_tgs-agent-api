@@ -31,7 +31,6 @@ namespace TGS.Apis.LogApi.Migrations
                         .IsUnicode(true);
 
                     b.Property<string>("Exception")
-                        .IsRequired()
                         .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 

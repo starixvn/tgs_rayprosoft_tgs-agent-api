@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -12,16 +13,47 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
+using TGS.Infrastructures.Json;
+using TGS.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-    public partial class UserController
+    [Route("api")]
+    public class AuthenticateController : BaseMessageController
     {
+        private readonly IHashProvider _hashProvider;
+        private readonly ITgsHashConfig _tgsHashConfig;
+        private readonly IAntiforgery _antiForgery;
+        private readonly IGenericQueries<User> _userQueries;
+        private readonly IGenericCommands<User> _userCommands;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public AuthenticateController(
+            IHashProvider hashProvider,
+            ITgsHashConfig tgsHashConfig,
+            IAntiforgery antiForgery,
+            IGenericQueries<User> userQueries,
+            IGenericCommands<User> userCommands,
+            IJsonSerializationProvider jsonSerializationProvider,
+            IHttpContextAccessor httpContextAccessor)
+        {
+            _hashProvider = hashProvider;
+            _tgsHashConfig = tgsHashConfig;
+            _antiForgery = antiForgery;
+            _userQueries = userQueries;
+            _userCommands = userCommands;
+            _jsonSerializationProvider = jsonSerializationProvider;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("auth"), Description("Authenticate user login")]
-        public async Task<AuthenticateUserResponse> AuthenticateAsync(AuthenticateUserRequest request)
+        public async Task<AuthenticateUserResponse> AuthenticateAsync([FromBody] AuthenticateUserRequest request)
         {
             var user = await _userQueries.GetSingleAsync(p => p.Username == request.Username, u => u.Include(p => p.Role));
 

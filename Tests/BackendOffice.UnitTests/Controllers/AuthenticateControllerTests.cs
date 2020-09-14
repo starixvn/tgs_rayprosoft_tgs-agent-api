@@ -10,15 +10,41 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using NUnit.Framework;
+using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Security;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
 {
-    public partial class UserControllerTests
+    [TestFixture, Parallelizable]
+    public class AuthenticateControllerTests : BaseTests
     {
+        private AuthenticateController _controller;
+        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
+        private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
+        private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
+        private readonly Mock<IGenericQueries<User>> _userQueriesMock = new Mock<IGenericQueries<User>>();
+        private readonly Mock<IGenericCommands<User>> _userCommandsMock = new Mock<IGenericCommands<User>>();
+        private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
+
+        [SetUp]
+        public override void Setup()
+        {
+            base.Setup();
+            _controller = new AuthenticateController(
+                _hashProviderMock.Object,
+                _tgsHashConfigMock.Object,
+                _antiForgeryMock.Object,
+                _userQueriesMock.Object,
+                _userCommandsMock.Object,
+                _jsonSerializationProviderMock.Object,
+                HttpContextAccessorMock.Object);
+        }
+
         [Test]
         public async Task Cannot_Authenticate_User_Not_Found()
         {
@@ -55,7 +81,6 @@ namespace BackendOffice.UnitTests.Controllers
 
             _hashProviderMock.Setup(p => p.Hash(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<HashAlgorithmKind>()))
                 .Returns(new Fixture().Create<byte[]>());
-
 
             var response = await _controller.AuthenticateAsync(request);
             response.Valid.Should().BeFalse();
@@ -123,7 +148,7 @@ namespace BackendOffice.UnitTests.Controllers
             mockHttpContext.Setup(p => p.Response)
                 .Returns(httpResponse.Object);
 
-            _httpContextAccessorMock.Setup(p => p.HttpContext)
+            HttpContextAccessorMock.Setup(p => p.HttpContext)
                 .Returns(mockHttpContext.Object);
         }
 
@@ -143,6 +168,15 @@ namespace BackendOffice.UnitTests.Controllers
                 .Setup(_ => _.GetService(typeof(IAuthenticationService)))
                 .Returns(_authServiceMock.Object);
             return serviceProviderMock;
+        }
+
+        private Fixture CreateUserFixture()
+        {
+            var fixture = new Fixture();
+            fixture.Customize<User>(u => u
+                .With(s => s.Role, new Role { Name = Generator.RandomString(5) })
+                .With(p => p.Department, new Department { Name = Generator.RandomString(5) }));
+            return fixture;
         }
     }
 }
