@@ -8,8 +8,11 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
     <None Remove="SqlScripts\SP\usp_Round_GetExternalRoundIdByExternalTransactionId.sql" />
     <None Remove="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
+    <None Remove="SqlScripts\SP\usp_Round_InsertRound.sql" />
+    <None Remove="SqlScripts\SP\usp_Round_UpdateRound.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,7 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Round_UpdateRound.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Round_InsertRound.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetExternalRoundIdByExternalTransactionId.sql" />
   </ItemGroup>
 

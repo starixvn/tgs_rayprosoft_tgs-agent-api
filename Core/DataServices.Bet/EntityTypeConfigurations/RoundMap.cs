@@ -28,8 +28,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
-            builder.Property(c => c.GameCode)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+            builder.Property(c => c.GameId)
                 .IsRequired();
 
             builder.Property(c => c.GameName)
@@ -39,9 +38,12 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.GameType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
+            
+            builder.Property(c => c.GameProviderId)               
+                .IsRequired();
 
             builder.Property(c => c.GameProviderCode)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
             builder.Property(c => c.GameProviderName)
@@ -52,7 +54,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varchar(16))
                 .IsRequired();
 
-            builder.Property(c => c.PlayerTypes)
+            builder.Property(c => c.PlayerType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -70,10 +72,15 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.WalletId)
                 .IsRequired();
 
-            builder.Property(c => c.GameId)
+            builder.Property(c => c.LicenseeId)
                 .IsRequired();
 
-            builder.Property(c => c.LicenseeId)
+            builder.Property(c => c.LicenseeCode)
+                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .IsRequired();
+
+            builder.Property(c => c.LicenseeName)
+                .HasColumnType(ColumnTypes.Nvarchar(255))
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
@@ -102,7 +109,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.WinLoss)
                 .HasColumnType(ColumnTypes.Decimal(18, 6));
 
-            builder.Property(c => c.TiebetAdjustment)
+            builder.Property(c => c.TieBetAdjustment)
                 .HasColumnType(ColumnTypes.Decimal(18, 6));
 
             builder.Property(c => c.Commission)

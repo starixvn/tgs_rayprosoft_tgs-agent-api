@@ -18,8 +18,6 @@ namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
-        public IList<BetActionData> ValidPreviousActions { get; private set; }
-
         private async Task<BetResult> ExecuteGameActionAsync(BetData data)
         {
             if (data?.Transactions == null || data.Transactions.Length == 0)
@@ -32,8 +30,8 @@ namespace TGS.Services.Operations.Bets
 
             // TODO: validate if place bet cap amount is exceed
 
-            var licenseeTimeZoneId = await _licenseeOperations.GetTimeZoneByBrandIdAsync(cachedPlayer.LicenseeId);
-
+            var cachedLicensee = await _licenseeOperations.GetCachedLicenseeAsync(cachedPlayer.LicenseeId);
+            
             var playerRelatedData = new PlayerRelatedData
             {
                 Wallet = new WalletData
@@ -44,16 +42,18 @@ namespace TGS.Services.Operations.Bets
                 },
                 PlayerCode = data.PlayerCode,
                 LicenseeId = cachedPlayer.LicenseeId,
-                LicenseeCode = cachedPlayer.LicenseeCode,
+                LicenseeCode = cachedLicensee.Code,
+                LicenseeName = cachedLicensee.Name,
                 Status = cachedPlayer.Status,
                 PlayerType = cachedPlayer.Type,
                 PlayerUsername = cachedPlayer.Username,
                 PlayerExternalId = cachedPlayer.ExternalId,
                 ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode,
-                LicenseeTimeZoneId = licenseeTimeZoneId
+                LicenseeTimeZoneId = cachedLicensee.TimeZoneId
                 //PlayerIp = data..Ip
             };
 
+            var cacheGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
             var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId);
 
             var externalTransactionIds = data.Transactions.Select(t => t.ExternalTransactionId).JoinAsStringBySemicolon();
@@ -61,12 +61,12 @@ namespace TGS.Services.Operations.Bets
                 _tgsRepoFactory,
                 IsolationLevel.RepeatableRead,
                 externalTransactionIds,
-                execute: async (r, trans) => await ProcessGameActionsAsync(r, data, playerRelatedData, games));
+                execute: async (r, trans) => await ProcessGameActionsAsync(r, data, playerRelatedData, cacheGameProvider, games));
 
             return transactionResult;
         }
 
-        private async Task<BetResult> ProcessGameActionsAsync(ITgsRepository repo, BetData data, PlayerRelatedData player, CachedGame[] games)
+        private async Task<BetResult> ProcessGameActionsAsync(ITgsRepository repo, BetData data, PlayerRelatedData player, CachedGameProvider gameProvider, CachedGame[] games)
         {
             var hasChanges = false;
             var transactionResults = new List<TransactionResult>();
@@ -79,7 +79,7 @@ namespace TGS.Services.Operations.Bets
                 var result = await HandleGameActionAsync(new GameActionState(transaction)
                 {
                     Repo = repo,
-                    GameProviderId = data.GameProviderId,
+                    GameProvider = gameProvider,
                     GameProviderConfigurationId = data.GameProviderConfigurationId,
                     BatchId = data.BatchId,
                     PlatformType = data.PlatformType ?? PlatformType.Desktop,
@@ -199,7 +199,7 @@ namespace TGS.Services.Operations.Bets
                                 RecordedOn = act.GameActionRecordedOn,
                                 SentOn = act.GameActionSentOn,
                                 GameName = s.Game.Name,
-                                GameProviderCode = s.GameProviderCode,
+                                GameProviderCode = s.GameProvider.Code,
                                 BetType = act.BetType,
                                 BetId = act.BetId,
                                 WalletId = act.WalletId,
@@ -383,7 +383,7 @@ namespace TGS.Services.Operations.Bets
                 IsExplicitlyClosingRound = s.RoundClosed == true,
                 IsExplicitlyNotClosingRound = s.RoundClosed == false,
                 GameName = s.Game.Name,
-                GameProviderCode = s.GameProviderCode,
+                GameProviderCode = s.GameProvider.Code,              
                 BetType = s.BetType,
                 BetId = s.BetId
             };
@@ -393,6 +393,113 @@ namespace TGS.Services.Operations.Bets
                 throw error;
 
             var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current, s.PreviousActions);
+
+            s.BetValueResult = betValues;
+
+            current.Turnover = betValues.Turnover;
+            current.WinLoss = betValues.WinLoss;
+            current.UnsettledBets = betValues.UnsettledBets;
+
+            s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s);
+            s.InternalRoundId = await CreateOrUpdateRoundAsync(s);
+
         }
+
+        private Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
+        {
+            var repo = s.Repo;
+            var walletId = s.PlayerData.Wallet.Id;
+
+            if (s.HasWalletUpdate && s.Amount != 0)
+            {
+                return AtomicUpdateBalanceAsync(repo, s.PlayerData.PlayerCode, walletId, s.Amount, s.LicenseeNow);
+            }
+
+            return GetBalanceAsync(repo, walletId);
+        }
+                
+        private async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
+        {
+            if (s.InternalRoundId == null)
+            {
+                return await CreateNewRoundAndGetIdAsync(s);
+            }
+           
+            await UpdatedRoundAsync(s);
+            return s.InternalRoundId.Value;
+        }
+
+        private async Task<Guid> CreateNewRoundAndGetIdAsync(GameActionState s)
+        {
+            var roundData = new RoundData 
+            { 
+                Id = GuidExtensions.NewSequentialGuid(),
+                GameProviderConfigurationId = s.GameProviderConfigurationId,
+                ExternalRoundId = s.ExternalRoundId,
+                GameId = s.GameId,
+                GameName = s.Game.Name,
+                GameType = s.Game.Type,
+                GameProviderId = s.GameProvider.Id,
+                GameProviderCode = s.GameProvider.Code,
+                GameProviderName = s.GameProvider.Name,
+                PlayerCode = s.PlayerData.PlayerCode,
+                PlatformType = s.PlatformType,
+                WalletId = s.PlayerData.Wallet.Id,
+                CurrencyCode = s.PlayerData.Wallet.CurrencyCode,
+                LicenseeId = s.PlayerData.LicenseeId,
+                LicenseeCode = s.PlayerData.LicenseeCode,
+                LicenseeName = s.PlayerData.LicenseeName,
+                CreatedOn = s.LicenseeNow,
+                UpdatedOn = s.LicenseeNow,
+                ClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.LicenseeNow : default(DateTimeOffset?),
+                Status = s.NewRoundStatus == RoundStatus.Closed ? RoundStatus.Closed : RoundStatus.Open,
+                RoundDetail = s.RoundDetail,
+                ExternalCreatedOn = s.Timestamp,
+                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),                
+            };
+
+            await InsertNewRoundAsync(s.Repo, roundData);
+
+            return roundData.Id;
+        }
+
+        private async Task UpdatedRoundAsync(GameActionState s)
+        {
+            var repo = s.Repo;
+
+            var roundData = new RoundData 
+            { 
+                Id = s.InternalRoundId.Value,   
+                RoundDetail = s.RoundDetail,  
+                Commission = s.Commission,
+                UpdatedOn = s.LicenseeNow,
+            };
+
+            if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
+            {
+                roundData = roundData with 
+                { 
+                    Status = s.NewRoundStatus, 
+                    IsReopen = true 
+                };  
+            }
+            else if (s.NewRoundStatus == RoundStatus.Closed)
+            { 
+                roundData = roundData with 
+                { 
+                    Status = s.NewRoundStatus, 
+                    ClosedOn = s.LicenseeNow,
+                    ExternalClosedOn = s.Timestamp,
+                    BetAmount = s.BetValueResult.BetAmount,
+                    WinAmount = s.BetValueResult.WinAmount,
+                    WinLoss = s.BetValueResult.WinLoss,
+                    TieBetAdjustment = s.BetValueResult.TieBetAdjustment,
+                    IsClosed = true 
+                };  
+            }
+
+            await UpdateRoundAsync(repo, roundData);
+        }
+
     }
 }

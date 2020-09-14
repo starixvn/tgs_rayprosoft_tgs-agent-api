@@ -11,10 +11,10 @@ namespace TGS.Services.Operations.Bets
 {
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
-        private Task<RoundData> GetRoundByExternalRoundIdAsync(ITgsRepository repo, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
+        private Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repo, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
         {
             const string sql = "usp_Round_GetRoundByExternalRoundId";
-            return repo.SqlQuerySingleAsync<RoundData>(sql, parameters: new SqlParameter[]
+            return repo.SqlQuerySingleAsync<RoundIdAndStatusData>(sql, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -73,6 +73,26 @@ namespace TGS.Services.Operations.Bets
                 ParameterName = "@externalTransactionId",
                 Value = externalTransactionId,
                 DbType = DbType.String
+            });
+        }
+
+        private Task<decimal> GetBalanceAsync(ITgsRepository repo, Guid walletId)
+        {
+            const string spName = "usp_Wallet_GetBalance";
+            return repo.SqlQuerySingleAsync<decimal>(spName, parameters: new[]
+            {
+                new SqlParameter
+                {
+                    ParameterName = "@walletId",
+                    Value = walletId,
+                    DbType = DbType.Guid
+                },
+                new SqlParameter
+                {
+                    ParameterName = "@isDirtyRead",
+                    Value = false,
+                    DbType = DbType.Boolean
+                }
             });
         }
     }

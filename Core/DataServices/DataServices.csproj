@@ -27,7 +27,10 @@
     <None Remove="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />
     <None Remove="SqlScripts\SP\usp_Round_GetExternalRoundIdByExternalTransactionId.sql" />
     <None Remove="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
+    <None Remove="SqlScripts\SP\usp_Round_InsertRound.sql" />
+    <None Remove="SqlScripts\SP\usp_Round_UpdateRound.sql" />
     <None Remove="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
+    <None Remove="SqlScripts\SP\usp_Wallet_UpdateWalletBalance.sql" />
     <None Remove="SqlScripts\TYPE\IntValuesType.sql" />
   </ItemGroup>
 
@@ -50,6 +53,9 @@
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetExternalRoundIdByExternalTransactionId.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Round_InsertRound.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Round_UpdateRound.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_UpdateWalletBalance.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLicenseeForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />

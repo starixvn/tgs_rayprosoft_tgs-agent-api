@@ -905,11 +905,10 @@ namespace TGS.Core.DataServices.Migrations
                 table: "Whitelists",
                 column: "ResellerId");
 
-            
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
-            
+
             // TYPE
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.TypeSqlForamt, "IntValuesType"));
@@ -925,6 +924,8 @@ namespace TGS.Core.DataServices.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_GetPlayerForCache"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_GetBalance"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_UpdateBalance"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeForCache"));
             migrationBuilder.SqlResource(assembly,
@@ -946,9 +947,13 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetRoundByExternalRoundId"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));    
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionsInSameRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_InsertRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
 
             #endregion Store Procedure
         }
