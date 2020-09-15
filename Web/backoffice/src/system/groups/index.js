@@ -56,7 +56,7 @@ export const Content = ({}) => {
       actionBar={
         <>
           <SearchForm search={setState} isPending={isPending} />
-          <AddButton />
+          <AddButton onSubmitted={fetchTable} />
         </>
       }
     >

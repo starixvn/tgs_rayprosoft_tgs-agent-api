@@ -51,10 +51,7 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
           <Modal.Disclosure
             ref={disclosureRef}
             use={Button}
-            onClick={() => {
-              async.run()
-              //dialog.show()
-            }}
+            onClick={async.run}
             css={css`
               flex: unset;
             `}
@@ -76,9 +73,8 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
                 <EditDialog
                   role={role}
                   onSubmitted={() => {
-                    console.log("onSubmitted")
-                    //dialog.hide()
-                    //TODO: refresh table
+                    dialog.hide()
+                    onSubmitted && onSubmitted()
                   }}
                   dialog={dialog}
                   disclosureRef={disclosureRef}
@@ -110,18 +106,21 @@ const EditDialog = ({
     setMenus(menus)
   }
 
+  const create = (data) =>
+    client.post(`/api/role`, {
+      data
+    })
+
+  const update = (data) =>
+    client.put(`/api/role/${id}`, {
+      data: {
+        ...role,
+        ...data
+      }
+    })
+
   const deferFn = ([data]) => {
-    return client
-      .put(`/api/role/${id}`, {
-        data: {
-          ...role,
-          ...data
-        }
-      })
-      .then((response) => {
-        onSubmitted && onSubmitted()
-        return response
-      })
+    return id ? update(data) : create(data)
   }
 
   return (
@@ -137,7 +136,6 @@ const EditDialog = ({
               }
 
               asyncSubmit.run(data)
-              console.log("submit", data)
             }}
           >
             {(formProps) => (
@@ -244,23 +242,14 @@ const EditDialog = ({
             }}
           </Async.Rejected>
           <Async.Fulfilled>
-            {(menus) => (
-              <>
-                <EditDialog
-                  role={{
-                    name: "",
-                    menus
-                  }}
-                  onSubmitted={() => {
-                    console.log("onSubmitted")
-                    dialog.hide()
-                    onSubmitted && onSubmitted()
-                  }}
-                  dialog={dialog}
-                  disclosureRef={disclosureRef}
-                />
-              </>
-            )}
+            {(submitResponse) => {
+              useEffect(() => {
+                dialog.hide()
+                onSubmitted && onSubmitted()
+              }, [dialog.visible])
+
+              return null
+            }}
           </Async.Fulfilled>
         </>
       )}
@@ -301,6 +290,24 @@ export const AddButton = ({ onSubmitted, ...props }) => {
                 <AlertDialog {...error} disclosureRef={disclosureRef} />
               )}
             </Async.Rejected>
+            <Async.Fulfilled>
+              {(menus) => {
+                return (
+                  <EditDialog
+                    role={{
+                      name: "",
+                      menus
+                    }}
+                    onSubmitted={() => {
+                      dialog.hide()
+                      onSubmitted && onSubmitted()
+                    }}
+                    dialog={dialog}
+                    disclosureRef={disclosureRef}
+                  />
+                )
+              }}
+            </Async.Fulfilled>
           </>
         )
       }}
@@ -452,7 +459,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 }
 */
 
-const MenuTable = ({ menus = [], setChecked }) => {
+const MenuTable = ({ menus = [], setChecked } = {}) => {
   return (
     <Table>
       {menus.map((menu, index) => {

@@ -11,19 +11,20 @@ export const toDataOrError = (response) => {
           })
         })
         .then((data) => {
-          let { title, errors = [] } = data
+          let { title, message, errors = [] } = data
           return Promise.reject({
-            title: title ?? response.statusText,
+            title: title ?? message ?? response.statusText,
             errors: Object.values(errors)
           })
         })
     }
   }
 
-  let promise = response?.json() ?? Promise.resolve({})
-  return promise.then((data) => {
+  return response.json().then((data) => {
     if (!data?.valid && data?.message) {
-      throw new Error(data?.message)
+      return Promise.reject({
+        title: data.message
+      })
     }
 
     return data
