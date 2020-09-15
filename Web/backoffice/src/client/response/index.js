@@ -3,7 +3,20 @@ export const toDataOrError = (response) => {
     if (response.statusText === "Unauthorized") {
       location.href = "/login"
     } else {
-      throw new Error(response.statusText)
+      return response
+        .json()
+        .catch((error) => {
+          return Promise.reject({
+            title: response.statusText
+          })
+        })
+        .then((data) => {
+          let { title, errors = [] } = data
+          return Promise.reject({
+            title: title ?? response.statusText,
+            errors: Object.values(errors)
+          })
+        })
     }
   }
 
