@@ -83,38 +83,6 @@ namespace TGS.Apis.BackendOffice.Middlewares
             _tgsLog.LogAdmin(adminLogEvent);
         }
 
-        //private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
-        //    RequestDelegate next)
-        //{
-        //    var originalBodyStream = context.Response.Body;
-        //    var responseStream = _recyclableMemoryStreamManager.GetStream();
-
-        //    try
-        //    {
-        //        var sw = Stopwatch.StartNew();
-        //        await next(context);
-        //        sw.Stop();
-        //        var ms = (int)sw.ElapsedMilliseconds;
-
-        //        //context.Response.Body.Seek(0, SeekOrigin.Begin);
-
-        //        context.Response.Body = responseStream;
-        //        responseStream.Seek(0, SeekOrigin.Begin);
-        //        using var sr = new StreamReader(responseStream);
-        //        var message = await sr.ReadToEndAsync();
-        //        context.Response.Body.Seek(0, SeekOrigin.Begin);
-        //        responseStream.Seek(0, SeekOrigin.Begin);
-        //        await responseStream.CopyToAsync(originalBodyStream);
-        //        //await context.Response.Body.CopyToAsync(originalBodyStream);
-        //        return (message, ms);
-        //    }
-        //    finally
-        //    {
-        //        context.Response.Body = originalBodyStream;
-        //        responseStream.Dispose();
-        //    }
-        //}
-
         private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
             RequestDelegate next)
         {
@@ -139,6 +107,43 @@ namespace TGS.Apis.BackendOffice.Middlewares
             {
                 context.Response.Body = originalBodyStream;
                 responseStream.Dispose();
+            }
+        }
+
+        private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync2(HttpContext context,
+            RequestDelegate next)
+        {
+            var originalResponseBody = context.Response.Body;
+            var responseBodyStream = _recyclableMemoryStreamManager.GetStream();
+            context.Response.Body = responseBodyStream;
+
+            try
+            {
+                var sw = Stopwatch.StartNew();
+                await next(context);
+                sw.Stop();
+                var ms = (int)sw.ElapsedMilliseconds;
+                responseBodyStream.Seek(0, SeekOrigin.Begin);
+                var message = string.Empty;
+                using (var sr = new StreamReader(responseBodyStream))
+                {
+
+                    message = await sr.ReadToEndAsync();
+                    responseBodyStream.Seek(0, SeekOrigin.Begin);
+                    await responseBodyStream.CopyToAsync(originalResponseBody);
+                }
+
+                return (message, ms);
+            }
+            catch (Exception ex)
+            {
+                var s = ex.Message;
+                return ("message", 0);
+            }
+            finally
+            {
+                context.Response.Body = originalResponseBody;
+                responseBodyStream.Dispose();
             }
         }
         private async Task<string> GetRequestBodyAsync(HttpContext context)

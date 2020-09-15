@@ -89,7 +89,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPut("{roleId}"), Description("Update role")]
         public async Task<MessageResponse> UpdateAsync(Guid roleId,
-            [FromQuery] UpdateRoleRequest request)
+            [FromBody] UpdateRoleRequest request)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
@@ -107,7 +107,9 @@ namespace TGS.Apis.BackendOffice.Controllers
             role.UpdatedByUsername = Username;
             role.UpdatedOn = DateTimeOffset.Now;
 
+
             await _roleCommands.UpdateAsync(role);
+
             return CreateValidResponse<MessageResponse>();
         }
 
