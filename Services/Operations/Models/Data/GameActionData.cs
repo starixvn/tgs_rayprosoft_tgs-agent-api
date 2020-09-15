@@ -17,9 +17,7 @@ namespace TGS.Services.Operations.Models.Data
         public decimal UnsettledBets { get; set; }
         public decimal Balance { get; set; }
         public string BetType { get; set; }
-        public Guid? BetId { get; set; }
         public string ExternalBetId { get; set; }
-        public Guid? GameActionGroupId { get; set; }
         public string ExternalGameActionGroupId { get; set; }
         public Guid? ReferencedGameActionId { get; set; }
         public Guid? GameActionBatchId { get; set; }

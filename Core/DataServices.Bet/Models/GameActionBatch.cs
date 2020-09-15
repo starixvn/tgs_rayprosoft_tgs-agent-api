@@ -8,7 +8,7 @@ namespace TGS.Core.DataServices.Bet.Models
     {
         public Guid Id { get; set; }
         public string ExternalId { get; set; }
-        public ApiErrorType ErrorType { get; set; }
+        public TgsApiError ErrorType { get; set; }
         public string ErrorDescription { get; set; }
         public int TransactionsCount { get; set; }
         public string ErrorsJson { get; set; }

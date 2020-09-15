@@ -1,32 +1,25 @@
 ﻿namespace TGS.Core.Models.Enums
 {
-    public enum ApiErrorType
+    public enum TgsApiError
     {
         None = 0,
         InvalidOrExpiredLicenseeToken = 12,
         InvalidOrExpiredResellerToken = 16,
-        InvalidOrExpiredJwtToken = 17,
-        InvalidTokenScope = 19,
         UserBlocked = 20,
         CountryRestricted = 21,
         InvalidCredentials = 30,
         CurrencyMismatch = 50,
         InvalidAmount = 60,
         InsufficientFunds = 100,
-        UnableToSplitSgsHeader = 101,
         InvalidSystemCode = 102,
         ClientIdNotFound = 103,
         InvalidSignature = 104,
-        ExpiredSgsHeader = 105,
-        SgsHeaderNotFound = 106,
         TransactionIdNotFound = 200,
         DuplicateTransaction = 210,
         InvalidGameAction = 250,
         InvalidArguments = 300,
-        MissingToken = 400,
         IncorrectFormat = 500,
         PlayerNotFound = 600,
-        CreateCampaignFail = 610,
         UnderMaintenance = 700,
         ConfiguredTimeoutExceeded = 800,
         ConfiguredGameProviderTimeoutExceeded = 801,
@@ -35,7 +28,6 @@
         OperationNotAllowed = 902,
         TestPlayerStakeAmountCapExceeded = 904,
         BrowserIncompatibility = 905,
-        PlatformMismatched = 906,
-        GameNotSupportTestPlayer = 907,
+        GameNotSupportTestPlayer = 906,
     }
 }

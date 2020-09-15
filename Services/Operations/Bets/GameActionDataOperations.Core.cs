@@ -31,7 +31,7 @@ namespace TGS.Services.Operations.Bets
             // TODO: validate if place bet cap amount is exceed
 
             var cachedLicensee = await _licenseeOperations.GetCachedLicenseeAsync(cachedPlayer.LicenseeId);
-            
+
             var playerRelatedData = new PlayerRelatedData
             {
                 Wallet = new WalletData
@@ -68,7 +68,6 @@ namespace TGS.Services.Operations.Bets
 
         private async Task<BetResult> ProcessGameActionsAsync(ITgsRepository repo, BetData data, PlayerRelatedData player, CachedGameProvider gameProvider, CachedGame[] games)
         {
-            var hasChanges = false;
             var transactionResults = new List<TransactionResult>();
 
             foreach (var transaction in data.Transactions)
@@ -93,9 +92,18 @@ namespace TGS.Services.Operations.Bets
                     ForceGetPreviousActions = data.ForceGetPreviousActions,
                     FreeBetAsSingleRound = data.FreeBetAsSingleRound
                 });
-            }
 
-            return new BetResult { };
+                transactionResults.Add(result.TransactionResult);
+            }            
+
+            return new BetResult
+            {
+                Balance = player.Wallet.Balance,
+                CurrencyCode = player.Wallet.CurrencyCode,
+                Transactions = transactionResults.ToArray(),
+                PlatformType = (int) data.PlatformType.Value,
+                Error = TgsApiError.None,
+            };
         }
 
         private async Task<GameActionResult> HandleGameActionAsync(GameActionState s)
@@ -117,9 +125,22 @@ namespace TGS.Services.Operations.Bets
 
             await ThrowIfStatusesIsInvalidAsync(s);
 
-            //var ga = await SaveDatabaseRecordsAsync(s);
+            var ga = await SaveDatabaseRecordsAsync(s);
 
-            return null;
+            var output = new GameActionResult
+            {
+                TransactionResult = new TransactionResult
+                {
+                    ExternalTransactionId = s.ExternalTransactionId,
+                    InternalTransactionId = ga.Id,
+                    IsDuplicate = false,
+                },
+                GameAction = ga,
+                ReferencedGameAction = s.ReferencedGameAction,
+                Game = s.Game
+            };
+
+            return output;
         }
 
         private async Task<GameActionState> FillRoundDataAsync(GameActionState s)
@@ -201,7 +222,6 @@ namespace TGS.Services.Operations.Bets
                                 GameName = s.Game.Name,
                                 GameProviderCode = s.GameProvider.Code,
                                 BetType = act.BetType,
-                                BetId = act.BetId,
                                 WalletId = act.WalletId,
                                 IsCancelled = false
                             })
@@ -212,7 +232,6 @@ namespace TGS.Services.Operations.Bets
             s.Amount = amount;
             s.ReferencedGameActionInternalId = refGameActionInternalId;
             s.ReferencedGameAction = refGameAction;
-            s.BetId = refData.BetId;
             s.PreviousActions = actions;
 
             if (s.InternalRoundId == null)
@@ -356,15 +375,6 @@ namespace TGS.Services.Operations.Bets
                 ValidPreviousActions = s.ValidPreviousActions
             });
 
-            // if the current action is "place bet then create new bet id"
-            // if there are no referenced IDs and the current action is
-            // "lock amount", "free bet" then create new bet id
-            if (s.GameActionType == PlaceBet ||
-                (s.BetId == null && s.GameActionType.IsOneOf(FreeBet, LockAmount)))
-            {
-                s.BetId = Guid.NewGuid();
-            }
-
             return s;
         }
 
@@ -383,9 +393,8 @@ namespace TGS.Services.Operations.Bets
                 IsExplicitlyClosingRound = s.RoundClosed == true,
                 IsExplicitlyNotClosingRound = s.RoundClosed == false,
                 GameName = s.Game.Name,
-                GameProviderCode = s.GameProvider.Code,              
-                BetType = s.BetType,
-                BetId = s.BetId
+                GameProviderCode = s.GameProvider.Code,
+                BetType = s.BetType
             };
 
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
@@ -403,7 +412,7 @@ namespace TGS.Services.Operations.Bets
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s);
             s.InternalRoundId = await CreateOrUpdateRoundAsync(s);
 
-            var ga = await CreateGameActionAsync(s);
+            var ga = await CreateGameActionAsync(s, current);
 
             return ga;
         }
@@ -420,22 +429,22 @@ namespace TGS.Services.Operations.Bets
 
             return GetBalanceAsync(repo, walletId);
         }
-                
+
         private async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
         {
             if (s.InternalRoundId == null)
             {
                 return await CreateNewRoundAndGetIdAsync(s);
             }
-           
+
             await UpdatedRoundAsync(s);
             return s.InternalRoundId.Value;
         }
 
         private async Task<Guid> CreateNewRoundAndGetIdAsync(GameActionState s)
         {
-            var roundData = new RoundData 
-            { 
+            var roundData = new RoundData
+            {
                 Id = GuidExtensions.NewSequentialGuid(),
                 GameProviderConfigurationId = s.GameProviderConfigurationId,
                 ExternalRoundId = s.ExternalRoundId,
@@ -458,7 +467,7 @@ namespace TGS.Services.Operations.Bets
                 Status = s.NewRoundStatus == RoundStatus.Closed ? RoundStatus.Closed : RoundStatus.Open,
                 RoundDetail = s.RoundDetail,
                 ExternalCreatedOn = s.Timestamp,
-                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),                
+                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),
             };
 
             await InsertNewRoundAsync(s.Repo, roundData);
@@ -470,40 +479,78 @@ namespace TGS.Services.Operations.Bets
         {
             var repo = s.Repo;
 
-            var roundData = new RoundData 
-            { 
-                Id = s.InternalRoundId.Value,   
-                RoundDetail = s.RoundDetail,  
+            var roundData = new RoundData
+            {
+                Id = s.InternalRoundId.Value,
+                RoundDetail = s.RoundDetail,
                 Commission = s.Commission,
                 UpdatedOn = s.LicenseeNow,
             };
 
             if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
             {
-                roundData = roundData with 
-                { 
-                    Status = s.NewRoundStatus, 
-                    IsReopen = true 
-                };  
+                roundData = roundData with
+                {
+                    Status = s.NewRoundStatus,
+                    IsReopen = true
+                };
             }
             else if (s.NewRoundStatus == RoundStatus.Closed)
-            { 
-                roundData = roundData with 
-                { 
-                    Status = s.NewRoundStatus, 
+            {
+                roundData = roundData with
+                {
+                    Status = s.NewRoundStatus,
                     ClosedOn = s.LicenseeNow,
                     ExternalClosedOn = s.Timestamp,
                     BetAmount = s.BetValueResult.BetAmount,
                     WinLoss = s.BetValueResult.WinLoss,
                     TieBetAdjustment = s.BetValueResult.TieBetAdjustment,
-                    IsClosed = true 
-                };  
+                    IsClosed = true
+                };
             }
 
             await UpdateRoundAsync(repo, roundData);
         }
-        
-        private Task<GameActionData> CreateGameActionAsync(GameActionState s)
+
+        private async Task<GameActionData> CreateGameActionAsync(GameActionState s, BetActionData current)
+        {
+            var player = s.PlayerData;
+
+            var gameActionData = new GameActionData
+            {
+                Id = current.Id,
+                ExternalBetId = s.ExternalBetId,
+                ExternalTransactionId = s.ExternalTransactionId,
+                GameProviderConfigurationId = s.GameProviderConfigurationId,
+                GameActionBatchId = s.BatchId,
+                ExternalGameActionGroupId = s.ExternalGameActionGroupId,
+                ReferencedGameActionId = s.ReferencedGameActionInternalId,
+                WalletId = player.Wallet.Id,
+                Type = s.GameActionType,
+                RoundId = s.InternalRoundId.Value,
+                RecordedOn = AdjustRecordedOnIfNeeded(s),
+                SentOn = s.Timestamp,
+                PlayerCode = player.PlayerCode,
+                PlayerIp = player.PlayerIp,
+                Turnover = current.Turnover,
+                WinLoss = current.WinLoss,
+                UnsettledBets = current.UnsettledBets,
+                IsClosingRound = current.IsClosingRound,
+                ClosingRoundExplicitRequest = current.IsExplicitlyClosingRound ? true :
+                    current.IsExplicitlyNotClosingRound ? false : (bool?)null,
+                LicenseeId = player.LicenseeId,
+                Amount = s.Amount,
+                Balance = player.Wallet.Balance,
+                BetType = s.BetType,
+                Description = s.Description,
+            };
+
+            await InsertGameActionAsync(s.Repo, gameActionData);
+
+            return gameActionData;
+        }
+
+        private DateTimeOffset AdjustRecordedOnIfNeeded(GameActionState s)
         {
             throw new NotImplementedException();
         }

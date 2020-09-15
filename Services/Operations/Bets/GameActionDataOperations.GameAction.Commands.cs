@@ -44,7 +44,7 @@ namespace TGS.Services.Operations.Bets
 
         private Task InsertNewRoundAsync(ITgsRepository repo, RoundData roundData)
         {
-            const string sql = "EXEC dbo.usp_Round_InsertRound";
+            const string sql = "usp_Round_InsertRound";
             return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
             {
                 new()
@@ -196,7 +196,7 @@ namespace TGS.Services.Operations.Bets
                 
         private Task UpdateRoundAsync(ITgsRepository repo, RoundData roundData)
         {
-             const string sql = "EXEC dbo.usp_Round_UpdateRound";
+             const string sql = "usp_Round_UpdateRound";
             return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
             {
                 new()
@@ -271,6 +271,158 @@ namespace TGS.Services.Operations.Bets
                     Value = roundData.IsClosed,
                     DbType = DbType.Boolean
                 },
+            });
+        }
+
+        private Task InsertGameActionAsync(ITgsRepository repo, GameActionData gameActionData)
+        {
+            const string sql = "usp_GameAction_InsertGameAction";
+            return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
+            {
+                new()
+                {
+                    ParameterName = "@gameActionId",
+                    Value = gameActionData.Id,
+                    DbType = DbType.Guid
+                },
+                new()
+                {
+                    ParameterName = "@gameProviderConfigurationId",
+                    Value = gameActionData.GameProviderConfigurationId,
+                    DbType = DbType.Guid
+                },
+                new()
+                {
+                    ParameterName = "@walletId",
+                    Value = gameActionData.WalletId,
+                    DbType = DbType.Guid
+                }, 
+                new()
+                {
+                    ParameterName = "@roundId",
+                    Value = gameActionData.RoundId,
+                    DbType = DbType.Guid
+                },  
+                new()
+                {
+                    ParameterName = "@externalTransactionId",
+                    Value = gameActionData.ExternalTransactionId,
+                    DbType = DbType.String
+                },
+                new()
+                {
+                    ParameterName = "@type",
+                    Value = gameActionData.Type,
+                    DbType = DbType.Int64
+                },
+                new()
+                {
+                    ParameterName = "@amount",
+                    Value = gameActionData.Amount,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@turnover",
+                    Value = gameActionData.Turnover,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@winLoss",
+                    Value = gameActionData.WinLoss,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@unsettledBets",
+                    Value = gameActionData.UnsettledBets,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@balance",
+                    Value = gameActionData.Balance,
+                    DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@betType",
+                    Value = gameActionData.BetType,
+                    DbType = DbType.String
+                }, 
+                new()
+                {
+                    ParameterName = "@externalBetId",
+                    Value = gameActionData.ExternalBetId,
+                    DbType = DbType.String
+                }, 
+                new()
+                {
+                    ParameterName = "@externalGameActionGroupId",
+                    Value = gameActionData.ExternalGameActionGroupId,
+                    DbType = DbType.String
+                }, 
+                new()
+                {
+                    ParameterName = "@referencedGameActionId",
+                    Value = gameActionData.ReferencedGameActionId,
+                    DbType = DbType.Guid
+                }, 
+                new()
+                {
+                    ParameterName = "@gameActionBatchId",
+                    Value = gameActionData.GameActionBatchId,
+                    DbType = DbType.Guid
+                }, 
+                new()
+                {
+                    ParameterName = "@recordedOn",
+                    Value = gameActionData.RecordedOn,
+                    DbType = DbType.DateTimeOffset
+                }, 
+                new()
+                {
+                    ParameterName = "@sentOn",
+                    Value = gameActionData.SentOn,
+                    DbType = DbType.DateTimeOffset
+                }, 
+                new()
+                {
+                    ParameterName = "@isClosingRound",
+                    Value = gameActionData.IsClosingRound,
+                    DbType = DbType.Boolean
+                }, 
+                new()
+                {
+                    ParameterName = "@closingRoundExplicitRequest,",
+                    Value = gameActionData.ClosingRoundExplicitRequest,
+                    DbType = DbType.Boolean
+                }, 
+                new()
+                {
+                    ParameterName = "@licenseeId",
+                    Value = gameActionData.LicenseeId,
+                    DbType = DbType.Guid
+                },
+                new()
+                {
+                    ParameterName = "@playerCode",
+                    Value = gameActionData.PlayerCode,
+                    DbType = DbType.String
+                }, 
+                new()
+                {
+                    ParameterName = "@playerIp",
+                    Value = gameActionData.PlayerIp,
+                    DbType = DbType.String
+                },                
+                new()
+                {
+                    ParameterName = "@description",
+                    Value = gameActionData.Description,
+                    DbType = DbType.String
+                }                 
             });
         }
     }
