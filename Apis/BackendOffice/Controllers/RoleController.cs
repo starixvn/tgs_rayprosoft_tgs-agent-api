@@ -195,8 +195,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 Name = name,
-                Description = description,
-                DisplayName = displayName,
+                Description = description ?? string.Empty,
+                DisplayName = displayName ?? string.Empty,
                 MenuSetting = menuSetting,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
