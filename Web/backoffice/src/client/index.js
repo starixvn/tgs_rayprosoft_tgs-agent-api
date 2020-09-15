@@ -17,6 +17,21 @@ export const get = (url = "", { searchParams = {}, ...options } = {}) => {
   return fetch(url, options).then(toDataOrError)
 }
 
+export const put = (
+  url,
+  { body, data = {}, headers = {}, ...options } = {}
+) => {
+  return fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers
+    },
+    body: body ?? JSON.stringify(data),
+    ...options
+  }).then(toDataOrError)
+}
+
 export const post = (
   url,
   { body, data = {}, headers = {}, ...options } = {}
@@ -34,5 +49,6 @@ export const post = (
 
 export default {
   get,
+  put,
   post
 }

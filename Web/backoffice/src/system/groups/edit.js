@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync } from "react-async"
+import Async, {
+  useAsync,
+  IfPending,
+  IfRejected,
+  IfFulfilled
+} from "react-async"
 import client from "../../client"
-import { Formik, Field, useFormik } from "formik"
+import { Formik, Field } from "formik"
 import {
+  Spinner,
   Stack,
   Flex,
   Box,
@@ -22,16 +28,287 @@ import {
   Table,
   useClassName
 } from "bumbag"
-//import { roles as fetchRoles } from "../../client/role"
-import { getMenus } from "../../client/setting"
 import {
   label as systemSubMenuLabel,
   Code as SystemCode,
   name as systemModuleLabel
 } from "../index"
 import { label as menuLabel, find as findMenu } from "../../menu"
+import LoadingBackdrop from "../../dialog/LoadingBackdrop"
+import AlertDialog from "../../dialog/Alert"
 
-export const AddButton = ({}) => {
+export const EditButton = ({ id, onSubmitted, ...props }) => {
+  const deferFn = () =>
+    client.get(`/api/role/${id}`).then(({ role = {} }) => role)
+
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  return (
+    <Async deferFn={deferFn}>
+      {(async) => (
+        <>
+          <Modal.Disclosure
+            ref={disclosureRef}
+            use={Button}
+            onClick={() => {
+              async.run()
+              //dialog.show()
+            }}
+            css={css`
+              flex: unset;
+            `}
+            {...dialog}
+          >
+            {edit()}
+          </Modal.Disclosure>
+          <Async.Pending>
+            <LoadingBackdrop />
+          </Async.Pending>
+          <Async.Rejected>
+            {(error) => (
+              <AlertDialog {...error} disclosureRef={disclosureRef} />
+            )}
+          </Async.Rejected>
+          <Async.Fulfilled>
+            {(role) => (
+              <>
+                <EditDialog
+                  role={role}
+                  onSubmitted={() => {
+                    console.log("onSubmitted")
+                    //dialog.hide()
+                    //TODO: refresh table
+                  }}
+                  dialog={dialog}
+                  disclosureRef={disclosureRef}
+                />
+              </>
+            )}
+          </Async.Fulfilled>
+        </>
+      )}
+    </Async>
+  )
+}
+
+const EditDialog = ({
+  role = {},
+  onClickCancel,
+  onSubmitted,
+  dialog,
+  disclosureRef,
+  children,
+  ...props
+}) => {
+  let { id } = role
+  let [menus = [], setMenus] = useState(role.menus)
+
+  const setChecked = (path = [], checked) => {
+    let item = findMenu(path, menus)
+    item.isDisplay = checked
+    setMenus(menus)
+  }
+
+  const deferFn = ([data]) => {
+    return client
+      .put(`/api/role/${id}`, {
+        data: {
+          ...role,
+          ...data
+        }
+      })
+      .then((response) => {
+        onSubmitted && onSubmitted()
+        return response
+      })
+  }
+
+  return (
+    <Async deferFn={deferFn}>
+      {(asyncSubmit) => (
+        <>
+          <Formik
+            initialValues={{ name: role.name }}
+            onSubmit={(form) => {
+              let data = {
+                ...form,
+                menus
+              }
+
+              asyncSubmit.run(data)
+              console.log("submit", data)
+            }}
+          >
+            {(formProps) => (
+              <>
+                <Dialog.Modal
+                  title={title()}
+                  showActionButtons
+                  actionButtonsProps={{
+                    isLoading: asyncSubmit.isPending,
+                    onClickSubmit: formProps.submitForm,
+                    onClickCancel: () => {
+                      //setMenus([])
+                      formProps.resetForm()
+                    }
+                  }}
+                  hideOnClickOutside={false}
+                  unstable_finalFocusRef={disclosureRef}
+                  {...dialog}
+                >
+                  <form
+                    onReset={formProps.handleReset}
+                    onSubmit={formProps.handleSubmit}
+                  >
+                    <div
+                      css={css`
+                        display: grid;
+                        grid-template-rows: auto;
+                        grid-template-areas:
+                          "name input"
+                          "group table";
+                      `}
+                    >
+                      <Box
+                        css={css`
+                          grid-area: name;
+                        `}
+                        margin="major-1"
+                      >
+                        <Label
+                          htmlFor="name"
+                          marginTop="major-1"
+                          css={css`
+                            line-height: unset;
+                          `}
+                        >
+                          {name()}
+                        </Label>
+                      </Box>
+
+                      <Box
+                        css={css`
+                          grid-area: input;
+                        `}
+                        margin="major-1"
+                      >
+                        <Field name="name">
+                          {({ field, form, meta }) => (
+                            <Input id="name" {...field} />
+                          )}
+                        </Field>
+                      </Box>
+                      <Box
+                        css={css`
+                          grid-area: group;
+                        `}
+                        margin="major-1"
+                      >
+                        <Label
+                          htmlFor="name"
+                          marginTop="major-1"
+                          css={css`
+                            line-height: unset;
+                          `}
+                        >
+                          {control()}
+                        </Label>
+                      </Box>
+                      <Box
+                        css={css`
+                          grid-area: table;
+                        `}
+                        margin="major-1"
+                      >
+                        <MenuTable menus={menus} setChecked={setChecked} />
+                      </Box>
+                    </div>
+                  </form>
+                </Dialog.Modal>
+              </>
+            )}
+          </Formik>
+          <Async.Rejected>
+            {({ title, errors }) => {
+              const BumbagZIndex = 19900410
+              let zIndex = `${BumbagZIndex + 100}`
+              return (
+                <AlertDialog
+                  title={title}
+                  errors={errors}
+                  visible={true}
+                  zIndex={zIndex}
+                />
+              )
+            }}
+          </Async.Rejected>
+          <Async.Fulfilled>
+            {(menus) => (
+              <>
+                <EditDialog
+                  role={{
+                    name: "",
+                    menus
+                  }}
+                  onSubmitted={() => {
+                    console.log("onSubmitted")
+                    dialog.hide()
+                    onSubmitted && onSubmitted()
+                  }}
+                  dialog={dialog}
+                  disclosureRef={disclosureRef}
+                />
+              </>
+            )}
+          </Async.Fulfilled>
+        </>
+      )}
+    </Async>
+  )
+}
+
+export const AddButton = ({ onSubmitted, ...props }) => {
+  const deferFn = () =>
+    client.post("/api/role/menus").then(({ menus = [] }) => {
+      return resetIsDisplay(false, menus)
+    })
+
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  return (
+    <Async deferFn={deferFn}>
+      {(async) => {
+        return (
+          <>
+            <Modal.Disclosure
+              use={Button}
+              ref={disclosureRef}
+              onClick={async.run}
+              css={css`
+                flex: unset;
+              `}
+              {...dialog}
+            >
+              {add()}
+            </Modal.Disclosure>
+            <Async.Pending>
+              <LoadingBackdrop />
+            </Async.Pending>
+            <Async.Rejected>
+              {(error) => (
+                <AlertDialog {...error} disclosureRef={disclosureRef} />
+              )}
+            </Async.Rejected>
+          </>
+        )
+      }}
+    </Async>
+  )
+}
+/*
+export const AddButton = ({ onSubmitted, ...props }) => {
   let { data, run: fetchMenus, ...asyncRoles } = useAsync({
     deferFn: getMenus
   })
@@ -44,10 +321,12 @@ export const AddButton = ({}) => {
     setMenus(menus)
   }
 
+  //TODO: handle error
   let [promise, setSubmit] = useState(Promise.resolve())
-  let async = useAsync({ promise })
+  let submit = useAsync({ promise })
 
   useEffect(() => {
+    console.log("shall reset?")
     setMenus(data)
   }, [data])
 
@@ -62,6 +341,12 @@ export const AddButton = ({}) => {
         }
 
         let promise = client.post("/api/role", { data })
+        promise.then((response) => {
+          //TODO: need to check success?
+          onSubmitted && onSubmitted()
+          return response
+        })
+
         setSubmit(promise)
       }}
     >
@@ -81,9 +366,14 @@ export const AddButton = ({}) => {
               title={title()}
               showActionButtons
               actionButtonsProps={{
+                isLoading: submit.isPending,
                 onClickSubmit: formProps.submitForm,
-                onClickCancel: formProps.resetForm
+                onClickCancel: () => {
+                  setMenus([])
+                  formProps.resetForm()
+                }
               }}
+              hideOnClickOutside={false}
             >
               <form
                 onReset={formProps.handleReset}
@@ -160,6 +450,7 @@ export const AddButton = ({}) => {
     </Formik>
   )
 }
+*/
 
 const MenuTable = ({ menus = [], setChecked }) => {
   return (
@@ -249,10 +540,26 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
   )
 }
 
-export const EditButton = ({}) => {}
+const getMenus = (id = "") => {
+  return client.post("/api/role/menus").then(({ menus = [] }) => {
+    return resetIsDisplay(false, menus)
+  })
+}
+
+const resetIsDisplay = (isDisplay, menus = []) => {
+  return menus.map((menu) => {
+    menu.isDisplay = isDisplay
+    if (menu.subMenus) {
+      menu.subMenus = resetIsDisplay(isDisplay, menu.subMenus)
+    }
+    return menu
+  })
+}
 
 //TODO: i18n
 const add = () => "新增"
+
+const edit = () => "修改"
 
 const title = () => "新增权限组"
 

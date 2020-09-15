@@ -27,20 +27,20 @@ namespace TGS.Apis.LogApi.DataService.Models
             return new AdminLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
-                Ip = a.ipaddress,
-                Path = a.path,
-                Method = a.method,
-                Description = a.description,
-                Exception = a.exception,
-                ServerName = a.servername,
-                RequestHeaders = a.requestheaders,
-                RequestContent = a.requestcontent,
-                ResponseHeaders = a.responseheaders,
-                ResponseContent = a.responsecontent,
+                Ip = a.ipaddress ?? string.Empty,
+                Path = a.path ?? string.Empty,
+                Method = a.method ?? string.Empty,
+                Description = a.description ?? string.Empty,
+                Exception = a.exception ?? string.Empty,
+                ServerName = a.servername ?? string.Empty,
+                RequestHeaders = a.requestheaders ?? string.Empty,
+                RequestContent = a.requestcontent ?? string.Empty,
+                ResponseHeaders = a.responseheaders ?? string.Empty,
+                ResponseContent = a.responsecontent ?? string.Empty,
                 ResponseCode = a.responsecode,
                 ExecutionTimeMs = a.executiontimems,
                 RecordedOn = a.recordedon,
-                StackTrace = a.StackTrace
+                StackTrace = a.StackTrace ?? string.Empty
             };
         }
     }
