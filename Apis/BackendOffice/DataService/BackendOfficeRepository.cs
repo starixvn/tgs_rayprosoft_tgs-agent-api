@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 
 namespace TGS.Apis.BackendOffice.DataService
 {
+    [ExcludeFromCodeCoverage]
     public class BackendOfficeRepository : DbContext, IBackendOfficeRepository
     {
         public BackendOfficeRepository(DbContextOptions<BackendOfficeRepository> options) : base(options)
