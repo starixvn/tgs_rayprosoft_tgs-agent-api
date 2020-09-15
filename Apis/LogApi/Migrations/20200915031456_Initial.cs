@@ -22,6 +22,7 @@ namespace TGS.Apis.LogApi.Migrations
                     Method = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Exception = table.Column<string>(type: "nvarchar(4000)", nullable: true),
+                    StackTrace = table.Column<string>(type: "nvarchar(4000)", nullable: true),
                     ServerName = table.Column<string>(type: "nvarchar(30)", nullable: false),
                     RequestHeaders = table.Column<string>(type: "nvarchar(4000)", nullable: false),
                     RequestContent = table.Column<string>(type: "nvarchar(4000)", nullable: false),

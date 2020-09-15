@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using TGS.Apis.BackendOffice.Controllers.Messages;
@@ -60,23 +60,24 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 adminLogEvent.responsecode = httpContext.Response.StatusCode;
                 adminLogEvent.executiontimems = ms;
                 adminLogEvent.recordedon = DateTimeOffset.Now;
+                adminLogEvent.StackTrace = string.Empty;
+                adminLogEvent.exception = string.Empty;
             }
             catch (Exception ex)
             {
-                adminLogEvent.exception = ex.Message;
+                adminLogEvent.exception = ex.Message.NoLongerThan(4000);
+                adminLogEvent.StackTrace = ex.StackTrace.NoLongerThan(4000);
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 httpContext.Response.ContentType = "application/json";
-                var contextFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
-                if (contextFeature != null)
-                {
-                    await httpContext.Response.WriteAsync(new ErrorDetails
-                    {
-                        StatusCode = httpContext.Response.StatusCode,
-                        Message = "Internal Server Error."
-                    }.ToString() ?? string.Empty);
-                }
 
+                var message = new ErrorDetails
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Message = "Internal Server Error."
+                }.ToString() ?? string.Empty;
+
+                await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(message));
             }
 
             _tgsLog.LogAdmin(adminLogEvent);

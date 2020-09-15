@@ -16,6 +16,7 @@ namespace TGS.Infrastructures.Log.Events
         public string requestcontent { get; set; }
         public string responseheaders { get; set; }
         public string responsecontent { get; set; }
+        public string StackTrace { get; set; }
         public string exception { get; set; }
         public string description { get; set; }
         public string ipaddress { get; set; }

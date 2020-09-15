@@ -83,6 +83,10 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("nvarchar(30)")
                         .IsUnicode(true);
 
+                    b.Property<string>("StackTrace")
+                        .HasColumnType("nvarchar(4000)")
+                        .IsUnicode(true);
+
                     b.HasKey("RecordedOn");
 
                     b.ToTable("AdminLogs","dbo");
