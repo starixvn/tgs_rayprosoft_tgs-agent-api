@@ -32,9 +32,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,6)");
 
-                    b.Property<Guid?>("BetId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("BetType")
                         .HasColumnType("nvarchar(128)");
 
@@ -58,9 +55,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<Guid?>("GameActionBatchId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("GameActionGroupId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("GameProviderConfigurationId")
                         .HasColumnType("uniqueidentifier");
 
@@ -69,6 +63,10 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("varchar(16)");
 
                     b.Property<string>("PlayerIp")
                         .IsRequired()
@@ -241,9 +239,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<Guid>("WalletId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("WinAmount")
-                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("WinLoss")
                         .HasColumnType("decimal(18,6)");

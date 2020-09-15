@@ -70,8 +70,6 @@ namespace TGS.Services.Operations.Models
         public BetValuesResult BetValueResult { get; set; }
         public Guid GameId { get; set; }
         public CachedGame Game { get; set; }
-
-        public Guid? BetId { get; set; }
         public Guid? InternalRoundId { get; set; }
         public RoundStatus OldRoundStatus { get; set; }
         public RoundStatus NewRoundStatus { get; set; }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Infrastructures.Extensions;
+using TGS.Infrastructures.Json;
 using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Log.Events;
 using TGS.Infrastructures.Log.Services;
@@ -36,14 +37,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
             try
             {
                 var reqMessage = await GetRequestBodyAsync(httpContext);
-                var (resMessage, ms) = await GetResponseMessageAsync(httpContext, next);
 
-                var descriptionAttribute = httpContext.GetEndpoint()?.Metadata.GetMetadata<DescriptionAttribute>();
-
-                if (descriptionAttribute != null)
-                {
-                    adminLogEvent.description = descriptionAttribute.Description;
-                }
 
                 adminLogEvent.ipaddress = _requestAnalyzer.GetIp(httpContext).NoLongerThan(256);
                 adminLogEvent.path = httpContext.Request.Path.Value;
@@ -53,20 +47,32 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 adminLogEvent.requestheaders = httpContext.Request.Headers.ToDetailString();
                 adminLogEvent.requestcontent = reqMessage;
                 adminLogEvent.responseheaders = httpContext.Response.Headers.ToDetailString();
-                adminLogEvent.responsecontent = resMessage?.Length > ResMessageSizeLimit
-                        ? CutOffResponseContent(resMessage)
-                        : resMessage;
 
-                adminLogEvent.responsecode = httpContext.Response.StatusCode;
-                adminLogEvent.executiontimems = ms;
                 adminLogEvent.recordedon = DateTimeOffset.Now;
                 adminLogEvent.StackTrace = string.Empty;
                 adminLogEvent.exception = string.Empty;
+
+                var (resMessage, ms) = await GetResponseMessageAsync(httpContext, next);
+
+                var descriptionAttribute = httpContext.GetEndpoint()?.Metadata.GetMetadata<DescriptionAttribute>();
+
+                if (descriptionAttribute != null)
+                {
+                    adminLogEvent.description = descriptionAttribute.Description;
+                }
+
+                adminLogEvent.responsecontent = resMessage?.Length > ResMessageSizeLimit
+                    ? CutOffResponseContent(resMessage)
+                    : resMessage;
+
+                adminLogEvent.responsecode = httpContext.Response.StatusCode;
+                adminLogEvent.executiontimems = ms;
             }
             catch (Exception ex)
             {
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
                 adminLogEvent.StackTrace = ex.StackTrace.NoLongerThan(4000);
+                adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 httpContext.Response.ContentType = "application/json";
@@ -75,9 +81,12 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Message = "Internal Server Error."
-                }.ToString() ?? string.Empty;
+                };
 
-                await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(message));
+                IJsonSerializationProvider json = new JsonSerializationProvider();
+                var result = json.SerializeToString(message);
+
+                await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
             }
 
             _tgsLog.LogAdmin(adminLogEvent);

@@ -21,7 +21,6 @@ namespace TGS.Services.Operations.Models.Data
         public string GameName { get; init; }
         public string GameProviderCode { get; init; }
         public string BetType { get; init; }
-        public Guid? BetId { get; init; }
         public Guid WalletId { get; init; }
         public bool IsCancelled { get; set; }
 

@@ -29,7 +29,6 @@ namespace TGS.Services.Operations.Models.Data
         public DateTimeOffset ExternalCreatedOn { get; init; }
         public DateTimeOffset? ExternalClosedOn { get; init; }
         public decimal? BetAmount { get; init; }
-        public decimal? WinAmount { get; init; }
         public decimal? Commission { get; init; }
         public decimal? TieBetAdjustment { get; init; }
         public decimal? WinLoss { get; init; }

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Core.Models.Services.Games
 {
-    internal record TransactionResult
+    public record TransactionResult
     {
         public bool IsDuplicate { get; init; }
         public string ExternalTransactionId { get; init; }

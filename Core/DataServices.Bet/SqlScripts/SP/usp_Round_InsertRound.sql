@@ -8,7 +8,7 @@ IF OBJECT_ID('usp_Round_InsertRound') IS NULL
 GO
 
 ALTER PROCEDURE [dbo].[usp_Round_InsertRound]
-        @id                             uniqueidentifier,
+        @roundId                        uniqueidentifier,
         @externalRoundId                nvarchar(255),
         @walletId                       uniqueidentifier,
         @gameId                         uniqueidentifier,
@@ -37,62 +37,62 @@ BEGIN
     SET NOCOUNT ON
     
     INSERT INTO [dbo].[Rounds]
-           ([Id]
-           ,[ExternalRoundId]
-           ,[WalletId]
-           ,[GameId]
-           ,[GameName]
-           ,[GameType]
-           ,[GameProviderId]
-           ,[GameProviderCode]
-           ,[GameProviderName]           
-           ,[PlayerCode]
-           ,[PlayerType]
-           ,[CurrencyCode]
-           ,[PlatformType]
-           ,[Status]
-           ,[GameProviderConfigurationId]
-           ,[CreatedOn]
-           ,[ClosedOn]
-           ,[UpdatedOn]
-           ,[LicenseeId]
-           ,[LicenseeCode]
-           ,[LicenseeName]
-           ,[ExternalCreatedOn]
-           ,[ExternalClosedOn])
+           ([Id],
+            [ExternalRoundId],
+            [WalletId],
+            [GameId],
+            [GameName],
+            [GameType],
+            [GameProviderId],
+            [GameProviderCode],
+            [GameProviderName],           
+            [PlayerCode],
+            [PlayerType],
+            [CurrencyCode],
+            [PlatformType],
+            [Status],
+            [GameProviderConfigurationId],
+            [LicenseeId],
+            [LicenseeCode],
+            [LicenseeName],
+            [CreatedOn],
+            [ClosedOn],
+            [UpdatedOn],
+            [ExternalCreatedOn],
+            [ExternalClosedOn])
      VALUES
-           ( @id
-            ,@externalRoundId
-            ,@walletId
-            ,@gameId
-            ,@gameName
-            ,@gameType
-            ,@gameProviderId
-            ,@gameProviderCode
-            ,@gameProviderName            
-            ,@playerCode
-            ,@playerType
-            ,@currencyCode
-            ,@platformType
-            ,@status
-            ,@gameProviderConfigurationId     
-            ,@licenseeId
-            ,@licenseeCode
-            ,@licenseeName
-            ,@createdOn
-            ,@closedOn
-            ,@updatedOn
-            ,@externalCreatedOn
-            ,@externalClosedOn);
+           (@roundId,
+            @externalRoundId,
+            @walletId,
+            @gameId,
+            @gameName,
+            @gameType,
+            @gameProviderId,
+            @gameProviderCode,
+            @gameProviderName,           
+            @playerCode,
+            @playerType,
+            @currencyCode,
+            @platformType,
+            @status,
+            @gameProviderConfigurationId,     
+            @licenseeId,
+            @licenseeCode,
+            @licenseeName,
+            @createdOn,
+            @closedOn,
+            @updatedOn,
+            @externalCreatedOn,
+            @externalClosedOn);
 
    IF ISNULL(@roundDetail, '') <> ''
    BEGIN
         INSERT INTO [dbo].[RoundDetails]
-               ([RoundId]
-               ,[AdditionalData])
+               ([RoundId],
+                [AdditionalData])
          VALUES
-               (@roundId           
-               ,@roundDetail);  
+               (@roundId,           
+                @roundDetail);  
    END
 
 END

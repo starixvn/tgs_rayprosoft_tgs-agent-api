@@ -77,6 +77,10 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.Balance)
                 .HasColumnType(ColumnTypes.Decimal(18, 6));
 
+            builder.Property(c => c.PlayerCode)
+                .HasColumnType(ColumnTypes.Varchar(16))
+                .IsRequired();
+
             builder.Property(c => c.PlayerIp)
                 .HasColumnType(ColumnTypes.Varchar(128))
                 .IsRequired();

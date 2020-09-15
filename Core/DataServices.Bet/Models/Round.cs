@@ -31,11 +31,9 @@ namespace TGS.Core.DataServices.Bet.Models
         public DateTimeOffset? ExternalCreatedOn { get; set; }
         public DateTimeOffset? ExternalClosedOn { get; set; }
         public decimal? BetAmount { get; set; }
-        public decimal? WinAmount { get; set; }
         public decimal? Commission { get; set; }
         public decimal? WinLoss { get; set; }
         public decimal? TieBetAdjustment { get; set; }
-
         public RoundDetail RoundDetail { get; set; }
     }
 }
