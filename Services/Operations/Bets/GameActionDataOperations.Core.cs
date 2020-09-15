@@ -491,7 +491,6 @@ namespace TGS.Services.Operations.Bets
                     ClosedOn = s.LicenseeNow,
                     ExternalClosedOn = s.Timestamp,
                     BetAmount = s.BetValueResult.BetAmount,
-                    WinAmount = s.BetValueResult.WinAmount,
                     WinLoss = s.BetValueResult.WinLoss,
                     TieBetAdjustment = s.BetValueResult.TieBetAdjustment,
                     IsClosed = true 

@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Bet;
 namespace TGS.Core.DataServices.Bet.Migrations
 {
     [DbContext(typeof(BetRepository))]
-    [Migration("20200914084245_Initial")]
+    [Migration("20200915013444_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -243,9 +243,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<Guid>("WalletId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("WinAmount")
-                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("WinLoss")
                         .HasColumnType("decimal(18,6)");

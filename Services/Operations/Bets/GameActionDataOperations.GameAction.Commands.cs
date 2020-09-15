@@ -49,7 +49,7 @@ namespace TGS.Services.Operations.Bets
             {
                 new()
                 {
-                    ParameterName = "@id",
+                    ParameterName = "@roundId",
                     Value = roundData.Id,
                     DbType = DbType.Guid
                 },
@@ -201,7 +201,7 @@ namespace TGS.Services.Operations.Bets
             {
                 new()
                 {
-                    ParameterName = "@id",
+                    ParameterName = "@roundId",
                     Value = roundData.Id,
                     DbType = DbType.Guid
                 },               
@@ -245,12 +245,6 @@ namespace TGS.Services.Operations.Bets
                 {
                     ParameterName = "@betAmount",
                     Value = roundData.BetAmount,
-                    DbType = DbType.Decimal
-                },
-                new()
-                {
-                    ParameterName = "@winAmount",
-                    Value = roundData.WinAmount,
                     DbType = DbType.Decimal
                 },
                 new()

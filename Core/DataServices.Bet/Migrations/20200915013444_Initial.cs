@@ -61,7 +61,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     ExternalCreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     ExternalClosedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     BetAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
-                    WinAmount = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
                     Commission = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
                     WinLoss = table.Column<decimal>(type: "decimal(18,6)", nullable: true),
                     TieBetAdjustment = table.Column<decimal>(type: "decimal(18,6)", nullable: true)

@@ -8,13 +8,12 @@ IF OBJECT_ID('usp_Round_UpdateRound') IS NULL
 GO
 
 ALTER PROCEDURE [dbo].[usp_Round_UpdateRound]
-        @id                 uniqueidentifier,        
+        @roundId            uniqueidentifier,        
         @status             smallint,        
         @closedOn           datetimeoffset,
         @updatedOn          datetimeoffset,
         @externalClosedOn   datetimeoffset NULL,
         @betAmount          decimal(18, 6) NULL,
-        @winAmount          decimal(18, 6) NULL,
         @winLoss            decimal(18, 6) NULL,
         @tieBetAdjustment   decimal(18, 6) NULL,        
         @commission         decimal(18, 6) NULL,        
@@ -28,31 +27,30 @@ BEGIN
     IF @isReopen = 1
     BEGIN
          UPDATE [dbo].[Rounds]
-         SET [Commssion] = @commission,
+         SET [Commission] = @commission,
              [Status] = @status,
              [UpdatedOn] = @updatedOn
-         WHERE [Id] = @id
+         WHERE [Id] = @roundId
     END
     ELSE IF @isClosed = 1
     BEGIN
          UPDATE [dbo].[Rounds]
-         SET [Commssion] = @commission,
-             [Status] = @status,
-             [ClosedOn] = @closedOn,
-             [ExternalClosedOn] = @externalClosedOn,
+         SET [Commission] = @commission,
+             [Status] = @status,             
              [BetAmount] = @betAmount,
-             [WinAmount] = @winAmount,
              [WinLoss] = @winLoss,
              [TieBetAdjustment] = @tieBetAdjustment,
-             [UpdatedOn] = @updatedOn
-         WHERE [Id] = @id
+             [UpdatedOn] = @updatedOn,
+             [ClosedOn] = @closedOn,
+             [ExternalClosedOn] = @externalClosedOn
+         WHERE [Id] = @roundId
     END
     ELSE
     BEGIN   
         UPDATE [dbo].[Rounds]
-        SET [Commssion] = @commission,
+        SET [Commission] = @commission,
             [UpdatedOn] = @updatedOn
-        WHERE [Id] = @id
+        WHERE [Id] = @roundId
     END
 
     IF ISNULL(@roundDetail, '') <> ''
@@ -60,7 +58,7 @@ BEGIN
         
         UPDATE [dbo].[RoundDetails]
         SET [AdditionalData] = @roundDetail
-        WHERE [RoundId] = @RoundId
+        WHERE [RoundId] = @roundId
 
         IF @@ROWCOUNT = 0
         BEGIN

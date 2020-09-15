@@ -8,7 +8,7 @@ IF OBJECT_ID('usp_Round_InsertRound') IS NULL
 GO
 
 ALTER PROCEDURE [dbo].[usp_Round_InsertRound]
-        @id                             uniqueidentifier,
+        @roundId                        uniqueidentifier,
         @externalRoundId                nvarchar(255),
         @walletId                       uniqueidentifier,
         @gameId                         uniqueidentifier,
@@ -52,16 +52,16 @@ BEGIN
            ,[PlatformType]
            ,[Status]
            ,[GameProviderConfigurationId]
-           ,[CreatedOn]
-           ,[ClosedOn]
-           ,[UpdatedOn]
            ,[LicenseeId]
            ,[LicenseeCode]
            ,[LicenseeName]
+           ,[CreatedOn]
+           ,[ClosedOn]
+           ,[UpdatedOn]
            ,[ExternalCreatedOn]
            ,[ExternalClosedOn])
      VALUES
-           ( @id
+           ( @roundId
             ,@externalRoundId
             ,@walletId
             ,@gameId

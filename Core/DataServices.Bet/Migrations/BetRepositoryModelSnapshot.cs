@@ -242,9 +242,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<Guid>("WalletId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("WinAmount")
-                        .HasColumnType("decimal(18,6)");
-
                     b.Property<decimal?>("WinLoss")
                         .HasColumnType("decimal(18,6)");
 
