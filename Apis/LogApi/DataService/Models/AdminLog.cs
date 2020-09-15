@@ -12,6 +12,7 @@ namespace TGS.Apis.LogApi.DataService.Models
         public string Method { get; set; }
         public string Description { get; set; }
         public string Exception { get; set; }
+        public string StackTrace { get; set; }
         public string ServerName { get; set; }
         public string RequestHeaders { get; set; }
         public string RequestContent { get; set; }
@@ -38,7 +39,8 @@ namespace TGS.Apis.LogApi.DataService.Models
                 ResponseContent = a.responsecontent,
                 ResponseCode = a.responsecode,
                 ExecutionTimeMs = a.executiontimems,
-                RecordedOn = a.recordedon
+                RecordedOn = a.recordedon,
+                StackTrace = a.StackTrace
             };
         }
     }

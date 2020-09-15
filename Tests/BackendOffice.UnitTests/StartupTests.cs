@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using BackendOffice.UnitTests.Controllers;
 using FluentAssertions;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,38 +13,12 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.Controllers;
-using TGS.Apis.BackendOffice.DataService;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Security;
 
 namespace BackendOffice.UnitTests
 {
     [TestFixture, Parallelizable]
     public class StartupTests : BaseTests
     {
-
-        private AuthenticateController _controller;
-        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
-        private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
-        private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
-        private readonly Mock<IGenericQueries<User>> _userQueriesMock = new Mock<IGenericQueries<User>>();
-        private readonly Mock<IGenericCommands<User>> _userCommandsMock = new Mock<IGenericCommands<User>>();
-        private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
-
-
-        [SetUp]
-        public override void Setup()
-        {
-            _controller = new AuthenticateController(
-                _hashProviderMock.Object,
-                _tgsHashConfigMock.Object,
-                _antiForgeryMock.Object,
-                _userQueriesMock.Object,
-                _userCommandsMock.Object,
-                _jsonSerializationProviderMock.Object,
-                HttpContextAccessorMock.Object);
-        }
 
         [Test]
         public void Can_Starup()

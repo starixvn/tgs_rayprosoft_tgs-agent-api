@@ -60,7 +60,10 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 
             builder.Property(c => c.Exception)
                 .HasColumnType(ColumnTypes.Nvarchar(4000))
-                .IsRequired(false)
+                .IsUnicode();
+
+            builder.Property(c => c.StackTrace)
+                .HasColumnType(ColumnTypes.Nvarchar(4000))
                 .IsUnicode();
 
             builder.Property(c => c.ResponseCode)
