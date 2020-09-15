@@ -13,6 +13,6 @@
     "metaDir": "snowpack"
   },
   "proxy": {
-    "/api": "http://backoffice.localhost/api"
+    "/api": "http://localhost:32667/api"
   }
 }

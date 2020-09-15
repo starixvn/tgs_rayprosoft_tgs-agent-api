@@ -13,6 +13,7 @@ import {
   Dialog,
   Modal
 } from "bumbag"
+import AlertDialog from "../dialog/Alert"
 
 export const Path = "/login"
 
@@ -45,7 +46,7 @@ export const Form = () => {
             setError(null)
 
             login(data).catch((error) => {
-              setError(error.message)
+              setError(error.message ?? error.title)
               dialog.show()
             })
           }}

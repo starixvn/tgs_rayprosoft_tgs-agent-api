@@ -43,7 +43,7 @@ export const useAuth = () => {
 
   return (data = {}) =>
     client
-      .post("api/users/auth", {
+      .post("api/auth", {
         data
       })
       .then(({ userInfo, ..._ }) => {

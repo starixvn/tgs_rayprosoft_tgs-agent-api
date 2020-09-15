@@ -22,22 +22,32 @@ import { AddButton, EditButton } from "./edit"
 export const Code = "groups"
 
 export const Content = ({}) => {
-  let columns = useMemo(tableColumns)
   let { state, setState, headSortBy, headOrderBy } = useTableState({ name: "" })
   let { pageIndex, pageSize, name = "", sortBy = [], request } = state
 
-  let async = useAsync({ promise: request })
-  let { isPending } = async
-
-  useEffect(() => {
-    let promise = getRoles({
+  let fetchTable = () => {
+    var promise = getRoles({
       page: pageIndex + 1,
       rows: pageSize,
       name,
       sortby: headSortBy(),
       orderby: headOrderBy()
     })
+
     setState({ ...state, request: promise })
+  }
+
+  let columns = useMemo(() =>
+    tableColumns({
+      fetchTable
+    })
+  )
+
+  let async = useAsync({ promise: request })
+  let { isPending } = async
+
+  useEffect(() => {
+    fetchTable()
   }, [pageIndex, pageSize, name, sortBy])
 
   return (
@@ -106,7 +116,7 @@ const searchButtonLabel = () => "搜索"
 
 //TODO: i18n
 const searchInputPlaceHolder = () => "权限组名称输入框"
-const tableColumns = () => [
+const tableColumns = ({ fetchTable }) => [
   sequenceColumn(),
   {
     Header: "权限组名称",
@@ -122,6 +132,7 @@ const tableColumns = () => [
     width: 400
   },
   {
+    accessor: "id",
     Header: "操作",
     headCell: {
       textAlign: "center"
@@ -129,10 +140,10 @@ const tableColumns = () => [
     cell: {
       textAlign: "center"
     },
-    Cell: () => {
+    Cell: ({ value }) => {
       return (
         <Set>
-          <Button>TODO: 修改</Button>
+          <EditButton id={value} onSubmitted={fetchTable} />
           <Button>TODO: 复制</Button>
           <Button>TODO: 删除</Button>
         </Set>
