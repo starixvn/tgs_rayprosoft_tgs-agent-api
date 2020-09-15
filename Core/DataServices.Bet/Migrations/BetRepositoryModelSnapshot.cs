@@ -184,10 +184,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("GameCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
 
@@ -197,9 +193,12 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<string>("GameProviderCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<Guid>("GameProviderConfigurationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GameProviderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("GameProviderName")
@@ -209,9 +208,17 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<short>("GameType")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("LicenseeCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(16)");
+
                     b.Property<Guid?>("LicenseeId")
                         .IsRequired()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LicenseeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlatformType")
                         .HasColumnType("smallint");
@@ -220,13 +227,13 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(16)");
 
-                    b.Property<short>("PlayerTypes")
+                    b.Property<short>("PlayerType")
                         .HasColumnType("smallint");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
 
-                    b.Property<decimal?>("TiebetAdjustment")
+                    b.Property<decimal?>("TieBetAdjustment")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")

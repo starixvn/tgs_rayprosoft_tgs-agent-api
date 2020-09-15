@@ -183,8 +183,8 @@ namespace TGS.Services.Operations
 
         private static class CachedPlayerFields
         {
-            public const string LicenseeId = "LicenseeId";
-            public const string LicenseeCode = "LicenseeCode";
+            public const string LicenseeId = "licenseeId";
+            public const string LicenseeCode = "licenseeCode";
             public const string ExternalId = "externalId";
             public const string Type = "type";
             public const string Username = "username";

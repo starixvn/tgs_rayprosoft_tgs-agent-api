@@ -14,6 +14,11 @@ namespace TGS.Services.Operations.Bets
     public interface IGameActionDataOperations
     {
         Task<BetResult> PlaceBetAsync(BetData data);
+        
+        Task<BetResult> SettleBetAsync(BetData data);
+
+        Task<BetResult> CancelTransactionAsync(BetData data);
+
     }
 
     public sealed partial class GameActionDataOperations : IGameActionDataOperations
@@ -74,5 +79,16 @@ namespace TGS.Services.Operations.Bets
         {
             return ExecuteGameActionAsync(data);
         }
+
+        Task<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data)
+        {
+            return ExecuteGameActionAsync(data);
+        }
+
+        Task<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data)
+        {
+            return ExecuteGameActionAsync(data);
+        }
+
     }
 }

@@ -4,7 +4,7 @@ using TGS.Apis.BackendOffice.DataService.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 {
-    internal class SettingMap : IEntityTypeConfiguration<Setting>
+    public sealed class SettingMap : IEntityTypeConfiguration<Setting>
     {
         void IEntityTypeConfiguration<Setting>.Configure(EntityTypeBuilder<Setting> builder)
         {

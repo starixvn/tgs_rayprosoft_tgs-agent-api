@@ -101,7 +101,7 @@ namespace TGS.Services.Operations.Bets
                 }
 
                 throw new InvalidGameActionException(
-                    $"Transaction being referenced not found, transaction ID: {s.ExternalTransactionReferenceId} for game provider: {s.GameProviderCode}",
+                    $"Transaction being referenced not found, transaction ID: {s.ExternalTransactionReferenceId} for game provider: {s.GameProvider.Code}",
                     InvalidGameActionErrorCode.TransactionBeingReferencedNotFound);
             }
 
@@ -117,7 +117,7 @@ namespace TGS.Services.Operations.Bets
         {
             var playerType = s.PlayerData.PlayerType;
             var gameActionType = s.GameActionType;
-            var gameProviderId = s.GameProviderId;
+            var gameProviderId = s.GameProvider.Id;
             var gameId = s.GameId;
 
             var status = _validStatus.GetStatus(playerType, gameActionType);

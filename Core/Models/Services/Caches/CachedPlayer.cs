@@ -24,5 +24,6 @@ namespace TGS.Core.Models.Services.Caches
         public string LastCashierUrl { get; init; }
         public string LastHelpUrl { get; init; }
         public string LastTermsUrl { get; init; }
+        public string LicenseeName { get; set; }
     }
 }

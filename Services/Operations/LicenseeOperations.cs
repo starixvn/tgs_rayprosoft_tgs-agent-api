@@ -62,6 +62,7 @@ namespace TGS.Services.Operations
             cachedLicensee = new()
             {
                 Code = r.Code,
+                Name = r.Name,
                 TimeZoneId = r.TimeZoneId,
                 Status = r.Status,
                 ResellerId = r.ResellerId,
@@ -179,6 +180,7 @@ namespace TGS.Services.Operations
                 var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Licensee, licenseeId, new RedisValue[]
                 {
                     CachedLicenseeFields.LicenseeCode,
+                    CachedLicenseeFields.LicenseeName,
                     CachedLicenseeFields.TimeZoneId,
                     CachedLicenseeFields.Status,
                     CachedLicenseeFields.ResellerId,
@@ -198,20 +200,21 @@ namespace TGS.Services.Operations
                     return new CachedLicensee
                     {
                         Code = values[0],
-                        TimeZoneId = values[1],
-                        Status = (Status)(int)values[2],
-                        ResellerId = Guid.Parse(values[3]),
-                        ResellerCode = values[4],
+                        Name = values[1],
+                        TimeZoneId = values[2],
+                        Status = (Status)(int)values[3],
+                        ResellerId = Guid.Parse(values[4]),
+                        ResellerCode = values[5],
                         Urls = new LicenseeUrls
                         {
-                            Terms = values[5],
-                            Cashier = values[6],
-                            Help = values[7],
-                            Login = values[8],
-                            MobileTerms = values[9],
-                            MobileCashier = values[10],
-                            MobileHelp = values[11],
-                            MobileLogin = values[12]
+                            Terms = values[6],
+                            Cashier = values[7],
+                            Help = values[8],
+                            Login = values[9],
+                            MobileTerms = values[10],
+                            MobileCashier = values[11],
+                            MobileHelp = values[12],
+                            MobileLogin = values[13]
                         }
                     };
                 }
@@ -224,25 +227,26 @@ namespace TGS.Services.Operations
             return null;
         }
 
-        private async Task CacheLicenseeAsync(Guid licenseeId, CachedLicensee Licensee)
+        private async Task CacheLicenseeAsync(Guid licenseeId, CachedLicensee licensee)
         {
             try
             {
                 var fields = new HashEntry[]
                 {
-                    new (CachedLicenseeFields.LicenseeCode, Licensee.Code),
-                    new (CachedLicenseeFields.TimeZoneId, Licensee.TimeZoneId),
-                    new (CachedLicenseeFields.Status, (int)Licensee.Status),
-                    new (CachedLicenseeFields.ResellerId, Licensee.ResellerId.ToString()),
-                    new (CachedLicenseeFields.ResellerCode, Licensee.ResellerCode),
-                    new (CachedLicenseeFields.TermsUrl, Licensee.Urls.Terms ?? string.Empty),
-                    new (CachedLicenseeFields.CashierUrl, Licensee.Urls.Cashier ?? string.Empty),
-                    new (CachedLicenseeFields.HelpUrl, Licensee.Urls.Help??string.Empty),
-                    new (CachedLicenseeFields.LoginUrl, Licensee.Urls.Login ?? string.Empty),
-                    new (CachedLicenseeFields.MobileTermsUrl, Licensee.Urls.MobileTerms ?? string.Empty),
-                    new (CachedLicenseeFields.MobileCashierUrl, Licensee.Urls.MobileCashier ?? string.Empty),
-                    new (CachedLicenseeFields.MobileHelpUrl, Licensee.Urls.MobileHelp ?? string.Empty),
-                    new (CachedLicenseeFields.MobileLoginUrl, Licensee.Urls.MobileLogin ?? string.Empty)
+                    new (CachedLicenseeFields.LicenseeCode, licensee.Code),
+                    new (CachedLicenseeFields.LicenseeName, licensee.Name),
+                    new (CachedLicenseeFields.TimeZoneId, licensee.TimeZoneId),
+                    new (CachedLicenseeFields.Status, (int)licensee.Status),
+                    new (CachedLicenseeFields.ResellerId, licensee.ResellerId.ToString()),
+                    new (CachedLicenseeFields.ResellerCode, licensee.ResellerCode),
+                    new (CachedLicenseeFields.TermsUrl, licensee.Urls.Terms ?? string.Empty),
+                    new (CachedLicenseeFields.CashierUrl, licensee.Urls.Cashier ?? string.Empty),
+                    new (CachedLicenseeFields.HelpUrl, licensee.Urls.Help??string.Empty),
+                    new (CachedLicenseeFields.LoginUrl, licensee.Urls.Login ?? string.Empty),
+                    new (CachedLicenseeFields.MobileTermsUrl, licensee.Urls.MobileTerms ?? string.Empty),
+                    new (CachedLicenseeFields.MobileCashierUrl, licensee.Urls.MobileCashier ?? string.Empty),
+                    new (CachedLicenseeFields.MobileHelpUrl, licensee.Urls.MobileHelp ?? string.Empty),
+                    new (CachedLicenseeFields.MobileLoginUrl, licensee.Urls.MobileLogin ?? string.Empty)
                 };
 
                 await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Licensee, licenseeId, fields, TimeSpan.FromHours(2), true);
@@ -291,7 +295,8 @@ namespace TGS.Services.Operations
 
         private static class CachedLicenseeFields
         {
-            public const string LicenseeCode = "LicenseeCode";
+            public const string LicenseeCode = "licenseeCode";
+            public const string LicenseeName = "licenseeName";
             public const string TimeZoneId = "timezoneId";
             public const string Status = "status";
             public const string ResellerId = "resellerId";
