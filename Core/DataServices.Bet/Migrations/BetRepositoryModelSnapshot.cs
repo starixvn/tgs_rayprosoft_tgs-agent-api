@@ -70,6 +70,10 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("varchar(16)");
+
                     b.Property<string>("PlayerIp")
                         .IsRequired()
                         .HasColumnType("varchar(128)");

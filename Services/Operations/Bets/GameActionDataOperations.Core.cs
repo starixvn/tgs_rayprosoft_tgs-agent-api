@@ -368,7 +368,7 @@ namespace TGS.Services.Operations.Bets
             return s;
         }
 
-        private async Task SaveDatabaseRecordsAsync(GameActionState s)
+        private async Task<GameActionData> SaveDatabaseRecordsAsync(GameActionState s)
         {
             var current = new BetActionData
             {
@@ -403,6 +403,9 @@ namespace TGS.Services.Operations.Bets
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s);
             s.InternalRoundId = await CreateOrUpdateRoundAsync(s);
 
+            var ga = await CreateGameActionAsync(s);
+
+            return ga;
         }
 
         private Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
@@ -499,6 +502,10 @@ namespace TGS.Services.Operations.Bets
 
             await UpdateRoundAsync(repo, roundData);
         }
-
+        
+        private Task<GameActionData> CreateGameActionAsync(GameActionState s)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
