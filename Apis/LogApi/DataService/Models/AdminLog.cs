@@ -27,7 +27,7 @@ namespace TGS.Apis.LogApi.DataService.Models
             return new AdminLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
-                Ip = a.ipaddress,
+                Ip = a.ipaddress ?? string.Empty,
                 Path = a.path,
                 Method = a.method,
                 Description = a.description,
