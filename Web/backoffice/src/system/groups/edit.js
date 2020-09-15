@@ -243,6 +243,25 @@ const EditDialog = ({
               )
             }}
           </Async.Rejected>
+          <Async.Fulfilled>
+            {(menus) => (
+              <>
+                <EditDialog
+                  role={{
+                    name: "",
+                    menus
+                  }}
+                  onSubmitted={() => {
+                    console.log("onSubmitted")
+                    dialog.hide()
+                    onSubmitted && onSubmitted()
+                  }}
+                  dialog={dialog}
+                  disclosureRef={disclosureRef}
+                />
+              </>
+            )}
+          </Async.Fulfilled>
         </>
       )}
     </Async>
@@ -250,10 +269,43 @@ const EditDialog = ({
 }
 
 export const AddButton = ({ onSubmitted, ...props }) => {
-  let { data, run } = useAsync({
-    deferFn: ([]) => {}
-  })
-  return <Modal.State></Modal.State>
+  const deferFn = () =>
+    client.post("/api/role/menus").then(({ menus = [] }) => {
+      return resetIsDisplay(false, menus)
+    })
+
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  return (
+    <Async deferFn={deferFn}>
+      {(async) => {
+        return (
+          <>
+            <Modal.Disclosure
+              use={Button}
+              ref={disclosureRef}
+              onClick={async.run}
+              css={css`
+                flex: unset;
+              `}
+              {...dialog}
+            >
+              {add()}
+            </Modal.Disclosure>
+            <Async.Pending>
+              <LoadingBackdrop />
+            </Async.Pending>
+            <Async.Rejected>
+              {(error) => (
+                <AlertDialog {...error} disclosureRef={disclosureRef} />
+              )}
+            </Async.Rejected>
+          </>
+        )
+      }}
+    </Async>
+  )
 }
 /*
 export const AddButton = ({ onSubmitted, ...props }) => {
