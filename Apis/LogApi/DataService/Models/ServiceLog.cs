@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TGS.Apis.LogApi.DataService.Models
 {
     public class ServiceLog
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
         public string MachineName { get; set; }

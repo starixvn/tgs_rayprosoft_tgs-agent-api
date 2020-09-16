@@ -202,8 +202,10 @@ namespace TGS.Apis.LogApi.Migrations
 
             modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ServiceLog", b =>
                 {
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Callsite")
                         .HasColumnType("nvarchar(512)");
@@ -213,9 +215,6 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("Https")
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Level")
                         .HasColumnType("nvarchar(10)");
@@ -235,6 +234,9 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<string>("Properties")
                         .HasColumnType("nvarchar(512)");
 
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("RemoteAddress")
                         .HasColumnType("nvarchar(512)");
 
@@ -250,7 +252,7 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(512)");
 
-                    b.HasKey("RecordedOn");
+                    b.HasKey("Id");
 
                     b.ToTable("ServiceLogs","dbo");
                 });

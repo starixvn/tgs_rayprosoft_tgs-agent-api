@@ -12,10 +12,10 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
 using TGS.Core.DataServices.DataInitializers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Middleware;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Apis.TgsApi
 {

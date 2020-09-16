@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Apis.LogApi.Migrations
 {
@@ -86,8 +88,9 @@ namespace TGS.Apis.LogApi.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    Id = table.Column<long>(nullable: false),
                     MachineName = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     Level = table.Column<string>(type: "nvarchar(10)", nullable: true),
                     ServerAddress = table.Column<string>(type: "nvarchar(512)", nullable: true),
@@ -105,8 +108,22 @@ namespace TGS.Apis.LogApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ServiceLogs", x => x.RecordedOn);
+                    table.PrimaryKey("PK_ServiceLogs", x => x.Id);
                 });
+
+            migrationBuilder.Sql(@"
+  ALTER TABLE [dbo].[AdminLogs] DROP CONSTRAINT PK_AdminLogs;
+  ALTER TABLE [dbo].[AdminLogs] ADD CONSTRAINT PK_AdminLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
+
+  ALTER TABLE [dbo].[ApiLogs] DROP CONSTRAINT PK_ApiLogs;
+  ALTER TABLE [dbo].[ApiLogs] ADD CONSTRAINT PK_ApiLogs PRIMARY KEY CLUSTERED (RecordedOn desc);
+
+  ALTER TABLE [dbo].[LogRecords] DROP CONSTRAINT PK_LogRecords;
+  ALTER TABLE [dbo].[LogRecords] ADD CONSTRAINT PK_LogRecords PRIMARY KEY CLUSTERED (RecordedOn desc);
+");
+
+            var assembly = Assembly.GetExecutingAssembly();
+            migrationBuilder.SqlResource(assembly, "TGS.Apis.LogApi.DataService.SqlScripts.SP.usp_ServiceLogs_InsertServiceLog.sql");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

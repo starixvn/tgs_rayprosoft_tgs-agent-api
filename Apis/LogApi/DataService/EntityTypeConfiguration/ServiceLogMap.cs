@@ -11,7 +11,10 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
         {
             builder.ToTable("ServiceLogs", "dbo");
 
-            builder.HasKey(p => p.RecordedOn);
+            builder.HasKey(p => p.Id);
+
+            builder.Property(p => p.Id)
+                .ValueGeneratedOnAdd();
 
             builder.Property(c => c.MachineName)
                 .HasColumnType(ColumnTypes.Nvarchar(512));

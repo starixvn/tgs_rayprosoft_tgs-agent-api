@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
-using TGS.Infrastructures.Extensions;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
