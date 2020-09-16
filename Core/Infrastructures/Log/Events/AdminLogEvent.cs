@@ -3,9 +3,9 @@ using MessagePack;
 
 // ReSharper disable InconsistentNaming
 
-namespace TGS.Infrastructures.Log.Events
+namespace TGS.Core.Infrastructures.Log.Events
 {
-    [MessagePackObject((true))]
+    [MessagePackObject(true)]
     public class AdminLogEvent : LogBusEvent
     {
         public Guid trackingid { get; set; }

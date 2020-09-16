@@ -1,7 +1,7 @@
 ﻿using System;
 using StackExchange.Redis;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public interface IRedisConnection : IDisposable
     {

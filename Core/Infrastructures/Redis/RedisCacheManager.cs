@@ -4,12 +4,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public sealed class RedisCacheManager : IRedisCacheManager
     {

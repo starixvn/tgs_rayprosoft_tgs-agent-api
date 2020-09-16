@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace TGS.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions
 {
     public static class PropertyInfoExtensions
     {
@@ -31,7 +31,7 @@ namespace TGS.Infrastructures.Extensions
             {
                 return null;
             }
-            
+
             var instance = Expression.Parameter(typeof(object), "i");
             var value = Expression.Parameter(typeof(object));
             if (pi.DeclaringType == null)

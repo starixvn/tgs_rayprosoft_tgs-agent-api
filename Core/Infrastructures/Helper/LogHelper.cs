@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace TGS.Infrastructures.Helper
+namespace TGS.Core.Infrastructures.Helper
 {
     public static class LogHelper
     {

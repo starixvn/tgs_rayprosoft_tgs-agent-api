@@ -1,8 +1,8 @@
 ﻿using MessagePack;
 
-namespace TGS.Infrastructures.Log.Events
+namespace TGS.Core.Infrastructures.Log.Events
 {
-    [MessagePackObject((true))]
+    [MessagePackObject(true)]
     public abstract class LogBusEvent
     {
     }

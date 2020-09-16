@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Redis;
 
-namespace TGS.Infrastructures.CodeMapper
+namespace TGS.Core.Infrastructures.CodeMapper
 {
     public interface ICodeMapper
     {
@@ -20,7 +20,7 @@ namespace TGS.Infrastructures.CodeMapper
         private readonly IJsonSerializationProvider _json;
 
         protected BaseCodeMapper(
-            IRedisCacheManager cacheManager, 
+            IRedisCacheManager cacheManager,
             IJsonSerializationProvider json)
         {
             _cacheManager = cacheManager;
@@ -44,7 +44,7 @@ namespace TGS.Infrastructures.CodeMapper
 
             Dictionary<string, string> dict;
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, filterId, cacheKeyPrefix);
-            
+
             if (value.HasValue)
             {
                 dict = _json.DeserializeFromString<Dictionary<string, string>>(value);

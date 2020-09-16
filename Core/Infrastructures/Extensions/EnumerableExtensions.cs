@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-namespace TGS.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions
 {
     public static class EnumerableExtensions
     {

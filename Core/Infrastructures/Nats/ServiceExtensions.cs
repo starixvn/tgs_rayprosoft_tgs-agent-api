@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TGS.Infrastructures.Nats
+namespace TGS.Core.Infrastructures.Nats
 {
     public static class ServiceExtensions
     {

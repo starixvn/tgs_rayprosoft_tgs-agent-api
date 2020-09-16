@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.CodeMapper;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Infrastructures.CodeMapper;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations.CodeMappers

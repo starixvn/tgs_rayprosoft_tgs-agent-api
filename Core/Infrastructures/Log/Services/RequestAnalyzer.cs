@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Http;
 
-namespace TGS.Infrastructures.Log.Services
+namespace TGS.Core.Infrastructures.Log.Services
 {
     public interface IRequestAnalyzer
     {

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 
-namespace TGS.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions
 {
     public static class GuidExtensions
     {

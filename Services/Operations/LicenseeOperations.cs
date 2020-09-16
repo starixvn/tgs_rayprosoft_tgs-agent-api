@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations

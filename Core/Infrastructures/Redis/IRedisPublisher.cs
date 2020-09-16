@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public interface IRedisPublisher
     {

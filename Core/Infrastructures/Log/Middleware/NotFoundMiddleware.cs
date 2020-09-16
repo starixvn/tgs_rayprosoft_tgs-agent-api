@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
 
-namespace TGS.Infrastructures.Log.Middleware
+namespace TGS.Core.Infrastructures.Log.Middleware
 {
     public sealed class NotFoundMiddleware : IMiddleware
     {

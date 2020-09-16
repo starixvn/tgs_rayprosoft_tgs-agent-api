@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using TGS.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests

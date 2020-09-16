@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using NATS.Client;
-using TGS.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log;
 
-namespace TGS.Infrastructures.Nats
+namespace TGS.Core.Infrastructures.Nats
 {
     public interface INatsManager : IDisposable
     {

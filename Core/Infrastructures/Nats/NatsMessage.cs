@@ -1,6 +1,6 @@
 using NATS.Client;
 
-namespace TGS.Infrastructures.Nats
+namespace TGS.Core.Infrastructures.Nats
 {
     public class NatsMessage<T>
     {
@@ -11,10 +11,10 @@ namespace TGS.Infrastructures.Nats
         public ISubscription ArrivalSubscription { get; }
 
         public NatsMessage(
-            string subject, 
-            string reply, 
-            byte[] data, 
-            T dataObject, 
+            string subject,
+            string reply,
+            byte[] data,
+            T dataObject,
             ISubscription arrivalSubscription)
         {
             Subject = subject;

@@ -1,4 +1,4 @@
-﻿namespace TGS.Infrastructures.Nats
+﻿namespace TGS.Core.Infrastructures.Nats
 {
     public class NatsSetting
     {

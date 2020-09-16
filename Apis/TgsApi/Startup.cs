@@ -10,11 +10,11 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Middleware;
-using TGS.Infrastructures.Nats;
-using TGS.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log.Middleware;
+using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Redis;
 
 namespace TGS.Apis.TgsApi
 {

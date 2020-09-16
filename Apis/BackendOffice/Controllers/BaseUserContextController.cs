@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
-using TGS.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
-using TGS.Infrastructures.Extensions;
 
 namespace TGS.Services.GameOperations
 {

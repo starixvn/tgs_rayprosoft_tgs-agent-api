@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.LogApi.Controllers.Messages;
 using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.Services;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
-using TGS.Infrastructures.Redis;
 
 namespace TGS.Apis.LogApi.Controllers
 {

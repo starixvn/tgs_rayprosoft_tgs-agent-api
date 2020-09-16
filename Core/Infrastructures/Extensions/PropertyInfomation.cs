@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace TGS.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions
 {
     public class PropertyInfomation
     {

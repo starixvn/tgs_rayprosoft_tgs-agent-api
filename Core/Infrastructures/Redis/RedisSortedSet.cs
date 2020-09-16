@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Infrastructures.Json;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public sealed class RedisSortedSet<T> : IRedisSortedSet<T>
     {

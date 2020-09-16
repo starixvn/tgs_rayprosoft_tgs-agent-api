@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using TGS.Core.DataServices;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
-using TGS.Infrastructures.Extensions;
 
 namespace TGS.Services.GameOperations.Models.Data
 {

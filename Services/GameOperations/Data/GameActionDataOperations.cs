@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.DataServices;
+using TGS.Core.Infrastructures;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
-using TGS.Infrastructures;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Redis;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Validators;
 using TGS.Services.Operations;
@@ -21,7 +21,6 @@ namespace TGS.Services.GameOperations.Data
         Task<BetResult> SettleBetAsync(BetData data);
 
         Task<BetResult> CancelTransactionAsync(BetData data);
-
     }
 
     internal sealed partial class GameActionDataOperations : IGameActionDataOperations

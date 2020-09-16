@@ -8,8 +8,8 @@ using TGS.Apis.TgsApi.Controllers.Message;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.Models;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 
 namespace TGS.Apis.TgsApi.Controllers
 {

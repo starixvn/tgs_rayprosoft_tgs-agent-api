@@ -1,8 +1,8 @@
 using System;
 using MessagePack;
-using TGS.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log;
 
-namespace TGS.Infrastructures.Nats
+namespace TGS.Core.Infrastructures.Nats
 {
     public interface IMessagePackProvider
     {

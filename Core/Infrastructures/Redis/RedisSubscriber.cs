@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Infrastructures.Json;
+using TGS.Core.Infrastructures.Json;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public class RedisSubscriber : IRedisSubscriber
     {

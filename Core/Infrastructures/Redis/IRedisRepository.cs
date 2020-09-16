@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public interface IRedisRepository
     {

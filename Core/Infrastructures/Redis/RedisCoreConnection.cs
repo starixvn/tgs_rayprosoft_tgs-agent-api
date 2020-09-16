@@ -1,6 +1,7 @@
-﻿using TGS.Infrastructures.Log;
+﻿using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public sealed class RedisCoreConnection : BaseRedisConnection
     {

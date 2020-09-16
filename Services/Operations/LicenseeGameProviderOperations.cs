@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
-using TGS.Infrastructures.Extensions;
 using TGS.Services.Operations.CodeMappers;
 
 namespace TGS.Services.Operations
