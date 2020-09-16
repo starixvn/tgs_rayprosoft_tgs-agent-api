@@ -357,6 +357,9 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(10)")
                         .IsUnicode(true);
 
+                    b.Property<string>("LocalizedName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(30)")
@@ -591,9 +594,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<int>("BetLimitGroupId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("CultureCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(6)");
@@ -605,27 +605,30 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("DefaultWalletId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<bool>("HasAgent")
+                        .HasColumnType("bit");
+
                     b.Property<DateTimeOffset>("LastActiveOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("LastCashierUrl")
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<string>("LastHelpUrl")
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<string>("LastLoginUrl")
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<string>("LastTermsUrl")
-                        .HasColumnType("nvarchar(1024)");
-
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("QQ")
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("RegisteredOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -637,6 +640,12 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
 
+                    b.Property<Guid>("VipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Wechat")
+                        .HasColumnType("nvarchar(64)");
+
                     b.HasKey("PlayerCode");
 
                     b.HasIndex("BetLimitGroupId");
@@ -645,7 +654,38 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("LicenseeId");
 
+                    b.HasIndex("VipId");
+
                     b.ToTable("Players","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerBank", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerCode");
+
+                    b.ToTable("PlayerBanks","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerLoginRecord", b =>
@@ -805,6 +845,25 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("Settings","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.VipLevel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VipLevels","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Wallet", b =>
@@ -1083,6 +1142,21 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
                         .WithMany("Players")
                         .HasForeignKey("LicenseeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.VipLevel", "Vip")
+                        .WithMany()
+                        .HasForeignKey("VipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerBank", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                        .WithMany("Banks")
+                        .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

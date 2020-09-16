@@ -1,8 +1,8 @@
 ﻿using System;
 using StackExchange.Redis;
-using TGS.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public abstract class BaseRedisConnection : IRedisConnection
     {

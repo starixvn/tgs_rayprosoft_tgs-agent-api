@@ -9,6 +9,7 @@ namespace TGS.Core.Models.Services.Caches
         public string PlayerCode { get; init; }
         public Guid LicenseeId { get; init; }
         public string LicenseeCode { get; init; }
+        public string LicenseeName { get; set; }
         public PlayerStatus Status { get; init; }
         public string Username { get; init; }
         public string ExternalId { get; init; }
@@ -19,11 +20,5 @@ namespace TGS.Core.Models.Services.Caches
         public string DefaultWalletCurrencyCode { get; init; }
         public string CultureCode { get; init; }
         public int BetLimitGroupId { get; init; }
-
-        public string LastLoginUrl { get; init; }
-        public string LastCashierUrl { get; init; }
-        public string LastHelpUrl { get; init; }
-        public string LastTermsUrl { get; init; }
-        public string LicenseeName { get; set; }
     }
 }

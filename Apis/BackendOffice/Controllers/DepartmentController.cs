@@ -10,7 +10,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Department;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Extensions;
-using TGS.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

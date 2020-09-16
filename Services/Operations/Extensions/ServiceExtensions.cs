@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations.Bets;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
@@ -37,8 +36,6 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
             services.AddSingleton<IPlayerOperations, PlayerOperations>();
 
-            services.AddScoped<GameActionDataOperations, GameActionDataOperations>();
-            
             #endregion
 
             services.AddSingleton<IValidStatus<Status>, ValidStatus>();
@@ -46,9 +43,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IStatusValidator, StatusValidator>();
             services.AddSingleton<IExpirationValidator, ExpirationValidator>();
             services.AddSingleton<IAmountValidator, AmountValidator>();
-            services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
-            services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
-
+           
             return services;
         }
 

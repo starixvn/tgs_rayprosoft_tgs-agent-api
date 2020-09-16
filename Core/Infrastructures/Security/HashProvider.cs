@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using TGS.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Extensions;
 
-namespace TGS.Infrastructures.Security
+namespace TGS.Core.Infrastructures.Security
 {
     public interface IHashProvider
     {

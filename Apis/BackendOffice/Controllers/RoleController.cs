@@ -11,8 +11,8 @@ using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Json;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

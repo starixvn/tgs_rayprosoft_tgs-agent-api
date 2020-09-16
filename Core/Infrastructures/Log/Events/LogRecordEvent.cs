@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using MessagePack;
-using TGS.Infrastructures.Log.Enums;
+using TGS.Core.Infrastructures.Log.Enums;
 
 // ReSharper disable InconsistentNaming
 
-namespace TGS.Infrastructures.Log.Events
+namespace TGS.Core.Infrastructures.Log.Events
 {
-    [MessagePackObject((true))]
+    [MessagePackObject(true)]
     public class LogRecordEvent : LogBusEvent
     {
         public Guid trackingid { get; set; }

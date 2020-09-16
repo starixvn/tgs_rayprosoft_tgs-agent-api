@@ -55,7 +55,6 @@ namespace BackendOffice.UnitTests
 
             foreach (var controllerType in controllers)
             {
-
                 var controller = serviceProvider.GetRequiredService(controllerType);
                 controller.Should().NotBe(null);
             }

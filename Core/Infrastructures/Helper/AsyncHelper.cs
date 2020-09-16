@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TGS.Infrastructures.Helper
+namespace TGS.Core.Infrastructures.Helper
 {
     public static class AsyncHelper
     {

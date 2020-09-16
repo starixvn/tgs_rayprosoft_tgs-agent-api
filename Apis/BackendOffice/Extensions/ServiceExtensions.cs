@@ -20,10 +20,10 @@ using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Nats;
-using TGS.Infrastructures.Security;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -53,6 +53,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                 {
                     opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                 });
+
+            services.AddHealthChecks()
+                .AddCheck<HealthCheck>("example_health_check");
 
             services.AddLogging(config =>
             {

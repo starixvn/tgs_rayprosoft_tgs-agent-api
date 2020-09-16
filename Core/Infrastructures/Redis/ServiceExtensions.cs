@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public static class ServiceExtensions
     {

@@ -1,5 +1,8 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -53,6 +56,15 @@ namespace TGS.Core.DataServices.Bet
         Task IBaseRepository.SaveChangesAsync()
         {
             return SaveChangesAsync();
+        }
+
+        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class
+        {
+            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        }
+        void IBaseRepository.SaveChanges()
+        {
+            SaveChanges();
         }
     }
 }

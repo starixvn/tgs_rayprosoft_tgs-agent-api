@@ -20,6 +20,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithOne(p => p.Player)
                 .HasForeignKey(p => p.PlayerCode);
 
+            builder.HasMany(p => p.Banks)
+                .WithOne(p => p.Player)
+                .HasForeignKey(p => p.PlayerCode);
+
             builder.Property(c => c.Username)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
@@ -40,7 +44,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
-            builder.Property(c => c.CreatedOn)
+            builder.Property(c => c.RegisteredOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
@@ -48,17 +52,17 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.Property(c => c.LastLoginUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(1024));
+            builder.Property(c => c.Phone)
+                .HasColumnType(ColumnTypes.Nvarchar(32));
 
-            builder.Property(c => c.LastCashierUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(1024));
+            builder.Property(c => c.Email)
+                .HasColumnType(ColumnTypes.Nvarchar(64));
 
-            builder.Property(c => c.LastHelpUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(1024));
+            builder.Property(c => c.QQ)
+                .HasColumnType(ColumnTypes.Nvarchar(64));
 
-            builder.Property(c => c.LastTermsUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(1024));
+            builder.Property(c => c.Wechat)
+                .HasColumnType(ColumnTypes.Nvarchar(64));
         }
     }
 }

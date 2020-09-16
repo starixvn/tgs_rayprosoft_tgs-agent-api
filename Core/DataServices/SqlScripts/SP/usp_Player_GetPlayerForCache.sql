@@ -25,10 +25,6 @@ BEGIN
 	        p.DefaultWalletId,
 	        p.CultureCode,
 	        p.BetLimitGroupId,
-	        p.LastCashierUrl,
-	        p.LastHelpUrl,
-	        p.LastLoginUrl,
-	        p.LastTermsUrl,
 	        p.PlayerCode
         FROM dbo.[Players] p
         WHERE p.PlayerCode = @playerCode

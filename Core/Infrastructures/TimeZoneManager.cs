@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using TimeZoneConverter;
 
-namespace TGS.Infrastructures
+namespace TGS.Core.Infrastructures
 {
     public interface ITimeZoneManager
     {

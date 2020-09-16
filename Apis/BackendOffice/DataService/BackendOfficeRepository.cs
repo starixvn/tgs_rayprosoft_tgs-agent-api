@@ -60,7 +60,7 @@ namespace TGS.Apis.BackendOffice.DataService
             modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
 
-        void IBackendOfficeRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
         {
 
             this.BulkInsertOrUpdate(entities, bulkConfig, progress);
@@ -74,6 +74,11 @@ namespace TGS.Apis.BackendOffice.DataService
         Task IBaseRepository.SaveChangesAsync()
         {
             return SaveChangesAsync();
+        }
+
+        void IBaseRepository.SaveChanges()
+        {
+            SaveChanges();
         }
     }
 }

@@ -2,8 +2,8 @@
 using System.Text;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Security;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {

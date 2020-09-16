@@ -5,7 +5,7 @@ using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using TGS.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Nats;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Nats.IntegrationTests

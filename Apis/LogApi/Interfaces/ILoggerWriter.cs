@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TGS.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Interfaces
 {

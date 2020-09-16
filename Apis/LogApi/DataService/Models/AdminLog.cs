@@ -1,6 +1,6 @@
 ﻿using System;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.DataService.Models
 {

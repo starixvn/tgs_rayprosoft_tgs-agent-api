@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TGS.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Redis;
 
 namespace TGS.Tests.Redis.IntegrationTests
 {

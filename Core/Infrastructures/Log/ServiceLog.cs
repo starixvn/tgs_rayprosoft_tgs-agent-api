@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace TGS.Infrastructures.Log
+namespace TGS.Core.Infrastructures.Log
 {
     public interface IServiceLog<T>
     {

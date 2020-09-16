@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Services;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Services;
 
 namespace TGS.Apis.BackendOffice.Middlewares
 {
