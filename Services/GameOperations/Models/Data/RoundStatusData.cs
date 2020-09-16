@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
-    public record RoundStatusData
+    internal record RoundStatusData
     {
         public bool AutoCloseRound { get; init; }
         public bool? RequestToCloseRound { get; init; }

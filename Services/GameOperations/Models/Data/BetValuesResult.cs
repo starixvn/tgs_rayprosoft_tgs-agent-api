@@ -1,4 +1,4 @@
-﻿namespace TGS.Services.Operations.Models.Data
+﻿namespace TGS.Services.GameOperations.Models.Data
 {
     public record BetValuesResult
     {

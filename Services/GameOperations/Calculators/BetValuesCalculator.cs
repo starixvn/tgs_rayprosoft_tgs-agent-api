@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using TGS.Core.Models.Extensions;
 using TGS.Infrastructures.Extensions;
-using TGS.Services.Operations.Models.Data;
+using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
 
-namespace TGS.Services.Operations.Calculators
+namespace TGS.Services.GameOperations.Calculators
 {
-    public interface IBetValuesCalculator
+    internal interface IBetValuesCalculator
     {
         BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions);
     }
 
-    public sealed class BetValuesCalculator : IBetValuesCalculator
+    internal sealed class BetValuesCalculator : IBetValuesCalculator
     {
         BetValuesResult IBetValuesCalculator.Calculate(bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions)
         {

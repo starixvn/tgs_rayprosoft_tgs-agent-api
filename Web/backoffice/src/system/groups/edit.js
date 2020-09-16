@@ -7,7 +7,7 @@ import Async, {
   IfFulfilled
 } from "react-async"
 import client from "../../client"
-import { Formik, Field } from "formik"
+import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Spinner,
   Stack,
@@ -67,14 +67,14 @@ export const AddButton = ({ onSubmitted, ...props }) => {
             </Async.Pending>
             <Async.Rejected>
               {(error) => (
-                <AlertDialog {...error} disclosureRef={disclosureRef} />
+                <AlertDialog {...error} finalFocusRef={disclosureRef} />
               )}
             </Async.Rejected>
             <Async.Fulfilled>
               {(menus) => {
                 return (
                   dialog.visible && (
-                    <SubmitFormDialog
+                    <SubmitDialog
                       role={{
                         name: "",
                         menus
@@ -124,23 +124,23 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
           </Async.Pending>
           <Async.Rejected>
             {(error) => (
-              <AlertDialog {...error} disclosureRef={disclosureRef} />
+              <AlertDialog {...error} finalFocusRef={disclosureRef} />
             )}
           </Async.Rejected>
           <Async.Fulfilled>
-            {(role) => (
-              <>
-                <SubmitFormDialog
+            {(role) =>
+              dialog.visible && (
+                <SubmitDialog
                   role={role}
                   onSubmitted={() => {
                     dialog.hide()
                     onSubmitted && onSubmitted()
                   }}
                   dialog={dialog}
-                  disclosureRef={disclosureRef}
+                  finalFocusRef={disclosureRef}
                 />
-              </>
-            )}
+              )
+            }
           </Async.Fulfilled>
         </>
       )}
@@ -148,23 +148,17 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
   )
 }
 
-const SubmitFormDialog = ({
+const SubmitDialog = ({
   role = {},
   onClickCancel,
   onSubmitted,
   dialog,
-  disclosureRef,
+  finalFocusRef,
   children,
   ...props
 }) => {
   let { id } = role
   let [menus = [], setMenus] = useState(role.menus)
-
-  const setChecked = (path = [], checked) => {
-    let item = findMenu(path, menus)
-    item.isDisplay = checked
-    setMenus(menus)
-  }
 
   const create = (data) =>
     client.post(`/api/role`, {
@@ -198,107 +192,15 @@ const SubmitFormDialog = ({
               submit.run(data)
             }}
           >
-            {(formProps) => (
-              <>
-                <Dialog.Modal
-                  title={title()}
-                  showActionButtons
-                  actionButtonsProps={{
-                    isLoading: submit.isPending,
-                    onClickSubmit: formProps.submitForm,
-                    onClickCancel: () => {
-                      formProps.resetForm()
-                    }
-                  }}
-                  hideOnClickOutside={false}
-                  unstable_finalFocusRef={disclosureRef}
-                  {...dialog}
-                >
-                  <form
-                    onReset={formProps.handleReset}
-                    onSubmit={formProps.handleSubmit}
-                  >
-                    <div
-                      css={css`
-                        display: grid;
-                        grid-template-rows: auto;
-                        grid-template-areas:
-                          "name input"
-                          "group table";
-                      `}
-                    >
-                      <Box
-                        css={css`
-                          grid-area: name;
-                        `}
-                        margin="major-1"
-                      >
-                        <Label
-                          htmlFor="name"
-                          marginTop="major-1"
-                          css={css`
-                            line-height: unset;
-                          `}
-                        >
-                          {name()}
-                        </Label>
-                      </Box>
-
-                      <Box
-                        css={css`
-                          grid-area: input;
-                        `}
-                        margin="major-1"
-                      >
-                        <Field name="name">
-                          {({ field, form, meta }) => (
-                            <Input id="name" {...field} />
-                          )}
-                        </Field>
-                      </Box>
-                      <Box
-                        css={css`
-                          grid-area: group;
-                        `}
-                        margin="major-1"
-                      >
-                        <Label
-                          htmlFor="name"
-                          marginTop="major-1"
-                          css={css`
-                            line-height: unset;
-                          `}
-                        >
-                          {control()}
-                        </Label>
-                      </Box>
-                      <Box
-                        css={css`
-                          grid-area: table;
-                        `}
-                        margin="major-1"
-                      >
-                        <MenuTable menus={menus} setChecked={setChecked} />
-                      </Box>
-                    </div>
-                  </form>
-                </Dialog.Modal>
-              </>
-            )}
+            <FormDialog
+              menus={menus}
+              setMenus={setMenus}
+              dialog={dialog}
+              finalFocusRef={finalFocusRef}
+            />
           </Formik>
           <Async.Rejected>
-            {({ title, errors }) => {
-              const BumbagZIndex = 19900410
-              let zIndex = `${BumbagZIndex + 100}`
-              return (
-                <AlertDialog
-                  title={title}
-                  errors={errors}
-                  visible={true}
-                  zIndex={zIndex}
-                />
-              )
-            }}
+            {(error) => <AlertDialog {...error} />}
           </Async.Rejected>
           <Async.Fulfilled>
             {(_) => {
@@ -313,6 +215,104 @@ const SubmitFormDialog = ({
         </>
       )}
     </Async>
+  )
+}
+
+const FormDialog = ({ menus, setMenus, dialog, finalFocusRef, ...props }) => {
+  const { values, submitForm, resetForm, isPending } = useFormikContext()
+  let nameInputRef = useRef()
+
+  const setChecked = (path = [], checked) => {
+    let item = findMenu(path, menus)
+    item.isDisplay = checked
+    setMenus(menus)
+  }
+
+  useEffect(() => {
+    if (dialog.visible) {
+      nameInputRef?.current?.focus()
+    }
+  }, [dialog.visible])
+
+  return (
+    <Dialog.Modal
+      title={title()}
+      showActionButtons
+      actionButtonsProps={{
+        isLoading: isPending,
+        onClickSubmit: submitForm,
+        onClickCancel: resetForm
+      }}
+      hideOnClickOutside={false}
+      unstable_finalFocusRef={finalFocusRef}
+      {...dialog}
+    >
+      <Form>
+        <div
+          css={css`
+            display: grid;
+            grid-template-rows: auto;
+            grid-template-areas:
+              "name input"
+              "group table";
+          `}
+        >
+          <Box
+            css={css`
+              grid-area: name;
+            `}
+            margin="major-1"
+          >
+            <Label
+              htmlFor="name"
+              marginTop="major-1"
+              css={css`
+                line-height: unset;
+              `}
+            >
+              {name()}
+            </Label>
+          </Box>
+
+          <Box
+            css={css`
+              grid-area: input;
+            `}
+            margin="major-1"
+          >
+            <Field name="name">
+              {({ field, form, meta }) => (
+                <Input inputRef={nameInputRef} id="name" {...field} />
+              )}
+            </Field>
+          </Box>
+          <Box
+            css={css`
+              grid-area: group;
+            `}
+            margin="major-1"
+          >
+            <Label
+              htmlFor="name"
+              marginTop="major-1"
+              css={css`
+                line-height: unset;
+              `}
+            >
+              {control()}
+            </Label>
+          </Box>
+          <Box
+            css={css`
+              grid-area: table;
+            `}
+            margin="major-1"
+          >
+            <MenuTable menus={menus} setChecked={setChecked} />
+          </Box>
+        </div>
+      </Form>
+    </Dialog.Modal>
   )
 }
 

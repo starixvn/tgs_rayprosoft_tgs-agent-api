@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Services.Operations.Models.Data;
+using TGS.Services.GameOperations.Models.Data;
 
-namespace TGS.Services.Operations.Bets
+namespace TGS.Services.GameOperations.Data
 {
-    public sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
         private Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repo, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
         {

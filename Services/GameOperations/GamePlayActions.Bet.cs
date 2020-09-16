@@ -7,7 +7,7 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures.Extensions;
 
-namespace TGS.Services.GameServices
+namespace TGS.Services.GameOperations
 {
     public partial interface IGamePlayActions
     {
@@ -46,9 +46,10 @@ namespace TGS.Services.GameServices
             await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
             await ThrowIfGameIsNotTakenByLicenseeAsync(player, data);
             await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
-            var res = await _operations.PlaceBetAsync(data);
-
-            return null;
+            var r = await _operations.PlaceBetAsync(data);
+            await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
+            
+            return r;
         }
 
         Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data)

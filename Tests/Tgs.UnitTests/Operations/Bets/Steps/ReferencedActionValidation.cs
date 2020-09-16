@@ -4,8 +4,8 @@ using System.Linq;
 using FluentAssertions;
 using TechTalk.SpecFlow;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations.Models.Data;
-using TGS.Services.Operations.Validators;
+using TGS.Services.GameOperations.Models.Data;
+using TGS.Services.GameOperations.Validators;
 using TGS.Tests.TestsCommon;
 using TGS.Tests.TestsCommon.Extensions;
 

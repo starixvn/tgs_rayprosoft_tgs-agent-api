@@ -68,6 +68,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessLogic", "BusinessLo
 		Readme\BusinessLogic\TurnoverGgrSqlQuery.md = Readme\BusinessLogic\TurnoverGgrSqlQuery.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOperations", "Services\GameOperations\GameOperations.csproj", "{4BD4697C-ACE2-490B-9F90-E081341FEA57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +140,10 @@ Global
 		{6D52C16E-873A-48C7-918E-443E440382B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D52C16E-873A-48C7-918E-443E440382B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D52C16E-873A-48C7-918E-443E440382B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BD4697C-ACE2-490B-9F90-E081341FEA57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BD4697C-ACE2-490B-9F90-E081341FEA57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BD4697C-ACE2-490B-9F90-E081341FEA57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BD4697C-ACE2-490B-9F90-E081341FEA57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -161,6 +167,7 @@ Global
 		{6D52C16E-873A-48C7-918E-443E440382B8} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB} = {897541B7-3AE6-4AEE-9D3E-51221088F2CC}
 		{BA86765F-9423-46BA-A60A-C55A9D26458C} = {A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}
+		{4BD4697C-ACE2-490B-9F90-E081341FEA57} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

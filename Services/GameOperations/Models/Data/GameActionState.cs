@@ -6,9 +6,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures.Extensions;
-using TGS.Services.Operations.Models.Data;
 
-namespace TGS.Services.Operations.Models
+namespace TGS.Services.GameOperations.Models.Data
 {
     internal class GameActionState
     {

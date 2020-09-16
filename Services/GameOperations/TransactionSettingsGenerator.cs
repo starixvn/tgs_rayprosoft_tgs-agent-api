@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations.Models;
+using TGS.Services.GameOperations.Models;
 using TGS.Services.Operations.Validators;
 
-namespace TGS.Services.Operations
+namespace TGS.Services.GameOperations
 {
-    public interface ITransactionSettingsGenerator
+    internal interface ITransactionSettingsGenerator
     {
         TransactionSettings GetTransactionSettings(GameActionType type);
     }
 
-    public sealed class TransactionSettingsGenerator : ITransactionSettingsGenerator
+    internal sealed class TransactionSettingsGenerator : ITransactionSettingsGenerator
     {
         private readonly IReadOnlyDictionary<GameActionType, TransactionSettings> _map;
         private readonly IAmountValidator _amountValidator;

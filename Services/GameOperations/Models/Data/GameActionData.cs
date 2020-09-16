@@ -1,9 +1,9 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
-    public record GameActionData
+    internal record GameActionData
     {
         public Guid Id { get; set; }
         public Guid GameProviderConfigurationId { get; set; }

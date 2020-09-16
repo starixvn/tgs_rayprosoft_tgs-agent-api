@@ -1,9 +1,9 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
-    public class BetActionData
+    internal class BetActionData
     {
         public Guid Id { get; init; }
         public Guid? ReferenceId { get; init; }

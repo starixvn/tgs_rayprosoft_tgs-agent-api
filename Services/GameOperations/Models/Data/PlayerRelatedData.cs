@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
     internal record PlayerRelatedData
     {
@@ -14,8 +14,8 @@ namespace TGS.Services.Operations.Models.Data
         public string PlayerUsername { get; init; }
         public string PlayerExternalId { get; init; }
         public PlayerTypes PlayerType { get; init; }
-        public string ExternalCurrencyCode { get; init; }        
+        public string ExternalCurrencyCode { get; init; }
         public string LicenseeTimeZoneId { get; init; }
-        public string PlayerIp { get; init; } = string.Empty;        
+        public string PlayerIp { get; init; } = string.Empty;
     }
 }

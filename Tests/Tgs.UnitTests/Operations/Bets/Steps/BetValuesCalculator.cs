@@ -4,12 +4,12 @@ using System.Linq;
 using FluentAssertions;
 using TechTalk.SpecFlow;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations.Calculators;
-using TGS.Services.Operations.Models.Data;
+using TGS.Services.GameOperations.Calculators;
+using TGS.Services.GameOperations.Models.Data;
 using TGS.Tests.TestsCommon;
 using TGS.Tests.TestsCommon.Extensions;
 
-using Calculators = TGS.Services.Operations.Calculators;
+using Calculators = TGS.Services.GameOperations.Calculators;
 
 namespace Tgs.UnitTests.Operations.Bets.Steps
 {

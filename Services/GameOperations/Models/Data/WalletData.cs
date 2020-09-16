@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
     internal class WalletData
     {

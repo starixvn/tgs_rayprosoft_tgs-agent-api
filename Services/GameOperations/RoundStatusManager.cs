@@ -1,16 +1,16 @@
 ﻿using System.Linq;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
-using TGS.Services.Operations.Models.Data;
+using TGS.Services.GameOperations.Models.Data;
 
-namespace TGS.Services.Operations
+namespace TGS.Services.GameOperations
 {
-    public interface IRoundStatusManager
+    internal interface IRoundStatusManager
     {
         RoundStatus GetStatus(RoundStatusData data);
     }
 
-    public sealed class RoundStatusManager : IRoundStatusManager
+    internal sealed class RoundStatusManager : IRoundStatusManager
     {
         RoundStatus IRoundStatusManager.GetStatus(RoundStatusData data)
         {
@@ -30,7 +30,7 @@ namespace TGS.Services.Operations
 
                 return RoundStatus.Closed;
             }
-        
+
             // Overall:
             // 1. IF autoCloseRound=false, round must be closed explicitly.
             // 2. IF autoCloseRound=true, round is closed on any bet - ending action;
@@ -55,7 +55,7 @@ namespace TGS.Services.Operations
                     .Select(r => r.Reference.Id).ToHashSet();
 
                 var unsettledBetIds = data.PreviousActions
-                    .Where(b => b.Reference == null && 
+                    .Where(b => b.Reference == null &&
                                 b.Type.IsNotAllOf(GameActionType.FreeBet) &&
                                 !allBetIdsInTheRound.Contains(b.Id))
                     .Select(r => r.Id);

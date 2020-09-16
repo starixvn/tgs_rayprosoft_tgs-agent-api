@@ -1,7 +1,7 @@
 ﻿using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
     internal record GameActionResult
     {

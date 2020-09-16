@@ -6,10 +6,12 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures;
 using TGS.Infrastructures.Redis;
-using TGS.Services.Operations.Calculators;
+using TGS.Services.GameOperations.Calculators;
+using TGS.Services.GameOperations.Validators;
+using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
 
-namespace TGS.Services.Operations.Bets
+namespace TGS.Services.GameOperations.Data
 {
     public interface IGameActionDataOperations
     {
@@ -21,7 +23,7 @@ namespace TGS.Services.Operations.Bets
 
     }
 
-    public sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
         private readonly Func<ITgsRepository> _tgsRepoFactory;
         private readonly ITransactionManager _transactionManager;
