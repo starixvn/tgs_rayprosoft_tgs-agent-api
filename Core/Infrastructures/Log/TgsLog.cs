@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using TGS.Infrastructures.Log.Enums;
-using TGS.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Enums;
+using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Services;
 
-namespace TGS.Infrastructures.Log
+namespace TGS.Core.Infrastructures.Log
 {
     public interface ITgsLog
     {
@@ -56,13 +57,13 @@ namespace TGS.Infrastructures.Log
 
         public Guid TrackingId
         {
-            get => Services.CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
+            get => CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
             set
             {
-                var slot = Services.CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
+                var slot = CallContext<Guid>.GetData(TrackingIdCallContextSlotName);
                 if (slot == Guid.Empty)
                 {
-                    Services.CallContext<Guid>.SetData(TrackingIdCallContextSlotName, value);
+                    CallContext<Guid>.SetData(TrackingIdCallContextSlotName, value);
                 }
             }
         }

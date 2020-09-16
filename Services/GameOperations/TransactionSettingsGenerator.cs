@@ -26,7 +26,7 @@ namespace TGS.Services.GameOperations
             GetTransactionAmount = a => -a      // Get Transaction Amount - set parameter as negative
         };
 
-        private TransactionSettings WinBetTransactionSettings => new TransactionSettings
+        private TransactionSettings WinBetTransactionSettings => new()
         {
             GameActionType = GameActionType.WinBet,
             ValidateAmount = t => _amountValidator.ThrowIfAmountIsNotPositive,
@@ -36,7 +36,7 @@ namespace TGS.Services.GameOperations
             GetTransactionAmount = a => a      // Get Transaction Amount - set parameter as is
         };
 
-        private TransactionSettings LoseBetTransactionSettings => new TransactionSettings
+        private TransactionSettings LoseBetTransactionSettings => new()
         {
             GameActionType = GameActionType.LoseBet,
             ValidateAmount = t => _amountValidator.IgnoreAmount,
@@ -46,7 +46,7 @@ namespace TGS.Services.GameOperations
             GetTransactionAmount = a => 0m      // Get Transaction Amount - set parameter as is
         };
 
-        private TransactionSettings FreeBetTransactionSettings => new TransactionSettings
+        private TransactionSettings FreeBetTransactionSettings => new()
         {
             GameActionType = GameActionType.FreeBet,
             ValidateAmount = t => _amountValidator.ThrowIfAmountIsNegative,
@@ -56,7 +56,7 @@ namespace TGS.Services.GameOperations
             GetTransactionAmount = a => a      // Get Transaction Amount - set parameter as is
         };
 
-        private TransactionSettings TieBetTransactionSettings => new TransactionSettings
+        private TransactionSettings TieBetTransactionSettings => new()
         {
             GameActionType = GameActionType.TieBet,
             ValidateAmount = t => _amountValidator.ThrowIfAmountIsNotPositive,
@@ -66,7 +66,7 @@ namespace TGS.Services.GameOperations
             GetTransactionAmount = a => a      // Get Transaction Amount - set parameter as is
         };
 
-        private TransactionSettings CancelTransactionSettings => new TransactionSettings
+        private TransactionSettings CancelTransactionSettings => new()
         {
             GameActionType = GameActionType.CancelTransaction,
             ValidateAmount = t => _amountValidator.IgnoreAmount,

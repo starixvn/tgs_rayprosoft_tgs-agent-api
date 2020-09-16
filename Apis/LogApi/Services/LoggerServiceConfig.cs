@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Hosting;
-using TGS.Infrastructures.Log.Enums;
+using TGS.Core.Infrastructures.Log.Enums;
 
 namespace TGS.Apis.LogApi.Services
 {

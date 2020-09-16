@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>TGS.Infrastructures</AssemblyName>
-    <RootNamespace>TGS.Infrastructures</RootNamespace>
+    <AssemblyName>TGS.Core.Infrastructures</AssemblyName>
+    <RootNamespace>TGS.Core.Infrastructures</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

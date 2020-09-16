@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.IO;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Log.Attributes;
-using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Services;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log.Attributes;
+using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Services;
 
-namespace TGS.Infrastructures.Log.Middleware
+namespace TGS.Core.Infrastructures.Log.Middleware
 {
     public sealed class ApiLoggerMiddleware : IMiddleware
     {

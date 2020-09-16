@@ -15,10 +15,10 @@ using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Nats;
-using TGS.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Redis;
 
 namespace TGS.Apis.LogApi
 {

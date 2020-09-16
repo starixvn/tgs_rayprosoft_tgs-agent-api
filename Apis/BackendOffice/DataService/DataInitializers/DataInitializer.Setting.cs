@@ -1,7 +1,7 @@
 using System;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Infrastructures.Json;
+using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {

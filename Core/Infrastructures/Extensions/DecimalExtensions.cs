@@ -1,4 +1,4 @@
-﻿namespace TGS.Infrastructures.Extensions
+﻿namespace TGS.Core.Infrastructures.Extensions
 {
     public static class DecimalExtensions
     {

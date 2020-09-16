@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Redis;
 using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations
@@ -40,11 +40,8 @@ namespace TGS.Services.Operations
     public sealed class GameProviderOperations : IGameProviderOperations
     {
         private readonly IRedisCacheManager _cacheManager;
-
         private readonly Func<IGameProviderQueries> _gameProviderQueriesFactory;
-
         private readonly IJsonSerializationProvider _json;
-
         private readonly IGameProviderOperations _interface;
 
         public GameProviderOperations(

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace TGS.Infrastructures.Security
+namespace TGS.Core.Infrastructures.Security
 {
     public static class BinaryUtil
     {

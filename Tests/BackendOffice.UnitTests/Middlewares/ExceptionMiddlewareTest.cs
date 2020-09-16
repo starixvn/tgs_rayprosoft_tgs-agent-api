@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Http.Features;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Middlewares;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Log.Services;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Services;
 
 namespace BackendOffice.UnitTests.Middlewares
 {

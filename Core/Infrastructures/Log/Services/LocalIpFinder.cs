@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
-namespace TGS.Infrastructures.Log.Services
+namespace TGS.Core.Infrastructures.Log.Services
 {
     public interface ILocalIpFinder
     {
@@ -84,10 +84,10 @@ namespace TGS.Infrastructures.Log.Services
                 {
                     if (i == bitLimit) break;
                     ++i;
-                    b |= (1 << (7 - bitIndex));
+                    b |= 1 << 7 - bitIndex;
 
                 }
-                mask |= (uint)(b << (8 * byteIndex));
+                mask |= (uint)(b << 8 * byteIndex);
                 if (i == bitLimit) break;
             }
             return mask;

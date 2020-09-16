@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using TGS.Infrastructures.Log.Middleware;
+using TGS.Core.Infrastructures.Log.Middleware;
 
-namespace TGS.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions
 {
     public static class ApplicationBuilderExtensions
     {

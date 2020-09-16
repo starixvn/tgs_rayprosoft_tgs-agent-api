@@ -3,13 +3,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using TGS.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
 {
-    //[TestFixture, Parallelizable]
-    [TestFixture]
+    [TestFixture, Parallelizable]
     [Category(Named.Integration)]
     public class RedisSubscriberPublisherTest
     {

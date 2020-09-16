@@ -15,7 +15,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Infrastructures.Json;
+using TGS.Core.Infrastructures.Json;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers

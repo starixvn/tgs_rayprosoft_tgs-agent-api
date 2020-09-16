@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace TGS.Infrastructures.Json
+namespace TGS.Core.Infrastructures.Json
 {
     public interface IJsonSerializationProvider
     {

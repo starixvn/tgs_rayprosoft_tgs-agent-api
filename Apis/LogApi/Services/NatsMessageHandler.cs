@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using NATS.Client;
 using TGS.Apis.LogApi.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Models;
-using TGS.Infrastructures.Extensions;
-using TGS.Infrastructures.Log;
-using TGS.Infrastructures.Log.Events;
-using TGS.Infrastructures.Nats;
 
 namespace TGS.Apis.LogApi.Services
 {

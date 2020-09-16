@@ -1,4 +1,4 @@
-﻿namespace TGS.Infrastructures.Security
+﻿namespace TGS.Core.Infrastructures.Security
 {
     public enum HashAlgorithmKind
     {

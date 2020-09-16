@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Extensions;
-using TGS.Infrastructures.Extensions;
 using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
 

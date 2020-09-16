@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 
-namespace TGS.Infrastructures.Log.Services
+namespace TGS.Core.Infrastructures.Log.Services
 {
     internal static class CallContext<T>
     {
@@ -20,6 +20,6 @@ namespace TGS.Infrastructures.Log.Services
         /// <typeparam name="T">The type of the data being retrieved. Must match the type used when the <paramref name="name"/> was set via <see cref="SetData{T}(string, T)"/>.</typeparam>
         /// <param name="name">The name of the item in the call context.</param>
         /// <returns>The object in the call context associated with the specified name, or a default value for <typeparamref name="T"/> if none is found.</returns>
-        public static T GetData(string name) => State.TryGetValue(name, out var data) ? data.Value : default(T);
+        public static T GetData(string name) => State.TryGetValue(name, out var data) ? data.Value : default;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace TGS.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions
 {
     public static class ByteArrayExtensions
     {

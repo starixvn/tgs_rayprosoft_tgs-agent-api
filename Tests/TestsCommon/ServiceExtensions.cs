@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Infrastructures.Json;
-using TGS.Infrastructures.Log;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Tests.TestsCommon
 {

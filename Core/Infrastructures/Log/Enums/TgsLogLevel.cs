@@ -1,4 +1,4 @@
-﻿namespace TGS.Infrastructures.Log.Enums
+﻿namespace TGS.Core.Infrastructures.Log.Enums
 {
     public enum TgsLogLevel
     {

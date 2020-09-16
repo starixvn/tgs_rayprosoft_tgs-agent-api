@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public interface IRedisLockSummary : IDisposable
     {

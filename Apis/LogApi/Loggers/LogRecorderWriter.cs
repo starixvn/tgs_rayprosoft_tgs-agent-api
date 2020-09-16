@@ -7,7 +7,7 @@ using TGS.Apis.LogApi.DataService;
 using TGS.Apis.LogApi.DataService.Models;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Services;
-using TGS.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
 {

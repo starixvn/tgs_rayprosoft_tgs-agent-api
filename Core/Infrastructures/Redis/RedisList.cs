@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Infrastructures.Json;
+using TGS.Core.Infrastructures.Json;
 
-namespace TGS.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis
 {
     public sealed class RedisList<T> : IRedisList<T>
     {
