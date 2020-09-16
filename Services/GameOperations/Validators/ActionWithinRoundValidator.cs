@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
-using TGS.Services.Operations.Models.Data;
+using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 
-namespace TGS.Services.Operations.Validators
+namespace TGS.Services.GameOperations.Validators
 {
-    public interface IActionWithinRoundValidator
+    internal interface IActionWithinRoundValidator
     {
         Exception FindError(BetActionData current, IList<BetActionData> previousActions);
     }
 
-    public sealed class ActionWithinRoundValidator : IActionWithinRoundValidator
+    internal sealed class ActionWithinRoundValidator : IActionWithinRoundValidator
     {
         Exception IActionWithinRoundValidator.FindError(BetActionData current, IList<BetActionData> previousActions)
         {

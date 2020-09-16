@@ -1,9 +1,9 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
-    public record RoundData
+    internal record RoundData
     {
         public Guid Id { get; init; }
         public string ExternalRoundId { get; init; }

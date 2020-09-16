@@ -6,13 +6,12 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Games;
 using TGS.Infrastructures.Extensions;
-using TGS.Services.Operations.Models;
-using TGS.Services.Operations.Models.Data;
+using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
 
-namespace TGS.Services.Operations.Bets
+namespace TGS.Services.GameOperations.Data
 {
-    public sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
     {        
         private void ThrowIfPlayerDisableToPlaceBet(TransactionData[] transactions, PlayerStatus playerStatus)
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data
 {
     internal record SameRoundActionData
     {

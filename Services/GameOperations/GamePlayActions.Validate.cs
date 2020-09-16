@@ -4,12 +4,12 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
+using TGS.Services.GameOperations.Data;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Bets;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
 
-namespace TGS.Services.GameServices
+namespace TGS.Services.GameOperations
 {
     public partial interface IGamePlayActions
     {
@@ -22,7 +22,7 @@ namespace TGS.Services.GameServices
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ILicenseeGameProviderOperations _LicenseeGameProviderOpertaions;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ILicenseeOperations _licenseeOperations;        
+        private readonly ILicenseeOperations _licenseeOperations;
         private readonly IGameActionDataOperations _operations;
         private readonly IStatusValidator _statusValidator;
         private readonly IExpirationValidator _expirationValidator;
@@ -61,7 +61,7 @@ namespace TGS.Services.GameServices
             var gameProviderConfigurationId = await _licenseeOperations.GetLicenseeGameProviderConfigurationIdAsync(licenseeId, gameProviderId);
 
             await ValidtePlayerAysnc(player, gameProviderId, gameProviderConfigurationId, false);
-            
+
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
             var lang = await _LicenseeGameProviderOpertaions.MapCultureAsync(gameProviderId, licenseeId, player.CultureCode);
             var gameProviderBetLimitCode = await _gameProviderOperations.GetGameProviderBetLimitCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode, player.BetLimitGroupId);
@@ -83,7 +83,7 @@ namespace TGS.Services.GameServices
         }
 
         private async Task ValidtePlayerAysnc(CachedPlayer player, Guid gameProviderId, Guid gameProviderConfigurationId, bool ignoreExpired = false)
-        {            
+        {
             if (!ignoreExpired)
             {
                 await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(player.PlayerCode);

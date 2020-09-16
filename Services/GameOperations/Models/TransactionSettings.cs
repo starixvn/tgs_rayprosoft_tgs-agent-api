@@ -2,7 +2,7 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 
-namespace TGS.Services.Operations.Models
+namespace TGS.Services.GameOperations.Models
 {
     public struct TransactionSettings
     {
