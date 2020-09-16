@@ -10,21 +10,27 @@ import {
   Button,
   Text,
   Label,
-  Input,
-  InputField,
-  Checkbox,
   FieldStack,
-  SelectField,
   Dialog,
   Modal,
   Overlay,
   Portal
 } from "bumbag"
 
-export default ({ title, errors = [], zIndex, disclosureRef, ...props }) => {
+const BumbagZIndex = 19900410
+
+export default ({
+  title,
+  errors = [],
+  visible = true,
+  zIndex = BumbagZIndex,
+  finalFocusRef,
+  ...props
+}) => {
+  let zIndexString = `${zIndex + 100}`
   return (
-    <Modal.State {...props}>
-      <Modal.Backdrop zIndex={zIndex}>
+    <Modal.State visible={visible} {...props}>
+      <Modal.Backdrop zIndex={zIndexString}>
         <Dialog.Modal
           type="danger"
           variant="alert"
@@ -41,7 +47,7 @@ export default ({ title, errors = [], zIndex, disclosureRef, ...props }) => {
             </Flex>
           )}
           hideOnClickOutside={false}
-          unstable_finalFocusRef={disclosureRef}
+          unstable_finalFocusRef={finalFocusRef}
         >
           <Box>
             {errors &&
