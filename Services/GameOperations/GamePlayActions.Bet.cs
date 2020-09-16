@@ -45,21 +45,25 @@ namespace TGS.Services.GameOperations
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId);
             await ThrowIfGameIsNotTakenByLicenseeAsync(player, data);
-            await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
+            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
             var r = await _operations.PlaceBetAsync(data);
-            await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
-            
-            return r;
+            return await EnsureMappingsAsync(data.GameProviderId, r);
         }
 
-        Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data)
+        async Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data)
         {
-            throw new NotImplementedException();
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
+            var res = await _operations.SettleBetAsync(data);
+            return await EnsureMappingsAsync(data.GameProviderId, res);
         }
 
-        Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
+        async Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
         {
-            throw new NotImplementedException();
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
+            var res = await _operations.CancelTransactionAsync(data);
+            return await EnsureMappingsAsync(data.GameProviderId, res);
         }
 
         private async Task ThrowIfGameIsNotTakenByLicenseeAsync(CachedPlayer player, BetData data, GameActionType type = GameActionType.PlaceBet)
@@ -105,10 +109,10 @@ namespace TGS.Services.GameOperations
             }
         }
 
-        private async Task EnsureMappingsAsync(BetData data, string playerCurrencyCode)
+        private async Task<BetData> EnsureMappingsAsync(BetData data, string playerCurrencyCode)
         {
             if (!data.HasCurrencyFromGameProvider)
-                return;
+                return data;
 
             foreach (var t in data.Transactions)
             {
@@ -121,6 +125,14 @@ namespace TGS.Services.GameOperations
                     throw new CurrencyNotMatchingException(playerCurrencyCode, internalCurrency);
                 }
             }
+
+            return data;
+        }
+        
+        private async Task<BetResult> EnsureMappingsAsync(Guid gameProviderId, BetResult r)
+        {
+            var currencyCode = await _currencyMapper.InternalToExternalAsync(r.CurrencyCode, gameProviderId);
+            return r with { CurrencyCode = currencyCode };
         }
 
         private async Task<PlatformType[]> GetPlatformTypes(string playerCode, PlatformType? platformType)
