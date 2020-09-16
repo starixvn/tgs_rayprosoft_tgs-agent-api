@@ -18,6 +18,7 @@ import PageContent from "../../page/Content"
 import AsyncTable, { useTableState } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
+import { CopyButton } from "./copy"
 
 export const Code = "groups"
 
@@ -132,7 +133,12 @@ const tableColumns = ({ fetchTable }) => [
   },
   {
     disableSortBy: true,
-    accessor: "id",
+    accessor: (row) => {
+      return {
+        id: row.id,
+        name: row.name
+      }
+    },
     Header: "操作",
     headCell: {
       textAlign: "center"
@@ -141,10 +147,11 @@ const tableColumns = ({ fetchTable }) => [
       textAlign: "center"
     },
     Cell: ({ value }) => {
+      let { id, name } = value
       return (
         <Set>
-          <EditButton id={value} onSubmitted={fetchTable} />
-          <Button>TODO: 复制</Button>
+          <EditButton id={id} onSubmitted={fetchTable} />
+          <CopyButton id={id} name={name} onSubmitted={fetchTable} />
           <Button>TODO: 删除</Button>
         </Set>
       )

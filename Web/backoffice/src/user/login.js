@@ -61,6 +61,7 @@ export const Form = () => {
                   component={InputField.Formik}
                   name="username"
                   placeholder="Username"
+                  autocomplete="username"
                 />
                 <Text>
                   {errors.username && touched.username && errors.username}
@@ -70,6 +71,7 @@ export const Form = () => {
                   name="password"
                   type="password"
                   placeholder="Password"
+                  autocomplete="current-password"
                 />
                 <Text>
                   {errors.password && touched.password && errors.password}
