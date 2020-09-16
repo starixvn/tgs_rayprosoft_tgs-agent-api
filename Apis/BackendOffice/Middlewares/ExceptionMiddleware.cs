@@ -38,7 +38,6 @@ namespace TGS.Apis.BackendOffice.Middlewares
             {
                 var reqMessage = await GetRequestBodyAsync(httpContext);
 
-
                 adminLogEvent.ipaddress = _requestAnalyzer.GetIp(httpContext).NoLongerThan(256);
                 adminLogEvent.path = httpContext.Request.Path.Value;
                 adminLogEvent.method = httpContext.Request.Method.NoLongerThan(8);

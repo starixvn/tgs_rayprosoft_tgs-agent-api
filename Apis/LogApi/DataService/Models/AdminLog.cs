@@ -6,6 +6,7 @@ namespace TGS.Apis.LogApi.DataService.Models
 {
     public class AdminLog
     {
+        public Guid TrackingId { get; set; }
         public Guid Id { get; set; }
         public string Ip { get; set; }
         public string Path { get; set; }
@@ -27,6 +28,7 @@ namespace TGS.Apis.LogApi.DataService.Models
             return new AdminLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                TrackingId = a.trackingid,
                 Ip = a.ipaddress ?? string.Empty,
                 Path = a.path ?? string.Empty,
                 Method = a.method ?? string.Empty,

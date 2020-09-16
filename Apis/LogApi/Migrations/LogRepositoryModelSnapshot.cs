@@ -87,6 +87,9 @@ namespace TGS.Apis.LogApi.Migrations
                         .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
 
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("RecordedOn");
 
                     b.ToTable("AdminLogs","dbo");

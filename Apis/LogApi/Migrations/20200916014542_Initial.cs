@@ -16,6 +16,7 @@ namespace TGS.Apis.LogApi.Migrations
                 columns: table => new
                 {
                     RecordedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TrackingId = table.Column<Guid>(nullable: false),
                     Id = table.Column<Guid>(nullable: false),
                     Ip = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     Path = table.Column<string>(type: "nvarchar(256)", nullable: false),

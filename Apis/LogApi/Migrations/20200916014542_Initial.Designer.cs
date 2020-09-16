@@ -10,7 +10,7 @@ using TGS.Apis.LogApi.DataService;
 namespace TGS.Apis.LogApi.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20200915031456_Initial")]
+    [Migration("20200916014542_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,6 +88,9 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<string>("StackTrace")
                         .HasColumnType("nvarchar(4000)")
                         .IsUnicode(true);
+
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RecordedOn");
 
