@@ -52,7 +52,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
         public Guid? BatchId { get; init; }
 
-        public DateTimeOffset LicenseeNow { get; set; }
+        public DateTimeOffset UtcNow { get; set; }
 
         /// <summary>
         /// all game actions in the same round
@@ -74,13 +74,13 @@ namespace TGS.Services.GameOperations.Models.Data
         public RoundStatus NewRoundStatus { get; set; }
 
         public DateTimeOffset RoundCreatedOn =>
-            PreviousActions?.FirstOrDefault()?.RecordedOn ?? LicenseeNow;
+            PreviousActions?.FirstOrDefault()?.RecordedOn ?? UtcNow;
 
         public DateTimeOffset ExternalRoundCreatedOn =>
-            PreviousActions?.FirstOrDefault()?.SentOn ?? LicenseeNow;
+            PreviousActions?.FirstOrDefault()?.SentOn ?? UtcNow;
 
         public DateTimeOffset? RoundClosedOn => NewRoundStatus == RoundStatus.Closed ?
-            LicenseeNow :
+            UtcNow :
             (DateTimeOffset?)null;
 
         // set from TransactionData
@@ -105,10 +105,5 @@ namespace TGS.Services.GameOperations.Models.Data
 
         public bool ForceGetPreviousActions { get; init; }
         public bool FreeBetAsSingleRound { get; init; }
-
-        //public string[] ForceCalculateTurnoverOnTieBetTypes { get; }
-        //internal OppositeBetPatterns OppositeBetPatterns { get; set; }
-        //internal bool AllowDuplicateTransactionIdAtDifferentRound { get; set; }
-        //internal List<BusEvent> Events { get; set; }
     }
 }

@@ -52,7 +52,7 @@ namespace TGS.Services.GameOperations.Data
                     InvalidGameActionErrorCode.GameNotFound);
             }
 
-            if (s.GameActionType.IsNotAllOf(PlaceBet) && s.ExternalBetId.IsNullOrEmpty())
+            if (s.GameActionType.IsNotAllOf(LockAmount, PlaceBet, UnlockAmount) && s.ExternalBetId.IsNullOrEmpty())
             {
                 throw new InvalidGameActionException("Missing external bet ID.");
             }

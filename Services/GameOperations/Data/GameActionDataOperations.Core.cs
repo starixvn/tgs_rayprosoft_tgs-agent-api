@@ -361,7 +361,7 @@ namespace TGS.Services.GameOperations.Data
 
         private GameActionState FillEmptyData(GameActionState s)
         {
-            s.LicenseeNow = _timeZoneManager.ToLocal(s.PlayerData.LicenseeTimeZoneId, DateTimeOffset.UtcNow);
+            s.UtcNow = DateTimeOffset.UtcNow;
             s.NewRoundStatus = _roundStatusManager.GetStatus(new()
             {
                 AutoCloseRound = s.AutoCloseRound,
@@ -423,7 +423,7 @@ namespace TGS.Services.GameOperations.Data
 
             if (s.HasWalletUpdate && s.Amount != 0)
             {
-                return AtomicUpdateBalanceAsync(repo, s.PlayerData.PlayerCode, walletId, s.Amount, s.LicenseeNow);
+                return AtomicUpdateBalanceAsync(repo, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow);
             }
 
             return GetBalanceAsync(repo, walletId);
@@ -460,9 +460,9 @@ namespace TGS.Services.GameOperations.Data
                 LicenseeId = s.PlayerData.LicenseeId,
                 LicenseeCode = s.PlayerData.LicenseeCode,
                 LicenseeName = s.PlayerData.LicenseeName,
-                CreatedOn = s.LicenseeNow,
-                UpdatedOn = s.LicenseeNow,
-                ClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.LicenseeNow : default(DateTimeOffset?),
+                CreatedOn = s.UtcNow,
+                UpdatedOn = s.UtcNow,
+                ClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.UtcNow : default(DateTimeOffset?),
                 Status = s.NewRoundStatus == RoundStatus.Closed ? RoundStatus.Closed : RoundStatus.Open,
                 RoundDetail = s.RoundDetail,
                 ExternalCreatedOn = s.Timestamp,
@@ -483,7 +483,7 @@ namespace TGS.Services.GameOperations.Data
                 Id = s.InternalRoundId.Value,
                 RoundDetail = s.RoundDetail,
                 Commission = s.Commission,
-                UpdatedOn = s.LicenseeNow,
+                UpdatedOn = s.UtcNow,
             };
 
             if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
@@ -499,7 +499,7 @@ namespace TGS.Services.GameOperations.Data
                 roundData = roundData with
                 {
                     Status = s.NewRoundStatus,
-                    ClosedOn = s.LicenseeNow,
+                    ClosedOn = s.UtcNow,
                     ExternalClosedOn = s.Timestamp,
                     BetAmount = s.BetValueResult.BetAmount,
                     WinLoss = s.BetValueResult.WinLoss,
