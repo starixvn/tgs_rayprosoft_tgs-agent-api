@@ -19,6 +19,7 @@ import AsyncTable, { useTableState } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
 import { CopyButton } from "./copy"
+import { DeleteButton } from "./delete"
 
 export const Code = "groups"
 
@@ -152,7 +153,7 @@ const tableColumns = ({ fetchTable }) => [
         <Set>
           <EditButton id={id} onSubmitted={fetchTable} />
           <CopyButton id={id} name={name} onSubmitted={fetchTable} />
-          <Button>TODO: 删除</Button>
+          <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
         </Set>
       )
     }

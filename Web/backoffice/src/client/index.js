@@ -17,12 +17,13 @@ export const get = (url = "", { searchParams = {}, ...options } = {}) => {
   return fetch(url, options).then(toDataOrError)
 }
 
-export const put = (
+const fetchApi = (
+  method = "",
   url,
   { body, data = {}, headers = {}, ...options } = {}
-) => {
-  return fetch(url, {
-    method: "PUT",
+) =>
+  fetch(url, {
+    method,
     headers: {
       "Content-Type": "application/json",
       ...headers
@@ -30,25 +31,10 @@ export const put = (
     body: body ?? JSON.stringify(data),
     ...options
   }).then(toDataOrError)
-}
-
-export const post = (
-  url,
-  { body, data = {}, headers = {}, ...options } = {}
-) => {
-  return fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
-    body: body ?? JSON.stringify(data),
-    ...options
-  }).then(toDataOrError)
-}
 
 export default {
   get,
-  put,
-  post
+  put: (url, options) => fetchApi("PUT", url, options),
+  post: (url, options) => fetchApi("POST", url, options),
+  delete: (url, options) => fetchApi("DELETE", url, options)
 }
