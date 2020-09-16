@@ -35,13 +35,6 @@ namespace TGS.Infrastructures.Log
             [CallerFilePath] string file = "",
             [CallerMemberName] string member = "",
             [CallerLineNumber] int line = 0);
-
-        void WriteEventLogError(string errorMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
-
-        void WriteEventLogWarning(string warningMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
-
-        void WriteEventLogInfo(string infoMessage, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
-
         void LogTrackingData(string trackingData);
 
         void LogApi(ApiLogEvent apiCall);
@@ -129,24 +122,9 @@ namespace TGS.Infrastructures.Log
             });
         }
 
-        void ITgsLog.WriteEventLogError(string errorMessage, string memberName, string sourceFilePath, int sourceLineNumber)
-        {
-
-        }
-
-        void ITgsLog.WriteEventLogWarning(string warningMessage, string memberName, string sourceFilePath, int sourceLineNumber)
-        {
-
-        }
-
-        void ITgsLog.WriteEventLogInfo(string infoMessage, string memberName, string sourceFilePath, int sourceLineNumber)
-        {
-
-        }
-
-
         void ITgsLog.LogAdmin(AdminLogEvent adminEvent)
         {
+            adminEvent.trackingid = TrackingId;
             _logPublisher(adminEvent);
         }
     }

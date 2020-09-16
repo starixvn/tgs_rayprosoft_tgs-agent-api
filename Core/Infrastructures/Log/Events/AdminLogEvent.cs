@@ -8,6 +8,7 @@ namespace TGS.Infrastructures.Log.Events
     [MessagePackObject((true))]
     public class AdminLogEvent : LogBusEvent
     {
+        public Guid trackingid { get; set; }
         public string path { get; set; }
         public string method { get; set; }
         public string host { get; set; }
