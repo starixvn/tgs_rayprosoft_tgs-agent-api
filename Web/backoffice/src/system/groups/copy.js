@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, {
-  useAsync,
-  IfPending,
-  IfRejected,
-  IfFulfilled
-} from "react-async"
+import Async from "react-async"
 import client from "../../client"
 import { Formik, Form, Field, useFormikContext } from "formik"
 import {
-  Spinner,
   Stack,
   Flex,
   Box,

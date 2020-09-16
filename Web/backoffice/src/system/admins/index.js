@@ -15,7 +15,7 @@ import {
 } from "react-router-dom"
 import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
-import AddAdminButton from "./add"
+import { AddButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import AsyncTable, { useTableState } from "../../table/async"
@@ -60,7 +60,7 @@ export const Content = () => {
       actionBar={
         <>
           <SearchForm search={setState} isPending={isPending} />
-          <AddAdminButton />
+          <AddButton />
         </>
       }
     >

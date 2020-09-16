@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, {
-  useAsync,
-  IfPending,
-  IfRejected,
-  IfFulfilled
-} from "react-async"
+import Async from "react-async"
 import client from "../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
@@ -22,6 +17,7 @@ import {
   InputField,
   Checkbox,
   FieldStack,
+  FieldWrapper,
   SelectField,
   Dialog,
   Modal,
@@ -280,10 +276,22 @@ const FormDialog = ({ menus, setMenus, dialog, finalFocusRef, ...props }) => {
             `}
             margin="major-1"
           >
-            <Field name="name">
-              {({ field, form, meta }) => (
-                <Input inputRef={nameInputRef} id="name" {...field} />
-              )}
+            <Field
+              name="name"
+              validate={(value) => {
+                if (!value) {
+                  return "required"
+                }
+              }}
+            >
+              {({ field, form, meta }) => {
+                let state = meta.error && "danger"
+                return (
+                  <FieldWrapper state={state}>
+                    <Input id="name" inputRef={nameInputRef} {...field} />
+                  </FieldWrapper>
+                )
+              }}
             </Field>
           </Box>
           <Box
