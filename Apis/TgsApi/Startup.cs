@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.Filters;
+using TGS.Core.DataServices.DataInitializers;
 using TGS.Infrastructures.Extensions;
 using TGS.Infrastructures.Log;
 using TGS.Infrastructures.Log.Middleware;
@@ -31,6 +32,7 @@ namespace TGS.Apis.TgsApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepositoriesAndExecuteMigrations(Configuration);
+            services.AddScoped<IDataInitializer, DataInitializer>();
             services.AddRedis();
             services.AddNats(Configuration);
             services.AddTgsLog();
@@ -75,6 +77,8 @@ namespace TGS.Apis.TgsApi
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.SeedData();
 
             app.UseEndpoints(endpoints =>
             {

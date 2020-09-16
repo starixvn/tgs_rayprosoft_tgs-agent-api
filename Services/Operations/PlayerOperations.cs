@@ -102,10 +102,6 @@ namespace TGS.Services.Operations
                 CachedPlayerFields.BetLimitGroupId,
                 CachedPlayerFields.LicenseeCode,
                 CachedPlayerFields.DefaultWalletCurrencyCode,
-                CachedPlayerFields.LastTermsUrl,
-                CachedPlayerFields.LastCashierUrl,
-                CachedPlayerFields.LastHelpUrl,
-                CachedPlayerFields.LastLoginUrl,
                 CachedPlayerFields.ExternalCurrencyCode
             });
 
@@ -124,11 +120,7 @@ namespace TGS.Services.Operations
                     BetLimitGroupId = (int)values[7],
                     LicenseeCode = values[8],
                     DefaultWalletCurrencyCode = values[9],
-                    LastTermsUrl = values[10],
-                    LastCashierUrl = values[11],
-                    LastHelpUrl = values[12],
-                    LastLoginUrl = values[13],
-                    ExternalCurrencyCode = values[14]
+                    ExternalCurrencyCode = values[10]
                 };
             }
 
@@ -149,10 +141,6 @@ namespace TGS.Services.Operations
                 new (CachedPlayerFields.DefaultWalletCurrencyCode, player.DefaultWalletCurrencyCode),
                 new (CachedPlayerFields.CultureCode, player.CultureCode),
                 new (CachedPlayerFields.BetLimitGroupId, player.BetLimitGroupId),
-                new (CachedPlayerFields.LastLoginUrl, player.LastLoginUrl ?? string.Empty),
-                new (CachedPlayerFields.LastCashierUrl, player.LastCashierUrl ?? string.Empty),
-                new (CachedPlayerFields.LastHelpUrl, player.LastHelpUrl ?? string.Empty),
-                new (CachedPlayerFields.LastTermsUrl, player.LastTermsUrl ?? string.Empty),
                 new (CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
             };
 
@@ -194,11 +182,6 @@ namespace TGS.Services.Operations
             public const string CultureCode = "cultureCode";
             public const string BetLimitGroupId = "betLimitGroupId";
             public const string ExternalCurrencyCode = "externalCurrencyCode";
-
-            public const string LastLoginUrl = "lastLoginUrl";
-            public const string LastCashierUrl = "lastCashierUrl";
-            public const string LastHelpUrl = "lastHelpUrl";
-            public const string LastTermsUrl = "lastTermsUrl";
         }
     }
 }

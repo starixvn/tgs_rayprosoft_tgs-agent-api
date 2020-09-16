@@ -92,12 +92,12 @@ namespace TGS.Services.Operations.Validators
             }
 
             if (!statuses.Contains(Status.Maintenance) && gameProviderStatus == Status.Maintenance)
-            { 
+            {
                 throw new GameProviderUnderMaintenanceException();
             }
-            
+
             if (!statuses.Contains(gameProviderStatus.Value))
-            { 
+            {
                 throw new InvalidStatusException($"GameProvider doesn't exist or is not active");
             }
 
@@ -107,7 +107,7 @@ namespace TGS.Services.Operations.Validators
             }
 
             if (!gameStatuses.Contains(gameStatus.Value))
-            { 
+            {
                 var idToThrow = externalGameId.IsNullOrEmpty() ? gameId.ToString() : externalGameId;
                 throw new InvalidStatusException($"Game '{idToThrow}' doesn't exist or is not active");
             }
@@ -120,7 +120,7 @@ namespace TGS.Services.Operations.Validators
 
         void IStatusValidator.ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status)
         {
-            EnsurePlayerStatus(status, PlayerStatus.DisablePlaceBet);
+            EnsurePlayerStatus(status, PlayerStatus.InBlacklist);
         }
 
         #region Private Methods

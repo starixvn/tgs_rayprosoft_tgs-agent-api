@@ -21,7 +21,5 @@ namespace TGS.Apis.BackendOffice.DataService
         EntityEntry<T> Entry<T>(T entity) where T : class;
 
         DbSet<T> Set<T>() where T : class;
-
-        void BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
     }
 }

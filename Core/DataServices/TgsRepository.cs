@@ -1,5 +1,8 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -35,6 +38,8 @@ namespace TGS.Core.DataServices
         DbSet<LicenseeBetLimit> ITgsRepository.LicenseeBetLimits { get; set; }
         DbSet<GameProviderBetLimit> ITgsRepository.GameProviderBetLimits { get; set; }
         DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
+        DbSet<PlayerBank> ITgsRepository.PlayerBanks { get; set; }
+        DbSet<VipLevel> ITgsRepository.VipLevels { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -99,6 +104,19 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new GameProviderBetLimitMap());
 
             modelBuilder.ApplyConfiguration(new PlayerLoginRecordMap());
+            modelBuilder.ApplyConfiguration(new PlayerBankMap());
+            modelBuilder.ApplyConfiguration(new VipLevelMap());
+
+        }
+
+        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        {
+            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        }
+
+        void IBaseRepository.SaveChanges()
+        {
+            SaveChanges();
         }
     }
 }

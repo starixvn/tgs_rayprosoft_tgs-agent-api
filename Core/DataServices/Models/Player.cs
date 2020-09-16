@@ -15,17 +15,22 @@ namespace TGS.Core.DataServices.Models
         public string DefaultWalletCurrencyCode { get; set; }
         public Guid LicenseeId { get; set; }
         public Licensee Licensee { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
+        public DateTimeOffset RegisteredOn { get; set; }
         public DateTimeOffset LastActiveOn { get; set; }
         public PlayerStatus Status { get; set; }
         public int BetLimitGroupId { get; set; }
         public BetLimitGroup BetLimitGroup { get; set; }
         public PlayerTypes Type { get; set; }
-        public string LastLoginUrl { get; set; }
-        public string LastCashierUrl { get; set; }
-        public string LastHelpUrl { get; set; }
-        public string LastTermsUrl { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string QQ { get; set; }
+        public string Wechat { get; set; }
+        public bool HasAgent { get; set; }
+
+        public Guid VipId { get; set; }
+        public VipLevel Vip { get; set; }
         public virtual ICollection<Wallet> Wallets { get; set; }
+        public virtual ICollection<PlayerBank> Banks { get; set; }
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
     }
 }

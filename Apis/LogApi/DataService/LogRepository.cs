@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -105,6 +106,16 @@ namespace TGS.Apis.LogApi.DataService
         {
             await AdminLogs.AddAsync(log);
             await SaveChangesAsync();
+        }
+
+        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        {
+            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        }
+
+        void IBaseRepository.SaveChanges()
+        {
+            SaveChanges();
         }
     }
 }
