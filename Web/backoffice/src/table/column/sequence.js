@@ -10,6 +10,7 @@ export default () => {
       }
     },
     Header: "序",
+    disableSortBy: true,
     width: 50,
     Cell: ({ state = {}, value = {} } = {}) => {
       let { pageIndex, pageSize } = state

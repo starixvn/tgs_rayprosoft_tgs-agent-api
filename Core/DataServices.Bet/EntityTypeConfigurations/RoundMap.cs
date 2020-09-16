@@ -103,9 +103,6 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.BetAmount)
                 .HasColumnType(ColumnTypes.Decimal(18, 6));
 
-             builder.Property(c => c.WinAmount)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
-
             builder.Property(c => c.WinLoss)
                 .HasColumnType(ColumnTypes.Decimal(18, 6));
 

@@ -37,6 +37,66 @@ import { label as menuLabel, find as findMenu } from "../../menu"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 
+export const AddButton = ({ onSubmitted, ...props }) => {
+  const deferFn = () =>
+    client.post("/api/role/menus").then(({ menus = [] }) => {
+      return resetIsDisplay(false, menus)
+    })
+
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  return (
+    <Async deferFn={deferFn}>
+      {(async) => {
+        return (
+          <>
+            <Modal.Disclosure
+              use={Button}
+              ref={disclosureRef}
+              onClick={async.run}
+              css={css`
+                flex: unset;
+              `}
+              {...dialog}
+            >
+              {add()}
+            </Modal.Disclosure>
+            <Async.Pending>
+              <LoadingBackdrop />
+            </Async.Pending>
+            <Async.Rejected>
+              {(error) => (
+                <AlertDialog {...error} disclosureRef={disclosureRef} />
+              )}
+            </Async.Rejected>
+            <Async.Fulfilled>
+              {(menus) => {
+                return (
+                  dialog.visible && (
+                    <SubmitFormDialog
+                      role={{
+                        name: "",
+                        menus
+                      }}
+                      onSubmitted={() => {
+                        dialog.hide()
+                        onSubmitted && onSubmitted()
+                      }}
+                      dialog={dialog}
+                      disclosureRef={disclosureRef}
+                    />
+                  )
+                )
+              }}
+            </Async.Fulfilled>
+          </>
+        )
+      }}
+    </Async>
+  )
+}
+
 export const EditButton = ({ id, onSubmitted, ...props }) => {
   const deferFn = () =>
     client.get(`/api/role/${id}`).then(({ role = {} }) => role)
@@ -46,15 +106,12 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 
   return (
     <Async deferFn={deferFn}>
-      {(async) => (
+      {(fetchRole) => (
         <>
           <Modal.Disclosure
             ref={disclosureRef}
             use={Button}
-            onClick={() => {
-              async.run()
-              //dialog.show()
-            }}
+            onClick={fetchRole.run}
             css={css`
               flex: unset;
             `}
@@ -73,12 +130,11 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
           <Async.Fulfilled>
             {(role) => (
               <>
-                <EditDialog
+                <SubmitFormDialog
                   role={role}
                   onSubmitted={() => {
-                    console.log("onSubmitted")
-                    //dialog.hide()
-                    //TODO: refresh table
+                    dialog.hide()
+                    onSubmitted && onSubmitted()
                   }}
                   dialog={dialog}
                   disclosureRef={disclosureRef}
@@ -92,7 +148,7 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
   )
 }
 
-const EditDialog = ({
+const SubmitFormDialog = ({
   role = {},
   onClickCancel,
   onSubmitted,
@@ -110,23 +166,26 @@ const EditDialog = ({
     setMenus(menus)
   }
 
+  const create = (data) =>
+    client.post(`/api/role`, {
+      data
+    })
+
+  const update = (data) =>
+    client.put(`/api/role/${id}`, {
+      data: {
+        ...role,
+        ...data
+      }
+    })
+
   const deferFn = ([data]) => {
-    return client
-      .put(`/api/role/${id}`, {
-        data: {
-          ...role,
-          ...data
-        }
-      })
-      .then((response) => {
-        onSubmitted && onSubmitted()
-        return response
-      })
+    return id ? update(data) : create(data)
   }
 
   return (
     <Async deferFn={deferFn}>
-      {(asyncSubmit) => (
+      {(submit) => (
         <>
           <Formik
             initialValues={{ name: role.name }}
@@ -136,8 +195,7 @@ const EditDialog = ({
                 menus
               }
 
-              asyncSubmit.run(data)
-              console.log("submit", data)
+              submit.run(data)
             }}
           >
             {(formProps) => (
@@ -146,10 +204,9 @@ const EditDialog = ({
                   title={title()}
                   showActionButtons
                   actionButtonsProps={{
-                    isLoading: asyncSubmit.isPending,
+                    isLoading: submit.isPending,
                     onClickSubmit: formProps.submitForm,
                     onClickCancel: () => {
-                      //setMenus([])
                       formProps.resetForm()
                     }
                   }}
@@ -244,23 +301,14 @@ const EditDialog = ({
             }}
           </Async.Rejected>
           <Async.Fulfilled>
-            {(menus) => (
-              <>
-                <EditDialog
-                  role={{
-                    name: "",
-                    menus
-                  }}
-                  onSubmitted={() => {
-                    console.log("onSubmitted")
-                    dialog.hide()
-                    onSubmitted && onSubmitted()
-                  }}
-                  dialog={dialog}
-                  disclosureRef={disclosureRef}
-                />
-              </>
-            )}
+            {(_) => {
+              useEffect(() => {
+                dialog.hide()
+                onSubmitted && onSubmitted()
+              }, [dialog.visible])
+
+              return null
+            }}
           </Async.Fulfilled>
         </>
       )}
@@ -268,191 +316,7 @@ const EditDialog = ({
   )
 }
 
-export const AddButton = ({ onSubmitted, ...props }) => {
-  const deferFn = () =>
-    client.post("/api/role/menus").then(({ menus = [] }) => {
-      return resetIsDisplay(false, menus)
-    })
-
-  let dialog = Modal.useState()
-  let disclosureRef = useRef()
-
-  return (
-    <Async deferFn={deferFn}>
-      {(async) => {
-        return (
-          <>
-            <Modal.Disclosure
-              use={Button}
-              ref={disclosureRef}
-              onClick={async.run}
-              css={css`
-                flex: unset;
-              `}
-              {...dialog}
-            >
-              {add()}
-            </Modal.Disclosure>
-            <Async.Pending>
-              <LoadingBackdrop />
-            </Async.Pending>
-            <Async.Rejected>
-              {(error) => (
-                <AlertDialog {...error} disclosureRef={disclosureRef} />
-              )}
-            </Async.Rejected>
-          </>
-        )
-      }}
-    </Async>
-  )
-}
-/*
-export const AddButton = ({ onSubmitted, ...props }) => {
-  let { data, run: fetchMenus, ...asyncRoles } = useAsync({
-    deferFn: getMenus
-  })
-
-  let [menus = [], setMenus] = useState(data)
-
-  const setChecked = (path = [], checked) => {
-    let item = findMenu(path, menus)
-    item.isDisplay = checked
-    setMenus(menus)
-  }
-
-  //TODO: handle error
-  let [promise, setSubmit] = useState(Promise.resolve())
-  let submit = useAsync({ promise })
-
-  useEffect(() => {
-    console.log("shall reset?")
-    setMenus(data)
-  }, [data])
-
-  //TODO: dialog loading status
-  return (
-    <Formik
-      initialValues={{ name: "" }}
-      onSubmit={(form) => {
-        let data = {
-          ...form,
-          menus
-        }
-
-        let promise = client.post("/api/role", { data })
-        promise.then((response) => {
-          //TODO: need to check success?
-          onSubmitted && onSubmitted()
-          return response
-        })
-
-        setSubmit(promise)
-      }}
-    >
-      {(formProps) => {
-        return (
-          <Modal.State>
-            <Modal.Disclosure
-              use={Button}
-              onClick={fetchMenus}
-              css={css`
-                flex: unset;
-              `}
-            >
-              {add()}
-            </Modal.Disclosure>
-            <Dialog.Modal
-              title={title()}
-              showActionButtons
-              actionButtonsProps={{
-                isLoading: submit.isPending,
-                onClickSubmit: formProps.submitForm,
-                onClickCancel: () => {
-                  setMenus([])
-                  formProps.resetForm()
-                }
-              }}
-              hideOnClickOutside={false}
-            >
-              <form
-                onReset={formProps.handleReset}
-                onSubmit={formProps.handleSubmit}
-              >
-                <div
-                  css={css`
-                    display: grid;
-                    grid-template-rows: auto;
-                    grid-template-areas:
-                      "name input"
-                      "group table";
-                  `}
-                >
-                  <Box
-                    css={css`
-                      grid-area: name;
-                    `}
-                    margin="major-1"
-                  >
-                    <Label
-                      htmlFor="name"
-                      marginTop="major-1"
-                      css={css`
-                        line-height: unset;
-                      `}
-                    >
-                      {name()}
-                    </Label>
-                  </Box>
-
-                  <Box
-                    css={css`
-                      grid-area: input;
-                    `}
-                    margin="major-1"
-                  >
-                    <Field name="name">
-                      {({ field, form, meta }) => (
-                        <Input id="name" {...field} />
-                      )}
-                    </Field>
-                  </Box>
-                  <Box
-                    css={css`
-                      grid-area: group;
-                    `}
-                    margin="major-1"
-                  >
-                    <Label
-                      htmlFor="name"
-                      marginTop="major-1"
-                      css={css`
-                        line-height: unset;
-                      `}
-                    >
-                      {control()}
-                    </Label>
-                  </Box>
-                  <Box
-                    css={css`
-                      grid-area: table;
-                    `}
-                    margin="major-1"
-                  >
-                    <MenuTable menus={menus} setChecked={setChecked} />
-                  </Box>
-                </div>
-              </form>
-            </Dialog.Modal>
-          </Modal.State>
-        )
-      }}
-    </Formik>
-  )
-}
-*/
-
-const MenuTable = ({ menus = [], setChecked }) => {
+const MenuTable = ({ menus = [], setChecked } = {}) => {
   return (
     <Table>
       {menus.map((menu, index) => {
@@ -538,12 +402,6 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
       `}
     ></Checkbox>
   )
-}
-
-const getMenus = (id = "") => {
-  return client.post("/api/role/menus").then(({ menus = [] }) => {
-    return resetIsDisplay(false, menus)
-  })
 }
 
 const resetIsDisplay = (isDisplay, menus = []) => {

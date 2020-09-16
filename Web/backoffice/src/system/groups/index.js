@@ -56,7 +56,7 @@ export const Content = ({}) => {
       actionBar={
         <>
           <SearchForm search={setState} isPending={isPending} />
-          <AddButton />
+          <AddButton onSubmitted={fetchTable} />
         </>
       }
     >
@@ -121,7 +121,6 @@ const tableColumns = ({ fetchTable }) => [
   {
     Header: "权限组名称",
     id: "name",
-    canSort: true,
     accessor: "name",
     headCell: {
       textAlign: "center"
@@ -132,6 +131,7 @@ const tableColumns = ({ fetchTable }) => [
     width: 400
   },
   {
+    disableSortBy: true,
     accessor: "id",
     Header: "操作",
     headCell: {
