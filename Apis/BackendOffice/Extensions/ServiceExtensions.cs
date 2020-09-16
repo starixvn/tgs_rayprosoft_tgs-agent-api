@@ -54,6 +54,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                     opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                 });
 
+            services.AddHealthChecks()
+                .AddCheck<HealthCheck>("example_health_check");
+
             services.AddLogging(config =>
             {
                 config.AddDebug();
