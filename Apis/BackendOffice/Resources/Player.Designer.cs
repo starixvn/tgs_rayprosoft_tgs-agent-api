@@ -61,11 +61,38 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bank account is required..
+        /// </summary>
+        public static string BankAccountRequired {
+            get {
+                return ResourceManager.GetString("BankAccountRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bank name is required..
+        /// </summary>
+        public static string BankNameRequired {
+            get {
+                return ResourceManager.GetString("BankNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bank is not found..
         /// </summary>
         public static string BankNotFound {
             get {
                 return ResourceManager.GetString("BankNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player bank username is required..
+        /// </summary>
+        public static string BankUsernameRequired {
+            get {
+                return ResourceManager.GetString("BankUsernameRequired", resourceCulture);
             }
         }
         

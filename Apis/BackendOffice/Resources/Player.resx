@@ -117,8 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BankAccountRequired" xml:space="preserve">
+    <value>Bank account is required.</value>
+  </data>
+  <data name="BankNameRequired" xml:space="preserve">
+    <value>Bank name is required.</value>
+  </data>
   <data name="BankNotFound" xml:space="preserve">
     <value>Bank is not found.</value>
+  </data>
+  <data name="BankUsernameRequired" xml:space="preserve">
+    <value>Player bank username is required.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
     <value>Player not found.</value>
