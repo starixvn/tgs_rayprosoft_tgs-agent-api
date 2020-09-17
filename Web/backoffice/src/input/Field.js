@@ -95,6 +95,7 @@ export const Field = ({ name, required, validate, ...props }) => {
       {({ field, form, meta }) => {
         let state = meta.error && meta.touched && "danger"
         let validationText = state ? `${meta.error}` : ""
+
         return (
           <FieldWrapper
             state={state}

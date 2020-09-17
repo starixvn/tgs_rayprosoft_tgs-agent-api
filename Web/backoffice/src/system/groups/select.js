@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
-import { Formik, Field as _Field, Form, useFormikContext } from "formik"
+import { Formik, Form, useFormikContext } from "formik"
 import { get } from "../../client"
 import {
   Spinner,
@@ -25,29 +25,14 @@ import {
   Table,
   useClassName
 } from "bumbag"
+import { Field as _Field } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
 
 export const Field = ({ required, validate, ...props }) => {
   let { name } = props
   return (
-    <_Field
-      name={name}
-      validate={(value) => {
-        if (required && !value) {
-          return "required"
-        }
-
-        return validate && validate(value)
-      }}
-    >
-      {({ field, form, meta }) => {
-        let state = meta.error && meta.touched && "danger"
-        return (
-          <FieldWrapper state={state}>
-            <Select {...field} {...props} />
-          </FieldWrapper>
-        )
-      }}
+    <_Field name={name} required={required}>
+      {(props) => <Select {...props} />}
     </_Field>
   )
 }
