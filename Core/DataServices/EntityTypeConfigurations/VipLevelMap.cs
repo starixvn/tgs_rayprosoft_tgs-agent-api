@@ -35,6 +35,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.HasMany(p => p.Players)
+                .WithOne(p => p.Vip)
+                .HasForeignKey(p => p.VipId);
         }
     }
 }
