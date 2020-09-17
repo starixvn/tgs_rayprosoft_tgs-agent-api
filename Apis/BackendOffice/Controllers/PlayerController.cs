@@ -22,6 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsQueries<AuditLog> _auditLogQueries;
+        private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
         private readonly ITgsCommands<PlayerBank> _bankCommands;
         private readonly ITgsCommands<AuditLog> _auditLogCommands;
@@ -33,6 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsHashConfig tgsHashConfig,
             ITgsQueries<Player> queries,
             ITgsQueries<AuditLog> auditLogQueries,
+            ITgsQueries<PlayerBank> bankQueries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerBank> bankCommands,
             ITgsCommands<AuditLog> auditLogCommands,
@@ -41,6 +43,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
             _queries = queries;
+            _bankQueries = bankQueries;
             _auditLogQueries = auditLogQueries;
             _commands = commands;
             _bankCommands = bankCommands;
