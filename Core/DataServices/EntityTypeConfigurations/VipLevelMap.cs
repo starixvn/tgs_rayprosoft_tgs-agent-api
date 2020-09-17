@@ -19,6 +19,22 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.Name)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
+
+            builder.Property(c => c.CreatedByUsername)
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedByUsername)
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
+
+            builder.Property(c => c.CreatedOn)
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedOn)
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired();
         }
     }
 }

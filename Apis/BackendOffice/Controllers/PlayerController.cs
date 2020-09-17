@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.DataServices.Models;
@@ -22,9 +21,10 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class PlayerController : BaseUserContextController
     {
         private readonly ITgsQueries<Player> _queries;
+        private readonly ITgsQueries<AuditLog> _auditLogQueries;
         private readonly ITgsCommands<Player> _commands;
         private readonly ITgsCommands<PlayerBank> _bankCommands;
-        private readonly IBackendOfficeCommands<AuditLog> _auditLogCommands;
+        private readonly ITgsCommands<AuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
 
@@ -32,14 +32,16 @@ namespace TGS.Apis.BackendOffice.Controllers
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
             ITgsQueries<Player> queries,
+            ITgsQueries<AuditLog> auditLogQueries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerBank> bankCommands,
-            IBackendOfficeCommands<AuditLog> auditLogCommands,
+            ITgsCommands<AuditLog> auditLogCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
             _queries = queries;
+            _auditLogQueries = auditLogQueries;
             _commands = commands;
             _bankCommands = bankCommands;
             _auditLogCommands = auditLogCommands;
@@ -109,57 +111,25 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [Route("{playerCode}/operation")]
+        [Route("{playerCode}/operations")]
         [HttpGet, Description("Get player operation")]
-        public async Task<GetPlayerResponse> GetPlayerOperationsAsync(string playerCode)
+        public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode, [FromQuery] GetPlayerOperationRequest request)
         {
-            var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode, p =>
-                p.Include(s => s.Vip)
-                    .Include(s => s.Banks)
-                    .Include(s => s.Wallets)
-                    .Include(s => s.ParentPlayer));
-
-            if (player == null)
-            {
-                return CreateInvalidResponse<GetPlayerResponse>(Resources.Player.NotFound);
-            }
-
-            var playerModel = new PlayerModel
-            {
-                Username = player.Username,
-                Realname = player.RealName,
-                VipLevel = player.Vip.Name,
-                Status = player.Status.ToString(),
-                HasAgent = player.HasAgent,
-                RegisteredOn = player.RegisteredOn,
-                ParentUsername = player.ParentPlayer.Username,
-                Balance = player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
-                Phone = player.Phone,
-                Email = player.Email,
-                QQ = player.QQ,
-                WeChat = player.Wechat,
-                Banks = player.Banks.Select(p => new PlayerModel.BankModel
+            return _auditLogQueries.GetQueries()
+                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.PlayerCode == playerCode)
+                .Select(p => new PlayerOperationModel
                 {
-                    Id = p.Id,
-                    RealName = p.Username,
-                    BankName = p.BankName,
-                    BankAccount = p.BankAccount
-                }).ToArray()
-
-            };
-
-            return new GetPlayerResponse
-            {
-                Valid = true,
-                Player = playerModel
-            };
+                    CreatedOn = p.CreatedOn,
+                    CreatedByUsername = p.CreatedByUsername,
+                    Operation = p.Operation
+                }).CreatePagedResponseAsync(request);
         }
 
         [Route("{playerCode}/{type}")]
         [HttpPut, Description("Update player")]
         public async Task<MessageResponse> UpdateAsync(string playerCode, string type, [FromBody] UpdatePlayerRequest request)
         {
-            var updatePlayerType = new[] { "Info", "Contact", "Password" };
+            var updatePlayerType = new[] { "info", "contact", "password" };
 
             if (!updatePlayerType.Contains(type))
             {
@@ -173,11 +143,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
             }
 
-
-
             if (type == updatePlayerType[0])
             {
-                var parentPlayer = await _queries.GetSingleAsync(p => p.PlayerCode == request.ParentUsername);
+                var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
 
                 if (parentPlayer == null)
                 {
@@ -210,11 +178,11 @@ namespace TGS.Apis.BackendOffice.Controllers
             player.UpdatedByUsername = Username;
             player.UpdatedOn = DateTimeOffset.Now;
             await _commands.UpdateAsync(player);
-            await CreateAuditLogAsync(type);
+            await CreateAuditLogAsync(type, playerCode);
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async Task CreateAuditLogAsync(string type)
+        private async Task CreateAuditLogAsync(string type, string playerCode)
         {
             var auditLog = new AuditLog
             {
@@ -222,7 +190,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 ModuleName = "Player",
                 CreatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
-                Operation = $"Update Player {type}"
+                Operation = $"Update Player {type}",
+                PlayerCode = playerCode
             };
 
             await _auditLogCommands.CreateAsync(auditLog);

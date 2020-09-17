@@ -79,6 +79,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Resources\VipLevel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VipLevel.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -118,6 +123,10 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\User.zh-CN.resx">
       <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\VipLevel.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
