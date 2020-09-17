@@ -17,6 +17,7 @@ namespace TGS.Core.Infrastructures.Log.Middleware
     {
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly ITgsLog _tgsLog;
+        private readonly Func<string> _prefixFunc;
 
         private const int ResMessageSizeLimit = 1000012;
 
@@ -25,14 +26,14 @@ namespace TGS.Core.Infrastructures.Log.Middleware
         //avoid LOH :https://stackoverflow.com/questions/43403941/how-to-read-asp-net-core-response-body/52328142#52328142
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
 
-        //[Dependency("Prefix")] public Func<string> PrefixFunc { get; set; } //Resolved by  InjectionProperty
-
         public ApiLoggerMiddleware(
             IRequestAnalyzer requestAnalyzer,
-            ITgsLog tgsLog)
+            ITgsLog tgsLog,
+            Func<string> prefixFunc)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = tgsLog;
+            _prefixFunc = prefixFunc;
 
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
@@ -115,7 +116,7 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                     ip = _requestAnalyzer.GetIp(context).NoLongerThan(256),
                     path = path.NoLongerThan(512),
                     method = context.Request.Method.NoLongerThan(8),
-                    prefix = path.NoLongerThan(512),
+                    prefix = GetPrefix(path),
                     servername = Environment.MachineName.NoLongerThan(128),
                     requestheaders = context.Request.Headers.ToDetailString(),
                     requestcontent = reqMessage,
@@ -129,6 +130,20 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                 };
 
             _tgsLog.LogApi(apiLogEvent);
+        }
+
+        private string GetPrefix(string path)
+        {
+            var prefix = default(string);
+
+            if (_prefixFunc != null)
+                prefix = _prefixFunc();
+
+            if (prefix.IsNotNullOrEmpty())
+                return prefix;
+
+            var arr = path.Split('/');
+            return arr.Length < 3 ? arr[^1] : arr[2];
         }
     }
 }

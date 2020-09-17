@@ -1,15 +1,27 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using TGS.Apis.TgsApi.GameProviders.Evolution;
+using TGS.Apis.TgsApi.GameProviders.RedTiger;
+using TGS.Core.Models;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace TGS.Apis.TgsApi
 {
     public class Program
     {
+        private static readonly IReadOnlyDictionary<string, Type> StartupMap = new Dictionary<string, Type>
+        { 
+            { Consts.GameProvider.RedTiger, typeof(RedTigerStartup) },
+            { Consts.GameProvider.RedTiger, typeof(EvolutionStartup) },
+        };
+
         public static Task Main(string[] args)
         {
             return CreateHostBuilder(args).Build().RunAsync();
@@ -17,32 +29,31 @@ namespace TGS.Apis.TgsApi
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
+            var gpCode = Environment.GetEnvironmentVariable("GameProviderCode");
+            var gpName = Environment.GetEnvironmentVariable("GameProviderName");
+
+            if (!StartupMap.TryGetValue(gpCode, out var startup))
+            {
+                throw new InvalidOperationException($"No startup is found with game provider code: {gpCode}");
+            }
+
             return Host.CreateDefaultBuilder(args)
-                           .ConfigureHostConfiguration(config =>
+                           .ConfigureAppConfiguration((hostContext, config) =>
                            {
-                               config.AddEnvironmentVariables();
+                               var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{gpName}/{gpName.ToLower()}.json";
+                               config.AddJsonFile(path);
                            })
                            .ConfigureWebHostDefaults(webBuilder =>
                            {
-                               webBuilder.UseStartup<Startup>();
+                               webBuilder.UseStartup(startup);
                            })
                            .ConfigureLogging((hostContext, logging) =>
                            {
                                logging.ClearProviders();
                                logging.SetMinimumLevel(LogLevel.Trace);
                            })
-                           .UseNLog()
-                           .ConfigureAppConfiguration((hostContext, config) =>
-                           {
-                               config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
-                               config.AddJsonFile("appsettings.json", false, true)
-                                   .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true)
-                                   .AddEnvironmentVariables();
-                               if (args != null)
-                               {
-                                   config.AddCommandLine(args);
-                               }
-                           });
+                           .UseNLog();
+                           
         }
     }
 }
