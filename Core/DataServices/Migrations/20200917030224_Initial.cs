@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
-using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Migrations
 {
@@ -615,7 +613,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    RealName = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     ExternalId = table.Column<string>(type: "nvarchar(128)", nullable: false),
+                    Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     DefaultWalletId = table.Column<Guid>(nullable: false),
                     DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
@@ -630,6 +631,7 @@ namespace TGS.Core.DataServices.Migrations
                     QQ = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     Wechat = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     HasAgent = table.Column<bool>(nullable: false),
+                    ParentPlayerCode = table.Column<string>(nullable: true),
                     VipId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
@@ -964,57 +966,7 @@ namespace TGS.Core.DataServices.Migrations
                 table: "Whitelists",
                 column: "ResellerId");
 
-            #region Store Procedure
-
-            var assembly = Assembly.GetExecutingAssembly();
-
-            // TYPE
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.TypeSqlForamt, "IntValuesType"));
-
-            // SP
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderIdByCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetCurrenciesByInternalCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetCurrenciesByExternalCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_GetPlayerForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_GetBalance"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_UpdateBalance"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeGameProviderConfigurationForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderConfigurationForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetLanguagesByInternalCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetLanguagesByExternalCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderBetLimitCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_GetPlayerLoginRecords"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeGamesForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetRoundByExternalRoundId"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_GetExternalRoundIdByExternalTransactionId"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionsInSameRound"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_InsertRound"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
-
-            #endregion Store Procedure
+            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -13,8 +13,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
@@ -27,8 +27,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
         private readonly IAntiforgery _antiForgery;
-        private readonly IGenericQueries<User> _userQueries;
-        private readonly IGenericCommands<User> _userCommands;
+        private readonly IBackendOfficeQueries<User> _userQueries;
+        private readonly IBackendOfficeCommands<User> _userCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -36,8 +36,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
             IAntiforgery antiForgery,
-            IGenericQueries<User> userQueries,
-            IGenericCommands<User> userCommands,
+            IBackendOfficeQueries<User> userQueries,
+            IBackendOfficeCommands<User> userCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor)
         {

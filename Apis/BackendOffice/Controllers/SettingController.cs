@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -16,12 +16,12 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class SettingController : BaseUserContextController
     {
-        private readonly IGenericQueries<Setting> _queries;
-        private readonly IGenericCommands<Setting> _commands;
+        private readonly IBackendOfficeQueries<Setting> _queries;
+        private readonly IBackendOfficeCommands<Setting> _commands;
 
         public SettingController(
-            IGenericQueries<Setting> queries,
-            IGenericCommands<Setting> commands,
+            IBackendOfficeQueries<Setting> queries,
+            IBackendOfficeCommands<Setting> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;

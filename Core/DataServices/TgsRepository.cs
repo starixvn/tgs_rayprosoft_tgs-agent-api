@@ -118,5 +118,9 @@ namespace TGS.Core.DataServices
         {
             SaveChanges();
         }
+        DbSet<T> IBaseRepository.Set<T>()
+        {
+            return Set<T>();
+        }
     }
 }

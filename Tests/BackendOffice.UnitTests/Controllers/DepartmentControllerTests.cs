@@ -13,6 +13,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
@@ -21,8 +22,8 @@ namespace BackendOffice.UnitTests.Controllers
     public class DepartmentControllerTests : BaseTests
     {
         private DepartmentController _controller;
-        private readonly Mock<IGenericQueries<Department>> _queriesMock = new Mock<IGenericQueries<Department>>();
-        private readonly Mock<IGenericCommands<Department>> _commandsMock = new Mock<IGenericCommands<Department>>();
+        private readonly Mock<IBackendOfficeQueries<Department>> _queriesMock = new Mock<IBackendOfficeQueries<Department>>();
+        private readonly Mock<IBackendOfficeCommands<Department>> _commandsMock = new Mock<IBackendOfficeCommands<Department>>();
 
         [SetUp]
         public override void Setup()

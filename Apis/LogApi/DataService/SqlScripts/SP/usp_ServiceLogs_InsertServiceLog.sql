@@ -26,7 +26,6 @@ ALTER PROCEDURE [dbo].[usp_ServiceLogs_InsertServiceLog]
 AS 
 BEGIN
     SET NOCOUNT ON
-    SET IDENTITY_INSERT [dbo].[ServiceLogs] ON
 
     INSERT INTO [dbo].[ServiceLogs]
     (
@@ -65,6 +64,5 @@ BEGIN
         @stackTrace
     );
     
-    SET IDENTITY_INSERT [dbo].[ServiceLogs] OFF
 END
 GO

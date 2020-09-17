@@ -12,6 +12,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
@@ -20,8 +21,8 @@ namespace BackendOffice.UnitTests.Controllers
     public class SettingControllerTests : BaseTests
     {
         private SettingController _controller;
-        private readonly Mock<IGenericQueries<Setting>> _queriesMock = new Mock<IGenericQueries<Setting>>();
-        private readonly Mock<IGenericCommands<Setting>> _commandsMock = new Mock<IGenericCommands<Setting>>();
+        private readonly Mock<IBackendOfficeQueries<Setting>> _queriesMock = new Mock<IBackendOfficeQueries<Setting>>();
+        private readonly Mock<IBackendOfficeCommands<Setting>> _commandsMock = new Mock<IBackendOfficeCommands<Setting>>();
 
         [SetUp]
         public override void Setup()

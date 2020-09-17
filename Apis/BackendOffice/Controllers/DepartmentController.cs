@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 
@@ -19,12 +19,12 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class DepartmentController : BaseUserContextController
     {
-        private readonly IGenericQueries<Department> _queries;
-        private readonly IGenericCommands<Department> _commands;
+        private readonly IBackendOfficeQueries<Department> _queries;
+        private readonly IBackendOfficeCommands<Department> _commands;
 
         public DepartmentController(
-            IGenericQueries<Department> queries,
-            IGenericCommands<Department> commands,
+            IBackendOfficeQueries<Department> queries,
+            IBackendOfficeCommands<Department> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;

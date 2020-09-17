@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

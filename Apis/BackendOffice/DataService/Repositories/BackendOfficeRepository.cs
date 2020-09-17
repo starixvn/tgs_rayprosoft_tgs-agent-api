@@ -11,7 +11,7 @@ using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
 
-namespace TGS.Apis.BackendOffice.DataService
+namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
     [ExcludeFromCodeCoverage]
     public class BackendOfficeRepository : DbContext, IBackendOfficeRepository
@@ -34,12 +34,6 @@ namespace TGS.Apis.BackendOffice.DataService
         {
             return Database.CanConnectAsync();
         }
-
-        EntityEntry<T> IBackendOfficeRepository.Entry<T>(T entity)
-        {
-            return base.Entry(entity);
-        }
-
 
         IDbConnection IBaseRepository.GetDbConnection()
         {
@@ -66,7 +60,12 @@ namespace TGS.Apis.BackendOffice.DataService
             this.BulkInsertOrUpdate(entities, bulkConfig, progress);
         }
 
-        DbSet<T> IBackendOfficeRepository.Set<T>()
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity)
+        {
+            return base.Entry(entity);
+        }
+
+        DbSet<T> IBaseRepository.Set<T>()
         {
             return Set<T>();
         }

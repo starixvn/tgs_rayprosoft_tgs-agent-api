@@ -621,14 +621,29 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ParentPlayerCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("QQ")
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<string>("RealName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<DateTimeOffset>("RegisteredOn")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1145,8 +1160,12 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
+                        .WithMany("SubPlayers")
+                        .HasForeignKey("PlayerCode");
+
                     b.HasOne("TGS.Core.DataServices.Models.VipLevel", "Vip")
-                        .WithMany()
+                        .WithMany("Players")
                         .HasForeignKey("VipId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
