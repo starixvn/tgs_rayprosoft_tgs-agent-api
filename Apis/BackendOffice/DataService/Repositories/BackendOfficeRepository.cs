@@ -35,12 +35,6 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             return Database.CanConnectAsync();
         }
 
-        EntityEntry<T> IBackendOfficeRepository.Entry<T>(T entity)
-        {
-            return base.Entry(entity);
-        }
-
-
         IDbConnection IBaseRepository.GetDbConnection()
         {
             return Database.GetDbConnection();
@@ -66,7 +60,12 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             this.BulkInsertOrUpdate(entities, bulkConfig, progress);
         }
 
-        DbSet<T> IBackendOfficeRepository.Set<T>()
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity)
+        {
+            return base.Entry(entity);
+        }
+
+        DbSet<T> IBaseRepository.Set<T>()
         {
             return Set<T>();
         }

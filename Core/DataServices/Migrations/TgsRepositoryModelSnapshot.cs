@@ -624,6 +624,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("ParentPlayerCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(32)");
 
@@ -631,10 +635,15 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("RealName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

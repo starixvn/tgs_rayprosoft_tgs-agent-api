@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200917024150_Initial")]
+    [Migration("20200917030224_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -626,6 +626,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("ParentPlayerCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(32)");
 
@@ -633,10 +637,15 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("RealName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

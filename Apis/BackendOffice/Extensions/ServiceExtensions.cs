@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Filters;
@@ -41,6 +40,8 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
             services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
+            services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
+            services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddNats(configuration);
             services.AddTgsLog();

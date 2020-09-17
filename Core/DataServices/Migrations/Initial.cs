@@ -6,7 +6,7 @@ namespace TGS.Core.DataServices.Migrations
 {
     public partial class Initial
     {
-
+        //InitAfterRun(migrationBuilder);
         public void InitAfterRun(MigrationBuilder migrationBuilder)
         {
 

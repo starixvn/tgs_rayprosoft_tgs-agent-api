@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
@@ -12,9 +13,9 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
 
     public class TgsCommands<TEntity> : ITgsCommands<TEntity> where TEntity : class
     {
-        private readonly IBackendOfficeRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public TgsCommands(IBackendOfficeRepository repository)
+        public TgsCommands(ITgsRepository repository)
         {
             _repository = repository;
         }

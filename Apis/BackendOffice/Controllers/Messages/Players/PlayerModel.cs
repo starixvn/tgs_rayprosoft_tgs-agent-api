@@ -1,7 +1,8 @@
 ﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
 {
-    public class PlayerModel
+    public class PlayersModel
     {
+        public int Index { get; set; }
         public string Username { get; set; }
         public string VipLevel { get; set; }
         public string Status { get; set; }

@@ -613,8 +613,10 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    RealName = table.Column<string>(nullable: true),
+                    RealName = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     ExternalId = table.Column<string>(type: "nvarchar(128)", nullable: false),
+                    Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     DefaultWalletId = table.Column<Guid>(nullable: false),
                     DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
@@ -963,7 +965,6 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-
 
             InitAfterRun(migrationBuilder);
         }

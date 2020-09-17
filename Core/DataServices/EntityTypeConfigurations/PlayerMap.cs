@@ -41,12 +41,24 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
+            builder.Property(c => c.RealName)
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
+
             builder.Property(c => c.ExternalId)
                 .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
             builder.Property(c => c.CultureCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))
+                .IsRequired();
+
+            builder.Property(c => c.Password)
+                .HasColumnType(ColumnTypes.Varbinary(128))
+                .IsRequired();
+
+            builder.Property(c => c.Salt)
+                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.BetLimitGroupId)
