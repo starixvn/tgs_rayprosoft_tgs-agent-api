@@ -10,15 +10,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validator.Player
             RuleFor(p => p.Username)
                 .NotNull()
                 .NotEmpty()
-                .WithMessage(Resources.User.NameRequired);
+                .WithMessage(Resources.Player.BankUsernameRequired);
 
             RuleFor(p => p.BankName)
                 .NotNull()
-                .WithMessage(Resources.User.PasswordRequired);
+                .WithMessage(Resources.Player.BankNameRequired);
 
             RuleFor(p => p.BankAccount)
                 .NotNull()
-                .WithMessage(Resources.User.PasswordRequired);
+                .WithMessage(Resources.Player.BankAccountRequired);
         }
     }
 }
