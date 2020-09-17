@@ -27,13 +27,13 @@ import {
 } from "bumbag"
 import AlertDialog from "../../dialog/Alert"
 
+//TODO: move to input/Field.js
 export const Field = ({ required, validate, ...props }) => {
   let { name } = props
   return (
     <_Field
       name={name}
       validate={(value) => {
-        console.log("name", name, "value", value)
         if (required && !value) {
           return "required"
         }

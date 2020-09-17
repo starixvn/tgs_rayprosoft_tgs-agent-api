@@ -36,7 +36,7 @@ export default ({
           variant="alert"
           title={title}
           placement="top"
-          footer={() => (
+          footer={
             <Flex
               alignX="right"
               css={css`
@@ -45,7 +45,7 @@ export default ({
             >
               <Modal.Disclosure use={Button}>{close()}</Modal.Disclosure>
             </Flex>
-          )}
+          }
           hideOnClickOutside={false}
           unstable_finalFocusRef={finalFocusRef}
         >
