@@ -30,10 +30,10 @@ const Disabled = 0
 const Enabled = 1
 
 export const from = (value) => {
-  if (value === "Disabled") {
+  if (value === "Disabled" || value === `${Disabled}`) {
     return Disabled
   }
-  if (value === Enabled) {
+  if (value === Enabled || value === `${Enabled}`) {
     return Enabled
   }
   return value

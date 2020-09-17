@@ -162,7 +162,13 @@ const SubmitDialog = ({
       data
     })
 
-  const deferFn = ([data]) => (isUpdate ? update(data) : create(data))
+  const deferFn = ([data]) => {
+    data = {
+      ...data,
+      status: statusFrom(data.status)
+    }
+    return isUpdate ? update(data) : create(data)
+  }
 
   let initialValues = isCreate
     ? {

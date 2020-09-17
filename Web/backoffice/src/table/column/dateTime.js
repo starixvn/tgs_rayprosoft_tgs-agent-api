@@ -10,7 +10,8 @@ export default ({
   Header,
   accessor,
   dateFormat = DefaultDateFormat,
-  timeFormat = DefaultTimeFormat
+  timeFormat = DefaultTimeFormat,
+  ...props
 }) => {
   return {
     Header,
@@ -40,6 +41,7 @@ export default ({
           {dateString} {timeString}
         </Text.Block>
       )
-    }
+    },
+    ...props
   }
 }
