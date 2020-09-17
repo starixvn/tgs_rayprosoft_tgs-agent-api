@@ -59,6 +59,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Resources\Player.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Player.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Role.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -91,6 +96,10 @@
     <EmbeddedResource Update="Resources\Department.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Department.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Player.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Player.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Role.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

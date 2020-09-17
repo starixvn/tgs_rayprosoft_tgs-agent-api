@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Apis.BackendOffice.DataService.Repositories;
@@ -37,11 +38,57 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(request.Username, p => request.Username.Contains(p.Username))
                 .Select(p => new PlayersModel
                 {
+                    PlayerCode = p.PlayerCode,
                     Username = p.Username,
                     VipLevel = p.Vip.Name,
                     Status = p.Status.ToString(),
                     HasAgent = p.HasAgent
                 }).CreatePagedResponseAsync(request);
+        }
+
+        [Route("{playerCode}")]
+        [HttpGet, Description("Get player")]
+        public async Task<GetPlayerResponse> GetSingleAsync(string playerCode)
+        {
+            var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode, p =>
+                p.Include(s => s.Vip)
+                    .Include(s => s.Banks)
+                    .Include(s => s.Wallets)
+                    .Include(s => s.ParentPlayer));
+
+            if (player == null)
+            {
+                return CreateInvalidResponse<GetPlayerResponse>(Resources.Player.NotFound);
+            }
+
+            var playerModel = new PlayerModel
+            {
+                Username = player.Username,
+                Realname = player.RealName,
+                VipLevel = player.Vip.Name,
+                Status = player.Status.ToString(),
+                HasAgent = player.HasAgent,
+                RegisteredOn = player.RegisteredOn,
+                ParentUsername = player.ParentPlayer.Username,
+                Balance = player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
+                Phone = player.Phone,
+                Email = player.Email,
+                QQ = player.QQ,
+                WeChat = player.Wechat,
+                Banks = player.Banks.Select(p => new PlayerModel.BankModel
+                {
+                    RealName = p.Username,
+                    BankName = p.BankName,
+                    BankAccount = p.BankAccount
+                }).ToArray()
+
+            };
+
+            return new GetPlayerResponse
+            {
+                Valid = true,
+                Player = playerModel
+            };
         }
     }
 }
