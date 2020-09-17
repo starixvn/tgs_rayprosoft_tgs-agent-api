@@ -26,19 +26,19 @@ namespace TGS.Services.Operations
     {
         private readonly IRedisCacheManager _cacheManager;
         private readonly IJsonSerializationProvider _json;
-        private readonly IWalletQueries _walletQueries;
+        private readonly Func<IWalletQueries> _walletQueriesFactory;
         private readonly Func<IPlayerQueries> _playerQueriesFactory;
         private readonly IPlayerOperations _interface;
 
         public PlayerOperations(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
-            IWalletQueries walletQueries,
+            Func<IWalletQueries> walletQueriesFactory,
             Func<IPlayerQueries> playerQueriesFactory)
         {
             _cacheManager = cacheManager;
             _json = json;
-            _walletQueries = walletQueries;
+            _walletQueriesFactory = walletQueriesFactory;
             _playerQueriesFactory = playerQueriesFactory;
 
             _interface = this;
@@ -66,7 +66,7 @@ namespace TGS.Services.Operations
 
         Task<decimal> IPlayerOperations.GetPlayerBalanceAsync(Guid walletId, bool dirtyRead)
         {
-            return _walletQueries.GetBalanceAsync(walletId, dirtyRead);
+            return _walletQueriesFactory().GetBalanceAsync(walletId, dirtyRead);
         }
 
         async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform)

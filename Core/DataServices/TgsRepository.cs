@@ -40,6 +40,7 @@ namespace TGS.Core.DataServices
         DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
         DbSet<PlayerBank> ITgsRepository.PlayerBanks { get; set; }
         DbSet<VipLevel> ITgsRepository.VipLevels { get; set; }
+        DbSet<AuditLog> ITgsRepository.AuditLogs { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -106,7 +107,7 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new PlayerLoginRecordMap());
             modelBuilder.ApplyConfiguration(new PlayerBankMap());
             modelBuilder.ApplyConfiguration(new VipLevelMap());
-
+            modelBuilder.ApplyConfiguration(new AuditLogMap());
         }
 
         void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
@@ -117,6 +118,10 @@ namespace TGS.Core.DataServices
         void IBaseRepository.SaveChanges()
         {
             SaveChanges();
+        }
+        DbSet<T> IBaseRepository.Set<T>()
+        {
+            return Set<T>();
         }
     }
 }

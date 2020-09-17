@@ -11,13 +11,15 @@ namespace TGS.Services.Operations.Extensions
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of Operations, need to add dependency by using AddInfrastructures in Infrastructures project
+        /// Dependency Injection of Operations, need to add the following dependencies beforehead:
+        /// 1. AddRedis() in Infrastructures.Redis        
         /// </summary>
         public static IServiceCollection AddOperations(this IServiceCollection services)
         {            
             #region Code Mappers
 
             services.AddSingleton<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
+            services.AddSingleton<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
 
             #endregion
 
@@ -35,6 +37,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<ILicenseeOperations, LicenseeOperations>();
             services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
             services.AddSingleton<IPlayerOperations, PlayerOperations>();
+            services.AddSingleton<ILicenseeGameProviderOperations, LicenseeGameProviderOperations>();
 
             #endregion
 
@@ -43,6 +46,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IStatusValidator, StatusValidator>();
             services.AddSingleton<IExpirationValidator, ExpirationValidator>();
             services.AddSingleton<IAmountValidator, AmountValidator>();
+
+            services.AddScoped<ITransactionManager, TransactionManager>();
            
             return services;
         }

@@ -6,20 +6,24 @@ namespace TGS.Core.Infrastructures.Redis
 {
     public static class ServiceExtensions
     {
+        /// <summary>
+        /// Dependency Injection of Redis, need to add the following dependencies beforehead:
+        /// 1. AddJson() in Infrastructures.Json
+        /// 2. AddTgpLog() in Infrastructures.Log
+        /// 3. AddLogging() in .net core
+        /// </summary>
         public static IServiceCollection AddRedis(this IServiceCollection services)
         {
-            services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
-            services.AddScoped<IRedisConfig, RedisConfig>();
-            services.AddScoped<IRedisConnection, RedisCoreConnection>();
-            services.AddScoped<IRedisRepository, RedisRepository>();
-            services.AddScoped<IRedisCacheManager, RedisCacheManager>();
-            services.AddScoped<IRedisLock, RedisLock>();
+            services.AddSingleton<IJsonSerializationProvider, JsonSerializationProvider>();
+            services.AddSingleton<IRedisConfig, RedisConfig>();
+            services.AddSingleton<IRedisConnection, RedisCoreConnection>();
+            services.AddSingleton<IRedisRepository, RedisRepository>();
+            services.AddSingleton<IRedisCacheManager, RedisCacheManager>();
+            services.AddSingleton<IRedisLock, RedisLock>();
             services.AddTransient(typeof(IRedisList<>), typeof(RedisList<>));
             services.AddTransient(typeof(IRedisSortedSet<>), typeof(RedisSortedSet<>));
-            services.AddScoped<IRedisPublisher, RedisPublisher>();
-            services.AddScoped<IRedisSubscriber, RedisSubscriber>();
-            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
-            services.AddLogging();
+            services.AddSingleton<IRedisPublisher, RedisPublisher>();
+            services.AddSingleton<IRedisSubscriber, RedisSubscriber>();
 
             return services;
         }

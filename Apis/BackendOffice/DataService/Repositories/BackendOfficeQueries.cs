@@ -4,36 +4,36 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace TGS.Apis.BackendOffice.DataService
+namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
-    public interface IGenericQueries<T>
+    public interface IBackendOfficeQueries<T>
     {
         IQueryable<T> GetQueries();
         Task<T> GetSingleAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> preQuery = null);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
     }
 
-    public class GenericQueries<T> : IGenericQueries<T> where T : class
+    public class BackendOfficeQueries<T> : IBackendOfficeQueries<T> where T : class
     {
         private readonly IBackendOfficeRepository _repository;
 
-        public GenericQueries(IBackendOfficeRepository repository)
+        public BackendOfficeQueries(IBackendOfficeRepository repository)
         {
             _repository = repository;
         }
 
-        Task<bool> IGenericQueries<T>.ExistsAsync(Expression<Func<T, bool>> predicate)
+        Task<bool> IBackendOfficeQueries<T>.ExistsAsync(Expression<Func<T, bool>> predicate)
         {
             return _repository.Set<T>().AnyAsync(predicate);
         }
 
-        Task<T> IGenericQueries<T>.GetSingleAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> preQuery)
+        Task<T> IBackendOfficeQueries<T>.GetSingleAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> preQuery)
         {
             preQuery ??= c => c;
             return preQuery(_repository.Set<T>()).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<T> IGenericQueries<T>.GetQueries()
+        IQueryable<T> IBackendOfficeQueries<T>.GetQueries()
         {
             return _repository.Set<T>();
         }

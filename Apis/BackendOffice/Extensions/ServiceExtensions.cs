@@ -15,10 +15,11 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -32,12 +33,15 @@ namespace TGS.Apis.BackendOffice.Extensions
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
+            services.AddRepository<ITgsRepository, TgsRepository>(configuration, "Tgs");
             services.AddScoped<IDataInitializer, DataInitializer>();
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
-            services.AddTransient(typeof(IGenericCommands<>), typeof(GenericCommands<>));
-            services.AddTransient(typeof(IGenericQueries<>), typeof(GenericQueries<>));
+            services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
+            services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
+            services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
+            services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddNats(configuration);
             services.AddTgsLog();

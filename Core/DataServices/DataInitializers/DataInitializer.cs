@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.DataInitializers
@@ -127,7 +130,6 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private void GenerateLanguages()
         {
-
             var tmpLanguages = new[]
             {
                 new _Language("en-US","en","English","English"),
@@ -185,18 +187,23 @@ namespace TGS.Core.DataServices.DataInitializers
         private void GeneratePlayers()
         {
             var rnd = new Random();
-
+            var (password, salt) = GenerateCredential("TgsP@ssw0rd");
+            var tmpPlayers = new List<string>();
             var players = Enumerable.Range(1, 200)
                 .Select(p =>
                 {
                     var defaultWalletId = GuidExtensions.NewSequentialGuid();
                     var currencyCode = "RMB";
                     var playerCode = Generator.RandomString(8);
+                    tmpPlayers.Add(playerCode);
                     return new Player
                     {
                         PlayerCode = playerCode,
                         Username = Generator.RandomString(12),
+                        RealName = Generator.RandomString(12),
                         ExternalId = playerCode + "_" + Generator.RandomString(4),
+                        Password = password,
+                        Salt = salt,
                         CultureCode = "en-US",
                         DefaultWalletId = defaultWalletId,
                         DefaultWalletCurrencyCode = currencyCode,
@@ -207,8 +214,11 @@ namespace TGS.Core.DataServices.DataInitializers
                         Phone = Generator.RandomIntString(10),
                         QQ = Generator.RandomString(20),
                         Wechat = Generator.RandomString(20),
+                        ParentPlayerCode = tmpPlayers.Count == 1 ? null : rnd.NextDouble() > 0.5 ? null : tmpPlayers[rnd.Next(0, tmpPlayers.Count - 1)],
                         HasAgent = rnd.NextDouble() > 0.5,
                         VipId = _vipLevels[rnd.Next(0, 6)].Id,
+                        RegisteredOn = _now,
+                        LastActiveOn = _now,
                         LicenseeId = _licenseeId,
                         Wallets = new[]
                         {
@@ -240,6 +250,19 @@ namespace TGS.Core.DataServices.DataInitializers
             _repository.BulkInsert(players.ToArray());
             _repository.BulkInsert(players.SelectMany(p => p.Wallets).ToArray());
             _repository.BulkInsert(players.SelectMany(p => p.Banks).ToArray());
+        }
+
+        private (byte[], byte[]) GenerateCredential(string password)
+        {
+            ITgsHashConfig tgsHashConfig = new TgsHashConfig();
+            IHashProvider hashProvider = new HashProvider(tgsHashConfig);
+
+            var salt = hashProvider.GenerateRandomSalt(32);
+            var hashedPassword = hashProvider.Hash(
+                Encoding.UTF8.GetBytes(password),
+                hashProvider.Hash(salt),
+                tgsHashConfig.HashAlgorithm);
+            return (salt, hashedPassword);
         }
     }
 

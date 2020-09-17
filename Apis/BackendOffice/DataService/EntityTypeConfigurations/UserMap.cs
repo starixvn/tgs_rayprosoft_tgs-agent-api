@@ -44,15 +44,15 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
 
             builder.Property(c => c.TimeZone)
                 .HasColumnType(ColumnTypes.Nvarchar(256))
-                .IsRequired();
-
-            builder.Property(c => c.Password)
-                .HasColumnType(ColumnTypes.Varbinary(128))
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(c => c.LastLoginIp)
                 .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired(false);
+
+            builder.Property(c => c.Password)
+                .HasColumnType(ColumnTypes.Varbinary(128))
+                .IsRequired();
 
             builder.Property(c => c.Salt)
                 .HasColumnType(ColumnTypes.Varbinary(128))
