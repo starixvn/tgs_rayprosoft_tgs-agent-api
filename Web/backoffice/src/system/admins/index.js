@@ -70,7 +70,7 @@ export const Content = () => {
       actionBar={
         <>
           <SearchForm search={setState} isPending={isPending} />
-          <AddButton />
+          <AddButton onSubmitted={fetchTable} />
         </>
       }
     >
@@ -146,6 +146,7 @@ const tableColumns = ({ fetchTable }) => [
   {
     Header: "姓名",
     accessor: "name",
+    disableSortBy: true,
     headCell: {
       textAlign: "center"
     },
@@ -156,26 +157,31 @@ const tableColumns = ({ fetchTable }) => [
   {
     Header: "部门",
     accessor: "departmentName",
+    disableSortBy: true,
     headCell: {
       textAlign: "center"
     },
     cell: {
-      textAlign: "center"
+      textAlign: "center",
+      whiteSpace: "nowrap"
     }
   },
   {
     Header: "权限组",
     accessor: "role",
+    disableSortBy: true,
     headCell: {
       textAlign: "center"
     },
     cell: {
-      textAlign: "center"
+      textAlign: "center",
+      whiteSpace: "nowrap"
     }
   },
   {
     Header: "最近登入IP",
     accessor: "lastLoginIp",
+    disableSortBy: true,
     headCell: {
       textAlign: "center"
     },
@@ -185,13 +191,16 @@ const tableColumns = ({ fetchTable }) => [
   },
   dateTimeColumn({
     Header: "最近登入时间",
-    accessor: "lastLoginTime"
+    accessor: "lastLoginTime",
+    disableSortBy: true
   }),
   dateTimeColumn({
     Header: "创建时间",
-    accessor: "createdOn"
+    accessor: "createdOn",
+    disableSortBy: true
   }),
   {
+    disableSortBy: true,
     Header: "状态",
     accessor: "status",
     headCell: {
@@ -205,6 +214,7 @@ const tableColumns = ({ fetchTable }) => [
     }
   },
   {
+    disableSortBy: true,
     Header: "操作",
     headCell: {
       textAlign: "center"

@@ -37,6 +37,7 @@ import {
   Field as InputField,
   Password as PasswordField
 } from "../../input/Field"
+import { Select as StatusSelect, from as statusFrom } from "./status"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -76,6 +77,7 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
         ref={disclosureRef}
         css={css`
           flex: unset;
+          white-space: nowrap;
         `}
         {...dialog}
       >
@@ -104,6 +106,7 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
         ref={disclosureRef}
         css={css`
           flex: unset;
+          white-space: nowrap;
         `}
         {...dialog}
       >
@@ -159,7 +162,13 @@ const SubmitDialog = ({
       data
     })
 
-  const deferFn = ([data]) => (isUpdate ? update(data) : create(data))
+  const deferFn = ([data]) => {
+    data = {
+      ...data,
+      status: statusFrom(data.status)
+    }
+    return isUpdate ? update(data) : create(data)
+  }
 
   let initialValues = isCreate
     ? {
@@ -174,7 +183,7 @@ const SubmitDialog = ({
         departmentId: user.departmentId,
         roleId: user.roleId,
         name: user.name,
-        status: user.status
+        status: statusFrom(user.status)
       }
 
   let asyncSubmit = useAsync({ deferFn })
@@ -386,7 +395,7 @@ const StatusLabelSelect = ({ name = "status" }) => {
     <>
       <LabelBox name={name} label={status()} />
       <FieldBox name={name}>
-        <InputField name={name} />
+        <StatusSelect name={name} required />
       </FieldBox>
     </>
   )

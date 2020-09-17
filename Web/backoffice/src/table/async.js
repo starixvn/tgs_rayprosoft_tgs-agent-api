@@ -85,7 +85,9 @@ export default ({
     },
     useFilters,
     useSortBy,
+    /*
     useFlexLayout,
+    */
     usePagination
   )
   let { getTableProps, rows, gotoPage, state: tableState } = table

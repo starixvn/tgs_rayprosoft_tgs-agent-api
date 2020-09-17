@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using EnvironmentVariable = TGS.Core.Models.Consts.EnvironmentVariable;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -20,8 +22,8 @@ namespace TGS.Apis.BackendOffice
                 })
                 .ConfigureAppConfiguration((hostContext, config) =>
                 {
-                    var env = Environment.GetEnvironmentVariable(Core.Models.Consts.Environment);
-                    config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
+                    var env = Environment.GetEnvironmentVariable(EnvironmentVariable.Environment);
+                    config.SetBasePath(Directory.GetCurrentDirectory());
                     config.AddJsonFile("appsettings.json", true, true)
                         .AddJsonFile($"appsettings.{env}.json", true)
                         .AddEnvironmentVariables();
