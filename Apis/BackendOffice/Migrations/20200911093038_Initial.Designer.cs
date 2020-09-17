@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 
 namespace TGS.Apis.BackendOffice.Migrations
 {

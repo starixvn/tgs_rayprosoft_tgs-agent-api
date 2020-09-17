@@ -8,6 +8,7 @@ namespace TGS.Core.DataServices.Models
     {
         public string PlayerCode { get; set; }
         public string Username { get; set; }
+        public string RealName { get; set; }
         public string ExternalId { get; set; }
         public string CultureCode { get; set; }
         public Language Language { get; set; }
@@ -27,10 +28,15 @@ namespace TGS.Core.DataServices.Models
         public string Wechat { get; set; }
         public bool HasAgent { get; set; }
 
+        public string ParentPlayerCode { get; set; }
+        public Player? ParentPlayer { get; set; }
+
         public Guid VipId { get; set; }
         public VipLevel Vip { get; set; }
+
         public virtual ICollection<Wallet> Wallets { get; set; }
         public virtual ICollection<PlayerBank> Banks { get; set; }
+        public virtual ICollection<Player> SubPlayers { get; set; }
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
     }
 }

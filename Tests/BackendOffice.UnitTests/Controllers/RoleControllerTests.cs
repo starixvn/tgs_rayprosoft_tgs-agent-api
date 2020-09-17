@@ -14,6 +14,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Json;
 using Resources = TGS.Apis.BackendOffice.Resources;
@@ -24,9 +25,9 @@ namespace BackendOffice.UnitTests.Controllers
     public class RoleControllerTests : BaseTests
     {
         private RoleController _controller;
-        private readonly Mock<IGenericQueries<Role>> _roleQueriesMock = new Mock<IGenericQueries<Role>>();
-        private readonly Mock<IGenericQueries<Setting>> _settingQueriesMock = new Mock<IGenericQueries<Setting>>();
-        private readonly Mock<IGenericCommands<Role>> _roleCommandsMock = new Mock<IGenericCommands<Role>>();
+        private readonly Mock<IBackendOfficeQueries<Role>> _roleQueriesMock = new Mock<IBackendOfficeQueries<Role>>();
+        private readonly Mock<IBackendOfficeQueries<Setting>> _settingQueriesMock = new Mock<IBackendOfficeQueries<Setting>>();
+        private readonly Mock<IBackendOfficeCommands<Role>> _roleCommandsMock = new Mock<IBackendOfficeCommands<Role>>();
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
         [SetUp]
         public override void Setup()

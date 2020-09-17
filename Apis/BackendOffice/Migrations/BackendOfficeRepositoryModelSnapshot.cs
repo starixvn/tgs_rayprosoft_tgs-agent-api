@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using TGS.Apis.BackendOffice.DataService;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 
 namespace TGS.Apis.BackendOffice.Migrations
 {

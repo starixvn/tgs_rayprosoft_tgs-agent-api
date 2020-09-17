@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
@@ -22,18 +22,18 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
-        private readonly IGenericQueries<User> _userQueries;
-        private readonly IGenericQueries<Department> _departmentQueries;
-        private readonly IGenericQueries<Role> _roleQueries;
-        private readonly IGenericCommands<User> _userCommands;
+        private readonly IBackendOfficeQueries<User> _userQueries;
+        private readonly IBackendOfficeQueries<Department> _departmentQueries;
+        private readonly IBackendOfficeQueries<Role> _roleQueries;
+        private readonly IBackendOfficeCommands<User> _userCommands;
 
         public UserController(
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
-            IGenericQueries<User> userQueries,
-            IGenericQueries<Department> departmentQueries,
-            IGenericQueries<Role> roleQueries,
-            IGenericCommands<User> userCommands,
+            IBackendOfficeQueries<User> userQueries,
+            IBackendOfficeQueries<Department> departmentQueries,
+            IBackendOfficeQueries<Role> roleQueries,
+            IBackendOfficeCommands<User> userCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;

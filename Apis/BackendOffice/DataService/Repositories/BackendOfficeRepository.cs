@@ -11,7 +11,7 @@ using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
 
-namespace TGS.Apis.BackendOffice.DataService
+namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
     [ExcludeFromCodeCoverage]
     public class BackendOfficeRepository : DbContext, IBackendOfficeRepository

@@ -14,6 +14,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using Resources = TGS.Apis.BackendOffice.Resources;
@@ -27,8 +28,8 @@ namespace BackendOffice.UnitTests.Controllers
         private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
         private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
         private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
-        private readonly Mock<IGenericQueries<User>> _userQueriesMock = new Mock<IGenericQueries<User>>();
-        private readonly Mock<IGenericCommands<User>> _userCommandsMock = new Mock<IGenericCommands<User>>();
+        private readonly Mock<IBackendOfficeQueries<User>> _userQueriesMock = new Mock<IBackendOfficeQueries<User>>();
+        private readonly Mock<IBackendOfficeCommands<User>> _userCommandsMock = new Mock<IBackendOfficeCommands<User>>();
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
 
         [SetUp]

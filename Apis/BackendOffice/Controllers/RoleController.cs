@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Models;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
@@ -21,15 +21,15 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class RoleController : BaseUserContextController
     {
-        private readonly IGenericQueries<Role> _roleQueries;
-        private readonly IGenericQueries<Setting> _settingQueries;
-        private readonly IGenericCommands<Role> _roleCommands;
+        private readonly IBackendOfficeQueries<Role> _roleQueries;
+        private readonly IBackendOfficeQueries<Setting> _settingQueries;
+        private readonly IBackendOfficeCommands<Role> _roleCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
         public RoleController(
-            IGenericQueries<Role> roleQueries,
-            IGenericQueries<Setting> settingQueries,
-            IGenericCommands<Role> roleCommands,
+            IBackendOfficeQueries<Role> roleQueries,
+            IBackendOfficeQueries<Setting> settingQueries,
+            IBackendOfficeCommands<Role> roleCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {

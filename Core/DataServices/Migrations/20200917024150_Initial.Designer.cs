@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200916093505_Initial")]
+    [Migration("20200917024150_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -623,11 +623,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ParentPlayerCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("QQ")
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("RealName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
                         .HasColumnType("datetimeoffset");
@@ -1147,8 +1153,12 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
+                        .WithMany("SubPlayers")
+                        .HasForeignKey("PlayerCode");
+
                     b.HasOne("TGS.Core.DataServices.Models.VipLevel", "Vip")
-                        .WithMany()
+                        .WithMany("Players")
                         .HasForeignKey("VipId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

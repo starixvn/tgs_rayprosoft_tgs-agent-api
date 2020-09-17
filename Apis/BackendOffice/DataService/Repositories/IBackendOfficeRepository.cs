@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
 
-namespace TGS.Apis.BackendOffice.DataService
+namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
     public interface IBackendOfficeRepository : IBaseRepository
     {
