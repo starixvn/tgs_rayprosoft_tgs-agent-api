@@ -59,6 +59,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Resources\Player.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Player.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Role.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -73,6 +78,11 @@
       <DependentUpon>User.Designer.cs</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\VipLevel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VipLevel.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -92,6 +102,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Department.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Player.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Player.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Role.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Role.Designer.cs</LastGenOutput>
@@ -109,6 +123,10 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\User.zh-CN.resx">
       <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\VipLevel.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

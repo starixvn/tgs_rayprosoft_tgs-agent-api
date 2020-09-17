@@ -37,6 +37,9 @@ namespace TGS.Core.DataServices.Models
         public Guid VipId { get; set; }
         public VipLevel Vip { get; set; }
 
+        public string UpdatedByUsername { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
+
         public virtual ICollection<Wallet> Wallets { get; set; }
         public virtual ICollection<PlayerBank> Banks { get; set; }
         public virtual ICollection<Player> SubPlayers { get; set; }

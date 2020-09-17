@@ -150,11 +150,13 @@ const tableColumns = ({ fetchTable }) => [
     Cell: ({ value }) => {
       let { id, name } = value
       return (
-        <Set>
-          <EditButton id={id} onSubmitted={fetchTable} />
-          <CopyButton id={id} name={name} onSubmitted={fetchTable} />
-          <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
-        </Set>
+        <Box alignX="center">
+          <Set>
+            <EditButton id={id} onSubmitted={fetchTable} />
+            <CopyButton id={id} name={name} onSubmitted={fetchTable} />
+            <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
+          </Set>
+        </Box>
       )
     }
   }

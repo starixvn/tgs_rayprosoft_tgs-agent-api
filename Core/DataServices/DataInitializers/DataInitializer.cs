@@ -124,7 +124,13 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private void GenerateVipLevel()
         {
-
+            foreach (var vip in _vipLevels)
+            {
+                vip.CreatedByUsername = AdminUsername;
+                vip.UpdatedByUsername = AdminUsername;
+                vip.CreatedOn = DateTimeOffset.Now;
+                vip.UpdatedOn = DateTimeOffset.Now;
+            }
             _repository.BulkInsert(_vipLevels.ToArray());
         }
 

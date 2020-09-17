@@ -15,10 +15,11 @@ import {
 } from "react-router-dom"
 import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
-import { AddButton } from "./edit"
+import { AddButton, EditButton, EditPasswordButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import AsyncTable, { useTableState } from "../../table/async"
+import { label as statusLabel } from "./status"
 
 export const Code = "admins"
 
@@ -34,16 +35,12 @@ export const label = (code = "") => {
 }
 
 export const Content = () => {
-  let columns = useMemo(tableColumns)
   let { state, setState, headSortBy, headOrderBy } = useTableState({
     username: ""
   })
   let { pageIndex, pageSize, username = "", sortBy = [], request } = state
 
-  let async = useAsync({ promise: request })
-  let { isPending } = async
-
-  useEffect(() => {
+  let fetchTable = () => {
     let promise = getUsers({
       page: pageIndex + 1,
       rows: pageSize,
@@ -52,7 +49,20 @@ export const Content = () => {
       orderby: headOrderBy()
     })
     setState({ ...state, request: promise })
+  }
+
+  let async = useAsync({ promise: request })
+  let { isPending } = async
+
+  useEffect(() => {
+    fetchTable()
   }, [pageIndex, pageSize, username, sortBy])
+
+  let columns = useMemo(() =>
+    tableColumns({
+      fetchTable
+    })
+  )
 
   return (
     <PageContent
@@ -121,28 +131,59 @@ const searchInputPlaceHolder = () => "管理员用户名输入框"
 //TODO: i18n
 const title = () => "管理员列表"
 
-const tableColumns = () => [
+const tableColumns = ({ fetchTable }) => [
   sequenceColumn(),
   {
     Header: "用户名",
     accessor: "username",
-    canSort: true
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    }
   },
   {
     Header: "姓名",
-    accessor: "name"
+    accessor: "name",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    }
   },
   {
     Header: "部门",
-    accessor: "departmentName"
+    accessor: "departmentName",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center",
+      whiteSpace: "nowrap"
+    }
   },
   {
     Header: "权限组",
-    accessor: "role"
+    accessor: "role",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center",
+      whiteSpace: "nowrap"
+    }
   },
   {
     Header: "最近登入IP",
-    accessor: "lastLoginIp"
+    accessor: "lastLoginIp",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    }
   },
   dateTimeColumn({
     Header: "最近登入时间",
@@ -154,15 +195,33 @@ const tableColumns = () => [
   }),
   {
     Header: "状态",
-    accessor: "status"
+    accessor: "status",
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    },
+    Cell: ({ value }) => {
+      return statusLabel(value)
+    }
   },
   {
     Header: "操作",
-    Cell: () => {
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    },
+    accessor: (row) => {
+      return row
+    },
+    Cell: ({ value }) => {
       return (
         <Set>
-          <Button>TODO: 修改</Button>
-          <Button>TODO: 修改密码</Button>
+          <EditButton user={value} onSubmitted={fetchTable} />
+          <EditPasswordButton user={value} onSubmitted={fetchTable} />
         </Set>
       )
     }
