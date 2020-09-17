@@ -77,6 +77,7 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
         ref={disclosureRef}
         css={css`
           flex: unset;
+          white-space: nowrap;
         `}
         {...dialog}
       >
@@ -105,6 +106,7 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
         ref={disclosureRef}
         css={css`
           flex: unset;
+          white-space: nowrap;
         `}
         {...dialog}
       >

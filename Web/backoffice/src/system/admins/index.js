@@ -160,7 +160,8 @@ const tableColumns = ({ fetchTable }) => [
       textAlign: "center"
     },
     cell: {
-      textAlign: "center"
+      textAlign: "center",
+      whiteSpace: "nowrap"
     }
   },
   {
@@ -170,7 +171,8 @@ const tableColumns = ({ fetchTable }) => [
       textAlign: "center"
     },
     cell: {
-      textAlign: "center"
+      textAlign: "center",
+      whiteSpace: "nowrap"
     }
   },
   {
