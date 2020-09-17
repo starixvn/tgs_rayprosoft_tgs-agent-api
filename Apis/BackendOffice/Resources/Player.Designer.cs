@@ -61,6 +61,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bank is not found..
+        /// </summary>
+        public static string BankNotFound {
+            get {
+                return ResourceManager.GetString("BankNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Player not found..
         /// </summary>
         public static string NotFound {

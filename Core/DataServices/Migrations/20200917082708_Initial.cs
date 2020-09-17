@@ -157,7 +157,11 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Code = table.Column<string>(type: "varchar(16)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -984,6 +988,7 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
+
             InitAfterRun(migrationBuilder);
         }
 

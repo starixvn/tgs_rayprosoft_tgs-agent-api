@@ -10,6 +10,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
         public string DepartmentName { get; set; }
         public string Role { get; set; }
         public string LastLoginIp { get; set; }
+        public Guid RoleId { get; set; }
+        public Guid DepartmentId { get; set; }
         public DateTimeOffset? LastLoginTime { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public string Status { get; set; }

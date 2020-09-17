@@ -55,6 +55,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Id = user.Id,
                     Username = user.Username,
                     Name = user.Name,
+                    RoleId = user.RoleId,
+                    DepartmentId = user.DepartmentId,
                     Role = user.Role.Name,
                     DepartmentName = user.Department.Name,
                     LastLoginIp = user.LastLoginIp,
