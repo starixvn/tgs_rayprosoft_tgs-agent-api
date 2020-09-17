@@ -15,6 +15,12 @@ export default ({
   return {
     Header,
     accessor,
+    headCell: {
+      textAlign: "center"
+    },
+    cell: {
+      textAlign: "center"
+    },
     Cell: ({ value = "" } = {}) => {
       let date = dayjs(value)
       if (!date.isValid()) {

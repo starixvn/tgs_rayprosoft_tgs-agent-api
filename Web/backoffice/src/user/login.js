@@ -61,7 +61,7 @@ export const Form = () => {
                   component={InputField.Formik}
                   name="username"
                   placeholder="Username"
-                  autocomplete="username"
+                  autoComplete="username"
                 />
                 <Text>
                   {errors.username && touched.username && errors.username}
@@ -71,7 +71,7 @@ export const Form = () => {
                   name="password"
                   type="password"
                   placeholder="Password"
-                  autocomplete="current-password"
+                  autoComplete="current-password"
                 />
                 <Text>
                   {errors.password && touched.password && errors.password}
@@ -89,6 +89,7 @@ export const Form = () => {
   )
 }
 
+//TODO: use alert dialog
 const ErrorDialog = ({ dialog, error, ...props }) => {
   return (
     <Dialog.Modal
@@ -96,7 +97,7 @@ const ErrorDialog = ({ dialog, error, ...props }) => {
       variant="alert"
       title={error}
       placement="top"
-      footer={(props) => (
+      footer={
         <Flex
           alignX="right"
           css={css`
@@ -107,7 +108,7 @@ const ErrorDialog = ({ dialog, error, ...props }) => {
             Close
           </Modal.Disclosure>
         </Flex>
-      )}
+      }
       {...dialog}
     ></Dialog.Modal>
   )

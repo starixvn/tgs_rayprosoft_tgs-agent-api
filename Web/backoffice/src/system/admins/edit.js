@@ -33,7 +33,10 @@ import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Field as DepartmentSelectField } from "../departments/select"
 import { Field as RoleSelectField } from "../groups/select"
-import InputField from "../../input/Field"
+import {
+  Field as InputField,
+  Password as PasswordField
+} from "../../input/Field"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -62,6 +65,79 @@ export const AddButton = ({ onSubmitted, ...props }) => {
   )
 }
 
+export const EditButton = ({ user, onSubmitted, ...props }) => {
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  return (
+    <>
+      <Modal.Disclosure
+        use={Button}
+        ref={disclosureRef}
+        css={css`
+          flex: unset;
+        `}
+        {...dialog}
+      >
+        {edit()}
+      </Modal.Disclosure>
+      {dialog.visible && (
+        <SubmitDialog
+          user={user}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={disclosureRef}
+        />
+      )}
+    </>
+  )
+}
+
+export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  return (
+    <>
+      <Modal.Disclosure
+        use={Button}
+        ref={disclosureRef}
+        css={css`
+          flex: unset;
+        `}
+        {...dialog}
+      >
+        {editPassword()}
+      </Modal.Disclosure>
+      <PasswordDialog
+        user={user}
+        editPassword
+        onSubmitted={onSubmitted}
+        dialog={dialog}
+        finalFocusRef={disclosureRef}
+      />
+    </>
+  )
+}
+
+const PasswordDialog = ({
+  user = {},
+  onSubmitted,
+  dialog,
+  finalFocusRef,
+  ...props
+}) => {
+  return (
+    <Dialog.Modal
+      title={title()}
+      unstable_finalFocusRef={finalFocusRef}
+      {...dialog}
+    >
+      <Input />
+    </Dialog.Modal>
+  )
+}
+
 const SubmitDialog = ({
   user = {},
   onSubmitted,
@@ -70,6 +146,8 @@ const SubmitDialog = ({
   ...props
 }) => {
   let { id } = user
+  let isUpdate = !!id
+  let isCreate = !isUpdate
 
   const create = (data) =>
     client.post(`/api/users`, {
@@ -84,28 +162,33 @@ const SubmitDialog = ({
       }
     })
 
-  const deferFn = ([data]) => (id ? update(data) : create(data))
+  const deferFn = ([data]) => (isUpdate ? update(data) : create(data))
 
-  let sumit = useAsync({ deferFn })
+  let initialValues = isCreate
+    ? {
+        username: "",
+        departmentId: "",
+        roleId: "",
+        name: "",
+        password: "",
+        confirmPassword: ""
+      }
+    : {
+        departmentId: user.departmentId,
+        roleId: user.roleId,
+        name: user.name,
+        status: user.status
+      }
+  let asyncSubmit = useAsync({ deferFn })
   return (
     <>
-      <Formik
-        initialValues={{
-          username: "",
-          departmentName: "",
-          role: "",
-          password: ""
-        }}
-        onSubmit={(data) => {
-          submit.run(data)
-        }}
-      >
+      <Formik initialValues={initialValues} onSubmit={asyncSubmit.run}>
         <FormDialog user={user} dialog={dialog}></FormDialog>
       </Formik>
-      <IfRejected state={sumit}>
-        {(error) => <AlertDialog {...error} finalFocusRef={inputRef} />}
+      <IfRejected state={asyncSubmit}>
+        {(error) => <AlertDialog {...error} />}
       </IfRejected>
-      <IfFulfilled state={sumit}>
+      <IfFulfilled state={asyncSubmit}>
         {(_) => {
           useEffect(() => {
             dialog.hide()
@@ -126,7 +209,13 @@ const FormDialog = ({
   finalFocusRef,
   ...props
 }) => {
-  const { values, submitForm, resetForm, isPending } = useFormikContext()
+  const {
+    values,
+    errors,
+    submitForm,
+    resetForm,
+    isPending
+  } = useFormikContext()
 
   let { id } = user
   let isUpdate = !!id
@@ -145,6 +234,8 @@ const FormDialog = ({
       showActionButtons
       actionButtonsProps={{
         isLoading: isPending,
+        submitText: confirmLabel(),
+        cancelText: cancelLabel(),
         onClickSubmit: submitForm,
         onClickCancel: resetForm
       }}
@@ -159,15 +250,15 @@ const FormDialog = ({
             grid-template-rows: auto;
             grid-template-areas:
               "username usernameField"
-              "department departmentField"
-              "role roleField"
+              "departmentId departmentIdField"
+              "roleId roleIdField"
               "name nameField"
-              "status statusField"
               "password passwordField"
-              "confirmPassword confirmPasswordField";
+              "confirmPassword confirmPasswordField"
+              "status statusField";
           `}
         >
-          <UernameLabelInput />
+          <UernameLabelInput disabled={isUpdate} />
           <DepartmentLabelSelect />
           <RoleLabelSelect />
           <NameLabelInput />
@@ -209,24 +300,25 @@ const FieldBox = ({ name, children, ...props }) => {
         grid-area: ${name}Field;
       `}
       margin="major-1"
+      marginBottom="0"
     >
       {children}
     </Box>
   )
 }
 
-const UernameLabelInput = ({ name = "username" }) => {
+const UernameLabelInput = ({ name = "username", disabled }) => {
   return (
     <>
       <LabelBox name={name} label={username()} />
       <FieldBox name={name}>
-        <InputField name={name} required />
+        <InputField name={name} required={!disabled} disabled={disabled} />
       </FieldBox>
     </>
   )
 }
 
-const DepartmentLabelSelect = ({ name = "department" }) => {
+const DepartmentLabelSelect = ({ name = "departmentId" }) => {
   return (
     <>
       <LabelBox name={name} label={departmentName()} />
@@ -237,7 +329,7 @@ const DepartmentLabelSelect = ({ name = "department" }) => {
   )
 }
 
-const RoleLabelSelect = ({ name = "role" }) => {
+const RoleLabelSelect = ({ name = "roleId" }) => {
   return (
     <>
       <LabelBox name={name} label={role()} />
@@ -259,25 +351,28 @@ const NameLabelInput = ({ name = "name" }) => {
   )
 }
 
-//TODO: password validation
 const PasswordLabelInput = ({ name = "password" }) => {
   return (
     <>
       <LabelBox name={name} label={password()} />
       <FieldBox name={name}>
-        <InputField name={name} type="password" />
+        <PasswordField name={name} autoComplete="new-password" />
       </FieldBox>
     </>
   )
 }
 
-//TODO: password validation
 const ConfirmPasswordLabelInput = ({ name = "confirmPassword" }) => {
+  const { values = {} } = useFormikContext()
   return (
     <>
       <LabelBox name={name} label={confirmPassword()} />
       <FieldBox name={name}>
-        <InputField name={name} type="password" />
+        <PasswordField
+          name={name}
+          matchPassword={values?.password ?? ""}
+          autoComplete="new-password"
+        />
       </FieldBox>
     </>
   )
@@ -299,6 +394,10 @@ const title = () => "新增管理员"
 
 const add = () => "新增"
 
+const edit = () => "修改"
+
+const editPassword = () => "修改密码"
+
 const username = () => "用户名"
 
 const departmentName = () => "部门"
@@ -312,3 +411,7 @@ const password = () => "密码"
 const confirmPassword = () => "确认密码"
 
 const status = () => "状态"
+
+const confirmLabel = () => "确定"
+
+const cancelLabel = () => "取消"
