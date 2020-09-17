@@ -12,6 +12,8 @@
 # Set this path to your site's directory.
 root * /usr/share/caddy
 
+try_files {path} /index.html
+
 # Enable the static file server.
 file_server
 

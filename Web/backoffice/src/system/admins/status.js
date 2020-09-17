@@ -29,10 +29,20 @@ import { Field as _Field } from "../../select/Field"
 const Disabled = 0
 const Enabled = 1
 
+export const from = (value) => {
+  if (value === "Disabled") {
+    return Disabled
+  }
+  if (value === Enabled) {
+    return Enabled
+  }
+  return value
+}
+
 export const Select = ({ name, required, ...props }) => {
   return (
     <_Field name={name} required={required}>
-      {(props) => <Select options={statusOptions()} {...props} />}
+      {(props) => <_Select options={statusOptions()} {...props} />}
     </_Field>
   )
 }
@@ -40,7 +50,7 @@ export const Select = ({ name, required, ...props }) => {
 const statusOptions = () => [
   {
     label: "",
-    disabled
+    value: null
   },
   {
     label: label(Disabled),
