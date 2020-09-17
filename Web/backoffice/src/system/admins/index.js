@@ -19,6 +19,7 @@ import { AddButton, EditButton, EditPasswordButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import AsyncTable, { useTableState } from "../../table/async"
+import { label as statusLabel } from "./status"
 
 export const Code = "admins"
 
@@ -198,6 +199,9 @@ const tableColumns = ({ fetchTable }) => [
     },
     cell: {
       textAlign: "center"
+    },
+    Cell: ({ value }) => {
+      return statusLabel(value)
     }
   },
   {

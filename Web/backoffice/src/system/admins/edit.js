@@ -129,7 +129,7 @@ const PasswordDialog = ({
 }) => {
   return (
     <Dialog.Modal
-      title={title()}
+      title={createTitle()}
       unstable_finalFocusRef={finalFocusRef}
       {...dialog}
     >
@@ -156,10 +156,7 @@ const SubmitDialog = ({
 
   const update = (data) =>
     client.put(`/api/users/${id}`, {
-      data: {
-        ...role,
-        ...data
-      }
+      data
     })
 
   const deferFn = ([data]) => (isUpdate ? update(data) : create(data))
@@ -179,6 +176,7 @@ const SubmitDialog = ({
         name: user.name,
         status: user.status
       }
+
   let asyncSubmit = useAsync({ deferFn })
   return (
     <>
@@ -230,7 +228,7 @@ const FormDialog = ({
 
   return (
     <Dialog.Modal
-      title={title()}
+      title={isCreate ? createTitle() : updateTitle()}
       showActionButtons
       actionButtonsProps={{
         isLoading: isPending,
@@ -258,7 +256,11 @@ const FormDialog = ({
               "status statusField";
           `}
         >
-          <UernameLabelInput disabled={isUpdate} />
+          <UernameLabelInput
+            user={user}
+            isCreate={isCreate}
+            isUpdate={isUpdate}
+          />
           <DepartmentLabelSelect />
           <RoleLabelSelect />
           <NameLabelInput />
@@ -307,12 +309,13 @@ const FieldBox = ({ name, children, ...props }) => {
   )
 }
 
-const UernameLabelInput = ({ name = "username", disabled }) => {
+const UernameLabelInput = ({ user, name = "username", isCreate, isUpdate }) => {
   return (
     <>
-      <LabelBox name={name} label={username()} />
+      <LabelBox name={name} label={username()} required={isCreate} />
       <FieldBox name={name}>
-        <InputField name={name} required={!disabled} disabled={disabled} />
+        {isCreate && <InputField name={name} required />}
+        {isUpdate && <InputField name={name} value={user?.username} disabled />}
       </FieldBox>
     </>
   )
@@ -383,14 +386,18 @@ const StatusLabelSelect = ({ name = "status" }) => {
     <>
       <LabelBox name={name} label={status()} />
       <FieldBox name={name}>
-        <InputField name={name} type="password" />
+        <InputField name={name} />
       </FieldBox>
     </>
   )
 }
 
 //TODO: i18n
-const title = () => "新增管理员"
+const createTitle = () => "新增管理员"
+
+const updateTitle = () => "修改"
+
+const passwordTitle = () => "修改密码"
 
 const add = () => "新增"
 
