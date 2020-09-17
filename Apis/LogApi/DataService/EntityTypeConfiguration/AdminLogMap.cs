@@ -25,7 +25,7 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
 
             builder.Property(c => c.Path)
                 .HasColumnType(ColumnTypes.Nvarchar(256))
-                .IsRequired()
+                .IsRequired(false)
                 .IsUnicode();
 
             builder.Property(c => c.Method)

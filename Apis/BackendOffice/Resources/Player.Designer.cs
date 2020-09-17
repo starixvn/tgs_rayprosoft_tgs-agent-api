@@ -68,5 +68,23 @@ namespace TGS.Apis.BackendOffice.Resources {
                 return ResourceManager.GetString("NotFound", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parent player is not found..
+        /// </summary>
+        public static string ParentPlayerNotFound {
+            get {
+                return ResourceManager.GetString("ParentPlayerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update type is not found..
+        /// </summary>
+        public static string UpdateTypeNotFound {
+            get {
+                return ResourceManager.GetString("UpdateTypeNotFound", resourceCulture);
+            }
+        }
     }
 }

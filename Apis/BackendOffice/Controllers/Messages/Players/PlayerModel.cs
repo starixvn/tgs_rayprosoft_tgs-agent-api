@@ -22,6 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
 
         public class BankModel
         {
+            public Guid Id { get; set; }
             public string RealName { get; set; }
             public string BankName { get; set; }
             public string BankAccount { get; set; }

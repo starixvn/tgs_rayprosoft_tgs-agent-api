@@ -11,6 +11,23 @@ namespace TGS.Core.DataServices.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
+                name: "AuditLogs",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    ModuleName = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: true),
+                    Operation = table.Column<string>(type: "nvarchar(256)", nullable: true),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BetLimitGroups",
                 schema: "dbo",
                 columns: table => new
@@ -632,7 +649,9 @@ namespace TGS.Core.DataServices.Migrations
                     Wechat = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     HasAgent = table.Column<bool>(nullable: false),
                     ParentPlayerCode = table.Column<string>(nullable: true),
-                    VipId = table.Column<Guid>(nullable: false)
+                    VipId = table.Column<Guid>(nullable: false),
+                    UpdatedByUsername = table.Column<string>(nullable: true),
+                    UpdatedOn = table.Column<DateTimeOffset>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -965,12 +984,15 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-
             InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AuditLogs",
+                schema: "dbo");
+
             migrationBuilder.DropTable(
                 name: "GameProviderBetLimits",
                 schema: "dbo");

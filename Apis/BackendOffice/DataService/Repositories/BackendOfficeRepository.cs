@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
+using Setting = TGS.Apis.BackendOffice.DataService.Models.Setting;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {

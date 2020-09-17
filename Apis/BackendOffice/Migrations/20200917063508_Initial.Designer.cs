@@ -5,13 +5,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 
 namespace TGS.Apis.BackendOffice.Migrations
 {
     [DbContext(typeof(BackendOfficeRepository))]
-    [Migration("20200911093038_Initial")]
+    [Migration("20200917063508_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -187,7 +186,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                         .HasColumnType("tinyint");
 
                     b.Property<string>("TimeZone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UpdatedByUsername")

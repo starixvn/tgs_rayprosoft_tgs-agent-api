@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Apis.BackendOffice.Migrations
 {
-    [ExcludeFromCodeCoverage]
     public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,7 +84,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     LastLoginIp = table.Column<string>(type: "nvarchar(128)", nullable: true),
                     LastLoginTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(30)", nullable: false),
-                    TimeZone = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    TimeZone = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),

@@ -120,4 +120,10 @@
   <data name="NotFound" xml:space="preserve">
     <value>Player not found.</value>
   </data>
+  <data name="ParentPlayerNotFound" xml:space="preserve">
+    <value>Parent player is not found.</value>
+  </data>
+  <data name="UpdateTypeNotFound" xml:space="preserve">
+    <value>Update type is not found.</value>
+  </data>
 </root>
