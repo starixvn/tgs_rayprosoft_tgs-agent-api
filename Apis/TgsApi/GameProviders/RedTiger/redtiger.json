@@ -1,0 +1,8 @@
+{
+  "GameProvider": {
+    "Domain": "gp-tgp.tgpaccess.com"
+  },
+  "FeatureManagement": {
+    "RT": true
+  }
+}

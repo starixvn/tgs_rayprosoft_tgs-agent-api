@@ -39,7 +39,7 @@ namespace TGS.Apis.LogApi.Controllers
                 MachineName = Environment.MachineName,
                 HostName = hostName,
                 HostIp = hostIp.ToString(),
-                Environment = Environment.GetEnvironmentVariable(Consts.Environment),
+                Environment = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.Environment),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectLogDb = await _logRepository.CanConnectionAsync(),
