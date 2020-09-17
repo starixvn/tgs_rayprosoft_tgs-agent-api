@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Tests.TestsCommon;
 
@@ -20,7 +21,9 @@ namespace TGS.Tests.Redis.IntegrationTests
         {
             var provider = new ServiceCollection()
                 .AddConfiguration()
-                .AddRedis()
+                .AddTgsLog()
+                .AddLogging()
+                .AddRedis()                
                 .BuildServiceProvider();
 
             _redisPublisher = provider.GetService<IRedisPublisher>();

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.DataServices;
-using TGS.Core.Infrastructures;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;

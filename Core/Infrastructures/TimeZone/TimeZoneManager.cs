@@ -1,7 +1,7 @@
 ﻿using System;
 using TimeZoneConverter;
 
-namespace TGS.Core.Infrastructures
+namespace TGS.Core.Infrastructures.TimeZone
 {
     public interface ITimeZoneManager
     {
