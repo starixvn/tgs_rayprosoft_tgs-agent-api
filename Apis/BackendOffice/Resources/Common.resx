@@ -123,7 +123,22 @@
   <data name="NotFound" xml:space="preserve">
     <value>not found.</value>
   </data>
+  <data name="Please upload .xlsx file and try again." xml:space="preserve">
+    <value>Incorrect file format.
+Please upload .xlsx file and try again.</value>
+  </data>
+  <data name="PleaseUploadXlsxFile" xml:space="preserve">
+    <value>PleaseUploadXlsxFile</value>
+    <comment>Incorrect file format.</comment>
+  </data>
   <data name="RequiredSetting" xml:space="preserve">
     <value>The setting is required.</value>
+  </data>
+  <data name="UnsupportedMediaType" xml:space="preserve">
+    <value>Unsupported media type</value>
+  </data>
+  <data name="UnsupportedMultiPartContent" xml:space="preserve">
+    <value>Unsupported multi-part content</value>
+    <comment>Unsupported multi-part content</comment>
   </data>
 </root>

@@ -9,7 +9,8 @@ namespace TGS.Core.DataServices.Models
         public Guid Id { get; set; }
         public string Subject { get; set; }
         public string Content { get; set; }
-        public string Description { get; set; }
+        public string Remarks { get; set; }
+        public bool AllPlayers { get; set; }
         public StationLetterStatus Status { get; set; }
         public string VerifiedByUsername { get; set; }
         public string CreatedByUsername { get; set; }

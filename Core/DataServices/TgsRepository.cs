@@ -41,6 +41,9 @@ namespace TGS.Core.DataServices
         DbSet<PlayerBank> ITgsRepository.PlayerBanks { get; set; }
         DbSet<VipLevel> ITgsRepository.VipLevels { get; set; }
         DbSet<AuditLog> ITgsRepository.AuditLogs { get; set; }
+        DbSet<Announcement> ITgsRepository.Announcements { get; set; }
+        DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
+        DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -70,6 +73,7 @@ namespace TGS.Core.DataServices
         {
             return SaveChangesAsync();
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
@@ -108,6 +112,10 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new PlayerBankMap());
             modelBuilder.ApplyConfiguration(new VipLevelMap());
             modelBuilder.ApplyConfiguration(new AuditLogMap());
+
+            modelBuilder.ApplyConfiguration(new AnnouncementMap());
+            modelBuilder.ApplyConfiguration(new StationLetterPlayerMap());
+            modelBuilder.ApplyConfiguration(new StationLetterMap());
         }
 
         void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
@@ -119,6 +127,7 @@ namespace TGS.Core.DataServices
         {
             SaveChanges();
         }
+
         DbSet<T> IBaseRepository.Set<T>()
         {
             return Set<T>();

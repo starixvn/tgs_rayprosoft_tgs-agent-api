@@ -21,7 +21,7 @@ using TGS.Core.Models;
 using TGS.Services.GameOperations.Extensions;
 using TGS.Services.Operations.Extensions;
 
-namespace TGS.Apis.TgsApi
+namespace TGS.Apis.TgsApi.Commons
 {
     public abstract class BaseStartup
     {
@@ -29,7 +29,7 @@ namespace TGS.Apis.TgsApi
         protected IConfiguration Configuration { get; }
         protected abstract string LogPrefix { get; }
 
-        public BaseStartup(IConfiguration configuration, IWebHostEnvironment env)
+        protected BaseStartup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Environment = env;
             Configuration = configuration;
@@ -53,7 +53,7 @@ namespace TGS.Apis.TgsApi
 
             AddCustomDependencyServices(services);
 
-            services.AddFeatureManagement();    
+            services.AddFeatureManagement();
 
             if (Environment.IsDevelopment())
             {

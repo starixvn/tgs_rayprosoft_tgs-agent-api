@@ -61,5 +61,11 @@ namespace TGS.Core.DataServices
         DbSet<VipLevel> VipLevels { get; set; }
 
         DbSet<AuditLog> AuditLogs { get; set; }
+
+        DbSet<Announcement> Announcements { get; set; }
+
+        DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
+
+        DbSet<StationLetter> StationLetters { get; set; }
     }
 }

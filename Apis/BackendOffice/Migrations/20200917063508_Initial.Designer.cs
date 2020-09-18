@@ -35,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
@@ -68,7 +68,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DisplayName")
@@ -114,7 +114,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
 
