@@ -10,9 +10,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
         public string Remarks { get; set; }
         public string CreatedByUsername { get; set; }
         public string VerifiedByUsername { get; set; }
-        public DateTimeOffset UpdatedOn { get; set; }
-        public DateTimeOffset From { get; set; }
-        public DateTimeOffset To { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
         public string Status { get; set; }
     }
 }

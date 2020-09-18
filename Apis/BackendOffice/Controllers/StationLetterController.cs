@@ -1,18 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
+using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
-using VerifyRequest = TGS.Apis.BackendOffice.Controllers.Messages.Announcement.VerifyRequest;
+using VerifyRequest = TGS.Apis.BackendOffice.Controllers.Messages.StationLetter.VerifyRequest;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -33,10 +36,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet, Description("Get station letters")]
-        public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] PageableRequest request)
+        public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] PageableRequest request)
         {
             return _queries.GetQueries()
-                .Select(a => new AnnouncementModel
+                .Select(a => new StationLetterModel
                 {
                     Id = a.Id,
                     Subject = a.Subject,
@@ -66,15 +69,13 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == types[0])
             {
-                stationLetter.Remarks = request.Remarks;
                 stationLetter.Status = StationLetterStatus.InVerify;
             }
             else if (type == types[1])
             {
-                stationLetter.Remarks = request.Remarks;
                 stationLetter.Status = StationLetterStatus.Rejected;
             }
-
+            stationLetter.Remarks = request.Remarks;
             stationLetter.UpdatedByUsername = Username;
             stationLetter.UpdatedOn = DateTimeOffset.Now;
 
@@ -85,25 +86,25 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPut("{id}"), Description("Update a station letter")]
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] StationLetterRequest request)
         {
-            var announcement = await _queries.GetSingleAsync(p => p.Id == id);
-            if (announcement == null)
+            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+            if (stationLetter == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
             }
 
-            announcement.Subject = request.Content;
-            announcement.Content = request.Subject;
-            announcement.UpdatedByUsername = Username;
-            announcement.UpdatedOn = DateTimeOffset.Now;
+            stationLetter.Subject = request.Content;
+            stationLetter.Content = request.Subject;
+            stationLetter.UpdatedByUsername = Username;
+            stationLetter.UpdatedOn = DateTimeOffset.Now;
 
-            await _commands.UpdateAsync(announcement);
+            await _commands.UpdateAsync(stationLetter);
             return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPost, Description("Create a station letter")]
         public async Task<MessageResponse> CreateAsync([FromBody] StationLetterRequest request)
         {
-            var announcement = new StationLetter
+            var stationLetter = new StationLetter
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 Subject = request.Subject,
@@ -115,7 +116,28 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            await _commands.CreateAsync(announcement);
+            await _commands.CreateAsync(stationLetter);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost, Description("Upload player file")]
+        public async Task<MessageResponse> UpdateAsync(IFormFile file)
+        {
+            var users = new List<UserModel>();
+
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            using (var stream = new MemoryStream())
+            {
+                file.CopyTo(stream);
+                stream.Position = 0;
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    while (reader.Read()) //Each row of the file
+                    {
+                        users.Add(new UserModel { Name = reader.GetValue(0).ToString(), Username = reader.GetValue(1).ToString() });
+                    }
+                }
+            }
             return CreateValidResponse<MessageResponse>();
         }
     }
