@@ -71,7 +71,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Name")
@@ -143,7 +143,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("EndpointPath")
@@ -221,7 +221,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
@@ -296,7 +296,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("DesktopEndpoint")
@@ -432,7 +432,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("HelpUrl")
@@ -799,7 +799,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Name")
@@ -882,7 +882,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UpdatedByUsername")
@@ -984,7 +984,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .IsRequired()
                         .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
