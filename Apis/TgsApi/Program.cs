@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi
         private static readonly IReadOnlyDictionary<string, Type> StartupMap = new Dictionary<string, Type>
         { 
             { Consts.GameProvider.RedTiger, typeof(RedTigerStartup) },
-            { Consts.GameProvider.RedTiger, typeof(EvolutionStartup) },
+            { Consts.GameProvider.Evolution, typeof(EvolutionStartup) },
         };
 
         public static Task Main(string[] args)
@@ -29,8 +29,8 @@ namespace TGS.Apis.TgsApi
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
-            var gpCode = Environment.GetEnvironmentVariable("GameProviderCode");
-            var gpName = Environment.GetEnvironmentVariable("GameProviderName");
+            var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode);
+            var gpName = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderName);
 
             if (!StartupMap.TryGetValue(gpCode, out var startup))
             {
@@ -41,11 +41,13 @@ namespace TGS.Apis.TgsApi
                            .ConfigureAppConfiguration((hostContext, config) =>
                            {
                                var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{gpName}/{gpName.ToLower()}.json";
-                               config.AddJsonFile(path);
+                               config.AddJsonFile(path)
+                                     .AddEnvironmentVariables();
                            })
                            .ConfigureWebHostDefaults(webBuilder =>
                            {
-                               webBuilder.UseStartup(startup);
+                               webBuilder.UseStartup(startup)
+                                         .UseKestrel(options => options.AddServerHeader = false);
                            })
                            .ConfigureLogging((hostContext, logging) =>
                            {

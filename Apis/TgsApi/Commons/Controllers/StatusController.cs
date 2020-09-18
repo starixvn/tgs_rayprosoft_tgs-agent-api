@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.Commons.Filters;
 using TGS.Apis.TgsApi.Models;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
