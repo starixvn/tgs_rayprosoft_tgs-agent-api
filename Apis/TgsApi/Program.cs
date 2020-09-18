@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,23 +30,24 @@ namespace TGS.Apis.TgsApi
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
-            var gpCode = Environment.GetEnvironmentVariable("GameProviderCode");
-            var gpName = Environment.GetEnvironmentVariable("GameProviderName");
-
-            if (!StartupMap.TryGetValue(gpCode, out var startup))
-            {
-                throw new InvalidOperationException($"No startup is found with game provider code: {gpCode}");
-            }
+            var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ?? string.Empty;
+            var gpName = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderName) ?? string.Empty;
 
             return Host.CreateDefaultBuilder(args)
                            .ConfigureAppConfiguration((hostContext, config) =>
                            {
                                var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{gpName}/{gpName.ToLower()}.json";
-                               config.AddJsonFile(path);
+                               config.AddJsonFile(path, true);
                            })
                            .ConfigureWebHostDefaults(webBuilder =>
                            {
-                               webBuilder.UseStartup(startup);
+                               if (!StartupMap.TryGetValue(gpCode, out var startup))
+                               {
+                                    startup = StartupMap.Values.ElementAt(0);
+                               }    
+
+                               webBuilder.UseStartup(startup)
+                                         .UseKestrel(options => options.AddServerHeader = false);
                            })
                            .ConfigureLogging((hostContext, logging) =>
                            {
