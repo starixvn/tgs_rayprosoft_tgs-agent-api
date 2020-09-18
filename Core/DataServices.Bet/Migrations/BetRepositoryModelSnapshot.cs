@@ -38,7 +38,7 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<bool?>("ClosingRoundExplicitRequest")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ExternalBetId")

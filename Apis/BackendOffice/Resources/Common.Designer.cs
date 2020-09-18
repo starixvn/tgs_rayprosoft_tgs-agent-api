@@ -79,11 +79,48 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incorrect file format.
+        ///Please upload .xlsx file and try again..
+        /// </summary>
+        public static string Please_upload__xlsx_file_and_try_again_ {
+            get {
+                return ResourceManager.GetString("Please upload .xlsx file and try again.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PleaseUploadXlsxFile.
+        /// </summary>
+        public static string PleaseUploadXlsxFile {
+            get {
+                return ResourceManager.GetString("PleaseUploadXlsxFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The setting is required..
         /// </summary>
         public static string RequiredSetting {
             get {
                 return ResourceManager.GetString("RequiredSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported media type.
+        /// </summary>
+        public static string UnsupportedMediaType {
+            get {
+                return ResourceManager.GetString("UnsupportedMediaType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported multi-part content.
+        /// </summary>
+        public static string UnsupportedMultiPartContent {
+            get {
+                return ResourceManager.GetString("UnsupportedMultiPartContent", resourceCulture);
             }
         }
     }

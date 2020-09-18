@@ -1,0 +1,131 @@
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
+using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.DataServices.Models;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
+
+namespace TGS.Apis.BackendOffice.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AnnouncementController : BaseUserContextController
+    {
+        private readonly ITgsQueries<Announcement> _queries;
+        private readonly ITgsCommands<Announcement> _commands;
+
+        public AnnouncementController(
+            ITgsQueries<Announcement> queries,
+            ITgsCommands<Announcement> commands,
+            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+        {
+            _queries = queries;
+            _commands = commands;
+        }
+
+        [HttpGet, Description("Get announcements")]
+        public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] PageableRequest request)
+        {
+            return _queries.GetQueries()
+                .Select(a => new AnnouncementModel
+                {
+                    Id = a.Id,
+                    Subject = a.Subject,
+                    Content = a.Content,
+                    Remarks = a.Remarks,
+                    CreatedByUsername = a.CreatedByUsername,
+                    VerifiedByUsername = a.VerifiedByUsername,
+                    From = a.From,
+                    To = a.To,
+                    Status = (DateTimeOffset.Now > a.To) ? AnnounceStatus.Expired.ToString() : a.Status.ToString()
+                })
+                .CreatePagedResponseAsync(request);
+        }
+
+
+        [HttpPut("{id}/{type}"), Description("Update a announcement")]
+        public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
+        {
+            var types = new[] { "pass", "reject", "invalid" };
+            var announcement = await _queries.GetSingleAsync(p => p.Id == id);
+            if (announcement == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            }
+
+            if (!types.Contains(type))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.InvalidUrl);
+            }
+
+            if (type == types[0])
+            {
+                announcement.Remarks = request.Remarks;
+                announcement.Status = AnnounceStatus.Effective;
+            }
+            else if (type == types[1])
+            {
+                announcement.Remarks = request.Remarks;
+                announcement.Status = AnnounceStatus.Rejected;
+            }
+            else if (type == types[2])
+            {
+                announcement.Status = AnnounceStatus.Invalid;
+            }
+
+            announcement.UpdatedByUsername = Username;
+            announcement.UpdatedOn = DateTimeOffset.Now;
+
+            await _commands.UpdateAsync(announcement);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut("{id}"), Description("Update a announcement")]
+        public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] AnnouncementRequest request)
+        {
+            var announcement = await _queries.GetSingleAsync(p => p.Id == id);
+            if (announcement == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            }
+
+            announcement.Subject = request.Content;
+            announcement.Content = request.Subject;
+            announcement.From = request.From;
+            announcement.To = request.To;
+            announcement.UpdatedByUsername = Username;
+            announcement.UpdatedOn = DateTimeOffset.Now;
+
+            await _commands.UpdateAsync(announcement);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost, Description("Create a announcement")]
+        public async Task<MessageResponse> CreateAsync([FromBody] AnnouncementRequest request)
+        {
+            var announcement = new Announcement
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                Subject = request.Subject,
+                Content = request.Content,
+                From = request.From,
+                To = request.To,
+                Status = AnnounceStatus.InVerify,
+                CreatedByUsername = Username,
+                UpdatedByUsername = Username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            await _commands.CreateAsync(announcement);
+            return CreateValidResponse<MessageResponse>();
+        }
+    }
+}

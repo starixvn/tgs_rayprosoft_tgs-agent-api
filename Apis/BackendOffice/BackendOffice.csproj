@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="EFCore.BulkExtensions" Version="3.1.5" />
+    <PackageReference Include="ExcelDataReader" Version="3.6.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="9.2.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.2.0" />
@@ -39,6 +40,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Resources\StationLetter - Copy.Designer.cs">
+      <DependentUpon>StationLetter.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\Announcement.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Announcement.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Common - Copy.Designer.cs">
       <DependentUpon>Common.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -74,6 +85,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Setting.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\StationLetter.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StationLetter.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\User - Copy.Designer.cs">
       <DependentUpon>User.Designer.cs</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -91,6 +107,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources\StationLetter.resx">
+      <LastGenOutput>StationLetter.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Announcement.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Announcement.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Common.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Common.Designer.cs</LastGenOutput>

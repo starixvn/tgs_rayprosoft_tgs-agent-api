@@ -102,7 +102,7 @@ namespace BackendOffice.UnitTests.Controllers
             //response.Player.Id.Should().Be(Player.Id);
             //response.Player.Name.Should().Be(Player.Name);
             //response.Player.DisplayName.Should().Be(Player.DisplayName);
-            //response.Player.Description.Should().Be(Player.Description);
+            //response.Player.Remarks.Should().Be(Player.Remarks);
             //response.Player.CreatedByUsername.Should().Be(Player.CreatedByUsername);
             //response.Player.UpdatedByUsername.Should().Be(Player.UpdatedByUsername);
             //response.Player.CreatedOn.Should().Be(Player.CreatedOn);

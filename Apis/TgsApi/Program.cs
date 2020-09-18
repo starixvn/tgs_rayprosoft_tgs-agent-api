@@ -17,9 +17,9 @@ namespace TGS.Apis.TgsApi
     public class Program
     {
         private static readonly IReadOnlyDictionary<string, Type> StartupMap = new Dictionary<string, Type>
-        { 
+        {
             { Consts.GameProvider.RedTiger, typeof(RedTigerStartup) },
-            { Consts.GameProvider.RedTiger, typeof(EvolutionStartup) },
+            { Consts.GameProvider.Evolution, typeof(EvolutionStartup) },
         };
 
         public static Task Main(string[] args)
@@ -53,7 +53,7 @@ namespace TGS.Apis.TgsApi
                                logging.SetMinimumLevel(LogLevel.Trace);
                            })
                            .UseNLog();
-                           
+
         }
     }
 }

@@ -37,6 +37,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithOne(p => p.ParentPlayer)
                 .HasForeignKey(p => p.PlayerCode);
 
+            builder.HasMany(p => p.Letters)
+                .WithOne(p => p.Player)
+                .HasForeignKey(p => p.PlayerCode);
+
             builder.Property(c => c.Username)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();

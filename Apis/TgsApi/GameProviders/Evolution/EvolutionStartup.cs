@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using TGS.Apis.TgsApi.Commons;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution
 {
