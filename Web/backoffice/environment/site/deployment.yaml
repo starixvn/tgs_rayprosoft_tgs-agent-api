@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backoffice-site
-          image: registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.0.1
+          image: registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.0.1-5315ce0
           ports:
             - containerPort: 80
           volumeMounts:
