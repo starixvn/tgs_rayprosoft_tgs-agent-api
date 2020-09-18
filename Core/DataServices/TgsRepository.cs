@@ -73,6 +73,7 @@ namespace TGS.Core.DataServices
         {
             return SaveChangesAsync();
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
@@ -126,6 +127,7 @@ namespace TGS.Core.DataServices
         {
             SaveChanges();
         }
+
         DbSet<T> IBaseRepository.Set<T>()
         {
             return Set<T>();

@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
+using ClosedXML.Extensions;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
-using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.DataServices.Models;
@@ -24,15 +28,21 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class StationLetterController : BaseUserContextController
     {
         private readonly ITgsQueries<StationLetter> _queries;
+        private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsCommands<StationLetter> _commands;
+        private readonly ITgsCommands<StationLetterPlayer> _playerCommands;
 
         public StationLetterController(
             ITgsQueries<StationLetter> queries,
+            ITgsQueries<Player> playerQueries,
             ITgsCommands<StationLetter> commands,
+            ITgsCommands<StationLetterPlayer> playerCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
+            _playerQueries = playerQueries;
             _commands = commands;
+            _playerCommands = playerCommands;
         }
 
         [HttpGet, Description("Get station letters")]
@@ -109,6 +119,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Id = GuidExtensions.NewSequentialGuid(),
                 Subject = request.Subject,
                 Content = request.Content,
+                AssignedAllPlayers = request.AssignedAllPlayers,
                 Status = StationLetterStatus.InVerify,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
@@ -117,16 +128,34 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             await _commands.CreateAsync(stationLetter);
+
+            var allPlayers = await _playerQueries.GetQueries()
+                .Where(p => p.Status == PlayerStatus.Enabled)
+                .ToArrayAsync();
+
+            if (!request.AssignedAllPlayers)
+            {
+                allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
+            }
+
+            var players = allPlayers.Select(p => new StationLetterPlayer
+            {
+                PlayerCode = p.PlayerCode,
+                StationLetterId = stationLetter.Id
+            }).ToArray();
+
+            _playerCommands.BatchInsert(players);
+
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost, Description("Upload player file")]
-        public async Task<MessageResponse> UpdateAsync(IFormFile file)
+        [HttpPost("upload"), Description("Upload player file")]
+        public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
         {
-            var users = new List<UserModel>();
+            var users = new List<string>();
 
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            using (var stream = new MemoryStream())
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            await using (var stream = new MemoryStream())
             {
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -134,11 +163,45 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     while (reader.Read()) //Each row of the file
                     {
-                        users.Add(new UserModel { Name = reader.GetValue(0).ToString(), Username = reader.GetValue(1).ToString() });
+                        users.Add(reader.GetValue(0).ToString());
                     }
                 }
             }
-            return CreateValidResponse<MessageResponse>();
+
+            var allPlayers = await _playerQueries.GetQueries()
+                .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))
+                .ToArrayAsync();
+
+            var players = from u in users
+                          join p in allPlayers on u equals p.Username
+                              into tmpU
+                          from p in tmpU.DefaultIfEmpty()
+                          select new GetPlayerFromFileResponse.PlayerModel
+                          {
+                              Username = u,
+                              Exists = p != null
+                          };
+
+            return new GetPlayerFromFileResponse
+            {
+                Valid = true,
+                Players = players.ToArray()
+            };
+        }
+
+        [HttpPost("export"), Description("Export player file")]
+        public async Task<HttpResponseMessage> ExportAsync()
+        {
+            var wb = await Task.Run(() =>
+            {
+                var wb = new XLWorkbook();
+                var ws = wb.AddWorksheet("Player");
+                ws.Cell("A1").Value = "Player1";
+                ws.Cell("A2").Value = "Player2";
+
+                return wb;
+            });
+            return wb.Deliver("Player.xlsx");
         }
     }
 }

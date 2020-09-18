@@ -29,9 +29,13 @@ namespace TGS.Apis.TgsApi
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
+#if DEBUG
+            var gpCode = "RT";
+            var gpName = "RedTiger";
+#else
             var gpCode = Environment.GetEnvironmentVariable("GameProviderCode");
             var gpName = Environment.GetEnvironmentVariable("GameProviderName");
-
+#endif
             if (!StartupMap.TryGetValue(gpCode, out var startup))
             {
                 throw new InvalidOperationException($"No startup is found with game provider code: {gpCode}");
