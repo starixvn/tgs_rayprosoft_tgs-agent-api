@@ -114,7 +114,6 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
       </Modal.Disclosure>
       <PasswordDialog
         user={user}
-        editPassword
         onSubmitted={onSubmitted}
         dialog={dialog}
         finalFocusRef={disclosureRef}
@@ -130,14 +129,42 @@ const PasswordDialog = ({
   finalFocusRef,
   ...props
 }) => {
+  const deferFn = ([data]) => client.put(`/api/${user.id}/password`, data)
+  const asyncSubmit = useAsync({ deferFn })
+
   return (
-    <Dialog.Modal
-      title={createTitle()}
-      unstable_finalFocusRef={finalFocusRef}
-      {...dialog}
-    >
-      <Input />
-    </Dialog.Modal>
+    <>
+      <Dialog.Modal
+        title={passwordTitle()}
+        unstable_finalFocusRef={finalFocusRef}
+        {...dialog}
+      >
+        <Formik
+          initialValues={{
+            password: "",
+            confirmPassword: ""
+          }}
+          onSubmit={asyncSubmit.run}
+        >
+          <Form>
+            <Input />
+          </Form>
+        </Formik>
+      </Dialog.Modal>
+      <IfRejected state={asyncSubmit}>
+        {(error) => <AlertDialog {...error} />}
+      </IfRejected>
+      <IfFulfilled state={asyncSubmit}>
+        {(_) => {
+          useEffect(() => {
+            dialog.hide()
+            onSubmitted && onSubmitted()
+          })
+
+          return null
+        }}
+      </IfFulfilled>
+    </>
   )
 }
 
