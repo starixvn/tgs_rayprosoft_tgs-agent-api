@@ -8,12 +8,20 @@
     "start:docker": "docker-compose -f ../../docker-compose.yml up --build --force-recreate --always-recreate-deps --remove-orphans",
     "build": "snowpack build",
     "login:docker": "docker login registry.gitlab.com",
-    "build:docker": "cross-var docker build . -t registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",
-    "push:docker": "cross-var docker push registry.gitlab.com/sam.chuang1/backoffice:$npm_package_version",
+    "postversion": "npm-run-all build:docker push:docker",
+    "build:docker": "cross-var docker build . -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version",
+    "push:docker": "cross-var docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version",
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
-    "lint": "prettier --check \"src/**/*.{js,jsx}\""
+    "lint": "prettier --check \"src/**/*.{js,jsx}\"",
+    "tag:docker:dev": "cross-env-shell GIT_COMMIT_HASH=$(git show --no-patch --format=%h) \"npm-run-all build:docker:dev push:docker:dev\"",
+    "build:docker:dev": "cross-var docker build . -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH",
+    "push:docker:dev": "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH"
   },
-  "husky": {},
+  "husky": {
+    "hooks": {
+      "pre-push": "npm-run-all tag:docker:dev"
+    }
+  },
   "dependencies": {
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
@@ -27,6 +35,7 @@
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/react": "^10.0.3",
     "bumbag": "^1.3.1",
+    "cross-env": "^7.0.2",
     "cross-var": "^1.1.0",
     "dayjs": "^1.8.35",
     "dotenv": "^8.2.0",
