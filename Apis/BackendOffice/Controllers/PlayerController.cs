@@ -57,7 +57,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _queries.GetQueries()
                 .Where(request.Status, p => p.Status == request.Status)
                 .Where(request.VipId, p => p.VipId == request.VipId)
-                .Where(request.Username, p => request.Username.Contains(p.Username))
+                .Where(request.Username, p => p.Username.Contains(request.Username))
                 .Select(p => new PlayersModel
                 {
                     PlayerCode = p.PlayerCode,
@@ -104,7 +104,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BankName = p.BankName,
                     BankAccount = p.BankAccount
                 }).ToArray()
-
             };
 
             return new GetPlayerResponse
@@ -149,7 +148,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             if (type == updatePlayerType[0])
             {
                 var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
-
                 if (parentPlayer == null)
                 {
                     return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
@@ -160,7 +158,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 player.ParentPlayerCode = parentPlayer.ParentPlayerCode;
                 player.Status = request.Status;
                 player.HasAgent = request.HasAgent;
-
             }
 
             if (type == updatePlayerType[1])
