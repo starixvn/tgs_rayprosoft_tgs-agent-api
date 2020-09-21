@@ -10,7 +10,7 @@ namespace BackendOffice.UnitTests.Controllers
     public class BaseTests
     {
         protected readonly Mock<IHttpContextAccessor> HttpContextAccessorMock = new Mock<IHttpContextAccessor>();
-
+        protected string Username = "admin.enabled";
         public virtual void Setup()
         {
             Login();

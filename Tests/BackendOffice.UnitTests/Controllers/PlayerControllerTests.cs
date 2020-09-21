@@ -304,7 +304,6 @@ namespace BackendOffice.UnitTests.Controllers
                 a.PlayerCode == playerCode)), Times.Never);
         }
 
-
         [Test]
         public async Task Cannot_Update_Player_With_Parent_Player_Not_Found()
         {

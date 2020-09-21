@@ -76,7 +76,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             }}
         };
 
-
         [HttpPut("{id}/{type}"), Description("Verify a announcement")]
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
