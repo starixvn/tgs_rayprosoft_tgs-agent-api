@@ -12,17 +12,18 @@ namespace TGS.Core.Infrastructures.Log
     {
         public static IServiceCollection AddTgsLog(this IServiceCollection services)
         {
-            services.AddScoped<LogBusEvent>(sp => new ApiLogEvent());
-            services.AddScoped<LogBusEvent>(sp => new LogRecordEvent());
-            services.AddScoped<LogBusEvent>(sp => new AdminLogEvent());
-            services.AddScoped(p => CreateLoggerPublisher(p.GetService<INatsManager>()));
-            services.AddScoped<ITgsLog, TgsLog>();
-            services.AddTransient<Func<ITgsLog>>(c => () => c.GetService<ITgsLog>());
-
+            services.AddSingleton<LogBusEvent>(sp => new ApiLogEvent());
+            services.AddSingleton<LogBusEvent>(sp => new LogRecordEvent());
+            services.AddSingleton<LogBusEvent>(sp => new AdminLogEvent());
+            services.AddScoped(p => CreateLoggerPublisher(p.GetRequiredService<INatsManager>()));    
+            
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScoped<ILocalIpFinder, LocalIpFinder>();
-            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
+            services.AddTransient<ITgsLog, TgsLog>();    
 
+            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
+            services.AddTransient<Func<ITgsLog>>(c => () => c.GetRequiredService<ITgsLog>());
+            
             return services;
         }
 

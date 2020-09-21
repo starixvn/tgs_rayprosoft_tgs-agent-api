@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FeatureManagement;
 using NLog;
-using TGS.Apis.TgsApi.Commons.Filters;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.DataServices.DataInitializers;
 using TGS.Core.Infrastructures.Extensions;
@@ -18,6 +17,7 @@ using TGS.Core.Infrastructures.Log.Middleware;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
+using TGS.Core.Models;
 using TGS.Services.GameOperations.Extensions;
 using TGS.Services.Operations.Extensions;
 
@@ -43,8 +43,9 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddRepositories(Configuration)
                     .AddNats(Configuration)
-                    .AddTgsLog()
-                    .AddJson()
+                    .AddTgsLog();
+
+            services.AddJson()
                     .AddRedis()
                     .AddOperations()
                     .AddTimeZone()
@@ -61,11 +62,11 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddScoped<ApiLoggerMiddleware>();
 
-            var gpCode = Configuration.GetValue<string>("GameProviderCode");
+            var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
             services.AddMvcCore(options =>
-            {
-                options.Filters.Add(new HttpResponseExceptionFilter());
+            { 
+                AddCustomFilters(options);
             })
             .ConfigureApiBehaviorOptions(options =>
             {
@@ -93,19 +94,16 @@ namespace TGS.Apis.TgsApi.Commons
 
             app.UseApiLogger();
 
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            //app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app
+                //.UseHttpsRedirection()
+                .UseRouting()
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                });
         }
 
-        #region Virtual Methods
+        #region Abstract and Virtual Methods
 
         protected virtual void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -114,6 +112,10 @@ namespace TGS.Apis.TgsApi.Commons
         protected virtual void UseCustomMiddlewares(IApplicationBuilder app)
         {
         }
+        
+        protected virtual void AddCustomFilters(MvcOptions options)
+        {
+        }             
 
         #endregion Virtual Methods
     }
