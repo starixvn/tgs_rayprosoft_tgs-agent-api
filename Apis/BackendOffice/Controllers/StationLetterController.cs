@@ -56,6 +56,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Content = a.Content,
                     Remarks = a.Remarks,
                     CreatedByUsername = a.CreatedByUsername,
+
                     VerifiedByUsername = a.VerifiedByUsername,
                     Status = a.Status.ToString(),
                     CreatedOn = a.CreatedOn
@@ -63,12 +64,16 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .CreatePagedResponseAsync(request);
         }
 
+        private readonly Dictionary<string, StationLetterStatus> _typeDictionary = new Dictionary<string, StationLetterStatus>()
+        {
+            { "pass", StationLetterStatus.Published},
+            { "reject", StationLetterStatus.Rejected}
+        };
+
         [HttpPut("{id}/{type}"), Description("Verify a station letter")]
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
-            var types = new[] { "pass", "reject" };
-
-            if (!types.Contains(type))
+            if (!_typeDictionary.ContainsKey(type))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidUrl);
             }
@@ -84,15 +89,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidStatus);
             }
 
-            if (type == types[0])
-            {
-                stationLetter.Status = StationLetterStatus.Published;
-            }
-            else if (type == types[1])
-            {
-                stationLetter.Status = StationLetterStatus.Rejected;
-            }
+            var targetStatus = _typeDictionary
+                .FirstOrDefault(t => t.Key == type);
 
+            stationLetter.Status = targetStatus.Value;
             stationLetter.VerifiedByUsername = Username;
             stationLetter.Remarks = request.Remarks;
             stationLetter.UpdatedByUsername = Username;
@@ -111,8 +111,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
             }
 
-            stationLetter.Subject = request.Content;
-            stationLetter.Content = request.Subject;
+            stationLetter.Subject = request.Subject;
+            stationLetter.Content = request.Content;
             stationLetter.UpdatedByUsername = Username;
             stationLetter.UpdatedOn = DateTimeOffset.Now;
 
@@ -136,8 +136,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            await _commands.CreateAsync(stationLetter);
-
             var allPlayers = await _playerQueries.GetQueries()
                 .Where(p => p.Status == PlayerStatus.Enabled)
                 .ToArrayAsync();
@@ -153,6 +151,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 StationLetterId = stationLetter.Id
             }).ToArray();
 
+            await _commands.CreateAsync(stationLetter);
             _playerCommands.BatchInsert(players);
 
             return CreateValidResponse<MessageResponse>();

@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.RedTiger.Filters;
+using TGS.Apis.TgsApi.GameProviders.RedTiger.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.RedTiger.Services;
 using TGS.Core.Models.Interfaces;
 
@@ -22,13 +24,12 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddSingleton<IErrorMapper, RedTigerErrorMapper>();
-            services.AddScoped<HandleRedTigerErrorFilter>();
+            services.AddScoped<HandleRedTigerErrorFilter>();            
         }
 
-        protected override void AddCustomFilters(MvcOptions options)
+        protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            options.Filters.Add<HandleRedTigerErrorFilter>();
+            app.UseMiddleware<RedTigerDispatcherMiddleware>();
         }
-
     }
 }

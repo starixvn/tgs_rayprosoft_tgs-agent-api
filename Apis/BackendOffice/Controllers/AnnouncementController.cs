@@ -51,16 +51,38 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .CreatePagedResponseAsync(request);
         }
 
+        private readonly Dictionary<string, dynamic> _typeDictionary = new Dictionary<string, dynamic>()
+        {
+            { "pass", new
+            {
+                AllowedStatus = AnnounceStatus.InVerify,
+                VerifiedStatus = AnnounceStatus.Effective,
+                Message = Resources.Announcement.OnlyInVerifyAnnouncementCanBePassed,
+                CanRemarks = true
+            }},
+            { "reject", new
+            {
+                AllowedStatus = AnnounceStatus.InVerify,
+                VerifiedStatus = AnnounceStatus.Rejected,
+                Message = Resources.Announcement.OnlyInVerifyAnnouncementCanBeRejected,
+                CanRemarks = true
+            }},
+            { "invalid", new
+            {
+                AllowedStatus = AnnounceStatus.Effective,
+                VerifiedStatus = AnnounceStatus.Invalid,
+                Message = Resources.Announcement.OnlyEffectiveAnnouncementCanBeInvalid,
+                CanRemarks = false
+            }}
+        };
 
-        [HttpPut("{id}/{type}"), Description("Update a announcement")]
+        [HttpPut("{id}/{type}"), Description("Verify a announcement")]
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
-            var typeDictionary = new Dictionary<string, dynamic>()
+            if (!_typeDictionary.ContainsKey(type))
             {
-                { "pass", new { AllowedStatus = AnnounceStatus.InVerify, VerifiedStatus = AnnounceStatus.Effective, Message = Resources.Announcement.OnlyInVerifyAccouncementCanBePassed }},
-                { "reject", new { AllowedStatus = AnnounceStatus.InVerify , VerifiedStatus = AnnounceStatus.Rejected, Message= Resources.Announcement.OnlyInVerifyAccouncementCanBeRejected}},
-                { "invalid", new { AllowedStatus = AnnounceStatus.Effective , VerifiedStatus = AnnounceStatus.Invalid, Message = Resources.Announcement.OnlyEffectiveAccouncementCanBeInvalid }}
-            };
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.InvalidUrl);
+            }
 
             var announcement = await _queries.GetSingleAsync(p => p.Id == id);
             if (announcement == null)
@@ -68,22 +90,21 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
             }
 
-            if (!typeDictionary.ContainsKey(type))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.InvalidUrl);
-            }
-
-            foreach (var types in typeDictionary.Where(types => types.Key == type))
+            foreach (var types in _typeDictionary.Where(types => types.Key == type))
             {
                 if (types.Value.AllowedStatus != announcement.Status)
                 {
                     return CreateInvalidResponse<MessageResponse>(types.Value.Message);
                 }
 
+                if (types.Value.CanRemarks)
+                {
+                    announcement.Remarks = request.Remarks;
+                }
+
                 announcement.Status = types.Value.VerifiedStatus;
             }
 
-            announcement.Remarks = request.Remarks;
             announcement.UpdatedByUsername = Username;
             announcement.UpdatedOn = DateTimeOffset.Now;
 
@@ -105,8 +126,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.CannotUpdateDueToInvalidStatus);
             }
 
-            announcement.Subject = request.Content;
-            announcement.Content = request.Subject;
+            announcement.Subject = request.Subject;
+            announcement.Content = request.Content;
             announcement.From = request.From;
             announcement.To = request.To;
             announcement.UpdatedByUsername = Username;

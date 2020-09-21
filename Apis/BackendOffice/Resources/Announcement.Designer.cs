@@ -88,29 +88,29 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only effective accouncement can be invalided..
+        ///   Looks up a localized string similar to Only effective announcement can be invalided..
         /// </summary>
-        public static string OnlyEffectiveAccouncementCanBeInvalid {
+        public static string OnlyEffectiveAnnouncementCanBeInvalid {
             get {
-                return ResourceManager.GetString("OnlyEffectiveAccouncementCanBeInvalid", resourceCulture);
+                return ResourceManager.GetString("OnlyEffectiveAnnouncementCanBeInvalid", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only accouncement in verify can be passed..
+        ///   Looks up a localized string similar to Only announcement in verify can be passed..
         /// </summary>
-        public static string OnlyInVerifyAccouncementCanBePassed {
+        public static string OnlyInVerifyAnnouncementCanBePassed {
             get {
-                return ResourceManager.GetString("OnlyInVerifyAccouncementCanBePassed", resourceCulture);
+                return ResourceManager.GetString("OnlyInVerifyAnnouncementCanBePassed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only accouncement in verify can be rejected..
+        ///   Looks up a localized string similar to Only announcement in verify can be rejected..
         /// </summary>
-        public static string OnlyInVerifyAccouncementCanBeRejected {
+        public static string OnlyInVerifyAnnouncementCanBeRejected {
             get {
-                return ResourceManager.GetString("OnlyInVerifyAccouncementCanBeRejected", resourceCulture);
+                return ResourceManager.GetString("OnlyInVerifyAnnouncementCanBeRejected", resourceCulture);
             }
         }
     }
