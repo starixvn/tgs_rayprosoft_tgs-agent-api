@@ -94,7 +94,7 @@ namespace BackendOffice.UnitTests.Controllers
         [TestCase(false)]
         public async Task Can_Get_Player_Operations(bool showAll)
         {
-            var playerCode = Generator.RandomString(12); ;
+            var playerCode = Generator.RandomString(12);
 
             var request = new GetPlayerOperationRequest
             {
@@ -136,7 +136,7 @@ namespace BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Cannot_Get_Player_Not_Found()
         {
-            var playerCode = Generator.RandomString(12); ;
+            var playerCode = Generator.RandomString(12);
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult<Player>(null));
 
@@ -352,7 +352,7 @@ namespace BackendOffice.UnitTests.Controllers
                 }})
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new Wallet[] { new Wallet { Balance = 0 } }));
+                .With(s => s.Wallets, new[] { new Wallet { Balance = 0 } }));
             return fixture;
         }
 
