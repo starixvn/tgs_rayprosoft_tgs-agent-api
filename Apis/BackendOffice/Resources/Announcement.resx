@@ -126,13 +126,13 @@
   <data name="NotFound" xml:space="preserve">
     <value>Announcement is not found.</value>
   </data>
-  <data name="OnlyEffectiveAccouncementCanBeInvalid" xml:space="preserve">
-    <value>Only effective accouncement can be invalided.</value>
+  <data name="OnlyEffectiveAnnouncementCanBeInvalid" xml:space="preserve">
+    <value>Only effective announcement can be invalided.</value>
   </data>
-  <data name="OnlyInVerifyAccouncementCanBePassed" xml:space="preserve">
-    <value>Only accouncement in verify can be passed.</value>
+  <data name="OnlyInVerifyAnnouncementCanBePassed" xml:space="preserve">
+    <value>Only announcement in verify can be passed.</value>
   </data>
-  <data name="OnlyInVerifyAccouncementCanBeRejected" xml:space="preserve">
-    <value>Only accouncement in verify can be rejected.</value>
+  <data name="OnlyInVerifyAnnouncementCanBeRejected" xml:space="preserve">
+    <value>Only announcement in verify can be rejected.</value>
   </data>
 </root>
