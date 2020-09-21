@@ -19,5 +19,4 @@ file_server
 
 respond /healthcheck 200
 
-# api proxy
-# reverse_proxy /api/* backoffice.api:80
+respond /api/* 404
