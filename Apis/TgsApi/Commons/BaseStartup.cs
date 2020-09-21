@@ -47,7 +47,6 @@ namespace TGS.Apis.TgsApi.Commons
                     .AddTgsLog()
                     .AddJson()
                     .AddRedis()
-                    .AddWebApiServices()
                     .AddOperations()
                     .AddTimeZone()
                     .AddGameOperations();
@@ -89,6 +88,10 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 app.UseDeveloperExceptionPage();
                 app.SeedData();
+            }
+            else
+            {
+                app.UseGlobalExceptionHandler();
             }
 
             UseCustomMiddlewares(app);

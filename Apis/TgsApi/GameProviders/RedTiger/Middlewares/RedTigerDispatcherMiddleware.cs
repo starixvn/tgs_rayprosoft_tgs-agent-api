@@ -42,6 +42,17 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Middlewares
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
                 context.Request.Body = stream;
 
+                context.Request.Path = $"{context.Request.PathBase.Value}/api/bet/places";
+                await _next(context);
+                return;
+            }
+            else if (model.Action.IgnoreCaseEquals("error"))
+            { 
+                var o = new { action = model.Action, value = 333 };
+                var json = _json.SerializeToString(o);
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+                context.Request.Body = stream;
+
                 context.Request.Path = $"{context.Request.PathBase.Value}/api/bet/error";
                 await _next(context);
                 return;

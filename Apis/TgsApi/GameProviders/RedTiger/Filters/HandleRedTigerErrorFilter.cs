@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TGS.Core.Infrastructures.Filters;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
 
 namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Filters
@@ -10,8 +12,8 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Filters
     {
         protected override string LoggerName => "redtiger";
 
-        public HandleRedTigerErrorFilter(IErrorMapper error, ITgsLog log) : 
-            base(error, log)
+        public HandleRedTigerErrorFilter(Func<string, IErrorMapper> mapper, ITgsLog log) : 
+            base(mapper, Consts.GameProvider.RedTiger, log)
         {
 
         }

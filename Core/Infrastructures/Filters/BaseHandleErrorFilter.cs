@@ -20,9 +20,9 @@ namespace TGS.Core.Infrastructures.Filters
 
         private IDictionary<string, object> _actionArguments;
 
-        public BaseHandleErrorFilter(IErrorMapper errorMapper, ITgsLog log)
+        public BaseHandleErrorFilter(Func<string, IErrorMapper> mapper, string mapperKey,  ITgsLog log)
         {
-            ErrorMapper = errorMapper;
+            ErrorMapper = mapper(mapperKey);
             Log = log.SetLogger(LoggerName);
         }
 

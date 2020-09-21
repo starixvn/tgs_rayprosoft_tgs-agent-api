@@ -31,12 +31,13 @@
         }
 
         public static class EnvironmentVariable
-        { 
+        {
             public const string Environment = "ASPNETCORE_ENVIRONMENT";
             public const string GameProviderCode = "GameProviderCode";
             public const string GameProviderName = "GameProviderName";
-        }        
-        
+        }
+
         public const string DefualtCultureCode = "en-US";
+        public const string Default = "default";
     }
 }
