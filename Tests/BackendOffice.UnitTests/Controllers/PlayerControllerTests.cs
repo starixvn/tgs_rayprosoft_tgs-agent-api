@@ -13,6 +13,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Security;
+using Resources = TGS.Apis.BackendOffice.Resources;
 
 namespace BackendOffice.UnitTests.Controllers
 {
@@ -89,38 +90,246 @@ namespace BackendOffice.UnitTests.Controllers
             _queriesMock.Verify(p => p.GetQueries());
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Can_Get_Player_Operations(bool showAll)
+        {
+            var playerCode = Generator.RandomString(12); ;
+
+            var request = new GetPlayerOperationRequest
+            {
+                Page = 1,
+                Rows = 10,
+                SortBy = "CreatedOn",
+                OrderBy = SortOrder.Descending,
+                ShowAll = showAll
+            };
+
+            var list = new Fixture()
+                .CreateMany<AuditLog>(105)
+                .AsQueryable()
+                .BuildMock().Object;
+
+            var (skip, take) = GetPage(request);
+            var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
+
+            var expectedPlayers = showAll ?
+                orderedPlayers.ToArray() :
+                orderedPlayers.Skip(skip).Take(take).ToArray();
+
+            _auditLogQueriesMock.Setup(x => x.GetQueries())
+                .Returns(list);
+
+            var response = await _controller.GetPlayerOperationsAsync(playerCode, request);
+            response.Valid.Should().BeTrue();
+
+            for (var i = 0; i < response.Items.Length; i++)
+            {
+                response.Items[i].CreatedOn.Should().Be(expectedPlayers[i].CreatedOn);
+                response.Items[i].CreatedByUsername.Should().Be(expectedPlayers[i].CreatedByUsername);
+                response.Items[i].Operation.Should().Be(expectedPlayers[i].Operation);
+            }
+
+            _auditLogQueriesMock.Verify(p => p.GetQueries());
+        }
+
+        [Test]
+        public async Task Cannot_Get_Player_Not_Found()
+        {
+            var playerCode = Generator.RandomString(12); ;
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult<Player>(null));
+
+            var response = await _controller.GetSingleAsync(playerCode);
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Player.NotFound);
+        }
 
         [Test]
         public async Task Can_Get_Player()
         {
-            var Player = CreatePlayerFixture().Create<Player>();
+            var player = CreatePlayerFixture().Create<Player>();
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(Player));
+                .Returns(Task.FromResult(player));
 
-            var response = await _controller.GetSingleAsync(Player.PlayerCode);
+            var response = await _controller.GetSingleAsync(player.PlayerCode);
             response.Valid.Should().BeTrue();
-            //response.Player.Id.Should().Be(Player.Id);
-            //response.Player.Name.Should().Be(Player.Name);
-            //response.Player.DisplayName.Should().Be(Player.DisplayName);
-            //response.Player.Remarks.Should().Be(Player.Remarks);
-            //response.Player.CreatedByUsername.Should().Be(Player.CreatedByUsername);
-            //response.Player.UpdatedByUsername.Should().Be(Player.UpdatedByUsername);
-            //response.Player.CreatedOn.Should().Be(Player.CreatedOn);
-            //response.Player.UpdatedOn.Should().Be(Player.UpdatedOn);
+            response.Player.Status.Should().Be(player.Status.ToString());
+            response.Player.Username.Should().Be(player.Username);
+            response.Player.RealName.Should().Be(player.RealName);
+            response.Player.VipLevel.Should().Be(player.Vip.Name);
+            response.Player.HasAgent.Should().Be(player.HasAgent);
+            response.Player.RegisteredOn.Should().Be(player.RegisteredOn);
+            response.Player.ParentUsername.Should().Be(player.ParentPlayer.Username);
+            response.Player.Balance.Should().Be(0);
+            response.Player.Phone.Should().Be(player.Phone);
+            response.Player.Email.Should().Be(player.Email);
+            response.Player.QQ.Should().Be(player.QQ);
+            response.Player.WeChat.Should().Be(player.Wechat);
 
-            //for (var i = 0; i < response.Player.Menus.Length; i++)
-            //{
-            //    response.Player.Menus[i].Code.Should().Be(menuSettings[i].Code);
-            //    response.Player.Menus[i].IsDisplay.Should().Be(menuSettings[i].IsDisplay);
+            for (var i = 0; i < response.Player.Banks.Length; i++)
+            {
+                response.Player.Banks[i].Id.Should().Be(player.Banks.ElementAt(i).Id);
+                response.Player.Banks[i].RealName.Should().Be(player.Banks.ElementAt(i).Username);
+                response.Player.Banks[i].BankName.Should().Be(player.Banks.ElementAt(i).BankName);
+                response.Player.Banks[i].BankAccount.Should().Be(player.Banks.ElementAt(i).BankAccount);
+            }
+        }
 
-            //    for (var j = 0; j < response.Player.Banks.Length; j++)
-            //    {
-            //        var actualMenu = response.Player.Banks[j];
-            //        var expectedMenu = menuSettings[i].SubMenus[j];
-            //        actualMenu.Code.Should().Be(expectedMenu.Code);
-            //        actualMenu.IsDisplay.Should().Be(expectedMenu.IsDisplay);
-            //    }
-            //}
+        [Test]
+        public async Task Can_Update_Player_Info()
+        {
+            var player = CreatePlayerFixture().Create<Player>();
+            var parnetPlayer = CreatePlayerFixture().Create<Player>();
+
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult(player))
+                .Returns(Task.FromResult(parnetPlayer));
+
+            var request = new Fixture().Create<UpdatePlayerRequest>();
+            var response = await _controller.UpdateAsync(player.PlayerCode, "info", request);
+            response.Valid.Should().BeTrue();
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
+                  a.RealName == request.RealName &&
+                  a.VipId == request.VipId &&
+                  a.ParentPlayerCode == parnetPlayer.PlayerCode &&
+                  a.Status == request.Status &&
+                  a.HasAgent == request.HasAgent)));
+
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
+                a.PlayerCode == player.PlayerCode)));
+        }
+
+        [Test]
+        public async Task Can_Update_Player_Contact()
+        {
+            var player = CreatePlayerFixture().Create<Player>();
+            var parnetPlayer = CreatePlayerFixture().Create<Player>();
+
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult(player))
+                .Returns(Task.FromResult(parnetPlayer));
+
+            var request = new Fixture().Create<UpdatePlayerRequest>();
+            var response = await _controller.UpdateAsync(player.PlayerCode, "contact", request);
+            response.Valid.Should().BeTrue();
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
+                a.Phone == request.Phone &&
+                a.Email == request.Email &&
+                a.QQ == request.QQ &&
+                a.Wechat == request.Wechat)));
+
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
+                a.PlayerCode == player.PlayerCode)));
+        }
+
+        [Test]
+        public async Task Can_Update_Player_Password()
+        {
+            var player = CreatePlayerFixture().Create<Player>();
+            var parnetPlayer = CreatePlayerFixture().Create<Player>();
+
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult(player))
+                .Returns(Task.FromResult(parnetPlayer));
+
+            var request = new Fixture().Create<UpdatePlayerRequest>();
+
+            var (salt, password) = GetCredential();
+
+            var response = await _controller.UpdateAsync(player.PlayerCode, "password", request);
+
+            response.Valid.Should().BeTrue();
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
+                a.Password == password &&
+                a.Salt == salt &&
+                a.UpdatedByUsername == "admin.enabled")));
+
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
+                a.PlayerCode == player.PlayerCode)));
+        }
+
+        [Test]
+        public async Task Cannot_Update_Player_With_Invalid_Update_Type()
+        {
+            var playerCode = Generator.RandomString(12);
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult<Player>(null))
+                .Returns(Task.FromResult<Player>(null));
+
+            var request = new Fixture().Create<UpdatePlayerRequest>();
+
+            var (salt, password) = GetCredential();
+
+            var response = await _controller.UpdateAsync(playerCode, "info2", request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Player.UpdateTypeNotFound);
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
+                a.Password == password &&
+                a.Salt == salt &&
+                a.UpdatedByUsername == "admin.enabled")), Times.Never);
+
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
+                a.PlayerCode == playerCode)), Times.Never);
+        }
+
+        [Test]
+        public async Task Cannot_Update_Player_Not_Found()
+        {
+            var playerCode = Generator.RandomString(12);
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult<Player>(null))
+                .Returns(Task.FromResult<Player>(null));
+
+            var request = new Fixture().Create<UpdatePlayerRequest>();
+
+            var (salt, password) = GetCredential();
+
+            var response = await _controller.UpdateAsync(playerCode, "info", request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Player.NotFound);
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
+                a.Password == password &&
+                a.Salt == salt &&
+                a.UpdatedByUsername == "admin.enabled")), Times.Never);
+
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
+                a.PlayerCode == playerCode)), Times.Never);
+        }
+
+
+        [Test]
+        public async Task Cannot_Update_Player_With_Parent_Player_Not_Found()
+        {
+            var player = CreatePlayerFixture().Create<Player>();
+            var playerCode = Generator.RandomString(12);
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult(player))
+                .Returns(Task.FromResult<Player>(null));
+
+            var request = new Fixture().Create<UpdatePlayerRequest>();
+
+            var (salt, password) = GetCredential();
+
+            var response = await _controller.UpdateAsync(playerCode, "info", request);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Resources.Player.ParentPlayerNotFound);
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
+                a.Password == password &&
+                a.Salt == salt &&
+                a.UpdatedByUsername == "admin.enabled")), Times.Never);
+
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
+                a.PlayerCode == playerCode)), Times.Never);
         }
 
         private Fixture CreatePlayerFixture()
@@ -142,8 +351,26 @@ namespace BackendOffice.UnitTests.Controllers
                     BankAccount = Generator.RandomIntString(20),
                 }})
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
-                .With(s => s.Wallets, new Wallet[] { }));
+                .With(s => s.Letters, new StationLetterPlayer[] { })
+                .With(s => s.Wallets, new Wallet[] { new Wallet { Balance = 0 } }));
             return fixture;
+        }
+
+        private (byte[], byte[]) GetCredential()
+        {
+            var salt = Generator.RandomByteArray(32);
+            var hashedPassword = Generator.RandomByteArray(128);
+
+            _hashProviderMock.Setup(p => p.GenerateRandomSalt(It.IsAny<ushort>()))
+                .Returns(salt);
+
+            _hashProviderMock.Setup(p => p.Hash(
+                It.IsAny<byte[]>(),
+                It.IsAny<byte[]>(),
+                It.IsAny<HashAlgorithmKind>()))
+                .Returns(hashedPassword);
+
+            return (salt, hashedPassword);
         }
     }
 }
