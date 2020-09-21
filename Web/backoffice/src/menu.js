@@ -14,9 +14,7 @@ export const find = (path = [], list = []) => {
   return find(restPath, menu?.subMenus)
 }
 
-const isLast = (index, list = []) => list.length - 1 === index
-
-export const findMemoized = memoize(find)
+export const memoizedFind = memoize(find)
 
 export const label = (codes = []) => {
   let [code, ...subMenuCodes] = codes

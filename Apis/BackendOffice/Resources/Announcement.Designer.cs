@@ -61,6 +61,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to It can be updated only for invalid status..
+        /// </summary>
+        public static string CannotUpdateDueToInvalidStatus {
+            get {
+                return ResourceManager.GetString("CannotUpdateDueToInvalidStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid url..
         /// </summary>
         public static string InvalidUrl {
@@ -75,6 +84,33 @@ namespace TGS.Apis.BackendOffice.Resources {
         public static string NotFound {
             get {
                 return ResourceManager.GetString("NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only effective accouncement can be invalided..
+        /// </summary>
+        public static string OnlyEffectiveAccouncementCanBeInvalid {
+            get {
+                return ResourceManager.GetString("OnlyEffectiveAccouncementCanBeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only accouncement in verify can be passed..
+        /// </summary>
+        public static string OnlyInVerifyAccouncementCanBePassed {
+            get {
+                return ResourceManager.GetString("OnlyInVerifyAccouncementCanBePassed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only accouncement in verify can be rejected..
+        /// </summary>
+        public static string OnlyInVerifyAccouncementCanBeRejected {
+            get {
+                return ResourceManager.GetString("OnlyInVerifyAccouncementCanBeRejected", resourceCulture);
             }
         }
     }

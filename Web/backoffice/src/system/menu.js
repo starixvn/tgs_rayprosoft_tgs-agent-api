@@ -5,12 +5,6 @@ import { label as groupLabel } from "./groups/menu"
 import { Code as DepartmentCode } from "./departments"
 import { label as departmentLabel } from "./departments/menu"
 
-const list = [
-  [AdminCode, adminLabel],
-  [GroupCode, groupLabel],
-  [DepartmentCode, departmentLabel]
-]
-
 export const label = (codes = []) => {
   let [code, ...subMenuCodes] = codes
   code = code.toLowerCase()
@@ -18,9 +12,8 @@ export const label = (codes = []) => {
     return toLabel(code)
   }
 
-  //TODO: util fn
   code = code.toLowerCase()
-  let [, fn] = list.find(([key]) => key === code) ?? []
+  let [, fn] = list().find(([key]) => key === code) ?? []
 
   return (fn && fn(subMenuCodes)) || ""
 }
@@ -38,3 +31,9 @@ export const toLabel = (code = "") => {
       return ""
   }
 }
+
+const list = () => [
+  [AdminCode, adminLabel],
+  [GroupCode, groupLabel],
+  [DepartmentCode, departmentLabel]
+]

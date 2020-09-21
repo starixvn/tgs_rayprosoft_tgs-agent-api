@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: backoffice-site
 spec:
+  selector:
+    app: backoffice-site
   ports:
     - port: 80
       targetPort: 80
-  selector:
-    app: backoffice-site
-  type: LoadBalancer
+  # type: LoadBalancer

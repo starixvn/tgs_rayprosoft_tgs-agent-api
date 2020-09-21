@@ -61,6 +61,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid status, it cannot be verified..
+        /// </summary>
+        public static string InvalidStatus {
+            get {
+                return ResourceManager.GetString("InvalidStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid url..
         /// </summary>
         public static string InvalidUrl {

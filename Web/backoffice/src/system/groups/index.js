@@ -1,25 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/core"
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  Redirect,
-  useHistory,
-  useLocation,
-  useRouteMatch
-} from "react-router-dom"
+import { useLocation, useRouteMatch } from "react-router-dom"
 import client from "../../client"
 import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
-import { Box, Stack, Table, Button, InputField, Set, Pagination } from "bumbag"
+import { Box, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
 import AsyncTable, { useTableState } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
 import { CopyButton } from "./copy"
 import { DeleteButton } from "./delete"
+import { useIsDisplayMenu } from "../../user/context"
 
 export const Code = "groups"
 
@@ -48,9 +40,19 @@ export const Content = ({}) => {
   let async = useAsync({ promise: request })
   let { isPending } = async
 
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu(codes)
+
   useEffect(() => {
-    fetchTable()
+    if (isDisplay) {
+      fetchTable()
+    }
   }, [pageIndex, pageSize, name, sortBy])
+
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <PageContent

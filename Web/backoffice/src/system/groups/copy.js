@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
+import { useLocation, useRouteMatch } from "react-router-dom"
 import Async from "react-async"
 import client from "../../client"
 import { Formik, Form, Field, useFormikContext } from "formik"
@@ -24,10 +25,19 @@ import {
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
+import { Copy as CopyMenu } from "./menu"
+import { useIsDisplayMenu } from "../../user/context"
 
 export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
+
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu([...codes, CopyMenu])
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
+import { useLocation, useRouteMatch } from "react-router-dom"
 import client from "../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
@@ -24,14 +25,11 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import {
-  label as systemSubMenuLabel,
-  Code as SystemCode,
-  name as systemModuleLabel
-} from "../index"
 import { label as menuLabel, find as findMenu } from "../../menu"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
+import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
+import { useIsDisplayMenu } from "../../user/context"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   const deferFn = () =>
@@ -41,6 +39,13 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
   let dialog = Modal.useState()
   let disclosureRef = useRef()
+
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu([...codes, CreateMenu])
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <Async deferFn={deferFn}>
@@ -99,6 +104,13 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 
   let dialog = Modal.useState()
   let disclosureRef = useRef()
+
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu([...codes, UpdateMenu])
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <Async deferFn={deferFn}>
