@@ -25,7 +25,7 @@ import {
   Text,
   Alert
 } from "bumbag"
-import { useIsAuthed as useUserIsAuthed, useAuthCodes } from "./user/context"
+import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
 import { Route as AuthRouter } from "./user/auth"
 import {
@@ -34,6 +34,7 @@ import {
   Content as SystemContent
 } from "./system"
 import PageNotFound from "./page/NotFound"
+import { useUsername, useDeauth } from "./user/context"
 
 function App() {
   let isUserAuthed = useUserIsAuthed()
@@ -77,7 +78,7 @@ const Layout = ({ children }) => {
 }
 
 const AuthContens = () => {
-  let codes = useAuthCodes()
+  let codes = useMenuCodes()
 
   return (
     <Switch>
@@ -91,7 +92,7 @@ const AuthContens = () => {
         )
       })}
       <AuthRouter path="*">
-        <PageContent>TODO: dashboard or redirect to?</PageContent>
+        <PageContent></PageContent>
       </AuthRouter>
     </Switch>
   )
@@ -107,20 +108,28 @@ const Content = ({ code }) => {
 }
 
 const Header = () => {
+  let usename = useUsername()
+  let deauth = useDeauth()
+
+  const logout = () => {
+    deauth()
+    location.replace(LoginPath)
+  }
+
   return (
     <TopNav>
       <TopNav.Section>
-        <TopNav.Item href="/" fontWeight="semibold">
-          TODO: App Name
-        </TopNav.Item>
+        <TopNav.Item href="/" fontWeight="semibold"></TopNav.Item>
       </TopNav.Section>
       <TopNav.Section marginRight="major-2">
         <TopNav.Item>
           <DropdownMenu
-            menu={<DropdownMenu.Item>TODO: Logout</DropdownMenu.Item>}
+            menu={
+              <DropdownMenu.Item onClick={logout}>Logout</DropdownMenu.Item>
+            }
           >
             <Button variant="ghost" iconAfter="chevron-down">
-              TODO: Username
+              {usename}
             </Button>
           </DropdownMenu>
         </TopNav.Item>
@@ -131,7 +140,7 @@ const Header = () => {
 
 const Sidebar = () => {
   let { pathname: selectedId } = useLocation()
-  let codes = useAuthCodes()
+  let codes = useMenuCodes()
 
   return (
     <Stack spacing="major-1" paddingY="major-2">

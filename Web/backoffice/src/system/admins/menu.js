@@ -1,8 +1,6 @@
-const Create = "create"
+export const Create = "create"
 
-const Update = "update"
-
-const Delete = "delete"
+export const Update = "update"
 
 //TODO: i18n
 export const label = (codes = []) => {

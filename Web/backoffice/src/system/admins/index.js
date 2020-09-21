@@ -3,16 +3,7 @@ import { css, Global } from "@emotion/core"
 import client from "../../client"
 import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  Redirect,
-  useHistory,
-  useLocation,
-  useRouteMatch
-} from "react-router-dom"
+import { useLocation, useRouteMatch } from "react-router-dom"
 import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
 import { AddButton, EditButton, EditPasswordButton } from "./edit"
@@ -20,19 +11,9 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import AsyncTable, { useTableState } from "../../table/async"
 import { label as statusLabel } from "./status"
+import { useIsDisplayMenu } from "../../user/context"
 
 export const Code = "admins"
-
-//TODO: i18n
-export const label = (code = "") => {
-  code = code.toLowerCase()
-  switch (code) {
-    case "create":
-      return "新增管理员"
-    case "update":
-      return "编辑管理员"
-  }
-}
 
 export const Content = () => {
   let { state, setState, headSortBy, headOrderBy } = useTableState({
@@ -54,8 +35,14 @@ export const Content = () => {
   let async = useAsync({ promise: request })
   let { isPending } = async
 
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu(codes)
+
   useEffect(() => {
-    fetchTable()
+    if (isDisplay) {
+      fetchTable()
+    }
   }, [pageIndex, pageSize, username, sortBy])
 
   let columns = useMemo(() =>
@@ -63,6 +50,10 @@ export const Content = () => {
       fetchTable
     })
   )
+
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <PageContent
