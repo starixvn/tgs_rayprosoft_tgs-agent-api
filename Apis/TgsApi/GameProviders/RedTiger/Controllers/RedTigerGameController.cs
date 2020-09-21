@@ -3,6 +3,7 @@ using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.GameProviders.RedTiger.Filters;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 
@@ -11,22 +12,32 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Controllers
     [FeatureGate(Consts.GameProvider.RedTiger)]
     [AllowAnonymous]
     [Route("api")]
-    [ApiController]
-    [Consumes("application/json")]
+    [ApiController] 
+    [TypeFilter(typeof(HandleRedTigerErrorFilter))]
     public class RedTigerGameController : ControllerBase
     {
+        [HttpPost]
+        public IActionResult CommomEntrance() 
+        { 
+            var obj = new { Error = TgsApiError.None, Action = "CommomEntrance" };
+            return new JsonResult(obj) { StatusCode = (int)HttpStatusCode.OK };
+        }
+
+        [HttpPost]
         [Route("bet/places")]
+        [Consumes("application/json")]
         public JsonResult PlaceBetAsync()
         {
-            var obj = new { Error = TgsApiError.None };
+            var obj = new { Error = TgsApiError.None, Action = "bet" };
             return new JsonResult(obj) { StatusCode = (int)HttpStatusCode.OK };
         }
 
         [HttpPost]
         [Route("bet/error")]
+        [Consumes("application/json")]
         public JsonResult ErrorAsync(Model model)
         {
-            throw new InvalidOperationException("111");
+            throw new InvalidOperationException(model.Value.ToString());
         }
 
         public class Model

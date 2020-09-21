@@ -8,13 +8,7 @@ import React, {
 import { css, Global } from "@emotion/core"
 import { Set, Button, Table, Pagination, Icon } from "bumbag"
 import Async, { useAsync } from "react-async"
-import {
-  useTable,
-  useFlexLayout,
-  usePagination,
-  useSortBy,
-  useFilters
-} from "react-table"
+import { useTable, usePagination, useSortBy, useFilters } from "react-table"
 import { fromIsDescending } from "./order"
 import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
@@ -85,9 +79,6 @@ export default ({
     },
     useFilters,
     useSortBy,
-    /*
-    useFlexLayout,
-    */
     usePagination
   )
   let { getTableProps, rows, gotoPage, state: tableState } = table

@@ -9,7 +9,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Interfaces;
 
-namespace TGS.Apis.TgsApi.Commons.Filters
+namespace TGS.Core.Infrastructures.Filters
 {
     public abstract class BaseHandleErrorFilter : IActionFilter
     {
@@ -55,7 +55,7 @@ namespace TGS.Apis.TgsApi.Commons.Filters
         private string GetErrorMessage(ActionExecutedContext context, string type, string errorMessage, int statusCode)
         {
             var reqParams = new List<object>();
-            
+
             try
             {
                 foreach (var arg in _actionArguments)

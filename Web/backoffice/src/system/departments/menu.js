@@ -1,11 +1,8 @@
-const Create = "create"
+export const Create = "create"
 
-const Update = "update"
+export const Update = "update"
 
-const Delete = "delete"
-
-//TODO: 复制管理组
-//const Copy = "copy"
+export const Delete = "delete"
 
 //TODO: i18n
 export const label = (codes = []) => {
@@ -14,11 +11,11 @@ export const label = (codes = []) => {
 
   switch (code) {
     case Create:
-      return "新增管理组"
+      return "新增部门"
     case Update:
-      return "编辑管理组"
+      return "编辑部门"
     case Delete:
-      return "删除管理组"
+      return "删除部门"
     default:
       return ""
   }

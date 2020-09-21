@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
+import { useLocation, useRouteMatch } from "react-router-dom"
 import client from "../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
@@ -23,12 +24,6 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import {
-  label as systemSubMenuLabel,
-  Code as SystemCode,
-  name as systemModuleLabel
-} from "../index"
-import { label as menuLabel, find as findMenu } from "../../menu"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Field as DepartmentSelectField } from "../departments/select"
@@ -38,10 +33,19 @@ import {
   Password as PasswordField
 } from "../../input/Field"
 import { Select as StatusSelect, from as statusFrom } from "./status"
+import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
+import { useIsDisplayMenu } from "../../user/context"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
+
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu([...codes, CreateMenu])
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <>
@@ -69,6 +73,13 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 export const EditButton = ({ user, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
+
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  let isDisplay = useIsDisplayMenu([...codes, UpdateMenu])
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <>
@@ -129,28 +140,21 @@ const PasswordDialog = ({
   finalFocusRef,
   ...props
 }) => {
-  const deferFn = ([data]) => client.put(`/api/${user.id}/password`, data)
+  const deferFn = ([data]) =>
+    client.put(`/api/users/${user.id}/password`, { data })
   const asyncSubmit = useAsync({ deferFn })
 
   return (
     <>
-      <Dialog.Modal
-        title={passwordTitle()}
-        unstable_finalFocusRef={finalFocusRef}
-        {...dialog}
+      <Formik
+        initialValues={{
+          password: "",
+          confirmPassword: ""
+        }}
+        onSubmit={asyncSubmit.run}
       >
-        <Formik
-          initialValues={{
-            password: "",
-            confirmPassword: ""
-          }}
-          onSubmit={asyncSubmit.run}
-        >
-          <Form>
-            <Input />
-          </Form>
-        </Formik>
-      </Dialog.Modal>
+        <PasswordFormDialog dialog={dialog} />
+      </Formik>
       <IfRejected state={asyncSubmit}>
         {(error) => <AlertDialog {...error} />}
       </IfRejected>
@@ -165,6 +169,42 @@ const PasswordDialog = ({
         }}
       </IfFulfilled>
     </>
+  )
+}
+
+const PasswordFormDialog = ({ dialog, finalFocusRef, ...props }) => {
+  const { submitForm, resetForm, isPending } = useFormikContext()
+
+  return (
+    <Dialog.Modal
+      title={passwordTitle()}
+      showActionButtons
+      actionButtonsProps={{
+        isLoading: isPending,
+        submitText: confirmLabel(),
+        cancelText: cancelLabel(),
+        onClickSubmit: submitForm,
+        onClickCancel: resetForm
+      }}
+      hideOnClickOutside={false}
+      unstable_finalFocusRef={finalFocusRef}
+      {...dialog}
+    >
+      <Form>
+        <Box
+          css={css`
+            display: grid;
+            grid-template-rows: auto;
+            grid-template-areas:
+              "password passwordField"
+              "confirmPassword confirmPasswordField";
+          `}
+        >
+          <PasswordLabelInput />
+          <ConfirmPasswordLabelInput />
+        </Box>
+      </Form>
+    </Dialog.Modal>
   )
 }
 
@@ -243,13 +283,7 @@ const FormDialog = ({
   finalFocusRef,
   ...props
 }) => {
-  const {
-    values,
-    errors,
-    submitForm,
-    resetForm,
-    isPending
-  } = useFormikContext()
+  const { submitForm, resetForm, isPending } = useFormikContext()
 
   let { id } = user
   let isUpdate = !!id

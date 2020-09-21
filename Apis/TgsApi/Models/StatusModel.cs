@@ -1,15 +1,17 @@
 ﻿namespace TGS.Apis.TgsApi.Models
 {
-    public class StatusModel
+    public record StatusModel
     {
-        public string MachineName { get; set; }
-        public string HostName { get; set; }
-        public string HostIp { get; set; }
-        public string Environment { get; set; }
-        public string OsVersion { get; set; }
-        public int ProcessCount { get; set; }
-        public bool CanConnectTgsDb { get; set; }
-        public bool CanConnectBetDb { get; set; }
-        public string RedisConnectionStatus { get; set; }
+        public string MachineName { get; init; }
+        public string HostName { get; init; }
+        public string HostIp { get; init; }
+        public string Environment { get; init; }
+        public string OsVersion { get; init; }
+        public int ProcessCount { get; init; }
+        public bool CanConnectTgsDb { get; init; }
+        public bool CanConnectBetDb { get; init; }
+        public string RedisConnectionStatus { get; init; }
+        public string GameProviderCode { get; init; }
+        public bool FeatureEnabled { get; init; }
     }
 }

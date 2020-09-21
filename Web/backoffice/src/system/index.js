@@ -10,7 +10,7 @@ import {
   useLocation,
   useRouteMatch
 } from "react-router-dom"
-import { useAuthCodes } from "../user/context"
+import { useMenuCodes } from "../user/context"
 import { Code as AdminCode, Content as AdminContent } from "./admins"
 import { Code as GroupCode, Content as GroupContent } from "./groups"
 import {
@@ -35,7 +35,7 @@ export const Menu = ({
   codePaths = DefaultCodePath,
   ...props
 }) => {
-  let authCodes = useAuthCodes(codePaths)
+  let authCodes = useMenuCodes(codePaths)
   codes = codes ?? authCodes
 
   return (
@@ -104,7 +104,7 @@ export const label = (code = "") => {
 export const Content = ({ codes, ...props }) => {
   let route = useRouteMatch()
   let codePaths = [Code]
-  let authCodes = useAuthCodes(codePaths)
+  let authCodes = useMenuCodes(codePaths)
   codes = codes ?? authCodes
 
   return (

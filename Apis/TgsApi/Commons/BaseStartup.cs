@@ -17,6 +17,7 @@ using TGS.Core.Infrastructures.Log.Middleware;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
+using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.GameOperations.Extensions;
 using TGS.Services.Operations.Extensions;
@@ -43,10 +44,10 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddRepositories(Configuration)
                     .AddNats(Configuration)
-                    .AddTgsLog();
-
-            services.AddJson()
+                    .AddTgsLog()
+                    .AddJson()
                     .AddRedis()
+                    .AddWebApiServices()
                     .AddOperations()
                     .AddTimeZone()
                     .AddGameOperations();

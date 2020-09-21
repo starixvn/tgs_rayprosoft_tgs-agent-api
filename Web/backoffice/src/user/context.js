@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useCallback
-} from "react"
+import React, { createContext, useContext, useState } from "react"
 import {
   BrowserRouter as Router,
   Switch,
@@ -17,6 +11,7 @@ import {
 } from "react-router-dom"
 import client from "../client"
 import memoize from "fast-memoize"
+import { memoizedFind as findMenu } from "../menu"
 
 const Key = "user"
 
@@ -78,7 +73,18 @@ export const useIsAuthed = () => {
   return !!userId
 }
 
-export const useAuthCodes = (codes = []) => {
+export const useUsername = () => {
+  let { state = {} } = useContext(Store)
+  return state?.userInfo?.username ?? ""
+}
+
+export const useIsDisplayMenu = (codes = []) => {
+  let { state = {} } = useContext(Store)
+  let menu = findMenu(codes, state?.userInfo?.menus ?? [])
+  return menu?.isDisplay ?? false
+}
+
+export const useMenuCodes = (codes = []) => {
   let { state = {} } = useContext(Store)
   let menus = state?.userInfo?.menus ?? []
 
