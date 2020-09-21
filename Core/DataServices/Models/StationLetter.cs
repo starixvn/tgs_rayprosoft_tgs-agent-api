@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Models
         public string Subject { get; set; }
         public string Content { get; set; }
         public string Remarks { get; set; }
-        public bool AllPlayers { get; set; }
+        public bool AssignedAllPlayers { get; set; }
         public StationLetterStatus Status { get; set; }
         public string VerifiedByUsername { get; set; }
         public string CreatedByUsername { get; set; }

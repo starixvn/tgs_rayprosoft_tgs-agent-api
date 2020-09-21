@@ -5,7 +5,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
     public class PlayerModel
     {
         public string Username { get; set; }
-        public string Realname { get; set; }
+        public string RealName { get; set; }
         public string VipLevel { get; set; }
         public string ParentUsername { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }

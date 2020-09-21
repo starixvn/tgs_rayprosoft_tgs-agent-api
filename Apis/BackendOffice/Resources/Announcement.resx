@@ -117,10 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CannotUpdateDueToInvalidStatus" xml:space="preserve">
+    <value>It can be updated only for invalid status.</value>
+  </data>
   <data name="InvalidUrl" xml:space="preserve">
     <value>Invalid url.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
     <value>Announcement is not found.</value>
+  </data>
+  <data name="OnlyEffectiveAccouncementCanBeInvalid" xml:space="preserve">
+    <value>Only effective accouncement can be invalided.</value>
+  </data>
+  <data name="OnlyInVerifyAccouncementCanBePassed" xml:space="preserve">
+    <value>Only accouncement in verify can be passed.</value>
+  </data>
+  <data name="OnlyInVerifyAccouncementCanBeRejected" xml:space="preserve">
+    <value>Only accouncement in verify can be rejected.</value>
   </data>
 </root>

@@ -86,7 +86,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var playerModel = new PlayerModel
             {
                 Username = player.Username,
-                Realname = player.RealName,
+                RealName = player.RealName,
                 VipLevel = player.Vip.Name,
                 Status = player.Status.ToString(),
                 HasAgent = player.HasAgent,
@@ -155,7 +155,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
                 player.RealName = request.RealName;
                 player.VipId = request.VipId;
-                player.ParentPlayerCode = parentPlayer.ParentPlayerCode;
+                player.ParentPlayerCode = parentPlayer.PlayerCode;
                 player.Status = request.Status;
                 player.HasAgent = request.HasAgent;
             }
@@ -170,7 +170,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == updatePlayerType[2])
             {
-                var (pwd, salt) = GenerateCredential(request.Password);
+                var (salt, pwd) = GenerateCredential(request.Password);
                 player.Password = pwd;
                 player.Salt = salt;
             }

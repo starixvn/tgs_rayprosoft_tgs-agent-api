@@ -9,6 +9,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         Task CreateAsync(TEntity obj);
         Task UpdateAsync(TEntity obj);
         Task DeleteAsync(TEntity obj);
+        void BatchInsert(TEntity[] obj);
     }
 
     public class TgsCommands<TEntity> : ITgsCommands<TEntity> where TEntity : class
@@ -18,6 +19,11 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         public TgsCommands(ITgsRepository repository)
         {
             _repository = repository;
+        }
+
+        void ITgsCommands<TEntity>.BatchInsert(TEntity[] obj)
+        {
+            _repository.BulkInsert(obj);
         }
 
         Task ITgsCommands<TEntity>.CreateAsync(TEntity obj)
@@ -34,6 +40,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
 
         Task ITgsCommands<TEntity>.UpdateAsync(TEntity obj)
         {
+
             _repository.Entry(obj).State = EntityState.Modified;
             return _repository.SaveChangesAsync();
         }

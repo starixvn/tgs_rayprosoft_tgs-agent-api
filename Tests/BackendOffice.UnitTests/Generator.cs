@@ -19,5 +19,13 @@ namespace BackendOffice.UnitTests
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+        public static byte[] RandomByteArray(int sizeInKb)
+        {
+            var rnd = new Random();
+            var b = new Byte[sizeInKb]; // convert kb to byte
+            rnd.NextBytes(b);
+            return b;
+        }
     }
 }
