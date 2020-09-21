@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
 using ClosedXML.Extensions;
-using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +13,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -31,18 +29,21 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsCommands<StationLetter> _commands;
         private readonly ITgsCommands<StationLetterPlayer> _playerCommands;
+        private readonly IUploadService _uploadService;
 
         public StationLetterController(
             ITgsQueries<StationLetter> queries,
             ITgsQueries<Player> playerQueries,
             ITgsCommands<StationLetter> commands,
             ITgsCommands<StationLetterPlayer> playerCommands,
+            IUploadService uploadService,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
             _playerQueries = playerQueries;
             _commands = commands;
             _playerCommands = playerCommands;
+            _uploadService = uploadService;
         }
 
         [HttpGet, Description("Get station letters")]
@@ -160,21 +161,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPost("upload"), Description("Upload player file")]
         public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
         {
-            var users = new List<string>();
-
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            await using (var stream = new MemoryStream())
-            {
-                file.CopyTo(stream);
-                stream.Position = 0;
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
-                {
-                    while (reader.Read()) //Each row of the file
-                    {
-                        users.Add(reader.GetValue(0).ToString());
-                    }
-                }
-            }
+            var uploadedResult = await _uploadService.GetUploadedExcelAsync(file);
+            var users = uploadedResult.Select(p => p.FirstOrDefault());
 
             var allPlayers = await _playerQueries.GetQueries()
                 .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))

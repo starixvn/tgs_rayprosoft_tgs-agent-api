@@ -19,6 +19,7 @@ using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -37,6 +38,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<IDataInitializer, DataInitializer>();
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
+            services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
             services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));

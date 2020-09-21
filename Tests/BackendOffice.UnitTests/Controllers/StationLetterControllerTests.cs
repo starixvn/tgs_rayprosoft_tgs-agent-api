@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using MockQueryable.Moq;
 using Moq;
@@ -12,6 +15,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
 using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
 using Resources = TGS.Apis.BackendOffice.Resources;
@@ -27,6 +31,7 @@ namespace BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new Mock<ITgsQueries<StationLetter>>();
         private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new Mock<ITgsCommands<StationLetter>>();
         private readonly Mock<ITgsCommands<StationLetterPlayer>> _playerCommandsMock = new Mock<ITgsCommands<StationLetterPlayer>>();
+        private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
 
         [SetUp]
         public override void Setup()
@@ -37,6 +42,7 @@ namespace BackendOffice.UnitTests.Controllers
                 _playerQueriesMock.Object,
                 _commandsMock.Object,
                 _playerCommandsMock.Object,
+                _uploadServiceMock.Object,
                 HttpContextAccessorMock.Object);
         }
 
@@ -210,6 +216,39 @@ namespace BackendOffice.UnitTests.Controllers
             var response = await _controller.VerifyAsync(stationLetterId, type, request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Resources.StationLetter.InvalidStatus);
+        }
+
+        [Test]
+        public async Task Can_Upload()
+        {
+            var players = CreatePlayerFixture()
+                .CreateMany<Player>(100)
+                .AsQueryable()
+                .BuildMock().Object; ;
+            var playerUsernames = players.Select(p => new List<string> { p.Username }).ToList();
+            _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync(It.IsAny<IFormFile>()))
+                .Returns(Task.FromResult(playerUsernames));
+
+            _playerQueriesMock.Setup(p => p.GetQueries())
+                .Returns(players);
+
+            var expectedPlayers = players
+                .ToArray();
+
+            var response = await _controller.UploadAsync(It.IsAny<IFormFile>());
+            response.Valid.Should().BeTrue();
+            for (var i = 0; i < response.Players.Length; i++)
+            {
+                response.Players[i].Username.Should().Be(expectedPlayers.ElementAt(i).Username);
+                response.Players[i].Exists.Should().Be(expectedPlayers.ElementAt(i).Status == PlayerStatus.Enabled);
+            }
+        }
+
+        [Test]
+        public async Task Can_Export()
+        {
+            var response = await _controller.ExportAsync();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         private Fixture CreateStationLetterFixture()
