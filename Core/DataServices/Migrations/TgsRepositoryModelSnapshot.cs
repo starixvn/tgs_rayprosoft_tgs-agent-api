@@ -62,7 +62,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("VerifiedByUsername")
-                        .IsRequired()
                         .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
@@ -955,7 +954,7 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllPlayers")
+                    b.Property<bool>("AssignedAllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("Content")
@@ -1003,7 +1002,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<DateTimeOffset>("ReadOn")
+                    b.Property<DateTimeOffset?>("ReadOn")
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("StationLetterId", "PlayerCode");

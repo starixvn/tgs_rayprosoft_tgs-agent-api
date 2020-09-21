@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Migrations
                     From = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     To = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     DisplayOrder = table.Column<short>(type: "smallint", nullable: false),
-                    VerifiedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    VerifiedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: true),
                     CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -183,7 +183,7 @@ namespace TGS.Core.DataServices.Migrations
                     Subject = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(4000)", nullable: true),
                     Remarks = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    AllPlayers = table.Column<bool>(nullable: false),
+                    AssignedAllPlayers = table.Column<bool>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     VerifiedByUsername = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
@@ -837,7 +837,7 @@ namespace TGS.Core.DataServices.Migrations
                     StationLetterId = table.Column<Guid>(nullable: false),
                     PlayerCode = table.Column<string>(nullable: false),
                     IsRead = table.Column<bool>(nullable: false),
-                    ReadOn = table.Column<DateTimeOffset>(nullable: false)
+                    ReadOn = table.Column<DateTimeOffset>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1069,8 +1069,6 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

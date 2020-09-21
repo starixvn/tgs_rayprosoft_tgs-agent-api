@@ -57,34 +57,43 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Remarks = a.Remarks,
                     CreatedByUsername = a.CreatedByUsername,
                     VerifiedByUsername = a.VerifiedByUsername,
-                    Status = a.Status.ToString()
+                    Status = a.Status.ToString(),
+                    CreatedOn = a.CreatedOn
                 })
                 .CreatePagedResponseAsync(request);
         }
 
-        [HttpPut("{id}/{type}"), Description("Update a station letter")]
+        [HttpPut("{id}/{type}"), Description("Verify a station letter")]
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
             var types = new[] { "pass", "reject" };
-            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-            if (stationLetter == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
 
             if (!types.Contains(type))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidUrl);
             }
 
+            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+            if (stationLetter == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            }
+
+            if (stationLetter.Status != StationLetterStatus.InVerify)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidStatus);
+            }
+
             if (type == types[0])
             {
-                stationLetter.Status = StationLetterStatus.InVerify;
+                stationLetter.Status = StationLetterStatus.Published;
             }
             else if (type == types[1])
             {
                 stationLetter.Status = StationLetterStatus.Rejected;
             }
+
+            stationLetter.VerifiedByUsername = Username;
             stationLetter.Remarks = request.Remarks;
             stationLetter.UpdatedByUsername = Username;
             stationLetter.UpdatedOn = DateTimeOffset.Now;
@@ -194,12 +203,12 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var wb = await Task.Run(() =>
             {
-                var wb = new XLWorkbook();
-                var ws = wb.AddWorksheet("Player");
+                var workbook = new XLWorkbook();
+                var ws = workbook.AddWorksheet("Player");
                 ws.Cell("A1").Value = "Player1";
                 ws.Cell("A2").Value = "Player2";
 
-                return wb;
+                return workbook;
             });
             return wb.Deliver("Player.xlsx");
         }

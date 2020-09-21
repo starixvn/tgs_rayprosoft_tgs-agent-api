@@ -34,7 +34,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.VerifiedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))

@@ -7,7 +7,7 @@ namespace TGS.Core.DataServices.Models
         public Guid StationLetterId { get; set; }
         public string PlayerCode { get; set; }
         public bool IsRead { get; set; }
-        public DateTimeOffset ReadOn { get; set; }
+        public DateTimeOffset? ReadOn { get; set; }
         public StationLetter StationLetter { get; set; }
         public Player Player { get; set; }
     }
