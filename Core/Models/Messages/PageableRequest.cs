@@ -1,6 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System.Data.SqlClient;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages
+namespace TGS.Core.Models.Messages
 {
     public class PageableRequest
     {

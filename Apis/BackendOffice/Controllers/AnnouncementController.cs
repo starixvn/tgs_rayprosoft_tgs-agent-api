@@ -9,9 +9,11 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

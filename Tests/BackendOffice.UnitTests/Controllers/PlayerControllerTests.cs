@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.Data.SqlClient;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
@@ -13,9 +13,11 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Security;
+using Player = TGS.Core.DataServices.Models.Player;
 using Resources = TGS.Apis.BackendOffice.Resources;
+using VipLevel = TGS.Core.DataServices.Models.VipLevel;
 
-namespace BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
     public class PlayerControllerTests : BaseTests

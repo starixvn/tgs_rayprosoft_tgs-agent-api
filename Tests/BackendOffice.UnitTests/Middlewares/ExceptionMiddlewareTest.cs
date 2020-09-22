@@ -14,7 +14,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.Log.Services;
 
-namespace BackendOffice.UnitTests.Middlewares
+namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 {
     [TestFixture, Parallelizable]
     public class ExceptionMiddlewareTest

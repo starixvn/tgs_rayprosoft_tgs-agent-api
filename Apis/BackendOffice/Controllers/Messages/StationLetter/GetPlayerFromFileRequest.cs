@@ -1,4 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
 {
     public class GetPlayerFromFileResponse : MessageResponse
     {

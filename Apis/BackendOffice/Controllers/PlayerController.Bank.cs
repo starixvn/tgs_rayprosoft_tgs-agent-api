@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

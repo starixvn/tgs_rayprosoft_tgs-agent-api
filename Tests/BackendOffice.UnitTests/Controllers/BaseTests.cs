@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Moq;
 using TGS.Apis.BackendOffice;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Core.Models.Messages;
 
-namespace BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     public class BaseTests
     {

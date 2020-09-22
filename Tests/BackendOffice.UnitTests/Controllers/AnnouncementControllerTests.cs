@@ -4,19 +4,19 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.Data.SqlClient;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Apis.BackendOffice.DataService.Repositories;
-using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
+using Announcement = TGS.Core.DataServices.Models.Announcement;
 using Resources = TGS.Apis.BackendOffice.Resources;
+using SortOrder = System.Data.SqlClient.SortOrder;
 
-namespace BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
     public class AnnouncementControllerTests : BaseTests

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
