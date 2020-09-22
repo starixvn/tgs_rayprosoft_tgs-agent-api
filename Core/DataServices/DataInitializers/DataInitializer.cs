@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 
@@ -18,15 +20,21 @@ namespace TGS.Core.DataServices.DataInitializers
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : IDataInitializer
     {
-        private const string AdminUsername = "admin.enabled";
+        private readonly ITgsRepository _repository;
+        private readonly IServiceLog<DataInitializer> _log;
         private readonly DateTimeOffset _now = DateTimeOffset.Now;
         private readonly Guid _resellerId = new Guid("5C0EFEFC-CCD4-423C-8CBF-6174CE08B1D3");
         private readonly Guid _licenseeId = new Guid("5C0EFEFC-CCD4-423C-8CBF-6174CE08B1D4");
-        private ITgsRepository _repository;
 
-        public DataInitializer(ITgsRepository repository)
+        private readonly StringBuilder _logBuilder = new StringBuilder();
+
+        private static readonly object Locker = new object();
+        private static readonly string AdminUsername = "admin.enabled";
+
+        public DataInitializer(ITgsRepository repository, IServiceLog<DataInitializer> log)
         {
             _repository = repository;
+            _log = log;
         }
 
         void IDataInitializer.SetInitialData()
@@ -36,6 +44,24 @@ namespace TGS.Core.DataServices.DataInitializers
                 return;
             }
 
+            var timer = new Stopwatch();
+            timer.Start();
+
+            LogSeedingTime(GenerateResellersAndLicensees, _logBuilder);
+            LogSeedingTime(GenerateCurrencies, _logBuilder);
+            LogSeedingTime(GenerateLanguages, _logBuilder);
+            LogSeedingTime(GenerateBetLimitGroups, _logBuilder);
+            LogSeedingTime(GenerateVipLevel, _logBuilder);
+            LogSeedingTime(GeneratePlayers, _logBuilder);
+
+            timer.Stop();
+
+            _logBuilder.AppendLine($"Total Time was {timer.ElapsedMilliseconds} ms");
+            _log.LogInformation(_logBuilder.ToString());
+        }
+
+        private void GenerateResellersAndLicensees()
+        {
             var reseller = new Reseller
             {
                 Id = _resellerId,
@@ -62,54 +88,46 @@ namespace TGS.Core.DataServices.DataInitializers
             _repository.Resellers.Add(reseller);
             _repository.Licensees.Add(licensee);
             _repository.SaveChanges();
-
-            GenerateCurrencies();
-            GenerateLanguages();
-            GenerateBetLimitGroups();
-            GenerateVipLevel();
-            GeneratePlayers();
         }
 
         private void GenerateCurrencies()
         {
-            var _tmpCurrencies = new[]
+            var currencies = new[]
             {
-                new _Currency("CAD", "Canadian Dollar", "Canadian Dollar", "$"),
-                new _Currency("CNY","Yuan", "元","¥"),
-                new _Currency("EUR", "Euro", "Euro","€"),
-                new _Currency("GBP", "Pound Sterling","Pound Sterling","£"),
-                new _Currency("IDR", "Indonesian rupiah","rupiah Indonesia","Rp"),
-                new _Currency("IDR_1000", "Indonesian rupiah","rupiah Indonesia","Rp"),
-                new _Currency("INR", "Indian Rupee","भारतीय रुपये","₹"),
-                new _Currency("JPY", "Japanese Yen","円","¥"),
-                new _Currency("KRW", "Korean won","Korean won","₩"),
-                new _Currency("MYR", "Malaysian Ringgit","Malaysian Ringgit","RM"),
-                new _Currency("PLN", "Polish zloty","Polski złoty","zł"),
-                new _Currency("RMB", "Yuan", "元","¥"),
-                new _Currency("RUB", "Russian ruble","Российский рубль","₽"),
-                new _Currency("SGD", "Singapore Dollar","Singapore Dollar","$"),
-                new _Currency("THB", "Thai Baht","บาท","฿"),
-                new _Currency("USD", "United States Dollar", "United States Dollar","$"),
-                new _Currency("VND", "Vietnamese Dong","đồng","₫"),
-                new _Currency("VND_1000", "Vietnamese Dong","đồng","₫")
-            };
-
-            var currencies = _tmpCurrencies.Select(p => new Currency
+                new { Code = "CAD", Name = "Canadian Dollar", NativeName = "Canadian Dollar", Symbol = "$" },
+                new { Code = "CNY", Name = "Yuan", NativeName = "元", Symbol ="¥" },
+                new { Code = "EUR", Name = "Euro", NativeName = "Euro", Symbol ="€" },
+                new { Code = "GBP", Name = "Pound Sterling", NativeName = "Pound Sterling", Symbol ="£" },
+                new { Code = "IDR", Name = "Indonesian rupiah", NativeName = "rupiah Indonesia", Symbol ="Rp" },
+                new { Code = "IDR_1000", Name = "Indonesian rupiah", NativeName = "rupiah Indonesia", Symbol ="Rp" },
+                new { Code = "INR", Name = "Indian Rupee", NativeName = "भारतीय रुपये", Symbol ="₹" },
+                new { Code = "JPY", Name = "Japanese Yen", NativeName = "円", Symbol ="¥" },
+                new { Code = "KRW", Name = "Korean won", NativeName = "Korean won", Symbol ="₩" },
+                new { Code = "MYR", Name = "Malaysian Ringgit", NativeName = "Malaysian Ringgit", Symbol ="RM" },
+                new { Code = "PLN", Name = "Polish zloty", NativeName = "Polski złoty", Symbol ="zł" },
+                new { Code = "RUB", Name = "Russian ruble", NativeName = "Российский рубль", Symbol ="₽" },
+                new { Code = "SGD", Name = "Singapore Dollar", NativeName = "Singapore Dollar", Symbol ="$" },
+                new { Code = "THB", Name = "Thai Baht", NativeName = "บาท",Symbol ="฿" },
+                new { Code = "USD", Name = "United States Dollar", NativeName = "United States Dollar", Symbol ="$" },
+                new { Code = "VND", Name = "Vietnamese Dong", NativeName ="đồng", Symbol ="₫" },
+                new { Code = "VND_1000", Name = "Vietnamese Dong", NativeName ="đồng", Symbol ="₫" }
+            }
+            .Select(c => new Currency
             {
-                Code = p.Code,
-                Name = p.Name,
-                NativeName = p.NativeName,
-                Symbol = p.Symbol,
+                Code = c.Code,
+                Name = c.Name,
+                NativeName = c.NativeName,
+                Symbol = c.Symbol,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = _now,
                 UpdatedOn = _now
             }).ToArray();
 
-            _repository.BulkInsert(currencies.ToArray());
+            _repository.BulkInsert(currencies);
         }
 
-        readonly VipLevel[] _vipLevels = new[]
+        private readonly VipLevel[] _vipLevels = new[]
         {
             new VipLevel{ Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A" },
             new VipLevel{ Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B" },
@@ -133,19 +151,18 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private void GenerateLanguages()
         {
-            var tmpLanguages = new[]
+            var languages = new[]
             {
-                new _Language("en-US","en","English","English"),
-                new _Language("id-ID","id","Indonesian","bahasa Indonesia"),
-                new _Language("ja-JP","ja","Japanese","日本語"),
-                new _Language("ko-KR","ko","Korean","한국어 / 조선말"),
-                new _Language("th-TH","th","Thai","ภาษาไทย"),
-                new _Language("vi-VN","vi","Vietnamese","ngôn ngữ tiếng Việt"),
-                new _Language("zh-CN","zh","Simplified Chinese", "简体中文"),
-                new _Language("zh-TW","zh","Traditional Chinese"," 繁體中文"),
-            };
-
-            var languages = tmpLanguages.Select(p => new Language
+                new { CultureCode = "en-US", LanguageCode = "en", Name = "English", LocalizedName = "English" },
+                new { CultureCode = "id-ID", LanguageCode = "id", Name ="Indonesian", LocalizedName ="bahasa Indonesia" },
+                new { CultureCode = "ja-JP", LanguageCode = "ja", Name ="Japanese", LocalizedName ="日本語" },
+                new { CultureCode = "ko-KR", LanguageCode = "ko", Name ="Korean", LocalizedName ="한국어 / 조선말" },
+                new { CultureCode = "th-TH", LanguageCode = "th", Name ="Thai", LocalizedName ="ภาษาไทย" },
+                new { CultureCode = "vi-VN", LanguageCode = "vi", Name ="Vietnamese", LocalizedName ="ngôn ngữ tiếng Việt" },
+                new { CultureCode = "zh-CN", LanguageCode = "zh", Name ="Simplified Chinese", LocalizedName = "简体中文" },
+                new { CultureCode = "zh-TW", LanguageCode = "zh", Name ="Traditional Chinese", LocalizedName =" 繁體中文" }
+            }
+            .Select(p => new Language
             {
                 CultureCode = p.CultureCode,
                 LanguageCode = p.LanguageCode,
@@ -156,7 +173,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreatedOn = _now,
                 UpdatedOn = _now
             }).ToArray();
-            _repository.BulkInsert(languages.ToArray());
+
+            _repository.BulkInsert(languages);
         }
 
         private BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
@@ -196,15 +214,15 @@ namespace TGS.Core.DataServices.DataInitializers
                 .Select(p =>
                 {
                     var defaultWalletId = GuidExtensions.NewSequentialGuid();
-                    var currencyCode = "RMB";
-                    var playerCode = Generator.RandomString(8);
+                    var currencyCode = "CNY";
+                    var playerCode = Generator.RandomString(12);
                     tmpPlayers.Add(playerCode);
                     return new Player
                     {
                         PlayerCode = playerCode,
                         Username = Generator.RandomString(12),
                         RealName = Generator.RandomString(12),
-                        ExternalId = playerCode + "_" + Generator.RandomString(4),
+                        ExternalId = $"{playerCode}_{Generator.RandomString(4)}",
                         Password = password,
                         Salt = salt,
                         CultureCode = "en-US",
@@ -267,23 +285,36 @@ namespace TGS.Core.DataServices.DataInitializers
                 tgsHashConfig.HashAlgorithm);
             return (salt, hashedPassword);
         }
+
+        private void LogSeedingTime(Action getFunc,
+            StringBuilder builder)
+        {
+            var timer = Stopwatch.StartNew();
+            getFunc();
+            timer.Stop();
+            lock (Locker)
+            {
+                builder.AppendLine($"{getFunc.Method.Name} total spent {timer.ElapsedMilliseconds} ms");
+            }
+        }
     }
 
     public class Generator
     {
-        private static Random random = new Random();
+        private static readonly Random _random = new Random();
+
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+                .Select(s => s[_random.Next(s.Length)]).ToArray());
         }
 
         public static string RandomIntString(int length)
         {
             const string chars = "0123456789";
             return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+                .Select(s => s[_random.Next(s.Length)]).ToArray());
         }
     }
 }

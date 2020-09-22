@@ -55,7 +55,6 @@ namespace TGS.Apis.TgsApi
                                logging.SetMinimumLevel(LogLevel.Trace);
                            })
                            .UseNLog();
-
         }
     }
 }
