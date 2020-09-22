@@ -18,16 +18,17 @@ namespace TGS.Apis.BackendOffice
 
         public IConfiguration Configuration { get; set; }
 
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services, IWebHostEnvironment env)
         {
-            services.AddBackendOfficeServices(Configuration);
+            services.AddBackendOfficeServices(Configuration, env);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();                
+                app.SeedData();
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
@@ -43,8 +44,6 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
-
-            app.SeedData();
 
             var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);

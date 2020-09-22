@@ -4,10 +4,12 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice;
@@ -41,10 +43,11 @@ namespace TGS.Tests.BackendOffice.UnitTests
             configurationStub.Setup(x => x.GetSection("NatsSetting")).
                 Returns(urls.Object);
 
+            var envStub = new Mock<IWebHostEnvironment>();
             var services = new ServiceCollection();
             var startup = new Startup(configurationStub.Object);
 
-            startup.ConfigureServices(services);
+            startup.ConfigureServices(services, envStub.Object);
             SetupHttpContext();
 
             services.AddSingleton(HttpContextAccessorMock.Object);
@@ -104,6 +107,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             serviceProviderMock
                 .Setup(_ => _.GetService(typeof(IAuthenticationService)))
                 .Returns(_authServiceMock.Object);
+
             return serviceProviderMock;
         }
     }

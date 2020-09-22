@@ -25,18 +25,18 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         private const string UserPassword = "TgsP@ssw0rd";
         private const string MarketDepartment = "市場";
         private const string ProductDepartment = "產品";
-        private IBackendOfficeRepository _repository;
 
-        private static Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
+        private readonly IBackendOfficeRepository _repository;
+
+        private static readonly Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
         {
             { MarketDepartment , new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB") },
             { ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA") }
         };
 
-        public DataInitializer(IServiceScopeFactory scopeFactory)
+        public DataInitializer(IBackendOfficeRepository repository)
         {
-            var serviceScope = scopeFactory.CreateScope();
-            _repository = serviceScope.ServiceProvider.GetRequiredService<IBackendOfficeRepository>();
+            _repository = repository;
         }
 
         private readonly IRole[] _roles =

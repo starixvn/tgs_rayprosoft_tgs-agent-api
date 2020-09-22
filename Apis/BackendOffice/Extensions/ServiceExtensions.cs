@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Repositories;
@@ -32,11 +34,10 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
             services.AddRepository<ITgsRepository, TgsRepository>(configuration, "Tgs");
-            services.AddScoped<IDataInitializer, DataInitializer>();
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IUploadService, UploadService>();
@@ -80,7 +81,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddCookie(options =>
                 {
                     options.LoginPath = new PathString("/api/auth");
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);//沒給預設14天
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.Events.OnRedirectToLogin = context =>
                     {
                         context.Response.Headers["Location"] = context.RedirectUri;
@@ -120,6 +121,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                 //// we need to implement it on our self if not done before deployment
                 //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             }).AddDataAnnotationsLocalization();
+
+            if (env.IsDevelopment())
+            {
+                services.AddScoped<IDataInitializer, DataInitializer>();
+            }
+
             return services;
         }
     }
