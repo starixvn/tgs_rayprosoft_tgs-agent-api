@@ -135,7 +135,13 @@
   <data name="ParentPlayerNotFound" xml:space="preserve">
     <value>Parent player is not found.</value>
   </data>
+  <data name="PasswordMismatched" xml:space="preserve">
+    <value>Password is mismatched.</value>
+  </data>
   <data name="UpdateTypeNotFound" xml:space="preserve">
     <value>Update type is not found.</value>
+  </data>
+  <data name="UsernameExists" xml:space="preserve">
+    <value>Username has existed already.</value>
   </data>
 </root>

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
+using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -41,6 +42,8 @@ namespace TGS.Apis.OperatorApi
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
+
             services.AddNats(Configuration);
             services.AddTgsLog();
             services.AddHttpContextAccessor();
@@ -49,7 +52,7 @@ namespace TGS.Apis.OperatorApi
                 .AddCookie(options =>
                 {
                     options.LoginPath = new PathString("/api/auth");
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);//沒給預設14天
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.Events.OnRedirectToLogin = context =>
                     {
                         context.Response.Headers["Location"] = context.RedirectUri;

@@ -1,17 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TGS.Apis.OperatorApi.Controllers.Messages.Players;
-using TGS.Core.DataServices.Base.Extensions;
+using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -21,62 +27,145 @@ namespace TGS.Apis.OperatorApi.Controllers
     public partial class PlayerController : BaseMessageController
     {
         private readonly ITgsQueries<Player> _queries;
-        private readonly ITgsQueries<AuditLog> _auditLogQueries;
-        private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsCommands<PlayerBank> _bankCommands;
+        private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly ITgsCommands<AuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;
+        private readonly ICaptchaFactory _captchaFactory;
 
         public PlayerController(
             IHashProvider hashProvider,
             ITgsHashConfig tgsHashConfig,
             ITgsQueries<Player> queries,
-            ITgsQueries<AuditLog> auditLogQueries,
-            ITgsQueries<PlayerBank> bankQueries,
             ITgsCommands<Player> commands,
-            ITgsCommands<PlayerBank> bankCommands,
             ITgsCommands<AuditLog> auditLogCommands,
+            ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
+            ICaptchaFactory captchaFactory,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
             _tgsHashConfig = tgsHashConfig;
             _queries = queries;
-            _bankQueries = bankQueries;
-            _auditLogQueries = auditLogQueries;
             _commands = commands;
-            _bankCommands = bankCommands;
             _auditLogCommands = auditLogCommands;
+            _playerLoginRecordCommands = playerLoginRecordCommands;
+            _captchaFactory = captchaFactory;
         }
 
-        [Route("")]
-        [HttpGet, Description("Get player list")]
-        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
+        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [HttpGet, Route("captcha")]
+        public async Task<CaptchaInfo> GetCaptcha()
         {
-            return _queries.GetQueries()
-                .Where(request.Status, p => p.Status == request.Status)
-                .Where(request.VipId, p => p.VipId == request.VipId)
-                .Where(request.Username, p => p.Username.Contains(request.Username))
-                .Select(p => new PlayersModel
-                {
-                    PlayerCode = p.PlayerCode,
-                    Username = p.Username,
-                    VipLevel = p.Vip.Name,
-                    Status = p.Status.ToString(),
-                    HasAgent = p.HasAgent
-                }).CreatePagedResponseAsync(request);
+            var model = await _captchaFactory.CreateAsync();
+            return model;
         }
 
-        [Route("{playerCode}")]
+        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [HttpGet, Route("/checkUsername"), Description("Username exists")]
+        public Task<bool> UsernameExistsAsync([FromQuery] string username)
+        {
+            return _queries.ExistsAsync(p => p.Username == username);
+        }
+
+        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [HttpPost, Description("Create a player")]
+        public async Task<MessageResponse> CreateAsync([FromBody] CreatePlayerRequest request)
+        {
+            var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            if (verifiedResult.Code != 100)
+            {
+                return CreateInvalidResponse<MessageResponse>(verifiedResult.Message);
+            }
+
+            var exists = await _queries.ExistsAsync(p => p.Username == request.Username);
+            if (exists)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Player.UsernameExists);
+            }
+
+            var (salt, password) = GenerateCredential(request.Password);
+
+            var player = new Player
+            {
+                PlayerCode = CodeGenerator.NewId(16),
+                Username = request.Username,
+                Password = password,
+                Salt = salt,
+                CultureCode = "zh-CN",
+                DefaultWalletCurrencyCode = "RMB",
+                RegisteredOn = DateTimeOffset.Now,
+                LastActiveOn = DateTimeOffset.Now,
+                Status = PlayerStatus.Enabled,
+                Type = PlayerTypes.RealPlayer,
+                BetLimitGroupId = 1,
+                UpdatedByUsername = Username,
+                UpdatedOn = DateTimeOffset.Now
+            };
+            await _commands.UpdateAsync(player);
+            await CreateAuditLogAsync(request.Username, player.PlayerCode);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost("login"), Description("login")]
+        public async Task<MessageResponse> LoginAsync([FromBody] LoginRequest request)
+        {
+            var player = await _queries.GetSingleAsync(p => p.Username == request.Username);
+
+            if (player == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
+            }
+
+            if (PasswordMismatch(player, request.Password))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
+            }
+
+            var ipAddress = string.Empty;
+            if (_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress != null)
+                ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+
+            var logRecord = new PlayerLoginRecord
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                CreatedOn = DateTimeOffset.Now,
+                ExpiredOn = DateTimeOffset.Now.AddHours(12),
+                IpAddress = ipAddress,
+                PlayerCode = player.PlayerCode,
+                Status = LoginStatus.Enabled,
+                PlatformType = PlatformType.Desktop
+            };
+
+            await SignInAsync(player);
+            await _playerLoginRecordCommands.CreateAsync(logRecord);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+
+        private async Task SignInAsync(Player player)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(Consts.UserInfo.UsernameKey, player.Username),
+            };
+
+            var authProperties = new AuthenticationProperties
+            {
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20),
+                IsPersistent = true,
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+        }
+
+
+        [Route("{username}")]
         [HttpGet, Description("Get player")]
-        public async Task<GetPlayerResponse> GetSingleAsync(string playerCode)
+        public async Task<GetPlayerResponse> GetSingleAsync(string username)
         {
-            var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode, p =>
-                p.Include(s => s.Vip)
-                    .Include(s => s.Banks)
-                    .Include(s => s.Wallets)
-                    .Include(s => s.ParentPlayer));
+            var player = await _queries.GetSingleAsync(p => p.Username == username);
 
             if (player == null)
             {
@@ -87,23 +176,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 Username = player.Username,
                 RealName = player.RealName,
-                VipLevel = player.Vip.Name,
-                Status = player.Status.ToString(),
-                HasAgent = player.HasAgent,
-                RegisteredOn = player.RegisteredOn,
-                ParentUsername = player.ParentPlayer.Username,
-                Balance = player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
                 Phone = player.Phone,
                 Email = player.Email,
                 QQ = player.QQ,
-                WeChat = player.Wechat,
-                Banks = player.Banks.Select(p => new PlayerModel.BankModel
-                {
-                    Id = p.Id,
-                    RealName = p.Username,
-                    BankName = p.BankName,
-                    BankAccount = p.BankAccount
-                }).ToArray()
+                WeChat = player.Wechat
             };
 
             return new GetPlayerResponse
@@ -113,76 +189,70 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        [Route("{playerCode}/operations")]
-        [HttpGet, Description("Get player operation")]
-        public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode, [FromQuery] GetPlayerOperationRequest request)
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Route("")]
+        [HttpPost(), Description("Forgot passowrd")]
+        public Task ForgotPasswordAsync([FromBody] ForgotPlayerRequest request)
         {
-            return _auditLogQueries.GetQueries()
-                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.PlayerCode == playerCode)
-                .Select(p => new PlayerOperationModel
-                {
-                    CreatedOn = p.CreatedOn,
-                    CreatedByUsername = p.CreatedByUsername,
-                    Operation = p.Operation
-                }).CreatePagedResponseAsync(request);
+            return Task.FromResult(0);
         }
 
-        [Route("{playerCode}/{type}")]
-        [HttpPut, Description("Update player")]
-        public async Task<MessageResponse> UpdateAsync(string playerCode, string type, [FromBody] UpdatePlayerRequest request)
+
+
+        [Route("{username}/contact")]
+        [HttpPut, Description("Update player contact")]
+        public async Task<MessageResponse> UpdateAsync(string username, [FromBody] UpdatePlayerRequest request)
         {
-            var updatePlayerType = new[] { "info", "contact", "password" };
-
-            if (!updatePlayerType.Contains(type))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.UpdateTypeNotFound);
-            }
-
-            var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode);
+            var player = await _queries.GetSingleAsync(p => p.Username == username);
 
             if (player == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
             }
 
-            if (type == updatePlayerType[0])
-            {
-                var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
-                if (parentPlayer == null)
-                {
-                    return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
-                }
-
-                player.RealName = request.RealName;
-                player.VipId = request.VipId;
-                player.ParentPlayerCode = parentPlayer.PlayerCode;
-                player.Status = request.Status;
-                player.HasAgent = request.HasAgent;
-            }
-
-            if (type == updatePlayerType[1])
-            {
-                player.Phone = request.Phone;
-                player.Email = request.Email;
-                player.QQ = request.QQ;
-                player.Wechat = request.Wechat;
-            }
-
-            if (type == updatePlayerType[2])
-            {
-                var (salt, pwd) = GenerateCredential(request.Password);
-                player.Password = pwd;
-                player.Salt = salt;
-            }
-
+            player.RealName = request.RealName;
+            player.Phone = request.Phone;
+            player.Email = request.Email;
+            player.QQ = request.QQ;
+            player.Wechat = request.Wechat;
             player.UpdatedByUsername = Username;
             player.UpdatedOn = DateTimeOffset.Now;
             await _commands.UpdateAsync(player);
-            await CreateAuditLogAsync(type, playerCode);
+            await CreateAuditLogAsync("Update Player Contact", player.PlayerCode);
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async Task CreateAuditLogAsync(string type, string playerCode)
+        [Route("{username}/password")]
+        [HttpPut, Description("Update player password")]
+        public async Task<MessageResponse> UpdatePasswordAsync(string username, [FromBody] UpdatePasswordRequest request)
+        {
+            var player = await _queries.GetSingleAsync(p => p.Username == username);
+
+            if (player == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
+            }
+
+            if (PasswordMismatch(player, request.OldPassword))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
+            }
+
+            var (salt, pwd) = GenerateCredential(request.NewPassword);
+            player.Password = pwd;
+            player.Salt = salt;
+            player.UpdatedByUsername = Username;
+            player.UpdatedOn = DateTimeOffset.Now;
+            await _commands.UpdateAsync(player);
+            await CreateAuditLogAsync("Update player password", player.PlayerCode);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        private async Task CreateAuditLogAsync(string username, string playerCode)
         {
             var auditLog = new AuditLog
             {
@@ -190,7 +260,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ModuleName = "Player",
                 CreatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
-                Operation = $"Update Player {type}",
+                Operation = $"Create Player '{username}'",
                 PlayerCode = playerCode
             };
 
@@ -205,6 +275,18 @@ namespace TGS.Apis.OperatorApi.Controllers
                 _hashProvider.Hash(salt),
                 _tgsHashConfig.HashAlgorithm);
             return (salt, hashedPassword);
+        }
+
+        private bool PasswordMismatch(Player player, string password)
+        {
+            var salt = _hashProvider.Hash(player.Salt);
+
+            var hashedPassword = _hashProvider.Hash(
+                Encoding.UTF8.GetBytes(password),
+                salt,
+                _tgsHashConfig.HashAlgorithm);
+
+            return !player.Password.SequenceEqual(hashedPassword);
         }
     }
 }

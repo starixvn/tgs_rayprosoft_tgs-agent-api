@@ -56,9 +56,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var serviceProvider = services.BuildServiceProvider();
 
-            foreach (var controllerType in controllers)
+            foreach (var controller in controllers.Select(controllerType => serviceProvider.GetRequiredService(controllerType)))
             {
-                var controller = serviceProvider.GetRequiredService(controllerType);
                 controller.Should().NotBe(null);
             }
         }
