@@ -1,4 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
 {
     public class AuthenticateUserResponse : MessageResponse
     {

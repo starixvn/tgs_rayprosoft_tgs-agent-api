@@ -5,10 +5,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Extensions
+namespace TGS.Core.DataServices.Base.Extensions
 {
     public static class QueryableExtensions
     {
@@ -49,7 +48,7 @@ namespace TGS.Apis.BackendOffice.Extensions
 
         public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption)
         {
-            if (sortOption.PropertyName.IsNotNullOrEmpty())
+            if (!string.IsNullOrEmpty(sortOption.PropertyName))
             {
                 return query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending);
             }
@@ -80,14 +79,14 @@ namespace TGS.Apis.BackendOffice.Extensions
         }
 
         private static readonly MethodInfo OrderByMethod =
-            (from x in typeof(System.Linq.Queryable).GetMethods()
+            (from x in typeof(Queryable).GetMethods()
              where x.Name == "OrderBy"
              let pars = x.GetParameters()
              where pars.Length == 2
              select x).Single();
 
         private static readonly MethodInfo OrderByDescendingMethod =
-            (from x in typeof(System.Linq.Queryable).GetMethods()
+            (from x in typeof(Queryable).GetMethods()
              where x.Name == "OrderByDescending"
              let pars = x.GetParameters()
              where pars.Length == 2

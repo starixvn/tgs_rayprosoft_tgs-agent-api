@@ -12,14 +12,15 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
-using TGS.Apis.BackendOffice.DataService;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
+using Department = TGS.Apis.BackendOffice.DataService.Models.Department;
 using Resources = TGS.Apis.BackendOffice.Resources;
+using Role = TGS.Apis.BackendOffice.DataService.Models.Role;
+using User = TGS.Apis.BackendOffice.DataService.Models.User;
 
-namespace BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
     public class AuthenticateControllerTests : BaseTests

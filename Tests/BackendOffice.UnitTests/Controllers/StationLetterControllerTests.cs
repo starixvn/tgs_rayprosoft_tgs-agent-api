@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -7,20 +8,23 @@ using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Data.SqlClient;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Services;
+using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
+using Player = TGS.Core.DataServices.Models.Player;
 using Resources = TGS.Apis.BackendOffice.Resources;
+using StationLetter = TGS.Core.DataServices.Models.StationLetter;
+using VipLevel = TGS.Core.DataServices.Models.VipLevel;
 
-namespace BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
     public class StationLetterControllerTests : BaseTests

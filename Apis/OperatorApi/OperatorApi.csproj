@@ -5,6 +5,8 @@
     <UserSecretsId>e0868ee3-eaa7-4a0e-885a-9ccf907086e0</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <AssemblyName>TGS.Apis.OperatorApi</AssemblyName>
+    <RootNamespace>TGS.Apis.OperatorApi</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,21 @@
     <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\Player.Designer.cs">
+      <DependentUpon>Player.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Player.resx">
+      <LastGenOutput>Player.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 

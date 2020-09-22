@@ -4,6 +4,10 @@
     <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <RootNamespace>TGS.Tests.BackendOffice.UnitTests</RootNamespace>
+
+    <AssemblyName>TGS.Tests.BackendOffice.UnitTests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

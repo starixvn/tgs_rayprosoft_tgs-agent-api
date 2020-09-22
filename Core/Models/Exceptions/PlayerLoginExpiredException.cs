@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UGS.Core.Models.Exceptions
+namespace TGS.Core.Models.Exceptions
 {
     public sealed class PlayerLoginExpiredException : Exception
     {

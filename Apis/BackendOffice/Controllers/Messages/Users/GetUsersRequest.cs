@@ -1,4 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
 {
     public class GetUsersRequest : PageableRequest
     {

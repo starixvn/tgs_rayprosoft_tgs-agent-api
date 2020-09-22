@@ -5,11 +5,11 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
 using TGS.Tests.TestsCommon;
-using UGS.Core.Models.Exceptions;
 
 namespace Tgs.UnitTests.Operations
 {
