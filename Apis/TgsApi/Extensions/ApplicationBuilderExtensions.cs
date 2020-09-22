@@ -8,8 +8,7 @@ namespace TGS.Apis.TgsApi.Extensions
     {
         public static void SeedData(this IApplicationBuilder app)
         {
-            var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
-            using var scope = scopeFactory.CreateScope();
+            using var scope = app.ApplicationServices.CreateScope();
             var dataInitializer = scope.ServiceProvider.GetRequiredService<IDataInitializer>();
             dataInitializer.SetInitialData();
         }

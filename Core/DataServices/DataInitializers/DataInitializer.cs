@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
@@ -25,12 +24,10 @@ namespace TGS.Core.DataServices.DataInitializers
         private readonly Guid _licenseeId = new Guid("5C0EFEFC-CCD4-423C-8CBF-6174CE08B1D4");
         private ITgsRepository _repository;
 
-        public DataInitializer(IServiceScopeFactory scopeFactory)
+        public DataInitializer(ITgsRepository repository)
         {
-            var serviceScope = scopeFactory.CreateScope();
-            _repository = serviceScope.ServiceProvider.GetRequiredService<ITgsRepository>();
+            _repository = repository;
         }
-
 
         void IDataInitializer.SetInitialData()
         {

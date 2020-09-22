@@ -29,7 +29,8 @@ namespace TGS.Core.Infrastructures.WebApiServices
                     if (exception == null)
                         return;
 
-                    var serviceProvider = app.ApplicationServices;
+                    using var scope = app.ApplicationServices.CreateScope();
+                    var serviceProvider = scope.ServiceProvider;
                     var log = serviceProvider.GetRequiredService<ITgsLog>();
                     var mapper = serviceProvider.GetRequiredService<Func<string, IErrorMapper>>();
                     var errorMapper = mapper(Consts.Default);
