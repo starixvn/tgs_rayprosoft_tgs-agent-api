@@ -26,15 +26,13 @@ import {
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Copy as CopyMenu } from "./menu"
-import { useIsDisplayMenu } from "../../user/context"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 
 export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu([...codes, CopyMenu])
+  let isDisplay = useIsDisplayMenuByRoute([CopyMenu])
   if (!isDisplay) {
     return null
   }

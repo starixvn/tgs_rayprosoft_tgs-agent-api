@@ -1,22 +1,22 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.Data.SqlClient;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
-using TGS.Apis.BackendOffice.DataService;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Core.Models.Messages;
+using Department = TGS.Apis.BackendOffice.DataService.Models.Department;
 using Resources = TGS.Apis.BackendOffice.Resources;
+using User = TGS.Apis.BackendOffice.DataService.Models.User;
 
-namespace BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     [TestFixture, Parallelizable]
     public class DepartmentControllerTests : BaseTests

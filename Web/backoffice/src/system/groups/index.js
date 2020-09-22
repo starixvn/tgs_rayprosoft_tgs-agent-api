@@ -11,25 +11,36 @@ import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
 import { CopyButton } from "./copy"
 import { DeleteButton } from "./delete"
-import { useIsDisplayMenu } from "../../user/context"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 
 export const Code = "groups"
 
 export const Content = ({}) => {
-  let { state, setState, headSortBy, headOrderBy } = useTableState({ name: "" })
-  let { pageIndex, pageSize, name = "", sortBy = [], request } = state
+  let isDisplay = useIsDisplayMenuByRoute()
+  if (!isDisplay) {
+    return null
+  }
 
-  let fetchTable = () => {
-    var promise = getRoles({
-      page: pageIndex + 1,
-      rows: pageSize,
-      name,
-      sortby: headSortBy(),
-      orderby: headOrderBy()
+  return <AsyncContent />
+}
+
+export const AsyncContent = () => {
+  let { state, setState, headSortBy, headOrderBy } = useTableState({ name: "" })
+  let { pageIndex, pageSize, name = "", sortBy = [] } = state
+
+  const deferFn = () =>
+    client.get("/api/role", {
+      searchParams: {
+        page: pageIndex + 1,
+        rows: pageSize,
+        name,
+        sortby: headSortBy(),
+        orderby: headOrderBy()
+      }
     })
 
-    setState({ ...state, request: promise })
-  }
+  let async = useAsync({ deferFn })
+  let { run: fetchTable, promise, isPending } = async
 
   let columns = useMemo(() =>
     tableColumns({
@@ -37,22 +48,9 @@ export const Content = ({}) => {
     })
   )
 
-  let async = useAsync({ promise: request })
-  let { isPending } = async
-
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu(codes)
-
   useEffect(() => {
-    if (isDisplay) {
-      fetchTable()
-    }
+    fetchTable()
   }, [pageIndex, pageSize, name, sortBy])
-
-  if (!isDisplay) {
-    return null
-  }
 
   return (
     <PageContent
@@ -67,7 +65,7 @@ export const Content = ({}) => {
       <AsyncTable
         state={state}
         onStateChange={setState}
-        promise={request}
+        promise={promise}
         head
         body
         columns={columns}
@@ -106,10 +104,6 @@ const SearchForm = ({ search, isPending, ...props }) => {
       )}
     </Formik>
   )
-}
-
-const getRoles = (searchParams = {}) => {
-  return client.get("/api/role", { searchParams })
 }
 
 //TODO: i18n

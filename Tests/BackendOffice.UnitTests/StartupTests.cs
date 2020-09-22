@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using BackendOffice.UnitTests.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -13,8 +12,9 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.Controllers;
+using TGS.Tests.BackendOffice.UnitTests.Controllers;
 
-namespace BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests
 {
     [TestFixture, Parallelizable]
     public class StartupTests : BaseTests
@@ -26,6 +26,9 @@ namespace BackendOffice.UnitTests
             var configurationSectionStub = new Mock<IConfigurationSection>();
             configurationSectionStub.Setup(x => x["BackendOffice"])
                 .Returns("server=localhost;database=BackendOffice;user=sa;password=1qaz2wsx!@");
+
+            configurationSectionStub.Setup(x => x["Tgs"])
+                .Returns("server=localhost;database=Tgs;user=sa;password=1qaz2wsx!@");
 
             var urls = new Mock<IConfigurationSection>();
             configurationSectionStub.Setup(x => x["Urls"])

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
-using UGS.Core.Models.Exceptions;
+using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operations.Validators
 {

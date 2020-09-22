@@ -23,7 +23,7 @@ const defaultState = {
 
 let HeadIndex = 0
 
-export const useTableState = (value = initialState) => {
+export const useTableState = (value = defaultState) => {
   let [state, set] = useState({ ...defaultState, ...value })
   //let async = useAsync(request ?? Promise.resolve())
 
@@ -168,7 +168,10 @@ const Body = ({ table }) => {
   )
 }
 
-const defaultMapDataItems = (data = {}) => data?.items ?? []
+const defaultMapDataItems = (data = {}) => {
+  console.log("defaultMapDataItems", data.items)
+  return data?.items ?? []
+}
 
 //TODO: check page size number?
 const DefaultPageSize = 10

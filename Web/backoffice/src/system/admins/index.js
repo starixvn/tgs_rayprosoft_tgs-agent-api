@@ -11,49 +11,49 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import AsyncTable, { useTableState } from "../../table/async"
 import { label as statusLabel } from "./status"
-import { useIsDisplayMenu } from "../../user/context"
+import {
+  useIsDisplayMenuByRoute,
+  useHasSubMenuByRoute
+} from "../../user/context"
 
 export const Code = "admins"
 
 export const Content = () => {
-  let { state, setState, headSortBy, headOrderBy } = useTableState({
-    username: ""
-  })
-  let { pageIndex, pageSize, username = "", sortBy = [], request } = state
-
-  let fetchTable = () => {
-    let promise = getUsers({
-      page: pageIndex + 1,
-      rows: pageSize,
-      username,
-      sortby: headSortBy(),
-      orderby: headOrderBy()
-    })
-    setState({ ...state, request: promise })
-  }
-
-  let async = useAsync({ promise: request })
-  let { isPending } = async
-
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu(codes)
-
-  useEffect(() => {
-    if (isDisplay) {
-      fetchTable()
-    }
-  }, [pageIndex, pageSize, username, sortBy])
-
-  let columns = useMemo(() =>
-    tableColumns({
-      fetchTable
-    })
-  )
-
+  let isDisplay = useIsDisplayMenuByRoute()
   if (!isDisplay) {
     return null
   }
+
+  return <AsyncContent />
+}
+
+const AsyncContent = ({}) => {
+  let { state, setState, headSortBy, headOrderBy } = useTableState({
+    username: ""
+  })
+  let { pageIndex, pageSize, username = "", sortBy = [] } = state
+
+  const deferFn = () =>
+    client.get("/api/users", {
+      searchParams: {
+        page: pageIndex + 1,
+        rows: pageSize,
+        username,
+        sortby: headSortBy(),
+        orderby: headOrderBy()
+      }
+    })
+
+  let async = useAsync({ deferFn })
+  let { run: fetchTable, promise, isPending } = async
+
+  let columns = useTableColumns({
+    fetchTable
+  })
+
+  useEffect(() => {
+    fetchTable()
+  }, [pageIndex, pageSize, username, sortBy])
 
   return (
     <PageContent
@@ -68,7 +68,7 @@ export const Content = () => {
       <AsyncTable
         state={state}
         onStateChange={setState}
-        promise={request}
+        promise={promise}
         head
         body
         columns={columns}
@@ -109,10 +109,6 @@ const SearchForm = ({ search, isPending, ...props }) => {
   )
 }
 
-const getUsers = (searchParams = {}) => {
-  return client.get("/api/users", { searchParams })
-}
-
 //TODO: i18n
 const searchButtonLabel = () => "搜索"
 
@@ -122,107 +118,115 @@ const searchInputPlaceHolder = () => "管理员用户名输入框"
 //TODO: i18n
 const title = () => "管理员列表"
 
-const tableColumns = ({ fetchTable }) => [
-  sequenceColumn(),
-  {
-    Header: "用户名",
-    accessor: "username",
-    headCell: {
-      textAlign: "center"
+const useTableColumns = ({ fetchTable }) => {
+  let columns = [
+    sequenceColumn(),
+    {
+      Header: "用户名",
+      accessor: "username",
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      }
     },
-    cell: {
-      textAlign: "center"
+    {
+      Header: "姓名",
+      accessor: "name",
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      }
+    },
+    {
+      Header: "部门",
+      accessor: "departmentName",
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center",
+        whiteSpace: "nowrap"
+      }
+    },
+    {
+      Header: "权限组",
+      accessor: "role",
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center",
+        whiteSpace: "nowrap"
+      }
+    },
+    {
+      Header: "最近登入IP",
+      accessor: "lastLoginIp",
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      }
+    },
+    dateTimeColumn({
+      Header: "最近登入时间",
+      accessor: "lastLoginTime",
+      disableSortBy: true
+    }),
+    dateTimeColumn({
+      Header: "创建时间",
+      accessor: "createdOn",
+      disableSortBy: true
+    }),
+    {
+      disableSortBy: true,
+      Header: "状态",
+      accessor: "status",
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        return statusLabel(value)
+      }
     }
-  },
-  {
-    Header: "姓名",
-    accessor: "name",
-    disableSortBy: true,
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    }
-  },
-  {
-    Header: "部门",
-    accessor: "departmentName",
-    disableSortBy: true,
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center",
-      whiteSpace: "nowrap"
-    }
-  },
-  {
-    Header: "权限组",
-    accessor: "role",
-    disableSortBy: true,
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center",
-      whiteSpace: "nowrap"
-    }
-  },
-  {
-    Header: "最近登入IP",
-    accessor: "lastLoginIp",
-    disableSortBy: true,
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    }
-  },
-  dateTimeColumn({
-    Header: "最近登入时间",
-    accessor: "lastLoginTime",
-    disableSortBy: true
-  }),
-  dateTimeColumn({
-    Header: "创建时间",
-    accessor: "createdOn",
-    disableSortBy: true
-  }),
-  {
-    disableSortBy: true,
-    Header: "状态",
-    accessor: "status",
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    },
-    Cell: ({ value }) => {
-      return statusLabel(value)
-    }
-  },
-  {
-    disableSortBy: true,
-    Header: "操作",
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    },
-    accessor: (row) => {
-      return row
-    },
-    Cell: ({ value }) => {
-      return (
-        <Set>
-          <EditButton user={value} onSubmitted={fetchTable} />
-          <EditPasswordButton user={value} onSubmitted={fetchTable} />
-        </Set>
-      )
-    }
+  ]
+
+  let hasAnyMenu = useHasSubMenuByRoute()
+  if (hasAnyMenu) {
+    columns.push({
+      disableSortBy: true,
+      Header: "操作",
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      accessor: (row) => {
+        return row
+      },
+      Cell: ({ value }) => {
+        return (
+          <Set>
+            <EditButton user={value} onSubmitted={fetchTable} />
+            <EditPasswordButton user={value} onSubmitted={fetchTable} />
+          </Set>
+        )
+      }
+    })
   }
-]
+
+  return useMemo(() => columns)
+}

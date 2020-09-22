@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests
 {
     public class Generator
     {
