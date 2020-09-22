@@ -34,15 +34,13 @@ import {
 } from "../../input/Field"
 import { Select as StatusSelect, from as statusFrom } from "./status"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
-import { useIsDisplayMenu } from "../../user/context"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu([...codes, CreateMenu])
+  let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
     return null
   }
@@ -74,9 +72,7 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu([...codes, UpdateMenu])
+  let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
   if (!isDisplay) {
     return null
   }
@@ -109,6 +105,11 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
 export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
+
+  let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
+  if (!isDisplay) {
+    return null
+  }
 
   return (
     <>

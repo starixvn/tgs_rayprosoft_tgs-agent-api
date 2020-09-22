@@ -1,8 +1,10 @@
-import React from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/core"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import { PageContent } from "bumbag"
-import { useIsDisplayMenu } from "../../user/context"
+import client from "../../client"
+import { Box, Button, InputField, Set } from "bumbag"
+import PageContent from "../../page/Content"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import sequenceColumn from "../../table/column/sequence"
 import AsyncTable, { useTableState } from "../../table/async"
 import { Async, useAsync } from "react-async"
@@ -10,9 +12,7 @@ import { Async, useAsync } from "react-async"
 export const Code = "departments"
 
 export const Content = () => {
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu(codes)
+  let isDisplay = useIsDisplayMenuByRoute()
   if (!isDisplay) {
     return null
   }
@@ -21,11 +21,11 @@ export const Content = () => {
 }
 
 const AsynPageContent = () => {
-  let { state, setState, headSortBy, headOrderBy, request } = useTableState()
+  let { state, setState, headSortBy, headOrderBy } = useTableState()
   let { pageIndex, pageSize, sortBy = [] } = state
 
-  let fetchTable = () => {
-    let promise = client.get("/api/department", {
+  let deferFn = ([data]) =>
+    client.get("/api/department", {
       searchParams: {
         page: pageIndex + 1,
         rows: pageSize,
@@ -33,9 +33,9 @@ const AsynPageContent = () => {
         orderby: headOrderBy()
       }
     })
-    setState({ ...state, request: promise })
-    return promise
-  }
+
+  let async = useAsync({ deferFn })
+  let { run: fetchTable, promise } = async
 
   let columns = useMemo(() =>
     tableColumns({
@@ -52,7 +52,7 @@ const AsynPageContent = () => {
       <AsyncTable
         state={state}
         onStateChange={setState}
-        promise={request}
+        promise={promise}
         head
         body
         columns={columns}
