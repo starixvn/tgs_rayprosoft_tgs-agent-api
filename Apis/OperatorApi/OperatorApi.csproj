@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>e0868ee3-eaa7-4a0e-885a-9ccf907086e0</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
+  </ItemGroup>
+
+
+</Project>

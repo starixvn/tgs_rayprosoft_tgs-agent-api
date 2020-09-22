@@ -23,6 +23,33 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         {
             var menus = new[]
             {
+                new MenuSetting("Platform")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "Announcement")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Delete")
+                            }
+                        },
+                        new MenuSetting( "StationLetter")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
+                            }
+                        }
+                    }
+                },
                 new MenuSetting("System")
                 {
                     SubMenus = new[]
@@ -44,9 +71,21 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
                                 new MenuSetting("View"),
-                                new MenuSetting("Delete")
+                                new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
                             }
                         },
+                        new MenuSetting( "Departments")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
+                            }
+                        }
                     }
                 },
                 new MenuSetting("PlayerManagement")
