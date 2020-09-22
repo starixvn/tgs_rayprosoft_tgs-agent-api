@@ -11,6 +11,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Security;
 using Player = TGS.Core.DataServices.Models.Player;

@@ -34,6 +34,7 @@ namespace TGS.Apis.LogApi.Services
         private readonly IServiceLog<NatsMessageHandler> _serviceLog;
         private readonly INatsManager _natsManager;
         private IAsyncSubscription _apiLogSubscription;
+        private IAsyncSubscription _adminLogSubscription;
         private IAsyncSubscription _logRecordSubscription;
         private DateTimeOffset _lastReceivedEventTime;
         private LogBusEvent _lastBusEvent;
@@ -103,7 +104,7 @@ namespace TGS.Apis.LogApi.Services
 
         private void SubscribeAdminLogReceived()
         {
-            _apiLogSubscription = _natsManager.SubscribeAsync<AdminLogEvent>(
+            _adminLogSubscription = _natsManager.SubscribeAsync<AdminLogEvent>(
                 nameof(AdminLogEvent),
                 Consts.Nats.NatsTgsLogQueueName,
                 message =>
@@ -170,6 +171,7 @@ namespace TGS.Apis.LogApi.Services
         {
             _apiLogSubscription?.Dispose();
             _logRecordSubscription?.Dispose();
+            _adminLogSubscription?.Dispose();
             Task.WaitAll(Task.Delay(_loggerServiceConfig.Value.BatchInsertWaitingSeconds.Add(TimeSpan.FromSeconds(3))));
             _subscription?.Dispose();
         }

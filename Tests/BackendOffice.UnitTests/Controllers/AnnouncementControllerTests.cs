@@ -10,6 +10,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Core.DataServices;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Announcement = TGS.Core.DataServices.Models.Announcement;

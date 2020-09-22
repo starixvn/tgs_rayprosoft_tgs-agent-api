@@ -3,9 +3,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices;
 
-namespace TGS.Apis.BackendOffice.DataService.Repositories
+namespace TGS.Core.DataServices
 {
     public interface ITgsQueries<T>
     {
