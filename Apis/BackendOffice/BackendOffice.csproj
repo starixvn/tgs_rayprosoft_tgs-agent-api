@@ -46,30 +46,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Department.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\StationLetter - Copy.Designer.cs">
-      <DependentUpon>StationLetter.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="Resources\Announcement.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Announcement.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\Common - Copy.Designer.cs">
-      <DependentUpon>Common.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="Resources\Common.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Common.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Resources\Menu - Copy.Designer.cs">
-      <DependentUpon>Menu.Designer.cs</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Update="Resources\Player.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -91,11 +76,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>StationLetter.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\User - Copy.Designer.cs">
-      <DependentUpon>User.Designer.cs</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="Resources\User.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -106,10 +86,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>VipLevel.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,16 +3,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices;
+using TGS.Core.DataServices.Base.Interfaces;
 
-namespace TGS.Core.DataServices
+namespace TGS.Apis.OperatorApi.DataServices
 {
-    public interface ITgsQueries<T>
-    {
-        IQueryable<T> GetQueries();
-        Task<T> GetSingleAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> preQuery = null);
-        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
-    }
-
     public class TgsQueries<T> : ITgsQueries<T> where T : class
     {
         private readonly ITgsRepository _repository;

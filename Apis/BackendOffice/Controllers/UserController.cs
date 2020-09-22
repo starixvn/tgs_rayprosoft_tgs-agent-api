@@ -18,7 +18,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
     [Route("api/users")]
     [ApiController]
-    public class UserController : BaseUserContextController
+    public class UserController : BaseContextController
     {
         private readonly IHashProvider _hashProvider;
         private readonly ITgsHashConfig _tgsHashConfig;

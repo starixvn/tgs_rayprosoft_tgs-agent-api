@@ -22,6 +22,7 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;

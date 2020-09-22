@@ -10,10 +10,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -24,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StationLetterController : BaseUserContextController
+    public class StationLetterController : BaseContextController
     {
         private readonly ITgsQueries<StationLetter> _queries;
         private readonly ITgsQueries<Player> _playerQueries;

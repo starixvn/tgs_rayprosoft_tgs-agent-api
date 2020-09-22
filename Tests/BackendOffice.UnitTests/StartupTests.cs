@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             services.AddSingleton(HttpContextAccessorMock.Object);
 
-            var controllers = typeof(BaseMessageController).Assembly.ExportedTypes
+            var controllers = typeof(BaseContextController).Assembly.ExportedTypes
                 .Where(x => !x.IsAbstract && typeof(ControllerBase).IsAssignableFrom(x)).ToList();
 
             controllers.ForEach(c => services.AddTransient(c));

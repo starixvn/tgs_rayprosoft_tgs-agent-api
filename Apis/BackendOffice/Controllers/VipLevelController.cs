@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.VipLevel;
-using TGS.Apis.BackendOffice.DataService.Repositories;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
@@ -18,7 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class VipLevelController : BaseUserContextController
+    public class VipLevelController : BaseContextController
     {
         private readonly ITgsQueries<VipLevel> _queries;
         private readonly ITgsCommands<VipLevel> _commands;

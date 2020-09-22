@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.OperatorApi.Controllers.Messages.Players;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
@@ -18,7 +18,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public partial class PlayerController : BaseUserContextController
+    public partial class PlayerController : BaseMessageController
     {
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsQueries<AuditLog> _auditLogQueries;

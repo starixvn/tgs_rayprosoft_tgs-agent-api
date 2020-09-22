@@ -2,14 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-    public class BaseUserContextController : BaseMessageController
+    public class BaseContextController : ControllerBase
     {
+        protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
+        {
+            return new TResponse
+            {
+                Valid = true
+            };
+        }
+
+        protected static TResponse CreateInvalidResponse<TResponse>(string message) where TResponse : MessageResponse, new()
+        {
+            return new TResponse
+            {
+                Valid = false,
+                Message = message
+            };
+        }
+
         private readonly Dictionary<string, string> _userInfoMap;
-        public BaseUserContextController(IHttpContextAccessor httpContextAccessor)
+        public BaseContextController(IHttpContextAccessor httpContextAccessor)
         {
             _userInfoMap = httpContextAccessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
         }

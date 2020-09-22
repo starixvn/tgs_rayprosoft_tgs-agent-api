@@ -17,7 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class DepartmentController : BaseUserContextController
+    public class DepartmentController : BaseContextController
     {
         private readonly IBackendOfficeQueries<Department> _queries;
         private readonly IBackendOfficeCommands<Department> _commands;

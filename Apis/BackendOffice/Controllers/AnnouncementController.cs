@@ -5,12 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
-using TGS.Apis.BackendOffice.DataService.Repositories;
-using TGS.Apis.BackendOffice.Extensions;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -20,7 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnnouncementController : BaseUserContextController
+    public class AnnouncementController : BaseContextController
     {
         private readonly ITgsQueries<Announcement> _queries;
         private readonly ITgsCommands<Announcement> _commands;

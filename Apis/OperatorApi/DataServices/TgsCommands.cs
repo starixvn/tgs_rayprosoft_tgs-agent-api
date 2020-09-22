@@ -1,16 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices;
+using TGS.Core.DataServices.Base.Interfaces;
 
-namespace TGS.Core.DataServices
+namespace TGS.Apis.OperatorApi.DataServices
 {
-    public interface ITgsCommands<in TEntity> where TEntity : class
-    {
-        Task CreateAsync(TEntity obj);
-        Task UpdateAsync(TEntity obj);
-        Task DeleteAsync(TEntity obj);
-        void BatchInsert(TEntity[] obj);
-    }
-
     public class TgsCommands<TEntity> : ITgsCommands<TEntity> where TEntity : class
     {
         private readonly ITgsRepository _repository;
@@ -39,7 +33,6 @@ namespace TGS.Core.DataServices
 
         Task ITgsCommands<TEntity>.UpdateAsync(TEntity obj)
         {
-
             _repository.Entry(obj).State = EntityState.Modified;
             return _repository.SaveChangesAsync();
         }
