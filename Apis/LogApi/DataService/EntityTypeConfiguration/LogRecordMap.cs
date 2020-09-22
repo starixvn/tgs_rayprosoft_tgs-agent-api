@@ -19,7 +19,7 @@ namespace TGS.Apis.LogApi.DataService.EntityTypeConfiguration
               .IsUnicode();
 
             builder.Property(c => c.Level)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.Int)
                 .IsRequired()
                 .IsUnicode();
 

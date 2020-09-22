@@ -78,10 +78,29 @@ export const useUsername = () => {
   return state?.userInfo?.username ?? ""
 }
 
-export const useIsDisplayMenu = (codes = []) => {
+export const useMenuByRoute = (extCodes = []) => {
+  let { path = "" } = useRouteMatch()
+  let [_, ...codes] = path.split("/")
+  codes = [...codes, ...extCodes]
+
   let { state = {} } = useContext(Store)
-  let menu = findMenu(codes, state?.userInfo?.menus ?? [])
+  return findMenu(codes, state?.userInfo?.menus ?? [])
+}
+
+export const useIsDisplayMenuByRoute = (path = []) => {
+  let menu = useMenuByRoute(path)
   return menu?.isDisplay ?? false
+}
+
+export const useHasSubMenuByRoute = (path = []) => {
+  let menu = useMenuByRoute(path)
+  if (!menu.isDisplay) {
+    return false
+  }
+
+  let hasSubMenu =
+    menu?.subMenus.findIndex((menu) => menu?.isDisplay === true) >= 0
+  return hasSubMenu ?? false
 }
 
 export const useMenuCodes = (codes = []) => {
@@ -95,12 +114,15 @@ const findCodes = memoize((targetCodePaths = [], list = []) => {
   let items = targetCodePaths.reduce((list, code) => {
     code = code.toLowerCase()
     list =
-      list.find((item) => item?.code?.toLowerCase() === code)?.subMenus ?? []
+      list.find((item) => item?.isDisplay && item?.code?.toLowerCase() === code)
+        ?.subMenus ?? []
 
     return list
   }, list)
 
-  let result = items.map((item) => item.code.toLowerCase())
+  let result = items
+    .filter((item) => item.isDisplay)
+    .map((item) => item.code.toLowerCase())
   return result
 })
 

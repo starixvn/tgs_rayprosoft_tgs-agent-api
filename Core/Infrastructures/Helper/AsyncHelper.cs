@@ -6,7 +6,7 @@ namespace TGS.Core.Infrastructures.Helper
 {
     public static class AsyncHelper
     {
-        private static readonly TaskFactory MyTaskFactory = new
+        private static readonly TaskFactory TaskFactory = new
             TaskFactory(CancellationToken.None,
                 TaskCreationOptions.None,
                 TaskContinuationOptions.None,
@@ -14,7 +14,7 @@ namespace TGS.Core.Infrastructures.Helper
 
         public static TResult RunSync<TResult>(Func<Task<TResult>> func)
         {
-            return MyTaskFactory
+            return TaskFactory
                 .StartNew(func)
                 .Unwrap()
                 .GetAwaiter()
@@ -23,7 +23,7 @@ namespace TGS.Core.Infrastructures.Helper
 
         public static void RunSync(Func<Task> func)
         {
-            MyTaskFactory
+            TaskFactory
                 .StartNew(func)
                 .Unwrap()
                 .GetAwaiter()
@@ -32,7 +32,7 @@ namespace TGS.Core.Infrastructures.Helper
 
         public static void RunAsync(Func<Task> func)
         {
-            MyTaskFactory
+            TaskFactory
                 .StartNew(func)
                 .Unwrap();
         }
@@ -44,7 +44,7 @@ namespace TGS.Core.Infrastructures.Helper
 
         public static void RunAsync(Func<object, Task> func, object arg0)
         {
-            MyTaskFactory
+            TaskFactory
                 .StartNew(func, arg0)
                 .Unwrap();
         }
@@ -52,7 +52,7 @@ namespace TGS.Core.Infrastructures.Helper
         public static CancellationTokenSource RunLongRunningAsync(Func<CancellationToken, Task> func)
         {
             var cancellationTokenSource = new CancellationTokenSource();
-            MyTaskFactory
+            TaskFactory
                 .StartNew(() =>
                         func(cancellationTokenSource.Token),
                     cancellationTokenSource.Token,

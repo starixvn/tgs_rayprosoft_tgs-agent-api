@@ -59,9 +59,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("View"),
-                                new MenuSetting("Delete")
+                                new MenuSetting("Update")
                             }
                         },
                         new MenuSetting( "Groups")
@@ -70,7 +68,6 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             {
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
-                                new MenuSetting("View"),
                                 new MenuSetting("Delete"),
                                 new MenuSetting("Copy")
                             }
@@ -81,9 +78,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             {
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
-                                new MenuSetting("View"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("Copy")
+                                new MenuSetting("Delete")
                             }
                         }
                     }

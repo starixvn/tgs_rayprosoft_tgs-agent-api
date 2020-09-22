@@ -11,15 +11,13 @@ using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.WebApiServices.Filters;
 using TGS.Core.Models;
 
 namespace TGS.Apis.TgsApi.Commons.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]
-    [ApiController]
-    [TypeFilter(typeof(HandleTgsErrorFilter))]
+    [ApiController]    
     public class StatusController : ControllerBase
     {
         private readonly ITgsRepository _tgpRepository;
@@ -73,7 +71,13 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
             };
         }
 
-        [HttpGet("/log")]
+        [HttpGet("error")]
+        public string ThrowErrorAsync()
+        {
+            throw new Exception("Test Tgs Error");
+        }
+
+        [HttpGet("log")]
         public string WriteLogAsync()
         {
             var message = DateTime.Now.ToString();
@@ -82,7 +86,7 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
 
         }
 
-        [HttpGet("/nlog")]
+        [HttpGet("nlog")]
         public string WriteNLogAsync()
         {
             var message = DateTime.Now.ToString();

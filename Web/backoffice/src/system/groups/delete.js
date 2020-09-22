@@ -27,15 +27,13 @@ import {
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Delete as DeleteMenu } from "./menu"
-import { useIsDisplayMenu } from "../../user/context"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 
 export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
-  let { path = "" } = useRouteMatch()
-  let [_, ...codes] = path.split("/")
-  let isDisplay = useIsDisplayMenu([...codes, DeleteMenu])
+  let isDisplay = useIsDisplayMenuByRoute([DeleteMenu])
   if (!isDisplay) {
     return null
   }
