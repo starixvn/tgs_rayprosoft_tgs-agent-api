@@ -51,7 +51,6 @@ namespace TGS.Apis.LogApi.Migrations
                         .IsUnicode(true);
 
                     b.Property<string>("Path")
-                        .IsRequired()
                         .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
 
@@ -175,8 +174,8 @@ namespace TGS.Apis.LogApi.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("Level")
-                        .HasColumnType("tinyint")
+                    b.Property<int>("Level")
+                        .HasColumnType("int")
                         .IsUnicode(true);
 
                     b.Property<string>("Logger")
