@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.DataInitializers
     }
 
     [ExcludeFromCodeCoverage]
-    public sealed partial class DataInitializer : IDataInitializer
+    internal sealed partial class DataInitializer : IDataInitializer
     {
         private readonly ITgsRepository _repository;
         private readonly IServiceLog<DataInitializer> _log;
