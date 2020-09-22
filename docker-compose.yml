@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   traefik:
-    image: traefik:v2.2
+    image: traefik:v2.3
     command:
       - --api.dashboard=true
       - --api.insecure=true # Debug router
@@ -25,8 +25,8 @@ services:
       - --tracing.jaeger.traceContextHeaderName=traefik-trace-id
       # - --tracing.jaeger.collector.endpoint=http://jaeger:14268/api/traces?format=jaeger.thrift
     ports:
-      # The Web UI (enabled by --api.insecure=true) -> http://localhost:18080/dashboard#/
-      - 18080:8080
+      # The Web UI (enabled by --api.insecure=true) -> http://localhost:8080/dashboard#/
+      - 8080:8080
       - 80:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
