@@ -10,6 +10,7 @@ namespace TGS.Core.DataServices.Models
         public string Username { get; set; }
         public string RealName { get; set; }
         public string ExternalId { get; set; }
+        public string InvitationCode { get; set; }
         public byte[] Password { get; set; }
         public byte[] Salt { get; set; }
 

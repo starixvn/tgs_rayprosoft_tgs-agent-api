@@ -115,11 +115,29 @@ namespace TGS.Apis.OperatorApi.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password is mismatched..
+        /// </summary>
+        public static string PasswordMismatched {
+            get {
+                return ResourceManager.GetString("PasswordMismatched", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update type is not found..
         /// </summary>
         public static string UpdateTypeNotFound {
             get {
                 return ResourceManager.GetString("UpdateTypeNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username has existed already..
+        /// </summary>
+        public static string UsernameExists {
+            get {
+                return ResourceManager.GetString("UsernameExists", resourceCulture);
             }
         }
     }
