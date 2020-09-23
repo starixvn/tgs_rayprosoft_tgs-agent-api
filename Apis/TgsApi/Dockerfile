@@ -3,7 +3,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
@@ -11,8 +10,9 @@ COPY ["Apis/TgsApi/TgsApi.csproj", "Apis/TgsApi/"]
 COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
 COPY ["Core/DataServices/DataServices.csproj", "Core/DataServices/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
-COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
+COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
+COPY ["Services/GameOperations/GameOperations.csproj", "Services/GameOperations/"]
 COPY ["Core/DataServices.Bet/DataServices.Bet.csproj", "Core/DataServices.Bet/"]
 RUN dotnet restore "Apis/TgsApi/TgsApi.csproj"
 COPY . .
