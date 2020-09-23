@@ -31,6 +31,14 @@ namespace TGS.Core.DataServices.DataInitializers
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
+        private static readonly IList<IGameProvider> GameProviders = new[] 
+        {
+            new RedTigerGameProvider()
+        };
+
+        private IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
+
+
         public DataInitializer(ITgsRepository repository, IServiceLog<DataInitializer> log)
         {
             _repository = repository;
@@ -53,6 +61,7 @@ namespace TGS.Core.DataServices.DataInitializers
             LogSeedingTime(GenerateBetLimitGroups, _logBuilder);
             LogSeedingTime(GenerateVipLevel, _logBuilder);
             LogSeedingTime(GeneratePlayers, _logBuilder);
+            //LogSeedingTime(GenerateGameProviders)
 
             timer.Stop();
 
@@ -176,7 +185,7 @@ namespace TGS.Core.DataServices.DataInitializers
             _repository.BulkInsert(languages);
         }
 
-        private BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
+        private static BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
         {
             return new BetLimitGroup
             {

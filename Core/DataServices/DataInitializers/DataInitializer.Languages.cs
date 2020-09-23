@@ -2,28 +2,11 @@
 {
     partial class DataInitializer
     {
-        internal interface ILanguage
+        internal interface ILanguage : ICodeMapper
         {
-            string Code { get; }
-            string ExternalCode { get; }
         }
 
-        internal record BaseLanguage : ILanguage
-        {
-            private readonly string _code;
-            private readonly string _externalCode;
-
-            public BaseLanguage(string code, string externalCode)
-            {
-                _code = code;
-                _externalCode = externalCode ?? code;
-            }
-
-            string ILanguage.Code => _code;
-            string ILanguage.ExternalCode => _externalCode;
-        }
-
-        internal record USLanguage : BaseLanguage
+        internal record USLanguage : BaseCodeMapper, ILanguage
         {
             public USLanguage(string externalCode = null) :
                 base("en-US", externalCode)
@@ -32,7 +15,7 @@
             }
         }
 
-        internal record IDLanguage : BaseLanguage
+        internal record IDLanguage : BaseCodeMapper, ILanguage
         {
             public IDLanguage(string externalCode = null) :
                 base("id-ID", externalCode)
@@ -41,7 +24,7 @@
             }
         }
 
-        internal record JPLanguage : BaseLanguage
+        internal record JPLanguage : BaseCodeMapper, ILanguage
         {
             public JPLanguage(string externalCode = null) :
                 base("ja-JP", externalCode)
@@ -50,7 +33,7 @@
             }
         }
 
-        internal record THLanguage : BaseLanguage
+        internal record THLanguage : BaseCodeMapper, ILanguage
         {
             public THLanguage(string externalCode = null) :
                 base("th-TH", externalCode)
@@ -59,7 +42,7 @@
             }
         }
 
-        internal record KRLanguage : BaseLanguage
+        internal record KRLanguage : BaseCodeMapper, ILanguage
         {
             public KRLanguage(string externalCode = null) :
                 base("ko-KR", externalCode)
@@ -68,7 +51,7 @@
             }
         }
 
-        internal record VNLanguage : BaseLanguage
+        internal record VNLanguage : BaseCodeMapper, ILanguage
         {
             public VNLanguage(string externalCode = null) :
                 base("vi-VN", externalCode)
@@ -77,7 +60,7 @@
             }
         }
 
-        internal record CNLanguage : BaseLanguage
+        internal record CNLanguage : BaseCodeMapper, ILanguage
         {
             public CNLanguage(string externalCode = null) :
                 base("zh-CN", externalCode)
