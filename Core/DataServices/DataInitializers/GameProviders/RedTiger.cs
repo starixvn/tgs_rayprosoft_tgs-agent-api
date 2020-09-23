@@ -7,7 +7,7 @@ namespace TGS.Core.DataServices.DataInitializers
 {
     partial class DataInitializer
     {
-        internal record RedTigerGameProvider : BaseGameProvider, IGameProvider
+        internal record RedTigerGameProvider : IGameProvider
         {
             private static readonly string EndpointPath = "/{CULTURE}/home";
             private static readonly string QueryString = "?ext_token={TOKEN}";
@@ -15,9 +15,9 @@ namespace TGS.Core.DataServices.DataInitializers
             private readonly IGame[] _games;
 
             public RedTigerGameProvider()
-                : base(GameProviderConst.RedTiger)
             {
-                _games = Games.Select(g => 
+                _games = LoadGamesFromCsv(GameProviderConst.RedTiger)
+                    .Select(g => 
                     {
                         if (g.EndpointPath.IsNotNullOrEmpty())
                             return g;
@@ -33,7 +33,10 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string IGameProvider.Name => "Red Tiger";
 
-            IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new[] { new RedTigerGameProviderConfiguration() };
+            IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new[] 
+            {
+                new RedTigerGameProviderConfiguration() 
+            };
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
@@ -60,13 +63,15 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration Dopamine";
 
+            string IGameProviderConfiguration.ClientId => "Dopamine-TGS";
+
             string IGameProviderConfiguration.SecretKey => "b87j4xy0bPMrpLhAlWCLP05236s261voeWX6nQE057E";
 
             string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
 
             string IGameProviderConfiguration.MobileEndpoint => _endpoint;
 
-            string IGameProviderConfiguration.ConfigurationData => null;
+            string IGameProviderConfiguration.ConfigurationData => string.Empty;
         }
     }
 }

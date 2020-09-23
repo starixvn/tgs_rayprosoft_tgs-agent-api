@@ -179,13 +179,11 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(16)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -210,8 +208,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlatformType")
                         .HasColumnType("smallint");
@@ -232,8 +229,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -257,13 +253,11 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(16)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -273,8 +267,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlaceBetTimeout")
                         .HasColumnType("smallint");
@@ -290,8 +283,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -339,9 +331,20 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasColumnType("varchar(128)");
+
                     b.Property<string>("ConfigurationData")
                         .IsRequired()
                         .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(256)");
@@ -369,6 +372,13 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", false);
@@ -472,13 +482,11 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(16)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -506,8 +514,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<Guid>("ResellerId")
                         .HasColumnType("uniqueidentifier");
@@ -527,8 +534,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
@@ -849,13 +855,11 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(16)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
@@ -865,16 +869,14 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("OperationalEmail")
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");

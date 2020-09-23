@@ -31,13 +31,12 @@ namespace TGS.Core.DataServices.DataInitializers
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
-        private static readonly IList<IGameProvider> GameProviders = new[] 
+        private static readonly IList<IGameProvider> GameProviders = new[]
         {
             new RedTigerGameProvider()
         };
 
         private IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
-
 
         public DataInitializer(ITgsRepository repository, IServiceLog<DataInitializer> log)
         {
@@ -61,7 +60,7 @@ namespace TGS.Core.DataServices.DataInitializers
             LogSeedingTime(GenerateBetLimitGroups, _logBuilder);
             LogSeedingTime(GenerateVipLevel, _logBuilder);
             LogSeedingTime(GeneratePlayers, _logBuilder);
-            //LogSeedingTime(GenerateGameProviders)
+            LogSeedingTime(GenerateGameProviders, _logBuilder);
 
             timer.Stop();
 
@@ -104,7 +103,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private void GenerateCurrencies()
         {
             var currencies = new[]
-            {               
+            {
                 new { Code = "CNY", Name = "Yuan", NativeName = "元", Symbol ="¥" },
                 new { Code = "EUR", Name = "Euro", NativeName = "Euro", Symbol ="€" },
                 new { Code = "GBP", Name = "Pound Sterling", NativeName = "Pound Sterling", Symbol ="£" },
@@ -137,8 +136,8 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private readonly VipLevel[] _vipLevels = new[]
         {
-            new VipLevel{ Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A" },
-            new VipLevel{ Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B" },
+            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A" },
+            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B" },
             new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C" },
             new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D" },
             new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E" },
@@ -151,10 +150,11 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 vip.CreatedByUsername = AdminUsername;
                 vip.UpdatedByUsername = AdminUsername;
-                vip.CreatedOn = DateTimeOffset.Now;
-                vip.UpdatedOn = DateTimeOffset.Now;
+                vip.CreatedOn = _now;
+                vip.UpdatedOn = _now;
             }
-            _repository.BulkInsert(_vipLevels.ToArray());
+
+            _repository.BulkInsert(_vipLevels);
         }
 
         private void GenerateLanguages()
@@ -185,7 +185,7 @@ namespace TGS.Core.DataServices.DataInitializers
             _repository.BulkInsert(languages);
         }
 
-        private static BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
+        private BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
         {
             return new BetLimitGroup
             {
@@ -194,9 +194,9 @@ namespace TGS.Core.DataServices.DataInitializers
                 Name = name,
                 Description = description,
                 CreatedByUsername = AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
                 UpdatedByUsername = AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
+                CreatedOn = _now,
+                UpdatedOn = _now
             };
         }
 
@@ -210,7 +210,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreateBetLimitGroup(4, "Platinum", "Platinum", "Level 4: Platinum"),
                 CreateBetLimitGroup(5, "Diamond", "Diamond", "Level 5: Diamond")
             };
-            _repository.BulkInsert(betLimitGroups.ToArray());
+
+            _repository.BulkInsert(betLimitGroups);
         }
 
         private void GeneratePlayers()
@@ -277,12 +278,103 @@ namespace TGS.Core.DataServices.DataInitializers
                     };
                 }).ToArray();
 
-            _repository.BulkInsert(players.ToArray());
+            _repository.BulkInsert(players);
             _repository.BulkInsert(players.SelectMany(p => p.Wallets).ToArray());
             _repository.BulkInsert(players.SelectMany(p => p.Banks).ToArray());
         }
 
-        private (byte[], byte[]) GenerateCredential(string password)
+        private void GenerateGameProviders()
+        {
+            foreach (var gp in GameProviders)
+            {
+                var gameProvider = AddGameProvider(gp);
+                _gameProvidersCreated.Add(gp.Code, gameProvider);
+            }
+
+            var gameProviders = _gameProvidersCreated.Values.ToArray();
+            _repository.BulkInsert(gameProviders);
+            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.GameProviderConfigurations).ToArray());
+            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.Currencies).ToArray());
+            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.Languages).ToArray());
+            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.Games).ToArray());
+        }
+
+        private GameProvider AddGameProvider(IGameProvider gameProvider)
+        {
+            var gp = new GameProvider
+            {
+                Id = gameProvider.Id,
+                Name = gameProvider.Name,
+                Code = gameProvider.Code,
+                Description = gameProvider.Name,
+                AutoCloseRound = gameProvider.AutoClosedRound,
+                Status = Status.Active,
+                SupportTestPlayer = gameProvider.SupportTestPlayer,
+                CreatedOn = _now,
+                UpdatedOn = _now,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                Currencies =
+                    gameProvider.Currencies.Select(curr =>
+                        new GameProviderCurrency
+                        {
+                            GameProviderId = gameProvider.Id,
+                            CurrencyCode = curr.Code,
+                            GameProviderCurrencyCode = curr.ExternalCode,
+                        }).ToHashSet(),
+                Languages = gameProvider.Languages.Select(lang =>
+                    new GameProviderLanguage
+                    {
+                        GameProviderId = gameProvider.Id,
+                        CultureCode = lang.Code,
+                        GameProviderCultureCode = lang.ExternalCode
+                    }).ToHashSet()
+            };
+
+            gp.GameProviderConfigurations = gameProvider.GameProviderConfigurations.Select((gpc, idx) => new GameProviderConfiguration
+            {
+                Id = gpc.Id,
+                Name = gpc.Name,
+                ClientId = gpc.ClientId,
+                SecretKey = gpc.SecretKey,
+                DesktopEndpoint = gpc.DesktopEndpoint,
+                MobileEndpoint = gpc.MobileEndpoint,
+                Description = gp.Name,
+                GameProviderId = gp.Id,
+                CreatedOn = _now,
+                UpdatedOn = _now,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                ConfigurationData = gpc.ConfigurationData,
+                IsDefault = idx == 0
+            }).ToHashSet();
+
+            gp.Games = gameProvider.Games.Select(g => new Models.Game 
+            {
+                Id = g.Id,
+                Name = g.Name,
+                ExternalId = g.ExternalId,
+                Code = g.Code,
+                EndpointPath = g.EndpointPath,
+                RuleUrl = g.GameRuleUrl,
+                Type = g.GameTypeCode,
+                Description = g.Description,
+                Status = GameStatus.Active,
+                GameProvider = gp,
+                GameProviderId = gp.Id,
+                PlatformType = g.PlatformType,
+                HasTurnoverOnTieBet = g.HasTurnoverOnTieBet,
+                SubGame = g.SubGame,
+                CreatedOn = _now,
+                UpdatedOn = _now,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername
+            }).ToHashSet();
+
+            return gp;
+        }
+
+        private static (byte[], byte[]) GenerateCredential(string password)
         {
             ITgsHashConfig tgsHashConfig = new TgsHashConfig();
             IHashProvider hashProvider = new HashProvider(tgsHashConfig);
@@ -292,10 +384,11 @@ namespace TGS.Core.DataServices.DataInitializers
                 Encoding.UTF8.GetBytes(password),
                 hashProvider.Hash(salt),
                 tgsHashConfig.HashAlgorithm);
+
             return (salt, hashedPassword);
         }
 
-        private void LogSeedingTime(Action getFunc,
+        private static void LogSeedingTime(Action getFunc,
             StringBuilder builder)
         {
             var timer = Stopwatch.StartNew();
