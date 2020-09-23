@@ -222,7 +222,7 @@ namespace TGS.Core.DataServices.DataInitializers
                         Username = Generator.RandomString(12),
                         RealName = Generator.RandomString(12),
                         ExternalId = $"{playerCode}_{Generator.RandomString(4)}",
-                        InvitationCode = Generator.RandomString(12),
+                        InvitationCode = Generator.RandomString(6),
                         Password = password,
                         Salt = salt,
                         CultureCode = "en-US",
