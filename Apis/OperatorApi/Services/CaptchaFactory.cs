@@ -183,7 +183,8 @@ namespace TGS.Apis.OperatorApi.Services
         /// <summary>
         /// 比对验证码
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="answer"></param>
+        /// <param name="captcha"></param>
         /// <param name="timeOut">单位秒，超时时间默认600秒（5分钟）</param>
         /// <returns></returns>
         async Task<VerifyResponse> ICaptchaFactory.VerifyAsync(string answer, string captcha, int timeOut = 600)
@@ -224,7 +225,7 @@ namespace TGS.Apis.OperatorApi.Services
                 }
 
                 var captcha1 = await Des.DecryptAsync(captcha);
-                var temp = captcha.Split('|');
+                var temp = captcha1.Split('|');
                 if (!DateTime.TryParse(temp[1], out var dateTime))
                 {
                     return new VerifyResponse
@@ -246,7 +247,7 @@ namespace TGS.Apis.OperatorApi.Services
                 }
 
                 var answe1 = temp[0];
-                if (string.Equals(answer, answer, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(answe1, answer, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return new VerifyResponse
                     {

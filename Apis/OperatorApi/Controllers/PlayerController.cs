@@ -99,7 +99,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Status = PlayerStatus.Enabled,
                 Type = PlayerTypes.RealPlayer,
                 BetLimitGroupId = 1,
-                UpdatedByUsername = Username,
+                UpdatedByUsername = request.Username,
                 UpdatedOn = DateTimeOffset.Now
             };
             await _commands.UpdateAsync(player);
@@ -107,6 +107,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
+        [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("login"), Description("login")]
         public async Task<MessageResponse> LoginAsync([FromBody] LoginRequest request)
         {
@@ -194,14 +195,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Route("")]
+        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [Route("forgotPassword")]
         [HttpPost(), Description("Forgot passowrd")]
         public Task ForgotPasswordAsync([FromBody] ForgotPlayerRequest request)
         {
             return Task.FromResult(0);
         }
-
-
 
         [Route("{username}/contact")]
         [HttpPut, Description("Update player contact")]
