@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Repositories;
@@ -25,6 +24,7 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -122,7 +122,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             }).AddDataAnnotationsLocalization();
 
-            if (env.IsDevelopment())
+            if (env.IsDevelopmentOrDocker())
             {
                 services.AddScoped<IDataInitializer, DataInitializer>();
             }

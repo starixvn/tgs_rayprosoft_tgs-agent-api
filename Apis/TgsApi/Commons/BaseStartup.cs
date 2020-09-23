@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.FeatureManagement;
 using NLog;
 using TGS.Apis.TgsApi.Extensions;
@@ -55,7 +54,7 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddFeatureManagement();
 
-            if (Environment.IsDevelopment())
+            if (Environment.IsDevelopmentOrDocker())
             {
                 services.AddScoped<IDataInitializer, DataInitializer>();
             }
@@ -65,7 +64,7 @@ namespace TGS.Apis.TgsApi.Commons
             var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
             services.AddMvcCore(options =>
-            { 
+            {
                 AddCustomFilters(options);
             })
             .ConfigureApiBehaviorOptions(options =>
@@ -84,7 +83,7 @@ namespace TGS.Apis.TgsApi.Commons
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            if (Environment.IsDevelopment())
+            if (Environment.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
                 app.SeedData();
@@ -116,11 +115,11 @@ namespace TGS.Apis.TgsApi.Commons
         protected virtual void UseCustomMiddlewares(IApplicationBuilder app)
         {
         }
-        
+
         protected virtual void AddCustomFilters(MvcOptions options)
         {
-        }             
+        }
 
-        #endregion Virtual Methods
+        #endregion Abstract and Virtual Methods
     }
 }

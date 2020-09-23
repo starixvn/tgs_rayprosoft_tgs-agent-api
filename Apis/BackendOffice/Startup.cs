@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -27,7 +28,7 @@ namespace TGS.Apis.BackendOffice
 
         public void Configure(IApplicationBuilder app)
         {
-            if (_env.IsDevelopment())
+            if (_env.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
                 app.SeedData();
