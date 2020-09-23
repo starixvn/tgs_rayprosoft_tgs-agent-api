@@ -44,7 +44,7 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
-
+        
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
 
@@ -69,6 +69,7 @@ namespace TGS.Core.DataServices
         {
             return Database.GetDbConnection();
         }
+
         Task IBaseRepository.SaveChangesAsync()
         {
             return SaveChangesAsync();
