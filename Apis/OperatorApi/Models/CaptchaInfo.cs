@@ -6,6 +6,7 @@
         /// 图片字节
         /// </summary>
         public byte[] Image { get; set; }
+
         /// <summary>
         /// 图片中显示的字符（经过DES加密）
         /// </summary>

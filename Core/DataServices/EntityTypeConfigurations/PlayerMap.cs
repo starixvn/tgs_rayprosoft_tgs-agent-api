@@ -77,6 +77,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
+            builder.Property(c => c.InvitationCode)
+                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .IsRequired(false);
+
             builder.Property(c => c.RegisteredOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
@@ -84,6 +88,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.LastActiveOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.Property(c => c.VipId)
+                .IsRequired(false);
 
             builder.Property(c => c.Phone)
                 .HasColumnType(ColumnTypes.Nvarchar(32));
