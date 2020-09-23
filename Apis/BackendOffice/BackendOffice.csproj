@@ -8,7 +8,6 @@
     <AssemblyName>TGS.Apis.BackendOffice</AssemblyName>
     <RootNamespace>TGS.Apis.BackendOffice</RootNamespace>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
