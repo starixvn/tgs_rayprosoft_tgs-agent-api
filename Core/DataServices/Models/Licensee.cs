@@ -16,6 +16,10 @@ namespace TGS.Core.DataServices.Models
 
         public Reseller Reseller { get; set; }
 
+        public string ClientId { get; set; }
+
+        public string SecretKey { get; set; }
+
         public string LoginUrl { get; set; }
 
         public string CashierUrl { get; set; }

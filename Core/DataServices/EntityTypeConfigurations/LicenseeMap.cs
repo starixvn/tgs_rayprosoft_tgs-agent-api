@@ -24,6 +24,14 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 
+            builder.Property(c => c.ClientId)
+                .HasColumnType(ColumnTypes.Varchar(128))
+                .IsRequired();
+
+            builder.Property(c => c.SecretKey)
+                .HasColumnType(ColumnTypes.Varchar(255))
+                .IsRequired(); ;
+
             builder.Property(c => c.TimeZoneId)
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 

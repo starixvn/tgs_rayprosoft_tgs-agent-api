@@ -466,6 +466,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("CashierUrl")
                         .HasColumnType("nvarchar(512)");
 
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasColumnType("varchar(128)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(16)")
@@ -507,6 +511,10 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<Guid>("ResellerId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SecretKey")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
@@ -695,6 +703,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<bool>("HasAgent")
                         .HasColumnType("bit");
 
+                    b.Property<string>("InvitationCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(6)");
+
                     b.Property<DateTimeOffset>("LastActiveOn")
                         .HasColumnType("datetimeoffset");
 
@@ -741,7 +753,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<Guid>("VipId")
+                    b.Property<Guid?>("VipId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Wechat")
@@ -1330,9 +1342,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasOne("TGS.Core.DataServices.Models.VipLevel", "Vip")
                         .WithMany("Players")
-                        .HasForeignKey("VipId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("VipId");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerBank", b =>

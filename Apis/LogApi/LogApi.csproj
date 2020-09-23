@@ -52,9 +52,5 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 
 </Project>

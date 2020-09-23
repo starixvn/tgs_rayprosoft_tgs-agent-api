@@ -412,6 +412,8 @@ namespace TGS.Core.DataServices.Migrations
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     TimeZoneId = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     ResellerId = table.Column<Guid>(nullable: false),
+                    ClientId = table.Column<string>(type: "varchar(128)", nullable: false),
+                    SecretKey = table.Column<string>(type: "varchar(255)", nullable: false),
                     LoginUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     CashierUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
                     HelpUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
@@ -682,6 +684,7 @@ namespace TGS.Core.DataServices.Migrations
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     RealName = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     ExternalId = table.Column<string>(type: "nvarchar(128)", nullable: false),
+                    InvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
@@ -699,7 +702,7 @@ namespace TGS.Core.DataServices.Migrations
                     Wechat = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     HasAgent = table.Column<bool>(nullable: false),
                     ParentPlayerCode = table.Column<string>(nullable: true),
-                    VipId = table.Column<Guid>(nullable: false),
+                    VipId = table.Column<Guid>(nullable: true),
                     UpdatedByUsername = table.Column<string>(nullable: true),
                     UpdatedOn = table.Column<DateTimeOffset>(nullable: false)
                 },
@@ -733,7 +736,7 @@ namespace TGS.Core.DataServices.Migrations
                         principalSchema: "dbo",
                         principalTable: "VipLevels",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1069,6 +1072,8 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
+
+            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
