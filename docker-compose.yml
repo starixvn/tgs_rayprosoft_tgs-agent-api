@@ -112,6 +112,29 @@ services:
     depends_on:
       - sqlserver
       - log-api
+      - tgs-api
+
+  tgs-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.TgsApi
+    image: tgs-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+      GameProviderCode: "RT"
+      GameProviderName: "RedTiger"
+    # For crash debug
+    # entrypoint: ["sh", "-c", "sleep infinity"]
+    ports:
+      - 32669:80
+    networks:
+      tgs:
+        aliases:
+          - tgs.api
+    depends_on:
+      - nats
+      - redis
+      - log-api
 
   log-api:
     build:
