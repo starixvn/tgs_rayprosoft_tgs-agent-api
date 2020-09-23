@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.DataInitializers
     }
 
     [ExcludeFromCodeCoverage]
-    internal sealed partial class DataInitializer : IDataInitializer
+    public sealed partial class DataInitializer : IDataInitializer
     {
         private readonly ITgsRepository _repository;
         private readonly IServiceLog<DataInitializer> _log;
@@ -93,8 +93,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private void GenerateCurrencies()
         {
             var currencies = new[]
-            {
-                new { Code = "CAD", Name = "Canadian Dollar", NativeName = "Canadian Dollar", Symbol = "$" },
+            {               
                 new { Code = "CNY", Name = "Yuan", NativeName = "元", Symbol ="¥" },
                 new { Code = "EUR", Name = "Euro", NativeName = "Euro", Symbol ="€" },
                 new { Code = "GBP", Name = "Pound Sterling", NativeName = "Pound Sterling", Symbol ="£" },
@@ -104,8 +103,6 @@ namespace TGS.Core.DataServices.DataInitializers
                 new { Code = "JPY", Name = "Japanese Yen", NativeName = "円", Symbol ="¥" },
                 new { Code = "KRW", Name = "Korean won", NativeName = "Korean won", Symbol ="₩" },
                 new { Code = "MYR", Name = "Malaysian Ringgit", NativeName = "Malaysian Ringgit", Symbol ="RM" },
-                new { Code = "PLN", Name = "Polish zloty", NativeName = "Polski złoty", Symbol ="zł" },
-                new { Code = "RUB", Name = "Russian ruble", NativeName = "Российский рубль", Symbol ="₽" },
                 new { Code = "SGD", Name = "Singapore Dollar", NativeName = "Singapore Dollar", Symbol ="$" },
                 new { Code = "THB", Name = "Thai Baht", NativeName = "บาท",Symbol ="฿" },
                 new { Code = "USD", Name = "United States Dollar", NativeName = "United States Dollar", Symbol ="$" },

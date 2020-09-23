@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
-    internal sealed partial class DataInitializer
+    partial class DataInitializer
     {
         internal interface ICurrency
         {

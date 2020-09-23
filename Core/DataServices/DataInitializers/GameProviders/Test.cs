@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Core.DataServices.DataInitializers.GameProviders
 {
-    internal sealed partial class DataInitializer
+    partial class DataInitializer
     {
         internal class TestGameProvider 
         { 
