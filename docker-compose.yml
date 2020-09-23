@@ -121,6 +121,8 @@ services:
     image: tgs-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
+      GameProviderCode: "RT"
+      GameProviderName: "RedTiger"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
