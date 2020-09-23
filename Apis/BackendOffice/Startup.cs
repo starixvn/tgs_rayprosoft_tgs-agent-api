@@ -11,23 +11,25 @@ namespace TGS.Apis.BackendOffice
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
-            Configuration = configuration;
+            _configuration = configuration;
+            _env = env;
         }
 
-        public IConfiguration Configuration { get; set; }
-
-        public void ConfigureServices(IServiceCollection services, IWebHostEnvironment env)
+        public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBackendOfficeServices(Configuration, env);
+            services.AddBackendOfficeServices(_configuration, _env);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();                
+                app.UseDeveloperExceptionPage();
                 app.SeedData();
             }
 
