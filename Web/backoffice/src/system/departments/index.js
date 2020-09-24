@@ -8,6 +8,8 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import sequenceColumn from "../../table/column/sequence"
 import AsyncTable, { useTableState } from "../../table/async"
 import { Async, useAsync } from "react-async"
+import { AddButton, EditButton } from "./edit"
+import { DeleteButton } from "./delete"
 
 export const Code = "departments"
 
@@ -48,7 +50,14 @@ const AsynPageContent = () => {
   }, [pageIndex, pageSize, sortBy])
 
   return (
-    <PageContent title={title()}>
+    <PageContent
+      title={title()}
+      actionBar={
+        <Box alignX="right">
+          <AddButton onSubmitted={fetchTable} />
+        </Box>
+      }
+    >
       <AsyncTable
         state={state}
         onStateChange={setState}
@@ -94,10 +103,12 @@ const tableColumns = ({ fetchTable }) => [
       let { id, name } = value
       return (
         <Box alignX="center">
-          {/* <Set>
-            <EditButton id={id} onSubmitted={fetchTable} />
-            <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
-          </Set> */}
+          {
+            <Set>
+              <EditButton id={id} name={name} onSubmitted={fetchTable} />
+              <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
+            </Set>
+          }
         </Box>
       )
     }
