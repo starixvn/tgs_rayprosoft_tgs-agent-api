@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="DataInitializers\Games\RT.csv" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
@@ -43,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
@@ -65,6 +67,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="15.0.5" />
     <PackageReference Include="EFCore.BulkExtensions" Version="3.1.5" />
     <PackageReference Include="MessagePack" Version="2.1.165" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />

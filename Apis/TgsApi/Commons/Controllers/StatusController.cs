@@ -9,6 +9,7 @@ using Microsoft.FeatureManagement;
 using TGS.Apis.TgsApi.Models;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
@@ -53,7 +54,7 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
             var hostIp = Array.Find(Dns.GetHostEntry(hostName).AddressList, x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
 
             var gpCode = _configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
-            var isFeatureEnabled = await _featureManagement.IsEnabledAsync(gpCode);
+            var isFeatureEnabled = gpCode.IsNullOrEmpty() ? false : await _featureManagement.IsEnabledAsync(gpCode);
 
             return new StatusModel
             {

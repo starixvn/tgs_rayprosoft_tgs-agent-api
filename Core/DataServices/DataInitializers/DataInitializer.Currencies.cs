@@ -1,33 +1,121 @@
-﻿using System;
-using TGS.Core.Models.Enums;
-
-namespace TGS.Core.DataServices.DataInitializers
+﻿namespace TGS.Core.DataServices.DataInitializers
 {
     partial class DataInitializer
     {
-        internal interface ICurrency
+        internal interface ICurrency : ICodeMapper
         {
-            string Code { get; }
-            string ExternalCode { get; }
-            decimal? PlayerCapAmount { get; }
         }
 
-        internal record BaseCurrency : ICurrency
+        internal record CNYCurrency : BaseCodeMapper, ICurrency
         {
-            private readonly string _code;
-            private readonly string _externalCode;
-            private readonly decimal? _playerCapAmount;
-
-            public BaseCurrency(string code, string externalCode, decimal? playerCapAmount)
+            public CNYCurrency(string externalCode = null)
+                : base("CNY", externalCode)
             {
-                _code = code;
-                _externalCode = externalCode ?? code;
-                _playerCapAmount = playerCapAmount;
             }
+        }
 
-            string ICurrency.Code => _code;
-            string ICurrency.ExternalCode => _externalCode;
-            decimal? ICurrency.PlayerCapAmount => _playerCapAmount;
+        internal record EURCurrency : BaseCodeMapper, ICurrency
+        {
+            public EURCurrency(string externalCode = null)
+                : base("EUR", externalCode)
+            {
+            }
+        }
+
+        internal record GBPCurrency : BaseCodeMapper, ICurrency
+        {
+            public GBPCurrency(string externalCode = null)
+                : base("GBP", externalCode)
+            {
+            }
+        }
+
+        internal record IDRCurrency : BaseCodeMapper, ICurrency
+        {
+            public IDRCurrency(string externalCode = null)
+                : base("IDR", externalCode)
+            {
+            }
+        }
+
+        internal record IDR1000Currency : BaseCodeMapper, ICurrency
+        {
+            public IDR1000Currency(string externalCode = null)
+                : base("IDR_1000", externalCode)
+            {
+            }
+        }
+
+        internal record INRCurrency : BaseCodeMapper, ICurrency
+        {
+            public INRCurrency(string externalCode = null)
+                : base("INR", externalCode)
+            {
+            }
+        }
+
+        internal record JPYCurrency : BaseCodeMapper, ICurrency
+        {
+            public JPYCurrency(string externalCode = null)
+                : base("JPY", externalCode)
+            {
+            }
+        }
+
+        internal record KRWCurrency : BaseCodeMapper, ICurrency
+        {
+            public KRWCurrency(string externalCode = null)
+                : base("KRW", externalCode)
+            {
+            }
+        }
+
+        internal record MYRCurrency : BaseCodeMapper, ICurrency
+        {
+            public MYRCurrency(string externalCode = null)
+                : base("MYR", externalCode)
+            {
+            }
+        }
+
+        internal record SGDCurrency : BaseCodeMapper, ICurrency
+        {
+            public SGDCurrency(string externalCode = null)
+                : base("SGD", externalCode)
+            {
+            }
+        }
+
+        internal record THBCurrency : BaseCodeMapper, ICurrency
+        {
+            public THBCurrency(string externalCode = null)
+                : base("THB", externalCode)
+            {
+            }
+        }
+
+        internal record USDCurrency : BaseCodeMapper, ICurrency
+        {
+            public USDCurrency(string externalCode = null)
+                : base("USD", externalCode)
+            {
+            }
+        }
+
+        internal record VNDCurrency : BaseCodeMapper, ICurrency
+        {
+            public VNDCurrency(string externalCode = null)
+                : base("VND", externalCode)
+            {
+            }
+        }
+
+        internal record VND1000Currency : BaseCodeMapper, ICurrency
+        {
+            public VND1000Currency(string externalCode = null)
+                : base("VND_1000", externalCode)
+            {
+            }
         }
     }
 }

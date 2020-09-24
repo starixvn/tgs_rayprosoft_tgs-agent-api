@@ -120,6 +120,7 @@ AppPackages/
 
 # Others
 .idea/
+.vscode/
 sql/
 node_modules/
 bower_components/
