@@ -418,15 +418,7 @@ namespace TGS.Core.DataServices.Migrations
                     TimeZoneId = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     ResellerId = table.Column<Guid>(nullable: false),
                     ClientId = table.Column<string>(type: "varchar(128)", nullable: false),
-                    SecretKey = table.Column<string>(type: "varchar(255)", nullable: false),
-                    LoginUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    CashierUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    HelpUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    TermsUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    MobileLoginUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    MobileCashierUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    MobileHelpUrl = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    MobileTermsUrl = table.Column<string>(type: "nvarchar(512)", nullable: true)
+                    SecretKey = table.Column<string>(type: "varchar(255)", nullable: false)                   
                 },
                 constraints: table =>
                 {

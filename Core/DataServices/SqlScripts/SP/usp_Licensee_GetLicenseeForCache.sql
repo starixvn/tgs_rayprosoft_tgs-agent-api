@@ -22,15 +22,7 @@ BEGIN
 			[TimeZoneId],
 			[Code],
 			[Name],
-			[Status],
-			[CashierUrl],
-			[HelpUrl],
-			[LoginUrl],
-			[TermsUrl],
-			[MobileCashierUrl],
-			[MobileHelpUrl],
-			[MobileLoginUrl],
-			[MobileTermsUrl]
+			[Status]
 		FROM dbo.[Licensees]
 		WHERE [Id] = @licenseeId
 	)
@@ -39,15 +31,7 @@ BEGIN
 		l.[Code],
 		l.[Name],
 		l.[TimeZoneId],
-		l.[Status],
-		l.[CashierUrl],
-		l.[HelpUrl],
-		l.[LoginUrl],
-		l.[TermsUrl],
-		l.[MobileCashierUrl],
-		l.[MobileHelpUrl],
-		l.[MobileLoginUrl],
-		l.[MobileTermsUrl],
+		l.[Status],		
 		r.[Id] AS [ResellerId],
 		r.[Code] AS [ResellerCode]		
 	FROM [Licensee] l

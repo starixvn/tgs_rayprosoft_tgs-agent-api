@@ -66,18 +66,7 @@ namespace TGS.Services.Operations
                 TimeZoneId = r.TimeZoneId,
                 Status = r.Status,
                 ResellerId = r.ResellerId,
-                ResellerCode = r.ResellerCode,
-                Urls = new LicenseeUrls
-                {
-                    Terms = r.TermsUrl,
-                    Cashier = r.CashierUrl,
-                    Help = r.HelpUrl,
-                    Login = r.LoginUrl,
-                    MobileTerms = r.MobileTermsUrl,
-                    MobileCashier = r.MobileCashierUrl,
-                    MobileHelp = r.MobileHelpUrl,
-                    MobileLogin = r.MobileLoginUrl
-                }
+                ResellerCode = r.ResellerCode
             };
 
             await CacheLicenseeAsync(licenseeId, cachedLicensee);
@@ -184,15 +173,7 @@ namespace TGS.Services.Operations
                     CachedLicenseeFields.TimeZoneId,
                     CachedLicenseeFields.Status,
                     CachedLicenseeFields.ResellerId,
-                    CachedLicenseeFields.ResellerCode,
-                    CachedLicenseeFields.TermsUrl,
-                    CachedLicenseeFields.CashierUrl,
-                    CachedLicenseeFields.HelpUrl,
-                    CachedLicenseeFields.LoginUrl,
-                    CachedLicenseeFields.MobileTermsUrl,
-                    CachedLicenseeFields.MobileCashierUrl,
-                    CachedLicenseeFields.MobileHelpUrl,
-                    CachedLicenseeFields.MobileLoginUrl,
+                    CachedLicenseeFields.ResellerCode
                 });
 
                 if (values.All(a => !a.IsNull))
@@ -204,18 +185,7 @@ namespace TGS.Services.Operations
                         TimeZoneId = values[2],
                         Status = (Status)(int)values[3],
                         ResellerId = Guid.Parse(values[4]),
-                        ResellerCode = values[5],
-                        Urls = new LicenseeUrls
-                        {
-                            Terms = values[6],
-                            Cashier = values[7],
-                            Help = values[8],
-                            Login = values[9],
-                            MobileTerms = values[10],
-                            MobileCashier = values[11],
-                            MobileHelp = values[12],
-                            MobileLogin = values[13]
-                        }
+                        ResellerCode = values[5]
                     };
                 }
             }
@@ -238,15 +208,7 @@ namespace TGS.Services.Operations
                     new (CachedLicenseeFields.TimeZoneId, licensee.TimeZoneId),
                     new (CachedLicenseeFields.Status, (int)licensee.Status),
                     new (CachedLicenseeFields.ResellerId, licensee.ResellerId.ToString()),
-                    new (CachedLicenseeFields.ResellerCode, licensee.ResellerCode),
-                    new (CachedLicenseeFields.TermsUrl, licensee.Urls.Terms ?? string.Empty),
-                    new (CachedLicenseeFields.CashierUrl, licensee.Urls.Cashier ?? string.Empty),
-                    new (CachedLicenseeFields.HelpUrl, licensee.Urls.Help??string.Empty),
-                    new (CachedLicenseeFields.LoginUrl, licensee.Urls.Login ?? string.Empty),
-                    new (CachedLicenseeFields.MobileTermsUrl, licensee.Urls.MobileTerms ?? string.Empty),
-                    new (CachedLicenseeFields.MobileCashierUrl, licensee.Urls.MobileCashier ?? string.Empty),
-                    new (CachedLicenseeFields.MobileHelpUrl, licensee.Urls.MobileHelp ?? string.Empty),
-                    new (CachedLicenseeFields.MobileLoginUrl, licensee.Urls.MobileLogin ?? string.Empty)
+                    new (CachedLicenseeFields.ResellerCode, licensee.ResellerCode)
                 };
 
                 await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Licensee, licenseeId, fields, TimeSpan.FromHours(2), true);
@@ -300,15 +262,7 @@ namespace TGS.Services.Operations
             public const string TimeZoneId = "timezoneId";
             public const string Status = "status";
             public const string ResellerId = "resellerId";
-            public const string ResellerCode = "resellerCode";
-            public const string LoginUrl = "loginUrl";
-            public const string CashierUrl = "cashierUrl";
-            public const string HelpUrl = "helpUrl";
-            public const string TermsUrl = "termsUrl";
-            public const string MobileLoginUrl = "mobileLoginUrl";
-            public const string MobileCashierUrl = "mobileCashierUrl";
-            public const string MobileHelpUrl = "mobileHelpUrl";
-            public const string MobileTermsUrl = "mobileTermsUrl";
+            public const string ResellerCode = "resellerCode";          
         }
     }
 }
