@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder
                 .HasOne(bl => bl.Licensee)
-                .WithMany(b => b.LicenseeLanguages)
+                .WithMany(b => b.Languages)
                 .HasForeignKey(bl => bl.LicenseeId);
 
             builder

@@ -473,9 +473,6 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CashierUrl")
-                        .HasColumnType("nvarchar(512)");
-
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasColumnType("varchar(128)");
@@ -494,24 +491,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("HelpUrl")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("LoginUrl")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("MobileCashierUrl")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("MobileHelpUrl")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("MobileLoginUrl")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("MobileTermsUrl")
-                        .HasColumnType("nvarchar(512)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
@@ -525,9 +504,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
-
-                    b.Property<string>("TermsUrl")
-                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("TimeZoneId")
                         .HasColumnType("nvarchar(256)");
@@ -629,6 +605,8 @@ namespace TGS.Core.DataServices.Migrations
                         .HasName("UK_LicenseeGameProviderConfigurations_LicenseeId_GameProviderId");
 
                     b.HasIndex("DefaultLanguageCode");
+
+                    b.HasIndex("GameProviderConfigurationId");
 
                     b.HasIndex("GameProviderId");
 
@@ -1252,7 +1230,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
-                        .WithMany("LicenseeCurrencies")
+                        .WithMany("Currencies")
                         .HasForeignKey("LicenseeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1279,20 +1257,20 @@ namespace TGS.Core.DataServices.Migrations
                         .WithMany("LicenseeGameProviderConfigurations")
                         .HasForeignKey("DefaultLanguageCode");
 
+                    b.HasOne("TGS.Core.DataServices.Models.GameProviderConfiguration", "GameProviderConfiguration")
+                        .WithMany("LicenseeGameProviderConfigurations")
+                        .HasForeignKey("GameProviderConfigurationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
                         .WithMany("LicenseeGameProviderConfigurations")
                         .HasForeignKey("GameProviderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.GameProviderConfiguration", "GameProviderConfiguration")
-                        .WithMany("LicenseeGameProviderConfigurations")
-                        .HasForeignKey("GameProviderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
-                        .WithMany("LicenseeGameProviderConfigurations")
+                        .WithMany("GameProviderConfigurations")
                         .HasForeignKey("LicenseeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1307,7 +1285,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
-                        .WithMany("LicenseeLanguages")
+                        .WithMany("Languages")
                         .HasForeignKey("LicenseeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -17,6 +17,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -88,7 +89,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var player = new Player
             {
-                PlayerCode = CodeGenerator.NewId(16),
+                PlayerCode = PlayerCodeGenerator.NewId(),
                 Username = request.Username,
                 Password = password,
                 Salt = salt,
@@ -102,6 +103,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedByUsername = request.Username,
                 UpdatedOn = DateTimeOffset.Now
             };
+
             await _commands.UpdateAsync(player);
             await CreateAuditLogAsync(request.Username, player.PlayerCode);
             return CreateValidResponse<MessageResponse>();

@@ -35,7 +35,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.TimeZoneId)
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 
-            builder.HasMany(c => c.LicenseeGameProviderConfigurations)
+            builder.HasMany(c => c.GameProviderConfigurations)
                 .WithOne(c => c.Licensee)
                 .HasForeignKey(c => c.LicenseeId)
                 .OnDelete(DeleteBehavior.Restrict);

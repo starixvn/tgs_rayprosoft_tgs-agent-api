@@ -24,11 +24,11 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<LicenseeGame> Games { get; set; }
 
-        public virtual ICollection<LicenseeCurrency> LicenseeCurrencies { get; set; }
+        public virtual ICollection<LicenseeCurrency> Currencies { get; set; }
 
-        public virtual ICollection<LicenseeLanguage> LicenseeLanguages { get; set; }
+        public virtual ICollection<LicenseeLanguage> Languages { get; set; }
 
-        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
+        public virtual ICollection<LicenseeGameProviderConfiguration> GameProviderConfigurations { get; set; }
 
         public virtual ICollection<LicenseeBetLimit> BetLimitGroups { get; set; }
 

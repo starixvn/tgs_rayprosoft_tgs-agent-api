@@ -418,7 +418,7 @@ namespace TGS.Core.DataServices.Migrations
                     TimeZoneId = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     ResellerId = table.Column<Guid>(nullable: false),
                     ClientId = table.Column<string>(type: "varchar(128)", nullable: false),
-                    SecretKey = table.Column<string>(type: "varchar(255)", nullable: false)                   
+                    SecretKey = table.Column<string>(type: "varchar(255)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -595,17 +595,17 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "CultureCode",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_LicenseeGameProviderConfigurations_GameProviderConfigurations_GameProviderConfigurationId",
+                        column: x => x.GameProviderConfigurationId,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviderConfigurations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_LicenseeGameProviderConfigurations_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_LicenseeGameProviderConfigurations_GameProviderConfigurations_GameProviderId",
-                        column: x => x.GameProviderId,
-                        principalSchema: "dbo",
-                        principalTable: "GameProviderConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -958,6 +958,12 @@ namespace TGS.Core.DataServices.Migrations
                 column: "DefaultLanguageCode");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LicenseeGameProviderConfigurations_GameProviderConfigurationId",
+                schema: "dbo",
+                table: "LicenseeGameProviderConfigurations",
+                column: "GameProviderConfigurationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LicenseeGameProviderConfigurations_GameProviderId",
                 schema: "dbo",
                 table: "LicenseeGameProviderConfigurations",
@@ -1082,8 +1088,6 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

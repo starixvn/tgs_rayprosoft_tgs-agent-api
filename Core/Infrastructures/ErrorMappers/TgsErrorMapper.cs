@@ -11,7 +11,7 @@ namespace TGS.Core.Infrastructures.ErrorMappers
     {
         internal static readonly IDictionary<Type, TgsApiError> TgsApiErrorByException =
             new Dictionary<Type, TgsApiError>
-        {
+            {
 
                 { typeof(PlayerDisabledException), TgsApiError.UserBlocked },
                 { typeof(PlayerNotFoundException), TgsApiError.PlayerNotFound }, 
@@ -23,7 +23,7 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 { typeof(InvalidGameActionException), TgsApiError.InvalidGameAction },               
                 { typeof(GameProviderUnderMaintenanceException), TgsApiError.UnderMaintenance },
                 { typeof(GameUnderMaintenanceException), TgsApiError.UnderMaintenance }
-        };
+            };
 
         internal static readonly IDictionary<TgsApiError, int> HttpCodeByException =
            new Dictionary<TgsApiError, int>
