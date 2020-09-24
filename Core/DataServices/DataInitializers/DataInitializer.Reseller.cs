@@ -11,8 +11,7 @@ namespace TGS.Core.DataServices.DataInitializers
             string Code { get; }
             string Name { get; }
             string OperationalEmail { get; }
-            ILicensee[] Licensees { get; }
-            string[] GameProviders { get; }
+            ILicensee[] Licensees { get; }           
             ICurrency[] Currencies { get; }
             ILanguage[] Languages { get; }
         }
@@ -30,11 +29,6 @@ namespace TGS.Core.DataServices.DataInitializers
             ILicensee[] IReseller.Licensees => new ILicensee[]
             {
                 new TgsLicensee()
-            };
-
-            string[] IReseller.GameProviders => new[]
-            {
-                Consts.GameProvider.RedTiger
             };
 
             ICurrency[] IReseller.Currencies => new ICurrency[]

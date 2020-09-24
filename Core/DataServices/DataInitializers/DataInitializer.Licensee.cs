@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
@@ -14,6 +15,7 @@ namespace TGS.Core.DataServices.DataInitializers
             string SecretKey {  get; }
             ICurrency[] Currencies {  get; }
             ILanguage[] Languages {  get; }
+            string[] GameProviders { get; }
         }
 
         internal record TgsLicensee : ILicensee
@@ -41,6 +43,11 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 new CNLanguage(), new USLanguage(), new IDLanguage(),
                 new VNLanguage(), new THLanguage()
+            };
+
+            string[] ILicensee.GameProviders => new[]
+            {
+                Consts.GameProvider.RedTiger
             };
         }
     }

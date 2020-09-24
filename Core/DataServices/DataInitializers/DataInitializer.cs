@@ -283,11 +283,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private void GenerateResellersAndLicensees()
         {
-            var resellers = Resellers.Select(r =>
-            {
-                var gameProviders = r.GameProviders.Select(code => _gameProvidersCreated[code]);
-                return CreateResellerWithLicensee(r, gameProviders);
-            }).ToArray();
+            var resellers = Resellers.Select(r => CreateResellerWithLicensee(r)).ToArray();
 
             // resellers
             _repository.BulkInsert(resellers);
@@ -379,7 +375,7 @@ namespace TGS.Core.DataServices.DataInitializers
             return gp;
         }
 
-        private Reseller CreateResellerWithLicensee(IReseller r, IEnumerable<GameProvider> gameProviders)
+        private Reseller CreateResellerWithLicensee(IReseller r)
         {
             return new Reseller
             {
@@ -391,12 +387,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = _now,
-                UpdatedOn = _now,
-                GameProviders = gameProviders.Select(gp => new ResellerGameProvider
-                {
-                    GameProviderId = gp.Id,
-                    ResellerId = r.Id
-                }).ToHashSet(),
+                UpdatedOn = _now,                
                 Currencies = r.Currencies.Select(curr => new ResellerCurrency
                 {
                     ResellerId = r.Id,
@@ -407,49 +398,61 @@ namespace TGS.Core.DataServices.DataInitializers
                     ResellerId = r.Id,
                     CultureCode = lang.Code
                 }).ToHashSet(),
-                Licensees = r.Licensees.Select(l => new Licensee
+                Licensees = r.Licensees.Select(l => CreateLicensee(r, l)).ToHashSet(),
+            };
+        }
+
+        private Licensee CreateLicensee(IReseller reseller, ILicensee licensee)
+        {
+            var gameProviders = licensee.GameProviders.Select(code => _gameProvidersCreated[code]);
+
+            return new Licensee
+            {
+                Id = licensee.Id,
+                Code = licensee.Code,
+                Name = licensee.Name,
+                Status = Status.Active,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                CreatedOn = _now,
+                UpdatedOn = _now,
+                ResellerId = reseller.Id,
+                ClientId = licensee.ClientId,
+                SecretKey = licensee.SecretKey,
+                Currencies = licensee.Currencies.Select(curr => new LicenseeCurrency
                 {
-                    Id = l.Id,
-                    Code = l.Code,
-                    Name = l.Name,
-                    Status = Status.Active,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
-                    CreatedOn = _now,
-                    UpdatedOn = _now,
-                    ResellerId = r.Id,
-                    ClientId = l.ClientId,
-                    SecretKey = l.SecretKey,
-                    Currencies = l.Currencies.Select(curr => new LicenseeCurrency
-                    {
-                        LicenseeId = l.Id,
-                        CurrencyCode = curr.Code,
-                        LicenseeCurrencyCode = curr.ExternalCode
-                    }).ToHashSet(),
-                    Languages = l.Languages.Select(lang => new LicenseeLanguage
-                    {
-                        LicenseeId = l.Id,
-                        CultureCode = lang.Code,
-                        LicenseeLanguageCode = lang.ExternalCode
-                    }).ToHashSet(),
-                    Games = gameProviders.SelectMany(gp => gp.Games).Select(g => new LicenseeGame
-                    {
-                        LicenseeId = l.Id,
-                        GameId = g.Id
-                    }).ToHashSet(),
-                    GameProviderConfigurations = gameProviders.SelectMany(gp => gp.GameProviderConfigurations)
-                                    .Where(gpc => gpc.IsDefault).Select(gpc => new LicenseeGameProviderConfiguration
-                                    {
-                                        Id = Guid.NewGuid(),
-                                        LicenseeId = l.Id,
-                                        GameProviderId = gpc.GameProviderId,
-                                        GameProviderConfigurationId = gpc.Id,
-                                        DefaultLanguageCode = "en-US",
-                                        DesktopQueryString = string.Empty,
-                                        MobileQueryString = string.Empty
-                                    })
-                                    .ToHashSet()
+                    LicenseeId = licensee.Id,
+                    CurrencyCode = curr.Code,
+                    LicenseeCurrencyCode = curr.ExternalCode
                 }).ToHashSet(),
+                Languages = licensee.Languages.Select(lang => new LicenseeLanguage
+                {
+                    LicenseeId = licensee.Id,
+                    CultureCode = lang.Code,
+                    LicenseeLanguageCode = lang.ExternalCode
+                }).ToHashSet(),
+                GameProviders = gameProviders.Select(gp => new LicenseeGameProvider
+                {
+                    GameProviderId = gp.Id,
+                    LicenseeId = reseller.Id
+                }).ToHashSet(),
+                Games = gameProviders.SelectMany(gp => gp.Games).Select(g => new LicenseeGame
+                {
+                    LicenseeId = licensee.Id,
+                    GameId = g.Id
+                }).ToHashSet(),
+                GameProviderConfigurations = gameProviders.SelectMany(gp => gp.GameProviderConfigurations)
+                                .Where(gpc => gpc.IsDefault).Select(gpc => new LicenseeGameProviderConfiguration
+                                {
+                                    Id = Guid.NewGuid(),
+                                    LicenseeId = licensee.Id,
+                                    GameProviderId = gpc.GameProviderId,
+                                    GameProviderConfigurationId = gpc.Id,
+                                    DefaultLanguageCode = "en-US",
+                                    DesktopQueryString = string.Empty,
+                                    MobileQueryString = string.Empty
+                                })
+                                .ToHashSet()
             };
         }
 

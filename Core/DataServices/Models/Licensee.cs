@@ -28,6 +28,8 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<LicenseeLanguage> Languages { get; set; }
 
+        public virtual ICollection<LicenseeGameProvider> GameProviders { get; set; }
+
         public virtual ICollection<LicenseeGameProviderConfiguration> GameProviderConfigurations { get; set; }
 
         public virtual ICollection<LicenseeBetLimit> BetLimitGroups { get; set; }

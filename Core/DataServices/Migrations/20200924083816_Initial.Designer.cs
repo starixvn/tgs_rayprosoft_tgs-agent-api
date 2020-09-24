@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200924082230_Initial")]
+    [Migration("20200924083816_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -574,6 +574,21 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("LicenseeGames","dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.LicenseeGameProvider", b =>
+                {
+                    b.Property<Guid>("LicenseeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LicenseeId", "GameProviderId");
+
+                    b.HasIndex("GameProviderId");
+
+                    b.ToTable("LicenseeGameProviders","dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.LicenseeGameProviderConfiguration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -879,21 +894,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasIndex("CurrencyCode");
 
                     b.ToTable("ResellerCurrencies","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Models.ResellerGameProvider", b =>
-                {
-                    b.Property<Guid>("ResellerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ResellerId", "GameProviderId");
-
-                    b.HasIndex("GameProviderId");
-
-                    b.ToTable("ResellerGameProviders","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.ResellerLanguage", b =>
@@ -1252,6 +1252,21 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.LicenseeGameProvider", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
+                        .WithMany("Licensee")
+                        .HasForeignKey("GameProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")
+                        .WithMany("GameProviders")
+                        .HasForeignKey("LicenseeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.LicenseeGameProviderConfiguration", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.Language", "DefaultLanguage")
@@ -1362,21 +1377,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasOne("TGS.Core.DataServices.Models.Reseller", "Reseller")
                         .WithMany("Currencies")
-                        .HasForeignKey("ResellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Models.ResellerGameProvider", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
-                        .WithMany("Resellers")
-                        .HasForeignKey("GameProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Models.Reseller", "Reseller")
-                        .WithMany("GameProviders")
                         .HasForeignKey("ResellerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
