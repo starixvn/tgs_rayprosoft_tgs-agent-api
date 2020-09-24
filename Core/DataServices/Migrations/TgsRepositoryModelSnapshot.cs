@@ -680,10 +680,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
-
                     b.Property<bool>("HasAgent")
                         .HasColumnType("bit");
 
@@ -696,6 +692,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ParentInvitationCode")
+                        .HasColumnType("nvarchar(6)");
 
                     b.Property<string>("ParentPlayerCode")
                         .HasColumnType("varchar(16)");

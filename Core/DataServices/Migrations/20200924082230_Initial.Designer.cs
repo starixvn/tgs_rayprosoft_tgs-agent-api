@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200924071205_Initial")]
+    [Migration("20200924082230_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -682,10 +682,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
-
                     b.Property<bool>("HasAgent")
                         .HasColumnType("bit");
 
@@ -698,6 +694,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ParentInvitationCode")
+                        .HasColumnType("nvarchar(6)");
 
                     b.Property<string>("ParentPlayerCode")
                         .HasColumnType("varchar(16)");

@@ -680,7 +680,6 @@ namespace TGS.Core.DataServices.Migrations
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     RealName = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    ExternalId = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     InvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
@@ -698,7 +697,8 @@ namespace TGS.Core.DataServices.Migrations
                     QQ = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     Wechat = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     HasAgent = table.Column<bool>(nullable: false),
-                    ParentPlayerCode = table.Column<string>(nullable: true),
+                    ParentPlayerCode = table.Column<string>(type: "varchar(16)", nullable: true),
+                    ParentInvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: true),
                     VipId = table.Column<Guid>(nullable: true),
                     UpdatedByUsername = table.Column<string>(nullable: true),
                     UpdatedOn = table.Column<DateTimeOffset>(nullable: false)
@@ -1088,6 +1088,8 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
+
+            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

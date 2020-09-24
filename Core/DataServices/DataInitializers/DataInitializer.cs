@@ -190,24 +190,30 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var rnd = new Random();
             var (password, salt) = GenerateCredential("TgsP@ssw0rd");
-            var parentPlayers = new List<string>();
+            var playerCodes = new List<string>();
+            var invitationCodes = new List<string>();
+           
             var players = Enumerable.Range(1, 200)
                 .Select(p =>
                 {
                     var defaultWalletId = GuidExtensions.NewSequentialGuid();
                     var currencyCode = "CNY";
+
                     var playerCode = PlayerCodeGenerator.NewId();
-                    var parentPlayerCode = parentPlayers.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : parentPlayers[rnd.Next(0, parentPlayers.Count - 1)];
+                    var parentPlayerCode = playerCodes.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : playerCodes[rnd.Next(0, playerCodes.Count - 1)];
                     
-                    parentPlayers.Add(playerCode);
+                    var invitationCode = Generator.RandomString(6);
+                    var parentInvitationCode = invitationCodes.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : invitationCodes[rnd.Next(0, invitationCodes.Count - 1)];
+
+                    playerCodes.Add(playerCode);
+                    invitationCodes.Add(invitationCode);
 
                     return new Player
                     {
                         PlayerCode = playerCode,
                         Username = Generator.RandomString(12),
                         RealName = Generator.RandomString(12),
-                        ExternalId = $"{playerCode}_{Generator.RandomString(4)}",
-                        InvitationCode = Generator.RandomString(6),
+                        InvitationCode = invitationCode,
                         Password = password,
                         Salt = salt,
                         CultureCode = "en-US",
@@ -221,6 +227,7 @@ namespace TGS.Core.DataServices.DataInitializers
                         QQ = Generator.RandomString(20),
                         Wechat = Generator.RandomString(20),
                         ParentPlayerCode = parentPlayerCode,
+                        ParentInvitationCode = parentInvitationCode,
                         HasAgent = rnd.NextDouble() > 0.5,
                         VipId = _vipLevels[rnd.Next(0, 6)].Id,
                         RegisteredOn = _now,

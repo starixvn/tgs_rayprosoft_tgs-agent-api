@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.OperatorApi.Controllers.Messages.Players
 {
-    public class UpdatePlayerRequest
+    public class UpdatePlayerRequest : BaseRequest
     {
         public string RealName { get; set; }
         public string Phone { get; set; }

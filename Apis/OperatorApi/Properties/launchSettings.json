@@ -20,7 +20,7 @@
     "OperatorApi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/player?Page=1&Rows=10&OrderBy=Descending&SortBy=Username",
+      "launchUrl": "api/status",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

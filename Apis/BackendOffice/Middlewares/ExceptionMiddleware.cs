@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
-using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -22,12 +21,14 @@ namespace TGS.Apis.BackendOffice.Middlewares
         private const int ResMessageSizeLimit = 1000012;
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly ITgsLog _tgsLog;
+        private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
 
-        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger)
+        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
+            _json = json;
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
 
@@ -83,9 +84,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                     Message = "Internal Server Error."
                 };
 
-                IJsonSerializationProvider json = new JsonSerializationProvider();
-                var result = json.SerializeToString(message);
-
+                var result = _json.SerializeToString(message);
                 await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
             }
 

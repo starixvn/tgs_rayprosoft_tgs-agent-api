@@ -25,7 +25,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public partial class PlayerController : BaseMessageController
+    public partial class PlayerController : BaseContextController
     {
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
@@ -63,7 +63,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("/checkUsername"), Description("Username exists")]
+        [HttpGet, Route("/checkUsername"), Description("Check username exists")]
         public Task<bool> UsernameExistsAsync([FromQuery] string username)
         {
             return _queries.ExistsAsync(p => p.Username == username);
@@ -73,11 +73,11 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost, Description("Create a player")]
         public async Task<MessageResponse> CreateAsync([FromBody] CreatePlayerRequest request)
         {
-            var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
-            if (verifiedResult.Code != 100)
-            {
-                return CreateInvalidResponse<MessageResponse>(verifiedResult.Message);
-            }
+            //var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            //if (verifiedResult.Code != 100)
+            //{
+            //    return CreateInvalidResponse<MessageResponse>(verifiedResult.Message);
+            //}
 
             var exists = await _queries.ExistsAsync(p => p.Username == request.Username);
             if (exists)
@@ -85,26 +85,45 @@ namespace TGS.Apis.OperatorApi.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.UsernameExists);
             }
 
+            var licenseeId = _httpContextAccessor.HttpContext.Request.Headers["LicenseeId"];
+
             var (salt, password) = GenerateCredential(request.Password);
+            var defaultCulture = "zh-CN";
+            var defaultCurrency = "RMB";
+
+            var playerCode = PlayerCodeGenerator.NewId();
+
+            var wallet = new Wallet
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                PlayerCode = playerCode,
+                CurrencyCode = defaultCurrency,
+                ExternalCurrencyCode = defaultCurrency,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
 
             var player = new Player
             {
-                PlayerCode = PlayerCodeGenerator.NewId(),
+                PlayerCode = playerCode,
                 Username = request.Username,
                 Password = password,
                 Salt = salt,
-                CultureCode = "zh-CN",
-                DefaultWalletCurrencyCode = "RMB",
+                InvitationCode = CodeGenerator.NewId(8),
+                LicenseeId = new Guid(licenseeId),
+                CultureCode = defaultCulture,
+                DefaultWalletCurrencyCode = defaultCurrency,
                 RegisteredOn = DateTimeOffset.Now,
                 LastActiveOn = DateTimeOffset.Now,
                 Status = PlayerStatus.Enabled,
                 Type = PlayerTypes.RealPlayer,
                 BetLimitGroupId = 1,
                 UpdatedByUsername = request.Username,
-                UpdatedOn = DateTimeOffset.Now
+                UpdatedOn = DateTimeOffset.Now,
+                Wallets = new HashSet<Wallet> {wallet}
             };
 
-            await _commands.UpdateAsync(player);
+            await _commands.CreateAsync(player);
             await CreateAuditLogAsync(request.Username, player.PlayerCode);
             return CreateValidResponse<MessageResponse>();
         }
@@ -200,7 +219,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("forgotPassword")]
         [HttpPost(), Description("Forgot passowrd")]
-        public Task ForgotPasswordAsync([FromBody] ForgotPlayerRequest request)
+        public Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
         {
             return Task.FromResult(0);
         }
