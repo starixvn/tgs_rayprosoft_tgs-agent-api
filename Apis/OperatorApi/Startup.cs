@@ -19,6 +19,7 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 
@@ -39,6 +40,10 @@ namespace TGS.Apis.OperatorApi
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+
+
+
+            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -46,6 +51,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddNats(Configuration);
             services.AddTgsLog();
+            services.AddRedis();
             services.AddScoped<AuthenticateMiddleware>();
 
             services.AddHttpContextAccessor();
