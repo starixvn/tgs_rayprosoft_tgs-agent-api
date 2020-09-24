@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
+using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
@@ -47,6 +48,9 @@ namespace TGS.Apis.OperatorApi
             services.AddNats(Configuration);
             services.AddTgsLog();
             services.AddHttpContextAccessor();
+
+            services.AddScoped<AuthenticateMiddleware>();
+
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -94,6 +98,8 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
             });
+
+            app.UseMiddleware<AuthenticateMiddleware>();
         }
     }
 }

@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200923063409_Initial")]
+    [Migration("20200924015854_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -716,7 +716,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ParentPlayerCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(16)");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
@@ -768,6 +768,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasIndex("CultureCode");
 
                     b.HasIndex("LicenseeId");
+
+                    b.HasIndex("ParentPlayerCode");
 
                     b.HasIndex("VipId");
 
@@ -1340,7 +1342,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
                         .WithMany("SubPlayers")
-                        .HasForeignKey("PlayerCode");
+                        .HasForeignKey("ParentPlayerCode");
 
                     b.HasOne("TGS.Core.DataServices.Models.VipLevel", "Vip")
                         .WithMany("Players")

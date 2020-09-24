@@ -27,7 +27,7 @@ namespace TGS.Apis.BackendOffice
 
         public void Configure(IApplicationBuilder app)
         {
-            if (_env.IsDevelopment())
+            if (_env.IsDevelopment() || _env.IsEnvironment("Docker"))
             {
                 app.UseDeveloperExceptionPage();
                 app.SeedData();

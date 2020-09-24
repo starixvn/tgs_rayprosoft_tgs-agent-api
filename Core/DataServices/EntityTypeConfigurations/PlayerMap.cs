@@ -35,7 +35,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.HasMany(p => p.SubPlayers)
                 .WithOne(p => p.ParentPlayer)
-                .HasForeignKey(p => p.PlayerCode);
+                .HasForeignKey(p => p.ParentPlayerCode);
 
             builder.HasMany(p => p.Letters)
                 .WithOne(p => p.Player)
