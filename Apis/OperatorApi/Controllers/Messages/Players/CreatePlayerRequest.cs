@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.OperatorApi.Controllers.Messages.Players
 {
-    public class CreatePlayerRequest
+    public class CreatePlayerRequest : BaseRequest
     {
         public string Answer { get; set; }
         public string Captcha { get; set; }

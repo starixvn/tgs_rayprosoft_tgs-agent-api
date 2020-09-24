@@ -24,7 +24,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public partial class PlayerController : BaseMessageController
+    public partial class PlayerController : BaseContextController
     {
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
@@ -62,7 +62,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("/checkUsername"), Description("Username exists")]
+        [HttpGet, Route("/checkUsername"), Description("Check username exists")]
         public Task<bool> UsernameExistsAsync([FromQuery] string username)
         {
             return _queries.ExistsAsync(p => p.Username == username);
@@ -198,7 +198,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("forgotPassword")]
         [HttpPost(), Description("Forgot passowrd")]
-        public Task ForgotPasswordAsync([FromBody] ForgotPlayerRequest request)
+        public Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
         {
             return Task.FromResult(0);
         }
