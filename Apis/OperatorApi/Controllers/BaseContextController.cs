@@ -6,11 +6,11 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
-    public class BaseMessageController : ControllerBase
+    public class BaseContextController : ControllerBase
     {
         protected IHttpContextAccessor _httpContextAccessor;
         private readonly Dictionary<string, string> _userInfoMap;
-        public BaseMessageController(IHttpContextAccessor httpContextAccessor)
+        public BaseContextController(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
             _userInfoMap = httpContextAccessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);

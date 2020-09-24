@@ -11,14 +11,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
+using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.WebApiServices;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -31,10 +34,8 @@ namespace TGS.Apis.OperatorApi
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
             services.AddRepository<ITgsRepository, TgsRepository>(Configuration, "Tgs");
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
@@ -46,6 +47,8 @@ namespace TGS.Apis.OperatorApi
 
             services.AddNats(Configuration);
             services.AddTgsLog();
+            services.AddScoped<AuthenticateMiddleware>();
+
             services.AddHttpContextAccessor();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -61,6 +64,8 @@ namespace TGS.Apis.OperatorApi
                     };
                 });
 
+            services.AddControllers();
+
             services.AddMvc(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
@@ -74,15 +79,24 @@ namespace TGS.Apis.OperatorApi
                 //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             });
 
+            services.AddErrorMappers(
+                add: () =>
+                {
+                    services.AddSingleton<TgsErrorMapper>();
+                },
+                get: provider => key =>
+                {
+                    return key switch
+                    {
+                        _ => provider.GetRequiredService<TgsErrorMapper>()
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseGlobalExceptionHandler();
 
             app.UseHttpsRedirection();
 
@@ -94,6 +108,8 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
             });
+
+            app.UseMiddleware<AuthenticateMiddleware>();
         }
     }
 }

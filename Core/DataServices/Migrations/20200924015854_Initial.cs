@@ -731,6 +731,13 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Players_Players_ParentPlayerCode",
+                        column: x => x.ParentPlayerCode,
+                        principalSchema: "dbo",
+                        principalTable: "Players",
+                        principalColumn: "PlayerCode",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Players_VipLevels_VipId",
                         column: x => x.VipId,
                         principalSchema: "dbo",
@@ -1018,6 +1025,12 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Players",
                 column: "LicenseeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Players_ParentPlayerCode",
+                schema: "dbo",
+                table: "Players",
+                column: "ParentPlayerCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Players_VipId",
