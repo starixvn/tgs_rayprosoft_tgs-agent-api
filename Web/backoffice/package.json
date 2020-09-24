@@ -9,13 +9,13 @@
     "build": "snowpack build",
     "login:docker": "docker login registry.gitlab.com",
     "postversion": "npm-run-all build:docker push:docker",
-    "build:docker": "cross-var docker build . -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version",
-    "push:docker": "cross-var docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version",
+    "build:docker": "cross-var docker build . -t registry.gitlab.com/rayprosoft/environment/backoffice-site:$npm_package_version",
+    "push:docker": "cross-var docker push registry.gitlab.com/rayprosoft/environment/backoffice-site:$npm_package_version",
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx}\"",
     "tag:docker:dev": "cross-env-shell GIT_COMMIT_HASH=$(git show --no-patch --format=%h) \"npm-run-all build:docker:dev push:docker:dev\"",
-    "build:docker:dev": "cross-var docker build . -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH",
-    "push:docker:dev": "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH"
+    "build:docker:dev": "cross-var docker build . -t registry.gitlab.com/rayprosoft/environment/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH",
+    "push:docker:dev": "docker push registry.gitlab.com/rayprosoft/environment/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH"
   },
   "husky": {
     "hooks": {
