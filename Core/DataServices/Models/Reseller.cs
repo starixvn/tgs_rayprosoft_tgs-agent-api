@@ -10,8 +10,6 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<Licensee> Licensees { get; set; }
 
-        public virtual ICollection<ResellerGameProvider> GameProviders { get; set; }
-
         public virtual ICollection<ResellerLanguage> Languages { get; set; }
 
         public virtual ICollection<ResellerCurrency> Currencies { get; set; }

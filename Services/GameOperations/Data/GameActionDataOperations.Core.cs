@@ -46,7 +46,6 @@ namespace TGS.Services.GameOperations.Data
                 Status = cachedPlayer.Status,
                 PlayerType = cachedPlayer.Type,
                 PlayerUsername = cachedPlayer.Username,
-                PlayerExternalId = cachedPlayer.ExternalId,
                 ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode,
                 LicenseeTimeZoneId = cachedLicensee.TimeZoneId
                 //PlayerIp = data..Ip

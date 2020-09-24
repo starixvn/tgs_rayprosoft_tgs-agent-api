@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Services;
@@ -20,6 +19,7 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 
@@ -40,6 +40,10 @@ namespace TGS.Apis.OperatorApi
             services.AddScoped<ITgsHashConfig, TgsHashConfig>();
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+
+
+
+            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -47,6 +51,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddNats(Configuration);
             services.AddTgsLog();
+            services.AddRedis();
             services.AddScoped<AuthenticateMiddleware>();
 
             services.AddHttpContextAccessor();
@@ -80,11 +85,11 @@ namespace TGS.Apis.OperatorApi
             });
 
             services.AddErrorMappers(
-                add: () =>
+                () =>
                 {
                     services.AddSingleton<TgsErrorMapper>();
                 },
-                get: provider => key =>
+                provider => key =>
                 {
                     return key switch
                     {
@@ -100,6 +105,8 @@ namespace TGS.Apis.OperatorApi
 
             app.UseHttpsRedirection();
 
+            app.UseMiddleware<AuthenticateMiddleware>();
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -108,8 +115,6 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
             });
-
-            app.UseMiddleware<AuthenticateMiddleware>();
         }
     }
 }

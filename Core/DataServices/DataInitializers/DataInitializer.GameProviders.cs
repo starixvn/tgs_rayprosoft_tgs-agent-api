@@ -30,10 +30,11 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             Guid Id { get; }
             string Name { get; }
+            string ClientId { get; }
             string SecretKey { get; }
             string DesktopEndpoint { get; }
             string MobileEndpoint { get; }
-            string ConfigurationData { get; }
+            string ConfigurationData { get; }            
         }
 
         internal interface IGame
@@ -70,26 +71,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string ICodeMapper.Code => _code;
             string ICodeMapper.ExternalCode => _externalCode;
-        }
-
-        internal record BaseGameProvider
-        {
-            private static readonly string Namespace = "TGS.Core.DataServices.DataInitializers";
-
-            protected IGame[] Games { get; }
-
-            public BaseGameProvider(string gameProviderCode)
-            {
-                if (gameProviderCode.IsNullOrEmpty())
-                    return;
-
-                var csvName = $"{Namespace}.Games.{gameProviderCode}.csv";
-                using var stream = typeof(DataInitializer).Assembly.GetManifestResourceStream(csvName);
-                using var reader = new StreamReader(stream);
-                using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-                Games = csv.GetRecords<Game>().Cast<IGame>().ToArray();
-            }
-        }
+        }        
 
         internal record Game : IGame
         {
@@ -124,16 +106,16 @@ namespace TGS.Core.DataServices.DataInitializers
             [Name("EndpointPath")]
             public string EndpointPath { get; init; }
 
-            [Name("GameRuleUrl")]
+            [Name("RuleUrl")]
             public string GameRuleUrl { get; init; }
 
             [Name("Description")]
             public string Description { get; init; }
 
-            [Name("GameTypeCode")]
+            [Name("GameType")]
             public GameType GameTypeCode { get; init; }
 
-            [Name("PlatformType")]
+            [Name("Platform")]
             public PlatformType PlatformType { get; init; }
 
             [Name("HasTurnoverOnTieBet")]
@@ -144,5 +126,23 @@ namespace TGS.Core.DataServices.DataInitializers
         }
 
         #endregion Interfaces and Base Models
+
+        #region Private Method
+
+        private static IGame[] LoadGamesFromCsv(string gameProviderCode)
+        {
+            const string Namespace = "TGS.Core.DataServices.DataInitializers";
+
+            if (gameProviderCode.IsNullOrEmpty())
+                return null;
+
+            var csvName = $"{Namespace}.Games.{gameProviderCode}.csv";
+            using var stream = typeof(DataInitializer).Assembly.GetManifestResourceStream(csvName);
+            using var reader = new StreamReader(stream);
+            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            return csv.GetRecords<Game>().Cast<IGame>().ToArray();
+        }
+
+        #endregion Private Method
     }
 }

@@ -195,7 +195,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
                   a.RealName == request.RealName &&
                   a.VipId == request.VipId &&
-                  a.ParentPlayerCode == parnetPlayer.PlayerCode &&
+                  a.ParentInvitationCode == parnetPlayer.InvitationCode &&
                   a.Status == request.Status &&
                   a.HasAgent == request.HasAgent)));
 

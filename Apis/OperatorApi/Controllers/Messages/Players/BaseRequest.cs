@@ -2,6 +2,6 @@
 {
     public class BaseRequest
     {
-        public string Action { get; set; }
+        public string action { get; set; }
     }
 }

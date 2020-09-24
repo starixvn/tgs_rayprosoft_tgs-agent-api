@@ -9,6 +9,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 
@@ -17,14 +18,16 @@ namespace TGS.Apis.OperatorApi.Middlewares
     public class AuthenticateMiddleware : IMiddleware
     {
         private readonly IHashProvider _hashProvider;
+        private readonly IRedisCacheManager _cacheManager;
         private readonly ITgsQueries<Licensee> _licenseeQueries;
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
-        public AuthenticateMiddleware(IHashProvider hashProvider, ITgsQueries<Licensee> licenseeQueries, IJsonSerializationProvider json)
+        public AuthenticateMiddleware(IHashProvider hashProvider, ITgsQueries<Licensee> licenseeQueries, IJsonSerializationProvider json, IRedisCacheManager cacheManager)
         {
             _hashProvider = hashProvider;
             _licenseeQueries = licenseeQueries;
             _json = json;
+            _cacheManager = cacheManager;
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
 
@@ -36,6 +39,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 return;
             }
 
+            
             var clientId = (string)context.Request.Headers["clientid"];
             var time = (string)context.Request.Headers["time"];
             var authCode = (string)context.Request.Headers["authcode"];
@@ -45,6 +49,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new InvalidOperationException("Invalid request.");
             }
 
+            //TODO: Need to cache
             var licensee = await _licenseeQueries.GetSingleAsync(p => 
                 p.ClientId == clientId);
 
@@ -69,9 +74,10 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new InvalidOperationException("Authenticate licensee failed");
             }
 
-            var req = await context.Request.ReadFromJsonAsync<BaseRequest>();
+            var reqMessage = await GetRequestBodyAsync(context);
+            var req =_json.DeserializeFromString<BaseRequest>(reqMessage) ;
 
-            if (req.Action.IgnoreCaseEquals("create"))
+            if (req.action.IgnoreCaseEquals("create"))
             {
                 context.Request.Headers.Add("licenseeId", licensee.Id.ToString());
             }
@@ -89,6 +95,13 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var message = await sr.ReadToEndAsync();
             context.Request.Body.Seek(0, SeekOrigin.Begin);
             return message;
+        }
+
+        public class RequestBody
+        {
+            public int Id { get; set; }
+            public string Result { get; set; }
+            public Exception Exception { get; set; }
         }
     }
 }

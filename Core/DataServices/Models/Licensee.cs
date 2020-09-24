@@ -20,31 +20,17 @@ namespace TGS.Core.DataServices.Models
 
         public string SecretKey { get; set; }
 
-        public string LoginUrl { get; set; }
-
-        public string CashierUrl { get; set; }
-
-        public string HelpUrl { get; set; }
-
-        public string TermsUrl { get; set; }
-
-        public string MobileLoginUrl { get; set; }
-
-        public string MobileCashierUrl { get; set; }
-
-        public string MobileHelpUrl { get; set; }
-
-        public string MobileTermsUrl { get; set; }
-
         public virtual ICollection<Player> Players { get; set; }
 
         public virtual ICollection<LicenseeGame> Games { get; set; }
 
-        public virtual ICollection<LicenseeCurrency> LicenseeCurrencies { get; set; }
+        public virtual ICollection<LicenseeCurrency> Currencies { get; set; }
 
-        public virtual ICollection<LicenseeLanguage> LicenseeLanguages { get; set; }
+        public virtual ICollection<LicenseeLanguage> Languages { get; set; }
 
-        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
+        public virtual ICollection<LicenseeGameProvider> GameProviders { get; set; }
+
+        public virtual ICollection<LicenseeGameProviderConfiguration> GameProviderConfigurations { get; set; }
 
         public virtual ICollection<LicenseeBetLimit> BetLimitGroups { get; set; }
 

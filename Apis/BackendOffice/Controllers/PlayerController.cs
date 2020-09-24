@@ -155,7 +155,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
                 player.RealName = request.RealName;
                 player.VipId = request.VipId;
-                player.ParentPlayerCode = parentPlayer.PlayerCode;
+                player.ParentInvitationCode = parentPlayer.InvitationCode;
                 player.Status = request.Status;
                 player.HasAgent = request.HasAgent;
             }

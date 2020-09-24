@@ -16,6 +16,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varchar(16))
                 .IsRequired();
 
+            builder.Property(c => c.ParentPlayerCode)
+                .HasColumnType(ColumnTypes.Varchar(16))
+                .IsRequired(false);
+
             builder.HasMany(p => p.Wallets)
                 .WithOne(p => p.Player)
                 .HasForeignKey(p => p.PlayerCode);
@@ -49,13 +53,13 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
-            builder.Property(c => c.ExternalId)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
-                .IsRequired();
-
             builder.Property(c => c.InvitationCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsRequired();
+
+            builder.Property(c => c.ParentInvitationCode)
+                .HasColumnType(ColumnTypes.Nvarchar(6))
+                .IsRequired(false);
 
             builder.Property(c => c.CultureCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))
