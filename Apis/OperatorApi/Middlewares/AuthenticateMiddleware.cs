@@ -69,9 +69,10 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new InvalidOperationException("Authenticate licensee failed");
             }
 
-            var req = await context.Request.ReadFromJsonAsync<BaseRequest>();
+            var reqMessage = await GetRequestBodyAsync(context);
+            var req =_json.DeserializeFromString<BaseRequest>(reqMessage) ;
 
-            if (req.Action.IgnoreCaseEquals("create"))
+            if (req.action.IgnoreCaseEquals("create"))
             {
                 context.Request.Headers.Add("licenseeId", licensee.Id.ToString());
             }
@@ -89,6 +90,13 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var message = await sr.ReadToEndAsync();
             context.Request.Body.Seek(0, SeekOrigin.Begin);
             return message;
+        }
+
+        public class RequestBody
+        {
+            public int Id { get; set; }
+            public string Result { get; set; }
+            public Exception Exception { get; set; }
         }
     }
 }

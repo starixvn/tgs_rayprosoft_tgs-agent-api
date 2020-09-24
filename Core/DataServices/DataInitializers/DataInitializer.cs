@@ -217,21 +217,23 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var rnd = new Random();
             var (password, salt) = GenerateCredential("TgsP@ssw0rd");
-            var tmpPlayers = new List<string>();
+            var tmpPlayerCodes = new List<string>();
+            var tmpPlayerInvitationCodes = new List<string>();
             var players = Enumerable.Range(1, 200)
                 .Select(p =>
                 {
                     var defaultWalletId = GuidExtensions.NewSequentialGuid();
                     var currencyCode = "CNY";
                     var playerCode = Generator.RandomString(12);
-                    tmpPlayers.Add(playerCode);
+                    var invitationCode = Generator.RandomString(6);
+                    tmpPlayerCodes.Add(playerCode);
+                    tmpPlayerInvitationCodes.Add(invitationCode);
                     return new Player
                     {
                         PlayerCode = playerCode,
                         Username = Generator.RandomString(12),
                         RealName = Generator.RandomString(12),
-                        ExternalId = $"{playerCode}_{Generator.RandomString(4)}",
-                        InvitationCode = Generator.RandomString(6),
+                        InvitationCode = invitationCode,
                         Password = password,
                         Salt = salt,
                         CultureCode = "en-US",
@@ -244,7 +246,8 @@ namespace TGS.Core.DataServices.DataInitializers
                         Phone = Generator.RandomIntString(10),
                         QQ = Generator.RandomString(20),
                         Wechat = Generator.RandomString(20),
-                        ParentPlayerCode = tmpPlayers.Count == 1 ? null : rnd.NextDouble() > 0.5 ? null : tmpPlayers[rnd.Next(0, tmpPlayers.Count - 1)],
+                        ParentPlayerCode = tmpPlayerCodes.Count == 1 ? null : rnd.NextDouble() > 0.5 ? null : tmpPlayerCodes[rnd.Next(0, tmpPlayerCodes.Count - 1)],
+                        ParentInvitationCode = tmpPlayerInvitationCodes.Count == 1 ? null : rnd.NextDouble() > 0.5 ? null : tmpPlayerInvitationCodes[rnd.Next(0, tmpPlayerInvitationCodes.Count - 1)],
                         HasAgent = rnd.NextDouble() > 0.5,
                         VipId = _vipLevels[rnd.Next(0, 6)].Id,
                         RegisteredOn = _now,

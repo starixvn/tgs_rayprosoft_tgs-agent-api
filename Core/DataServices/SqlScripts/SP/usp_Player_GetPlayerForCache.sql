@@ -18,7 +18,6 @@ BEGIN
     (
         SELECT 
             p.LicenseeId,
-	        p.ExternalId,
 	        p.Type,
 	        p.Username,
 	        p.Status,

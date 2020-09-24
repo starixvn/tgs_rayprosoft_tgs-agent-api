@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Services;
@@ -80,11 +79,11 @@ namespace TGS.Apis.OperatorApi
             });
 
             services.AddErrorMappers(
-                add: () =>
+                () =>
                 {
                     services.AddSingleton<TgsErrorMapper>();
                 },
-                get: provider => key =>
+                provider => key =>
                 {
                     return key switch
                     {
@@ -100,6 +99,8 @@ namespace TGS.Apis.OperatorApi
 
             app.UseHttpsRedirection();
 
+            app.UseMiddleware<AuthenticateMiddleware>();
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -108,8 +109,6 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
             });
-
-            app.UseMiddleware<AuthenticateMiddleware>();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace TGS.Core.Models.Services.Caches
         public string LicenseeName { get; set; }
         public PlayerStatus Status { get; init; }
         public string Username { get; init; }
-        public string ExternalId { get; init; }
         public string ExternalCurrencyCode { get; init; }
         public PlayerTypes Type { get; init; }
         public bool IsTestPlayer => Type.IsTestPlayer();

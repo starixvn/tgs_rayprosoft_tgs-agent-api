@@ -93,7 +93,6 @@ namespace TGS.Services.Operations
             var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, new RedisValue[]
             {
                 CachedPlayerFields.LicenseeId,
-                CachedPlayerFields.ExternalId,
                 CachedPlayerFields.Status,
                 CachedPlayerFields.Type,
                 CachedPlayerFields.Username,
@@ -111,7 +110,6 @@ namespace TGS.Services.Operations
                 {
                     PlayerCode = playerCode,
                     LicenseeId = Guid.Parse(values[0]),
-                    ExternalId = values[1],
                     Status = (PlayerStatus)(int)values[2],
                     Type = (PlayerTypes)(int)values[3],
                     Username = values[4],
@@ -133,7 +131,6 @@ namespace TGS.Services.Operations
             {
                 new (CachedPlayerFields.LicenseeId, player.LicenseeId.ToString()),
                 new (CachedPlayerFields.LicenseeCode, player.LicenseeCode),
-                new (CachedPlayerFields.ExternalId, player.ExternalId),
                 new (CachedPlayerFields.Type, (int) player.Type),
                 new (CachedPlayerFields.Username, player.Username),
                 new (CachedPlayerFields.Status, (int) player.Status),
@@ -173,7 +170,6 @@ namespace TGS.Services.Operations
         {
             public const string LicenseeId = "licenseeId";
             public const string LicenseeCode = "licenseeCode";
-            public const string ExternalId = "externalId";
             public const string Type = "type";
             public const string Username = "username";
             public const string Status = "status";

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.Log.Services;
@@ -21,6 +22,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
     {
         private readonly Mock<IRequestAnalyzer> _requestAnalyzerMock = new Mock<IRequestAnalyzer>();
         private readonly Mock<ITgsLog> _tgsLogMock = new Mock<ITgsLog>();
+        private readonly Mock<IJsonSerializationProvider> _json = new Mock<IJsonSerializationProvider>();
         private readonly string _requestString = "Hello World Request!!";
         private readonly string _responseString = "Hello World Response!!";
         private RequestDelegate _requestDelegate;
@@ -30,7 +32,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
         public void Setup()
         {
             _requestDelegate = (innerContext) => Task.FromResult(0);
-            _target = new ExceptionMiddleware(_requestAnalyzerMock.Object, _tgsLogMock.Object);
+            _target = new ExceptionMiddleware(_requestAnalyzerMock.Object, _tgsLogMock.Object, _json.Object);
         }
 
         ///TODO: fix  cannot pass   using var sr = new StreamReader(context.Response.Body);
