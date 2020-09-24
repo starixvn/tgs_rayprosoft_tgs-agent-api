@@ -108,7 +108,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Username = request.Username,
                 Password = password,
                 Salt = salt,
-                InvitationCode = CodeGenerator.NewId(8),
+                InvitationCode = CodeGenerator.NewId(6),
                 LicenseeId = new Guid(licenseeId),
                 CultureCode = defaultCulture,
                 DefaultWalletCurrencyCode = defaultCurrency,

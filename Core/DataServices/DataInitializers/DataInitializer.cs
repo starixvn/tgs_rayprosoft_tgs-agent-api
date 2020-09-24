@@ -31,10 +31,10 @@ namespace TGS.Core.DataServices.DataInitializers
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
-        private static readonly IList<IGameProvider> GameProviders = new[] 
-        {
-            new RedTigerGameProvider()
-        };
+        //private static readonly IList<IGameProvider> GameProviders = new[] 
+        //{
+        //    new RedTigerGameProvider()
+        //};
 
         private IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
 
@@ -88,8 +88,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 ResellerId = _resellerId,
                 Code = "TGS",
                 Name = "Turnkey Game System",
-                ClientId = Generator.RandomString(16),
-                SecretKey = Generator.RandomString(54),
+                ClientId = "KDG0CMZMbZZJqf8k",
+                SecretKey = "5bK6LWWCeEBDS9bciLAdq0D4Rln3fRwY60L1Dh4yqEV7KV3c77kefe",
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = _now,
