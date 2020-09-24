@@ -164,7 +164,7 @@ const PasswordDialog = ({
           useEffect(() => {
             dialog.hide()
             onSubmitted && onSubmitted()
-          })
+          }, [dialog.visible])
 
           return null
         }}

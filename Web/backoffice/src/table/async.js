@@ -169,7 +169,6 @@ const Body = ({ table }) => {
 }
 
 const defaultMapDataItems = (data = {}) => {
-  console.log("defaultMapDataItems", data.items)
   return data?.items ?? []
 }
 

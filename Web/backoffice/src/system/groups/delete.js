@@ -1,33 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import Async from "react-async"
 import client from "../../client"
-import { Formik, Form, Field, useFormikContext } from "formik"
-import {
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Alert,
-  Button,
-  Text,
-  Label,
-  Input,
-  InputField,
-  Checkbox,
-  FieldStack,
-  SelectField,
-  Dialog,
-  Modal,
-  Table,
-  useClassName
-} from "bumbag"
-import LoadingBackdrop from "../../dialog/LoadingBackdrop"
-import AlertDialog from "../../dialog/Alert"
+import { Alert, Button, Text, Modal } from "bumbag"
 import { Delete as DeleteMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
+import AsyncFormSubmitModal from "../../dialog/AsyncFormSubmitModal"
 
 export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -51,15 +28,13 @@ export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
       >
         {deleteLabel()}
       </Modal.Disclosure>
-      {dialog.visible && (
-        <SubmitDialog
-          id={id}
-          name={name}
-          onSubmitted={onSubmitted}
-          dialog={dialog}
-          finalFocusRef={disclosureRef}
-        />
-      )}
+      <SubmitDialog
+        id={id}
+        name={name}
+        onSubmitted={onSubmitted}
+        dialog={dialog}
+        finalFocusRef={disclosureRef}
+      />
     </>
   )
 }
@@ -67,8 +42,8 @@ export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
 const SubmitDialog = ({
   id,
   name = "",
-  onSubmitted,
   dialog,
+  onSubmitted,
   finalFocusRef,
   ...props
 }) => {
@@ -77,42 +52,17 @@ const SubmitDialog = ({
   }
 
   return (
-    <Async deferFn={deferFn}>
-      {(asyncDelete) => {
-        return (
-          <>
-            <Dialog.Modal
-              title={title(name)}
-              showActionButtons
-              actionButtonsProps={{
-                isLoading: asyncDelete.isPending,
-                onClickSubmit: asyncDelete.run
-              }}
-              hideOnClickOutside={false}
-              unstable_finalFocusRef={finalFocusRef}
-              {...dialog}
-            >
-              <Alert title={warningTitle(name)} type="warning" variant="">
-                <Text color="danger">{warningContent}</Text>
-              </Alert>
-            </Dialog.Modal>
-            <Async.Rejected>
-              {(error) => <AlertDialog {...error} finalFocusRef={inputRef} />}
-            </Async.Rejected>
-            <Async.Fulfilled>
-              {(_) => {
-                useEffect(() => {
-                  dialog.hide()
-                  onSubmitted && onSubmitted()
-                })
-
-                return null
-              }}
-            </Async.Fulfilled>
-          </>
-        )
-      }}
-    </Async>
+    <AsyncFormSubmitModal
+      deferFn={deferFn}
+      title={title(name)}
+      dialog={dialog}
+      onSubmitted={onSubmitted}
+      finalFocusRef={finalFocusRef}
+    >
+      <Alert title={warningTitle(name)} type="warning" variant="">
+        <Text color="danger">{warningContent}</Text>
+      </Alert>
+    </AsyncFormSubmitModal>
   )
 }
 
