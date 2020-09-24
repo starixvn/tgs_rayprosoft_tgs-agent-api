@@ -1,4 +1,4 @@
-Name,Code,GameRuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,Endpoint,Description,SubGame
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame
 Dragon's Luck,,,DragonsLuck,Slot,Desktop,FALSE,,Win special symbols and hidden coins to make your fortune in the realm of the Chinese dragons!,FALSE
 Wild Fight,,,WildFight,Slot,Desktop,FALSE,,"Fight your way to win locking wilds, free spins and other great action prizes from the WILD FIGHT!",FALSE
 Red Phoenix Rising,,,RedPhoenixRising,Slot,Desktop,FALSE,,Discover Golden Egg Instant Wins and endless Free Spins in the mystical lair of the Red Phoenix!,FALSE

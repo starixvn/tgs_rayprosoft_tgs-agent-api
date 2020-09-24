@@ -31,10 +31,10 @@ namespace TGS.Core.DataServices.DataInitializers
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
-        //private static readonly IList<IGameProvider> GameProviders = new[] 
-        //{
-        //    new RedTigerGameProvider()
-        //};
+        private static readonly IList<IGameProvider> GameProviders = new[] 
+        {
+            new RedTigerGameProvider()
+        };
 
         private IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
 

@@ -35,31 +35,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.TimeZoneId)
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 
-            builder.Property(c => c.LoginUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.CashierUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.HelpUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.TermsUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.MobileLoginUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.MobileCashierUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.MobileHelpUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.Property(c => c.MobileTermsUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
-
-            builder.HasMany(c => c.LicenseeGameProviderConfigurations)
+            builder.HasMany(c => c.GameProviderConfigurations)
                 .WithOne(c => c.Licensee)
                 .HasForeignKey(c => c.LicenseeId)
                 .OnDelete(DeleteBehavior.Restrict);

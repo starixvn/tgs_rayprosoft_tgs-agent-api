@@ -13,23 +13,19 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.Code)
                 .HasColumnType(ColumnTypes.Nvarchar(16))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.Name)
                 .HasColumnType(ColumnTypes.Nvarchar(255))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.CreatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)

@@ -17,6 +17,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -90,7 +91,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var defaultCulture = "zh-CN";
             var defaultCurrency = "RMB";
 
-            var playerCode = CodeGenerator.NewId(16);
+            var playerCode = PlayerCodeGenerator.NewId();
 
             var wallet = new Wallet
             {
@@ -121,7 +122,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedOn = DateTimeOffset.Now,
                 Wallets = new HashSet<Wallet> {wallet}
             };
-
 
             await _commands.CreateAsync(player);
             await CreateAuditLogAsync(request.Username, player.PlayerCode);

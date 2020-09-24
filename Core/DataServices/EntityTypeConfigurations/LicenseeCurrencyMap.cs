@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(bc => new {bc.LicenseeId, bc.CurrencyCode});
             builder
                 .HasOne(bc => bc.Licensee)
-                .WithMany(c => c.LicenseeCurrencies)
+                .WithMany(c => c.Currencies)
                 .HasForeignKey(bc => bc.LicenseeId);
 
             builder

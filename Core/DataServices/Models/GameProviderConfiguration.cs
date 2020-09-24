@@ -9,6 +9,7 @@ namespace TGS.Core.DataServices.Models
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string ClientId { get; set; }
         public string SecretKey { get; set; }
         public Status Status { get; set; }
         public Guid GameProviderId { get; set; }
@@ -17,6 +18,10 @@ namespace TGS.Core.DataServices.Models
         public string MobileEndpoint { get; set; }
         public string ConfigurationData { get; set; }
         public bool IsDefault { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
+        public string CreatedByUsername { get; set; }
+        public string UpdatedByUsername { get; set; }
 
         public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
     }

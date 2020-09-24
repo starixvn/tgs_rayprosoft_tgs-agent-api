@@ -24,6 +24,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 
+            builder.Property(c => c.ClientId)
+                   .HasColumnType(ColumnTypes.Varchar(128))
+                   .IsRequired();
+
             builder.Property(c => c.SecretKey)
                 .HasColumnType(ColumnTypes.Varchar(64))
                 .IsRequired();
@@ -43,9 +47,25 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.IsDefault)
                 .IsRequired();
 
+            builder.Property(c => c.CreatedByUsername)
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedByUsername)
+                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .IsRequired();
+
+            builder.Property(c => c.CreatedOn)
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedOn)
+                .HasColumnType(ColumnTypes.DatetimeOffset)
+                .IsRequired();
+
             builder.HasMany(c => c.LicenseeGameProviderConfigurations)
                 .WithOne(c => c.GameProviderConfiguration)
-                .HasForeignKey(c => c.GameProviderId)
+                .HasForeignKey(c => c.GameProviderConfigurationId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
