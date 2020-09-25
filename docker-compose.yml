@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   traefik:
-    image: traefik:v2.3
+    image: traefik:v2.2
     command:
       - --api.dashboard=true
       - --api.insecure=true # Debug router
@@ -25,8 +25,8 @@ services:
       - --tracing.jaeger.traceContextHeaderName=traefik-trace-id
       # - --tracing.jaeger.collector.endpoint=http://jaeger:14268/api/traces?format=jaeger.thrift
     ports:
-      # The Web UI (enabled by --api.insecure=true) -> http://localhost:8080/dashboard#/
-      - 8080:8080
+      # The Web UI (enabled by --api.insecure=true) -> http://localhost:9000/dashboard#/
+      - 9000:8080
       - 80:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -184,6 +184,27 @@ services:
       - "6379:6379"
     networks:
       tgs:
+
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack
+    network_mode: bridge
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=${SERVICES- }
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOST_TMP_FOLDER=${TMPDIR}
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
 networks:
   tgs:
