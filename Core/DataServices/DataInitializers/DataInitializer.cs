@@ -22,6 +22,7 @@ namespace TGS.Core.DataServices.DataInitializers
     public sealed partial class DataInitializer : IDataInitializer
     {
         private readonly ITgsRepository _repository;
+        private readonly IHashProvider _hashProvider;
         private readonly IServiceLog<DataInitializer> _log;
         private readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
 
@@ -42,9 +43,10 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
 
-        public DataInitializer(ITgsRepository repository, IServiceLog<DataInitializer> log)
+        public DataInitializer(ITgsRepository repository, IHashProvider hashProvider, IServiceLog<DataInitializer> log)
         {
             _repository = repository;
+            _hashProvider = hashProvider;
             _log = log;
         }
 
@@ -189,7 +191,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private void GeneratePlayers()
         {
             var rnd = new Random();
-            var (password, salt) = GenerateCredential("TgsP@ssw0rd");
+            var (password, salt) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
            
@@ -454,20 +456,6 @@ namespace TGS.Core.DataServices.DataInitializers
                                 })
                                 .ToHashSet()
             };
-        }
-
-        private static (byte[], byte[]) GenerateCredential(string password)
-        {
-            ITgsHashConfig tgsHashConfig = new TgsHashConfig();
-            IHashProvider hashProvider = new HashProvider(tgsHashConfig);
-
-            var salt = hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                hashProvider.Hash(salt),
-                tgsHashConfig.HashAlgorithm);
-
-            return (salt, hashedPassword);
         }
 
         private static void LogSeedingTime(Action getFunc,

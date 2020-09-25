@@ -87,7 +87,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
-            var (salt, password) = GenerateCredential(request.Password);
+            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
             var user = new User
             {
                 Id = GuidExtensions.NewSequentialGuid(),
@@ -146,7 +146,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
             }
 
-            var (salt, password) = GenerateCredential(request.Password);
+            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
             user.Password = password;
             user.Salt = salt;
             user.UpdatedByUsername = Username;
@@ -154,16 +154,6 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             await _userCommands.UpdateAsync(user);
             return CreateValidResponse<MessageResponse>();
-        }
-
-        protected (byte[], byte[]) GenerateCredential(string password)
-        {
-            var salt = _hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                _hashProvider.Hash(salt),
-                _tgsHashConfig.HashAlgorithm);
-            return (salt, hashedPassword);
         }
     }
 }
