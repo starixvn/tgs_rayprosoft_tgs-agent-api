@@ -73,17 +73,18 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet, Route("/checkUsername"), Description("Check username exists")]
         public Task<bool> UsernameExistsAsync([FromQuery] string username)
         {
-            return _queries.ExistsAsync(p => p.Username == username);
+            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
+            return _queries.ExistsAsync(p => p.Username == username && p.LicenseeId == licenseeId);
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost, Description("Create a player")]
         public async Task<TgsResponse> CreateAsync([FromBody] CreatePlayerRequest request)
         {
-            var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
-            if (verifiedResult.Code != 100)
+            var result = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            if (!result.IsValid)
             {
-                throw new InvalidOperationException(verifiedResult.Message);
+                throw new InvalidOperationException(result.Message);
             }
 
             var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);

@@ -196,8 +196,8 @@ namespace TGS.Apis.OperatorApi.Services
                 {
                     return new VerifyResponse
                     {
-                        Code = 102,
-                        Message = "验证失败"
+                        IsValid = false,
+                        Message = Resources.Player.AuthenticateInvalid
                     };
                 }
 
@@ -206,8 +206,8 @@ namespace TGS.Apis.OperatorApi.Services
                 {
                     return new VerifyResponse
                     {
-                        Code = 101,
-                        Message = "验证码失效"
+                        IsValid = false,
+                        Message = Resources.Player.AuthenticateInvalid
                     };
                 }
 
@@ -230,8 +230,8 @@ namespace TGS.Apis.OperatorApi.Services
                 {
                     return new VerifyResponse
                     {
-                        Code = 101,
-                        Message = "验证码失效"
+                        IsValid = false,
+                        Message = Resources.Player.AuthenticateInvalid
                     };
                 }
 
@@ -241,32 +241,28 @@ namespace TGS.Apis.OperatorApi.Services
                 {
                     return new VerifyResponse
                     {
-                        Code = 101,
-                        Message = "验证码失效"
+                        IsValid = false,
+                        Message = Resources.Player.AuthenticateInvalid
                     };
                 }
 
                 var answe1 = temp[0];
                 if (string.Equals(answe1, answer, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    return new VerifyResponse
-                    {
-                        Code = 100,
-                        Message = "验证成功"
-                    };
+                    return new VerifyResponse();
                 }
 
                 return new VerifyResponse
                 {
-                    Code = 102,
-                    Message = "验证失败"
+                    IsValid = false,
+                    Message = Resources.Player.AuthenticateInvalid
                 };
             }
             catch (Exception ex)
             {
                 return new VerifyResponse
                 {
-                    Code = -1,
+                    IsValid = false,
                     Message = ex.Message
                 };
             }
