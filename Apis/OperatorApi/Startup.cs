@@ -41,8 +41,6 @@ namespace TGS.Apis.OperatorApi
             services.AddScoped<IHashProvider, HashProvider>();
             services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
 
-
-
             services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));

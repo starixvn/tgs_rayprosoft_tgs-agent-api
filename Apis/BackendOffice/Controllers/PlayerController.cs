@@ -21,21 +21,21 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class PlayerController : BaseContextController
     {
         private readonly ITgsQueries<Player> _queries;
-        private readonly ITgsQueries<AuditLog> _auditLogQueries;
+        private readonly ITgsQueries<PlayerAuditLog> _auditLogQueries;
         private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
         private readonly ITgsCommands<PlayerBank> _bankCommands;
-        private readonly ITgsCommands<AuditLog> _auditLogCommands;
+        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
 
         public PlayerController(
             IHashProvider hashProvider,
             ITgsQueries<Player> queries,
-            ITgsQueries<AuditLog> auditLogQueries,
+            ITgsQueries<PlayerAuditLog> auditLogQueries,
             ITgsQueries<PlayerBank> bankQueries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerBank> bankCommands,
-            ITgsCommands<AuditLog> auditLogCommands,
+            ITgsCommands<PlayerAuditLog> auditLogCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
@@ -115,7 +115,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode, [FromQuery] GetPlayerOperationRequest request)
         {
             return _auditLogQueries.GetQueries()
-                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.PlayerCode == playerCode)
+                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == playerCode)
                 .Select(p => new PlayerOperationModel
                 {
                     CreatedOn = p.CreatedOn,
@@ -181,14 +181,14 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private async Task CreateAuditLogAsync(string type, string playerCode)
         {
-            var auditLog = new AuditLog
+            var auditLog = new PlayerAuditLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 ModuleName = "Player",
                 CreatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
                 Operation = $"Update Player {type}",
-                PlayerCode = playerCode
+                Username = playerCode
             };
 
             await _auditLogCommands.CreateAsync(auditLog);

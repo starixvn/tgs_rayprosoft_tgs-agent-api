@@ -7,6 +7,6 @@
         public string Username { get; set; }
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
-        public string InvitationCode { get; set; }
+        public string ParentInvitationCode { get; set; }
     }
 }

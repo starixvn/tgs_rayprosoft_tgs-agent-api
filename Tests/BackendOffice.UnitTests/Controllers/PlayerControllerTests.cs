@@ -25,11 +25,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private PlayerController _controller;
 
         private readonly Mock<ITgsQueries<Player>> _queriesMock = new Mock<ITgsQueries<Player>>();
-        private readonly Mock<ITgsQueries<AuditLog>> _auditLogQueriesMock = new Mock<ITgsQueries<AuditLog>>();
+        private readonly Mock<ITgsQueries<PlayerAuditLog>> _auditLogQueriesMock = new Mock<ITgsQueries<PlayerAuditLog>>();
         private readonly Mock<ITgsQueries<PlayerBank>> _bankQueriesMock = new Mock<ITgsQueries<PlayerBank>>();
         private readonly Mock<ITgsCommands<Player>> _commandsMock = new Mock<ITgsCommands<Player>>();
         private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new Mock<ITgsCommands<PlayerBank>>();
-        private readonly Mock<ITgsCommands<AuditLog>> _auditLogCommandsMock = new Mock<ITgsCommands<AuditLog>>();
+        private readonly Mock<ITgsCommands<PlayerAuditLog>> _auditLogCommandsMock = new Mock<ITgsCommands<PlayerAuditLog>>();
         private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
 
         [SetUp]
@@ -106,7 +106,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             };
 
             var list = new Fixture()
-                .CreateMany<AuditLog>(105)
+                .CreateMany<PlayerAuditLog>(105)
                 .AsQueryable()
                 .BuildMock().Object;
 
@@ -197,8 +197,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                   a.Status == request.Status &&
                   a.HasAgent == request.HasAgent)));
 
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
-                a.PlayerCode == player.PlayerCode)));
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
+                a.Username == player.PlayerCode)));
         }
 
         [Test]
@@ -221,8 +221,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 a.QQ == request.QQ &&
                 a.Wechat == request.Wechat)));
 
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
-                a.PlayerCode == player.PlayerCode)));
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
+                a.Username == player.PlayerCode)));
         }
 
         [Test]
@@ -251,8 +251,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 a.Salt == salt &&
                 a.UpdatedByUsername == "admin.enabled")));
 
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
-                a.PlayerCode == player.PlayerCode)));
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
+                a.Username == player.PlayerCode)));
         }
 
         [Test]
@@ -280,8 +280,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 a.Salt == salt &&
                 a.UpdatedByUsername == "admin.enabled")), Times.Never);
 
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
-                a.PlayerCode == playerCode)), Times.Never);
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
+                a.Username == playerCode)), Times.Never);
         }
 
         [Test]
@@ -309,8 +309,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 a.Salt == salt &&
                 a.UpdatedByUsername == "admin.enabled")), Times.Never);
 
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
-                a.PlayerCode == playerCode)), Times.Never);
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
+                a.Username == playerCode)), Times.Never);
         }
 
         [Test]
@@ -339,8 +339,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 a.Salt == salt &&
                 a.UpdatedByUsername == "admin.enabled")), Times.Never);
 
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<AuditLog>(a =>
-                a.PlayerCode == playerCode)), Times.Never);
+            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
+                a.Username == playerCode)), Times.Never);
         }
 
         private Fixture CreatePlayerFixture()

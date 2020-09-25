@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.OperatorApi.Controllers.Messages.Players;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Services;
@@ -20,6 +21,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.Operations;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -30,15 +32,16 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
         private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
-        private readonly ITgsCommands<AuditLog> _auditLogCommands;
+        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
         private readonly ICaptchaFactory _captchaFactory;
+        private readonly ITransactionManager _transactionManager;
 
         public PlayerController(
             IHashProvider hashProvider,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
-            ITgsCommands<AuditLog> auditLogCommands,
+            ITgsCommands<PlayerAuditLog> auditLogCommands,
             ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
             ICaptchaFactory captchaFactory,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
@@ -76,19 +79,39 @@ namespace TGS.Apis.OperatorApi.Controllers
                 return new TgsResponse(TgsApiError.InvalidArguments, verifiedResult.Message);
             }
 
-            var exists = await _queries.ExistsAsync(p => p.Username == request.Username);
+            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
+
+            var exists = await _queries.ExistsAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
             if (exists)
             {
                 return new TgsResponse(TgsApiError.InvalidArguments, Resources.Player.UsernameExists);
             }
 
-            var licenseeId = _httpContextAccessor.HttpContext.Request.Headers["LicenseeId"];
-
-            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
             var defaultCulture = "zh-CN";
             var defaultCurrency = "RMB";
 
+            await CreatePlayerAsync(request, defaultCulture, defaultCurrency, licenseeId);
+
+             //        var transactionResult = await _transactionManager.ExecuteTransactionAsync(
+             //_tgsRepoFactory,
+             //IsolationLevel.RepeatableRead,
+             //externalTransactionIds,
+             //execute: async (r, trans) => await ProcessGameActionsAsync(r, data, playerRelatedData, cacheGameProvider, games));
+
+            await CreateAuditLogAsync($"Create Player '{request.Username}'", request.Username);
+            return new TgsResponse();
+        }
+
+
+        private async Task CreatePlayerAsync(
+            CreatePlayerRequest request,  
+            string defaultCulture, 
+            string defaultCurrency, 
+            Guid licenseeId)
+        {
+            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
             var playerCode = PlayerCodeGenerator.NewId();
+          
 
             var wallet = new Wallet
             {
@@ -107,9 +130,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Password = password,
                 Salt = salt,
                 InvitationCode = StringGenerator.GenerateAlphanumericString(6),
-                LicenseeId = new Guid(licenseeId),
+                LicenseeId = licenseeId,
                 CultureCode = defaultCulture,
                 DefaultWalletCurrencyCode = defaultCurrency,
+                ParentInvitationCode = request.ParentInvitationCode,
                 RegisteredOn = DateTimeOffset.Now,
                 LastActiveOn = DateTimeOffset.Now,
                 Status = PlayerStatus.Enabled,
@@ -117,12 +141,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 BetLimitGroupId = 1,
                 UpdatedByUsername = request.Username,
                 UpdatedOn = DateTimeOffset.Now,
-                Wallets = new HashSet<Wallet> {wallet}
+                Wallets = new HashSet<Wallet> { wallet }
             };
 
             await _commands.CreateAsync(player);
-            await CreateAuditLogAsync(request.Username, player.PlayerCode);
-            return new TgsResponse();
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
@@ -266,20 +288,20 @@ namespace TGS.Apis.OperatorApi.Controllers
             player.UpdatedByUsername = Username;
             player.UpdatedOn = DateTimeOffset.Now;
             await _commands.UpdateAsync(player);
-            await CreateAuditLogAsync("Update player password", player.PlayerCode);
+            await CreateAuditLogAsync("Update player password", player.Username);
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async Task CreateAuditLogAsync(string username, string playerCode)
+        private async Task CreateAuditLogAsync(string operation, string username)
         {
-            var auditLog = new AuditLog
+            var auditLog = new PlayerAuditLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 ModuleName = "Player",
                 CreatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
-                Operation = $"Create Player '{username}'",
-                PlayerCode = playerCode
+                Operation = operation,
+                Username = username
             };
 
             await _auditLogCommands.CreateAsync(auditLog);
