@@ -51,8 +51,6 @@ namespace TGS.Apis.OperatorApi
                     .AddOperations()
                     .AddErrorMappers();
 
-            services.AddScoped<AuthenticateMiddleware>();
-
             services.AddHttpContextAccessor();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
