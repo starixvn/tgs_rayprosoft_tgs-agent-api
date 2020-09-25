@@ -9,6 +9,7 @@ using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
@@ -26,6 +27,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         private const string MarketDepartment = "市場";
         private const string ProductDepartment = "產品";
 
+        IHashProvider _hashProvider;
         private readonly IBackendOfficeRepository _repository;
 
         private static readonly Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
@@ -34,9 +36,10 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             { ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA") }
         };
 
-        public DataInitializer(IBackendOfficeRepository repository)
+        public DataInitializer(IBackendOfficeRepository repository, IHashProvider hashProvider)
         {
             _repository = repository;
+            _hashProvider = hashProvider;
         }
 
         private readonly IRole[] _roles =

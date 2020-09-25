@@ -11,6 +11,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Middlewares

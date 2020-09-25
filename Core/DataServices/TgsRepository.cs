@@ -40,7 +40,7 @@ namespace TGS.Core.DataServices
         DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
         DbSet<PlayerBank> ITgsRepository.PlayerBanks { get; set; }
         DbSet<VipLevel> ITgsRepository.VipLevels { get; set; }
-        DbSet<AuditLog> ITgsRepository.AuditLogs { get; set; }
+        DbSet<PlayerAuditLog> ITgsRepository.AuditLogs { get; set; }
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }

@@ -5,15 +5,15 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public sealed class AuditLogMap : IEntityTypeConfiguration<AuditLog>
+    public sealed class AuditLogMap : IEntityTypeConfiguration<PlayerAuditLog>
     {
-        void IEntityTypeConfiguration<AuditLog>.Configure(EntityTypeBuilder<AuditLog> builder)
+        void IEntityTypeConfiguration<PlayerAuditLog>.Configure(EntityTypeBuilder<PlayerAuditLog> builder)
         {
-            builder.ToTable("AuditLogs", "dbo");
+            builder.ToTable("PlayerAuditLogs", "dbo");
             builder.HasKey(c => c.Id);
 
-            builder.Property(c => c.PlayerCode)
-                .HasColumnType(ColumnTypes.Varchar(16))
+            builder.Property(c => c.Username)
+                .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired(false);
 
             builder.Property(c => c.ModuleName)

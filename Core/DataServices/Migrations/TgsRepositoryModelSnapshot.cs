@@ -69,37 +69,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("Announcements","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Models.AuditLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)")
-                        .IsUnicode(true);
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ModuleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
-
-                    b.Property<string>("Operation")
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
-
-                    b.Property<string>("PlayerCode")
-                        .HasColumnType("varchar(16)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AuditLogs","dbo");
-                });
-
             modelBuilder.Entity("TGS.Core.DataServices.Models.BetLimitGroup", b =>
                 {
                     b.Property<int>("Id")
@@ -770,6 +739,37 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasIndex("VipId");
 
                     b.ToTable("Players","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)")
+                        .IsUnicode(true);
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ModuleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
+
+                    b.Property<string>("Operation")
+                        .HasColumnType("nvarchar(256)")
+                        .IsUnicode(true);
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlayerAuditLogs","dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerBank", b =>

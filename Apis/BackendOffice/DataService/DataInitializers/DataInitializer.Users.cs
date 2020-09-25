@@ -18,7 +18,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             Guid? resellerId = null,
             RoleType roleType = RoleType.Admin)
         {
-            var (salt, passwordHash) = GenerateCredential(UserPassword);
+            var (salt, passwordHash) = _hashProvider.GenerateCredential(UserPassword);
             userId ??= GuidExtensions.NewSequentialGuid();
 
             return new User
@@ -39,19 +39,6 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                 UpdatedByUsername = AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             };
-        }
-
-        private (byte[], byte[]) GenerateCredential(string password)
-        {
-            ITgsHashConfig tgsHashConfig = new TgsHashConfig();
-            IHashProvider hashProvider = new HashProvider(tgsHashConfig);
-
-            var salt = hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                hashProvider.Hash(salt),
-                tgsHashConfig.HashAlgorithm);
-            return (salt, hashedPassword);
         }
     }
 }

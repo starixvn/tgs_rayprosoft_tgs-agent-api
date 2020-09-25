@@ -21,27 +21,24 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class PlayerController : BaseContextController
     {
         private readonly ITgsQueries<Player> _queries;
-        private readonly ITgsQueries<AuditLog> _auditLogQueries;
+        private readonly ITgsQueries<PlayerAuditLog> _auditLogQueries;
         private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
         private readonly ITgsCommands<PlayerBank> _bankCommands;
-        private readonly ITgsCommands<AuditLog> _auditLogCommands;
+        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
-        private readonly ITgsHashConfig _tgsHashConfig;
 
         public PlayerController(
             IHashProvider hashProvider,
-            ITgsHashConfig tgsHashConfig,
             ITgsQueries<Player> queries,
-            ITgsQueries<AuditLog> auditLogQueries,
+            ITgsQueries<PlayerAuditLog> auditLogQueries,
             ITgsQueries<PlayerBank> bankQueries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerBank> bankCommands,
-            ITgsCommands<AuditLog> auditLogCommands,
+            ITgsCommands<PlayerAuditLog> auditLogCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
-            _tgsHashConfig = tgsHashConfig;
             _queries = queries;
             _bankQueries = bankQueries;
             _auditLogQueries = auditLogQueries;
@@ -118,7 +115,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode, [FromQuery] GetPlayerOperationRequest request)
         {
             return _auditLogQueries.GetQueries()
-                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.PlayerCode == playerCode)
+                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == playerCode)
                 .Select(p => new PlayerOperationModel
                 {
                     CreatedOn = p.CreatedOn,
@@ -170,7 +167,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == updatePlayerType[2])
             {
-                var (salt, pwd) = GenerateCredential(request.Password);
+                var (salt, pwd) = _hashProvider.GenerateCredential(request.Password);
                 player.Password = pwd;
                 player.Salt = salt;
             }
@@ -184,27 +181,17 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private async Task CreateAuditLogAsync(string type, string playerCode)
         {
-            var auditLog = new AuditLog
+            var auditLog = new PlayerAuditLog
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 ModuleName = "Player",
                 CreatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
                 Operation = $"Update Player {type}",
-                PlayerCode = playerCode
+                Username = playerCode
             };
 
             await _auditLogCommands.CreateAsync(auditLog);
-        }
-
-        protected (byte[], byte[]) GenerateCredential(string password)
-        {
-            var salt = _hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                _hashProvider.Hash(salt),
-                _tgsHashConfig.HashAlgorithm);
-            return (salt, hashedPassword);
         }
     }
 }

@@ -22,36 +22,34 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.OperatorApi
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
-
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRepository<ITgsRepository, TgsRepository>(Configuration, "Tgs");
-            services.AddScoped<ITgsHashConfig, TgsHashConfig>();
-            services.AddScoped<IHashProvider, HashProvider>();
-            services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
-
-
-
-            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
+            services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
+            
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
 
-            services.AddNats(Configuration);
-            services.AddTgsLog();
-            services.AddRedis();
+            services.AddNats(_configuration)
+                    .AddTgsLog()
+                    .AddRedis()
+                    .AddJson()
+                    .AddSecurity()
+                    .AddOperations();
+
             services.AddScoped<AuthenticateMiddleware>();
 
             services.AddHttpContextAccessor();
@@ -69,19 +67,12 @@ namespace TGS.Apis.OperatorApi
                     };
                 });
 
-            services.AddControllers();
-
-            services.AddMvc(options =>
+            services.AddControllers(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
-                //options.Filters.Add(new ValidationFilter());
-
-                //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
-                //// we need to implement it on our self if not done before deployment
-                //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             });
 
             services.AddErrorMappers(

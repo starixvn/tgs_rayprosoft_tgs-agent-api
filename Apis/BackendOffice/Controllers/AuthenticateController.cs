@@ -25,7 +25,6 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class AuthenticateController : BaseContextController
     {
         private readonly IHashProvider _hashProvider;
-        private readonly ITgsHashConfig _tgsHashConfig;
         private readonly IAntiforgery _antiForgery;
         private readonly IBackendOfficeQueries<User> _userQueries;
         private readonly IBackendOfficeCommands<User> _userCommands;
@@ -34,7 +33,6 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public AuthenticateController(
             IHashProvider hashProvider,
-            ITgsHashConfig tgsHashConfig,
             IAntiforgery antiForgery,
             IBackendOfficeQueries<User> userQueries,
             IBackendOfficeCommands<User> userCommands,
@@ -42,7 +40,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
-            _tgsHashConfig = tgsHashConfig;
             _antiForgery = antiForgery;
             _userQueries = userQueries;
             _userCommands = userCommands;
@@ -62,7 +59,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.NotFound);
             }
 
-            if (PasswordMismatch(user, request.Password))
+            if (_hashProvider.PasswordMismatch(user.Password, user.Salt, request.Password))
             {
                 return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.InvalidPassword);
             }
@@ -132,18 +129,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
-        }
-
-        private bool PasswordMismatch(User user, string password)
-        {
-            var salt = _hashProvider.Hash(user.Salt);
-
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                salt,
-                _tgsHashConfig.HashAlgorithm);
-
-            return !user.Password.SequenceEqual(hashedPassword);
         }
     }
 }

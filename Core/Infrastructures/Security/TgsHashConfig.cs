@@ -1,4 +1,6 @@
-﻿namespace TGS.Core.Infrastructures.Security
+﻿using TGS.Core.Infrastructures.Security.Enums;
+
+namespace TGS.Core.Infrastructures.Security
 {
     public interface ITgsHashConfig
     {
