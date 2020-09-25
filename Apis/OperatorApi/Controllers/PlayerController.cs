@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Controllers.Messages.Players;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.Pipelines;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -26,6 +27,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [MiddlewareFilter(typeof(VerifyCredentialsPipeline))]
     public partial class PlayerController : BaseContextController
     {
         private readonly Func<ITgsRepository> _tgsRepoFactory;
@@ -70,21 +72,22 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("/checkUsername"), Description("Check username exists")]
+        [HttpGet, Route("checkUsername"), Description("Check username exists")]
         public Task<bool> UsernameExistsAsync([FromQuery] string username)
         {
             return _queries.ExistsAsync(p => p.Username == username);
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost, Description("Create a player")]
-        public async Task<TgsResponse> CreateAsync([FromBody] CreatePlayerRequest request)
+        [Consumes("application/json")]
+        [HttpPost, Route("create"), Description("Create a player")]
+        public async Task<TgsResponse> CreateAsync(CreatePlayerRequest request)
         {
-            var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
-            if (verifiedResult.Code != 100)
-            {
-                throw new InvalidOperationException(verifiedResult.Message);
-            }
+            //var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            //if (verifiedResult.Code != 100)
+            //{
+            //    throw new InvalidOperationException(verifiedResult.Message);
+            //}
 
             var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
 
@@ -97,7 +100,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var defaultCulture = "zh-CN";
             var defaultCurrency = "CNY";
 
-            object p = await _transactionManager.ExecuteTransactionAsync(
+            _ = await _transactionManager.ExecuteTransactionAsync(
                  _tgsRepoFactory,
                 IsolationLevel.Serializable,
                 request.Username,

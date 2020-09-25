@@ -2,7 +2,6 @@
 {
     public class Consts
     {
-
         public const string CsrfTokenName = "X-CSRF-TOKEN";
 
         public static class UserInfo

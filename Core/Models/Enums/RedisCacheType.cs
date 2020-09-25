@@ -15,6 +15,6 @@
         GameProviderBetLimitCode,
         PlayerLoginRecords,
         LicenseeGames,
-        Games
+        Games,        
     }
 }

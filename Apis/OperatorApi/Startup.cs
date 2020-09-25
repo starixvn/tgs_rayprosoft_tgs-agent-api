@@ -43,7 +43,6 @@ namespace TGS.Apis.OperatorApi
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
-            services.AddSingleton<ITransactionManager, TransactionManager>();
 
             services.AddNats(_configuration)
                     .AddTgsLog()
@@ -82,8 +81,6 @@ namespace TGS.Apis.OperatorApi
             app.UseGlobalExceptionHandler();
 
             app.UseHttpsRedirection();
-
-            app.UseMiddleware<AuthenticateMiddleware>();
 
             app.UseRouting();
 

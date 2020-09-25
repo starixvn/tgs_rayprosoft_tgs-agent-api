@@ -34,19 +34,20 @@ namespace TGS.Services.Operations.Extensions
 
             #region Operations
 
-            services.AddSingleton<ILicenseeOperations, LicenseeOperations>();
-            services.AddSingleton<IGameProviderOperations, GameProviderOperations>();
-            services.AddSingleton<IPlayerOperations, PlayerOperations>();
-            services.AddSingleton<ILicenseeGameProviderOperations, LicenseeGameProviderOperations>();
+            services.AddScoped<ILicenseeOperations, LicenseeOperations>();
+            services.AddScoped<IGameProviderOperations, GameProviderOperations>();
+            services.AddScoped<IPlayerOperations, PlayerOperations>();
+            services.AddScoped<ILicenseeGameProviderOperations, LicenseeGameProviderOperations>();
 
             #endregion
 
             services.AddSingleton<IValidStatus<Status>, ValidStatus>();
             services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
-            services.AddSingleton<IStatusValidator, StatusValidator>();
-            services.AddSingleton<IExpirationValidator, ExpirationValidator>();
             services.AddSingleton<IAmountValidator, AmountValidator>();
 
+            services.AddScoped<IStatusValidator, StatusValidator>();
+            services.AddScoped<IExpirationValidator, ExpirationValidator>();
+           
             services.AddScoped<ITransactionManager, TransactionManager>();
            
             return services;
@@ -57,7 +58,7 @@ namespace TGS.Services.Operations.Extensions
             where TServices : class, TInterface
         {
             services.AddScoped<TInterface, TServices>();
-            services.AddTransient<Func<TInterface>>(c => () => c.GetService<TInterface>());
+            services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());
         }
     }
 }

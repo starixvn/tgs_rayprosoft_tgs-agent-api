@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Services.Caches;
@@ -17,13 +18,15 @@ namespace TGS.Services.Operations.Queries
         Task<GetCachedLicenseeGameProviderConfigurationResult> GetCachedLicenseeGameProviderConfigurationAsync(Guid licenseeId, Guid gameProviderId);
 
         Task<CachedLicenseeGame[]> GetLicenseeGamesAsync(Guid licenseeId);
+
+        Task<Guid> GetLicenseeIdByClientIdAsync(string clientId);
     }
 
     public sealed class LicenseeQueries : ILicenseeQueries
     {
-        private readonly TgsRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public LicenseeQueries(TgsRepository repository)
+        public LicenseeQueries(ITgsRepository repository)
         {
             _repository = repository;
         }
@@ -73,5 +76,10 @@ namespace TGS.Services.Operations.Queries
             return r.ToArray();
         }
 
+        Task<Guid> ILicenseeQueries.GetLicenseeIdByClientIdAsync(string clientId)
+        {
+            return _repository.Licensees.Where(l => l.ClientId == clientId)
+                .Select(l => l.Id).FirstOrDefaultAsync();
+        }
     }
 }
