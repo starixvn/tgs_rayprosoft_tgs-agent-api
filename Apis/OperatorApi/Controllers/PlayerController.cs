@@ -214,6 +214,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
+        [HttpPost, Route("logout")]
+        public Task LogoutAsync()
+        {
+            return _httpContextAccessor.HttpContext?.SignOutAsync();
+        }
 
         [Route("{username}")]
         [HttpGet, Description("Get player")]
