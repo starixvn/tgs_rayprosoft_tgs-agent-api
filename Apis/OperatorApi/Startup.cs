@@ -48,7 +48,8 @@ namespace TGS.Apis.OperatorApi
                     .AddRedis()
                     .AddJson()
                     .AddSecurity()
-                    .AddOperations();
+                    .AddOperations()
+                    .AddErrorMappers();
 
             services.AddScoped<AuthenticateMiddleware>();
 
@@ -74,19 +75,6 @@ namespace TGS.Apis.OperatorApi
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
             });
-
-            services.AddErrorMappers(
-                () =>
-                {
-                    services.AddSingleton<TgsErrorMapper>();
-                },
-                provider => key =>
-                {
-                    return key switch
-                    {
-                        _ => provider.GetRequiredService<TgsErrorMapper>()
-                    };
-                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
