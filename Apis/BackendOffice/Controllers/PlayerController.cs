@@ -27,11 +27,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsCommands<PlayerBank> _bankCommands;
         private readonly ITgsCommands<AuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
-        private readonly ITgsHashConfig _tgsHashConfig;
 
         public PlayerController(
             IHashProvider hashProvider,
-            ITgsHashConfig tgsHashConfig,
             ITgsQueries<Player> queries,
             ITgsQueries<AuditLog> auditLogQueries,
             ITgsQueries<PlayerBank> bankQueries,
@@ -41,7 +39,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
-            _tgsHashConfig = tgsHashConfig;
             _queries = queries;
             _bankQueries = bankQueries;
             _auditLogQueries = auditLogQueries;
@@ -170,7 +167,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == updatePlayerType[2])
             {
-                var (salt, pwd) = GenerateCredential(request.Password);
+                var (salt, pwd) = _hashProvider.GenerateCredential(request.Password);
                 player.Password = pwd;
                 player.Salt = salt;
             }
@@ -195,16 +192,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             await _auditLogCommands.CreateAsync(auditLog);
-        }
-
-        protected (byte[], byte[]) GenerateCredential(string password)
-        {
-            var salt = _hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                _hashProvider.Hash(salt),
-                _tgsHashConfig.HashAlgorithm);
-            return (salt, hashedPassword);
         }
     }
 }

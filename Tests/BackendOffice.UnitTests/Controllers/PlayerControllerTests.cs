@@ -31,7 +31,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new Mock<ITgsCommands<PlayerBank>>();
         private readonly Mock<ITgsCommands<AuditLog>> _auditLogCommandsMock = new Mock<ITgsCommands<AuditLog>>();
         private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
-        private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
 
         [SetUp]
         public override void Setup()
@@ -39,7 +38,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new PlayerController(
                 _hashProviderMock.Object,
-                _tgsHashConfigMock.Object,
                 _queriesMock.Object,
                 _auditLogQueriesMock.Object,
                 _bankQueriesMock.Object,
@@ -239,7 +237,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
 
-            var (salt, password) = GetCredential();
+            var salt = new Fixture().Create<byte[]>();
+            var password = new Fixture().Create<byte[]>();
+            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+                .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(player.PlayerCode, "password", request);
 
@@ -264,7 +265,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
 
-            var (salt, password) = GetCredential();
+            var salt = new Fixture().Create<byte[]>();
+            var password = new Fixture().Create<byte[]>();
+            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+                .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info2", request);
 
@@ -290,7 +294,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
 
-            var (salt, password) = GetCredential();
+            var salt = new Fixture().Create<byte[]>();
+            var password = new Fixture().Create<byte[]>();
+            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+                .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
@@ -317,7 +324,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
 
-            var (salt, password) = GetCredential();
+            var salt = new Fixture().Create<byte[]>();
+            var password = new Fixture().Create<byte[]>();
+            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+                .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
@@ -355,23 +365,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Letters, new StationLetterPlayer[] { })
                 .With(s => s.Wallets, new[] { new Wallet { Balance = 0 } }));
             return fixture;
-        }
-
-        private (byte[], byte[]) GetCredential()
-        {
-            var salt = Generator.RandomByteArray(32);
-            var hashedPassword = Generator.RandomByteArray(128);
-
-            _hashProviderMock.Setup(p => p.GenerateRandomSalt(It.IsAny<ushort>()))
-                .Returns(salt);
-
-            _hashProviderMock.Setup(p => p.Hash(
-                It.IsAny<byte[]>(),
-                It.IsAny<byte[]>(),
-                It.IsAny<HashAlgorithmKind>()))
-                .Returns(hashedPassword);
-
-            return (salt, hashedPassword);
         }
     }
 }

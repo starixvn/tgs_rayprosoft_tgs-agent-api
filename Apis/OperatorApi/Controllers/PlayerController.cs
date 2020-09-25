@@ -32,12 +32,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly ITgsCommands<AuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
-        private readonly ITgsHashConfig _tgsHashConfig;
         private readonly ICaptchaFactory _captchaFactory;
 
         public PlayerController(
             IHashProvider hashProvider,
-            ITgsHashConfig tgsHashConfig,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
             ITgsCommands<AuditLog> auditLogCommands,
@@ -46,7 +44,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
-            _tgsHashConfig = tgsHashConfig;
             _queries = queries;
             _commands = commands;
             _auditLogCommands = auditLogCommands;
@@ -71,23 +68,23 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost, Description("Create a player")]
-        public async Task<MessageResponse> CreateAsync([FromBody] CreatePlayerRequest request)
+        public async Task<TgsResponse> CreateAsync([FromBody] CreatePlayerRequest request)
         {
-            //var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
-            //if (verifiedResult.Code != 100)
-            //{
-            //    return CreateInvalidResponse<MessageResponse>(verifiedResult.Message);
-            //}
+            var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            if (verifiedResult.Code != 100)
+            {
+                return new TgsResponse(TgsApiError.InvalidArguments, verifiedResult.Message);
+            }
 
             var exists = await _queries.ExistsAsync(p => p.Username == request.Username);
             if (exists)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.UsernameExists);
+                return new TgsResponse(TgsApiError.InvalidArguments, Resources.Player.UsernameExists);
             }
 
             var licenseeId = _httpContextAccessor.HttpContext.Request.Headers["LicenseeId"];
 
-            var (salt, password) = GenerateCredential(request.Password);
+            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
             var defaultCulture = "zh-CN";
             var defaultCurrency = "RMB";
 
@@ -109,7 +106,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Username = request.Username,
                 Password = password,
                 Salt = salt,
-                InvitationCode = CodeGenerator.NewId(6),
+                InvitationCode = StringGenerator.GenerateAlphanumericString(6),
                 LicenseeId = new Guid(licenseeId),
                 CultureCode = defaultCulture,
                 DefaultWalletCurrencyCode = defaultCurrency,
@@ -125,7 +122,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await _commands.CreateAsync(player);
             await CreateAuditLogAsync(request.Username, player.PlayerCode);
-            return CreateValidResponse<MessageResponse>();
+            return new TgsResponse();
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
@@ -139,7 +136,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
             }
 
-            if (PasswordMismatch(player, request.Password))
+            if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.Password))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
             }
@@ -258,12 +255,12 @@ namespace TGS.Apis.OperatorApi.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
             }
 
-            if (PasswordMismatch(player, request.OldPassword))
+            if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.OldPassword))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
             }
 
-            var (salt, pwd) = GenerateCredential(request.NewPassword);
+            var (salt, pwd) = _hashProvider.GenerateCredential(request.NewPassword);
             player.Password = pwd;
             player.Salt = salt;
             player.UpdatedByUsername = Username;
@@ -286,28 +283,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
 
             await _auditLogCommands.CreateAsync(auditLog);
-        }
-
-        protected (byte[], byte[]) GenerateCredential(string password)
-        {
-            var salt = _hashProvider.GenerateRandomSalt(32);
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                _hashProvider.Hash(salt),
-                _tgsHashConfig.HashAlgorithm);
-            return (salt, hashedPassword);
-        }
-
-        private bool PasswordMismatch(Player player, string password)
-        {
-            var salt = _hashProvider.Hash(player.Salt);
-
-            var hashedPassword = _hashProvider.Hash(
-                Encoding.UTF8.GetBytes(password),
-                salt,
-                _tgsHashConfig.HashAlgorithm);
-
-            return !player.Password.SequenceEqual(hashedPassword);
         }
     }
 }
