@@ -50,9 +50,8 @@ namespace TGS.Apis.OperatorApi
                     .AddRedis()
                     .AddJson()
                     .AddSecurity()
-                    .AddOperations();
-
-            services.AddScoped<AuthenticateMiddleware>();
+                    .AddOperations()
+                    .AddErrorMappers();
 
             services.AddHttpContextAccessor();
 
@@ -76,19 +75,6 @@ namespace TGS.Apis.OperatorApi
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
             });
-
-            services.AddErrorMappers(
-                () =>
-                {
-                    services.AddSingleton<TgsErrorMapper>();
-                },
-                provider => key =>
-                {
-                    return key switch
-                    {
-                        _ => provider.GetRequiredService<TgsErrorMapper>()
-                    };
-                });
         }
 
         public void Configure(IApplicationBuilder app)

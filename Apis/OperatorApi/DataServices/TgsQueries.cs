@@ -12,9 +12,9 @@ namespace TGS.Apis.OperatorApi.DataServices
     {
         private readonly ITgsRepository _repository;
 
-        public TgsQueries(ITgsRepository repository)
+        public TgsQueries(Func<ITgsRepository> repoFactory)
         {
-            _repository = repository;
+            _repository = repoFactory();
         }
 
         Task<bool> ITgsQueries<T>.ExistsAsync(Expression<Func<T, bool>> predicate)

@@ -16,27 +16,31 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Middlewares
 {
-    public class AuthenticateMiddleware : IMiddleware
+    public sealed class AuthenticateMiddleware
     {
         private readonly IHashProvider _hashProvider;
         private readonly IRedisCacheManager _cacheManager;
-        private readonly ITgsQueries<Licensee> _licenseeQueries;
+        private readonly RequestDelegate _next;
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
-        public AuthenticateMiddleware(IHashProvider hashProvider, ITgsQueries<Licensee> licenseeQueries, IJsonSerializationProvider json, IRedisCacheManager cacheManager)
+        public AuthenticateMiddleware(
+            IHashProvider hashProvider,             
+            IJsonSerializationProvider json, 
+            IRedisCacheManager cacheManager,
+            RequestDelegate next)
         {
             _hashProvider = hashProvider;
-            _licenseeQueries = licenseeQueries;
             _json = json;
             _cacheManager = cacheManager;
+            _next = next;
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
 
-        async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
-        {
+        public async Task InvokeAsync(HttpContext context, ITgsQueries<Licensee> licenseeQueries)
+        { 
             if (!HttpMethods.IsPost(context.Request.Method))
             {
-                await next(context);
+                await _next(context);
                 return;
             }
             
@@ -50,7 +54,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             }
 
             //TODO: Need to cache
-            var licensee = await _licenseeQueries.GetSingleAsync(p => 
+            var licensee = await licenseeQueries.GetSingleAsync(p => 
                 p.ClientId == clientId);
 
             if (licensee == null)
@@ -82,7 +86,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 context.Request.Headers.Add("licenseeId", licensee.Id.ToString());
             }
 
-            await next(context);
+            await _next(context);
         }
 
         private async Task<string> GetRequestBodyAsync(HttpContext context)
