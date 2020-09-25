@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Security.Enums;
 
 namespace TGS.Core.Infrastructures.Security
 {
@@ -28,11 +29,11 @@ namespace TGS.Core.Infrastructures.Security
         private static readonly IDictionary<HashAlgorithmKind, Func<HashAlgorithm>> AlgByKind =
             new Dictionary<HashAlgorithmKind, Func<HashAlgorithm>>
             {
-                {HashAlgorithmKind.Md5, () => new MD5CryptoServiceProvider()},
-                {HashAlgorithmKind.Sha1, () => new SHA1CryptoServiceProvider()},
-                {HashAlgorithmKind.Sha256, () => new SHA256Managed()},
-                {HashAlgorithmKind.Sha384, () => new SHA384Managed()},
-                {HashAlgorithmKind.Sha512, () => new SHA512Managed()}
+                { HashAlgorithmKind.Md5, () => new MD5CryptoServiceProvider() },
+                { HashAlgorithmKind.Sha1, () => new SHA1CryptoServiceProvider() },
+                { HashAlgorithmKind.Sha256, () => new SHA256Managed() },
+                { HashAlgorithmKind.Sha384, () => new SHA384Managed() },
+                { HashAlgorithmKind.Sha512, () => new SHA512Managed() }
             };
 
         public HashProvider(ITgsHashConfig config)
@@ -48,15 +49,13 @@ namespace TGS.Core.Infrastructures.Security
                 var data = encoding.GetBytes(plainText);
 
                 var hash = func().ComputeHash(data);
-                switch (kind)
+                return kind switch
                 {
-                    case HashStringKind.Base64:
-                        return hash.ToBase64String();
-
-                    case HashStringKind.Hex:
-                        return hash.ToHexString();
-                }
+                    HashStringKind.Base64 => hash.ToBase64String(),
+                    _ => hash.ToHexString(),
+                };
             }
+
             throw new ArgumentException($"Unknown hash algorithm {algorithm}");
         }
 
@@ -71,6 +70,7 @@ namespace TGS.Core.Infrastructures.Security
             {
                 return func().ComputeHash(BinaryUtil.ConcatenateBytes(salt, data));
             }
+
             throw new ArgumentException($"Unknown hash algorithm {algorithm}");
         }
 
@@ -79,13 +79,15 @@ namespace TGS.Core.Infrastructures.Security
         /// </summary>
         byte[] IHashProvider.Hash(byte[] data)
         {
-            return
-                _hashProvider.Hash(data, _config.Salt, _config.HashAlgorithm);
+            return _hashProvider.Hash(data, _config.Salt, _config.HashAlgorithm);
         }
 
         byte[] IHashProvider.GenerateRandomSalt(ushort length)
         {
-            if (length == 0) throw new ArgumentException("Length of random bytes generated cannot be 0");
+            if (length == 0)
+            {
+                throw new ArgumentException("Length of random bytes generated cannot be 0");
+            }
 
             var bytes = new byte[length];
             _randomGenerator.GetNonZeroBytes(bytes);

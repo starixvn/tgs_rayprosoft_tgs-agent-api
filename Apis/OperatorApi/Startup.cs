@@ -37,8 +37,6 @@ namespace TGS.Apis.OperatorApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
-            services.AddScoped<ITgsHashConfig, TgsHashConfig>();
-            services.AddScoped<IHashProvider, HashProvider>();
             
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
@@ -49,6 +47,7 @@ namespace TGS.Apis.OperatorApi
                     .AddTgsLog()
                     .AddRedis()
                     .AddJson()
+                    .AddSecurity()
                     .AddOperations();
 
             services.AddScoped<AuthenticateMiddleware>();
