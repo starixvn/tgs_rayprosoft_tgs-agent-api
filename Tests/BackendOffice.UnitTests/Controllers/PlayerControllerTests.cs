@@ -13,6 +13,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Security.Enums;
 using Player = TGS.Core.DataServices.Models.Player;
 using Resources = TGS.Apis.BackendOffice.Resources;
 using VipLevel = TGS.Core.DataServices.Models.VipLevel;

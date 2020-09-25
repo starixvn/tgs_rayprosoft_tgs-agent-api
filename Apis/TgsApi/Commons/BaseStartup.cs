@@ -47,6 +47,7 @@ namespace TGS.Apis.TgsApi.Commons
                     .AddTgsLog()
                     .AddJson()
                     .AddRedis()
+                    .AddSecurity()
                     .AddOperations()
                     .AddTimeZone()
                     .AddGameOperations();
