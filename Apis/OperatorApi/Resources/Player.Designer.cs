@@ -124,6 +124,15 @@ namespace TGS.Apis.OperatorApi.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Player&apos;s status is invalid..
+        /// </summary>
+        public static string StatusInvalid {
+            get {
+                return ResourceManager.GetString("StatusInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update type is not found..
         /// </summary>
         public static string UpdateTypeNotFound {

@@ -138,6 +138,9 @@
   <data name="PasswordMismatched" xml:space="preserve">
     <value>Password is mismatched.</value>
   </data>
+  <data name="StatusInvalid" xml:space="preserve">
+    <value>Player's status is invalid.</value>
+  </data>
   <data name="UpdateTypeNotFound" xml:space="preserve">
     <value>Update type is not found.</value>
   </data>

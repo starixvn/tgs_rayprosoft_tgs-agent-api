@@ -51,7 +51,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.RealName)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(c => c.InvitationCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))

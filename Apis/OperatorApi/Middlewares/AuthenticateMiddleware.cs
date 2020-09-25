@@ -39,7 +39,6 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 await next(context);
                 return;
             }
-
             
             var clientId = (string)context.Request.Headers["clientid"];
             var time = (string)context.Request.Headers["time"];
@@ -78,7 +77,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var reqMessage = await GetRequestBodyAsync(context);
             var req =_json.DeserializeFromString<BaseRequest>(reqMessage) ;
 
-            if (req.action.IgnoreCaseEquals("create"))
+            if (req.action.IgnoreCaseEquals("create") || req.action.IgnoreCaseEquals("login"))
             {
                 context.Request.Headers.Add("licenseeId", licensee.Id.ToString());
             }

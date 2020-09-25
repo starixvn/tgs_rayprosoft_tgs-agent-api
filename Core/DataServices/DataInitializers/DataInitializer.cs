@@ -191,7 +191,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private void GeneratePlayers()
         {
             var rnd = new Random();
-            var (password, salt) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
+            var (salt, password) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
            
