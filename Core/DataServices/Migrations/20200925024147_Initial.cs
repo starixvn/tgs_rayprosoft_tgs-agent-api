@@ -679,7 +679,7 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    RealName = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    RealName = table.Column<string>(type: "nvarchar(32)", nullable: true),
                     InvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),

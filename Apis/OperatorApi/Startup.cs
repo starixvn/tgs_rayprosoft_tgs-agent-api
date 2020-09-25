@@ -22,6 +22,7 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.Operations;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.OperatorApi
@@ -42,6 +43,7 @@ namespace TGS.Apis.OperatorApi
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
+            services.AddSingleton<ITransactionManager, TransactionManager>();
 
             services.AddNats(_configuration)
                     .AddTgsLog()
@@ -75,8 +77,7 @@ namespace TGS.Apis.OperatorApi
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
 
@@ -85,6 +86,8 @@ namespace TGS.Apis.OperatorApi
             app.UseMiddleware<AuthenticateMiddleware>();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

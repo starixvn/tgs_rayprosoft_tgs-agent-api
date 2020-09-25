@@ -694,7 +694,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("RealName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("RegisteredOn")

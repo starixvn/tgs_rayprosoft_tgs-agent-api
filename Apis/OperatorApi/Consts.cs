@@ -7,7 +7,7 @@
 
         public static class UserInfo
         {
-            public static string UsernameKey = "Usernme";
+            public static string UsernameKey = "Username";
         }
     }
 }

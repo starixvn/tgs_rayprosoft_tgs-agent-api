@@ -81,7 +81,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var reqMessage = await GetRequestBodyAsync(context);
             var req =_json.DeserializeFromString<BaseRequest>(reqMessage) ;
 
-            if (req.action.IgnoreCaseEquals("create"))
+            if (req.action.IgnoreCaseEquals("create") || req.action.IgnoreCaseEquals("login"))
             {
                 context.Request.Headers.Add("licenseeId", licensee.Id.ToString());
             }

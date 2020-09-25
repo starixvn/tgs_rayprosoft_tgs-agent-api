@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20200925021430_Initial")]
+    [Migration("20200925024147_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -696,7 +696,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("RealName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
