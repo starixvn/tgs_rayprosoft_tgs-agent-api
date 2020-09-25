@@ -15,6 +15,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Middleware;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
