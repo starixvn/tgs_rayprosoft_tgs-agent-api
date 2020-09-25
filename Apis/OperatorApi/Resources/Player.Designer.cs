@@ -70,7 +70,7 @@ namespace TGS.Apis.OperatorApi.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Authenticate code is invalid..
         /// </summary>
         public static string AuthenticateInvalid {
             get {
