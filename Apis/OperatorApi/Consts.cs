@@ -4,9 +4,17 @@
     {
         public const string CsrfTokenName = "X-CSRF-TOKEN";
 
+        public const string DefaultCulture = "zh-CN";
+        public const string DefaultCurrency = "CNY";
+
         public static class UserInfo
         {
-            public static string UsernameKey = "Username";
+            public const string UsernameKey = "Username";
+        }
+
+        public static class ContextItems
+        {
+            public const string LicenseeId = "licenseeId";
         }
     }
 }

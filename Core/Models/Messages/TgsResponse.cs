@@ -1,15 +1,15 @@
-﻿using TGS.Core.Models.Enums;
+﻿using System.Runtime.Serialization;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Messages
 {
+    [DataContract]
     public record TgsResponse
     {
-        public TgsResponse(
-            TgsApiError errorType = TgsApiError.None, 
-            string message = "")
-            => (Error, ErrorMessage) = ((int)errorType, message);
+        [DataMember(EmitDefaultValue = false)]
+        public int Error { get; init; } = (int) TgsApiError.None;
 
-        public int Error { get; init; } = (int)TgsApiError.None;
-        public string ErrorMessage { get; init; } = string.Empty;
+        [DataMember(EmitDefaultValue = false)]
+        public string ErrorMessage { get; init; }
     }
 }

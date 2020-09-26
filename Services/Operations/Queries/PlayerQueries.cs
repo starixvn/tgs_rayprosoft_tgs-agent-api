@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
@@ -17,13 +18,15 @@ namespace TGS.Services.Operations.Queries
         Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);
 
         Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(string playerCode, params LoginStatus[] statuses);
+
+        Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
     }
 
     public sealed class PlayerQueries : IPlayerQueries
     {
-        private readonly TgsRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public PlayerQueries(TgsRepository repository)
+        public PlayerQueries(ITgsRepository repository)
         {
             _repository = repository;
         }
@@ -66,6 +69,15 @@ namespace TGS.Services.Operations.Queries
                 });
 
             return results.ToArray();
+        }
+
+        Task<string> IPlayerQueries.GetPlayerCodeByUsernameAsync(Guid licenseeId, string username)
+        {
+            return _repository.Players
+                .Where(p => p.LicenseeId == licenseeId &&
+                            p.Username == username)
+                .Select(p => p.PlayerCode)
+                .FirstOrDefaultAsync();
         }
     }
 }

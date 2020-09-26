@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -7,8 +9,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Services;
@@ -22,12 +26,11 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Services.Operations;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.OperatorApi
 {
-    public class Startup
+    public sealed class Startup
     {
         private readonly IConfiguration _configuration;
 
@@ -76,11 +79,21 @@ namespace TGS.Apis.OperatorApi
             });
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            IList<string> BypassRouting = new[] { "/api/status" };
+
             app.UseGlobalExceptionHandler();
 
+            if (!env.IsDevelopment()) 
+            {
+                app.UseHsts();
+            }
+
             app.UseHttpsRedirection();
+
+            app.UseWhen(context => BypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)), 
+                builder => builder.UseMiddleware<VerifyCredentialsMiddleware>());            
 
             app.UseRouting();
 

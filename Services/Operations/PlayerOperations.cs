@@ -20,6 +20,8 @@ namespace TGS.Services.Operations
         Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform);
 
         Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
+
+        Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -164,6 +166,11 @@ namespace TGS.Services.Operations
                 }, expiresIn);
 
             return loginRecords;
+        }
+
+        Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid licenseeId, string username)
+        {
+            return _playerQueriesFactory().GetPlayerCodeByUsernameAsync(licenseeId, username);
         }
 
         private static class CachedPlayerFields

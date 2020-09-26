@@ -1,12 +1,12 @@
 ﻿namespace TGS.Apis.OperatorApi.Controllers.Messages.Players
 {
-    public class CreatePlayerRequest : BaseRequest
+    public record CreatePlayerRequest
     {
-        public string Answer { get; set; }
-        public string Captcha { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string ConfirmPassword { get; set; }
-        public string ParentInvitationCode { get; set; }
+        public string Answer { get; init; }
+        public string Captcha { get; init; }
+        public string Username { get; init; }
+        public string Password { get; init; }
+        public string ConfirmPassword { get; init; }
+        public string ParentInvitationCode { get; init; }
     }
 }
