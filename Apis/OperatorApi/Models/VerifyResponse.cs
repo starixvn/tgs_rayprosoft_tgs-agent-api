@@ -1,8 +1,13 @@
 ﻿namespace TGS.Apis.OperatorApi.Models
 {
-    public class VerifyResponse
+    public record VerifyResponse
     {
-        public int Code { get; set; }
-        public string Message { get; set; }
+        public VerifyResponse(
+            bool isValid = true,
+            string message = "")
+            => (IsValid, Message) = (isValid, message);
+
+        public bool IsValid { get; init; } = true;
+        public string Message { get; init; } = string.Empty;
     }
 }

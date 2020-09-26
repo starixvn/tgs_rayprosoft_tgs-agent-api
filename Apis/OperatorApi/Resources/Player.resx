@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AuthenticateFailed" xml:space="preserve">
+    <value>Authenticate failed.</value>
+  </data>
+  <data name="AuthenticateInvalid" xml:space="preserve">
+    <value>Authenticate code is invalid.</value>
+  </data>
   <data name="BankAccountRequired" xml:space="preserve">
     <value>Bank account is required.</value>
   </data>

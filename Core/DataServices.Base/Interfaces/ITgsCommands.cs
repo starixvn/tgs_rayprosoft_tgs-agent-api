@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace TGS.Core.DataServices.Base.Interfaces
 {
