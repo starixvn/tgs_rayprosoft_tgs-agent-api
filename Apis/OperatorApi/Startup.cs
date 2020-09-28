@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -9,12 +7,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
-using TGS.Apis.OperatorApi.Middlewares;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
@@ -38,10 +35,11 @@ namespace TGS.Apis.OperatorApi
         {
             _configuration = configuration;
         }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
-            
+
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -70,30 +68,28 @@ namespace TGS.Apis.OperatorApi
                     };
                 });
 
-            services.AddControllers(options =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-            });
+            services
+                .AddControllers(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            IList<string> BypassRouting = new[] { "/api/status" };
-
             app.UseGlobalExceptionHandler();
 
-            if (!env.IsDevelopment()) 
+            if (!env.IsDevelopment())
             {
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
 
-            app.UseWhen(context => BypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)), 
-                builder => builder.UseMiddleware<VerifyCredentialsMiddleware>());            
+            app.UseVerifyCredentialsMiddleware();
 
             app.UseRouting();
 
