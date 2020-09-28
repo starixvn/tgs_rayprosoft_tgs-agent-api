@@ -14,15 +14,17 @@ using System.Threading.Tasks;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Tests.BackendOffice.UnitTests.Controllers;
+using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
+    [Category(Named.Unit)]
     [TestFixture, Parallelizable]
     public class StartupTests : BaseTests
     {
 
         [Test]
-        public void Can_Starup()
+        public void Can_Run_Startup()
         {
             var configurationSectionStub = new Mock<IConfigurationSection>();
             configurationSectionStub.Setup(x => x["BackendOffice"])

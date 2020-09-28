@@ -26,4 +26,4 @@ build:
 tests:
   stage: test
   script:
-    - "dotnet test $solution"  
+    - "dotnet test $solution" --filter Unit"
