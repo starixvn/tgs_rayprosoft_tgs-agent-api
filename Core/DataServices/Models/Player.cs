@@ -33,7 +33,7 @@ namespace TGS.Core.DataServices.Models
 
         public string ParentPlayerCode { get; set; }
         public string ParentInvitationCode { get; set; }
-        public Player? ParentPlayer { get; set; }
+        public Player ParentPlayer { get; set; }
 
         public Guid? VipId { get; set; }
         public VipLevel Vip { get; set; }

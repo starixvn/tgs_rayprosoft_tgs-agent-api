@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -9,18 +8,18 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.OperatorApi.Controllers.Messages.Players;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -28,23 +27,19 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public partial class PlayerController : BaseContextController
     {
-        private readonly Func<ITgsRepository> _tgsRepoFactory;
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsCommands<Wallet> _walletCommands;
         private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly IPlayerOperations _playerOperations;
         private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
         private readonly ICaptchaFactory _captchaFactory;
-        private readonly ITransactionManager _transactionManager;
 
         public PlayerController(
             Func<ITgsRepository> tgsRepoFactory,
             IHashProvider hashProvider,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
-            ITgsCommands<Wallet> walletCommands,
             ITgsCommands<PlayerAuditLog> auditLogCommands,
             ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
             IPlayerOperations playerOperations,
@@ -53,15 +48,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             IHttpContextAccessor httpContextAccessor) : 
             base(httpContextAccessor)
         {
-            _tgsRepoFactory = tgsRepoFactory;
             _hashProvider = hashProvider;
             _queries = queries;
             _commands = commands;
-            _walletCommands = walletCommands;
             _auditLogCommands = auditLogCommands;
             _playerLoginRecordCommands = playerLoginRecordCommands;
             _playerOperations = playerOperations;
-            _transactionManager = transactionManager;
             _captchaFactory = captchaFactory;
         }
 
@@ -100,63 +92,25 @@ namespace TGS.Apis.OperatorApi.Controllers
                 return new CreatePlayerResponse { IsNew = false, PlayerCode = playerCode };
             }
 
-
-            _ = await _transactionManager.ExecuteTransactionAsync(
-                 _tgsRepoFactory,
-                IsolationLevel.Serializable,
-                request.Username,
-                execute: async (r, trans) => {
-                    await CreatePlayerAsync(request, Consts.DefaultCulture, Consts.DefaultCurrency, licenseeId);
-                    await CreateAuditLogAsync($"Create Player '{request.Username}'", request.Username);
-                    return Task.FromResult(0);
-                });
-
-            return new CreatePlayerResponse { IsNew = true, PlayerCode = "" };
-        }
-
-        private async Task CreatePlayerAsync(
-            CreatePlayerRequest request,  
-            string defaultCulture, 
-            string defaultCurrency, 
-            Guid licenseeId)
-        {
             var (salt, password) = _hashProvider.GenerateCredential(request.Password);
-            var playerCode = PlayerCodeGenerator.NewId();    
 
-            var wallet = new Wallet
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                PlayerCode = playerCode,
-                CurrencyCode = defaultCurrency,
-                ExternalCurrencyCode = defaultCurrency,
-                Balance = 0,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            var player = new Player
-            {
-                PlayerCode = playerCode,
-                Username = request.Username,
-                Password = password,
-                Salt = salt,
-                InvitationCode = StringGenerator.GenerateAlphanumericString(6),
+            playerCode = await _playerOperations.CreatePlayerAsync(new CreatePlayerData 
+            {                
                 LicenseeId = licenseeId,
-                CultureCode = defaultCulture,
-                DefaultWalletCurrencyCode = defaultCurrency,
+                Username = request.Username,
+                Salt = salt,
+                Password = password,
+                CultureCode = Consts.DefaultCulture,
+                CurrencyCode = Consts.DefaultCurrency,
+                ExternalCurrencyCode = Consts.DefaultCurrency,
                 ParentInvitationCode = request.ParentInvitationCode,
-                RegisteredOn = DateTimeOffset.Now,
-                LastActiveOn = DateTimeOffset.Now,
-                Status = PlayerStatus.Enabled,
-                Type = PlayerTypes.RealPlayer,
-                BetLimitGroupId = 1,
-                UpdatedByUsername = request.Username,
-                UpdatedOn = DateTimeOffset.Now,
-                Wallets = new HashSet<Wallet> { wallet }
-            };
+                BetLimitGroup = 1,
+                ParentPlayerCode = "",
+                Type = request.IsTestPlayer ? PlayerTypes.OperatorTestPlayer : PlayerTypes.RealPlayer,
+                HasAgent = request.HasAgent
+            });
 
-            await _commands.CreateAsync(player);
-            await _walletCommands.CreateAsync(wallet);
+            return new CreatePlayerResponse { IsNew = true, PlayerCode = playerCode };
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
