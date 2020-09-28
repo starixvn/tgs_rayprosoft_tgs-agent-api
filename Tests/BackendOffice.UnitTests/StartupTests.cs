@@ -18,7 +18,6 @@ using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
-    [Category(Named.Unit)]
     [TestFixture, Parallelizable]
     public class StartupTests : BaseTests
     {
