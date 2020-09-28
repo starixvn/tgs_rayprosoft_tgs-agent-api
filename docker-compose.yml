@@ -194,18 +194,18 @@ services:
       - "4571:4571"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
-      - SERVICES=${SERVICES- }
-      - DEBUG=${DEBUG- }
-      - DATA_DIR=${DATA_DIR- }
-      - PORT_WEB_UI=${PORT_WEB_UI- }
-      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - SERVICES=ec2,s3,dynamodb
+      - DEBUG=${DEBUG-1}
+      - DATA_DIR=${DATA_DIR-/tmp/localstack/data}
+      - PORT_WEB_UI=8080
+      - LAMBDA_EXECUTOR=docker-reuse
       - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
       - DOCKER_HOST=unix:///var/run/docker.sock
       - HOST_TMP_FOLDER=${TMPDIR}
     volumes:
-      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - ./.localstack/data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
-
+      - ./bin:/docker-entrypoint-initaws.d
 networks:
   tgs:
     driver: bridge
