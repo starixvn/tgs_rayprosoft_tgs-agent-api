@@ -29,6 +29,7 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.WebApiServices;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -48,6 +49,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddNats(configuration);
+            services.AddWebApiServices();
             services.AddTgsLog();
             services.AddScoped<ExceptionMiddleware>();
 

@@ -46,6 +46,7 @@ namespace TGS.Apis.OperatorApi
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
 
             services.AddNats(_configuration)
+                    .AddWebApiServices()
                     .AddTgsLog()
                     .AddRedis()
                     .AddJson()
