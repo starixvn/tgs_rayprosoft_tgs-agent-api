@@ -13,6 +13,18 @@ pipeline {
              ])
            }
         }
+        stage('Restore packages'){
+            steps{
+                sh "dotnet restore tgs.sln"
+              }
+        }
+        stage('Build') {
+            steps {
+                sh '''
+                echo "haha"
+                '''
+            }
+        }
         stage('Test') {
             steps {
                 sh '''
