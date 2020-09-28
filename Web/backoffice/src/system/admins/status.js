@@ -1,39 +1,25 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
-import client from "../../client"
-import { Formik, Field, Form, useFormikContext } from "formik"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Label,
-  Input,
-  Select as _Select,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Dialog,
-  Modal,
-  Table,
-  useClassName
-} from "bumbag"
+import { Select as _Select } from "bumbag"
 import { Field as _Field } from "../../select/Field"
 
 const Disabled = 0
+
+const DisabledString = "Disabled"
+
 const Enabled = 1
 
+const EnabledString = "Enabled"
+
+const Archived = 2
+
+const Locked = 3
+
 export const from = (value) => {
-  if (value === "Disabled" || value === `${Disabled}`) {
+  if (value === DisabledString || value === `${Disabled}`) {
     return Disabled
   }
-  if (value === Enabled || value === `${Enabled}`) {
+  if (value === EnabledString || value === `${Enabled}`) {
     return Enabled
   }
   return value
@@ -64,11 +50,11 @@ const statusOptions = () => [
 
 //TODO: i18n
 export const label = (value) => {
-  if (value === "Enabled" || value === Disabled) {
+  if (value === EnabledString || value === Disabled) {
     return "活跃"
   }
 
-  if (value === "Disabled" || value === Enabled) {
+  if (value === DisabledString || value === Enabled) {
     return "封锁"
   }
 

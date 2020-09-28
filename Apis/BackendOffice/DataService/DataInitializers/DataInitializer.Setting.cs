@@ -93,7 +93,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             {
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
-                                new MenuSetting("View"),
+                                new MenuSetting("Delete"),
                                 new MenuSetting("SendMessage")
                             }
                         }
