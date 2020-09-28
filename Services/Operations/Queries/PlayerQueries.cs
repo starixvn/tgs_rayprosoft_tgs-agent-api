@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
@@ -20,6 +21,10 @@ namespace TGS.Services.Operations.Queries
         Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(string playerCode, params LoginStatus[] statuses);
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
+
+        Task<Player> GetPlayerByPlayerCodeAsync(string playerCode);
+
+        Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -77,6 +82,19 @@ namespace TGS.Services.Operations.Queries
                 .Where(p => p.LicenseeId == licenseeId &&
                             p.Username == username)
                 .Select(p => p.PlayerCode)
+                .FirstOrDefaultAsync();
+        }
+
+        Task<Player> IPlayerQueries.GetPlayerByPlayerCodeAsync(string playerCode)
+        {
+            return _repository.Players
+                              .FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
+        }
+
+        Task<(byte[] salt, byte[] password)> IPlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(string playerCode)
+        {
+           return _repository.Players.Where(p => p.PlayerCode == playerCode)
+                .Select(p => new Tuple<byte[], byte[]>(p.Salt, p.Password).ToValueTuple())                
                 .FirstOrDefaultAsync();
         }
     }

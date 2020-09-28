@@ -78,7 +78,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
-            _hashProviderMock.Setup(p => p.PasswordMismatch(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
+            _hashProviderMock.Setup(p => p.PasswordMatched(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns(false);
 
             var response = await _controller.AuthenticateAsync(request);
@@ -100,7 +100,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
-            _hashProviderMock.Setup(p => p.PasswordMismatch(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
+            _hashProviderMock.Setup(p => p.PasswordMatched(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns(true);
 
             _antiForgeryMock.Setup(p => p.GetAndStoreTokens(It.IsAny<HttpContext>()))

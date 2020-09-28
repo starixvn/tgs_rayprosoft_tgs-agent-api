@@ -15,10 +15,16 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
+using TGS.Services.Operations.Queries;
+using TGS.Services.Operations.Validators;
+using PlayerConsts = TGS.Core.Models.Consts.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -30,27 +36,36 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly ITgsCommands<Player> _commands;
         private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
+        private readonly IStatusValidator _statusValidator;
+        private readonly IPlayerQueries _playerQueries;
         private readonly ICaptchaFactory _captchaFactory;
 
         public PlayerController(
             IHashProvider hashProvider,
+            IStatusValidator statusValidator,
+            IPlayerQueries playerQueries,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerAuditLog> auditLogCommands,
             ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
             IPlayerOperations playerOperations,
+            IRequestAnalyzer requestAnalyzer,
             ICaptchaFactory captchaFactory,
             IHttpContextAccessor httpContextAccessor) : 
             base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
+            _statusValidator = statusValidator;
+            _playerQueries = playerQueries;
             _queries = queries;
             _commands = commands;
             _auditLogCommands = auditLogCommands;
             _playerLoginRecordCommands = playerLoginRecordCommands;
             _playerOperations = playerOperations;
+            _requestAnalyzer = requestAnalyzer;
             _captchaFactory = captchaFactory;
         }
 
@@ -88,6 +103,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             //}
 
             var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
             if (playerCode.IsNotNullOrEmpty())
             {
@@ -116,60 +133,61 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
+        [Consumes("application/json")]
         [HttpPost("login"), Description("login")]
-        public async Task<TgsResponse> LoginAsync([FromBody] LoginRequest request)
+        public async Task<TgsResponse> LoginAsync(LoginRequest request)
         {
-            var licenseeId = new Guid(HttpContext.Request.Headers["LicenseeId"]);
-            var player = await _queries.GetSingleAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
+            var username = request.Username;
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
-            if (player == null)
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNullOrEmpty())
             {
-                throw new InvalidOperationException(Resources.Player.NotFound);
+                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
             }
 
-            if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.Password))
+            var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
+            if (!_hashProvider.PasswordMatched(password, salt, request.Password))
             {
-                throw new InvalidOperationException(Resources.Player.PasswordMismatched);
+                throw new InvalidCredentialsException(Resources.Player.PasswordMismatched);
             }
 
-            if (player.Status != PlayerStatus.Enabled)
-            {
-                throw new InvalidOperationException(Resources.Player.StatusInvalid);
-            }
+            _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
+            
+            var createdOn = DateTimeOffset.UtcNow;
+            var ipAddress = _requestAnalyzer.GetIp(HttpContext);
 
-            var ipAddress = string.Empty;
-            if (HttpContext?.Connection.RemoteIpAddress != null)
-                ipAddress = HttpContext?.Connection.RemoteIpAddress.ToString();
 
-            var logRecord = new PlayerLoginRecord
+            await _playerOperations.PlayerLoginAsync(new PlayerLoginData 
             {
-                Id = GuidExtensions.NewSequentialGuid(),
-                CreatedOn = DateTimeOffset.Now,
-                ExpiredOn = DateTimeOffset.Now.AddHours(12),
+                LicenseeId = licenseeId,
+                Username = username,
+                PlayerCode = playerCode,
+                PlatformType = request.PlatformType,
                 IpAddress = ipAddress,
-                PlayerCode = player.PlayerCode,
-                Status = LoginStatus.Enabled,
-                PlatformType = PlatformType.Desktop,
-                LicenseeId = licenseeId
-            };
+                CreatedOn = createdOn,
+                ExpiredOn = createdOn.AddSeconds(PlayerConsts.LoginExpirationSeconds)
+            });
 
-            await SignInAsync(player);
-            await _playerLoginRecordCommands.CreateAsync(logRecord);
+            await SignInAsync(username);
+            
             return new TgsResponse();
         }
 
-        private async Task SignInAsync(Player player)
+        private async Task SignInAsync(string username)
         {
             var claims = new List<Claim>
             {
-                new Claim(Consts.UserInfo.UsernameKey, player.Username),
+                new Claim(Consts.UserInfo.UsernameKey, username),
             };
 
             var authProperties = new AuthenticationProperties
             {
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20),
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(PlayerConsts.LoginExpirationSeconds),
                 IsPersistent = true,
             };
+
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
@@ -251,7 +269,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
             }
 
-            if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.OldPassword))
+            if (_hashProvider.PasswordMatched(player.Password, player.Salt, request.OldPassword))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
             }

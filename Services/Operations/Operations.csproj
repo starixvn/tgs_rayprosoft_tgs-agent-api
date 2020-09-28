@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Commands\**" />
     <Compile Remove="Extensions\**" />
-    <EmbeddedResource Remove="Commands\**" />
     <EmbeddedResource Remove="Extensions\**" />
-    <None Remove="Commands\**" />
     <None Remove="Extensions\**" />
   </ItemGroup>
 

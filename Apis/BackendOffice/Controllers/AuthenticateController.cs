@@ -57,7 +57,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.NotFound);
             }
 
-            if (_hashProvider.PasswordMismatch(user.Password, user.Salt, request.Password))
+            if (!_hashProvider.PasswordMatched(user.Password, user.Salt, request.Password))
             {
                 return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.InvalidPassword);
             }
