@@ -180,3 +180,6 @@ $RECYCLE.BIN/
 
 #NLog
 **/logs/
+
+# Local Stack
+.localstack/**
