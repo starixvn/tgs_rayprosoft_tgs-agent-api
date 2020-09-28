@@ -9,7 +9,6 @@ namespace TGS.Core.DataServices.Migrations
         //InitAfterRun(migrationBuilder);
         public void InitAfterRun(MigrationBuilder migrationBuilder)
         {
-
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();

@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TGS.Apis.OperatorApi.DataServices;
-using TGS.Apis.OperatorApi.Middlewares;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
@@ -22,12 +23,11 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Services.Operations;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.OperatorApi
 {
-    public class Startup
+    public sealed class Startup
     {
         private readonly IConfiguration _configuration;
 
@@ -35,15 +35,15 @@ namespace TGS.Apis.OperatorApi
         {
             _configuration = configuration;
         }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
-            
+
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
-            services.AddSingleton<ITransactionManager, TransactionManager>();
 
             services.AddNats(_configuration)
                     .AddTgsLog()
@@ -68,22 +68,28 @@ namespace TGS.Apis.OperatorApi
                     };
                 });
 
-            services.AddControllers(options =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-            });
+            services
+                .AddControllers(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                });
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseGlobalExceptionHandler();
 
+            if (!env.IsDevelopment())
+            {
+                app.UseHsts();
+            }
+
             app.UseHttpsRedirection();
 
-            app.UseMiddleware<AuthenticateMiddleware>();
+            app.UseVerifyCredentialsMiddleware();
 
             app.UseRouting();
 

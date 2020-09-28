@@ -15,14 +15,19 @@ namespace TGS.Core.Infrastructures.Log
             services.AddSingleton<LogBusEvent>(sp => new ApiLogEvent());
             services.AddSingleton<LogBusEvent>(sp => new LogRecordEvent());
             services.AddSingleton<LogBusEvent>(sp => new AdminLogEvent());
-            services.AddScoped(p => CreateLoggerPublisher(p.GetRequiredService<INatsManager>()));    
+            services.AddScoped(c => CreateLoggerPublisher(c.GetRequiredService<INatsManager>()));    
             
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScoped<ILocalIpFinder, LocalIpFinder>();
             services.AddTransient<ITgsLog, TgsLog>();    
 
             services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
-            services.AddTransient<Func<ITgsLog>>(c => () => c.GetRequiredService<ITgsLog>());
+
+            //services.AddTransient<Func<ITgsLog>>(c => () =>
+            //{ 
+            //    using var scope = c.CreateScope();
+            //    return scope.ServiceProvider.GetRequiredService<ITgsLog>();
+            //});
             
             return services;
         }

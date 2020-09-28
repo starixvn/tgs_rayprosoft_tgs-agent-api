@@ -22,7 +22,9 @@ BEGIN
 			[TimeZoneId],
 			[Code],
 			[Name],
-			[Status]
+			[Status],
+			[ClientId],
+			[SecretKey]
 		FROM dbo.[Licensees]
 		WHERE [Id] = @licenseeId
 	)
@@ -32,6 +34,8 @@ BEGIN
 		l.[Name],
 		l.[TimeZoneId],
 		l.[Status],		
+		l.[ClientId],
+		l.[SecretKey],
 		r.[Id] AS [ResellerId],
 		r.[Code] AS [ResellerCode]		
 	FROM [Licensee] l

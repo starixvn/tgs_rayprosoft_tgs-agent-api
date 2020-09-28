@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -12,7 +13,6 @@ namespace TGS.Core.Infrastructures.ErrorMappers
         internal static readonly IDictionary<Type, TgsApiError> TgsApiErrorByException =
             new Dictionary<Type, TgsApiError>
             {
-
                 { typeof(PlayerDisabledException), TgsApiError.UserBlocked },
                 { typeof(PlayerNotFoundException), TgsApiError.PlayerNotFound }, 
                 { typeof(ArgumentException), TgsApiError.InvalidArguments },
@@ -22,13 +22,16 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 { typeof(InvalidStatusException), TgsApiError.SystemError },
                 { typeof(InvalidGameActionException), TgsApiError.InvalidGameAction },               
                 { typeof(GameProviderUnderMaintenanceException), TgsApiError.UnderMaintenance },
-                { typeof(GameUnderMaintenanceException), TgsApiError.UnderMaintenance }
+                { typeof(GameUnderMaintenanceException), TgsApiError.UnderMaintenance },
+                { typeof(InvalidCredentialsException), TgsApiError.InvalidCredentials },
+                { typeof(ClientIdNotFoundException), TgsApiError.ClientIdNotFound }
             };
 
         internal static readonly IDictionary<TgsApiError, int> HttpCodeByException =
            new Dictionary<TgsApiError, int>
            {
                { TgsApiError.InvalidArguments, StatusCodes.Status500InternalServerError},
+               { TgsApiError.ClientIdNotFound, StatusCodes.Status401Unauthorized },
                { TgsApiError.InvalidCredentials, StatusCodes.Status401Unauthorized},
                { TgsApiError.PlayerNotFound, StatusCodes.Status401Unauthorized },
                { TgsApiError.TransactionIdNotFound, StatusCodes.Status500InternalServerError },
@@ -38,7 +41,7 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                { TgsApiError.UnderMaintenance, StatusCodes.Status503ServiceUnavailable },
                { TgsApiError.OperationNotAllowed, StatusCodes.Status405MethodNotAllowed },
                { TgsApiError.CountryRestricted, StatusCodes.Status403Forbidden },
-               { TgsApiError.TestPlayerStakeAmountCapExceeded, StatusCodes.Status500InternalServerError },               
+               { TgsApiError.TestPlayerStakeAmountCapExceeded, StatusCodes.Status500InternalServerError },
            };
 
         int IErrorMapper.GetApiErrorByException(Exception exception)

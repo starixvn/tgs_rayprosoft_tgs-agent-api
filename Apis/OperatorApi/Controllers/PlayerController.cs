@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -9,18 +8,18 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.OperatorApi.Controllers.Messages.Players;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -28,36 +27,33 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public partial class PlayerController : BaseContextController
     {
-        private readonly Func<ITgsRepository> _tgsRepoFactory;
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsCommands<Wallet> _walletCommands;
         private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
+        private readonly IPlayerOperations _playerOperations;
         private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
         private readonly ICaptchaFactory _captchaFactory;
-        private readonly ITransactionManager _transactionManager;
 
         public PlayerController(
             Func<ITgsRepository> tgsRepoFactory,
             IHashProvider hashProvider,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
-            ITgsCommands<Wallet> walletCommands,
             ITgsCommands<PlayerAuditLog> auditLogCommands,
             ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
+            IPlayerOperations playerOperations,
             ICaptchaFactory captchaFactory,
             ITransactionManager transactionManager,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor) : 
+            base(httpContextAccessor)
         {
-            _tgsRepoFactory = tgsRepoFactory;
             _hashProvider = hashProvider;
             _queries = queries;
             _commands = commands;
-            _walletCommands = walletCommands;
             _auditLogCommands = auditLogCommands;
             _playerLoginRecordCommands = playerLoginRecordCommands;
-            _transactionManager = transactionManager;
+            _playerOperations = playerOperations;
             _captchaFactory = captchaFactory;
         }
 
@@ -70,96 +66,58 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("/checkUsername"), Description("Check username exists")]
+        [HttpGet, Route("checkUsername"), Description("Check username exists")]
         public Task<bool> UsernameExistsAsync([FromQuery] string username)
         {
-            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
+            var licenseeId = new Guid(HttpContext.Request.Headers["LicenseeId"]);
             return _queries.ExistsAsync(p => p.Username == username && p.LicenseeId == licenseeId);
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost, Description("Create a player")]
-        public async Task<TgsResponse> CreateAsync([FromBody] CreatePlayerRequest request)
+        [Consumes("application/json")]
+        [HttpPost, Route("create"), Description("Create a player")]
+        public async Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request)
         {
-            var result = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
-            if (!result.IsValid)
+            //var result = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            //if (!result.IsValid)
+            //{
+            //    throw new InvalidOperationException(result.Message);
+            //}
+
+            var licenseeId = HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid) v : Guid.Empty;
+
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNotNullOrEmpty())
             {
-                throw new InvalidOperationException(result.Message);
+                return new CreatePlayerResponse { IsNew = false, PlayerCode = playerCode };
             }
 
-            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
-
-            var exists = await _queries.ExistsAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
-            if (exists)
-            {
-                throw new InvalidOperationException(Resources.Player.UsernameExists);
-            }
-
-            var defaultCulture = "zh-CN";
-            var defaultCurrency = "CNY";
-
-            object p = await _transactionManager.ExecuteTransactionAsync(
-                 _tgsRepoFactory,
-                IsolationLevel.Serializable,
-                request.Username,
-                execute: async (r, trans) => {
-                    await CreatePlayerAsync(request, defaultCulture, defaultCurrency, licenseeId);
-                    await CreateAuditLogAsync($"Create Player '{request.Username}'", request.Username);
-                    return Task.FromResult(0);
-                });
-            return new TgsResponse();
-        }
-
-        private async Task CreatePlayerAsync(
-            CreatePlayerRequest request,  
-            string defaultCulture, 
-            string defaultCurrency, 
-            Guid licenseeId)
-        {
             var (salt, password) = _hashProvider.GenerateCredential(request.Password);
-            var playerCode = PlayerCodeGenerator.NewId();    
 
-            var wallet = new Wallet
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                PlayerCode = playerCode,
-                CurrencyCode = defaultCurrency,
-                ExternalCurrencyCode = defaultCurrency,
-                Balance = 0,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            var player = new Player
-            {
-                PlayerCode = playerCode,
-                Username = request.Username,
-                Password = password,
-                Salt = salt,
-                InvitationCode = StringGenerator.GenerateAlphanumericString(6),
+            playerCode = await _playerOperations.CreatePlayerAsync(new CreatePlayerData 
+            {                
                 LicenseeId = licenseeId,
-                CultureCode = defaultCulture,
-                DefaultWalletCurrencyCode = defaultCurrency,
+                Username = request.Username,
+                Salt = salt,
+                Password = password,
+                CultureCode = Consts.DefaultCulture,
+                CurrencyCode = Consts.DefaultCurrency,
+                ExternalCurrencyCode = Consts.DefaultCurrency,
                 ParentInvitationCode = request.ParentInvitationCode,
-                RegisteredOn = DateTimeOffset.Now,
-                LastActiveOn = DateTimeOffset.Now,
-                Status = PlayerStatus.Enabled,
-                Type = PlayerTypes.RealPlayer,
-                BetLimitGroupId = 1,
-                UpdatedByUsername = request.Username,
-                UpdatedOn = DateTimeOffset.Now,
-                Wallets = new HashSet<Wallet> { wallet }
-            };
+                BetLimitGroup = 1,
+                ParentPlayerCode = "",
+                Type = request.IsTestPlayer ? PlayerTypes.OperatorTestPlayer : PlayerTypes.RealPlayer,
+                HasAgent = request.HasAgent
+            });
 
-            await _commands.CreateAsync(player);
-            await _walletCommands.CreateAsync(wallet);
+            return new CreatePlayerResponse { IsNew = true, PlayerCode = playerCode };
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("login"), Description("login")]
         public async Task<TgsResponse> LoginAsync([FromBody] LoginRequest request)
         {
-            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
+            var licenseeId = new Guid(HttpContext.Request.Headers["LicenseeId"]);
             var player = await _queries.GetSingleAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
 
             if (player == null)
@@ -178,8 +136,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             var ipAddress = string.Empty;
-            if (_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress != null)
-                ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+            if (HttpContext?.Connection.RemoteIpAddress != null)
+                ipAddress = HttpContext?.Connection.RemoteIpAddress.ToString();
 
             var logRecord = new PlayerLoginRecord
             {
@@ -212,13 +170,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
         [HttpPost, Route("logout")]
         public Task LogoutAsync()
         {
-            return _httpContextAccessor.HttpContext?.SignOutAsync();
+            return HttpContext?.SignOutAsync();
         }
 
         [Route("{username}")]
