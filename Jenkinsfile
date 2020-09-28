@@ -20,15 +20,15 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh '''
-                echo "haha"
+                sh "dotnet build tgs.sln"
+                echo "build solution"
                 '''
             }
         }
         stage('Test') {
             steps {
-                sh '''
-                echo "haha"
+                sh  "dotnet test tgs.sln"  
+                echo "test tgs.sln"
                 '''
             }
         }
