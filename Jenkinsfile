@@ -16,6 +16,7 @@ pipeline {
         stage('Restore packages'){
             steps{
                 sh "dotnet restore tgs.sln"
+                echo "restore tgs.sln"
               }
         }
         stage('Build') {
