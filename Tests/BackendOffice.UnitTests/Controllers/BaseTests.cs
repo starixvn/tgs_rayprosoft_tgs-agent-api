@@ -1,12 +1,15 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
+    [Category(Named.Unit)]
     public class BaseTests
     {
         protected readonly Mock<IHttpContextAccessor> HttpContextAccessorMock = new Mock<IHttpContextAccessor>();

@@ -185,7 +185,7 @@ namespace TGS.Core.Infrastructures.Extensions
 
         public static bool IgnoreCaseContains(this string str, string second)
         {
-            return str.IndexOf(second, StringComparison.OrdinalIgnoreCase) > -1;
+            return str.Contains(second, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

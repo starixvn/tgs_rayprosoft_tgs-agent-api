@@ -79,7 +79,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Returns(Task.FromResult(user));
 
             _hashProviderMock.Setup(p => p.PasswordMismatch(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
-                .Returns(false);
+                .Returns(true);
 
             var response = await _controller.AuthenticateAsync(request);
             response.Valid.Should().BeFalse();
@@ -101,7 +101,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Returns(Task.FromResult(user));
 
             _hashProviderMock.Setup(p => p.PasswordMismatch(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
-                .Returns(true);
+                .Returns(false);
 
             _antiForgeryMock.Setup(p => p.GetAndStoreTokens(It.IsAny<HttpContext>()))
                 .Returns(new Fixture().Create<AntiforgeryTokenSet>());

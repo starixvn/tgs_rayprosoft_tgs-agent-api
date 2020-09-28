@@ -26,4 +26,11 @@ build:
 tests:
   stage: test
   script:
-    - "dotnet test $solution"  
+    - 'dotnet test $solution --filter Unit --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+  artifacts:
+    when: always
+    paths:
+        - ./**/*test-result.xml
+    reports:
+      junit:
+        - ./**/*test-result.xml
