@@ -191,7 +191,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private void GeneratePlayers()
         {
             var rnd = new Random();
-            var (password, salt) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
+            var (salt, password) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
            
@@ -377,30 +377,30 @@ namespace TGS.Core.DataServices.DataInitializers
             return gp;
         }
 
-        private Reseller CreateResellerWithLicensee(IReseller r)
+        private Reseller CreateResellerWithLicensee(IReseller reseller)
         {
             return new Reseller
             {
-                Id = r.Id,
-                Code = r.Code,
-                Name = r.Name,
-                OperationalEmail = r.OperationalEmail,
+                Id = reseller.Id,
+                Code = reseller.Code,
+                Name = reseller.Name,
+                OperationalEmail = reseller.OperationalEmail,
                 Description = string.Empty,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = _now,
                 UpdatedOn = _now,                
-                Currencies = r.Currencies.Select(curr => new ResellerCurrency
+                Currencies = reseller.Currencies.Select(curr => new ResellerCurrency
                 {
-                    ResellerId = r.Id,
+                    ResellerId = reseller.Id,
                     CurrencyCode = curr.Code
                 }).ToHashSet(),
-                Languages = r.Languages.Select(lang => new ResellerLanguage
+                Languages = reseller.Languages.Select(lang => new ResellerLanguage
                 {
-                    ResellerId = r.Id,
+                    ResellerId = reseller.Id,
                     CultureCode = lang.Code
                 }).ToHashSet(),
-                Licensees = r.Licensees.Select(l => CreateLicensee(r, l)).ToHashSet(),
+                Licensees = reseller.Licensees.Select(l => CreateLicensee(reseller, l)).ToHashSet(),
             };
         }
 
@@ -419,6 +419,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreatedOn = _now,
                 UpdatedOn = _now,
                 ResellerId = reseller.Id,
+                TimeZoneId = licensee.TimeZoneId,
+                Description = string.Empty,
                 ClientId = licensee.ClientId,
                 SecretKey = licensee.SecretKey,
                 Currencies = licensee.Currencies.Select(curr => new LicenseeCurrency

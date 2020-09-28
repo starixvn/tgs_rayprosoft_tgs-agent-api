@@ -4,6 +4,8 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Services.Operations
 {
@@ -21,12 +23,12 @@ namespace TGS.Services.Operations
 
     public sealed class TransactionManager : ITransactionManager
     {
-        //private readonly IUgsLog _log;
+        private readonly ITgsLog _log;
 
-        // public TransactionManager(IUgsLog log)
-        // {
-        //     _log = log.SetLogger("Transaction Manager");
-        // }
+        public TransactionManager(ITgsLog log)
+        {
+            _log = log.SetLogger("Transaction Manager");
+        }
 
         async Task<TResult> ITransactionManager.ExecuteTransactionAsync<TContext, TResult>(
             Func<TContext> contextFactory,
@@ -57,7 +59,7 @@ namespace TGS.Services.Operations
                 }
                 catch (Exception ex)
                 {
-                    //_log.LogError("Error during post transaction committed.", ex);
+                    _log.LogError("Error during post transaction committed.", ex);
                 }
 
                 return result;
@@ -68,8 +70,8 @@ namespace TGS.Services.Operations
             }
 
             // log the error in saving the commit
-            //_log.LogWarning($"Error during transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
-            //    errorInfo.SourceException);
+            _log.LogWarning($"Error during transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
+                errorInfo.SourceException);
 
             try
             {
@@ -80,9 +82,9 @@ namespace TGS.Services.Operations
             }
             catch (Exception ex2)
             {
-                //_log.LogWarning(
-                //    $"Error during rolling back transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
-                //    ex2);
+                _log.LogWarning(
+                    $"Error during rolling back transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
+                    ex2);
             }
 
             if (onPostRollback != null)

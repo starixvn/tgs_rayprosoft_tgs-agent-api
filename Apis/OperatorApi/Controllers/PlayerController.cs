@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
+using System.Data;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.OperatorApi.Controllers.Messages.Players;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.Pipelines;
 using TGS.Apis.OperatorApi.Services;
+using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -27,10 +27,13 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [MiddlewareFilter(typeof(VerifyCredentialsPipeline))]
     public partial class PlayerController : BaseContextController
     {
+        private readonly Func<ITgsRepository> _tgsRepoFactory;
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
+        private readonly ITgsCommands<Wallet> _walletCommands;
         private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
@@ -38,19 +41,25 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly ITransactionManager _transactionManager;
 
         public PlayerController(
+            Func<ITgsRepository> tgsRepoFactory,
             IHashProvider hashProvider,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
+            ITgsCommands<Wallet> walletCommands,
             ITgsCommands<PlayerAuditLog> auditLogCommands,
             ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
             ICaptchaFactory captchaFactory,
+            ITransactionManager transactionManager,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
+            _tgsRepoFactory = tgsRepoFactory;
             _hashProvider = hashProvider;
             _queries = queries;
             _commands = commands;
+            _walletCommands = walletCommands;
             _auditLogCommands = auditLogCommands;
             _playerLoginRecordCommands = playerLoginRecordCommands;
+            _transactionManager = transactionManager;
             _captchaFactory = captchaFactory;
         }
 
@@ -63,20 +72,22 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("/checkUsername"), Description("Check username exists")]
+        [HttpGet, Route("checkUsername"), Description("Check username exists")]
         public Task<bool> UsernameExistsAsync([FromQuery] string username)
         {
-            return _queries.ExistsAsync(p => p.Username == username);
+            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
+            return _queries.ExistsAsync(p => p.Username == username && p.LicenseeId == licenseeId);
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost, Description("Create a player")]
-        public async Task<TgsResponse> CreateAsync([FromBody] CreatePlayerRequest request)
+        [Consumes("application/json")]
+        [HttpPost, Route("create"), Description("Create a player")]
+        public async Task<TgsResponse> CreateAsync(CreatePlayerRequest request)
         {
-            var verifiedResult = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
-            if (verifiedResult.Code != 100)
+            var result = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
+            if (!result.IsValid)
             {
-                return new TgsResponse(TgsApiError.InvalidArguments, verifiedResult.Message);
+                throw new InvalidOperationException(result.Message);
             }
 
             var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
@@ -84,24 +95,23 @@ namespace TGS.Apis.OperatorApi.Controllers
             var exists = await _queries.ExistsAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
             if (exists)
             {
-                return new TgsResponse(TgsApiError.InvalidArguments, Resources.Player.UsernameExists);
+                throw new InvalidOperationException(Resources.Player.UsernameExists);
             }
 
             var defaultCulture = "zh-CN";
-            var defaultCurrency = "RMB";
+            var defaultCurrency = "CNY";
 
-            await CreatePlayerAsync(request, defaultCulture, defaultCurrency, licenseeId);
-
-             //        var transactionResult = await _transactionManager.ExecuteTransactionAsync(
-             //_tgsRepoFactory,
-             //IsolationLevel.RepeatableRead,
-             //externalTransactionIds,
-             //execute: async (r, trans) => await ProcessGameActionsAsync(r, data, playerRelatedData, cacheGameProvider, games));
-
-            await CreateAuditLogAsync($"Create Player '{request.Username}'", request.Username);
+            _ = await _transactionManager.ExecuteTransactionAsync(
+                 _tgsRepoFactory,
+                IsolationLevel.Serializable,
+                request.Username,
+                execute: async (r, trans) => {
+                    await CreatePlayerAsync(request, defaultCulture, defaultCurrency, licenseeId);
+                    await CreateAuditLogAsync($"Create Player '{request.Username}'", request.Username);
+                    return Task.FromResult(0);
+                });
             return new TgsResponse();
         }
-
 
         private async Task CreatePlayerAsync(
             CreatePlayerRequest request,  
@@ -110,8 +120,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             Guid licenseeId)
         {
             var (salt, password) = _hashProvider.GenerateCredential(request.Password);
-            var playerCode = PlayerCodeGenerator.NewId();
-          
+            var playerCode = PlayerCodeGenerator.NewId();    
 
             var wallet = new Wallet
             {
@@ -119,6 +128,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 PlayerCode = playerCode,
                 CurrencyCode = defaultCurrency,
                 ExternalCurrencyCode = defaultCurrency,
+                Balance = 0,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
@@ -145,22 +155,29 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
 
             await _commands.CreateAsync(player);
+            await _walletCommands.CreateAsync(wallet);
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("login"), Description("login")]
-        public async Task<MessageResponse> LoginAsync([FromBody] LoginRequest request)
+        public async Task<TgsResponse> LoginAsync([FromBody] LoginRequest request)
         {
-            var player = await _queries.GetSingleAsync(p => p.Username == request.Username);
+            var licenseeId = new Guid(_httpContextAccessor.HttpContext.Request.Headers["LicenseeId"]);
+            var player = await _queries.GetSingleAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
 
             if (player == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
+                throw new InvalidOperationException(Resources.Player.NotFound);
             }
 
             if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.Password))
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
+                throw new InvalidOperationException(Resources.Player.PasswordMismatched);
+            }
+
+            if (player.Status != PlayerStatus.Enabled)
+            {
+                throw new InvalidOperationException(Resources.Player.StatusInvalid);
             }
 
             var ipAddress = string.Empty;
@@ -175,14 +192,14 @@ namespace TGS.Apis.OperatorApi.Controllers
                 IpAddress = ipAddress,
                 PlayerCode = player.PlayerCode,
                 Status = LoginStatus.Enabled,
-                PlatformType = PlatformType.Desktop
+                PlatformType = PlatformType.Desktop,
+                LicenseeId = licenseeId
             };
 
             await SignInAsync(player);
             await _playerLoginRecordCommands.CreateAsync(logRecord);
-            return CreateValidResponse<MessageResponse>();
+            return new TgsResponse();
         }
-
 
         private async Task SignInAsync(Player player)
         {
@@ -201,6 +218,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
+        [HttpPost, Route("logout")]
+        public Task LogoutAsync()
+        {
+            return _httpContextAccessor.HttpContext?.SignOutAsync();
+        }
 
         [Route("{username}")]
         [HttpGet, Description("Get player")]
@@ -230,11 +252,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("forgotPassword")]
         [HttpPost(), Description("Forgot passowrd")]
@@ -298,7 +315,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 ModuleName = "Player",
-                CreatedByUsername = Username,
+                CreatedByUsername = username,
                 CreatedOn = DateTimeOffset.Now,
                 Operation = operation,
                 Username = username

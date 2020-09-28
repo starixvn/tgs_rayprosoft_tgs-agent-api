@@ -24,9 +24,8 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {            
             services.AddErrorMappers(
-                add: () => 
+                addCustomErrorMappers: () => 
                 { 
-                    services.AddSingleton<TgsErrorMapper>();
                     services.AddSingleton<RedTigerErrorMapper>();
                 }, 
                 get: provider => key => 

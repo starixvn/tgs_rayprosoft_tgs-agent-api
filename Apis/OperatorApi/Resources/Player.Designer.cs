@@ -61,6 +61,24 @@ namespace TGS.Apis.OperatorApi.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authenticate failed..
+        /// </summary>
+        public static string AuthenticateFailed {
+            get {
+                return ResourceManager.GetString("AuthenticateFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authenticate code is invalid..
+        /// </summary>
+        public static string AuthenticateInvalid {
+            get {
+                return ResourceManager.GetString("AuthenticateInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bank account is required..
         /// </summary>
         public static string BankAccountRequired {
@@ -120,6 +138,15 @@ namespace TGS.Apis.OperatorApi.Resources {
         public static string PasswordMismatched {
             get {
                 return ResourceManager.GetString("PasswordMismatched", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player&apos;s status is invalid..
+        /// </summary>
+        public static string StatusInvalid {
+            get {
+                return ResourceManager.GetString("StatusInvalid", resourceCulture);
             }
         }
         

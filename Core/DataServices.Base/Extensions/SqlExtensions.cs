@@ -12,7 +12,7 @@ namespace TGS.Core.DataServices.Base.Extensions
     {
         public static async Task<IEnumerable<TEntity>> SqlQueryMultipleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
         {
-            using var conn = repository.GetDbConnection();
+            var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {
@@ -26,7 +26,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
         public static async Task<TEntity> SqlQuerySingleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
         {
-            using var conn = repository.GetDbConnection();
+            var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {
@@ -40,7 +40,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
         public static async Task<int> ExecuteSqlCommandAsync(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
         {
-            using var conn = repository.GetDbConnection();
+            var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {

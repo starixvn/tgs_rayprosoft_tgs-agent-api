@@ -40,7 +40,7 @@ namespace TGS.Services.GameOperations.Data
         private readonly IRoundStatusManager _roundStatusManager;
         private readonly IValidStatus<Status> _validStatus;
         private readonly IValidStatus<GameStatus> _validGameStatus;
-        private readonly Func<ITgsLog> _logFactory;
+        private readonly ITgsLog _log;
 
         private static readonly GameType[] BypassPreviousActionGameTypes = { GameType.Slot };
         
@@ -60,7 +60,7 @@ namespace TGS.Services.GameOperations.Data
             IRoundStatusManager roundStatusManager,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
-            Func<ITgsLog> logFactory)
+            ITgsLog log)
         {
             _tgsRepoFactory = tgsRepoFactory;
             _transactionManager = transactionManager;
@@ -77,7 +77,7 @@ namespace TGS.Services.GameOperations.Data
             _roundStatusManager = roundStatusManager;
             _validStatus = validStatus;
             _validGameStatus = validGameStatus;
-            _logFactory = logFactory;
+            _log = log;
         }
 
         Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)

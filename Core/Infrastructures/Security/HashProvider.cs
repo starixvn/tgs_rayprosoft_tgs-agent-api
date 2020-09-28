@@ -73,7 +73,7 @@ namespace TGS.Core.Infrastructures.Security
                 return kind switch
                 {
                     HashStringKind.Base64 => hash.ToBase64String(),
-                    _ => hash.ToHexString(),
+                    _ => hash.ToHexString()
                 };
             }
 

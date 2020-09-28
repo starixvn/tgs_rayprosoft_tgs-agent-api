@@ -22,6 +22,7 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.Operations;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.OperatorApi
@@ -48,9 +49,8 @@ namespace TGS.Apis.OperatorApi
                     .AddRedis()
                     .AddJson()
                     .AddSecurity()
-                    .AddOperations();
-
-            services.AddScoped<AuthenticateMiddleware>();
+                    .AddOperations()
+                    .AddErrorMappers();
 
             services.AddHttpContextAccessor();
 
@@ -74,31 +74,17 @@ namespace TGS.Apis.OperatorApi
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
             });
-
-            services.AddErrorMappers(
-                () =>
-                {
-                    services.AddSingleton<TgsErrorMapper>();
-                },
-                provider => key =>
-                {
-                    return key switch
-                    {
-                        _ => provider.GetRequiredService<TgsErrorMapper>()
-                    };
-                });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
 
             app.UseHttpsRedirection();
 
-            app.UseMiddleware<AuthenticateMiddleware>();
-
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

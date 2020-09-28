@@ -33,7 +33,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(commandTimeout);
-                    serverOption.EnableRetryOnFailure(maxRetryCount);
+                    //serverOption.EnableRetryOnFailure(maxRetryCount);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                 });
 
@@ -50,7 +50,7 @@ namespace TGS.Core.DataServices.Base.Extensions
             }, 128);
 
             services.AddScoped<TInterface, TRepository>();
-            services.AddTransient<Func<TInterface>>(c => () => c.GetService<TInterface>());
+            services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());
 
             return services;
         }
