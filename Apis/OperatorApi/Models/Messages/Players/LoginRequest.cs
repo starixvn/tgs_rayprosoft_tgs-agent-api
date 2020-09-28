@@ -1,8 +1,10 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages.Players
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public class LoginRequest : BaseRequest
+    public record LoginRequest : BaseRequest
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        [JsonPropertyName("password")]
+        public string Password { get; init; }
     }
 }

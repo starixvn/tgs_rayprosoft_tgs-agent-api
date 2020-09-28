@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Apis.OperatorApi.Services;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -36,7 +35,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly ICaptchaFactory _captchaFactory;
 
         public PlayerController(
-            Func<ITgsRepository> tgsRepoFactory,
             IHashProvider hashProvider,
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
@@ -44,7 +42,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
             IPlayerOperations playerOperations,
             ICaptchaFactory captchaFactory,
-            ITransactionManager transactionManager,
             IHttpContextAccessor httpContextAccessor) : 
             base(httpContextAccessor)
         {
@@ -66,11 +63,17 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("checkUsername"), Description("Check username exists")]
-        public Task<bool> UsernameExistsAsync([FromQuery] string username)
+        [Consumes("application/json")]
+        [HttpPost, Route("checkUsername"), Description("Check username exists")]
+        public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
-            var licenseeId = new Guid(HttpContext.Request.Headers["LicenseeId"]);
-            return _queries.ExistsAsync(p => p.Username == username && p.LicenseeId == licenseeId);
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            return new CheckPlayerResponse 
+            { 
+                Exists = playerCode.IsNotNullOrEmpty(), 
+                PlayerCode = playerCode 
+            };
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
@@ -84,8 +87,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             //    throw new InvalidOperationException(result.Message);
             //}
 
-            var licenseeId = HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid) v : Guid.Empty;
-
+            var licenseeId = GetLicenseeIdFromHttpContext();
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
             if (playerCode.IsNotNullOrEmpty())
             {
@@ -278,5 +280,11 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await _auditLogCommands.CreateAsync(auditLog);
         }
+
+        private Guid GetLicenseeIdFromHttpContext()
+        {
+            return HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
+        }
+
     }
 }
