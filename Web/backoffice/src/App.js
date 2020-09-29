@@ -28,12 +28,7 @@ import {
 import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
 import { Route as AuthRouter } from "./user/auth"
-import {
-  Code as SystemCode,
-  Menu as SystemMenu,
-  Content as SystemContent
-} from "./system"
-import PageNotFound from "./page/NotFound"
+import { Menus, Contents } from "./menu"
 import { useUsername, useDeauth } from "./user/context"
 
 function App() {
@@ -46,7 +41,7 @@ function App() {
       </Route>
       <AuthRouter path="*">
         <Layout>
-          <AuthContens />
+          <Contents />
         </Layout>
       </AuthRouter>
     </Switch>
@@ -75,36 +70,6 @@ const Layout = ({ children }) => {
       </PageWithSidebar>
     </PageWithHeader>
   )
-}
-
-const AuthContens = () => {
-  let codes = useMenuCodes()
-
-  return (
-    <Switch>
-      {codes.map((code) => {
-        let path = `/${code}`
-
-        return (
-          <AuthRouter key={code} path={path}>
-            <Content code={code} />
-          </AuthRouter>
-        )
-      })}
-      <AuthRouter path="*">
-        <PageContent></PageContent>
-      </AuthRouter>
-    </Switch>
-  )
-}
-
-const Content = ({ code }) => {
-  switch (code) {
-    case SystemCode:
-      return <SystemContent />
-    default:
-      return <PageNotFound />
-  }
 }
 
 const Header = () => {
@@ -140,26 +105,14 @@ const Header = () => {
 
 const Sidebar = () => {
   let { pathname: selectedId } = useLocation()
-  let codes = useMenuCodes()
 
   return (
     <Stack spacing="major-1" paddingY="major-2">
       <SideNav selectedId={selectedId}>
-        {codes.map((code) => (
-          <MenuItem key={code} code={code} />
-        ))}
+        <Menus />
       </SideNav>
     </Stack>
   )
-}
-
-const MenuItem = ({ code }) => {
-  switch (code) {
-    case SystemCode:
-      return <SystemMenu />
-    default:
-      return null
-  }
 }
 
 const Footer = () => {
