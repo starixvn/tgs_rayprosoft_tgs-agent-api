@@ -8,7 +8,8 @@ IF OBJECT_ID('usp_Player_Deauthorize') IS NULL
 GO
 
 ALTER PROCEDURE [dbo].[usp_Player_Deauthorize]
-      @playerCode  NVARCHAR(16)
+      @playerCode    NVARCHAR(16),
+      @platformType  smallint NULL
 AS 
 BEGIN
     SET NOCOUNT ON
@@ -17,8 +18,9 @@ BEGIN
     SET [dbo].[PlayerLoginRecords].[Status] = 1
     FROM [dbo].[PlayerLoginRecords] record
     WHERE record.[Status] = 0 
-    AND record.PlayerCode = @playerCode
-    AND record.ExpiredOn >= SYSDATETIMEOFFSET()
+    AND record.[PlayerCode] = @playerCode
+    AND record.[PlatformType] = @platformType OR @platformType IS NULL
+    AND record.[ExpiredOn] >= SYSDATETIMEOFFSET()
     
 END
 GO

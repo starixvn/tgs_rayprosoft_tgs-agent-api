@@ -20,6 +20,8 @@ namespace TGS.Services.Operations.Commands
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
         Task PlayerLoginAsync(PlayerLoginData data);
+
+        Task PlayerLogoutAsync(PlayerLogoutData data);
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -139,7 +141,7 @@ namespace TGS.Services.Operations.Commands
               username,
               execute: async (repo, trans) =>
               {
-                  await DeauthorizePlayerAsync(repo, data.PlayerCode, trans.GetDbTransaction());
+                  await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType, trans.GetDbTransaction());
 
                   repo.PlayerLoginRecords.Add(new PlayerLoginRecord 
                   { 
@@ -154,6 +156,26 @@ namespace TGS.Services.Operations.Commands
                   });
 
                   CreateAuditLog(repo, username, $"Player '{username}' login.", data.CreatedOn);
+
+                  await repo.SaveChangesAsync();
+
+                  return Task.CompletedTask;
+              });
+        }
+
+        async Task IPlayerCommands.PlayerLogoutAsync(PlayerLogoutData data)
+        {
+            var username = data.Username;
+
+            _ = await _transactionManager.ExecuteTransactionAsync(
+               _repositoryFactory,
+              IsolationLevel.ReadCommitted,
+              username,
+              execute: async (repo, trans) =>
+              {
+                  await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType, trans.GetDbTransaction());
+
+                  CreateAuditLog(repo, username, $"Player '{username}' logout.", data.UpdatedOn);
 
                   await repo.SaveChangesAsync();
 
@@ -176,7 +198,7 @@ namespace TGS.Services.Operations.Commands
             });
         }
 
-        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, IDbTransaction transaction = null)
+        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, PlatformType? platformType, IDbTransaction transaction = null)
         {
             const string sql = "usp_Player_Deauthorize";
             return repo.ExecuteSqlCommandAsync(sql, transaction: transaction, parameters: new SqlParameter[]
@@ -186,6 +208,12 @@ namespace TGS.Services.Operations.Commands
                     ParameterName = "@playerCode",
                     Value = playerCode,
                     DbType = DbType.String
+                },
+                new()
+                {
+                    ParameterName = "@platformType",
+                    Value = platformType,
+                    DbType = DbType.Int16
                 }
             });
         }

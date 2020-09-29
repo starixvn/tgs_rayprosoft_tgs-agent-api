@@ -171,9 +171,30 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost, Route("logout")]
-        public Task LogoutAsync()
+        public async Task<LogoutResponse> LogoutAsync(LogoutRequest request)
         {
-            return HttpContext?.SignOutAsync();
+            var username = request.Username;
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNullOrEmpty())
+            {
+                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
+            }
+
+            var updatedOn = DateTimeOffset.UtcNow;
+            await _playerOperations.PlayerLogoutAsync(new PlayerLogoutData 
+            {
+                Username = username,
+                PlayerCode = playerCode, 
+                PlatformType = request.PlatformType,
+                UpdatedOn = updatedOn,
+            });
+
+            await HttpContext?.SignOutAsync();
+
+            return new LogoutResponse { UpdateTime = updatedOn };
         }
 
         [Route("{username}")]

@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
@@ -37,6 +29,8 @@ namespace TGS.Services.Operations
         Task<string> CreatePlayerAsync(CreatePlayerData data);
         
         Task PlayerLoginAsync(PlayerLoginData data);
+
+        Task PlayerLogoutAsync(PlayerLogoutData data);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -129,6 +123,12 @@ namespace TGS.Services.Operations
             await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
         }
 
+        async Task IPlayerOperations.PlayerLogoutAsync(PlayerLogoutData data)
+        {
+            await _playerCommands.PlayerLogoutAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
+        }
+
         #region Private Methods
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
@@ -208,7 +208,7 @@ namespace TGS.Services.Operations
 
             return loginRecords;
         }
-       
+
         private static class CachedPlayerFields
         {
             public const string LicenseeId = "licenseeId";
