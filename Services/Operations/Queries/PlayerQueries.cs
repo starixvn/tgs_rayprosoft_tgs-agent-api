@@ -22,9 +22,11 @@ namespace TGS.Services.Operations.Queries
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
 
+        Task<Player> GetPlayerByPlayerCodeAsync(Guid licenseeId, string username);
+
         Task<Player> GetPlayerByPlayerCodeAsync(string playerCode);
 
-        Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
+        Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);        
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -83,6 +85,12 @@ namespace TGS.Services.Operations.Queries
                             p.Username == username)
                 .Select(p => p.PlayerCode)
                 .FirstOrDefaultAsync();
+        }
+
+        Task<Player> IPlayerQueries.GetPlayerByPlayerCodeAsync(Guid licenseeId, string username)
+        {
+            return _repository.Players.
+                    FirstOrDefaultAsync(p => p.LicenseeId == licenseeId && p.Username == username);
         }
 
         Task<Player> IPlayerQueries.GetPlayerByPlayerCodeAsync(string playerCode)

@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
@@ -26,8 +27,14 @@ namespace TGS.Services.Operations
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
 
+        Task<Player> GetPlayerByUsernameAsync(Guid licenseeId, string username);
+
         Task<string> CreatePlayerAsync(CreatePlayerData data);
-        
+
+        Task UpdatePlayerAsync(UpdatePlayerData data);
+
+        Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
+
         Task PlayerLoginAsync(PlayerLoginData data);
 
         Task PlayerLogoutAsync(PlayerLogoutData data);
@@ -117,6 +124,18 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
+        async Task IPlayerOperations.UpdatePlayerAsync(UpdatePlayerData data)
+        {
+            await _playerCommands.UpdatePlayerAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
+        }
+
+        async Task IPlayerOperations.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        {
+            await _playerCommands.ChangePlayerPasswordAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
+        }
+
         async Task IPlayerOperations.PlayerLoginAsync(PlayerLoginData data)
         {
             await _playerCommands.PlayerLoginAsync(data);
@@ -127,6 +146,11 @@ namespace TGS.Services.Operations
         {
             await _playerCommands.PlayerLogoutAsync(data);
             await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
+        }
+
+        Task<Player> IPlayerOperations.GetPlayerByUsernameAsync(Guid licenseeId, string username)
+        {
+            return _playerQueriesFactory().GetPlayerByPlayerCodeAsync(licenseeId, username);
         }
 
         #region Private Methods

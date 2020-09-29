@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
@@ -19,9 +20,15 @@ namespace TGS.Services.Operations.Commands
     {
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
+        Task UpdatePlayerAsync(UpdatePlayerData data);
+
+Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
+
         Task PlayerLoginAsync(PlayerLoginData data);
 
         Task PlayerLogoutAsync(PlayerLogoutData data);
+
+        
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -48,86 +55,154 @@ namespace TGS.Services.Operations.Commands
             var username = data.Username;
 
             return await _transactionManager.ExecuteTransactionAsync(
+                          _repositoryFactory,
+                         IsolationLevel.ReadCommitted,
+                         username,
+                         execute: async (repo, trans) =>
+                         {
+                             var walletId = GuidExtensions.NewSequentialGuid();
+                             var createdOn = DateTimeOffset.UtcNow;
+                             var playerCode = default(string);
+
+                             while (retries < RetryCount)
+                             {
+                                 playerCode = PlayerCodeGenerator.NewId();
+
+                                 try
+                                 {
+                                     var player = new Player
+                                     {
+                                         PlayerCode = playerCode,
+                                         Username = username,
+                                         Password = data.Password,
+                                         Salt = data.Salt,
+                                         InvitationCode = StringGenerator.GenerateAlphanumericString(6),
+                                         LicenseeId = data.LicenseeId,
+                                         CultureCode = data.CultureCode,
+                                         DefaultWalletId = walletId,
+                                         DefaultWalletCurrencyCode = data.CurrencyCode,
+                                         ParentInvitationCode = data.ParentInvitationCode,
+                                         RegisteredOn = createdOn,
+                                         LastActiveOn = createdOn,
+                                         Status = PlayerStatus.Enabled,
+                                         Type = data.Type,
+                                         BetLimitGroupId = data.BetLimitGroup,
+                                         HasAgent = data.HasAgent,
+                                         UpdatedByUsername = username,
+                                         UpdatedOn = createdOn,
+                                         Wallets = new HashSet<Wallet>
+                                         {
+                                              new Wallet
+                                              {
+                                                  Id = walletId,
+                                                  PlayerCode = playerCode,
+                                                  CurrencyCode = data.CurrencyCode,
+                                                  ExternalCurrencyCode = data.ExternalCurrencyCode,
+                                                  Balance = 0,
+                                                  CreatedOn = createdOn,
+                                                  UpdatedOn = createdOn
+                                              }
+                                         }
+                                     };
+
+                                     repo.Players.Add(player);
+
+                                     CreateAuditLog(repo, username, $"Create Player '{username}'", createdOn);
+
+                                     await repo.SaveChangesAsync();
+
+                                     break;
+                                 }
+                                 catch (Exception e) when (e.InnerException?.InnerException is SqlException)
+                                 {
+                                     retries++;
+                                     var err =
+                                         $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
+
+                                     _log.LogError(err, e);
+
+                                     if (retries == RetryCount)
+                                     {
+                                         throw new InvalidOperationException(err, e);
+                                     }
+
+                                     var exception = (SqlException)e.InnerException.InnerException;
+                                     if (exception.Number == 2601) // 2601 is "unique index"
+                                     {
+                                         continue;
+                                     }
+                                 }
+                             }
+
+                             return playerCode;
+                         });
+        }
+
+        async Task IPlayerCommands.UpdatePlayerAsync(UpdatePlayerData data)
+        {
+            var username = data.Username;
+
+            _ = await _transactionManager.ExecuteTransactionAsync(
                _repositoryFactory,
               IsolationLevel.ReadCommitted,
               username,
               execute: async (repo, trans) =>
               {
-                  var walletId = GuidExtensions.NewSequentialGuid();
-                  var createdOn = DateTimeOffset.UtcNow;
-                  var playerCode = default(string);
-
-                  while (retries < RetryCount)
+                  var player = new Player
                   {
-                      playerCode = PlayerCodeGenerator.NewId();
+                      PlayerCode = data.PlayerCode,
+                      RealName = data.RealName,
+                      Email = data.Email,
+                      Phone = data.Phone,
+                      QQ = data.QQ,
+                      Wechat = data.Wechat,
+                      UpdatedOn = data.UpdatedOn
+                  };
 
-                      try
-                      {
-                          var player = new Player
-                          {
-                              PlayerCode = playerCode,
-                              Username = username,
-                              Password = data.Password,
-                              Salt = data.Salt,
-                              InvitationCode = StringGenerator.GenerateAlphanumericString(6),
-                              LicenseeId = data.LicenseeId,
-                              CultureCode = data.CultureCode,
-                              DefaultWalletId = walletId,
-                              DefaultWalletCurrencyCode = data.CurrencyCode,
-                              ParentInvitationCode = data.ParentInvitationCode,
-                              RegisteredOn = createdOn,
-                              LastActiveOn = createdOn,
-                              Status = PlayerStatus.Enabled,
-                              Type = data.Type,
-                              BetLimitGroupId = data.BetLimitGroup,
-                              HasAgent = data.HasAgent,
-                              UpdatedByUsername = username,
-                              UpdatedOn = createdOn,
-                              Wallets = new HashSet<Wallet>
-                              {
-                                  new Wallet
-                                  {
-                                      Id = walletId,
-                                      PlayerCode = playerCode,
-                                      CurrencyCode = data.CurrencyCode,
-                                      ExternalCurrencyCode = data.ExternalCurrencyCode,
-                                      Balance = 0,
-                                      CreatedOn = createdOn,
-                                      UpdatedOn = createdOn
-                                  }
-                              }
-                          };
+                  repo.Players.Attach(player);
+                  repo.Entry(player).Property(nameof(player.RealName)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.Email)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.Phone)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.QQ)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.Wechat)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
 
-                          repo.Players.Add(player);
+                  CreateAuditLog(repo, username, $"Update player information", data.UpdatedOn);
 
-                          CreateAuditLog(repo, username, $"Create Player '{username}'", createdOn);
+                  await repo.SaveChangesAsync();
 
-                          await repo.SaveChangesAsync();
+                  return Task.CompletedTask;
+              });
+        }
 
-                          break;
-                      }
-                      catch (Exception e) when (e.InnerException?.InnerException is SqlException)
-                      {
-                          retries++;
-                          var err =
-                              $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
+        async Task IPlayerCommands.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        {
+            var username = data.Username;
 
-                          _log.LogError(err, e);
+            _ = await _transactionManager.ExecuteTransactionAsync(
+               _repositoryFactory,
+              IsolationLevel.ReadCommitted,
+              username,
+              execute: async (repo, trans) =>
+              {
+                  var player = new Player
+                  {
+                      PlayerCode = data.PlayerCode,
+                      Salt = data.Salt,
+                      Password = data.Password,
+                      UpdatedOn = data.UpdatedOn
+                  };
 
-                          if (retries == RetryCount)
-                          {
-                              throw new InvalidOperationException(err, e);
-                          }
+                  repo.Players.Attach(player);
+                  repo.Entry(player).Property(nameof(player.Salt)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.Password)).IsModified = true;
+                  repo.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
 
-                          var exception = (SqlException)e.InnerException.InnerException;
-                          if (exception.Number == 2601) // 2601 is "unique index"
-                          {
-                              continue;
-                          }
-                      }
-                  }
+                  CreateAuditLog(repo, username, $"Update player password", data.UpdatedOn);
 
-                  return playerCode;
+                  await repo.SaveChangesAsync();
+
+                  return Task.CompletedTask;
               });
         }
 
@@ -143,8 +218,8 @@ namespace TGS.Services.Operations.Commands
               {
                   await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType, trans.GetDbTransaction());
 
-                  repo.PlayerLoginRecords.Add(new PlayerLoginRecord 
-                  { 
+                  repo.PlayerLoginRecords.Add(new PlayerLoginRecord
+                  {
                       Id = GuidExtensions.NewSequentialGuid(),
                       PlayerCode = data.PlayerCode,
                       LicenseeId = data.LicenseeId,

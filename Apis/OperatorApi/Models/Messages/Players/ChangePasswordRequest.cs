@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record UpdatePasswordRequest : BaseRequest
+    public record ChangePasswordRequest : BaseRequest
     {
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
