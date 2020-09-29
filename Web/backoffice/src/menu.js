@@ -8,21 +8,11 @@ import {
   useLocation
 } from "react-router-dom"
 import { useMenuCodes } from "./user/context"
-import { Route as AuthRouter } from "./user/auth"
 import { SideNav } from "bumbag"
-import PageNotFound from "./page/NotFound"
 import memoize from "fast-memoize"
-import { Code as SystemCode } from "./system"
-import { label as systemLabel } from "./system/menu"
-import {
-  codeMenuPair as playerManagementMenuPair,
-  codeContentPair as playerManagementContentPair
-} from "./player-management"
-import {
-  codeMenuPair as systemMenuPair,
-  codeContentPair as systemContentPair
-} from "./system"
-import { PageContent } from "bumbag"
+import { codeMenuContentPair as platformPair } from "./platform"
+import { codeMenuContentPair as playerManagementPair } from "./player-management"
+import { codeMenuContentPair as systemPair } from "./system"
 
 export const Menu = ({ title, url, codes, codePaths, itemLabel }) => {
   let authCodes = useMenuCodes(codePaths)
@@ -62,74 +52,24 @@ const MenuItem = ({ code, path, itemLabel, ...props }) => {
   )
 }
 
-export const Content = ({ codes, path, pairs = [], ...props }) => {
-  let route = useRouteMatch()
-  let authCodes = useMenuCodes(path)
-  codes = codes ?? authCodes
-
-  return (
-    <Switch>
-      {codes.map((code) => {
-        return (
-          <Route key={code} path={`${route?.path}/${code}`}>
-            <FindValueByCode code={code} pairs={pairs} />
-          </Route>
-        )
-      })}
-      <Route>
-        <PageNotFound />
-      </Route>
-    </Switch>
-  )
-}
-
-const codeMenuPairs = () => [playerManagementMenuPair(), systemMenuPair()]
-
-export const addCodeMenuPair = (entry = []) => codeMenuPairs.push(entry)
-
-export const Menus = ({ codes }) => {
-  let authCodes = useMenuCodes()
-  codes = codes ?? authCodes
-  let pairs = codeMenuPairs()
-  return codes.map((code) => (
-    <FindValueByCode key={code} code={code} pairs={pairs} />
-  ))
-}
-
-const codeContentPairs = () => [
-  playerManagementContentPair(),
-  systemContentPair()
+const pairs = () => [
+  // platformPair,
+  playerManagementPair,
+  systemPair
 ]
 
-export const addCodeContentPair = (entry = []) => codeContentPairs.push(entry)
-
-export const Contents = ({ codes }) => {
+export const AllMenus = ({ codes }) => {
   let authCodes = useMenuCodes()
   codes = codes ?? authCodes
-  let pairs = codeContentPairs()
-  return (
-    <Switch>
-      {codes.map((code) => {
-        let path = `/${code}`
-
-        return (
-          <AuthRouter key={code} path={path}>
-            <FindValueByCode code={code} pairs={pairs} />
-          </AuthRouter>
-        )
-      })}
-
-      <AuthRouter path="*">
-        <PageContent></PageContent>
-      </AuthRouter>
-    </Switch>
-  )
+  let list = pairs()
+  return codes.map((code) => <MenuByCode key={code} code={code} pairs={list} />)
 }
 
-const FindValueByCode = ({ code = "", pairs = [] }) => {
-  let [, Value] = pairs.find(([id]) => id === code) ?? []
-  if (Value) {
-    return <Value />
+const MenuByCode = ({ code = "", pairs = [] }) => {
+  let [, pair] = pairs.find(([id]) => id === code) ?? []
+  if (pair) {
+    let [Menu] = pair
+    return <Menu />
   }
 
   return null
@@ -160,17 +100,3 @@ export const findMenuLabel = (toLabel, subMenuList) => (codes = []) => {
   let [, subMenuLabel] = subMenuCodeLabelList.find(([id]) => id === code) ?? []
   return (subMenuLabel && subMenuLabel(subMenuCodes)) ?? ""
 }
-
-export const label = findMenuLabel(toLabel, subMenuList)
-
-//TODO: i18n
-export const toLabel = (code = "") => {
-  switch (code) {
-    case SystemCode:
-      return "系统管理"
-    default:
-      return ""
-  }
-}
-
-const subMenuList = () => [[SystemCode, systemLabel]]

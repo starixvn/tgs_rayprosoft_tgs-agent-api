@@ -1,20 +1,15 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
-import {
-  Code as PlayerListCode,
-  Content as PlayerListContent
-} from "./player-list"
-import { Content as _MenuContent } from "../menu"
+import { CodeContentPair as PlayerListPair } from "./player-list"
+import { Switch } from "../content"
 import { Code, DefaultCodePath, Menu } from "./menu"
 
 export { Code } from "./menu"
 
-export const codeMenuPair = () => [Code, Menu]
-
-const codeContentPairs = () => [[PlayerListCode, PlayerListContent]]
+const pairs = () => [PlayerListPair]
 
 export const Content = ({ codes, path = DefaultCodePath, ...props }) => (
-  <_MenuContent path={path} pairs={codeContentPairs()} />
+  <Switch path={path} pairs={pairs()} />
 )
 
-export const codeContentPair = () => [Code, Content]
+export const codeMenuContentPair = [Code, [Menu, Content]]

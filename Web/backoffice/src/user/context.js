@@ -106,7 +106,6 @@ export const useHasSubMenuByRoute = (path = []) => {
 export const useMenuCodes = (codes = []) => {
   let { state = {} } = useContext(Store)
   let menus = state?.userInfo?.menus ?? []
-
   return findCodes(codes, menus)
 }
 

@@ -1,8 +1,10 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
 import { Menu as _Menu, findMenuLabel } from "../menu"
-import { Code as PlayerListCode } from "./player-list"
-import { label as playerListLabel } from "./player-list/menu"
+import {
+  Code as PlayerListCode,
+  label as playerListLabel
+} from "./player-list/menu"
 
 //TODO: i18n
 export const name = () => "玩家管理"
@@ -29,6 +31,7 @@ export const Menu = ({
   />
 )
 
+const subMenuList = () => [[PlayerListCode, playerListLabel]]
 export const label = (codes = []) => {
   let findLabelBy = findMenuLabel(toLabel, subMenuList)
   return findLabelBy(codes)
@@ -43,5 +46,3 @@ export const toLabel = (code = "") => {
       return ""
   }
 }
-
-const subMenuList = () => [[PlayerListCode, playerListLabel]]

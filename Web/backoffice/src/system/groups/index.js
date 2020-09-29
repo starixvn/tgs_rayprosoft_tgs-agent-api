@@ -12,8 +12,9 @@ import { AddButton, EditButton } from "./edit"
 import { CopyButton } from "./copy"
 import { DeleteButton } from "./delete"
 import { useIsDisplayMenuByRoute } from "../../user/context"
+import { Code } from "./menu"
 
-export const Code = "groups"
+export { Code }
 
 export const Content = ({}) => {
   let isDisplay = useIsDisplayMenuByRoute()
@@ -23,6 +24,8 @@ export const Content = ({}) => {
 
   return <AsyncContent />
 }
+
+export const CodeContentPair = [Code, Content]
 
 export const AsyncContent = () => {
   let { state, setState, headSortBy, headOrderBy } = useTableState({ name: "" })
