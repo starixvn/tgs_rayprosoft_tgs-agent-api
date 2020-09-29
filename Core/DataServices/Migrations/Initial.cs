@@ -58,6 +58,8 @@ namespace TGS.Core.DataServices.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_InsertRound"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_Deauthorize"));
 
             #endregion Store Procedure
 

@@ -123,7 +123,6 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-
         async Task IPlayerOperations.PlayerLoginAsync(PlayerLoginData data)
         {
             await _playerCommands.PlayerLoginAsync(data);

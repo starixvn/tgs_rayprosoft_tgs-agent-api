@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
@@ -16,6 +18,7 @@ namespace TGS.Services.Operations.Commands
     public interface IPlayerCommands
     {
         Task<string> CreatePlayerAsync(CreatePlayerData data);
+
         Task PlayerLoginAsync(PlayerLoginData data);
     }
 
@@ -97,8 +100,7 @@ namespace TGS.Services.Operations.Commands
 
                           CreateAuditLog(repo, username, $"Create Player '{username}'", createdOn);
 
-                          await repo.SaveChangesAsync()
-                                    .ConfigureAwait(false);
+                          await repo.SaveChangesAsync();
 
                           break;
                       }
@@ -127,11 +129,37 @@ namespace TGS.Services.Operations.Commands
               });
         }
 
-        Task IPlayerCommands.PlayerLoginAsync(PlayerLoginData data)
+        async Task IPlayerCommands.PlayerLoginAsync(PlayerLoginData data)
         {
-            throw new NotImplementedException();
-        }
+            var username = data.Username;
 
+            _ = await _transactionManager.ExecuteTransactionAsync(
+               _repositoryFactory,
+              IsolationLevel.ReadCommitted,
+              username,
+              execute: async (repo, trans) =>
+              {
+                  await DeauthorizePlayerAsync(repo, data.PlayerCode, trans.GetDbTransaction());
+
+                  repo.PlayerLoginRecords.Add(new PlayerLoginRecord 
+                  { 
+                      Id = GuidExtensions.NewSequentialGuid(),
+                      PlayerCode = data.PlayerCode,
+                      LicenseeId = data.LicenseeId,
+                      Status = LoginStatus.Enabled,
+                      PlatformType = data.PlatformType,
+                      IpAddress = data.IpAddress,
+                      CreatedOn = data.CreatedOn,
+                      ExpiredOn = data.ExpiredOn
+                  });
+
+                  CreateAuditLog(repo, username, $"Player '{username}' login.", data.CreatedOn);
+
+                  await repo.SaveChangesAsync();
+
+                  return Task.CompletedTask;
+              });
+        }
 
         #region Private Methods
 
@@ -148,6 +176,20 @@ namespace TGS.Services.Operations.Commands
             });
         }
 
-        #endregion
+        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, IDbTransaction transaction = null)
+        {
+            const string sql = "usp_Player_Deauthorize";
+            return repo.ExecuteSqlCommandAsync(sql, transaction: transaction, parameters: new SqlParameter[]
+            {
+                new()
+                {
+                    ParameterName = "@playerCode",
+                    Value = playerCode,
+                    DbType = DbType.String
+                }
+            });
+        }
+
+        #endregion Private Methods
     }
 }

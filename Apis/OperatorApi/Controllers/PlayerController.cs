@@ -30,11 +30,11 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Consumes(MediaTypeNames.Application.Json)]
     public partial class PlayerController : BaseContextController
     {
         private readonly ITgsQueries<Player> _queries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly IPlayerOperations _playerOperations;
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
@@ -50,11 +50,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             ITgsQueries<Player> queries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerAuditLog> auditLogCommands,
-            ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
             IPlayerOperations playerOperations,
             IRequestAnalyzer requestAnalyzer,
             ICaptchaFactory captchaFactory,
-            IHttpContextAccessor httpContextAccessor) : 
+            IHttpContextAccessor httpContextAccessor) :
             base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
@@ -63,7 +62,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             _queries = queries;
             _commands = commands;
             _auditLogCommands = auditLogCommands;
-            _playerLoginRecordCommands = playerLoginRecordCommands;
             _playerOperations = playerOperations;
             _requestAnalyzer = requestAnalyzer;
             _captchaFactory = captchaFactory;
@@ -78,16 +76,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [Consumes("application/json")]
         [HttpPost, Route("checkUsername"), Description("Check username exists")]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
-            return new CheckPlayerResponse 
-            { 
-                Exists = playerCode.IsNotNullOrEmpty(), 
-                PlayerCode = playerCode 
+            return new CheckPlayerResponse
+            {
+                Exists = playerCode.IsNotNullOrEmpty(),
+                PlayerCode = playerCode
             };
         }
 
@@ -113,8 +110,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var (salt, password) = _hashProvider.GenerateCredential(request.Password);
 
-            playerCode = await _playerOperations.CreatePlayerAsync(new CreatePlayerData 
-            {                
+            playerCode = await _playerOperations.CreatePlayerAsync(new CreatePlayerData
+            {
                 LicenseeId = licenseeId,
                 Username = request.Username,
                 Salt = salt,
@@ -135,7 +132,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [Consumes("application/json")]
         [HttpPost("login"), Description("login")]
-        public async Task<TgsResponse> LoginAsync(LoginRequest request)
+        public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
             var username = request.Username;
             var licenseeId = GetLicenseeIdFromHttpContext();
@@ -154,12 +151,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
-            
+
             var createdOn = DateTimeOffset.UtcNow;
             var ipAddress = _requestAnalyzer.GetIp(HttpContext);
 
-
-            await _playerOperations.PlayerLoginAsync(new PlayerLoginData 
+            await _playerOperations.PlayerLoginAsync(new PlayerLoginData
             {
                 LicenseeId = licenseeId,
                 Username = username,
@@ -171,26 +167,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             });
 
             await SignInAsync(username);
-            
-            return new TgsResponse();
-        }
-
-        private async Task SignInAsync(string username)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(Consts.UserInfo.UsernameKey, username),
-            };
-
-            var authProperties = new AuthenticationProperties
-            {
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(PlayerConsts.LoginExpirationSeconds),
-                IsPersistent = true,
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+            return new LoginResponse { LoginTime = createdOn };
         }
 
         [HttpPost, Route("logout")]
@@ -304,5 +281,22 @@ namespace TGS.Apis.OperatorApi.Controllers
             return HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
         }
 
+        private async Task SignInAsync(string username)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(Consts.UserInfo.UsernameKey, username),
+            };
+
+            var authProperties = new AuthenticationProperties
+            {
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(PlayerConsts.LoginExpirationSeconds),
+                IsPersistent = true,
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+        }
     }
 }

@@ -1,0 +1,12 @@
+﻿using System;
+using System.Text.Json.Serialization;
+using TGS.Core.Models.Messages;
+
+namespace TGS.Apis.OperatorApi.Models.Messages.Players
+{
+    public record LoginResponse : TgsResponse
+    {
+        [JsonPropertyName("logintime")]
+        public DateTimeOffset LoginTime { get; init; }
+    }
+}
