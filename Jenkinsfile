@@ -8,7 +8,7 @@ pipeline {
               branches: [[name: "**" ]],
               userRemoteConfigs: [[
                 url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
-                credentialsId: '',
+                credentialsId: 'GitLab Api Token',
               ]]
              ])
            }
