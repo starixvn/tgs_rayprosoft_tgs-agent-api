@@ -8,7 +8,7 @@ pipeline {
               branches: [[name: "*/develop" ]],
               userRemoteConfigs: [[
                 url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
-                credentialsId: 'gitlab_api_token',
+                credentialsId: 'gitlab_lester_account',
               ]]
              ])
            }
