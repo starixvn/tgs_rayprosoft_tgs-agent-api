@@ -1,3 +1,5 @@
+export const Code = "groups"
+
 export const Create = "create"
 
 export const Update = "update"

@@ -25,7 +25,6 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { label as menuLabel, find as findMenu } from "../../menu"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"

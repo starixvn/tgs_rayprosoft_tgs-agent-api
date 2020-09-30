@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
                                 new MenuSetting("View"),
-                                new MenuSetting("Delete")
+                                new MenuSetting("Audit")
                             }
                         },
                         new MenuSetting( "StationLetter")
@@ -42,43 +42,8 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("Create"),
-                                new MenuSetting("Update"),
                                 new MenuSetting("View"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("Copy")
-                            }
-                        }
-                    }
-                },
-                new MenuSetting("System")
-                {
-                    SubMenus = new[]
-                    {
-                        new MenuSetting( "Admins")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting( "Groups")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("Copy")
-                            }
-                        },
-                        new MenuSetting( "Departments")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete")
+                                new MenuSetting("Audit")
                             }
                         }
                     }
@@ -91,10 +56,8 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("SendMessage")
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
                             }
                         }
                     }
@@ -204,6 +167,39 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("Brands")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("System")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting( "Admins")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting( "Groups")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
+                            }
+                        },
+                        new MenuSetting( "Departments")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete")
                             }
                         }
                     }

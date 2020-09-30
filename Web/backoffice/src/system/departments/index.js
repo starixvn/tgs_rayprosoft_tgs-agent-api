@@ -10,8 +10,9 @@ import AsyncTable, { useTableState } from "../../table/async"
 import { Async, useAsync } from "react-async"
 import { AddButton, EditButton } from "./edit"
 import { DeleteButton } from "./delete"
+import { Code } from "./menu"
 
-export const Code = "departments"
+export { Code }
 
 export const Content = () => {
   let isDisplay = useIsDisplayMenuByRoute()
@@ -21,6 +22,8 @@ export const Content = () => {
 
   return <AsynPageContent />
 }
+
+export const CodeContentPair = [Code, Content]
 
 const AsynPageContent = () => {
   let { state, setState, headSortBy, headOrderBy } = useTableState()

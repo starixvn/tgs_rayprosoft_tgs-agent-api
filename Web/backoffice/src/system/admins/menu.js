@@ -1,3 +1,5 @@
+export const Code = "admins"
+
 export const Create = "create"
 
 export const Update = "update"

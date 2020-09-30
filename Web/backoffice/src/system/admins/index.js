@@ -15,8 +15,9 @@ import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
+import { Code } from "./menu"
 
-export const Code = "admins"
+export { Code }
 
 export const Content = () => {
   let isDisplay = useIsDisplayMenuByRoute()
@@ -26,6 +27,8 @@ export const Content = () => {
 
   return <AsyncContent />
 }
+
+export const CodeContentPair = [Code, Content]
 
 const AsyncContent = ({}) => {
   let { state, setState, headSortBy, headOrderBy } = useTableState({

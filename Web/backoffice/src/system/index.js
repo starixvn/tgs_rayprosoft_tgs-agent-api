@@ -1,26 +1,17 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
-import { Code as AdminCode, Content as AdminContent } from "./admins"
-import { Code as GroupCode, Content as GroupContent } from "./groups"
-import {
-  Code as DepartmentCode,
-  Content as DepartmentContent
-} from "./departments"
-import { Content as _MenuContent } from "../menu"
+import { CodeContentPair as AdminPair } from "./admins"
+import { CodeContentPair as GroupPair } from "./groups"
+import { CodeContentPair as DepartmentPair } from "./departments"
+import { Switch } from "../content"
 import { Code, DefaultCodePath, Menu } from "./menu"
 
 export { Code } from "./menu"
 
-export const codeMenuPair = () => [Code, Menu]
-
-const codeContentPairs = () => [
-  [AdminCode, AdminContent],
-  [GroupCode, GroupContent],
-  [DepartmentCode, DepartmentContent]
-]
+const pairs = () => [AdminPair, GroupPair, DepartmentPair]
 
 export const Content = ({ codes, path = DefaultCodePath, ...props }) => (
-  <_MenuContent path={path} pairs={codeContentPairs()} />
+  <Switch path={path} pairs={pairs()} />
 )
 
-export const codeContentPair = () => [Code, Content]
+export const codeMenuContentPair = [Code, [Menu, Content]]

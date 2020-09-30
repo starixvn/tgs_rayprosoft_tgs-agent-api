@@ -28,7 +28,8 @@ import {
 import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
 import { Route as AuthRouter } from "./user/auth"
-import { Menus, Contents } from "./menu"
+import { AllMenus } from "./menu"
+import { AllContents } from "./content"
 import { useUsername, useDeauth } from "./user/context"
 
 function App() {
@@ -41,7 +42,7 @@ function App() {
       </Route>
       <AuthRouter path="*">
         <Layout>
-          <Contents />
+          <AllContents />
         </Layout>
       </AuthRouter>
     </Switch>
@@ -109,7 +110,7 @@ const Sidebar = () => {
   return (
     <Stack spacing="major-1" paddingY="major-2">
       <SideNav selectedId={selectedId}>
-        <Menus />
+        <AllMenus />
       </SideNav>
     </Stack>
   )
