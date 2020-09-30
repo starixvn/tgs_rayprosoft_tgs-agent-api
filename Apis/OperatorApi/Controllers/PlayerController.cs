@@ -72,7 +72,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Check username exists
         /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost, Route("checkUsername"), Description("Check username exists")]
+        [HttpPost, Route("checkUsername")]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
@@ -88,7 +88,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Create a player
         /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost, Route("create"), Description("Create a player")]
+        [HttpPost, Route("create")]
         public async Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request)
         {
             //var result = await _captchaFactory.VerifyAsync(request.Answer, request.Captcha);
@@ -131,7 +131,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Player login
         /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost("login"), Description("login")]
+        [HttpPost, Route("login")]
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
             var username = request.Username;
@@ -171,10 +171,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Player logout
+        /// Player logout, player login is needed when use this
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         [Authorize]
         [HttpPost, Route("logout")]
         public async Task<LogoutResponse> LogoutAsync(LogoutRequest request)
@@ -206,9 +204,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Get player information
         /// </summary>
-        [AllowAnonymous, IgnoreAntiforgeryToken]
-        [Route("{username}")]
-        [HttpGet, Description("Get player")]
+        [AllowAnonymous, IgnoreAntiforgeryToken]        
+        [HttpGet, Route("{username}")]
         public async Task<GetPlayerResponse> GetPlayerAsync(string username)
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
@@ -238,21 +235,17 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Player forget password
         /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [Route("forgotPassword")]
-        [HttpPost(), Description("Forgot passowrd")]
+        [HttpPost, Route("forgotPassword"), Description("Forgot passowrd")]
         public Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
         {
             return Task.FromResult(0);
         }
 
         /// <summary>
-        /// Update player information
+        /// Update player information, player login is needed when use this
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         [Authorize]
-        [Route("update")]
-        [HttpPut, Description("Update player information")]
+        [HttpPut, Route("update")]
         public async Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request)
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
@@ -285,13 +278,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Player change password
+        /// Player change password, player login is needed when use this
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         [Authorize]
-        [Route("changePassword")]
-        [HttpPut, Description("Change player password")]
+        [HttpPut, Route("changePassword")]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
