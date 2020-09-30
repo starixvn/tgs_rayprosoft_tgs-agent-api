@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
@@ -27,10 +30,12 @@ namespace TGS.Apis.OperatorApi
     public sealed class Startup
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             _configuration = configuration;
+            _env = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -71,13 +76,25 @@ namespace TGS.Apis.OperatorApi
                         .Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
                 });
+
+            if (!_env.IsProduction())
+            {
+                services.AddSwaggerGen(c => 
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TGS Operator API", Version = "v1" }); 
+
+                    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    var path = Path.Combine(AppContext.BaseDirectory, xml);
+                    c.IncludeXmlComments(path);
+                });
+            }
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
 
-            if (!env.IsDevelopment())
+            if (!_env.IsDevelopment())
             {
                 app.UseHsts();
             }
@@ -96,6 +113,16 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
             });
+
+            if (!_env.IsProduction())
+            {
+                app.UseSwagger(c =>
+                {
+                    c.SerializeAsV2 = true;
+                });
+
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+            }
         }
     }
 }

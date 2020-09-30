@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Internal;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
@@ -41,7 +38,6 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new ArgumentException("Required header parameters are missing");
             }
 
-            //TODO: Need to cache
             var licenseeId = await licenseeOperations.GetLicenseeIdByClientIdAsync(clientId);
             if (licenseeId == Guid.Empty)
             {
