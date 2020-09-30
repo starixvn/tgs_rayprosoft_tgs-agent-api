@@ -21,7 +21,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/player?Page=1&Rows=10&OrderBy=Descending&SortBy=Username",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
       "publishAllPorts": true,
       "useSSL": true
     }

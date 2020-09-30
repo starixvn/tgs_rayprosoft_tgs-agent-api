@@ -114,6 +114,24 @@ services:
       - log-api
       - tgs-api
 
+  operator-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.OperatorApi
+    image: operator-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    # For crash debug
+    # entrypoint: ["sh", "-c", "sleep infinity"]
+    ports:
+      - 32670:80
+    networks:
+      tgs:
+        aliases:
+          - operator.api
+    depends_on:
+      - tgs-api
+
   tgs-api:
     build:
       context: .
