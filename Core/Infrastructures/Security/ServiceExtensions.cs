@@ -12,6 +12,8 @@ namespace TGS.Core.Infrastructures.Security
             services.AddSingleton<ITgsHashConfig, TgsHashConfig>();
             services.AddSingleton<IHashProvider, HashProvider>();
 
+            services.AddSingleton<IDESCryptoProvider, DESCryptoProvider>();
+
             return services;
         }
     }

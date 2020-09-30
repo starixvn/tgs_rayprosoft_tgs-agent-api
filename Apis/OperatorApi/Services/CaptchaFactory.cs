@@ -6,63 +6,26 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Services
 {
     public interface ICaptchaFactory
     {
-        Task<CaptchaInfo> CreateAsync(int charCount = 4, int width = 85, int height = 40);
+        CaptchaInfo Create(int charCount = 4, int width = 85, int height = 40);
 
-        Task VerifyAsync(string answer, string captcha, int timeOut = 600);
+        void Verify(string answer, string captcha, int timeOut = 600);
     }
 
-    public partial class CaptchaFactory
+    public sealed class CaptchaFactory : ICaptchaFactory
     {
-        /// <summary>
-        /// Draw disorder lines and points
-        /// </summary>
-        public static void DrawDisorderLinesAndPoints(Random random, Bitmap bitmap, Graphics graphics, int lineCount, int pointCount)
-        {
-            var colors = new Color[]
-            {
-                Color.AliceBlue,
-                Color.Azure,
-                Color.CadetBlue,
-                Color.Beige,
-                Color.Chartreuse
-            };
-
-            // disorder lines
-            for (var i = 0; i < lineCount; i++)
-            {
-                var x1 = random.Next(bitmap.Width);
-                var x2 = random.Next(bitmap.Width);
-                var y1 = random.Next(bitmap.Height);
-                var y2 = random.Next(bitmap.Height);
-
-                var pen = new Pen(colors[random.Next(0, colors.Length - 1)]);
-                graphics.DrawLine(pen, x1, y1, x2, y2);
-            }
-
-            // disorder points
-            for (var i = 0; i < pointCount; i++)
-            {
-                var x = random.Next(bitmap.Width);
-                var y = random.Next(bitmap.Height);
-                bitmap.SetPixel(x, y, Color.FromArgb(random.Next()));
-            }
-        }
-    }
-
-    public partial class CaptchaFactory : ICaptchaFactory
-    {
-        private static List<char> _characters;
+        private static IList<char> _characters;
 
         private const string ContentType = "image/jpeg";
+        private const string Secret = "TCAPTCHA";
 
         private static readonly IList<string> FontNames = new string[]
         {
@@ -72,7 +35,9 @@ namespace TGS.Apis.OperatorApi.Services
         // use thread safe dictionary to prevent the brute-force attack from bots
         private static readonly ConcurrentDictionary<string, DateTime> Dic = new ConcurrentDictionary<string, DateTime>();
 
-        public CaptchaFactory()
+        private readonly IDESCryptoProvider _cryptoProvider;
+
+        public CaptchaFactory(IDESCryptoProvider cryptoProvider)
         {
             _characters = new List<char>();
 
@@ -103,9 +68,11 @@ namespace TGS.Apis.OperatorApi.Services
                 }
                 _characters.Add(c);
             }
+
+            _cryptoProvider = cryptoProvider;
         }
 
-        async Task<CaptchaInfo> ICaptchaFactory.CreateAsync(int charCount, int width, int height)
+        CaptchaInfo ICaptchaFactory.Create(int charCount, int width, int height)
         {
             var random = new Random();
             var chars = Enumerable.Range(0, charCount)
@@ -149,7 +116,7 @@ namespace TGS.Apis.OperatorApi.Services
             using var memoryStream = new MemoryStream();
             bitmap.Save(memoryStream, ImageFormat.Jpeg);
 
-            var answer = await GetAnswerAsync(chars);
+            var answer = GetAnswer(chars);
 
             return new CaptchaInfo
             {
@@ -159,7 +126,7 @@ namespace TGS.Apis.OperatorApi.Services
             };
         }
 
-        async Task ICaptchaFactory.VerifyAsync(string answer, string captcha, int timeout = 600)
+        void ICaptchaFactory.Verify(string answer, string captcha, int timeout = 600)
         {
             if (answer.IsNullOrEmpty() || captcha.IsNullOrEmpty())
             {
@@ -184,7 +151,7 @@ namespace TGS.Apis.OperatorApi.Services
                 }
             }
 
-            var captcha1 = await Des.DecryptAsync(captcha);
+            var captcha1 = _cryptoProvider.DecryptString(captcha, Secret, Secret);
             var temp = captcha1.Split('|');
             if (!DateTime.TryParse(temp[1], out var dateTime))
             {
@@ -205,10 +172,45 @@ namespace TGS.Apis.OperatorApi.Services
             }
         }
 
-        private static Task<string> GetAnswerAsync(char[] chars)
+        private string GetAnswer(char[] chars)
         {
             var answer = chars.JoinAsString(string.Empty);
-            return Des.EncryptAsync($"{answer}|{DateTime.Now}");
+            return _cryptoProvider.EncryptString($"{answer}|{DateTime.Now}", Secret, Secret);
+        }
+
+        /// <summary>
+        /// Draw disorder lines and points
+        /// </summary>
+        private static void DrawDisorderLinesAndPoints(Random random, Bitmap bitmap, Graphics graphics, int lineCount, int pointCount)
+        {
+            var colors = new Color[]
+            {
+                Color.AliceBlue,
+                Color.Azure,
+                Color.CadetBlue,
+                Color.Beige,
+                Color.Chartreuse
+            };
+
+            // disorder lines
+            for (var i = 0; i < lineCount; i++)
+            {
+                var x1 = random.Next(bitmap.Width);
+                var x2 = random.Next(bitmap.Width);
+                var y1 = random.Next(bitmap.Height);
+                var y2 = random.Next(bitmap.Height);
+
+                var pen = new Pen(colors[random.Next(0, colors.Length - 1)]);
+                graphics.DrawLine(pen, x1, y1, x2, y2);
+            }
+
+            // disorder points
+            for (var i = 0; i < pointCount; i++)
+            {
+                var x = random.Next(bitmap.Width);
+                var y = random.Next(bitmap.Height);
+                bitmap.SetPixel(x, y, Color.FromArgb(random.Next()));
+            }
         }
     }
 }
