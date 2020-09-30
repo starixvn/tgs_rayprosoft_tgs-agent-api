@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -11,49 +12,47 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Apis.OperatorApi.Services;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
+using TGS.Services.Operations.Queries;
+using TGS.Services.Operations.Validators;
+using PlayerConsts = TGS.Core.Models.Consts.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Consumes(MediaTypeNames.Application.Json)]
     public partial class PlayerController : BaseContextController
     {
-        private readonly ITgsQueries<Player> _queries;
-        private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsCommands<PlayerLoginRecord> _playerLoginRecordCommands;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
+        private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly IHashProvider _hashProvider;
+        private readonly IStatusValidator _statusValidator;
+        private readonly IPlayerQueries _playerQueries;
         private readonly ICaptchaFactory _captchaFactory;
 
         public PlayerController(
-            Func<ITgsRepository> tgsRepoFactory,
             IHashProvider hashProvider,
-            ITgsQueries<Player> queries,
-            ITgsCommands<Player> commands,
-            ITgsCommands<PlayerAuditLog> auditLogCommands,
-            ITgsCommands<PlayerLoginRecord> playerLoginRecordCommands,
+            IStatusValidator statusValidator,
+            IPlayerQueries playerQueries,
             IPlayerOperations playerOperations,
+            IRequestAnalyzer requestAnalyzer,
             ICaptchaFactory captchaFactory,
-            ITransactionManager transactionManager,
-            IHttpContextAccessor httpContextAccessor) : 
+            IHttpContextAccessor httpContextAccessor) :
             base(httpContextAccessor)
         {
             _hashProvider = hashProvider;
-            _queries = queries;
-            _commands = commands;
-            _auditLogCommands = auditLogCommands;
-            _playerLoginRecordCommands = playerLoginRecordCommands;
+            _statusValidator = statusValidator;
+            _playerQueries = playerQueries;
             _playerOperations = playerOperations;
+            _requestAnalyzer = requestAnalyzer;
             _captchaFactory = captchaFactory;
         }
 
@@ -66,15 +65,19 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpGet, Route("checkUsername"), Description("Check username exists")]
-        public Task<bool> UsernameExistsAsync([FromQuery] string username)
+        [HttpPost, Route("checkUsername"), Description("Check username exists")]
+        public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
-            var licenseeId = new Guid(HttpContext.Request.Headers["LicenseeId"]);
-            return _queries.ExistsAsync(p => p.Username == username && p.LicenseeId == licenseeId);
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            return new CheckPlayerResponse
+            {
+                Exists = playerCode.IsNotNullOrEmpty(),
+                PlayerCode = playerCode
+            };
         }
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
-        [Consumes("application/json")]
         [HttpPost, Route("create"), Description("Create a player")]
         public async Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request)
         {
@@ -84,7 +87,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             //    throw new InvalidOperationException(result.Message);
             //}
 
-            var licenseeId = HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid) v : Guid.Empty;
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
             if (playerCode.IsNotNullOrEmpty())
@@ -94,8 +98,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var (salt, password) = _hashProvider.GenerateCredential(request.Password);
 
-            playerCode = await _playerOperations.CreatePlayerAsync(new CreatePlayerData 
-            {                
+            playerCode = await _playerOperations.CreatePlayerAsync(new CreatePlayerData
+            {
                 LicenseeId = licenseeId,
                 Username = request.Username,
                 Salt = salt,
@@ -115,95 +119,97 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("login"), Description("login")]
-        public async Task<TgsResponse> LoginAsync([FromBody] LoginRequest request)
+        public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            var licenseeId = new Guid(HttpContext.Request.Headers["LicenseeId"]);
-            var player = await _queries.GetSingleAsync(p => p.Username == request.Username && p.LicenseeId == licenseeId);
+            var username = request.Username;
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
-            if (player == null)
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNullOrEmpty())
             {
-                throw new InvalidOperationException(Resources.Player.NotFound);
+                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
             }
 
-            if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.Password))
+            var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
+            if (!_hashProvider.PasswordMatched(password, salt, request.Password))
             {
-                throw new InvalidOperationException(Resources.Player.PasswordMismatched);
+                throw new InvalidCredentialsException(Resources.Player.PasswordMismatched);
             }
 
-            if (player.Status != PlayerStatus.Enabled)
-            {
-                throw new InvalidOperationException(Resources.Player.StatusInvalid);
-            }
+            _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
 
-            var ipAddress = string.Empty;
-            if (HttpContext?.Connection.RemoteIpAddress != null)
-                ipAddress = HttpContext?.Connection.RemoteIpAddress.ToString();
+            var createdOn = DateTimeOffset.UtcNow;
+            var ipAddress = _requestAnalyzer.GetIp(HttpContext);
 
-            var logRecord = new PlayerLoginRecord
+            await _playerOperations.PlayerLoginAsync(new PlayerLoginData
             {
-                Id = GuidExtensions.NewSequentialGuid(),
-                CreatedOn = DateTimeOffset.Now,
-                ExpiredOn = DateTimeOffset.Now.AddHours(12),
+                LicenseeId = licenseeId,
+                Username = username,
+                PlayerCode = playerCode,
+                PlatformType = request.PlatformType,
                 IpAddress = ipAddress,
-                PlayerCode = player.PlayerCode,
-                Status = LoginStatus.Enabled,
-                PlatformType = PlatformType.Desktop,
-                LicenseeId = licenseeId
-            };
+                CreatedOn = createdOn,
+                ExpiredOn = createdOn.AddSeconds(PlayerConsts.LoginExpirationSeconds)
+            });
 
-            await SignInAsync(player);
-            await _playerLoginRecordCommands.CreateAsync(logRecord);
-            return new TgsResponse();
+            await SignInAsync(username);
+            return new LoginResponse { LoginTime = createdOn };
         }
 
-        private async Task SignInAsync(Player player)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(Consts.UserInfo.UsernameKey, player.Username),
-            };
-
-            var authProperties = new AuthenticationProperties
-            {
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20),
-                IsPersistent = true,
-            };
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
-        }
-
+        [Authorize]
         [HttpPost, Route("logout")]
-        public Task LogoutAsync()
+        public async Task<LogoutResponse> LogoutAsync(LogoutRequest request)
         {
-            return HttpContext?.SignOutAsync();
+            var username = request.Username;
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNullOrEmpty())
+            {
+                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
+            }
+
+            var updatedOn = DateTimeOffset.UtcNow;
+            await _playerOperations.PlayerLogoutAsync(new PlayerLogoutData
+            {
+                Username = username,
+                PlayerCode = playerCode,
+                PlatformType = request.PlatformType,
+                UpdatedOn = updatedOn,
+            });
+
+            await HttpContext?.SignOutAsync();
+
+            return new LogoutResponse { UpdateTime = updatedOn };
         }
 
+        [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("{username}")]
         [HttpGet, Description("Get player")]
-        public async Task<GetPlayerResponse> GetSingleAsync(string username)
+        public async Task<GetPlayerResponse> GetPlayerAsync(string username)
         {
-            var player = await _queries.GetSingleAsync(p => p.Username == username);
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
+            var player = await _playerOperations.GetPlayerByUsernameAsync(licenseeId, username);
             if (player == null)
             {
-                return CreateInvalidResponse<GetPlayerResponse>(Resources.Player.NotFound);
+                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
             }
-
-            var playerModel = new PlayerModel
-            {
-                Username = player.Username,
-                RealName = player.RealName,
-                Phone = player.Phone,
-                Email = player.Email,
-                QQ = player.QQ,
-                WeChat = player.Wechat
-            };
 
             return new GetPlayerResponse
             {
-                Valid = true,
-                Player = playerModel
+                Data = new()
+                {
+                    Username = player.Username,
+                    RealName = player.RealName,
+                    Email = player.Email,
+                    Phone = player.Phone,
+                    QQ = player.QQ,
+                    Wechat = player.Wechat
+                }
             };
         }
 
@@ -215,68 +221,99 @@ namespace TGS.Apis.OperatorApi.Controllers
             return Task.FromResult(0);
         }
 
-        [Route("{username}/contact")]
+        [Authorize]
+        [Route("update")]
         [HttpPut, Description("Update player contact")]
-        public async Task<MessageResponse> UpdateAsync(string username, [FromBody] UpdatePlayerRequest request)
+        public async Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request)
         {
-            var player = await _queries.GetSingleAsync(p => p.Username == username);
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
-            if (player == null)
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNullOrEmpty())
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
+                throw new PlayerNotFoundException(request.Username, Resources.Player.NotFound);
             }
 
-            player.RealName = request.RealName;
-            player.Phone = request.Phone;
-            player.Email = request.Email;
-            player.QQ = request.QQ;
-            player.Wechat = request.Wechat;
-            player.UpdatedByUsername = Username;
-            player.UpdatedOn = DateTimeOffset.Now;
-            await _commands.UpdateAsync(player);
-            await CreateAuditLogAsync("Update Player Contact", player.PlayerCode);
-            return CreateValidResponse<MessageResponse>();
+            var updatedOn = DateTimeOffset.UtcNow;
+            await _playerOperations.UpdatePlayerAsync(new UpdatePlayerData
+            {
+                Username = Username,
+                PlayerCode = playerCode,
+                RealName = request.RealName,
+                Phone = request.Phone,
+                Email = request.Email,
+                QQ = request.QQ,
+                Wechat = request.Wechat,
+                UpdatedOn = updatedOn
+            });
+
+            return new UpdatePlayerResponse
+            {
+                PlayerCode = playerCode,
+                UpdateTime = updatedOn
+            };
         }
 
-        [Route("{username}/password")]
-        [HttpPut, Description("Update player password")]
-        public async Task<MessageResponse> UpdatePasswordAsync(string username, [FromBody] UpdatePasswordRequest request)
+        [Authorize]
+        [Route("changePassword")]
+        [HttpPut, Description("Change player password")]
+        public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
-            var player = await _queries.GetSingleAsync(p => p.Username == username);
+            var licenseeId = GetLicenseeIdFromHttpContext();
+            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
-            if (player == null)
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            if (playerCode.IsNullOrEmpty())
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
+                throw new PlayerNotFoundException(request.Username, Resources.Player.NotFound);
             }
 
-            if (_hashProvider.PasswordMismatch(player.Password, player.Salt, request.OldPassword))
+            var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
+            if (!_hashProvider.PasswordMatched(password, salt, request.OldPassword))
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.PasswordMismatched);
+                throw new InvalidCredentialsException(Resources.Player.PasswordMismatched);
             }
 
-            var (salt, pwd) = _hashProvider.GenerateCredential(request.NewPassword);
-            player.Password = pwd;
-            player.Salt = salt;
-            player.UpdatedByUsername = Username;
-            player.UpdatedOn = DateTimeOffset.Now;
-            await _commands.UpdateAsync(player);
-            await CreateAuditLogAsync("Update player password", player.Username);
-            return CreateValidResponse<MessageResponse>();
+            var updatedOn = DateTimeOffset.UtcNow;
+            var (newSalt, newPassword) = _hashProvider.GenerateCredential(request.NewPassword);
+            await _playerOperations.ChangePlayerPasswordAsync(new ChangePlayerPasswordData
+            {
+                Username = Username,
+                PlayerCode = playerCode,
+                Salt = newSalt,
+                Password = newPassword,
+                UpdatedOn = updatedOn
+            });
+
+            return new ChangePasswordResponse
+            {
+                PlayerCode = playerCode,
+                UpdateTime = updatedOn
+            };
         }
 
-        private async Task CreateAuditLogAsync(string operation, string username)
+        private Guid GetLicenseeIdFromHttpContext()
         {
-            var auditLog = new PlayerAuditLog
+            return HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
+        }
+
+        private async Task SignInAsync(string username)
+        {
+            var claims = new List<Claim>
             {
-                Id = GuidExtensions.NewSequentialGuid(),
-                ModuleName = "Player",
-                CreatedByUsername = username,
-                CreatedOn = DateTimeOffset.Now,
-                Operation = operation,
-                Username = username
+                new Claim(Consts.UserInfo.UsernameKey, username),
             };
 
-            await _auditLogCommands.CreateAsync(auditLog);
+            var authProperties = new AuthenticationProperties
+            {
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(PlayerConsts.LoginExpirationSeconds),
+                IsPersistent = true,
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
     }
 }

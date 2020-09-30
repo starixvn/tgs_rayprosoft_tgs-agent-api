@@ -1,9 +1,10 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages.Players
-{
-    public class BaseRequest
-    {
-        //public string action { get; set; }
+﻿using System.Text.Json.Serialization;
 
-        public string LicenseeId { get; set; }
+namespace TGS.Apis.OperatorApi.Models.Messages.Players
+{
+    public record BaseRequest
+    {
+        [JsonPropertyName("username")]
+        public string Username { get; init; }
     }
 }

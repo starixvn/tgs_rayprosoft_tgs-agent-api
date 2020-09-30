@@ -19,6 +19,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Infrastructures.WebApiServices;
 
 namespace TGS.Apis.LogApi
 {
@@ -37,6 +38,7 @@ namespace TGS.Apis.LogApi
             services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
             services.AddRedis();
             services.AddNats(Configuration);
+            services.AddWebApiServices();
             services.AddTgsLog();
 
             services.AddScoped<IMessagePackProvider, MessagePackProvider>();

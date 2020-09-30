@@ -16,7 +16,7 @@ namespace TGS.Core.Infrastructures.Security
 
         (byte[], byte[]) GenerateCredential(string password);
 
-        bool PasswordMismatch(byte[] existedPassword, byte[] existedSalt, string password);
+        bool PasswordMatched(byte[] existedPassword, byte[] existedSalt, string password);
     }
 
     public sealed class HashProvider : IHashProvider
@@ -51,7 +51,7 @@ namespace TGS.Core.Infrastructures.Security
             return (salt, hashedPassword);
         }
 
-        bool IHashProvider.PasswordMismatch(byte[] existedPassword, byte[]existedSalt, string password)
+        bool IHashProvider.PasswordMatched(byte[] existedPassword, byte[]existedSalt, string password)
         {
             var salt = Hash(existedSalt);
 
@@ -60,7 +60,7 @@ namespace TGS.Core.Infrastructures.Security
                 salt,
                 _config.HashAlgorithm);
 
-            return !existedPassword.SequenceEqual(hashedPassword);
+            return existedPassword.SequenceEqual(hashedPassword);
         }
 
         string IHashProvider.Hash(string plainText, HashAlgorithmKind algorithm, HashStringKind kind, Encoding encoding)

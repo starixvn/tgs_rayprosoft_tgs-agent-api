@@ -13,7 +13,7 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
-using TGS.Core.Infrastructures.Log.Services;
+using TGS.Core.Infrastructures.WebApiServices;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 {

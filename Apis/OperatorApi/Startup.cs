@@ -6,16 +6,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TGS.Apis.OperatorApi.DataServices;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -40,12 +37,10 @@ namespace TGS.Apis.OperatorApi
         {
             services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
 
-            services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
-            services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
 
             services.AddNats(_configuration)
+                    .AddWebApiServices()
                     .AddTgsLog()
                     .AddRedis()
                     .AddJson()

@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
 
 namespace TGS.Core.DataServices.Base.Extensions
@@ -38,32 +39,32 @@ namespace TGS.Core.DataServices.Base.Extensions
             return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, param, commandType: commandType);
         }
 
-        public static async Task<int> ExecuteSqlCommandAsync(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
+        public static async Task<int> ExecuteSqlCommandAsync(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, IDbTransaction transaction = null, params SqlParameter[] parameters)
         {
             var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {
-                return await conn.ExecuteAsync(sql, commandType: commandType);
+                return await conn.ExecuteAsync(sql, commandType: commandType, transaction: transaction);
             }
 
             var param = GetDynamicParameters(parameters);
 
-            return await conn.ExecuteAsync(sql, param, commandType: commandType);
+            return await conn.ExecuteAsync(sql, param, commandType: commandType, transaction: transaction);
         }
 
-        public static int ExecuteSqlCommand(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
+        public static int ExecuteSqlCommand(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, IDbTransaction transaction = null, params SqlParameter[] parameters)
         {
             var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {
-                return conn.Execute(sql, commandType: commandType);
+                return conn.Execute(sql, commandType: commandType, transaction: transaction);
             }
 
             var param = GetDynamicParameters(parameters);
 
-            return conn.Execute(sql, param, commandType: commandType);
+            return conn.Execute(sql, param, commandType: commandType, transaction: transaction);
         }
 
         private static DynamicParameters GetDynamicParameters(IEnumerable<SqlParameter> parameters)

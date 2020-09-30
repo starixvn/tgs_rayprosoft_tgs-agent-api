@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 
@@ -29,6 +30,12 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
+
+            #endregion
+
+            #region Commands
+
+            services.AddFactory<IPlayerCommands, PlayerCommands>();
 
             #endregion
 

@@ -2,16 +2,13 @@
 
 namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record CreatePlayerRequest
+    public record CreatePlayerRequest : BaseRequest
     {
         [JsonPropertyName("answer")]
         public string Answer { get; init; }
 
         [JsonPropertyName("captcha")]
         public string Captcha { get; init; }
-
-        [JsonPropertyName("username")]
-        public string Username { get; init; }
 
         [JsonPropertyName("password")]
         public string Password { get; init; }

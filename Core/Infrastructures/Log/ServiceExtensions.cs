@@ -3,32 +3,28 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Helper;
 using TGS.Core.Infrastructures.Log.Events;
-using TGS.Core.Infrastructures.Log.Services;
 using TGS.Core.Infrastructures.Nats;
 
 namespace TGS.Core.Infrastructures.Log
 {
     public static class ServiceExtensions
     {
+        /// <summary>
+        /// Dependency Injections of Infrastructure.Log, needs to add the following dependencies beforehead:
+        /// 1. AddWebApiServices() in Infrastructure.WebApiServices
+        /// </summary>
         public static IServiceCollection AddTgsLog(this IServiceCollection services)
         {
             services.AddSingleton<LogBusEvent>(sp => new ApiLogEvent());
             services.AddSingleton<LogBusEvent>(sp => new LogRecordEvent());
             services.AddSingleton<LogBusEvent>(sp => new AdminLogEvent());
             services.AddScoped(c => CreateLoggerPublisher(c.GetRequiredService<INatsManager>()));    
-            
-            services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
-            services.AddScoped<ILocalIpFinder, LocalIpFinder>();
+    
             services.AddTransient<ITgsLog, TgsLog>();    
-
             services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
 
-            //services.AddTransient<Func<ITgsLog>>(c => () =>
-            //{ 
-            //    using var scope = c.CreateScope();
-            //    return scope.ServiceProvider.GetRequiredService<ITgsLog>();
-            //});
-            
+            services.AddLogging();
+
             return services;
         }
 

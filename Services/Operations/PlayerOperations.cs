@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
+using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 
@@ -32,7 +27,17 @@ namespace TGS.Services.Operations
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
 
-        Task<string> CreatePlayerAsync(CreatePlayerData createPlayerData);
+        Task<Player> GetPlayerByUsernameAsync(Guid licenseeId, string username);
+
+        Task<string> CreatePlayerAsync(CreatePlayerData data);
+
+        Task UpdatePlayerAsync(UpdatePlayerData data);
+
+        Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
+
+        Task PlayerLoginAsync(PlayerLoginData data);
+
+        Task PlayerLogoutAsync(PlayerLogoutData data);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -41,29 +46,22 @@ namespace TGS.Services.Operations
         private readonly IJsonSerializationProvider _json;
         private readonly Func<IWalletQueries> _walletQueriesFactory;
         private readonly Func<IPlayerQueries> _playerQueriesFactory;
-        private readonly ITransactionManager _transactionManager;
-        private readonly Func<ITgsRepository> _tgsRepositoryFactory;
-        private readonly ITgsLog _log;
-        private readonly IPlayerOperations _interface;
+        private readonly IPlayerCommands _playerCommands;
 
-        private const int RetryCount = 3;
+        private readonly IPlayerOperations _interface;
 
         public PlayerOperations(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
             Func<IWalletQueries> walletQueriesFactory,
             Func<IPlayerQueries> playerQueriesFactory,
-            ITransactionManager transactionManager,
-            Func<ITgsRepository> tgsRepositoryFactory,
-            ITgsLog log)
+            IPlayerCommands playerCommands)
         {
             _cacheManager = cacheManager;
             _json = json;
             _walletQueriesFactory = walletQueriesFactory;
             _playerQueriesFactory = playerQueriesFactory;
-            _transactionManager = transactionManager;
-            _tgsRepositoryFactory = tgsRepositoryFactory;
-            _log = log;
+            _playerCommands = playerCommands;
 
             _interface = this;
         }
@@ -118,98 +116,44 @@ namespace TGS.Services.Operations
         }
 
         async Task<string> IPlayerOperations.CreatePlayerAsync(CreatePlayerData data)
-        {            
-            var retries = 0;
-            var username = data.Username;
+        {                  
+            var playerCode = await _playerCommands.CreatePlayerAsync(data);
 
-            var playerCode = await _transactionManager.ExecuteTransactionAsync(
-               _tgsRepositoryFactory,
-              IsolationLevel.Serializable,
-              username,
-              execute: async (repo, trans) =>
-              {
-                  var walletId = GuidExtensions.NewSequentialGuid();
-                  var createdOn = DateTimeOffset.UtcNow;
-                  var playerCode = default(string);
-
-                  while (retries < RetryCount)
-                  {
-                      playerCode = PlayerCodeGenerator.NewId();
-
-                      try
-                      {
-                          var player = new Player
-                          {
-                              PlayerCode = playerCode,
-                              Username = username,
-                              Password = data.Password,
-                              Salt = data.Salt,
-                              InvitationCode = StringGenerator.GenerateAlphanumericString(6),
-                              LicenseeId = data.LicenseeId,
-                              CultureCode = data.CultureCode,
-                              DefaultWalletId = walletId,
-                              DefaultWalletCurrencyCode = data.CurrencyCode,
-                              ParentInvitationCode = data.ParentInvitationCode,
-                              RegisteredOn = createdOn,
-                              LastActiveOn = createdOn,
-                              Status = PlayerStatus.Enabled,
-                              Type = data.Type,
-                              BetLimitGroupId = data.BetLimitGroup,
-                              HasAgent = data.HasAgent,
-                              UpdatedByUsername = username,
-                              UpdatedOn = createdOn,
-                              Wallets = new HashSet<Wallet>
-                              {
-                                  new Wallet
-                                  {
-                                      Id = walletId,
-                                      PlayerCode = playerCode,
-                                      CurrencyCode = data.CurrencyCode,
-                                      ExternalCurrencyCode = data.ExternalCurrencyCode,
-                                      Balance = 0,
-                                      CreatedOn = createdOn,
-                                      UpdatedOn = createdOn
-                                  }
-                              }
-                          };
-
-                          repo.Players.Add(player);
-
-                          CreateAuditLog(repo, username, $"Create Player '{username}'", createdOn);
-
-                          await repo.SaveChangesAsync()
-                                    .ConfigureAwait(false);
-
-                          break;
-                      }
-                      catch (Exception e) when (e.InnerException?.InnerException is SqlException)
-                      {
-                          retries++;
-                          var err =
-                              $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
-
-                          _log.LogError(err, e);
-
-                          if (retries == RetryCount)
-                          {
-                              throw new InvalidOperationException(err, e);
-                          }
-
-                          var exception = (SqlException)e.InnerException.InnerException;
-                          if (exception.Number == 2601) // 2601 is "unique index"
-                          {
-                              continue;
-                          }
-                      }
-                  }
-
-                  return playerCode;
-              });
-
-            await _cacheManager.SafeCacheAsync(RedisCacheType.UsernameToPlayerCode, username, TimeSpan.FromHours(2), playerCode);
+            await _cacheManager.SafeCacheAsync(RedisCacheType.UsernameToPlayerCode, data.Username, TimeSpan.FromHours(2), playerCode);
 
             return playerCode;
         }
+
+        async Task IPlayerOperations.UpdatePlayerAsync(UpdatePlayerData data)
+        {
+            await _playerCommands.UpdatePlayerAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
+        }
+
+        async Task IPlayerOperations.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        {
+            await _playerCommands.ChangePlayerPasswordAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
+        }
+
+        async Task IPlayerOperations.PlayerLoginAsync(PlayerLoginData data)
+        {
+            await _playerCommands.PlayerLoginAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
+        }
+
+        async Task IPlayerOperations.PlayerLogoutAsync(PlayerLogoutData data)
+        {
+            await _playerCommands.PlayerLogoutAsync(data);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
+        }
+
+        Task<Player> IPlayerOperations.GetPlayerByUsernameAsync(Guid licenseeId, string username)
+        {
+            return _playerQueriesFactory().GetPlayerByPlayerCodeAsync(licenseeId, username);
+        }
+
+        #region Private Methods
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
         {
@@ -288,19 +232,6 @@ namespace TGS.Services.Operations
 
             return loginRecords;
         }
-       
-        private static void CreateAuditLog(ITgsRepository repo, string username, string operation, DateTimeOffset createdOn)
-        {
-            repo.AuditLogs.Add(new PlayerAuditLog
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                ModuleName = "Player",
-                CreatedByUsername = username,
-                CreatedOn = createdOn,
-                Operation = operation,
-                Username = username
-            });
-        }
 
         private static class CachedPlayerFields
         {
@@ -315,5 +246,7 @@ namespace TGS.Services.Operations
             public const string BetLimitGroupId = "betLimitGroupId";
             public const string ExternalCurrencyCode = "externalCurrencyCode";
         }
+
+        #endregion
     }
 }

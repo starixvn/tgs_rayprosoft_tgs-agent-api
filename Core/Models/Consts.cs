@@ -21,7 +21,7 @@
 
         public static class Player
         {
-            public const int LoginExpirationSeconds = 3600 * 24; // 1d
+            public const int LoginExpirationSeconds = 3600 * 12; // 12 hours
         }
 
         public static class GameProvider

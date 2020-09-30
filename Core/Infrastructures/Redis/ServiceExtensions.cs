@@ -9,8 +9,7 @@ namespace TGS.Core.Infrastructures.Redis
         /// <summary>
         /// Dependency Injection of Redis, need to add the following dependencies beforehead:
         /// 1. AddJson() in Infrastructures.Json
-        /// 2. AddTgpLog() in Infrastructures.Log
-        /// 3. AddLogging() in .net core
+        /// 2. AddTgpLog() in Infrastructures.Log       
         /// </summary>
         public static IServiceCollection AddRedis(this IServiceCollection services)
         {

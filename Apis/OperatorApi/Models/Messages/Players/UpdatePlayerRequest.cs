@@ -1,11 +1,11 @@
 ﻿namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public class UpdatePlayerRequest : BaseRequest
+    public record UpdatePlayerRequest : BaseRequest
     {
-        public string RealName { get; set; }
-        public string Phone { get; set; }
-        public string Email { get; set; }
-        public string QQ { get; set; }
-        public string Wechat { get; set; }
+        public string RealName { get; init; }
+        public string Phone { get; init; }
+        public string Email { get; init; }
+        public string QQ { get; init; }
+        public string Wechat { get; init; }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.IO;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log.Attributes;
 using TGS.Core.Infrastructures.Log.Events;
-using TGS.Core.Infrastructures.Log.Services;
+using TGS.Core.Infrastructures.WebApiServices;
 
 namespace TGS.Core.Infrastructures.Log.Middleware
 {

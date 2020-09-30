@@ -119,7 +119,8 @@ VALUES
                     new SqlParameter { ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String },
                     new SqlParameter { ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String }
                 };
-                _repository.ExecuteSqlCommand(command, CommandType.Text, args);
+
+                _repository.ExecuteSqlCommand(command, CommandType.Text, parameters: args);
             }
         }
 

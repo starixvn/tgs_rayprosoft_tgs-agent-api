@@ -1,8 +1,10 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages.Players
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public class ForgotPasswordRequest : BaseRequest
+    public record ForgotPasswordRequest : BaseRequest
     {
-        public string Username { get; set; }
-        public string Email { get; set; }
+        [JsonPropertyName("email")]
+        public string Email { get; init; }
     }
 }

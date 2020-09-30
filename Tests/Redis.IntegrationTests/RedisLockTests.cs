@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
@@ -23,8 +24,8 @@ namespace TGS.Tests.Redis.IntegrationTests
         {
             var provider = new ServiceCollection()
                 .AddConfiguration()
+                .AddWebApiServices()
                 .AddTgsLog()
-                .AddLogging()
                 .AddRedis() 
                 .BuildServiceProvider();
 
