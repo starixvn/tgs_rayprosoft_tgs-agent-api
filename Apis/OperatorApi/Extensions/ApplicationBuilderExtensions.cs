@@ -9,7 +9,7 @@ namespace TGS.Apis.OperatorApi.Extensions
     {
         public static IApplicationBuilder UseVerifyCredentialsMiddleware(this IApplicationBuilder app)
         {
-            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico" };
+            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico", "/swagger" };
 
             app.UseWhen(context => bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)),
                 builder => builder.UseMiddleware<VerifyCredentialsMiddleware>());

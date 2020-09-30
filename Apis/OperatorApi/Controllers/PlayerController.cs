@@ -29,6 +29,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
+    [Produces(MediaTypeNames.Application.Json)]
     public partial class PlayerController : BaseContextController
     {
         private readonly IPlayerOperations _playerOperations;
@@ -56,6 +57,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             _captchaFactory = captchaFactory;
         }
 
+        /// <summary>
+        /// Get captcha image, answer related information
+        /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpGet, Route("captcha")]
         public async Task<CaptchaInfo> GetCaptcha()
@@ -64,6 +68,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             return model;
         }
 
+        /// <summary>
+        /// Check username exists
+        /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost, Route("checkUsername"), Description("Check username exists")]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
@@ -77,6 +84,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
+        /// <summary>
+        /// Create a player
+        /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost, Route("create"), Description("Create a player")]
         public async Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request)
@@ -117,6 +127,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             return new CreatePlayerResponse { IsNew = true, PlayerCode = playerCode };
         }
 
+        /// <summary>
+        /// Player login
+        /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("login"), Description("login")]
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -157,6 +170,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             return new LoginResponse { LoginTime = createdOn };
         }
 
+        /// <summary>
+        /// Player logout
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost, Route("logout")]
         public async Task<LogoutResponse> LogoutAsync(LogoutRequest request)
@@ -185,6 +203,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             return new LogoutResponse { UpdateTime = updatedOn };
         }
 
+        /// <summary>
+        /// Get player information
+        /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("{username}")]
         [HttpGet, Description("Get player")]
@@ -213,6 +234,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
+        /// <summary>
+        /// Player forget password
+        /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [Route("forgotPassword")]
         [HttpPost(), Description("Forgot passowrd")]
@@ -221,9 +245,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             return Task.FromResult(0);
         }
 
+        /// <summary>
+        /// Update player information
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [Authorize]
         [Route("update")]
-        [HttpPut, Description("Update player contact")]
+        [HttpPut, Description("Update player information")]
         public async Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request)
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
@@ -255,6 +284,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
+        /// <summary>
+        /// Player change password
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [Authorize]
         [Route("changePassword")]
         [HttpPut, Description("Change player password")]

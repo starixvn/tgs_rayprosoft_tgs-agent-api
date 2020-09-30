@@ -50,11 +50,11 @@ const statusOptions = () => [
 
 //TODO: i18n
 export const label = (value) => {
-  if (value === EnabledString || value === Disabled) {
+  if (value === EnabledString || value === Enabled) {
     return "活跃"
   }
 
-  if (value === DisabledString || value === Enabled) {
+  if (value === DisabledString || value === Disabled) {
     return "封锁"
   }
 
