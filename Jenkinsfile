@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages {
-       stage('Checkout SCM') {
+        stage('Checkout SCM') {
           steps {
             checkout([
               $class: 'GitSCM',
@@ -13,7 +13,6 @@ pipeline {
              ])
            }
         }
-		
 		stage('Restore packages'){
 			steps{
 				sh "dotnet restore tgs.sln"
