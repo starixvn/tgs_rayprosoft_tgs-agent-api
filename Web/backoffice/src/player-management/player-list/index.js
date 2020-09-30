@@ -15,8 +15,9 @@ import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
+import { Code } from "./menu"
 
-export const Code = "playerlist"
+export { Code }
 
 export const Content = () => {
   let isDisplay = useIsDisplayMenuByRoute()
@@ -31,5 +32,5 @@ export const CodeContentPair = [Code, Content]
 
 //TODO
 const AsyncContent = () => {
-  return <div>TODO: async player list content</div>
+  return <PageContent>TODO: async player list content</PageContent>
 }
