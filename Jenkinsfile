@@ -28,6 +28,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh  "dotnet test tgs.sln"  
+				dotcover()
                 echo "test tgs.sln"
             }
         }
