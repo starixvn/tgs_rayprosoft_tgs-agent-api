@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+	    image: 'mcr.microsoft.com/dotnet/sdk:5.0' 
+	}
     stages {
         stage('Checkout SCM') {
           steps {
