@@ -34,7 +34,7 @@ const AsyncContent = ({}) => {
   let { state, setState, headSortBy, headOrderBy } = useTableState({
     username: ""
   })
-  let { pageIndex, pageSize, username = "", sortBy = [] } = state
+  let { pageIndex, pageSize, username = "" } = state
 
   const deferFn = () =>
     client.get("/api/users", {
@@ -56,7 +56,7 @@ const AsyncContent = ({}) => {
 
   useEffect(() => {
     fetchTable()
-  }, [pageIndex, pageSize, username, sortBy])
+  }, [pageIndex, pageSize, username])
 
   return (
     <PageContent
