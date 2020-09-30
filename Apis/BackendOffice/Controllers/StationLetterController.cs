@@ -57,7 +57,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Content = a.Content,
                     Remarks = a.Remarks,
                     CreatedByUsername = a.CreatedByUsername,
-
                     VerifiedByUsername = a.VerifiedByUsername,
                     Status = a.Status.ToString(),
                     CreatedOn = a.CreatedOn
