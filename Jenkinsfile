@@ -14,4 +14,24 @@ pipeline {
            }
         }
     }
+	
+	stage('Restore packages'){
+		steps{
+			sh "dotnet restore tgs.sln"
+			echo "restore tgs.sln"
+		  }
+	}
+	stage('Build') {
+		steps {
+			sh "dotnet build tgs.sln"
+			echo "build solution"
+		}
+	}
+	stage('Test') {
+		steps {
+			sh  "dotnet test tgs.sln"  
+			dotcover()
+			echo "test tgs.sln"
+		}
+	}
 }
