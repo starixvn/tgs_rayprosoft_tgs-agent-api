@@ -39,28 +39,40 @@ namespace TGS.Apis.BackendOffice.Extensions
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
             services.AddRepository<ITgsRepository, TgsRepository>(configuration, "Tgs");
-            services.AddScoped<ITgsHashConfig, TgsHashConfig>();
-            services.AddScoped<IHashProvider, HashProvider>();
+            
             services.AddScoped<IUploadService, UploadService>();
-            services.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+            services.AddScoped<ExceptionMiddleware>();
+
             services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddNats(configuration);
-            services.AddWebApiServices();
-            services.AddTgsLog();
-            services.AddScoped<ExceptionMiddleware>();
 
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
+
+            services.AddNats(configuration)
+                    .AddJson()
+                    .AddSecurity()
+                    .AddWebApiServices()
+                    .AddTgsLog();
+            
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             services.AddHttpContextAccessor();
-            services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
-            services.AddControllers()
-                .AddFluentValidation(opt =>
+            services
+                .AddControllers(options =>
                 {
-                    opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                    var policy = new AuthorizationPolicyBuilder()
+                                    .RequireAuthenticatedUser()
+                                    .Build();
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                    options.Filters.Add(new ValidationFilter());
+                })
+                .AddDataAnnotationsLocalization()
+                .AddFluentValidation(c =>
+                {                    
+                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                 });
 
             services.AddHealthChecks()
@@ -78,7 +90,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 options.HeaderName = Consts.CsrfTokenName;
             });
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.LoginPath = new PathString("/api/auth");
@@ -91,12 +104,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                     };
                 });
 
-
-            var enUSCulture = "en-US";
-            var zhCNCulture = "zh-CN";
-
+            
             services.Configure<RequestLocalizationOptions>(options =>
             {
+                var enUSCulture = "en-US";
+                var zhCNCulture = "zh-CN";
+
                 var supportedCultures = new[]
                 {
                     new CultureInfo(enUSCulture),
@@ -109,19 +122,6 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                 options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context => await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
             });
-
-            services.AddMvc(options =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-                options.Filters.Add(new ValidationFilter());
-
-                //// TODO: It seems AutoValidateAntiforgeryTokenAttribute not work,
-                //// we need to implement it on our self if not done before deployment
-                //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-            }).AddDataAnnotationsLocalization();
 
             if (env.IsDevelopmentOrDocker())
             {
