@@ -3,7 +3,7 @@ import { toDataOrError } from "./response"
 export const get = (url = "", { searchParams = {}, ...options } = {}) => {
   let urlSearchParams = Object.entries(searchParams).reduce(
     (searchParams, [key, value]) => {
-      if (typeof value == "string" && !value) {
+      if (isEmptyString(value) || isNilOrUndefined(value)) {
         return searchParams
       }
 
@@ -31,6 +31,11 @@ const fetchApi = (
     body: body ?? JSON.stringify(data),
     ...options
   }).then(toDataOrError)
+
+const isEmptyString = (value) => typeof value == "string" && !value
+
+const isNilOrUndefined = (value) =>
+  typeof value === "undefined" || value === null
 
 export default {
   get,
