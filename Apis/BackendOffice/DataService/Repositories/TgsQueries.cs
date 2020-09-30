@@ -3,15 +3,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
     public class TgsQueries<T> : ITgsQueries<T> where T : class
     {
-        private readonly IBackendOfficeRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public TgsQueries(IBackendOfficeRepository repository)
+        public TgsQueries(ITgsRepository repository)
         {
             _repository = repository;
         }
