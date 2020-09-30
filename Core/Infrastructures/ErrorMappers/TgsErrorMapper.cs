@@ -24,7 +24,8 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 { typeof(GameProviderUnderMaintenanceException), TgsApiError.UnderMaintenance },
                 { typeof(GameUnderMaintenanceException), TgsApiError.UnderMaintenance },
                 { typeof(InvalidCredentialsException), TgsApiError.InvalidCredentials },
-                { typeof(ClientIdNotFoundException), TgsApiError.ClientIdNotFound }
+                { typeof(ClientIdNotFoundException), TgsApiError.ClientIdNotFound },
+                { typeof(InvalidCaptchaException), TgsApiError.InvalidCaptcha }
             };
 
         internal static readonly IDictionary<TgsApiError, int> HttpCodeByException =
@@ -33,6 +34,7 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                { TgsApiError.InvalidArguments, StatusCodes.Status500InternalServerError},
                { TgsApiError.ClientIdNotFound, StatusCodes.Status401Unauthorized },
                { TgsApiError.InvalidCredentials, StatusCodes.Status401Unauthorized},
+               { TgsApiError.InvalidCaptcha, StatusCodes.Status401Unauthorized},
                { TgsApiError.PlayerNotFound, StatusCodes.Status401Unauthorized },
                { TgsApiError.TransactionIdNotFound, StatusCodes.Status500InternalServerError },
                { TgsApiError.DuplicateTransaction, StatusCodes.Status400BadRequest },

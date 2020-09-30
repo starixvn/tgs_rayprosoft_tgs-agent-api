@@ -3,20 +3,17 @@
     public class CaptchaInfo
     {
         /// <summary>
-        /// 图片字节
+        /// image of captcha
         /// </summary>
-        public byte[] Image { get; set; }
+        public byte[] Image { get; init; }
 
         /// <summary>
-        /// 图片中显示的字符（经过DES加密）
+        /// the value in captcha image, encoded with DES
         /// </summary>
         public string Answer { get; set; }
+
         /// <summary>
-        /// 设计后续有类似问题类的图片验证码
-        /// </summary>
-        public string Tip { get; set; }
-        /// <summary>
-        /// 验证码图片文件为类型
+        /// image content type
         /// </summary>
         public string ContentType { get; set; }
     }

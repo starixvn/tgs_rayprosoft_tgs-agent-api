@@ -8,6 +8,7 @@
         UserBlocked = 20,
         CountryRestricted = 21,
         InvalidCredentials = 30,
+        InvalidCaptcha = 31,
         CurrencyMismatch = 50,
         InvalidAmount = 60,
         InsufficientFunds = 100,        
