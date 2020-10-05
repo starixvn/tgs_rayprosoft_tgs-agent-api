@@ -30,6 +30,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
+            services.AddFactory<ISettingQueries, SettingQueries>();
 
             #endregion
 
@@ -45,6 +46,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddScoped<IGameProviderOperations, GameProviderOperations>();
             services.AddScoped<IPlayerOperations, PlayerOperations>();
             services.AddScoped<ILicenseeGameProviderOperations, LicenseeGameProviderOperations>();
+            services.AddScoped<ISettingOperations, SettingOperations>();
 
             #endregion
 
