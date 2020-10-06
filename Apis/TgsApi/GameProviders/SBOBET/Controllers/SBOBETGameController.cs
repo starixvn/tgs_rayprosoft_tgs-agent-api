@@ -2,6 +2,7 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.GameProviders.SBOBET.Filters;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 
@@ -11,6 +12,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
     [Route("api")]
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
+    [TypeFilter(typeof(HandleSBOErrorFilter))]
     public class SBOBETGameController : ControllerBase
     {
         [Route("bet")]

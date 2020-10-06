@@ -70,7 +70,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameOperations", "Services\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogApi", "Apis\LogApi\LogApi.csproj", "{193468E0-E560-4E87-AE37-64A6BBD82365}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperatorApi", "Apis\OperatorApi\OperatorApi.csproj", "{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperatorApi", "Apis\OperatorApi\OperatorApi.csproj", "{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TgsApi.GameModels", "Apis\TgsApi.GameModels\TgsApi.GameModels.csproj", "{1B57C935-5B7F-4715-9C5D-04169137C2CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -150,6 +152,10 @@ Global
 		{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B57C935-5B7F-4715-9C5D-04169137C2CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B57C935-5B7F-4715-9C5D-04169137C2CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B57C935-5B7F-4715-9C5D-04169137C2CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B57C935-5B7F-4715-9C5D-04169137C2CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -175,6 +181,7 @@ Global
 		{4BD4697C-ACE2-490B-9F90-E081341FEA57} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{193468E0-E560-4E87-AE37-64A6BBD82365} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 		{B0908BE6-46B5-4AEE-AF06-4C995822D0CA} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
+		{1B57C935-5B7F-4715-9C5D-04169137C2CA} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

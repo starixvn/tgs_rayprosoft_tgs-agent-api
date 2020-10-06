@@ -36,6 +36,7 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\TgsApi.GameModels\TgsApi.GameModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

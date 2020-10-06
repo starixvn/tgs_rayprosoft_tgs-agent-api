@@ -8,11 +8,11 @@ namespace TGS.Core.Infrastructures.ErrorMappers
     {
         /// <summary>
         /// Dependency Injection of Infrastruce.ErrorMappers, it adds and resloves TgsErrorMapper as default;
-        /// if you need to add custom error mappers, please DO PASS the implementation of 'addCustomErrorMappers' and 'get' as parameters
+        /// if you need to add custom error mappers, please DO Implement 'addCustom' and 'get' parameters
         /// </summary>
-        public static IServiceCollection AddErrorMappers(this IServiceCollection services, Action addCustomErrorMappers = null, Func<IServiceProvider, Func<string, IErrorMapper>> get = null)
+        public static IServiceCollection AddErrorMappers(this IServiceCollection services, Action addCustom = null, Func<IServiceProvider, Func<string, IErrorMapper>> get = null)
         {
-            addCustomErrorMappers?.Invoke();
+            addCustom?.Invoke();
             
             services.AddSingleton<TgsErrorMapper>();
 
