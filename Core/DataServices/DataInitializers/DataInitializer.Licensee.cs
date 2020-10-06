@@ -47,7 +47,8 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string[] ILicensee.GameProviders => new[]
             {
-                Consts.GameProvider.RedTiger
+                Consts.GameProvider.RedTiger,
+                Consts.GameProvider.SBOBET
             };
         }
     }

@@ -27,7 +27,7 @@
         public static class GameProvider
         {
             public const string RedTiger = "RT";
-            public const string Evolution = "EVO";
+            public const string SBOBET = "SBO";
         }
 
         public static class EnvironmentVariable

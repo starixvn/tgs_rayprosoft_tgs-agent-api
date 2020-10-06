@@ -8,10 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using TGS.Apis.TgsApi.GameProviders.Evolution;
 using TGS.Apis.TgsApi.GameProviders.RedTiger;
 using TGS.Core.Models;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using TGS.Apis.TgsApi.GameProviders.SBOBET;
 
 namespace TGS.Apis.TgsApi
 {
@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi
         private static readonly IReadOnlyDictionary<string, Type> StartupMap = new Dictionary<string, Type>
         {
             { Consts.GameProvider.RedTiger, typeof(RedTigerStartup) },
-            { Consts.GameProvider.Evolution, typeof(EvolutionStartup) },
+            { Consts.GameProvider.SBOBET, typeof(SBOBETStartup) },
         };
 
         public static Task Main(string[] args)

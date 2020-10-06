@@ -31,9 +31,9 @@ namespace TGS.Core.DataServices.DataInitializers
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
-        private static readonly IList<IGameProvider> GameProviders = new[]
+        private static readonly IList<IGameProvider> GameProviders = new IGameProvider[]
         {
-            new RedTigerGameProvider()
+            new RedTigerGameProvider(), new SBOGameProvider()
         };
 
         private static readonly IList<IReseller> Resellers = new[] 

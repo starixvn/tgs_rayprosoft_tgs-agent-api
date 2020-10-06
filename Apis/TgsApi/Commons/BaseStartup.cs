@@ -66,7 +66,7 @@ namespace TGS.Apis.TgsApi.Commons
 
             var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
-            services.AddMvcCore(options =>
+            services.AddControllers(options =>
             {
                 AddCustomFilters(options);
             })
