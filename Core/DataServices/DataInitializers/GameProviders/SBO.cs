@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.GameProviders.Settings;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.DataInitializers
@@ -73,5 +74,11 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string IGameProviderConfiguration.ConfigurationData => string.Empty;
         }
+
+        private static readonly SBOConfiguration SBOConfiguration = new()
+        {
+            ServiceEndpointUrl = new Uri("https://localhost:62331"),
+            CompanyKey = "difjwifjwejfdisdfkidsjfiojwiowej213kiorfj23o5sdfkj9"
+        }; 
     }
 }

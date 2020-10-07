@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Utility;
@@ -24,7 +25,8 @@ namespace TGS.Core.DataServices.DataInitializers
         private readonly ITgsRepository _repository;
         private readonly IHashProvider _hashProvider;
         private readonly IServiceLog<DataInitializer> _log;
-        private readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
 
         private readonly StringBuilder _logBuilder = new StringBuilder();
 
@@ -41,13 +43,18 @@ namespace TGS.Core.DataServices.DataInitializers
             new TgsReseller()
         };
 
-        private IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
+        private readonly IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
 
-        public DataInitializer(ITgsRepository repository, IHashProvider hashProvider, IServiceLog<DataInitializer> log)
+        public DataInitializer(
+            ITgsRepository repository, 
+            IHashProvider hashProvider, 
+            IServiceLog<DataInitializer> log,
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _repository = repository;
             _hashProvider = hashProvider;
             _log = log;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         void IDataInitializer.SetInitialData()
@@ -67,6 +74,7 @@ namespace TGS.Core.DataServices.DataInitializers
             LogSeedingTime(GenerateGameProviders, _logBuilder);
             LogSeedingTime(GenerateResellersAndLicensees, _logBuilder);
             LogSeedingTime(GeneratePlayers, _logBuilder);
+            LogSeedingTime(GenerateSettings, _logBuilder);
 
             timer.Stop();
 
