@@ -64,7 +64,7 @@ namespace TGS.Services.Operations.Queries
                     new()
                     {
                         ParameterName = "@statuses",
-                        Value = statuses.Select(s => (int)s).ToDataTable(),
+                        Value = statuses.Select(s => new { Value = (int)s }).ToDataTable(),
                         SqlDbType = SqlDbType.Structured,
                     },
                     new()

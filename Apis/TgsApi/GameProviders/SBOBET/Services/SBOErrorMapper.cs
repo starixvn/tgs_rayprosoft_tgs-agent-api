@@ -15,6 +15,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
              new Dictionary<Type, GameApiError>
              {
                 { typeof(PlayerDisabledException), GameApiError.UserBlocked },
+                { typeof(PlayerLoginExpiredException), GameApiError.PlayerNotLogin },
                 { typeof(PlayerNotFoundException), GameApiError.PlayerNotFound },
                 { typeof(ArgumentException), GameApiError.InvalidArguments },
                 { typeof(FormatException), GameApiError.IncorrectFormat },

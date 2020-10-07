@@ -76,8 +76,6 @@ namespace TGS.Apis.TgsApi.Commons
                 {
                     var result = new BadRequestObjectResult(context.ModelState);
                     result.ContentTypes.Add(MediaTypeNames.Application.Json);
-                    result.ContentTypes.Add(MediaTypeNames.Application.Xml);
-
                     return result;
                 };
             });
@@ -96,9 +94,9 @@ namespace TGS.Apis.TgsApi.Commons
                 app.UseGlobalExceptionHandler();
             }
 
-            UseCustomMiddlewares(app);
-
             app.UseApiLogger();
+
+            UseCustomMiddlewares(app);
 
             app
                 //.UseHttpsRedirection()
@@ -117,6 +115,7 @@ namespace TGS.Apis.TgsApi.Commons
 
         protected virtual void UseCustomMiddlewares(IApplicationBuilder app)
         {
+
         }
 
         protected virtual void AddCustomFilters(MvcOptions options)

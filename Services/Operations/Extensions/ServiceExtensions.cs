@@ -19,8 +19,8 @@ namespace TGS.Services.Operations.Extensions
         {            
             #region Code Mappers
 
-            services.AddSingleton<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
-            services.AddSingleton<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
+            services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
+            services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
 
             #endregion
 

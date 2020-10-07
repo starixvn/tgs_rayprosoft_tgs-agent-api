@@ -33,7 +33,6 @@ namespace TGS.Core.DataServices.Base.Extensions
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(commandTimeout);
-                    //serverOption.EnableRetryOnFailure(maxRetryCount);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                 });
 

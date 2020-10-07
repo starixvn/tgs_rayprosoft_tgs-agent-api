@@ -45,6 +45,7 @@ namespace TGS.Apis.TgsApi.GameModels.SBOBET.Enums
         InvalidArguments = 2006,
         InvalidAmount = 2007,
         InvalidGameAction = 2008,
-        UnderMaintenance = 2009,      
+        UnderMaintenance = 2009,
+        PlayerNotLogin = 2010,
     }
 }

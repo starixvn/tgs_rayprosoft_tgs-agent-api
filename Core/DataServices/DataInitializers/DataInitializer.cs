@@ -310,7 +310,7 @@ namespace TGS.Core.DataServices.DataInitializers
             _repository.BulkInsert(licensees.SelectMany(l => l.Games).ToArray());
         }
 
-        private GameProvider CreateGameProvider(IGameProvider gameProvider)
+        private static GameProvider CreateGameProvider(IGameProvider gameProvider)
         {
             var gp = new GameProvider
             {

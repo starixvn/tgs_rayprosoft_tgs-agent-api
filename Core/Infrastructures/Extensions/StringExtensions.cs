@@ -163,6 +163,11 @@ namespace TGS.Core.Infrastructures.Extensions
                                     string.Concat(str.Substring(0, 1), "".PadLeft(str.Length - 1, '*'));
         }
 
+        public static bool NotEquals(this string str, string second)
+        {
+            return !string.Equals(str, second);
+        }
+
         public static bool IgnoreCaseEquals(this string str, string second)
         {
             return string.Equals(str, second, StringComparison.OrdinalIgnoreCase);

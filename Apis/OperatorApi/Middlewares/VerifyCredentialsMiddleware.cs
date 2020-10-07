@@ -9,6 +9,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
+using ContextItems = TGS.Core.Models.Consts.ContextItems;
 
 namespace TGS.Apis.OperatorApi.Middlewares
 {
@@ -59,7 +60,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new InvalidCredentialsException($"Fail to authorize licensee with client id: {clientId}");
             }
             
-            context.Items.Add(Consts.ContextItems.LicenseeId, licenseeId);
+            context.Items.Add(ContextItems.LicenseeId, licenseeId);
 
             await _next(context);
         }

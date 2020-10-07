@@ -13,7 +13,7 @@ namespace TGS.Core.Infrastructures.ErrorMappers
         public static IServiceCollection AddErrorMappers(this IServiceCollection services, Action addCustom = null, Func<IServiceProvider, Func<string, IErrorMapper>> get = null)
         {
             addCustom?.Invoke();
-            
+
             services.AddSingleton<TgsErrorMapper>();
 
             if (get == null)

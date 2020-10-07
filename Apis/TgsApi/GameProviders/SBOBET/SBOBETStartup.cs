@@ -1,8 +1,11 @@
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
-using TGS.Apis.TgsApi.GameProviders.SBOBET.Filters;
+using TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Models;
@@ -31,7 +34,23 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
                     };
                 });
 
-            services.AddScoped<HandleSBOErrorFilter>();
+            services.AddScoped<AuthorizeSBOMiddleware>();
+            services.AddScoped<HandleSBOExceptionMiddleware>();
+
+            services.AddSingleton<ISBOGameControllerMapper, SBOGameControllerMapper>();
+            
+        }
+
+        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        {
+            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico" };
+
+            app.UseWhen(context => bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)),
+                builder =>
+                {
+                    builder.UseMiddleware<HandleSBOExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeSBOMiddleware>();
+                });
         }
     }
 }

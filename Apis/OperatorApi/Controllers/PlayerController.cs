@@ -23,6 +23,7 @@ using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using PlayerConsts = TGS.Core.Models.Consts.Player;
+using ContextItems = TGS.Core.Models.Consts.ContextItems;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -318,7 +319,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         private Guid GetLicenseeIdFromHttpContext()
         {
-            return HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
+            return HttpContext.Items.TryGetValue(ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
         }
 
         private async Task SignInAsync(string username)

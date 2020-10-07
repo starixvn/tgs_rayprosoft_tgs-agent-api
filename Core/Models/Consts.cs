@@ -37,6 +37,14 @@
             public const string GameProviderName = "GameProviderName";
         }
 
+        public static class ContextItems
+        {
+            public const string LicenseeId = "licenseeId";
+            public const string GameProviderId = "gameProviderId";
+            public const string GameProviderConfigurationId = "gameProviderConfigurationId";
+            public const string PlatformType = "platformType";
+        }
+
         public const string DefualtCultureCode = "en-US";
         public const string Default = "default";
     }
