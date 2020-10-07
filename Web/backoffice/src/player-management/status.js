@@ -1,3 +1,8 @@
+import React, { useState, useEffect, useMemo, useRef } from "react"
+import { css, Global } from "@emotion/core"
+import { Select as _Select } from "bumbag"
+import { Field as _Field } from "../select/Field"
+
 const Enabled = 0
 
 const EnabledString = "Enabled"
@@ -25,4 +30,32 @@ export const label = (value) => {
   }
 
   return value
+}
+
+export const Field = ({ required, validate, ...props }) => {
+  let { name } = props
+  return (
+    <_Field name={name} required={required}>
+      {(props) => <Select {...props} />}
+    </_Field>
+  )
+}
+
+export const Select = ({ visible = true, ...props }) => {
+  let options = [
+    {
+      label: label(Enabled),
+      value: Enabled
+    },
+    {
+      label: label(Disabled),
+      value: Disabled
+    },
+    {
+      label: label(InBlacklist),
+      value: InBlacklist
+    }
+  ]
+
+  return <_Select options={[{ label: "", value: "" }, ...options]} {...props} />
 }

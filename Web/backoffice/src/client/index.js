@@ -1,6 +1,6 @@
 import { toDataOrError } from "./response"
 
-export const get = (url = "", { searchParams = {}, ...options } = {}) => {
+export const urlWith = (searchParams = {}, url) => {
   let urlSearchParams = Object.entries(searchParams).reduce(
     (searchParams, [key, value]) => {
       if (isEmptyString(value) || isNilOrUndefined(value)) {
@@ -13,7 +13,11 @@ export const get = (url = "", { searchParams = {}, ...options } = {}) => {
     },
     ""
   )
-  url = `${url}?${urlSearchParams}`
+  return urlSearchParams ? `${url}?${urlSearchParams}` : url
+}
+
+export const get = (url = "", { searchParams = {}, ...options } = {}) => {
+  url = urlWith(searchParams, url)
   return fetch(url, options).then(toDataOrError)
 }
 
@@ -32,7 +36,7 @@ const fetchApi = (
     ...options
   }).then(toDataOrError)
 
-const isEmptyString = (value) => typeof value == "string" && !value
+const isEmptyString = (value) => typeof value == "string" && value === ""
 
 const isNilOrUndefined = (value) =>
   typeof value === "undefined" || value === null

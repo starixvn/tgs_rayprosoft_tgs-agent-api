@@ -27,7 +27,7 @@ export const CodeContentPair = [Code, Content]
 
 const AsynPageContent = () => {
   let { state, setState, headSortBy, headOrderBy } = useTableState()
-  let { pageIndex, pageSize, sortBy = [] } = state
+  let { pageIndex, pageSize } = state
 
   let deferFn = ([data]) =>
     client.get("/api/department", {
@@ -50,7 +50,7 @@ const AsynPageContent = () => {
 
   useEffect(() => {
     fetchTable()
-  }, [pageIndex, pageSize, sortBy])
+  }, [pageIndex, pageSize])
 
   return (
     <PageContent
