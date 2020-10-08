@@ -13,10 +13,12 @@ namespace TGS.Core.DataServices.Base.Extensions
     public static class RepositoryExtensions
     {
         public static IServiceCollection AddRepository<TInterface, TRepository>(this IServiceCollection services,
-            IConfiguration configuration, string connectionName, int commandTimeout = 180, int maxRetryCount = 3)
+            IConfiguration configuration, string connectionName, int commandTimeout = 180)
             where TInterface : class
             where TRepository : DbContext, TInterface
         {
+            const int PoolSize = 64;
+
             services.AddDbContextPool<TRepository>((option) =>
             {
 #if DEBUG
@@ -46,7 +48,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 {
                     db.Database.Migrate();
                 }
-            }, 128);
+            }, PoolSize);
 
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
             services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());
