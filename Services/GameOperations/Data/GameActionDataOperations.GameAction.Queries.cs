@@ -11,10 +11,10 @@ namespace TGS.Services.GameOperations.Data
 {
     internal sealed partial class GameActionDataOperations : IGameActionDataOperations
     {
-        private Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repo, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
+        private static Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(Db db, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
         {
             const string sql = "usp_Round_GetRoundByExternalRoundId";
-            return repo.SqlQuerySingleAsync<RoundIdAndStatusData>(sql, parameters: new SqlParameter[]
+            return db.Repository.SqlQuerySingleAsync<RoundIdAndStatusData>(sql, transaction: db.Transaction, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -37,10 +37,10 @@ namespace TGS.Services.GameOperations.Data
             });
         }
 
-        private async Task<SameRoundActionData[]> GetGameActionsInSameRoundAsync(ITgsRepository repo, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
+        private static async Task<SameRoundActionData[]> GetGameActionsInSameRoundAsync(Db db, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
         {
             const string sql = "usp_GameAction_GetGameActionsInSameRound";
-            var data = await repo.SqlQueryMultipleAsync<SameRoundActionData>(sql, parameters: new SqlParameter[]
+            var data = await db.Repository.SqlQueryMultipleAsync<SameRoundActionData>(sql, transaction: db.Transaction, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -65,10 +65,10 @@ namespace TGS.Services.GameOperations.Data
             return data.ToArray();
         }
 
-        private Task<string> GetExternalRoundIdAsync(ITgsRepository repo, string externalTransactionId)
+        private static Task<string> GetExternalRoundIdAsync(Db db, string externalTransactionId)
         {
             const string sql = "usp_Round_GetExternalRoundIdByExternalTransactionId";
-            return repo.SqlQuerySingleAsync<string>(sql, parameters: new SqlParameter
+            return db.Repository.SqlQuerySingleAsync<string>(sql, transaction: db.Transaction, parameters: new SqlParameter
             {
                 ParameterName = "@externalTransactionId",
                 Value = externalTransactionId,
@@ -76,10 +76,10 @@ namespace TGS.Services.GameOperations.Data
             });
         }
 
-        private Task<decimal> GetBalanceAsync(ITgsRepository repo, Guid walletId)
+        private static Task<decimal> GetBalanceAsync(Db db, Guid walletId)
         {
             const string spName = "usp_Wallet_GetBalance";
-            return repo.SqlQuerySingleAsync<decimal>(spName, parameters: new[]
+            return db.Repository.SqlQuerySingleAsync<decimal>(spName, transaction: db.Transaction, parameters: new[]
             {
                 new SqlParameter
                 {

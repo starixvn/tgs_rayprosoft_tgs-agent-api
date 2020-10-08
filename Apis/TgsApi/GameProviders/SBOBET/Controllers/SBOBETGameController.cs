@@ -1,16 +1,14 @@
-﻿using System.Net;
+﻿using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Services.GameOperations;
+using ContextItems = TGS.Core.Models.Consts.ContextItems;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
@@ -39,6 +37,20 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         {
             var r = await _actions.GetBalanceAsync(GameProviderConst.SBOBET, request.PlayerCode);
             return _map.Response(request.PlayerCode, r);            
+        }
+
+        [Route("Deduct")]
+        public async Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
+        { 
+            var items = HttpContext.Items;
+
+            var gameProviderId = (Guid) items[ContextItems.GameProviderId];
+            var gameProviderConfigurationId = (Guid)items[ContextItems.GameProviderConfigurationId];
+            var platformType = (PlatformType) items[ContextItems.PlatformType];
+
+            var betData = _map.Request(gameProviderId, gameProviderConfigurationId, platformType, request);
+            var r = await _actions.PlaceBetAsync(betData);
+            return _map.Response(request, r);
         }
     }
 }

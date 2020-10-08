@@ -48,7 +48,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                 }
             }, 128);
 
-            services.AddScoped<TInterface, TRepository>();
+            services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
             services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());
 
             return services;

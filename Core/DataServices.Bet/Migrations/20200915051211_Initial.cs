@@ -182,6 +182,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_InsertRound"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_InsertGameAction"));
 
             #endregion Store Procedure
         }

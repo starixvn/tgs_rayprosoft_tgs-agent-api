@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -47,8 +48,8 @@ namespace TGS.Services.GameOperations.Data
                 PlayerType = cachedPlayer.Type,
                 PlayerUsername = cachedPlayer.Username,
                 ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode,
-                LicenseeTimeZoneId = cachedLicensee.TimeZoneId
-                //PlayerIp = data..Ip
+                LicenseeTimeZoneId = cachedLicensee.TimeZoneId,
+                PlayerIp = string.Empty
             };
 
             var cacheGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
@@ -59,23 +60,23 @@ namespace TGS.Services.GameOperations.Data
                 _tgsRepoFactory,
                 IsolationLevel.RepeatableRead,
                 externalTransactionIds,
-                execute: async (r, trans) => await ProcessGameActionsAsync(r, data, playerRelatedData, cacheGameProvider, games));
+                execute: async (r, trans) => await ProcessGameActionsAsync(r, trans, data, playerRelatedData, cacheGameProvider, games));
 
             return transactionResult;
         }
 
-        private async Task<BetResult> ProcessGameActionsAsync(ITgsRepository repo, BetData data, PlayerRelatedData player, CachedGameProvider gameProvider, CachedGame[] games)
+        private async Task<BetResult> ProcessGameActionsAsync(ITgsRepository repo, IDbContextTransaction transaction, BetData data, PlayerRelatedData player, CachedGameProvider gameProvider, CachedGame[] games)
         {
             var transactionResults = new List<TransactionResult>();
 
-            foreach (var transaction in data.Transactions)
+            foreach (var trx in data.Transactions)
             {
-                var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(transaction.GameActionType);
-                var hasWalletUpdate = transactionSettings.HasWalletUpdate(transaction);
+                var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx.GameActionType);
+                var hasWalletUpdate = transactionSettings.HasWalletUpdate(trx);
 
-                var result = await HandleGameActionAsync(new GameActionState(transaction)
+                var result = await HandleGameActionAsync(new GameActionState(trx)
                 {
-                    Repo = repo,
+                    Db = new(repo, transaction.GetDbTransaction()),
                     GameProvider = gameProvider,
                     GameProviderConfigurationId = data.GameProviderConfigurationId,
                     BatchId = data.BatchId,
@@ -83,7 +84,7 @@ namespace TGS.Services.GameOperations.Data
                     HasWalletUpdate = hasWalletUpdate,
                     MustHaveExistingRound = transactionSettings.MustHaveExistingRound,
                     MustHaveReferencedTransaction = transactionSettings.MustHaveReferencedTransaction,
-                    ValidateAmount = transactionSettings.ValidateAmount(transaction),
+                    ValidateAmount = transactionSettings.ValidateAmount(trx),
                     PrepareAmount = transactionSettings.GetTransactionAmount,
                     PlayerData = player,
                     GameProviderGames = games,
@@ -141,9 +142,9 @@ namespace TGS.Services.GameOperations.Data
             return output;
         }
 
-        private async Task<GameActionState> FillRoundDataAsync(GameActionState s)
+        private static async Task<GameActionState> FillRoundDataAsync(GameActionState s)
         {
-            var roundData = await GetRoundByExternalRoundIdAsync(s.Repo, s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId);
+            var roundData = await GetRoundByExternalRoundIdAsync(s.Db, s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId);
             if (s.MustHaveExistingRound && roundData == null)
             {
                 throw new InvalidGameActionException(
@@ -151,13 +152,16 @@ namespace TGS.Services.GameOperations.Data
                     InvalidGameActionErrorCode.RoundNotFound);
             }
 
-            s.InternalRoundId = roundData.RoundId;
-            s.OldRoundStatus = roundData.Status;
+            if (roundData != null)
+            { 
+                s.InternalRoundId = roundData.RoundId;
+                s.OldRoundStatus = roundData.Status;
+            }
 
             return s;
         }
 
-        private GameActionState GetGame(GameActionState s)
+        private static GameActionState GetGame(GameActionState s)
         {
             var game =
                     s.GameProviderGames.FirstOrDefault(
@@ -184,22 +188,30 @@ namespace TGS.Services.GameOperations.Data
                 return (s, null);
             }
 
-            var repo = s.Repo;
+            var db = s.Db;
             var gameProviderConfigurationId = s.GameProviderConfigurationId;
             var walletId = s.PlayerData.Wallet.Id;
             var externalRoundId = s.ExternalRoundId;
 
             // get all transactions belonging to this round
-            var actionsData = await GetGameActionsInSameRoundAsync(repo, gameProviderConfigurationId, walletId, externalRoundId);
+            var actionsData = await GetGameActionsInSameRoundAsync(db, gameProviderConfigurationId, walletId, externalRoundId);
 
             if (actionsData.Length == 0 && s.HasExtRefTransactionId)
             {
-                await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repo, externalRoundId, s.ExternalTransactionReferenceId);
+                await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(db, externalRoundId, s.ExternalTransactionReferenceId);
                 return (s, null);
             }
 
             var (refData, refGameActionInternalId, amount) = GetReferencedActionAndActualAmount(s, actionsData);
+            
+            s.Amount = amount;
+            s.ReferencedGameActionInternalId = refGameActionInternalId;
 
+            if (actionsData.Length == 0)
+            {
+                return (s, null);
+            }
+            
             var dict = actionsData
                             .Select(act => new BetActionData
                             {
@@ -227,12 +239,10 @@ namespace TGS.Services.GameOperations.Data
 
             var (actions, refGameAction) = GetPreviousActions(refGameActionInternalId, dict);
 
-            s.Amount = amount;
-            s.ReferencedGameActionInternalId = refGameActionInternalId;
             s.ReferencedGameAction = refGameAction;
             s.PreviousActions = actions;
 
-            if (s.InternalRoundId == null)
+            if (s.InternalRoundId == null && refData != null)
             {
                 s.InternalRoundId = refData.RoundId;
                 s.OldRoundStatus = refData.RoundStatus;
@@ -273,7 +283,7 @@ namespace TGS.Services.GameOperations.Data
             return (actions.AsReadOnly(), refGameAction);
         }
 
-        private IList<BetActionData> GetValidatePreviousActions(IList<BetActionData> actions)
+        private static IList<BetActionData> GetValidatePreviousActions(IList<BetActionData> actions)
         {
             var allCancelledIdsInTheRound = actions
                 .Where(r => r.Type == CancelTransaction && r.Reference != null)
@@ -287,6 +297,11 @@ namespace TGS.Services.GameOperations.Data
             var amount = s.PrepareAmount(s.Amount);
             Guid? refGameActionInternalId = null;
             SameRoundActionData refData = null;
+
+            if (actionsData.Length == 0)
+            {
+                return (refData, refGameActionInternalId, amount);
+            }
 
             if (s.HasExtRefTransactionId)
             {
@@ -415,17 +430,17 @@ namespace TGS.Services.GameOperations.Data
             return ga;
         }
 
-        private Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
+        private static Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
         {
-            var repo = s.Repo;
+            var db = s.Db;
             var walletId = s.PlayerData.Wallet.Id;
 
             if (s.HasWalletUpdate && s.Amount != 0)
             {
-                return AtomicUpdateBalanceAsync(repo, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow);
+                return AtomicUpdateBalanceAsync(db, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow);
             }
 
-            return GetBalanceAsync(repo, walletId);
+            return GetBalanceAsync(db, walletId);
         }
 
         private async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
@@ -439,7 +454,7 @@ namespace TGS.Services.GameOperations.Data
             return s.InternalRoundId.Value;
         }
 
-        private async Task<Guid> CreateNewRoundAndGetIdAsync(GameActionState s)
+        private static async Task<Guid> CreateNewRoundAndGetIdAsync(GameActionState s)
         {
             var roundData = new RoundData
             {
@@ -468,15 +483,13 @@ namespace TGS.Services.GameOperations.Data
                 ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),
             };
 
-            await InsertNewRoundAsync(s.Repo, roundData);
+            await InsertNewRoundAsync(s.Db, roundData);
 
             return roundData.Id;
         }
 
-        private async Task UpdatedRoundAsync(GameActionState s)
+        private static async Task UpdatedRoundAsync(GameActionState s)
         {
-            var repo = s.Repo;
-
             var roundData = new RoundData
             {
                 Id = s.InternalRoundId.Value,
@@ -507,7 +520,7 @@ namespace TGS.Services.GameOperations.Data
                 };
             }
 
-            await UpdateRoundAsync(repo, roundData);
+            await UpdateRoundAsync(s.Db, roundData);
         }
 
         private async Task<GameActionData> CreateGameActionAsync(GameActionState s, BetActionData current)
@@ -543,14 +556,28 @@ namespace TGS.Services.GameOperations.Data
                 Description = s.Description,
             };
 
-            await InsertGameActionAsync(s.Repo, gameActionData);
+            await InsertGameActionAsync(s.Db, gameActionData);
 
             return gameActionData;
         }
 
-        private DateTimeOffset AdjustRecordedOnIfNeeded(GameActionState s)
+        private static DateTimeOffset AdjustRecordedOnIfNeeded(GameActionState s)
         {
-            throw new NotImplementedException();
+            var now = DateTimeOffset.UtcNow;
+
+            if (s.PreviousActions == null)
+            { 
+                return now;
+            }
+
+            var previousRecordedOn = s.PreviousActions
+                .OrderByDescending(x => x.RecordedOn)
+                .Select(x => x.RecordedOn)
+                .FirstOrDefault();
+
+            // due to multiple servers, if current server time is earlier than the latest timestamp, 
+            // take the lasted timestamp and add 50 milliseconds as current timestamp.
+            return now > previousRecordedOn ? now : previousRecordedOn.AddMilliseconds(50);
         }
     }
 }

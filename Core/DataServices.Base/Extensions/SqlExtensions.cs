@@ -11,32 +11,32 @@ namespace TGS.Core.DataServices.Base.Extensions
 {
     public static class SqlExtensions
     {
-        public static async Task<IEnumerable<TEntity>> SqlQueryMultipleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
+        public static async Task<IEnumerable<TEntity>> SqlQueryMultipleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, IDbTransaction transaction = null, params SqlParameter[] parameters)
         {
             var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {
-                return await conn.QueryAsync<TEntity>(sql, commandType: commandType);
+                return await conn.QueryAsync<TEntity>(sql, commandType: commandType, transaction: transaction);
             }
 
             var param = GetDynamicParameters(parameters);
 
-            return await conn.QueryAsync<TEntity>(sql, param, commandType: commandType);
+            return await conn.QueryAsync<TEntity>(sql, param, commandType: commandType, transaction: transaction);
         }
 
-        public static async Task<TEntity> SqlQuerySingleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, params SqlParameter[] parameters)
+        public static async Task<TEntity> SqlQuerySingleAsync<TEntity>(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, IDbTransaction transaction = null, params SqlParameter[] parameters)
         {
             var conn = repository.GetDbConnection();
 
             if (parameters == null || parameters.Length == 0)
             {
-                return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, commandType: commandType);
+                return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, commandType: commandType, transaction: transaction);
             }
 
             var param = GetDynamicParameters(parameters);
 
-            return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, param, commandType: commandType);
+            return await conn.QueryFirstOrDefaultAsync<TEntity>(sql, param, commandType: commandType, transaction: transaction);
         }
 
         public static async Task<int> ExecuteSqlCommandAsync(this IBaseRepository repository, string sql, CommandType commandType = CommandType.StoredProcedure, IDbTransaction transaction = null, params SqlParameter[] parameters)

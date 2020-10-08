@@ -58,9 +58,9 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(ITgsRepository repo, string externalRoundId, string externalTransactionId)
+        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(Db db, string externalRoundId, string externalTransactionId)
         {
-            var foundExternalRoundId = await GetExternalRoundIdAsync(repo, externalTransactionId);
+            var foundExternalRoundId = await GetExternalRoundIdAsync(db, externalTransactionId);
             if (foundExternalRoundId.IsNotNullOrEmpty() && foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
             {
                 throw new InvalidGameActionException(
@@ -69,7 +69,7 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private GameActionResult ValidateReferenceAction(GameActionState s)
+        private static GameActionResult ValidateReferenceAction(GameActionState s)
         {
             var action = s.PreviousActions?.FirstOrDefault(pa => pa.ExternalId == s.ExternalTransactionId);
 

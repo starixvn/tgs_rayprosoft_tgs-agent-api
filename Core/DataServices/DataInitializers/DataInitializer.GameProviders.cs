@@ -1,9 +1,9 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration.Attributes;
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using CsvHelper;
+using CsvHelper.Configuration.Attributes;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 
@@ -34,7 +34,7 @@ namespace TGS.Core.DataServices.DataInitializers
             string SecretKey { get; }
             string DesktopEndpoint { get; }
             string MobileEndpoint { get; }
-            string ConfigurationData { get; }            
+            string ConfigurationData { get; }
         }
 
         internal interface IGame
@@ -71,7 +71,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string ICodeMapper.Code => _code;
             string ICodeMapper.ExternalCode => _externalCode;
-        }        
+        }
 
         internal record Game : IGame
         {
@@ -93,10 +93,12 @@ namespace TGS.Core.DataServices.DataInitializers
                 get { return _code; }
                 init
                 {
-                    _code = value ?? _name.ReplaceApostropheByEmpty()
-                                          .Replace("&", "And")
-                                          .Replace("-", "_")
-                                          .Replace("+", "Plus");
+                    _code = value.IsNotNullOrEmpty() ?
+                                value :
+                                _name.ReplaceApostropheByEmpty()
+                                     .Replace("&", "And")
+                                     .Replace("-", "_")
+                                     .Replace("+", "Plus");
                 }
             }
 
@@ -140,7 +142,7 @@ namespace TGS.Core.DataServices.DataInitializers
             using var stream = typeof(DataInitializer).Assembly.GetManifestResourceStream(csvName);
             using var reader = new StreamReader(stream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-            return csv.GetRecords<Game>().Cast<IGame>().ToArray();
+            return csv.GetRecords<Game>().ToList().Cast<IGame>().ToArray();
         }
 
         #endregion Private Method

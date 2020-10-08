@@ -27,7 +27,6 @@ BEGIN
            ga.[IsClosingRound] AS [IsClosingRound],
            ga.[ClosingRoundExplicitRequest] AS [ClosingRoundExplicitRequest],
            ga.[Type] AS [Type],
-           ga.[BetId] AS [BetId],
            r.[Id] AS [RoundId],
            r.[GameId] AS [GameId],
            r.[Status] AS [RoundStatus],

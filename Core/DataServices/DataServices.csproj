@@ -16,6 +16,7 @@
     <None Remove="DataInitializers\Games\RT.csv" />
     <None Remove="DataInitializers\Games\SBO.csv" />
     <None Remove="SqlScripts\SP\usp_GameAction_GetGameActionsInSameRound.sql" />
+    <None Remove="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
     <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
@@ -52,6 +53,7 @@
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_GetGameActionsInSameRound.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />

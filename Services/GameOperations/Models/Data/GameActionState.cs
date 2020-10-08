@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
@@ -34,7 +35,7 @@ namespace TGS.Services.GameOperations.Models.Data
             BetType = td.BetType;
         }
 
-        public ITgsRepository Repo { get; init; }
+        public Db Db { get; init; }
         public GameActionType GameActionType { get; init; }
         public PlatformType PlatformType { get; init; }
         public Action<string, decimal> ValidateAmount { get; init; }
@@ -106,4 +107,6 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool ForceGetPreviousActions { get; init; }
         public bool FreeBetAsSingleRound { get; init; }
     }
+
+    internal record Db(ITgsRepository Repository, IDbTransaction Transaction);
 }
