@@ -31,6 +31,8 @@ import {
   Table,
   useClassName
 } from "bumbag"
+import { FieldValues, TwoColumns } from "../../../layout/Grid"
+import { Trans, FormattedDateTime, FormattedNumber } from "../../../i18n"
 
 export const Key = "banks"
 
@@ -38,18 +40,40 @@ export const Tab = ({ ...props }) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      {title()}
+      <Trans zh="银行卡信息" en="Bank" />
     </_Tab>
   )
 }
 
-export const Panel = ({ ...props }) => {
+//TODO: use grid layout?
+export const Panel = ({ banks = [], ...props }) => {
   return (
     <_TabPanel {...props} id={Key}>
-      TODO: async player bank cards
+      <TwoColumns>
+        {banks.length > 0 &&
+          banks.map((bank, index) => <Bank key={index} {...bank} />)}
+      </TwoColumns>
     </_TabPanel>
   )
 }
 
-//TODO: i18n
-const title = () => "银行卡信息"
+const Bank = ({ realName = "", bankName = "", bankAccount = "" }) => {
+  return (
+    <Card
+      variant="bordered"
+      margin="major-1"
+      css={css`
+        flex: 1 50%;
+      `}
+    >
+      <FieldValues>
+        <Trans zh="真实姓名" en="Real name" />
+        <Text>{realName}</Text>
+        <Trans zh="银行" en="Bank" />
+        <Text>{bankName}</Text>
+        <Trans zh="银行卡号" en="Bank Account" />
+        <Text>{bankAccount}</Text>
+      </FieldValues>
+    </Card>
+  )
+}

@@ -31,7 +31,8 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { FieldValuePair as FieldValueGrid } from "../../../layout/Grid"
+import { FieldValues } from "../../../layout/Grid"
+import { Trans } from "../../../i18n"
 
 export const Key = "contact"
 
@@ -39,7 +40,7 @@ export const Tab = ({ ...props }) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      {title()}
+      <Trans zh="联系信息" en="Contact Info" />
     </_Tab>
   )
 }
@@ -48,10 +49,16 @@ export const Panel = ({ player = {}, ...props }) => {
   let { phone, email, qq, weChat } = player
   return (
     <_TabPanel {...props} id={Key}>
-      <FieldValueGrid margin="major-1"></FieldValueGrid>
+      <FieldValues margin="major-1">
+        <Trans zh="手机号码" en="Mobile" />
+        <Text>{phone}</Text>
+        <Trans zh="邮箱" en="Email" />
+        <Text>{email}</Text>
+        <Trans zh="QQ" en="QQ" />
+        <Text>{qq}</Text>
+        <Trans zh="微信号" en="WeChat" />
+        <Text>{weChat}</Text>
+      </FieldValues>
     </_TabPanel>
   )
 }
-
-//TODO: i18n
-const title = () => "联系信息"

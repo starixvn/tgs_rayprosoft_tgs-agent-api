@@ -6,6 +6,7 @@ import "./index.css"
 import { Provider as BumbagProvider } from "bumbag"
 import { Provider as UserProvider } from "./user/context"
 import { BrowserRouter as Router } from "react-router-dom"
+import { Provider as I18nProvider } from "./i18n"
 
 const theme = {
   PageContent: {
@@ -20,7 +21,9 @@ ReactDOM.render(
     <Router>
       <BumbagProvider theme={theme}>
         <UserProvider>
-          <App />
+          <I18nProvider>
+            <App />
+          </I18nProvider>
         </UserProvider>
       </BumbagProvider>
     </Router>

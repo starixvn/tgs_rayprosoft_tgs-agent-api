@@ -21,9 +21,16 @@ export const Grid = ({ areas = "", children, ...props }) => {
 }
 
 //  margin: ${space(2, "major")}rem;
-export const FieldValuePair = styled(Box)`
+export const FieldValues = styled(Box)`
   display: grid;
   grid-template-columns: minmax(20%, auto) 1fr;
+  gap: ${space(1, "major")}rem;
+`
+
+export const TwoColumns = styled(Box)`
+  display: grid;
+  grid-template-columns: ${(props) =>
+    `${props?.columns?.[0] ?? "1fr"} ${props?.columns?.[1] ?? "1fr"}`};
   gap: ${space(1, "major")}rem;
 `
 

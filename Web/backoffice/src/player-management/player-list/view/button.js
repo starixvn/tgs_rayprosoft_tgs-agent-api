@@ -87,10 +87,18 @@ const TabsDialog = ({ playerCode, dialog, finalFocusRef }) => {
           showCloseButton={true}
           hideOnClickOutside={false}
           unstable_finalFocusRef={finalFocusRef}
+          placement="top"
           {...dialog}
-          css={css``}
+          css={css`
+            min-width: 80vw;
+            min-height: 80vh;
+
+            & .bb-DialogContent {
+              min-height: 80vh;
+            }
+          `}
         >
-          <_Tabs use={Box} css={css``}>
+          <_Tabs use={Box} isFitted css={css``}>
             <_Tabs.List use={TabList} {...tab}>
               <PlayerTab {...tab} />
               <ContractTab {...tab} />

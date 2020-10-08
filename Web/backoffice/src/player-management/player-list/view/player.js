@@ -33,7 +33,9 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { FieldValuePair as FieldValueGrid } from "../../../layout/Grid"
+import { FieldValues } from "../../../layout/Grid"
+import { Trans, FormattedDateTime, FormattedNumber } from "../../../i18n"
+import { Label as StatusLabel } from "../status"
 
 export const Key = "player"
 
@@ -41,7 +43,7 @@ export const Tab = ({ ...props }) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      {title()}
+      <Trans zh="玩家信息" en="Player" />
     </_Tab>
   )
 }
@@ -59,43 +61,35 @@ export const Panel = ({ player, ...props }) => {
   } = player
   return (
     <_TabPanel {...props} id={Key}>
-      <FieldValueGrid margin="major-1">
-        <Text>{usernameField()}</Text>
+      <FieldValues margin="major-1">
+        <Trans zh="用户名" en="User name" />
         <Text>{username}</Text>
-        <Text>{realNameField()}</Text>
+
+        <Trans zh="真实姓名" en="Real name" />
         <Text>{realName}</Text>
-        <Text>{vipLevelField()}</Text>
+
+        <Trans zh="VIP等级" en="VIP Level" />
         <Text>{vipLevel}</Text>
-        <Text>{parentUsernameField()}</Text>
+
+        <Trans zh="上级用户名" en="上级用户名" />
         <Text>{parentUsername}</Text>
-        <Text>{registeredOnField()}</Text>
-        <Text>TODO: fmt {registeredOn}</Text>
-        <Text>{balanceField()}</Text>
-        <Text>TODO: fmt {balance}</Text>
-        <Text>{statusField()}</Text>
-        <Text>TODO: trans {status}</Text>
-        <Text>{agentField()}</Text>
-        <Text>TODO: {hasAgent}</Text>
-      </FieldValueGrid>
+
+        <Trans zh="注册时间" en="Registration" />
+        <FormattedDateTime value={registeredOn} />
+
+        <Trans zh="余额" en="Balance" />
+        <FormattedNumber value={balance} />
+
+        <Trans zh="状态" en="Status" />
+        <StatusLabel value={status} />
+
+        <Trans zh="代理功能" en="Agent" />
+        <Text>
+          {hasAgent && <Trans zh="开启" en="Turn on" />}
+          {!hasAgent && <Trans zh="关闭" en="Turn off" />}
+        </Text>
+        <Text>{hasAgent}</Text>
+      </FieldValues>
     </_TabPanel>
   )
 }
-
-//TODO: i18n
-const title = () => "玩家信息"
-
-const usernameField = () => "用户名"
-
-const realNameField = () => "真实姓名"
-
-const vipLevelField = () => "VIP等级"
-
-const parentUsernameField = () => "上级用户名"
-
-const registeredOnField = () => "注册时间"
-
-const balanceField = () => "余额"
-
-const statusField = () => "状态"
-
-const agentField = () => "代理功能"

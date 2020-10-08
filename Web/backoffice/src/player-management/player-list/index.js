@@ -18,7 +18,7 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useList } from "./client"
 import { useTable, Table, pageCount } from "../../table"
-import { label as statusLabel } from "../status"
+import { Label as StatueLabel } from "./status"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
@@ -146,6 +146,7 @@ const useTableColumns = ({} = {}) => {
     {
       Header: "用户名",
       accessor: "username",
+      disableSortBy: true,
       headCell: {
         textAlign: "center"
       },
@@ -155,6 +156,7 @@ const useTableColumns = ({} = {}) => {
     },
     {
       Header: "VIP 等级",
+      disableSortBy: true,
       accessor: "vipLevel",
       headCell: {
         textAlign: "center"
@@ -173,9 +175,7 @@ const useTableColumns = ({} = {}) => {
       cell: {
         textAlign: "center"
       },
-      Cell: ({ value }) => {
-        return statusLabel(value)
-      }
+      Cell: ({ value }) => <StatueLabel value={value} />
     }
   ]
 
