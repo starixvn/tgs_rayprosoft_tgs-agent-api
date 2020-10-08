@@ -62,10 +62,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpGet, Route("captcha")]
-        public async Task<CaptchaInfo> GetCaptcha()
+        public CaptchaInfo GetCaptcha()
         {
-            var model = await _captchaFactory.CreateAsync();
-            return model;
+            return _captchaFactory.Create();
         }
 
         /// <summary>

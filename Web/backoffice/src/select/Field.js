@@ -25,12 +25,17 @@ export const Field = ({ required, validate, children, ...props }) => {
       {({ field, form, meta }) => {
         let state = meta.error && meta.touched && "danger"
         let validationText = state ? `${meta.error}` : ""
-        return (
+
+        return required || validate ? (
           <FieldWrapper
             state={state}
             validationText={validationText}
             minHeight={`${FieldMinHeight}rem`}
           >
+            {children({ ...field, ...props })}
+          </FieldWrapper>
+        ) : (
+          <FieldWrapper state={state} validationText={validationText}>
             {children({ ...field, ...props })}
           </FieldWrapper>
         )
