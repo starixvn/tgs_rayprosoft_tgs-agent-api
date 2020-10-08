@@ -89,18 +89,19 @@ namespace TGS.Services.GameOperations.Data
                     PlayerData = player,
                     GameProviderGames = games,
                     ForceGetPreviousActions = data.ForceGetPreviousActions,
-                    FreeBetAsSingleRound = data.FreeBetAsSingleRound
+                    FreeBetAsSingleRound = data.FreeBetAsSingleRound,
+                    AutoCloseRound = data.AutoCloseRound
                 });
 
                 transactionResults.Add(result.TransactionResult);
-            }            
+            }
 
             return new BetResult
             {
                 Balance = player.Wallet.Balance,
                 CurrencyCode = player.Wallet.CurrencyCode,
                 Transactions = transactionResults.ToArray(),
-                PlatformType = (int) data.PlatformType.Value,
+                PlatformType = (int)data.PlatformType.Value,
                 Error = TgsApiError.None,
             };
         }
@@ -153,7 +154,7 @@ namespace TGS.Services.GameOperations.Data
             }
 
             if (roundData != null)
-            { 
+            {
                 s.InternalRoundId = roundData.RoundId;
                 s.OldRoundStatus = roundData.Status;
             }
@@ -203,7 +204,7 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var (refData, refGameActionInternalId, amount) = GetReferencedActionAndActualAmount(s, actionsData);
-            
+
             s.Amount = amount;
             s.ReferencedGameActionInternalId = refGameActionInternalId;
 
@@ -211,7 +212,7 @@ namespace TGS.Services.GameOperations.Data
             {
                 return (s, null);
             }
-            
+
             var dict = actionsData
                             .Select(act => new BetActionData
                             {
@@ -264,15 +265,17 @@ namespace TGS.Services.GameOperations.Data
             {
                 if (act.ReferenceId.HasValue && actionMap.TryGetValue(act.ReferenceId.Value, out var refBet))
                 {
-                    var isCancelled = GetGameActionIsCancelled(act.Type, false);
+                    refBet.IsCancelled = act.Type == CancelTransaction;                   
                     act.Reference = refBet;
-                    act.Reference.IsCancelled = isCancelled;
                 }
 
                 if (act.Id == refGameActionInternalId)
                 {
-                    var isCancelled = GetGameActionIsCancelled(act.Type, true);
-                    act.Reference.Reference.IsCancelled = isCancelled;
+                    // for un-cancel transaction
+                    if (act.Type == CancelTransaction && act.Reference.Type == CancelTransaction)
+                    {
+                        act.Reference.Reference.IsCancelled = false;
+                    }
 
                     refGameAction = act;
                 }
@@ -342,22 +345,6 @@ namespace TGS.Services.GameOperations.Data
             return s.ForceGetPreviousActions ||
                    s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
                    !BypassPreviousActionGameTypes.Contains(s.Game.Type);
-        }
-
-        private static bool GetGameActionIsCancelled(GameActionType type, bool isReference)
-        {
-            if (type != CancelTransaction)
-            {
-                return false;
-            }
-
-            // for un-cancel transaction
-            if (isReference)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId)
@@ -443,7 +430,7 @@ namespace TGS.Services.GameOperations.Data
             return GetBalanceAsync(db, walletId);
         }
 
-        private async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
+        private static async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
         {
             if (s.InternalRoundId == null)
             {
@@ -523,7 +510,7 @@ namespace TGS.Services.GameOperations.Data
             await UpdateRoundAsync(s.Db, roundData);
         }
 
-        private async Task<GameActionData> CreateGameActionAsync(GameActionState s, BetActionData current)
+        private static async Task<GameActionData> CreateGameActionAsync(GameActionState s, BetActionData current)
         {
             var player = s.PlayerData;
 
@@ -566,7 +553,7 @@ namespace TGS.Services.GameOperations.Data
             var now = DateTimeOffset.UtcNow;
 
             if (s.PreviousActions == null)
-            { 
+            {
                 return now;
             }
 
@@ -575,7 +562,7 @@ namespace TGS.Services.GameOperations.Data
                 .Select(x => x.RecordedOn)
                 .FirstOrDefault();
 
-            // due to multiple servers, if current server time is earlier than the latest timestamp, 
+            // due to multiple servers, if current server time is earlier than the latest timestamp,
             // take the lasted timestamp and add 50 milliseconds as current timestamp.
             return now > previousRecordedOn ? now : previousRecordedOn.AddMilliseconds(50);
         }

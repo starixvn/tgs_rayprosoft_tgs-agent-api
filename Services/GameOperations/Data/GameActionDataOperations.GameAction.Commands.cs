@@ -242,8 +242,8 @@ namespace TGS.Services.GameOperations.Data
                 },
                 new()
                 {
-                    ParameterName = "@betAmount",
-                    Value = roundData.BetAmount,
+                    ParameterName = "@winLoss",
+                    Value = roundData.WinLoss,
                     DbType = DbType.Decimal
                 },
                 new()
@@ -254,7 +254,7 @@ namespace TGS.Services.GameOperations.Data
                 },
                 new()
                 {
-                    ParameterName = "@commssion",
+                    ParameterName = "@commission",
                     Value = roundData.Commission,
                     DbType = DbType.Decimal
                 },

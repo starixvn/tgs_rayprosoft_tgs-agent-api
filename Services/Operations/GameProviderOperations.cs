@@ -71,7 +71,7 @@ namespace TGS.Services.Operations
                 Name = r.Name,
                 Description = r.Description,
                 Status = r.Status,
-                AutoClosedRound = r.AutoClosedRound,
+                AutoCloseRound = r.AutoCloseRound,
                 SupportTestPlayer = r.SupportTestPlayer,
                 PlaceBetTimeout = r.PlaceBetTimeout,
                 SettleBetTimeout = r.SettleBetTimeout
@@ -234,7 +234,7 @@ namespace TGS.Services.Operations
                 CachedGameProviderFields.GameProviderName,
                 CachedGameProviderFields.Status,
                 CachedGameProviderFields.Decription,
-                CachedGameProviderFields.AutoClosedRound,
+                CachedGameProviderFields.AutoCloseRound,
                 CachedGameProviderFields.SupportTestPlayer,
                 CachedGameProviderFields.PlaceBetTimeout,
                 CachedGameProviderFields.SettleBetTimeout
@@ -249,7 +249,7 @@ namespace TGS.Services.Operations
                     Name = values[2],
                     Status = (Status)(int)values[3],
                     Description = values[4],
-                    AutoClosedRound = (bool)values[5],
+                    AutoCloseRound = (bool)values[5],
                     SupportTestPlayer = (bool)values[6],
                     PlaceBetTimeout = (int)values[7],
                     SettleBetTimeout = (int)values[8]
@@ -268,7 +268,7 @@ namespace TGS.Services.Operations
                 new (CachedGameProviderFields.GameProviderName, gameProvider.Name),
                 new (CachedGameProviderFields.Status, (int)gameProvider.Status),
                 new (CachedGameProviderFields.Decription, gameProvider.Description),
-                new (CachedGameProviderFields.AutoClosedRound, gameProvider.AutoClosedRound),
+                new (CachedGameProviderFields.AutoCloseRound, gameProvider.AutoCloseRound),
                 new (CachedGameProviderFields.SupportTestPlayer, gameProvider.SupportTestPlayer),
                 new (CachedGameProviderFields.PlaceBetTimeout, gameProvider.PlaceBetTimeout),
                 new (CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout)
@@ -317,7 +317,7 @@ namespace TGS.Services.Operations
             public const string GameProviderName = "gameProviderName";
             public const string Status = "status";
             public const string Decription = "description";
-            public const string AutoClosedRound = "autoClosedRound";
+            public const string AutoCloseRound = "autoClosedRound";
             public const string SupportTestPlayer = "supportTestPlayer";
             public const string PlaceBetTimeout = "placeBetTimeout";
             public const string SettleBetTimeout = "settleBetTimeout";

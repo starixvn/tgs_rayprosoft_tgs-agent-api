@@ -13,8 +13,8 @@ namespace TGS.Core.Models.Services.Games
         public bool AutoCloseRound { get; init; }
         public TransactionData[] Transactions { get; init; }
         public bool HasCurrencyFromGameProvider { get; init; } = true;
-        public bool ForceGetPreviousActions { get; init; } = false;
-        public bool FreeBetAsSingleRound { get; init; } = false;
+        public bool ForceGetPreviousActions { get; init; }
+        public bool FreeBetAsSingleRound { get; init; }
         public Guid? BatchId { get; init; }
     }
 }

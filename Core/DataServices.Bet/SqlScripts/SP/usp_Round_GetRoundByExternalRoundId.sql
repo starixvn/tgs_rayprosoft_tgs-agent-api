@@ -16,7 +16,7 @@ BEGIN
     SET NOCOUNT ON
     
     SELECT 
-        [Id],
+        [Id] AS [RoundId],
         [ExternalRoundId],
         [Status]
     FROM dbo.[Rounds]
