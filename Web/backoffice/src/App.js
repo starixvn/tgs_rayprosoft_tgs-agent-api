@@ -40,7 +40,8 @@ function App() {
   return (
     <SWRConfig
       value={{
-        errorRetryCount: 0
+        revalidateOnFocus: false,
+        shouldRetryOnError: false
       }}
     >
       <Switch>

@@ -1,4 +1,4 @@
-import useSWR, { useSWRInfinite } from "swr"
+import useSWR from "swr"
 import { urlWith, get } from "../../client"
 
 export const useList = (searchParams = {}) => {

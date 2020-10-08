@@ -32,7 +32,7 @@ import {
 } from "bumbag"
 import { useTable, Table, pageCount } from "../../../table"
 import dateTimeColumn from "../../../table/column/dateTime"
-import { useOperations } from "../player"
+import { useOperations } from "../client"
 
 export const Key = "operation"
 

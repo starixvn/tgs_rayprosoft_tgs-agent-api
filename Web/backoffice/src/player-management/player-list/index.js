@@ -4,11 +4,19 @@ import client from "../../client"
 import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import { Heading, Stack, Box, Button, InputField, Set } from "bumbag"
+import {
+  Heading,
+  Stack,
+  Box,
+  Button,
+  InputField,
+  Set,
+  useModalState
+} from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import { useList } from "./player"
+import { useList } from "./client"
 import { useTable, Table, pageCount } from "../../table"
 import { label as statusLabel } from "../status"
 import {
@@ -49,7 +57,7 @@ const AsyncContent = () => {
     vipId,
     username = ""
   } = state
-  let { data = {}, isLoading, mutate } = useList({
+  let { data = {}, isLoading, isValidating, mutate } = useList({
     page: pageIndex + 1,
     rows: pageSize,
     sortby,
@@ -71,7 +79,6 @@ const AsyncContent = () => {
               pageIndex: 0,
               ...data
             })
-            //mutate()
           }}
           isPending={isLoading}
         />

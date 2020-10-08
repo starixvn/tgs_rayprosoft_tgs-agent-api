@@ -37,7 +37,7 @@ import { Tab as BettingTab, Panel as BettingPanel } from "./betting"
 import { Tab as OperationTab, Panel as OperationPanel } from "./operation"
 import LoadingBackdrop from "../../../dialog/LoadingBackdrop"
 import AlertDialog from "../../../dialog/Alert"
-import { usePlayer } from "../player"
+import { usePlayer } from "../client"
 
 export const Button = ({ player, ...props }) => {
   let dialog = Modal.useState()
@@ -77,11 +77,10 @@ const TabsDialog = ({ playerCode, dialog, finalFocusRef }) => {
   })
 
   const { player, isLoading, isError, error } = usePlayer({ playerCode })
-
   return (
     <>
       {isLoading && <LoadingBackdrop />}
-      {isError && <AlertDialog {...error} onClickClose={() => dialog.hide()} />}
+      {isError && <AlertDialog {...error} onClickClose={dialog.hide} />}
       {player && (
         <Dialog.Modal
           title={title()}

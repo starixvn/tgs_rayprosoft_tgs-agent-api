@@ -13,9 +13,6 @@ import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 const DefaultState = {
   pageIndex: 0,
   pageSize: 10,
-  /*
-  sortBy: []
-  */
   sortby: "",
   orderby: ""
 }
@@ -41,32 +38,12 @@ export const useTable = (initialState = {}) => {
   const setSortOrder = ({ sortby = "", orderby = "" }) => {
     set((prevState) => ({ ...prevState, sortby, orderby }))
   }
-  /*
-  const setSortOrder = ({ id = "", desc }) =>
-    set((prevState) => ({ ...prevState, sortBy: [{ id, desc }] }))
-
-  const HeadIndex = 0
-  const sortBy = () => {
-    let { id = "" } = state?.sortBy?.[HeadIndex] ?? {}
-    return id
-  }
-
-  const orderBy = () => {
-    let { id = "", desc } = state?.sortBy?.[HeadIndex] ?? {}
-    return id && fromIsDescending(desc)
-  }
-  */
 
   return {
     state,
     setState,
     setPageIndex,
     setPageSize,
-    /*
-    sortBy,
-    orderBy,
-    setSortOrder
-    */
     setSortOrder
   }
 }
@@ -123,21 +100,10 @@ export const Table = ({
   let sortby = tableState?.sortBy?.[HeadIndex]?.id ?? ""
   let orderby =
     sortby && fromIsDescending(tableState?.sortBy?.[HeadIndex]?.desc)
+
   useEffect(() => {
-    console.log("setSortOrder sortby", sortby, "orderby", orderby)
-    setSortOrder({ sortby, orderby })
+    setSortOrder && setSortOrder({ sortby, orderby })
   }, [sortby, orderby])
-  /*
-  let HeadIndex = 0
-  let id = tableState?.sortBy?.[HeadIndex]?.id ?? ""
-  let desc = tableState?.sortBy?.[HeadIndex]?.desc ?? null
-  useEffect(() => {
-    setSortOrder({
-      id,
-      desc
-    })
-  }, [id, desc])
-  */
 
   const getPage = () => pageIndex + 1
   return (

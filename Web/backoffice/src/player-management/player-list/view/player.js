@@ -4,7 +4,7 @@ import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
 import client from "../../../client"
 import useSWR from "swr"
-import { usePlayer } from "../player"
+import { usePlayer } from "../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
