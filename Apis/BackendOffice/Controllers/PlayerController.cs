@@ -88,7 +88,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Status = player.Status.ToString(),
                 HasAgent = player.HasAgent,
                 RegisteredOn = player.RegisteredOn,
-                ParentUsername = player.ParentPlayer.Username,
+                ParentUsername = player.ParentPlayer?.Username,
                 Balance = player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
                 Phone = player.Phone,
                 Email = player.Email,
