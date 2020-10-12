@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
 {
@@ -6,11 +7,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
     {
         public string Username { get; set; }
         public string RealName { get; set; }
+        public Guid VipId { get; set; }
         public string VipLevel { get; set; }
         public string ParentUsername { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
         public decimal Balance { get; set; }
-        public string Status { get; set; }
+        public PlayerStatus Status { get; set; }
+        public string StatusName { get; set; }
         public bool HasAgent { get; set; }
 
         public string Phone { get; set; }
