@@ -109,4 +109,5 @@ export const Label = ({ value }) => {
         </Text>
       )
   }
+  return null
 }

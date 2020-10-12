@@ -2,9 +2,8 @@ import React, { useState, useEffect, useMemo, useRef, useContext } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../../client"
 import useSWR from "swr"
-import { usePlayer } from "../client"
+import { usePlayer } from "./client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
@@ -33,9 +32,9 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { FieldValues } from "../../../layout/Grid"
-import { Trans, FormattedDateTime, FormattedNumber } from "../../../i18n"
-import { Label as StatusLabel } from "../status"
+import { FieldValues } from "../../layout/Grid"
+import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
+import { Label as StatusLabel } from "./status"
 
 export const Key = "player"
 
@@ -48,7 +47,8 @@ export const Tab = ({ ...props }) => {
   )
 }
 
-export const Panel = ({ player, ...props }) => {
+export const Panel = ({ player = {}, edit = false, ...props }) => {
+  let readonly = !edit
   let {
     username = "",
     realName = "",
@@ -66,29 +66,45 @@ export const Panel = ({ player, ...props }) => {
         <Text>{username}</Text>
 
         <Trans zh="真实姓名" en="Real name" />
-        <Text>{realName}</Text>
-
+        <Box>
+          {readonly && <Text>{realName}</Text>}
+        </Box>
+        
         <Trans zh="VIP等级" en="VIP Level" />
-        <Text>{vipLevel}</Text>
+        <Box>
+          {readonly && <Text>{vipLevel}</Text>}
+        </Box>
+        
 
         <Trans zh="上级用户名" en="上级用户名" />
-        <Text>{parentUsername}</Text>
+        <Box>
+          {readonly && <Text>{parentUsername}</Text>}
+        </Box>
 
         <Trans zh="注册时间" en="Registration" />
-        <FormattedDateTime value={registeredOn} />
+        <Box>
+          <FormattedDateTime value={registeredOn} />
+        </Box>
 
         <Trans zh="余额" en="Balance" />
-        <FormattedNumber value={balance} />
-
+        <Box>
+          <FormattedNumber value={balance} />
+        </Box>
+        
         <Trans zh="状态" en="Status" />
-        <StatusLabel value={status} />
-
+        <Box>
+          {readonly && <StatusLabel value={status} />}
+        </Box>
+        
         <Trans zh="代理功能" en="Agent" />
-        <Text>
-          {hasAgent && <Trans zh="开启" en="Turn on" />}
-          {!hasAgent && <Trans zh="关闭" en="Turn off" />}
-        </Text>
-        <Text>{hasAgent}</Text>
+        <Box>
+          {readonly && 
+            <Text>
+              {hasAgent && <Trans zh="开启" en="Turn on" />}
+              {!hasAgent && <Trans zh="关闭" en="Turn off" />}
+            </Text>
+          }
+        </Box>
       </FieldValues>
     </_TabPanel>
   )

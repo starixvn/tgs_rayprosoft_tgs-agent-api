@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import client from "../../client"
 import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import { useLocation, useRouteMatch } from "react-router-dom"
@@ -26,8 +25,7 @@ import {
 import { Code } from "./menu"
 import { Field as StatusField } from "../status"
 import { Field as VipLevelField } from "../vipLevel"
-import { Button as ViewButton } from "./view/button"
-import { Button as EditButton } from "./edit/button"
+import { ViewButton, EditButton } from "./button"
 
 export { Code }
 

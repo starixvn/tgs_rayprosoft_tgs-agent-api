@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
@@ -31,8 +30,8 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { FieldValues, TwoColumns } from "../../../layout/Grid"
-import { Trans, FormattedDateTime, FormattedNumber } from "../../../i18n"
+import { FieldValues, TwoColumns } from "../../layout/Grid"
+import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 
 export const Key = "banks"
 
@@ -46,7 +45,7 @@ export const Tab = ({ ...props }) => {
 }
 
 //TODO: use grid layout?
-export const Panel = ({ banks = [], ...props }) => {
+export const Panel = ({ banks = [], edit = false, ...props }) => {
   return (
     <_TabPanel {...props} id={Key}>
       <TwoColumns>

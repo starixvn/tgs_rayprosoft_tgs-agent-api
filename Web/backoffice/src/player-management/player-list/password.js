@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
@@ -31,34 +30,24 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { FieldValues } from "../../../layout/Grid"
-import { Trans } from "../../../i18n"
+import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 
-export const Key = "contact"
+export const Key = "password"
 
-export const Tab = ({ ...props }) => {
+export const Tab = (props = {}) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      <Trans zh="联系信息" en="Contact Info" />
+      <Trans zh="修改密码" en="Update Password" />
     </_Tab>
   )
+  
 }
 
-export const Panel = ({ player = {}, ...props }) => {
-  let { phone, email, qq, weChat } = player
+export const Panel = ({ player, ...props }) => {
   return (
     <_TabPanel {...props} id={Key}>
-      <FieldValues margin="major-1">
-        <Trans zh="手机号码" en="Mobile" />
-        <Text>{phone}</Text>
-        <Trans zh="邮箱" en="Email" />
-        <Text>{email}</Text>
-        <Trans zh="QQ" en="QQ" />
-        <Text>{qq}</Text>
-        <Trans zh="微信号" en="WeChat" />
-        <Text>{weChat}</Text>
-      </FieldValues>
+      TODO: edit player password
     </_TabPanel>
   )
 }

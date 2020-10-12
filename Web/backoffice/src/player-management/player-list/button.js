@@ -24,8 +24,8 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { View as ViewMenu } from "../menu"
-import { useIsDisplayMenuByRoute } from "../../../user/context"
+import { View as ViewMenu, Update as UpdateMenu } from "./menu"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
   Tab as PlayerTab,
   Panel as PlayerPanel,
@@ -35,11 +35,13 @@ import { Tab as ContractTab, Panel as ContractPanel } from "./contact"
 import { Tab as BankTab, Panel as BankPanel } from "./bank"
 import { Tab as BettingTab, Panel as BettingPanel } from "./betting"
 import { Tab as OperationTab, Panel as OperationPanel } from "./operation"
-import LoadingBackdrop from "../../../dialog/LoadingBackdrop"
-import AlertDialog from "../../../dialog/Alert"
-import { usePlayer } from "../client"
+import { Tab as PasswordTab, Panel as PasswordPanel } from "./password"
+import LoadingBackdrop from "../../dialog/LoadingBackdrop"
+import AlertDialog from "../../dialog/Alert"
+import { usePlayer } from "./client"
+import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 
-export const Button = ({ player, ...props }) => {
+export const ViewButton = ({ player, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
@@ -71,7 +73,42 @@ export const Button = ({ player, ...props }) => {
   )
 }
 
-const TabsDialog = ({ playerCode, dialog, finalFocusRef }) => {
+export const EditButton = ({ player, onSubmitted, ...props }) => {
+  let dialog = Modal.useState()
+  let disclosureRef = useRef()
+
+  let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
+  if (!isDisplay) {
+    return null
+  }
+
+  return (
+    <>
+      <Modal.Disclosure
+        use={_Button}
+        ref={disclosureRef}
+        css={css`
+          flex: unset;
+        `}
+        {...dialog}
+      >
+        <Trans zh="修改" en="Edit"/>
+      </Modal.Disclosure>
+      {dialog.visible && 
+        <TabsDialog
+          edit={true}
+          playerCode={player.playerCode}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={disclosureRef}
+        />
+      }
+      
+    </>
+  )
+}
+
+const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
   let tab = useTabState({
     selectedId: PlayerId
   })
@@ -103,14 +140,16 @@ const TabsDialog = ({ playerCode, dialog, finalFocusRef }) => {
               <PlayerTab {...tab} />
               <ContractTab {...tab} />
               <BankTab {...tab} />
-              <BettingTab {...tab} />
-              <OperationTab {...tab} />
+              {!edit && <BettingTab {...tab} />}
+              {!edit && <OperationTab {...tab} />}
+              {edit && <PasswordTab {...tab}/>}
             </_Tabs.List>
-            <PlayerPanel player={player} {...tab} />
-            <ContractPanel player={player} {...tab} />
-            <BankPanel banks={player.banks} {...tab} />
-            <BettingPanel playerCode={playerCode} {...tab} />
-            <OperationPanel playerCode={playerCode} {...tab} />
+            <PlayerPanel player={player} edit={edit} {...tab} />
+            <ContractPanel player={player} edit={edit} {...tab} />
+            <BankPanel banks={player.banks} edit={edit} {...tab} />
+            {!edit && <BettingPanel playerCode={playerCode} {...tab} />}
+            {!edit && <OperationPanel playerCode={playerCode} {...tab} />}
+            {edit && <PasswordPanel player={player} {...tab}/>}
           </_Tabs>
         </Dialog.Modal>
       )}

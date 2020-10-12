@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
@@ -30,9 +29,9 @@ import {
   Modal,
   useClassName
 } from "bumbag"
-import { useTable, Table, pageCount } from "../../../table"
-import dateTimeColumn from "../../../table/column/dateTime"
-import { useOperations } from "../client"
+import { useTable, Table, pageCount } from "../../table"
+import dateTimeColumn from "../../table/column/dateTime"
+import { useOperations } from "./client"
 
 export const Key = "operation"
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
@@ -31,25 +30,39 @@ import {
   Table,
   useClassName
 } from "bumbag"
+import { FieldValues } from "../../layout/Grid"
+import { Trans } from "../../i18n"
 
-export const Key = "betting"
+export const Key = "contact"
 
 export const Tab = ({ ...props }) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      {title()}
+      <Trans zh="联系信息" en="Contact Info" />
     </_Tab>
   )
 }
 
-export const Panel = ({ playerCode, ...props }) => {
+export const Panel = ({ player = {}, edit = false, ...props }) => {
+  let readonly = !edit
+  let { phone, email, qq, weChat } = player
   return (
     <_TabPanel {...props} id={Key}>
-      TODO: async betting table
+      <FieldValues margin="major-1">
+        <Trans zh="手机号码" en="Mobile" />
+        {readonly && <Text>{phone}</Text>}
+        
+        <Trans zh="邮箱" en="Email" />
+        {readonly && <Text>{email}</Text>}
+        
+        <Trans zh="QQ" en="QQ" />
+        {readonly && <Text>{qq}</Text>}
+        
+        <Trans zh="微信号" en="WeChat" />
+        {readonly && <Text>{weChat}</Text>}
+        
+      </FieldValues>
     </_TabPanel>
   )
 }
-
-//TODO: i18n
-const title = () => "投注记录"
