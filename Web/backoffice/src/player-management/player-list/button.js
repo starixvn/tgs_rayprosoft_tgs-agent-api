@@ -29,6 +29,7 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
   Tab as PlayerTab,
   Panel as PlayerPanel,
+  EditPanel as PlayerEditTab,
   Key as PlayerId
 } from "./player"
 import { Tab as ContractTab, Panel as ContractPanel } from "./contact"
@@ -39,7 +40,7 @@ import { Tab as PasswordTab, Panel as PasswordPanel } from "./password"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { usePlayer } from "./client"
-import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
+import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 
 export const ViewButton = ({ player, ...props }) => {
   let dialog = Modal.useState()
@@ -60,7 +61,7 @@ export const ViewButton = ({ player, ...props }) => {
         `}
         {...dialog}
       >
-        {view()}
+        <Trans zh="查看" en="View"/>
       </Modal.Disclosure>
       {dialog.visible && (
         <TabsDialog
@@ -113,6 +114,11 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
     selectedId: PlayerId
   })
 
+  let title = useTrans({
+    zh: "玩家详情",
+    en: "Player info"
+  })
+
   const { player, isLoading, isError, error } = usePlayer({ playerCode })
   return (
     <>
@@ -120,7 +126,7 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
       {isError && <AlertDialog {...error} onClickClose={dialog.hide} />}
       {player && (
         <Dialog.Modal
-          title={title()}
+          title={title}
           showCloseButton={true}
           hideOnClickOutside={false}
           unstable_finalFocusRef={finalFocusRef}
@@ -144,9 +150,10 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
               {!edit && <OperationTab {...tab} />}
               {edit && <PasswordTab {...tab}/>}
             </_Tabs.List>
-            <PlayerPanel player={player} edit={edit} {...tab} />
-            <ContractPanel player={player} edit={edit} {...tab} />
-            <BankPanel banks={player.banks} edit={edit} {...tab} />
+            {!edit && <PlayerPanel player={player} {...tab} />}
+            {edit && <PlayerEditTab player={player} playerCode={playerCode} {...tab}/>}
+            <ContractPanel player={player} {...tab} />
+            <BankPanel banks={player.banks} {...tab} />
             {!edit && <BettingPanel playerCode={playerCode} {...tab} />}
             {!edit && <OperationPanel playerCode={playerCode} {...tab} />}
             {edit && <PasswordPanel player={player} {...tab}/>}
@@ -156,7 +163,3 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
     </>
   )
 }
-
-const view = () => "查看"
-
-const title = () => "玩家详情"
