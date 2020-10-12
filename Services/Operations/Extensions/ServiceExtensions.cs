@@ -32,6 +32,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IWalletQueries, WalletQueries>();
             services.AddFactory<ISettingQueries, SettingQueries>();
 
+            services.AddFactory<IGameActionQueries, GameActionQueries>();
+
             #endregion
 
             #region Commands

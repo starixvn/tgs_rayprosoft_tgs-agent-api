@@ -53,6 +53,9 @@ namespace TGS.Apis.TgsApi.Commons
                     .AddTimeZone()
                     .AddGameOperations();
 
+            services.AddHttpContextAccessor();
+            services.AddScoped<ApiLoggerMiddleware>();
+
             AddCustomDependencyServices(services);
 
             services.AddFeatureManagement();
@@ -61,8 +64,6 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 services.AddScoped<IDataInitializer, DataInitializer>();
             }
-
-            services.AddScoped<ApiLoggerMiddleware>();
 
             var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
@@ -99,7 +100,7 @@ namespace TGS.Apis.TgsApi.Commons
             UseCustomMiddlewares(app);
 
             app
-                //.UseHttpsRedirection()
+                .UseHttpsRedirection()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
                 {
@@ -115,7 +116,6 @@ namespace TGS.Apis.TgsApi.Commons
 
         protected virtual void UseCustomMiddlewares(IApplicationBuilder app)
         {
-
         }
 
         protected virtual void AddCustomFilters(MvcOptions options)

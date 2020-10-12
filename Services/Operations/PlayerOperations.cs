@@ -40,6 +40,8 @@ namespace TGS.Services.Operations
         Task PlayerLogoutAsync(PlayerLogoutData data);
 
         Task<Guid> GetLicenseeIdByPlayerCodeAsync(string playerCode);
+
+        Task<Guid> GetMainWalletIdByPlayerIdAsync(string playerCode);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -165,6 +167,18 @@ namespace TGS.Services.Operations
 
             var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
             return cachedPlayer?.LicenseeId ?? Guid.Empty;
+        }
+
+        async Task<Guid> IPlayerOperations.GetMainWalletIdByPlayerIdAsync(string playerCode)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, CachedPlayerFields.DefaultWalletId);
+            if (value.HasValue)
+            {
+                return Guid.Parse(value);
+            }
+
+            var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
+            return cachedPlayer?.DefaultWalletId ?? Guid.Empty;
         }
 
         #region Private Methods

@@ -182,7 +182,7 @@ namespace TGS.Services.GameOperations.Data
             return s;
         }
 
-        private async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(GameActionState s)
+        private static async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(GameActionState s)
         {
             if (!ShouldGetPreviousActions(s))
             {
@@ -238,7 +238,7 @@ namespace TGS.Services.GameOperations.Data
                             })
                             .ToDictionary(e => e.Id);
 
-            var (actions, refGameAction) = GetPreviousActions(refGameActionInternalId, dict);
+            var (actions, refGameAction) = GetPreviousActions(s.GameActionType, refGameActionInternalId, dict);
 
             s.ReferencedGameAction = refGameAction;
             s.PreviousActions = actions;
@@ -256,7 +256,7 @@ namespace TGS.Services.GameOperations.Data
             return (s, r);
         }
 
-        private static (IList<BetActionData>, BetActionData) GetPreviousActions(Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
+        private static (IList<BetActionData>, BetActionData) GetPreviousActions(GameActionType currentActionType, Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
         {
             BetActionData refGameAction = default;
             List<BetActionData> actions = new();
@@ -265,19 +265,14 @@ namespace TGS.Services.GameOperations.Data
             {
                 if (act.ReferenceId.HasValue && actionMap.TryGetValue(act.ReferenceId.Value, out var refBet))
                 {
-                    refBet.IsCancelled = act.Type == CancelTransaction;                   
                     act.Reference = refBet;
+                    UpdateReferenceGameActionIsCancelled(act.Type, act.Reference);
                 }
 
                 if (act.Id == refGameActionInternalId)
                 {
-                    // for un-cancel transaction
-                    if (act.Type == CancelTransaction && act.Reference.Type == CancelTransaction)
-                    {
-                        act.Reference.Reference.IsCancelled = false;
-                    }
-
                     refGameAction = act;
+                    UpdateReferenceGameActionIsCancelled(currentActionType, refGameAction);
                 }
 
                 actions.Add(act);
@@ -358,6 +353,22 @@ namespace TGS.Services.GameOperations.Data
                     IsDuplicate = true
                 }
             };
+        }
+
+        private static void UpdateReferenceGameActionIsCancelled(GameActionType currentActionType, BetActionData reference)
+        {
+            if (currentActionType != CancelTransaction)
+            {
+                return;
+            }
+
+            reference.IsCancelled = true;
+
+            //un-cancel transaction
+            if (reference.Type == CancelTransaction)
+            {
+                reference.Reference.IsCancelled = false;
+            }
         }
 
         private GameActionState FillEmptyData(GameActionState s)

@@ -37,8 +37,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
             services.AddScoped<AuthorizeSBOMiddleware>();
             services.AddScoped<HandleSBOExceptionMiddleware>();
 
-            services.AddSingleton<ISBOGameControllerMapper, SBOGameControllerMapper>();
-            
+            services.AddScoped<ISBOServices, SBOServices>();
+            services.AddSingleton<ISBOGameControllerMapper, SBOGameControllerMapper>();            
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
