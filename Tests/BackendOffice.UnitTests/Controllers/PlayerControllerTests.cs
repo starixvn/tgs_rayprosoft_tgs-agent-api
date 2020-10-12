@@ -155,7 +155,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.GetSingleAsync(player.PlayerCode);
             response.Valid.Should().BeTrue();
-            response.Player.Status.Should().Be(player.Status.ToString());
+            response.Player.Status.Should().Be(player.Status);
             response.Player.Username.Should().Be(player.Username);
             response.Player.RealName.Should().Be(player.RealName);
             response.Player.VipLevel.Should().Be(player.Vip.Name);
