@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useContext } from "react"
 import { css, Global } from "@emotion/core"
-import Async from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
 import useSWR from "swr"
-import { usePlayer, useEditPlayerInfo } from "./client"
+import { useEditPlayerInfo } from "./client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useTabState,
@@ -35,11 +33,12 @@ import {
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
-import { Field as InputField, Password as PasswordField } from "../../input/Field"
+import { Field as InputField } from "../../input/Field"
 import { Field as StatusField, from as toStatus } from "../status"
 import { Field as VipLevelField } from "../../vip-level/field"
 import { Field as _Field, FieldMinHeight } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
+import { SubmitCancel } from "../../button/ActionButtons"
 
 export const Key = "player"
 
@@ -52,7 +51,7 @@ export const Tab = ({ ...props }) => {
   )
 }
 
-export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, onClickClose, ...props }) => {
+export const EditPanel = ({ playerCode = "", player = {}, onSubmitted, onClickClose, ...props }) => {
   let [submitData, setSubmit] = useState()
   let { result, error, mutate } = useEditPlayerInfo({ playerCode, data: submitData })
   useEffect(() => {
@@ -148,7 +147,7 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, onClickCl
                 </Box>
               </FieldValues>      
               <Box alignX="right">
-                <ActionButtons 
+                <SubmitCancel 
                   onClickSubmit={formikProps.submitForm}
                   onClickCancel={onClickClose}
                   /> 
@@ -178,7 +177,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
   return (
     <_TabPanel {...props} id={Key}>
       <FieldValues margin="major-1">
-        <UserNameLabel />
+          <UserNameLabel />
           <Text>{username}</Text>
 
           <RealNameLabel />

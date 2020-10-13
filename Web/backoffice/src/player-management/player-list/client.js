@@ -39,7 +39,7 @@ export const useEditPlayerInfo = ({ playerCode, data }) => {
 
   return {
     result,
-    isLoading: !error && !data,
+    isLoading: !error && !result,
     isValidating,
     error,
     isError: error,
@@ -47,15 +47,15 @@ export const useEditPlayerInfo = ({ playerCode, data }) => {
   }
 }
 
-export const useEditPlayerContact = ({ player }) => {
-  const { data, error, isValidating, mutate } = useSWR(
-    player ? `/api/player/${player.playerCode}/contact` : null,
-    (url) => put(url, { data: player })
+export const useEditPlayerContact = ({ playerCode, data }) => {
+  const { data: result, error, isValidating, mutate } = useSWR(
+    playerCode && data ? `/api/player/${playerCode}/contact` : null,
+    (url) => put(url, { data })
   )
 
   return {
-    data,
-    isLoading: !error && !data,
+    result,
+    isLoading: !error && !result,
     isValidating,
     error,
     isError: error,
@@ -64,14 +64,14 @@ export const useEditPlayerContact = ({ player }) => {
 }
 
 export const useEditPlayerPassword = ({ player }) => {
-  const { data, error, isValidating, mutate } = useSWR(
+  const { data: result, error, isValidating, mutate } = useSWR(
     player ? `/api/player/${player.playerCode}/password` : null,
     (url) => put(url, { data: player })
   )
 
   return {
-    data,
-    isLoading: !error && !data,
+    result,
+    isLoading: !error && !result,
     isValidating,
     error,
     isError: error,
