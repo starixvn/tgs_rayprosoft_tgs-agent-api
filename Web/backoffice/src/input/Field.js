@@ -79,7 +79,7 @@ export const Password = ({
 const InputMinHeight = 2.75
 const InputPadding = 0.4
 const FieldValidationTextHeight = 0.875
-const FieldMinHeight = InputMinHeight + InputPadding + FieldValidationTextHeight
+export const FieldMinHeight = InputMinHeight + InputPadding + FieldValidationTextHeight
 export const Field = ({ name, required, validate, ...props }) => {
   return (
     <_Field
@@ -96,12 +96,11 @@ export const Field = ({ name, required, validate, ...props }) => {
         let state = meta.error && meta.touched && "danger"
         let validationText = state ? `${meta.error}` : ""
 
+        //minHeight={`${FieldMinHeight}rem`}
         return (
           <FieldWrapper
             state={state}
-            validationText={validationText}
-            minHeight={`${FieldMinHeight}rem`}
-          >
+            validationText={validationText}>
             <Input id={name} {...field} {...props} />
           </FieldWrapper>
         )

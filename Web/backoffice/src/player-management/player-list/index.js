@@ -17,14 +17,14 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useList } from "./client"
 import { useTable, Table, pageCount } from "../../table"
-import { Label as StatueLabel } from "./status"
+import { Label as StatueLabel } from "../status"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code } from "./menu"
 import { Field as StatusField } from "../status"
-import { Field as VipLevelField } from "../vipLevel"
+import { Field as VipLevelField } from "../../vip-level/field"
 import { ViewButton, EditButton } from "./button"
 
 export { Code }

@@ -7,7 +7,7 @@ import { FieldWrapper } from "bumbag"
 const InputMinHeight = 2.75
 const InputPadding = 0.4
 const FieldValidationTextHeight = 0.875
-const FieldMinHeight = InputMinHeight + InputPadding + FieldValidationTextHeight
+export const FieldMinHeight = InputMinHeight + InputPadding + FieldValidationTextHeight
 
 export const Field = ({ required, validate, children, ...props }) => {
   let { name } = props
@@ -25,16 +25,8 @@ export const Field = ({ required, validate, children, ...props }) => {
       {({ field, form, meta }) => {
         let state = meta.error && meta.touched && "danger"
         let validationText = state ? `${meta.error}` : ""
-
-        return required || validate ? (
-          <FieldWrapper
-            state={state}
-            validationText={validationText}
-            minHeight={`${FieldMinHeight}rem`}
-          >
-            {children({ ...field, ...props })}
-          </FieldWrapper>
-        ) : (
+        //minHeight={`${FieldMinHeight}rem`}
+        return (
           <FieldWrapper state={state} validationText={validationText}>
             {children({ ...field, ...props })}
           </FieldWrapper>
