@@ -34,11 +34,10 @@ import {
   ActionButtons
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
-import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
+import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 import { Field as InputField, Password as PasswordField } from "../../input/Field"
-import { Field as StatusField } from "../status"
+import { Field as StatusField, from as toStatus } from "../status"
 import { Field as VipLevelField } from "../../vip-level/field"
-import { useVipLevels } from "../../vip-level/client"
 import { Field as _Field, FieldMinHeight } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
 
@@ -53,48 +52,42 @@ export const Tab = ({ ...props }) => {
   )
 }
 
-export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props }) => {
+export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, onClickClose, ...props }) => {
   let [submitData, setSubmit] = useState()
   let { result, error, mutate } = useEditPlayerInfo({ playerCode, data: submitData })
+  useEffect(() => {
+    if (result && !error) {
+      onSubmitted && onSubmitted()
+    }
+  }, [result])
 
   const submit = (data = {}) => {
     let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
+    let status = toStatus(data.status)
     setSubmit({
       ...data,
-      hasAgent
+      hasAgent,
+      status
     })
   }
 
   const clearResult = () => {
     setSubmit(null)
-    mutate()
   }
-
-  let {
-    items: vipLevels,
-  } = useVipLevels()
 
   let {
     username = "",
     realName = "",
-    vipLevel = "",
+    vipId = "",
     parentUsername = "",
     registeredOn,
     balance,
     status,
     hasAgent
   } = player
-  hasAgent = hasAgent.toString()
-  //TODO: vipId from API?
-  let vip = vipLevels.find(
-    item => item.name === vipLevel
-  ) ?? ""
 
-  let vipId = vip.id
-
-  useEffect(() => {
-    console.log("TODO: apply onSubmitted ?")
-  }, [result])
+  let turnOnLabel = useTurnOnLabel()
+  let turnOffLabel = useTurnOffLabel()
   return (
     <_TabPanel {...props} id={Key}>
       {error && <AlertDialog {...error} onClickClose={clearResult}/>}
@@ -104,7 +97,7 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props 
           vipId,
           parentUsername: parentUsername ?? "",
           status,
-          hasAgent
+          hasAgent: hasAgent.toString()
         }}
         onSubmit={submit}
         >
@@ -148,21 +141,16 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props 
                 <Box>
                     <_Field name="hasAgent" required>
                       {(props) => <_Select options={[
-                        { label: "开启", value: true }, 
-                        { label: "关闭", value: false }
+                        { label: turnOnLabel, value: "true" }, 
+                        { label: turnOffLabel, value: "false" }
                         ]} {...props} />}                  
                     </_Field>
                 </Box>
               </FieldValues>      
               <Box alignX="right">
                 <ActionButtons 
-                  onClickSubmit={() => {
-                    formikProps.submitForm()
-                    //submit(formikProps.values)
-                  }}
-                  onClickCancel={() => {
-                    console.log('cancelled')
-                  }}
+                  onClickSubmit={formikProps.submitForm}
+                  onClickCancel={onClickClose}
                   /> 
               </Box>  
             </form>
@@ -184,6 +172,9 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
     hasAgent
   } = player
   
+
+  let turnOnLabel = useTurnOnLabel()
+  let turnOffLabel = useTurnOffLabel()
   return (
     <_TabPanel {...props} id={Key}>
       <FieldValues margin="major-1">
@@ -223,8 +214,8 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
           <AgentLabel />
           <Box>
             <Text>
-              {hasAgent && <Trans zh="开启" en="Turn on" />}
-              {!hasAgent && <Trans zh="关闭" en="Turn off" />}
+              {hasAgent && turnOnLabel}
+              {!hasAgent && turnOffLabel}
             </Text>
           </Box>
         </FieldValues>
@@ -247,3 +238,13 @@ const BalanceLabel = () => <Trans zh="余额" en="Balance" />
 const StatusLabel = () => <Trans zh="状态" en="Status" />
 
 const AgentLabel = () => <Trans zh="代理功能" en="Agent" />
+
+const useTurnOnLabel = () => useTrans({
+  zh: "开启",
+  en: "Turn on"
+})
+
+const useTurnOffLabel = () => useTrans({
+  zh: "关闭",
+  en: "Turn off"
+})

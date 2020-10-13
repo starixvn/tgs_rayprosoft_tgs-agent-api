@@ -22,7 +22,7 @@ const InBlacklistString = "InBlacklist"
 
 const InBlacklistLabel = "In Blacklist"
 
-const from = (value) => {
+export const from = (value) => {
   if (value === EnabledString || value === `${Enabled}`) {
     return Enabled
   }
@@ -68,7 +68,7 @@ const useEnabledPair = () => {
 
   return {
     label,
-    value: EnabledString
+    value: `${Enabled}`
   }
 }
 
@@ -80,7 +80,7 @@ const useDisabledPair = () => {
 
   return {
     label,
-    value: DisabledString
+    value: `${Disabled}`
   }
 }
 
@@ -92,7 +92,7 @@ const useBlockedPair = () => {
 
   return {
     label,
-    value: InBlacklistString
+    value: `${InBlacklist}`
   }
 }
 
@@ -114,7 +114,7 @@ export const Label = ({ value }) => {
     case InBlacklist:
       return (
         <Text>
-          <Trans zh="黑名单" en={"Blacklist"} />
+          <Trans zh="黑名单" en={InBlacklistLabel} />
         </Text>
       )
   }

@@ -65,7 +65,7 @@ const AsyncContent = () => {
     username
   })
 
-  let columns = useTableColumns()
+  let columns = useTableColumns({ fetchData: mutate })
 
   return (
     <PageContent
@@ -138,7 +138,7 @@ const searchInputPlaceHolder = () => "用户名输入框"
 //TODO: i18n
 const searchButtonLabel = () => "搜索"
 
-const useTableColumns = ({} = {}) => {
+const useTableColumns = ({ fetchData } = {}) => {
   let columns = [
     sequenceColumn(),
     {
@@ -196,7 +196,7 @@ const useTableColumns = ({} = {}) => {
           <Box alignX="center">
             <Set>
               <ViewButton player={value} />
-              <EditButton player={value} />
+              <EditButton player={value} onSubmitted={fetchData}/>
             </Set>
           </Box>
         )
