@@ -17,6 +17,7 @@ using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Bet;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -42,6 +43,7 @@ namespace TGS.Apis.OperatorApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
+            services.AddRepository<IBetRepository, BetRepository>(_configuration, "Bet");
 
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
 

@@ -8,6 +8,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
+using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
@@ -15,11 +16,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     {
         BetData Request(GameProviderConfigurationData data, PlaceBetRequest request);
 
-        BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request);
+        BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request, GameActionExternalIds[] settleGameActionExternalIds);
 
         BetData Request(GameProviderConfigurationData data, CancelBetRequest request);
 
-        BetData Request(GameProviderConfigurationData data, CancelBetRequest request, GameActionExternalIds[] gameActionExternalIds);
+        BetData Request(GameProviderConfigurationData data, CancelBetRequest request, GameActionExternalIds[] validGameActionExternalIds);
+
+        BetData Request(GameProviderConfigurationData data, RollbackRequest request, GameActionExternalIds[] validGameActionExternalIds);
 
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
 
@@ -28,6 +31,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         SettleBetResponse Response(SettleBetRequest request, BetResult r);
 
         CancelBetResponse Response(CancelBetRequest request, BetResult r);
+
+        RollbackResponse Response(RollbackRequest request, BetResult r);
     }
 
     public sealed class SBOGameControllerMapper : ISBOGameControllerMapper
@@ -50,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalBetId = externalTransactionId,
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.ExternalGameId,
-                    GameActionType = GameActionType.PlaceBet,
+                    GameActionType = PlaceBet,
                     TimeStamp = request.BetTime
                 }
             };
@@ -58,8 +63,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOGameControllerMapper.Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request)
+        BetData ISBOGameControllerMapper.Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request, GameActionExternalIds[] settleGameActionExternalIds)
         {
+            var settleCount = settleGameActionExternalIds.Length;
             var externalTrasactionId = request.ExternalTransactionId;
 
             var transactions = new TransactionData[]
@@ -67,7 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 new()
                 {
                     Amount = request.WinLoss,
-                    ExternalTransactionId = $"{externalTrasactionId}_settle",
+                    ExternalTransactionId = settleCount == 0 ? $"{externalTrasactionId}_settle" : $"{externalTrasactionId}_settle_{settleCount}",
                     ExternalTransactionReferenceId = externalTrasactionId,
                     ExternalRoundId = externalRoundId,
                     ExternalBetId = request.ExternalTransactionId,
@@ -96,7 +102,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalBetId = externalTrasactionId,
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.ExternalGameId,
-                    GameActionType = GameActionType.CancelTransaction,
+                    GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.UtcNow
                 }
             };
@@ -104,9 +110,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOGameControllerMapper.Request(GameProviderConfigurationData data, CancelBetRequest request, GameActionExternalIds[] gameActionExternalIds)
+        BetData ISBOGameControllerMapper.Request(GameProviderConfigurationData data, CancelBetRequest request, GameActionExternalIds[] validGameActionExternalIds)
         {
-            var transactions = gameActionExternalIds.OrderByDescending(ga => ga.RecordedOn)
+            var transactions = validGameActionExternalIds.OrderByDescending(ga => ga.RecordedOn)
                 .Select((ga, idx) => new TransactionData
                 {
                     ExternalTransactionId = $"{ga.ExternalTransactionId}_cancel",
@@ -115,21 +121,39 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalBetId = ga.ExternalBetId,
                     ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
                     ExternalGameId = request.ExternalGameId,
-                    GameActionType = GameActionType.CancelTransaction,
+                    GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.UtcNow,
-                    RoundClosed = idx + 1 == gameActionExternalIds.Length
+                    RoundClosed = idx + 1 == validGameActionExternalIds.Length
                 }).ToArray();
 
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        GetBalanceResponse ISBOGameControllerMapper.Response(string playerCode, GetBalanceResult r) => new()
+        BetData ISBOGameControllerMapper.Request(GameProviderConfigurationData data, RollbackRequest request, GameActionExternalIds[] validGameActionExternalIds)
         {
-            ErrorCode = (int)GameApiError.Success,
-            ErrorMessage = GameApiError.Success.Description(),
-            PlayerCode = playerCode,
-            Balance = r.Balance
-        };
+            var lastSettle = validGameActionExternalIds.Where(ga => ga.GameActionType != PlaceBet).Last();
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    ExternalTransactionId = $"{lastSettle.ExternalTransactionId}_cancel",
+                    ExternalTransactionReferenceId = lastSettle.ExternalTransactionId,
+                    ExternalRoundId = lastSettle.ExternalRoundId,
+                    ExternalBetId = lastSettle.ExternalBetId,
+                    ExternalGameActionGroupId = lastSettle.ExternalGameActionGroupId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = CancelTransaction,
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    RoundClosed = false
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions);
+        }
+
+        GetBalanceResponse ISBOGameControllerMapper.Response(string playerCode, GetBalanceResult r) =>
+            Response<GetBalanceResponse>(playerCode, r.Balance);
 
         PlaceBetResponse ISBOGameControllerMapper.Response(PlaceBetRequest request, BetResult r) => new()
         {
@@ -140,21 +164,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             BetAmount = request.Amount
         };
 
-        SettleBetResponse ISBOGameControllerMapper.Response(SettleBetRequest request, BetResult r) => new()
-        {
-            ErrorCode = (int)GameApiError.Success,
-            ErrorMessage = GameApiError.Success.Description(),
-            PlayerCode = request.PlayerCode,
-            Balance = r.Balance
-        };
+        SettleBetResponse ISBOGameControllerMapper.Response(SettleBetRequest request, BetResult r) =>
+            Response<SettleBetResponse>(request.PlayerCode, r.Balance);
 
-        CancelBetResponse ISBOGameControllerMapper.Response(CancelBetRequest request, BetResult r) => new()
-        {
-            ErrorCode = (int)GameApiError.Success,
-            ErrorMessage = GameApiError.Success.Description(),
-            PlayerCode = request.PlayerCode,
-            Balance = r.Balance
-        };
+        CancelBetResponse ISBOGameControllerMapper.Response(CancelBetRequest request, BetResult r) =>
+            Response<CancelBetResponse>(request.PlayerCode, r.Balance);
+
+        RollbackResponse ISBOGameControllerMapper.Response(RollbackRequest request, BetResult r) =>
+            Response<RollbackResponse>(request.PlayerCode, r.Balance);
 
         #region Private Methods
 
@@ -172,10 +189,21 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         private static GameActionType GetGameActionType(ResultType result) => result switch
         {
-            ResultType.Win => GameActionType.WinBet,
-            ResultType.Tie => GameActionType.TieBet,
-            ResultType.Loss => GameActionType.LoseBet
+            ResultType.Win => WinBet,
+            ResultType.Tie => TieBet,
+            ResultType.Loss => LoseBet
         };
+
+        private static T Response<T>(string playerCode, decimal balance) where T : BaseResponse, new()
+        {
+            return new T
+            {
+                ErrorCode = (int)GameApiError.Success,
+                ErrorMessage = GameApiError.Success.Description(),
+                PlayerCode = playerCode,
+                Balance = balance
+            };
+        }
 
         #endregion Private Methods
     }

@@ -170,6 +170,10 @@ namespace TGS.Core.DataServices.Bet.Migrations
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
+            
+            // TYPE
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.TypeSqlForamt, "IntValuesType"));
 
             // SP
             migrationBuilder.SqlResource(assembly,
@@ -186,6 +190,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_InsertGameAction"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetValidGameActionExternalIds"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionExternalIds"));
 
             // View
             migrationBuilder.SqlResource(assembly,

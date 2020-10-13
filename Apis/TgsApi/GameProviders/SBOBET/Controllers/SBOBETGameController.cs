@@ -7,9 +7,11 @@ using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameModels;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
+using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 {
@@ -24,6 +26,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         private readonly IGamePlayActions _actions;
         private readonly ISBOGameControllerMapper _map;
         private readonly ISBOServices _services;
+
+        private static readonly GameActionType[] SettleGameActionTypes = new [] { WinBet, LoseBet, TieBet, FreeBet };
 
         public SBOBETGameController(
             IGamePlayActions actions,
@@ -56,9 +60,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         public async Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
+            var externalRoundId = request.ExternalTransactionId;
 
-            var roundId = request.ExternalTransactionId;
-            var betData = _map.Request(data, roundId, request);
+            var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(data.GameProviderId, request.PlayerCode, externalRoundId, SettleGameActionTypes);
+
+            var betData = _map.Request(data, externalRoundId, request, gameActionExternalIds);
             var r = await _actions.SettleBetAsync(betData);
             return _map.Response(request, r);
         }
@@ -71,6 +77,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
                 request.IsCancelAll ? VoidRoundAsync : CancelBetAsync;
 
             return await func(data, request);
+        }
+
+        [Route("Rollback")]
+        public async Task<RollbackResponse> CancelSettleAsync(RollbackRequest request)
+        { 
+            var data = await _services.GetGameProviderConfigurationDataAsync();
+
+            var externalRoundId = request.ExternalTransactionId;
+            var gameActionExternalIds = await _services.GetValidGameActionExternalIdsAsync(data.GameProviderId, request.PlayerCode, externalRoundId);
+
+            var betData = _map.Request(data, request, gameActionExternalIds);
+            var r = await _actions.CancelTransactionAsync(betData);
+            return _map.Response(request, r);
         }
 
         #region Private Methods

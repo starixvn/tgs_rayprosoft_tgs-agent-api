@@ -113,9 +113,12 @@ namespace TGS.Services.GameOperations.Data
 
             s = await FillRoundDataAsync(s);
             s = GetGame(s);
+            
             var (st, r) = await GetAndValidatePreviousActionsAsync(s);
             if (r != null)
+            { 
                 return r;
+            }
 
             s = st;
 
@@ -278,7 +281,7 @@ namespace TGS.Services.GameOperations.Data
                 actions.Add(act);
             }
 
-            return (actions.AsReadOnly(), refGameAction);
+            return (actions.ToArray(), refGameAction);
         }
 
         private static IList<BetActionData> GetValidatePreviousActions(IList<BetActionData> actions)
@@ -287,7 +290,7 @@ namespace TGS.Services.GameOperations.Data
                 .Where(r => r.Type == CancelTransaction && r.Reference != null)
                 .Select(r => r.Reference.Id).ToHashSet();
 
-            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToList().AsReadOnly();
+            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToArray();
         }
 
         private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(GameActionState s, SameRoundActionData[] actionsData)
@@ -373,7 +376,6 @@ namespace TGS.Services.GameOperations.Data
 
         private GameActionState FillEmptyData(GameActionState s)
         {
-            s.UtcNow = DateTimeOffset.UtcNow;
             s.NewRoundStatus = _roundStatusManager.GetStatus(new()
             {
                 AutoCloseRound = s.AutoCloseRound,

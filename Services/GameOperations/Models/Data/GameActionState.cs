@@ -33,6 +33,8 @@ namespace TGS.Services.GameOperations.Models.Data
             RoundDetail = td.RoundDetail;
             RoundClosed = td.RoundClosed;
             BetType = td.BetType;
+
+            UtcNow = DateTimeOffset.UtcNow;
         }
 
         public Db Db { get; init; }
@@ -53,7 +55,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
         public Guid? BatchId { get; init; }
 
-        public DateTimeOffset UtcNow { get; set; }
+        public DateTimeOffset UtcNow { get; }
 
         /// <summary>
         /// all game actions in the same round
