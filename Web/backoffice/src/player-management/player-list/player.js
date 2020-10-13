@@ -57,6 +57,14 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props 
   let [submitData, setSubmit] = useState()
   let { result, error, mutate } = useEditPlayerInfo({ playerCode, data: submitData })
 
+  const submit = (data = {}) => {
+    let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
+    setSubmit({
+      ...data,
+      hasAgent
+    })
+  }
+
   const clearResult = () => {
     setSubmit(null)
     mutate()
@@ -98,10 +106,7 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props 
           status,
           hasAgent
         }}
-        onSubmit={data => {
-          console.log("onSubmit", data)
-          setSubmit(data)
-        }}
+        onSubmit={submit}
         >
           {formikProps => (
             <form onReset={formikProps.handleReset} onSubmit={formikProps.handleSubmit} >
@@ -143,8 +148,8 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props 
                 <Box>
                     <_Field name="hasAgent" required>
                       {(props) => <_Select options={[
-                        { label: "开启", value: "true" }, 
-                        { label: "关闭", value: "false" }
+                        { label: "开启", value: true }, 
+                        { label: "关闭", value: false }
                         ]} {...props} />}                  
                     </_Field>
                 </Box>
@@ -152,8 +157,8 @@ export const EditPanel = ({ player = {}, playerCode = "", onSubmitted, ...props 
               <Box alignX="right">
                 <ActionButtons 
                   onClickSubmit={() => {
-                    setSubmit(formikProps.values)
-                    console.log('submitted data', formikProps.values)
+                    formikProps.submitForm()
+                    //submit(formikProps.values)
                   }}
                   onClickCancel={() => {
                     console.log('cancelled')
