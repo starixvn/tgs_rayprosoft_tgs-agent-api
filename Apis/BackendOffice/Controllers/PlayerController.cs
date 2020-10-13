@@ -146,15 +146,18 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == updatePlayerType[0])
             {
-                var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
-                if (parentPlayer == null)
+                if (!request.ParentUsername.IsNullOrEmpty())
                 {
-                    return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
+                    var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
+                    if (parentPlayer == null)
+                    {
+                        return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
+                    }
+                    player.ParentInvitationCode = parentPlayer.InvitationCode;
                 }
 
                 player.RealName = request.RealName;
-                player.VipId = request.VipId;
-                player.ParentInvitationCode = parentPlayer.InvitationCode;
+                player.VipId = request.VipId;              
                 player.Status = request.Status;
                 player.HasAgent = request.HasAgent;
             }
