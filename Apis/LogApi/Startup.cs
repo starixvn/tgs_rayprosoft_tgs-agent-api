@@ -99,8 +99,14 @@ namespace TGS.Apis.LogApi
             messageHandler.StopReceiveMessages();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        public void Configure(
+            IApplicationBuilder app, 
+            IWebHostEnvironment env, 
+            IHostApplicationLifetime appLifetime,
+            ILogRepository repository)
         {
+            repository.ExecuteMigrationAndSeeding();
+
             appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
 

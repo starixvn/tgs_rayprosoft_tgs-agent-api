@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -14,17 +15,11 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
-    public interface IDataInitializer
-    {
-        void SetInitialData();
-    }
-
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : IDataInitializer
     {
         private readonly ITgsRepository _repository;
         private readonly IHashProvider _hashProvider;
-        private readonly IServiceLog<DataInitializer> _log;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
 
@@ -45,16 +40,13 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private readonly IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
 
-        public DataInitializer(
-            ITgsRepository repository, 
-            IHashProvider hashProvider, 
-            IServiceLog<DataInitializer> log,
-            IJsonSerializationProvider jsonSerializationProvider)
+        public DataInitializer(ITgsRepository repository)
         {
             _repository = repository;
-            _hashProvider = hashProvider;
-            _log = log;
-            _jsonSerializationProvider = jsonSerializationProvider;
+
+            var config = new TgsHashConfig();
+            _hashProvider = new HashProvider(config);
+            _jsonSerializationProvider = new JsonSerializationProvider();
         }
 
         void IDataInitializer.SetInitialData()
@@ -79,7 +71,7 @@ namespace TGS.Core.DataServices.DataInitializers
             timer.Stop();
 
             _logBuilder.AppendLine($"Total Time was {timer.ElapsedMilliseconds} ms");
-            _log.LogInformation(_logBuilder.ToString());
+            Console.WriteLine(_logBuilder.ToString());
         }
       
         private void GenerateCurrencies()

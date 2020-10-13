@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -79,6 +82,23 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         void IBaseRepository.SaveChanges()
         {
             SaveChanges();
+        }
+
+        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        {
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                          Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                Database.Migrate();
+            }
+
+            if (addSeeding)
+            {
+                IDataInitializer data = new DataInitializer(this);
+                data.SetInitialData();
+            }
         }
     }
 }

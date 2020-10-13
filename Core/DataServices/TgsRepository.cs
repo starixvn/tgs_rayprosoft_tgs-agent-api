@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.DataInitializers;
 using TGS.Core.DataServices.EntityTypeConfigurations;
 using TGS.Core.DataServices.Models;
 
@@ -127,6 +130,23 @@ namespace TGS.Core.DataServices
         void IBaseRepository.SaveChanges()
         {
             SaveChanges();
+        }
+
+        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        {           
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                           Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                Database.Migrate();
+            }
+
+            if (addSeeding)
+            {
+                IDataInitializer data = new DataInitializer(this);
+                data.SetInitialData();
+            }
         }
 
         DbSet<T> IBaseRepository.Set<T>()

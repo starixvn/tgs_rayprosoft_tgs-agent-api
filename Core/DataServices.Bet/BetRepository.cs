@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.EntityTypeConfigurations;
@@ -76,6 +78,17 @@ namespace TGS.Core.DataServices.Bet
         void IBaseRepository.SaveChanges()
         {
             SaveChanges();
+        }
+
+        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        {
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                           Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                Database.Migrate();
+            }            
         }
     }
 }

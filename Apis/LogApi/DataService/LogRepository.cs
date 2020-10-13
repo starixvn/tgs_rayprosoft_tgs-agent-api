@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.LogApi.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -116,6 +119,17 @@ namespace TGS.Apis.LogApi.DataService
         void IBaseRepository.SaveChanges()
         {
             SaveChanges();
+        }
+
+        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        {
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                          Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                Database.Migrate();
+            }
         }
     }
 }
