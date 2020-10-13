@@ -154,6 +154,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
                     }
                     player.ParentInvitationCode = parentPlayer.InvitationCode;
+                    player.ParentPlayerCode = parentPlayer.PlayerCode;
                 }
 
                 player.RealName = request.RealName;
