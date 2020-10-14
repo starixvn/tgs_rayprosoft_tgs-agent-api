@@ -15,12 +15,9 @@ using Microsoft.OpenApi.Models;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Services;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Bet;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -99,11 +96,6 @@ namespace TGS.Apis.OperatorApi
 
         public void Configure(IApplicationBuilder app)
         {
-            //var isDevelopmentOrDocker = _env.IsDevelopmentOrDocker();
-            
-            //tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            //betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-
             app.UseGlobalExceptionHandler();
 
             if (!_env.IsDevelopment())

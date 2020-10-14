@@ -8,10 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using NLog;
 using TGS.Apis.TgsApi.Extensions;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Bet;
-using TGS.Core.DataServices.DataInitializers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -83,11 +79,6 @@ namespace TGS.Apis.TgsApi.Commons
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            //var isDevelopmentOrDocker = Environment.IsDevelopmentOrDocker();
-
-            //tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            //betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-
             if (Environment.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
