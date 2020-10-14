@@ -41,15 +41,14 @@ namespace TGS.Apis.LogApi
                 .AddNats(Configuration)
                 .AddWebApiServices()
                 .AddTgsLog();
+            
+            services.AddSingleton<IMessageHandler, NatsMessageHandler>();
 
-            services.AddScoped<IMessagePackProvider, MessagePackProvider>();
-            services.AddScoped<IMessageHandler, NatsMessageHandler>();
+            services.AddSingleton<ApiLogWriter>();
+            services.AddSingleton<LogRecordWriter>();
+            services.AddSingleton<AdminLogWriter>();
 
-            services.AddScoped<ApiLogWriter>();
-            services.AddScoped<LogRecordWriter>();
-            services.AddScoped<AdminLogWriter>();
-
-            services.AddScoped<Func<string, ILoggerWriter>>(serviceProvider => key =>
+            services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
             {
                 return key switch
                 {
@@ -86,26 +85,21 @@ namespace TGS.Apis.LogApi
 
         protected void OnApplicationStarted(IServiceProvider serviceProvider)
         {
-            var scope = serviceProvider.CreateScope();
-            var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler>();
+            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StartReceiveMessages();
         }
 
         protected void OnApplicationStopped(IServiceProvider serviceProvider)
         {
-            var scope = serviceProvider.CreateScope();
-            var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler>();
+            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StopReceiveMessages();
         }
 
         public void Configure(
             IApplicationBuilder app, 
             IWebHostEnvironment env, 
-            IHostApplicationLifetime appLifetime,
-            ILogRepository repository)
-        {
-            //repository.ExecuteMigrationAndSeeding();
-
+            IHostApplicationLifetime appLifetime)
+        {            
             appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
 

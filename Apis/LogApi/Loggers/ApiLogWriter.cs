@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.LogApi.DataService;
@@ -12,9 +13,9 @@ namespace TGS.Apis.LogApi.Loggers
     {
         private readonly ILogRepository _logRepository;
 
-        public ApiLogWriter(ILogRepository logRepository)
+        public ApiLogWriter(Func<ILogRepository> repoFactory)
         {
-            _logRepository = logRepository;
+            _logRepository = repoFactory();
         }
 
         Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)

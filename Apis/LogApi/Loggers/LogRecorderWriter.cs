@@ -16,10 +16,10 @@ namespace TGS.Apis.LogApi.Loggers
         private readonly ILogRepository _logRepository;
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
         public LogRecordWriter(
-            ILogRepository ugsRepository,
+            Func<ILogRepository> repoFactory,
             IOptions<LoggerServiceConfig> loggerServiceConfig)
         {
-            _logRepository = ugsRepository;
+            _logRepository = repoFactory();
             _loggerServiceConfig = loggerServiceConfig;
         }
 
