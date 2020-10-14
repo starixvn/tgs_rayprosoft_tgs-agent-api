@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Middlewares;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Bet;
 using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice
@@ -30,12 +27,6 @@ namespace TGS.Apis.BackendOffice
 
         public void Configure(IApplicationBuilder app)
         {
-            //var isDevelopmentOrDocker = _env.IsDevelopmentOrDocker();
-
-            //tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            //betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            //backendOfficeRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-
             if (_env.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();

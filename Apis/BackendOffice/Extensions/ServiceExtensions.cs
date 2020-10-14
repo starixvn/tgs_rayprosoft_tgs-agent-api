@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
@@ -78,12 +77,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddHealthChecks()
                 .AddCheck<HealthCheck>("example_health_check");
 
-            services.AddLogging(config =>
-            {
-                config.AddDebug();
-                config.AddConsole();
-            });
-
             services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
@@ -103,7 +96,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                         return Task.CompletedTask;
                     };
                 });
-
             
             services.Configure<RequestLocalizationOptions>(options =>
             {
