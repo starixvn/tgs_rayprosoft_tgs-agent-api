@@ -109,7 +109,7 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
   )
 }
 
-const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
+const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef, ...props }) => {
   let tab = useTabState({
     selectedId: PlayerId
   })
@@ -119,11 +119,20 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
     en: "Player info"
   })
 
-  const { player, isLoading, isError, error } = usePlayer({ playerCode })
+  const { player, isLoading, isError, error, mutate } = usePlayer({ playerCode })
+
+  const onSubmitted = () => {
+    dialog.hide()
+    props?.onSubmitted()
+    mutate()
+  }
+
+  const onClickClose = dialog.hide
+
   return (
     <>
       {isLoading && <LoadingBackdrop />}
-      {isError && <AlertDialog {...error} onClickClose={dialog.hide} />}
+      {isError && <AlertDialog {...error} onClickClose={onClickClose} />}
       {player && (
         <Dialog.Modal
           title={title}
@@ -151,7 +160,7 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef }) => {
               {edit && <PasswordTab {...tab}/>}
             </_Tabs.List>
             {!edit && <PlayerPanel player={player} {...tab} />}
-            {edit && <PlayerEditTab player={player} playerCode={playerCode} {...tab}/>}
+            {edit && <PlayerEditTab player={player} playerCode={playerCode} onSubmitted={onSubmitted} onClickClose={onClickClose} {...tab}/>}
             <ContractPanel player={player} {...tab} />
             <BankPanel banks={player.banks} {...tab} />
             {!edit && <BettingPanel playerCode={playerCode} {...tab} />}
