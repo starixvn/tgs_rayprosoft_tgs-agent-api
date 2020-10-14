@@ -1,7 +1,9 @@
-﻿namespace TGS.Core.DataServices.Base.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace TGS.Core.DataServices.Base.Interfaces
 {
     public interface IDataInitializer
     {
-        void SetInitialData();
+        Task SetInitialDataAsync();
     }
 }

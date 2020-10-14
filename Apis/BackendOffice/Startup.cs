@@ -28,18 +28,15 @@ namespace TGS.Apis.BackendOffice
             services.AddBackendOfficeServices(_configuration);
         }
 
-        public void Configure(IApplicationBuilder app, 
-            ITgsRepository tgsRepository,
-            IBetRepository betRepository,
-            IBackendOfficeRepository backendOfficeRepository)
+        public void Configure(IApplicationBuilder app)
         {
-            var isDevelopmentOrDocker = _env.IsDevelopmentOrDocker();
+            //var isDevelopmentOrDocker = _env.IsDevelopmentOrDocker();
 
-            tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            backendOfficeRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //backendOfficeRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
 
-            if (isDevelopmentOrDocker)
+            if (_env.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
             }

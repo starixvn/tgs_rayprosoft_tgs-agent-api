@@ -36,10 +36,11 @@ namespace TGS.Apis.LogApi
         {
             services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
             services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
-            services.AddRedis();
-            services.AddNats(Configuration);
-            services.AddWebApiServices();
-            services.AddTgsLog();
+            
+            services.AddRedis()
+                .AddNats(Configuration)
+                .AddWebApiServices()
+                .AddTgsLog();
 
             services.AddScoped<IMessagePackProvider, MessagePackProvider>();
             services.AddScoped<IMessageHandler, NatsMessageHandler>();
@@ -59,8 +60,15 @@ namespace TGS.Apis.LogApi
                 };
             });
 
-            services.AddControllers(options =>
-                    options.Filters.Add(new HttpResponseExceptionFilter()))
+            services
+                .AddControllers(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                    options.Filters.Add(new HttpResponseExceptionFilter());
+                })
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     options.InvalidModelStateResponseFactory = context =>
@@ -74,15 +82,6 @@ namespace TGS.Apis.LogApi
                         return result;
                     };
                 });
-
-            services.AddMvcCore(options =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-                options.Filters.Add(new HttpResponseExceptionFilter());
-            });
         }
 
         protected void OnApplicationStarted(IServiceProvider serviceProvider)
@@ -105,7 +104,7 @@ namespace TGS.Apis.LogApi
             IHostApplicationLifetime appLifetime,
             ILogRepository repository)
         {
-            repository.ExecuteMigrationAndSeeding();
+            //repository.ExecuteMigrationAndSeeding();
 
             appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));

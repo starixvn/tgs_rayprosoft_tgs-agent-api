@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Threading.Tasks;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models;
 
@@ -6,7 +7,7 @@ namespace TGS.Core.DataServices.DataInitializers
 {
     partial class DataInitializer
     {
-        private void GenerateSettings()
+        private Task GenerateSettingsAsync()
         {
             var options = new JsonSerializerOptions
             {
@@ -18,7 +19,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreateSetting(SettingConsts.GameProviderConfigurations.SBOBET, _jsonSerializationProvider.SerializeToString(SBOConfiguration, options), "JSON based configuration of SBOBET.")
             };
 
-            _repository.BulkInsert(settings);
+            return _repository.BulkInsertAsync(settings);
         }
 
         private static Setting CreateSetting(string key, string value, string description)

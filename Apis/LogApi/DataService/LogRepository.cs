@@ -111,25 +111,27 @@ namespace TGS.Apis.LogApi.DataService
             await SaveChangesAsync();
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        void IBaseRepository.SaveChanges()
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            SaveChanges();
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
 
-        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
                           Database.GetPendingMigrations().Any();
 
             if (isMigrate)
             {
-                Database.Migrate();
+                return Database.MigrateAsync();
             }
+
+            return Task.CompletedTask;
         }
     }
 }

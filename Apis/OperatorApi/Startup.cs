@@ -97,15 +97,12 @@ namespace TGS.Apis.OperatorApi
             }
         }
 
-        public void Configure(
-            IApplicationBuilder app,
-            ITgsRepository tgsRepository,
-            IBetRepository betRepository)
+        public void Configure(IApplicationBuilder app)
         {
-            var isDevelopmentOrDocker = _env.IsDevelopmentOrDocker();
+            //var isDevelopmentOrDocker = _env.IsDevelopmentOrDocker();
             
-            tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
 
             app.UseGlobalExceptionHandler();
 

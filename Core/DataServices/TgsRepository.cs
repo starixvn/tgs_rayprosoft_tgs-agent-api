@@ -122,30 +122,30 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new StationLetterMap());
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        void IBaseRepository.SaveChanges()
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            SaveChanges();
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
 
-        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {           
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
                            Database.GetPendingMigrations().Any();
 
             if (isMigrate)
             {
-                Database.Migrate();
+                await Database.MigrateAsync();
             }
 
             if (addSeeding)
             {
                 IDataInitializer data = new DataInitializer(this);
-                data.SetInitialData();
+                await data.SetInitialDataAsync();
             }
         }
 

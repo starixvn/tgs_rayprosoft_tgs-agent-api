@@ -81,17 +81,14 @@ namespace TGS.Apis.TgsApi.Commons
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(
-            IApplicationBuilder app, 
-            ITgsRepository tgsRepository, 
-            IBetRepository betRepository)
+        public void Configure(IApplicationBuilder app)
         {
-            var isDevelopmentOrDocker = Environment.IsDevelopmentOrDocker();
+            //var isDevelopmentOrDocker = Environment.IsDevelopmentOrDocker();
 
-            tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
-            betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //tgsRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
+            //betRepository.ExecuteMigrationAndSeeding(isDevelopmentOrDocker);
 
-            if (isDevelopmentOrDocker)
+            if (Environment.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
             }

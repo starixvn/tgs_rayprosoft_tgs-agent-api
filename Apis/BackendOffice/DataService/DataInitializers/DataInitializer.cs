@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
@@ -44,20 +45,20 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             new AdminRole(), new ResellerAdminRole()
         };
 
-        void IDataInitializer.SetInitialData()
+        async Task IDataInitializer.SetInitialDataAsync()
         {
             if (_repository.Users.Any())
             {
                 return;
             }
 
-            GenerateDepartments();
-            GenerateRoles();
-            GenerateUsers();
-            GenerateSettings();
+            await GenerateDepartmentsAsync();
+            await GenerateRolesAsync();
+            await GenerateUsersAsync();
+            await GenerateSettingsAsync();
         }
 
-        private void GenerateDepartments()
+        private Task GenerateDepartmentsAsync()
         {
             var departments = Departments.Select(p => new Department
             {
@@ -69,10 +70,11 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             });
-            _repository.BulkInsert(departments.ToArray());
+
+            return _repository.BulkInsertAsync(departments.ToArray());
         }
 
-        private void GenerateRoles()
+        private async Task GenerateRolesAsync()
         {
             var roles = CreateRoleWithMenus(_roles);
             var command = @"
@@ -117,7 +119,7 @@ VALUES
                     new SqlParameter { ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String }
                 };
 
-                _repository.ExecuteSqlCommand(command, CommandType.Text, parameters: args);
+                await _repository.ExecuteSqlCommandAsync(command, CommandType.Text, parameters: args);
             }
         }
 
@@ -140,7 +142,7 @@ VALUES
         }
 
 
-        private void GenerateUsers()
+        private Task GenerateUsersAsync()
         {
             string[] usernames =
             {
@@ -156,7 +158,8 @@ VALUES
             };
 
             users.AddRange(usernames.Select(username => CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
-            _repository.BulkInsert(users);
+            
+            return _repository.BulkInsertAsync(users);
         }
     }
 }

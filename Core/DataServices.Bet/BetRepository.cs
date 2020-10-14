@@ -71,24 +71,27 @@ namespace TGS.Core.DataServices.Bet
             return SaveChangesAsync();
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
-        }
-        void IBaseRepository.SaveChanges()
-        {
-            SaveChanges();
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        {
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        }
+
+        Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
                            Database.GetPendingMigrations().Any();
 
             if (isMigrate)
             {
-                Database.Migrate();
-            }            
+                return Database.MigrateAsync();
+            }
+            
+            return Task.CompletedTask;
         }
     }
 }

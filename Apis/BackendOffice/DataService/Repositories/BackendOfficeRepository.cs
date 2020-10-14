@@ -58,10 +58,14 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
         {
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
+        }
 
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        {
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
 
         EntityEntry<T> IBaseRepository.Entry<T>(T entity)
@@ -79,25 +83,20 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             return SaveChangesAsync();
         }
 
-        void IBaseRepository.SaveChanges()
-        {
-            SaveChanges();
-        }
-
-        void IBaseRepository.ExecuteMigrationAndSeeding(bool addSeeding)
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
                           Database.GetPendingMigrations().Any();
 
             if (isMigrate)
             {
-                Database.Migrate();
+                await Database.MigrateAsync();
             }
 
             if (addSeeding)
             {
                 IDataInitializer data = new DataInitializer(this);
-                data.SetInitialData();
+                await data.SetInitialDataAsync();
             }
         }
     }

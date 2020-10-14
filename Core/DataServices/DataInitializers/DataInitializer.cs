@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
@@ -49,7 +49,7 @@ namespace TGS.Core.DataServices.DataInitializers
             _jsonSerializationProvider = new JsonSerializationProvider();
         }
 
-        void IDataInitializer.SetInitialData()
+        async Task IDataInitializer.SetInitialDataAsync()
         {
             if (_repository.Players.Any())
             {
@@ -59,14 +59,14 @@ namespace TGS.Core.DataServices.DataInitializers
             var timer = new Stopwatch();
             timer.Start();
                         
-            LogSeedingTime(GenerateCurrencies, _logBuilder);
-            LogSeedingTime(GenerateLanguages, _logBuilder);
-            LogSeedingTime(GenerateBetLimitGroups, _logBuilder);
-            LogSeedingTime(GenerateVipLevel, _logBuilder);            
-            LogSeedingTime(GenerateGameProviders, _logBuilder);
-            LogSeedingTime(GenerateResellersAndLicensees, _logBuilder);
-            LogSeedingTime(GeneratePlayers, _logBuilder);
-            LogSeedingTime(GenerateSettings, _logBuilder);
+            await LogSeedingTimeAsync(GenerateCurrenciesAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateLanguagesAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateBetLimitGroupsAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateVipLevelAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateGameProvidersAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateResellersAndLicenseesAsync, _logBuilder);
+            await LogSeedingTimeAsync(GeneratePlayersAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
 
             timer.Stop();
 
@@ -74,7 +74,7 @@ namespace TGS.Core.DataServices.DataInitializers
             Console.WriteLine(_logBuilder.ToString());
         }
       
-        private void GenerateCurrencies()
+        private Task GenerateCurrenciesAsync()
         {
             var currencies = new[]
             {
@@ -105,7 +105,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 UpdatedOn = _now
             }).ToArray();
 
-            _repository.BulkInsert(currencies);
+            return _repository.BulkInsertAsync(currencies);
         }
 
         private readonly VipLevel[] _vipLevels = new[]
@@ -118,7 +118,7 @@ namespace TGS.Core.DataServices.DataInitializers
             new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F" }
         };
 
-        private void GenerateVipLevel()
+        private Task GenerateVipLevelAsync()
         {
             foreach (var vip in _vipLevels)
             {
@@ -128,10 +128,10 @@ namespace TGS.Core.DataServices.DataInitializers
                 vip.UpdatedOn = _now;
             }
 
-            _repository.BulkInsert(_vipLevels);
+            return _repository.BulkInsertOrUpdateAsync(_vipLevels);
         }
 
-        private void GenerateLanguages()
+        private Task GenerateLanguagesAsync()
         {
             var languages = new[]
             {
@@ -156,10 +156,10 @@ namespace TGS.Core.DataServices.DataInitializers
                 UpdatedOn = _now
             }).ToArray();
 
-            _repository.BulkInsert(languages);
+            return _repository.BulkInsertAsync(languages);
         }
 
-        private BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
+        private static BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
         {
             return new BetLimitGroup
             {
@@ -174,7 +174,7 @@ namespace TGS.Core.DataServices.DataInitializers
             };
         }
 
-        private void GenerateBetLimitGroups()
+        private Task GenerateBetLimitGroupsAsync()
         {
             var betLimitGroups = new[]
             {
@@ -185,10 +185,10 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreateBetLimitGroup(5, "Diamond", "Diamond", "Level 5: Diamond")
             };
 
-            _repository.BulkInsert(betLimitGroups);
+            return _repository.BulkInsertAsync(betLimitGroups);
         }
 
-        private void GeneratePlayers()
+        private async Task GeneratePlayersAsync()
         {
             var rnd = new Random();
             var (salt, password) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
@@ -262,12 +262,12 @@ namespace TGS.Core.DataServices.DataInitializers
                     };
                 }).ToArray();
 
-            _repository.BulkInsert(players);
-            _repository.BulkInsert(players.SelectMany(p => p.Wallets).ToArray());
-            _repository.BulkInsert(players.SelectMany(p => p.Banks).ToArray());
+            await _repository.BulkInsertAsync(players);
+            await _repository.BulkInsertAsync(players.SelectMany(p => p.Wallets).ToArray());
+            await _repository.BulkInsertAsync(players.SelectMany(p => p.Banks).ToArray());
         }
 
-        private void GenerateGameProviders()
+        private async Task GenerateGameProvidersAsync()
         {
             foreach (var gp in GameProviders)
             {
@@ -276,30 +276,30 @@ namespace TGS.Core.DataServices.DataInitializers
             }
 
             var gameProviders = _gameProvidersCreated.Values.ToArray();
-            _repository.BulkInsert(gameProviders);
-            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.GameProviderConfigurations).ToArray());
-            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.Currencies).ToArray());
-            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.Languages).ToArray());
-            _repository.BulkInsert(gameProviders.SelectMany(gp => gp.Games).ToArray());
+            await _repository.BulkInsertAsync(gameProviders);
+            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.GameProviderConfigurations).ToArray());
+            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Currencies).ToArray());
+            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Languages).ToArray());
+            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Games).ToArray());
         }
 
-        private void GenerateResellersAndLicensees()
+        private async Task GenerateResellersAndLicenseesAsync()
         {
             var resellers = Resellers.Select(r => CreateResellerWithLicensee(r)).ToArray();
 
             // resellers
-            _repository.BulkInsert(resellers);
-            _repository.BulkInsert(resellers.SelectMany(r => r.Currencies).ToArray());
-            _repository.BulkInsert(resellers.SelectMany(r => r.Languages).ToArray());
+            await _repository.BulkInsertAsync(resellers);
+            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.Currencies).ToArray());
+            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.Languages).ToArray());
 
             // licensees
             var licensees = resellers.SelectMany(r => r.Licensees).ToArray();
-            
-            _repository.BulkInsert(licensees);
-            _repository.BulkInsert(licensees.SelectMany(l => l.Currencies).ToArray());
-            _repository.BulkInsert(licensees.SelectMany(l => l.Languages).ToArray());
-            _repository.BulkInsert(licensees.SelectMany(l => l.GameProviderConfigurations).ToArray());
-            _repository.BulkInsert(licensees.SelectMany(l => l.Games).ToArray());
+
+            await _repository.BulkInsertAsync(licensees);
+            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Currencies).ToArray());
+            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Languages).ToArray());
+            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviderConfigurations).ToArray());
+            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Games).ToArray());
         }
 
         private static GameProvider CreateGameProvider(IGameProvider gameProvider)
@@ -460,11 +460,11 @@ namespace TGS.Core.DataServices.DataInitializers
             };
         }
 
-        private static void LogSeedingTime(Action getFunc,
+        private static async Task LogSeedingTimeAsync(Func<Task> getFunc,
             StringBuilder builder)
         {
             var timer = Stopwatch.StartNew();
-            getFunc();
+            await getFunc();
             timer.Stop();
             lock (Locker)
             {
