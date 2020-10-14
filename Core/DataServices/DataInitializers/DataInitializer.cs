@@ -33,7 +33,7 @@ namespace TGS.Core.DataServices.DataInitializers
             new RedTigerGameProvider(), new SBOGameProvider()
         };
 
-        private static readonly IList<IReseller> Resellers = new[] 
+        private static readonly IList<IReseller> Resellers = new[]
         {
             new TgsReseller()
         };
@@ -58,7 +58,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             var timer = new Stopwatch();
             timer.Start();
-                        
+
             await LogSeedingTimeAsync(GenerateCurrenciesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateLanguagesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateBetLimitGroupsAsync, _logBuilder);
@@ -73,7 +73,7 @@ namespace TGS.Core.DataServices.DataInitializers
             _logBuilder.AppendLine($"Total Time was {timer.ElapsedMilliseconds} ms");
             Console.WriteLine(_logBuilder.ToString());
         }
-      
+
         private Task GenerateCurrenciesAsync()
         {
             var currencies = new[]
@@ -194,77 +194,110 @@ namespace TGS.Core.DataServices.DataInitializers
             var (salt, password) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
-           
-            var players = Enumerable.Range(1, 200)
+
+            var tmpPlayer = new[] 
+            {
+                new { Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer },
+                new { Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer },
+                new { Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN", CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer },
+                new { Username = "RP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer },
+                new { Username = "RP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer },
+            };
+
+            var players = tmpPlayer.Select(p =>
+            {
+                var playerCode = PlayerCodeGenerator.NewId();
+                var vipId = _vipLevels[rnd.Next(0, 6)].Id;
+
+                return CreatePlayer(playerCode, p.Username, p.RealName, salt, password, p.CultureCode, p.CurrencyCode, vipId, p.Type);
+            }).ToArray();
+
+            var randomPlayers = Enumerable.Range(1, 100)
                 .Select(p =>
                 {
-                    var defaultWalletId = GuidExtensions.NewSequentialGuid();
                     var currencyCode = "CNY";
+                    var cultureCode = "en-US";
 
                     var playerCode = PlayerCodeGenerator.NewId();
                     var parentPlayerCode = playerCodes.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : playerCodes[rnd.Next(0, playerCodes.Count - 1)];
-                    
+
                     var invitationCode = Generator.RandomString(6);
                     var parentInvitationCode = invitationCodes.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : invitationCodes[rnd.Next(0, invitationCodes.Count - 1)];
 
                     playerCodes.Add(playerCode);
                     invitationCodes.Add(invitationCode);
 
-                    return new Player
-                    {
-                        PlayerCode = playerCode,
-                        Username = Generator.RandomString(12),
-                        RealName = Generator.RandomString(12),
-                        InvitationCode = invitationCode,
-                        Password = password,
-                        Salt = salt,
-                        CultureCode = "en-US",
-                        DefaultWalletId = defaultWalletId,
-                        DefaultWalletCurrencyCode = currencyCode,
-                        Status = (PlayerStatus)rnd.Next(0, 3),
-                        BetLimitGroupId = rnd.Next(1, 6),
-                        Type = PlayerTypes.RealPlayer,
-                        Email = Generator.RandomString(5) + "@gmail.com",
-                        Phone = Generator.RandomIntString(10),
-                        QQ = Generator.RandomString(20),
-                        Wechat = Generator.RandomString(20),
-                        ParentPlayerCode = parentPlayerCode,
-                        ParentInvitationCode = parentInvitationCode,
-                        HasAgent = rnd.NextDouble() > 0.5,
-                        VipId = _vipLevels[rnd.Next(0, 6)].Id,
-                        RegisteredOn = _now,
-                        LastActiveOn = _now,
-                        LicenseeId = Resellers[0].Licensees[0].Id,
-                        Wallets = new[]
-                        {
-                            new Wallet
-                            {
-                                Id = defaultWalletId,
-                                PlayerCode = playerCode,
-                                CurrencyCode = currencyCode,
-                                ExternalCurrencyCode = currencyCode,
-                                Balance = rnd.Next(1000,100000),
-                                CreatedOn = _now,
-                                UpdatedOn = _now
-                            }
-                        },
-                        Banks = new[]
-                        {
-                            new PlayerBank
-                            {
-                                Id = GuidExtensions.NewSequentialGuid(),
-                                PlayerCode = playerCode,
-                                Username = Generator.RandomString(4),
-                                BankName = Generator.RandomString(12),
-                                BankAccount = Generator.RandomIntString(20),
-                            },
-                        }
-                    };
+                    var username = Generator.RandomString(12);
+                    var realName = Generator.RandomString(12);
+                    var vipId = _vipLevels[rnd.Next(0, 6)].Id;
+
+                    return CreatePlayer(playerCode, username, realName, salt, password, cultureCode, currencyCode, vipId, 
+                        PlayerTypes.RealPlayer, parentPlayerCode, invitationCode, parentInvitationCode);
                 }).ToArray();
+
+            players = players.Concat(randomPlayers).ToArray();
 
             await _repository.BulkInsertAsync(players);
             await _repository.BulkInsertAsync(players.SelectMany(p => p.Wallets).ToArray());
             await _repository.BulkInsertAsync(players.SelectMany(p => p.Banks).ToArray());
+        }
+
+        private static Player CreatePlayer(string playerCode, string username, string realName, byte[] salt, byte[] password, 
+            string cultureCode, string currencyCode, Guid vipId, PlayerTypes playerType, string parentPlayerCode = null, string invitationCode = null, 
+            string parentInvitationCode = null)
+        {
+            var defaultWalletId = GuidExtensions.NewSequentialGuid();
+
+            return new Player
+            {
+                PlayerCode = playerCode,
+                Username = username,
+                RealName = realName,
+                InvitationCode = invitationCode,
+                Password = password,
+                Salt = salt,
+                CultureCode = cultureCode,
+                DefaultWalletId = defaultWalletId,
+                DefaultWalletCurrencyCode = currencyCode,
+                Status = PlayerStatus.Enabled,
+                BetLimitGroupId = 1,
+                Type = playerType,
+                Email = Generator.RandomString(5) + "@gmail.com",
+                Phone = Generator.RandomIntString(10),
+                QQ = Generator.RandomString(20),
+                Wechat = Generator.RandomString(20),
+                ParentPlayerCode = parentPlayerCode,
+                ParentInvitationCode = parentInvitationCode,
+                HasAgent = false,
+                VipId = vipId,
+                RegisteredOn = _now,
+                LastActiveOn = _now,
+                LicenseeId = Resellers[0].Licensees[0].Id,
+                Wallets = new[]
+                {
+                    new Wallet
+                    {
+                        Id = defaultWalletId,
+                        PlayerCode = playerCode,
+                        CurrencyCode = currencyCode,
+                        ExternalCurrencyCode = currencyCode,
+                        Balance = 1000,
+                        CreatedOn = _now,
+                        UpdatedOn = _now
+                    }
+                },
+                Banks = new[]
+                {
+                    new PlayerBank
+                    {
+                        Id = GuidExtensions.NewSequentialGuid(),
+                        PlayerCode = playerCode,
+                        Username = Generator.RandomString(4),
+                        BankName = Generator.RandomString(12),
+                        BankAccount = Generator.RandomIntString(20),
+                    },
+                }
+            };
         }
 
         private async Task GenerateGameProvidersAsync()
@@ -352,7 +385,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 IsDefault = idx == 0
             }).ToHashSet();
 
-            gp.Games = gameProvider.Games.Select(g => new Models.Game 
+            gp.Games = gameProvider.Games.Select(g => new Models.Game
             {
                 Id = g.Id,
                 Name = g.Name,
@@ -389,7 +422,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = _now,
-                UpdatedOn = _now,                
+                UpdatedOn = _now,
                 Currencies = reseller.Currencies.Select(curr => new ResellerCurrency
                 {
                     ResellerId = reseller.Id,
