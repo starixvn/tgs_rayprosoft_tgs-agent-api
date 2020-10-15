@@ -208,8 +208,9 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 var playerCode = PlayerCodeGenerator.NewId();
                 var vipId = _vipLevels[rnd.Next(0, 6)].Id;
+                var invitationCode = Generator.RandomString(6);
 
-                return CreatePlayer(playerCode, p.Username, p.RealName, salt, password, p.CultureCode, p.CurrencyCode, vipId, p.Type);
+                return CreatePlayer(playerCode, p.Username, p.RealName, salt, password, p.CultureCode, p.CurrencyCode, vipId, p.Type, invitationCode);
             }).ToArray();
 
             var randomPlayers = Enumerable.Range(1, 100)
@@ -232,7 +233,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     var vipId = _vipLevels[rnd.Next(0, 6)].Id;
 
                     return CreatePlayer(playerCode, username, realName, salt, password, cultureCode, currencyCode, vipId, 
-                        PlayerTypes.RealPlayer, parentPlayerCode, invitationCode, parentInvitationCode);
+                        PlayerTypes.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
                 }).ToArray();
 
             players = players.Concat(randomPlayers).ToArray();
@@ -243,7 +244,7 @@ namespace TGS.Core.DataServices.DataInitializers
         }
 
         private static Player CreatePlayer(string playerCode, string username, string realName, byte[] salt, byte[] password, 
-            string cultureCode, string currencyCode, Guid vipId, PlayerTypes playerType, string parentPlayerCode = null, string invitationCode = null, 
+            string cultureCode, string currencyCode, Guid vipId, PlayerTypes playerType, string invitationCode, string parentPlayerCode = null, 
             string parentInvitationCode = null)
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
@@ -272,6 +273,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 VipId = vipId,
                 RegisteredOn = _now,
                 LastActiveOn = _now,
+                UpdatedOn = _now,
+                UpdatedByUsername = username,
                 LicenseeId = Resellers[0].Licensees[0].Id,
                 Wallets = new[]
                 {

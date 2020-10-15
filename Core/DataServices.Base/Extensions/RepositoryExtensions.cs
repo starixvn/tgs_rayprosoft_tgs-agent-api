@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.Base.Extensions
@@ -38,17 +34,6 @@ namespace TGS.Core.DataServices.Base.Extensions
                     serverOption.CommandTimeout(commandTimeout);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                 });
-
-                //var options = (DbContextOptions<TRepository>)option.Options;
-                //using var db = (DbContext)Activator.CreateInstance(typeof(TRepository), options);
-
-                //var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                //                db.Database.GetPendingMigrations().Any();
-
-                //if (isMigrate)
-                //{
-                //    db.Database.Migrate();
-                //}
             }, PoolSize);
 
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
