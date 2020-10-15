@@ -9,7 +9,7 @@ GO
 
 ALTER PROCEDURE [dbo].[usp_GameAction_GetValidGameActionExternalIds]
     @gameProviderId					UNIQUEIDENTIFIER,
-	@walletId						UNIQUEIDENTIFIER,
+	@playerCode						VARCHAR(16),
 	@externalRoundId                NVARCHAR(255),
 	@onlyPlacements					BIT
 AS
@@ -31,11 +31,13 @@ BEGIN
     WHERE
         r.ExternalRoundId = @externalRoundId
         AND
+        r.PlayerCode = @playerCode
+        AND
         ga.GameProviderConfigurationId = r.GameProviderConfigurationId
         AND
         r.GameProviderId = @gameProviderId
         AND
-        ga.WalletId = @walletId
+        ga.WalletId = r.WalletId
         AND
         (@onlyPlacements = 0 OR ga.[Type] = 0) -- 0 is a PlaceBet	
 END

@@ -13,6 +13,8 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
+using GameActionData = TGS.Services.GameOperations.Models.Data.GameActionData;
+using GameActionResult = TGS.Services.GameOperations.Models.Data.GameActionResult;
 
 namespace TGS.Services.GameOperations.Data
 {
@@ -254,7 +256,7 @@ namespace TGS.Services.GameOperations.Data
 
             var r = ValidateReferenceAction(s);
 
-            s.ValidPreviousActions = GetValidatePreviousActions(actions);
+            s.ValidPreviousActions = GetValidPreviousActions(actions);
 
             return (s, r);
         }
@@ -284,7 +286,7 @@ namespace TGS.Services.GameOperations.Data
             return (actions.ToArray(), refGameAction);
         }
 
-        private static IList<BetActionData> GetValidatePreviousActions(IList<BetActionData> actions)
+        private static IList<BetActionData> GetValidPreviousActions(IList<BetActionData> actions)
         {
             var allCancelledIdsInTheRound = actions
                 .Where(r => r.Type == CancelTransaction && r.Reference != null)

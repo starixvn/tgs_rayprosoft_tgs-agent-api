@@ -9,7 +9,7 @@ GO
 
 ALTER PROCEDURE [dbo].[usp_GameAction_GetGameActionExternalIds]
     @gameProviderId		UNIQUEIDENTIFIER,
-	@walletId			UNIQUEIDENTIFIER,
+	@playerCode			VARCHAR(16),
 	@externalRoundId    NVARCHAR(255),
 	@gameActionTypes    IntValuesType READONLY
 AS
@@ -30,8 +30,9 @@ BEGIN
     ON r.Id = ga.RoundId
     WHERE r.ExternalRoundId = @externalRoundId        
       AND r.GameProviderId = @gameProviderId
+      AND r.PlayerCode = @playerCode
       AND ga.GameProviderConfigurationId = r.GameProviderConfigurationId
-      AND ga.WalletId = @walletId
+      AND ga.WalletId = r.WalletId
       AND ga.[Type] IN (SELECT [Value] FROM @gameActionTypes) 	
 END
 

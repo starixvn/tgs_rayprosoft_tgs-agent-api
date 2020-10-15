@@ -11,14 +11,14 @@ using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 {
-    public sealed class AuthorizeSBOMiddleware : IMiddleware
+    public sealed class AuthorizeSBOBETMiddleware : IMiddleware
     {
         private readonly ISettingOperations _settingOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ILicenseeOperations _licenseeOperations;
 
-        public AuthorizeSBOMiddleware(
+        public AuthorizeSBOBETMiddleware(
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,

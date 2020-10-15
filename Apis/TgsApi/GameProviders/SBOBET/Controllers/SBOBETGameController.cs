@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
-using TGS.Apis.TgsApi.GameModels;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
-using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 using static TGS.Core.Models.Enums.GameActionType;
+using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 {
@@ -24,15 +24,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
     public sealed class SBOBETGameController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
-        private readonly ISBOGameControllerMapper _map;
-        private readonly ISBOServices _services;
+        private readonly ISBOBETGameControllerMapper _map;
+        private readonly ISBOBETServices _services;
 
         private static readonly GameActionType[] SettleGameActionTypes = new [] { WinBet, LoseBet, TieBet, FreeBet };
 
         public SBOBETGameController(
             IGamePlayActions actions,
-            ISBOGameControllerMapper map,
-            ISBOServices services)
+            ISBOBETGameControllerMapper map,
+            ISBOBETServices services)
         {
             _actions = actions;
             _map = map;
@@ -91,6 +91,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var r = await _actions.CancelTransactionAsync(betData);
             return _map.Response(request, r);
         }
+
+        [Route("GetBetStatus")]
+        public async Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
+        {
+            var data = await _services.GetGameProviderConfigurationDataAsync();
+            var ga = await _services.GetValidGameActionsAsync(data.GameProviderId, request.PlayerCode, request.ExternalRoundId);
+
+            if (ga == null)
+            {
+                throw new InvalidGameActionException(
+                    $"Transaction of transferCode: {request.ExternalTransactionId} and transactionId: {request.ExternalRoundId} is not found.",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            return _map.Response(request, ga);
+        }        
 
         #region Private Methods
 

@@ -7,7 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using NLog;
-using TGS.Apis.TgsApi.Extensions;
+using TGS.Core.DataServices.Bet.Extensions;
+using TGS.Core.DataServices.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -41,8 +42,10 @@ namespace TGS.Apis.TgsApi.Commons
         {
             services.AddSingleton<Func<string>>(c => () => LogPrefix);
 
-            services.AddRepositories(Configuration)
-                    .AddNats(Configuration)
+            services.AddTgsRepository(Configuration, "Tgs")
+                    .AddBetRepository(Configuration, "Bet");
+
+            services.AddNats(Configuration)
                     .AddWebApiServices()
                     .AddTgsLog()
                     .AddJson()

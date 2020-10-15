@@ -9,7 +9,7 @@ using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
-    public sealed class SBOErrorMapper : IErrorMapper
+    public sealed class SBOBETErrorMapper : IErrorMapper
     {
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
              new Dictionary<Type, GameApiError>

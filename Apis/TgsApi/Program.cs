@@ -5,17 +5,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
 using TGS.Apis.TgsApi.GameProviders.RedTiger;
-using TGS.Core.Models;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
-using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace TGS.Apis.TgsApi
 {
@@ -34,33 +34,33 @@ namespace TGS.Apis.TgsApi
             await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args)
+        private static IHostBuilder CreateHostBuilder(string[] args)
         {
             var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ?? string.Empty;
             var gpName = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderName) ?? string.Empty;
 
             return Host.CreateDefaultBuilder(args)
-                           .ConfigureAppConfiguration((hostContext, config) =>
-                           {
-                               var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{gpName}/{gpName.ToLower()}.json";
-                               config.AddJsonFile(path, true);
-                           })
-                           .ConfigureWebHostDefaults(webBuilder =>
-                           {
-                               if (!StartupMap.TryGetValue(gpCode, out var startup))
-                               {
-                                    startup = StartupMap.Values.ElementAt(0);
-                               }    
+                    .ConfigureAppConfiguration((hostContext, config) =>
+                    {
+                        var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{gpName}/{gpName.ToLower()}.json";
+                        config.AddJsonFile(path, true);
+                    })
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        if (!StartupMap.TryGetValue(gpCode, out var startup))
+                        {
+                            startup = StartupMap.Values.ElementAt(0);
+                        }
 
-                               webBuilder.UseStartup(startup)
-                                         .UseKestrel(options => options.AddServerHeader = false);
-                           })
-                           .ConfigureLogging((hostContext, logging) =>
-                           {
-                               logging.ClearProviders();
-                               logging.SetMinimumLevel(LogLevel.Trace);
-                           })
-                           .UseNLog();
+                        webBuilder.UseStartup(startup)
+                                  .UseKestrel(options => options.AddServerHeader = false);
+                    })
+                    .ConfigureLogging((hostContext, logging) =>
+                    {
+                        logging.ClearProviders();
+                        logging.SetMinimumLevel(LogLevel.Trace);
+                    })
+                    .UseNLog();
         }
 
         private static async Task ExecuteMigraionsAndSeedingsAsync(IServiceProvider services)

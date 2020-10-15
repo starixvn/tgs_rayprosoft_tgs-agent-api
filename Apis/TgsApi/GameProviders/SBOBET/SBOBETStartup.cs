@@ -24,21 +24,21 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                addCustom: () => services.AddSingleton<SBOErrorMapper>(),
+                addCustom: () => services.AddSingleton<SBOBETErrorMapper>(),
                 get: provider => key =>
                 {
                     return key switch
                     {
-                        Consts.GameProvider.SBOBET => provider.GetRequiredService<SBOErrorMapper>(),
+                        Consts.GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
                         _ => provider.GetRequiredService<TgsErrorMapper>()
                     };
                 });
 
-            services.AddScoped<AuthorizeSBOMiddleware>();
-            services.AddScoped<HandleSBOExceptionMiddleware>();
+            services.AddScoped<AuthorizeSBOBETMiddleware>();
+            services.AddScoped<HandleSBOBETExceptionMiddleware>();
 
-            services.AddScoped<ISBOServices, SBOServices>();
-            services.AddSingleton<ISBOGameControllerMapper, SBOGameControllerMapper>();            
+            services.AddScoped<ISBOBETServices, SBOBETServices>();
+            services.AddSingleton<ISBOBETGameControllerMapper, SBOBETGameControllerMapper>();            
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
@@ -48,8 +48,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
             app.UseWhen(context => bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)),
                 builder =>
                 {
-                    builder.UseMiddleware<HandleSBOExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeSBOMiddleware>();
+                    builder.UseMiddleware<HandleSBOBETExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeSBOBETMiddleware>();
                 });
         }
     }

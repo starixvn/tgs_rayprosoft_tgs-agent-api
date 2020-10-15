@@ -23,10 +23,15 @@
       },
       "applicationUrl": "https://localhost:62331"
     },
-    "Docker": {
+    "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
+      "environmentVariables": {
+        "GameProviderCode": "SBO",
+        "GameProviderName": "SBOBET",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
       "publishAllPorts": true,
       "useSSL": true
     }

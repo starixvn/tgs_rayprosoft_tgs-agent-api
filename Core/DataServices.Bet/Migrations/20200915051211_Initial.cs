@@ -192,6 +192,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetValidGameActionExternalIds"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionExternalIds"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetValidGameActionsByExternalRoundId"));
 
             // View
             migrationBuilder.SqlResource(assembly,

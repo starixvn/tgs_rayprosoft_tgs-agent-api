@@ -11,11 +11,11 @@ using TGS.Core.Models.Interfaces;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 {
-    public sealed class HandleSBOExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
+    public sealed class HandleSBOBETExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
     {
         protected override string LoggerName => "sbo";
 
-        public HandleSBOExceptionMiddleware(
+        public HandleSBOBETExceptionMiddleware(
             Func<string, IErrorMapper> mapper,
             ITgsLog log)
             : base(mapper, Consts.GameProvider.SBOBET, log)
