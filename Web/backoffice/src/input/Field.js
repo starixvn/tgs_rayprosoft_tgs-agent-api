@@ -84,7 +84,7 @@ export const Email = ({ type = "mail", ...props }) => {
     <Field
       type={type}
       validate={(value) => {
-        if (!EmailReg.test(value)) {
+        if (value && !EmailReg.test(value)) {
           return invalidEmail
         }
 

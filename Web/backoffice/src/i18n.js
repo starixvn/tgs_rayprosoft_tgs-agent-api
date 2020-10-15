@@ -70,3 +70,6 @@ export const FormattedDateTime = ({
 export const FormattedNumber = ({ value }) => {
   return Number.isFinite(value) && <Text>{numeral(value).format("0,0")}</Text>
 }
+
+export const getTrans = (messages = {}, locale = Locales.zh) => 
+  Reflect.get(messages, locale) ?? ""
