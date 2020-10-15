@@ -128,6 +128,10 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef, ...props 
     mutate()
   }
 
+  const onBankSubmitted = () => {
+    mutate()
+  }
+
   const onClickClose = dialog.hide
 
   return (
@@ -152,7 +156,13 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef, ...props 
           `}
         >
           {readonly && <ViewTabs playerCode={playerCode} player={player} tab={tab}/>}
-          {edit && <EditTabs playerCode={playerCode} player={player} tab={tab} onSubmitted={onSubmitted} onClickClose={onClickClose}/>}
+          {edit && <EditTabs 
+                    playerCode={playerCode} 
+                    player={player} 
+                    tab={tab} 
+                    onSubmitted={onSubmitted} 
+                    onBankSubmitted={onBankSubmitted}
+                    onClickClose={onClickClose}/>}
         </Dialog.Modal>
       )}
     </>
@@ -178,7 +188,7 @@ const ViewTabs = ({ playerCode, player, tab }) => {
   )
 }
 
-const EditTabs = ({ playerCode, player, tab, onSubmitted, onClickClose }) => {
+const EditTabs = ({ playerCode, player, tab, onSubmitted, onBankSubmitted, onClickClose }) => {
   return (
     <_Tabs use={Box} isFitted css={css``}>
       <_Tabs.List use={TabList} {...tab}>
@@ -189,7 +199,7 @@ const EditTabs = ({ playerCode, player, tab, onSubmitted, onClickClose }) => {
       </_Tabs.List>
       <PlayerEditTab player={player} playerCode={playerCode} onSubmitted={onSubmitted} onClickClose={onClickClose} {...tab}/>
       <ContractEditPanel player={player} playerCode={playerCode} onSubmitted={onSubmitted} onClickClose={onClickClose} {...tab} />
-      <BankPanel banks={player.banks} {...tab} />
+      <BankPanel playerCode={playerCode} banks={player.banks} edit={true} onSubmitted={onBankSubmitted} {...tab} />
       <PasswordPanel player={player} {...tab}/>
     </_Tabs>
   )

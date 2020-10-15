@@ -86,10 +86,10 @@ export const EditPanel = ({ playerCode = "", player = {}, onSubmitted, onClickCl
       {error && <AlertDialog {...error} onClickClose={clearResult}/>}
       <Formik 
         initialValues={{
-          phone,
-          email,
-          qq,
-          weChat
+          phone: phone ?? "",
+          email: email ?? "",
+          qq: qq ?? "",
+          weChat: weChat ?? ""
         }}
         onSubmit={submit}>
         <Form>

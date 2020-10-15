@@ -92,7 +92,7 @@ export const EditPanel = ({ playerCode = "", player = {}, onSubmitted, onClickCl
       {error && <AlertDialog {...error} onClickClose={clearResult}/>}
       <Formik 
         initialValues={{
-          realName,
+          realName: realName ?? "",
           vipId,
           parentUsername: parentUsername ?? "",
           status,

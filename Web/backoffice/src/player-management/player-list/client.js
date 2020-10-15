@@ -1,5 +1,5 @@
 import useSWR from "swr"
-import { urlWith, get, put } from "../../client"
+import client, { urlWith, get, put, post } from "../../client"
 
 export const useList = (searchParams = {}) => {
   let url = urlWith(searchParams, `/api/player`)
@@ -32,14 +32,15 @@ export const usePlayer = ({ playerCode }) => {
 }
 
 export const useEditPlayerInfo = ({ playerCode, data }) => {
+  let fetchData = playerCode && data
   const { data: result, error, isValidating, mutate } = useSWR(
-    playerCode && data ? `/api/player/${playerCode}/info` : null,
+    fetchData ? `/api/player/${playerCode}/info` : null,
     (url) => put(url, { data })
   )
 
   return {
     result,
-    isLoading: !error && !result,
+    isLoading: !error && !result && fetchData,
     isValidating,
     error,
     isError: error,
@@ -48,14 +49,66 @@ export const useEditPlayerInfo = ({ playerCode, data }) => {
 }
 
 export const useEditPlayerContact = ({ playerCode, data }) => {
+  let fetchData = playerCode && data
   const { data: result, error, isValidating, mutate } = useSWR(
-    playerCode && data ? `/api/player/${playerCode}/contact` : null,
+    fetchData ? `/api/player/${playerCode}/contact` : null,
     (url) => put(url, { data })
   )
 
   return {
     result,
-    isLoading: !error && !result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}
+
+export const useAddPlayerBank = ({ playerCode, data }) => {
+  let fetchData = playerCode && data
+  const { data: result, error, isValidating, mutate } = useSWR(
+    fetchData ? `/api/player/${playerCode}/bank` : null,
+    (url) => post(url, { data })
+  )
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}
+
+export const useEditPlayerBank = ({ playerCode, id, data }) => {
+  let fetchData = playerCode && id && data
+  const { data: result, error, isValidating, mutate } = useSWR(
+    fetchData ? `/api/player/${playerCode}/bank/${id}` : null,
+    (url) => put(url, { data })
+  )
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}
+
+export const useDeletePlayerBank = ({ playerCode, id }) => {
+  let fetchData = playerCode && id
+  const { data: result, error, isValidating, mutate } = useSWR(
+    fetchData ? `/api/player/${playerCode}/bank/${id}` : null,
+    (url) => client.delete(url)
+  )
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
     isValidating,
     error,
     isError: error,
