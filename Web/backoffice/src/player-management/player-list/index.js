@@ -1,21 +1,31 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import client from "../../client"
 import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
+import {
+  Heading,
+  Stack,
+  Box,
+  Button,
+  InputField,
+  Set,
+  useModalState
+} from "bumbag"
 import PageContent from "../../page/Content"
-import { EditButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import AsyncTable, { useTableState } from "../../table/async"
-import { label as statusLabel } from "../status"
+import { useList } from "./client"
+import { useTable, Table, pageCount } from "../../table"
+import { Label as StatueLabel } from "../status"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code } from "./menu"
+import { Field as StatusField } from "../status"
+import { Field as VipLevelField } from "../../vip-level/field"
+import { ViewButton, EditButton } from "./button"
 
 export { Code }
 
@@ -30,51 +40,56 @@ export const Content = () => {
 
 export const CodeContentPair = [Code, Content]
 
-//TODO
 const AsyncContent = () => {
-  let { state, setState, headSortBy, headOrderBy } = useTableState({
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
     status: null,
     vipId: null,
     username: ""
   })
-  let { pageIndex, pageSize, status, vipId, username = "" } = state
-
-  const deferFn = () =>
-    client.get("/api/player", {
-      searchParams: {
-        page: pageIndex + 1,
-        rows: pageSize,
-        status,
-        vipId,
-        username,
-        sortby: headSortBy(),
-        orderby: headOrderBy()
-      }
-    })
-
-  let async = useAsync({ deferFn })
-  let { run: fetchTable, promise, isPending } = async
-
-  let columns = useTableColumns({
-    fetchTable
+  let {
+    pageIndex,
+    pageSize,
+    sortby,
+    orderby,
+    status,
+    vipId,
+    username = ""
+  } = state
+  let { data = {}, isLoading, isValidating, mutate } = useList({
+    page: pageIndex + 1,
+    rows: pageSize,
+    sortby,
+    orderby,
+    status,
+    vipId,
+    username
   })
 
-  useEffect(() => {
-    fetchTable()
-  }, [pageIndex, pageSize, status, vipId, username])
+  let columns = useTableColumns({ fetchData: mutate })
 
   return (
     <PageContent
       title={title()}
-      actionBar={<SearchForm search={setState} isPending={isPending} />}
+      actionBar={
+        <SearchForm
+          search={(data) => {
+            setState({
+              pageIndex: 0,
+              ...data
+            })
+          }}
+          isPending={isLoading}
+        />
+      }
     >
-      <AsyncTable
-        state={state}
-        onStateChange={setState}
-        promise={promise}
-        head
-        body
+      <Table
+        controlledState={state}
         columns={columns}
+        data={data?.items}
+        pageCount={pageCount(pageSize, data?.totalCount)}
+        setPageIndex={setPageIndex}
+        setSortOrder={setSortOrder}
+        isLoading={isLoading}
       />
     </PageContent>
   )
@@ -83,7 +98,7 @@ const AsyncContent = () => {
 const SearchForm = ({ search, isPending, ...props }) => {
   return (
     <Formik
-      initialValues={{ username: "" }}
+      initialValues={{ status: "", vipId: "", username: "" }}
       onSubmit={(data) => {
         search(data)
       }}
@@ -91,6 +106,8 @@ const SearchForm = ({ search, isPending, ...props }) => {
       {(formProps) => (
         <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
           <Set>
+            <StatusField name="status" />
+            <VipLevelField name="vipId" />
             <Field
               component={InputField.Formik}
               name="username"
@@ -121,12 +138,13 @@ const searchInputPlaceHolder = () => "用户名输入框"
 //TODO: i18n
 const searchButtonLabel = () => "搜索"
 
-const useTableColumns = ({ fetchTable }) => {
+const useTableColumns = ({ fetchData } = {}) => {
   let columns = [
     sequenceColumn(),
     {
       Header: "用户名",
       accessor: "username",
+      disableSortBy: true,
       headCell: {
         textAlign: "center"
       },
@@ -136,7 +154,8 @@ const useTableColumns = ({ fetchTable }) => {
     },
     {
       Header: "VIP 等级",
-      accessor: "vipId",
+      disableSortBy: true,
+      accessor: "vipLevel",
       headCell: {
         textAlign: "center"
       },
@@ -154,9 +173,7 @@ const useTableColumns = ({ fetchTable }) => {
       cell: {
         textAlign: "center"
       },
-      Cell: ({ value }) => {
-        return statusLabel(value)
-      }
+      Cell: ({ value }) => <StatueLabel value={value} />
     }
   ]
 
@@ -175,7 +192,14 @@ const useTableColumns = ({ fetchTable }) => {
         return row
       },
       Cell: ({ value }) => {
-        return <Set>TODO: buttons</Set>
+        return (
+          <Box alignX="center">
+            <Set>
+              <ViewButton player={value} />
+              <EditButton player={value} onSubmitted={fetchData}/>
+            </Set>
+          </Box>
+        )
       }
     })
   }

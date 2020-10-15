@@ -3,6 +3,7 @@ import { css, Global } from "@emotion/core"
 import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
+import { Box, space, styled } from "bumbag"
 
 export const Grid = ({ areas = "", children, ...props }) => {
   return (
@@ -18,5 +19,19 @@ export const Grid = ({ areas = "", children, ...props }) => {
     </div>
   )
 }
+
+//  margin: ${space(2, "major")}rem;
+export const FieldValues = styled(Box)`
+  display: grid;
+  grid-template-columns: minmax(20%, auto) 1fr;
+  gap: ${space(1, "major")}rem;
+`
+
+export const TwoColumns = styled(Box)`
+  display: grid;
+  grid-template-columns: ${(props) =>
+    `${props?.columns?.[0] ?? "1fr"} ${props?.columns?.[1] ?? "1fr"}`};
+  gap: ${space(1, "major")}rem;
+`
 
 export default Grid

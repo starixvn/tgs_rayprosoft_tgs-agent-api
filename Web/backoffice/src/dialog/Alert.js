@@ -25,6 +25,7 @@ export default ({
   visible = true,
   zIndex = BumbagZIndex,
   finalFocusRef,
+  onClickClose,
   ...props
 }) => {
   let zIndexString = `${zIndex + 100}`
@@ -43,7 +44,9 @@ export default ({
                 width: 100%;
               `}
             >
-              <Modal.Disclosure use={Button}>{close()}</Modal.Disclosure>
+              <Modal.Disclosure use={Button} onClick={onClickClose}>
+                {close()}
+              </Modal.Disclosure>
             </Flex>
           }
           hideOnClickOutside={false}

@@ -1,84 +1,194 @@
 import React, { useState, useEffect } from "react"
 import { css, Global } from "@emotion/core"
-import { useAsync } from "react-async"
+import { Icon, Table as _Table, Pagination, Set } from "bumbag"
 import {
-  Heading,
-  Box,
-  PageContent,
-  Container,
-  Stack,
-  Icon,
-  Table,
-  Pagination,
-  Button,
-  InputField,
-  Set
-} from "bumbag"
-import { Ascending, of as normalize } from "./order"
+  useTable as _useTable,
+  usePagination,
+  useSortBy,
+  useFilters
+} from "react-table"
+import { fromIsDescending } from "./order"
+import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
 const DefaultState = {
-  page: 1,
-  /* page size */
-  rows: 10,
+  pageIndex: 0,
+  pageSize: 10,
   sortby: "",
-  orderby: Ascending,
-  search: [
-    /* [field, value] */
-  ],
-  promise: null
+  orderby: ""
 }
 
-export const useTable = ({ initialState = DefaultState, ...props } = {}) => {
-  let [state = {}, set] = useState(initialState)
+export const useTable = (initialState = {}) => {
+  let [state, set] = useState({ ...DefaultState, ...initialState })
 
-  let { page, rows, sortby, orderby, promise } = state
+  const setPageIndex = (pageIndex) => {
+    set((prevState) => ({ ...prevState, pageIndex }))
+  }
+
+  const setPageSize = (pageSize) => {
+    set((prevState) => ({
+      ...prevState,
+      pageSize
+    }))
+  }
+
+  const setState = (state) => {
+    set((prevState) => ({ ...prevState, ...state }))
+  }
+
+  const setSortOrder = ({ sortby = "", orderby = "" }) => {
+    set((prevState) => ({ ...prevState, sortby, orderby }))
+  }
+
   return {
-    page,
-    setPage: (page) =>
-      set((prevState) => {
-        return { ...prevState, page }
-      }),
-    rows,
-    setRows: (rows) =>
-      set((prevState) => {
-        return { ...prevState, rows }
-      }),
-    sortby,
-    orderby,
-    setSortOrder: ({ sortby = "", orderby }) =>
-      set((prevState) => {
-        return { ...prevState, sortby, orderby: normalize(orderby) }
-      }),
-    promise,
-    setPromise: (promise) =>
-      set((prevState) => {
-        return { ...prevState, promise }
-      })
+    state,
+    setState,
+    setPageIndex,
+    setPageSize,
+    setSortOrder
   }
 }
 
-export default ({ table, children, ...props }) => {
-  let { page, setPage, rows, promise } = table
-  let { data = {}, ...async } = useAsync({
-    promise
-  })
+export const Table = ({
+  columns,
+  data = [],
+  controlledState = {},
+  manualSortBy = true,
+  setSortOrder,
+  disableMultiSort = true,
+  manualPagination = true,
+  pageCount,
+  manualFilters = true,
+  setPageIndex,
+  isLoading,
+  head = true,
+  body = true,
+  children,
+  ...props
+}) => {
+  let table = _useTable(
+    {
+      columns,
+      data,
+      useControlledState: (state) => {
+        let pageIndex = controlledState?.pageIndex ?? state.pageIndex
+        let pageSize = controlledState?.pageSize ?? state.pageSize
 
-  let { totalCount = 0 } = data
-  let numberOfPages = Math.ceil(totalCount / rows)
-
-  //TODO: support react children?
-  return (
-    <Set>
-      {children({ data, table, async, ...props })}
-      <Box>
-        <Pagination
-          currentPage={page}
-          onChangePage={(page) => {
-            setPage(page)
-          }}
-          numberOfPages={numberOfPages}
-        />
-      </Box>
-    </Set>
+        return React.useMemo(
+          () => ({
+            ...state,
+            pageIndex,
+            pageSize
+          }),
+          [state, pageIndex, pageSize]
+        )
+      },
+      manualSortBy,
+      disableMultiSort,
+      manualPagination,
+      pageCount,
+      manualFilters
+    },
+    useFilters,
+    useSortBy,
+    usePagination
   )
+
+  let { getTableProps, gotoPage, state: tableState } = table
+  let { pageIndex } = tableState
+
+  let HeadIndex = 0
+  let sortby = tableState?.sortBy?.[HeadIndex]?.id ?? ""
+  let orderby =
+    sortby && fromIsDescending(tableState?.sortBy?.[HeadIndex]?.desc)
+
+  useEffect(() => {
+    setSortOrder && setSortOrder({ sortby, orderby })
+  }, [sortby, orderby])
+
+  const getPage = () => pageIndex + 1
+  return (
+    <>
+      <Set orientation="vertical">
+        <_Table width="100%" overflowX="auto" {...getTableProps()} {...props}>
+          {head === true && <Head table={table} />}
+          {body === true && <Body table={table} />}
+          {children}
+        </_Table>
+        {pageCount > 0 && (
+          <Pagination
+            currentPage={getPage()}
+            onChangePage={(page) => {
+              let pageIndex = page - 1
+              setPageIndex(pageIndex)
+
+              gotoPage(pageIndex)
+            }}
+            numberOfPages={pageCount}
+          />
+        )}
+      </Set>
+      {isLoading && <div>loading</div>}
+    </>
+  )
+}
+
+const Head = ({ table }) => {
+  let { headerGroups } = table
+  return (
+    <_Table.Head>
+      {headerGroups.map((headerGroup) => (
+        <_Table.Row {...headerGroup.getHeaderGroupProps()}>
+          {headerGroup.headers.map((column) => {
+            let props = column.getHeaderProps({
+              ...column?.headCell,
+              ...column?.getSortByToggleProps()
+            })
+            return (
+              <_Table.HeadCell {...props}>
+                {column.render("Header")}
+                {column.isSorted ? (
+                  column.isSortedDesc ? (
+                    <Icon icon={faCaretDown} type="font-awesome" />
+                  ) : (
+                    <Icon icon={faCaretUp} type="font-awesome" />
+                  )
+                ) : (
+                  ""
+                )}
+              </_Table.HeadCell>
+            )
+          })}
+        </_Table.Row>
+      ))}
+    </_Table.Head>
+  )
+}
+
+const Body = ({ table }) => {
+  let { rows, getTableBodyProps, prepareRow } = table
+
+  return (
+    <_Table.Body {...getTableBodyProps()}>
+      {rows.map((row, i) => {
+        prepareRow(row)
+        return (
+          <_Table.Row {...row.getRowProps()}>
+            {row.cells.map((cell) => {
+              let props = cell.getCellProps({ ...cell?.column?.cell })
+              return <_Table.Cell {...props}>{cell.render("Cell")}</_Table.Cell>
+            })}
+          </_Table.Row>
+        )
+      })}
+    </_Table.Body>
+  )
+}
+
+export const pageCount = (pageSize, totalCount) => {
+  if (!pageSize) {
+    return
+  }
+
+  let numberOfPages = Math.ceil(totalCount / pageSize)
+  return numberOfPages
 }

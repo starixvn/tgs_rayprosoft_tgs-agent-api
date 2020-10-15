@@ -85,10 +85,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Username = player.Username,
                 RealName = player.RealName,
                 VipLevel = player.Vip.Name,
-                Status = player.Status.ToString(),
+                VipId = player.VipId.Value,
+                Status = player.Status,
+                StatusName = player.Status.ToString(),
                 HasAgent = player.HasAgent,
                 RegisteredOn = player.RegisteredOn,
-                ParentUsername = player.ParentPlayer.Username,
+                ParentUsername = player.ParentPlayer?.Username,
                 Balance = player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
                 Phone = player.Phone,
                 Email = player.Email,
@@ -144,15 +146,19 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == updatePlayerType[0])
             {
-                var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
-                if (parentPlayer == null)
+                if (!request.ParentUsername.IsNullOrEmpty())
                 {
-                    return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
+                    var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
+                    if (parentPlayer == null)
+                    {
+                        return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
+                    }
+                    player.ParentInvitationCode = parentPlayer.InvitationCode;
+                    player.ParentPlayerCode = parentPlayer.PlayerCode;
                 }
 
                 player.RealName = request.RealName;
-                player.VipId = request.VipId;
-                player.ParentInvitationCode = parentPlayer.InvitationCode;
+                player.VipId = request.VipId;              
                 player.Status = request.Status;
                 player.HasAgent = request.HasAgent;
             }

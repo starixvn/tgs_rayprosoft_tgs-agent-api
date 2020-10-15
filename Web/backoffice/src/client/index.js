@@ -1,6 +1,6 @@
 import { toDataOrError } from "./response"
 
-export const get = (url = "", { searchParams = {}, ...options } = {}) => {
+export const urlWith = (searchParams = {}, url) => {
   let urlSearchParams = Object.entries(searchParams).reduce(
     (searchParams, [key, value]) => {
       if (isEmptyString(value) || isNilOrUndefined(value)) {
@@ -13,16 +13,35 @@ export const get = (url = "", { searchParams = {}, ...options } = {}) => {
     },
     ""
   )
-  url = `${url}?${urlSearchParams}`
+  return urlSearchParams ? `${url}?${urlSearchParams}` : url
+}
+
+export const get = (url = "", { searchParams = {}, ...options } = {}) => {
+  url = urlWith(searchParams, url)
   return fetch(url, options).then(toDataOrError)
 }
+
+export const put = (url, options) => fetchApi("PUT", url, options)
+
+export const post = (url, options) => fetchApi("POST", url, options)
 
 const fetchApi = (
   method = "",
   url,
   { body, data = {}, headers = {}, ...options } = {}
-) =>
-  fetch(url, {
+) => {
+  data = Object.entries(data).reduce(
+    (data, [key, value]) => {
+      if (isEmptyString(value) || isNilOrUndefined(value)) {
+        return data
+      }
+
+      data[key] = value
+      return data
+    }
+    , {}
+  )
+  return fetch(url, {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -31,15 +50,17 @@ const fetchApi = (
     body: body ?? JSON.stringify(data),
     ...options
   }).then(toDataOrError)
+}
+  
 
-const isEmptyString = (value) => typeof value == "string" && !value
+const isEmptyString = (value) => typeof value == "string" && value === ""
 
 const isNilOrUndefined = (value) =>
   typeof value === "undefined" || value === null
 
 export default {
   get,
-  put: (url, options) => fetchApi("PUT", url, options),
-  post: (url, options) => fetchApi("POST", url, options),
+  put,
+  post,
   delete: (url, options) => fetchApi("DELETE", url, options)
 }

@@ -32,9 +32,10 @@ export const CodeContentPair = [Code, Content]
 
 const AsyncContent = ({}) => {
   let { state, setState, headSortBy, headOrderBy } = useTableState({
-    username: ""
+    username: "",
+    searchCount: 0
   })
-  let { pageIndex, pageSize, username = "" } = state
+  let { pageIndex, pageSize, username = "", searchCount } = state
 
   const deferFn = () =>
     client.get("/api/users", {
@@ -56,14 +57,23 @@ const AsyncContent = ({}) => {
 
   useEffect(() => {
     fetchTable()
-  }, [pageIndex, pageSize, username])
+  }, [pageIndex, pageSize, username, searchCount])
 
   return (
     <PageContent
       title={title()}
       actionBar={
         <>
-          <SearchForm search={setState} isPending={isPending} />
+          <SearchForm
+            search={(data) => {
+              setState({
+                page: 0,
+                searchCount: searchCount + 1,
+                ...data
+              })
+            }}
+            isPending={isPending}
+          />
           <AddButton onSubmitted={fetchTable} />
         </>
       }

@@ -23,7 +23,8 @@ import {
   DropdownMenu,
   Button,
   Text,
-  Alert
+  Alert,
+  Modal
 } from "bumbag"
 import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
@@ -31,21 +32,29 @@ import { Route as AuthRouter } from "./user/auth"
 import { AllMenus } from "./menu"
 import { AllContents } from "./content"
 import { useUsername, useDeauth } from "./user/context"
+import { SWRConfig } from "swr"
 
 function App() {
   let isUserAuthed = useUserIsAuthed()
-  //return isUserAuthed ? <AuthedLayout>TODO</AuthedLayout> : <Login></Login>
+
   return (
-    <Switch>
-      <Route path={LoginPath}>
-        <Login />
-      </Route>
-      <AuthRouter path="*">
-        <Layout>
-          <AllContents />
-        </Layout>
-      </AuthRouter>
-    </Switch>
+    <SWRConfig
+      value={{
+        revalidateOnFocus: false,
+        shouldRetryOnError: false
+      }}
+    >
+      <Switch>
+        <Route path={LoginPath}>
+          <Login />
+        </Route>
+        <AuthRouter path="*">
+          <Layout>
+            <AllContents />
+          </Layout>
+        </AuthRouter>
+      </Switch>
+    </SWRConfig>
   )
 }
 
