@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mssql-deployment-demo
+  name: mssql-deployment
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: mssql-demo
+      app: mssql
   replicas: 1
   template:
     metadata:
       labels:
-        app: mssql-demo
+        app: mssql
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-      - name: mssql2019-demo
+      - name: mssql2019
         image: mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
         securityContext:
           runAsUser: 0
@@ -28,23 +28,23 @@ spec:
         - name: ACCEPT_EULA
           value: "Y"
         - name: MSSQL_SA_PASSWORD
-          value: "Sa12345678"
+          value: "1qaz2wsx!@"
         volumeMounts:
-        - name: mssqldb-demo
+        - name: mssqldb
           mountPath: /var/opt/mssql
       volumes:
-      - name: mssqldb-demo
+      - name: mssqldb
         persistentVolumeClaim:
-          claimName: pvc-mssqldemo-data
+          claimName: pvc-mssql-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mssql-service-demo
+  name: mssql-service
   namespace: default
 spec:
   selector:
-    app: mssql-demo
+    app: mssql
   ports:
     - protocol: TCP
       port: 1433
@@ -64,30 +64,30 @@ volumeBindingMode: WaitForFirstConsumer
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: pv-mssqldemo-data
+  name: pv-mssql-data
   labels:
     type: local
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 15Gi #15GB容量大小
+    storage: 500Gi #15GB容量大小
   accessModes:
     - ReadWriteOnce #只允許單一PVC獨佔
   claimRef:
     namespace: default
-    name: pvc-mssqldemo-data
+    name: pvc-mssql-data
   hostPath:
-    path: "/var/opt/mssqldemo"
+    path: "/var/opt/mssql"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: pvc-mssqldemo-data
+  name: pvc-mssql-data
   namespace: default
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi #只分配5GB容量大小
+      storage: 500Gi #只分配5GB容量大小
   storageClassName: local-storage
