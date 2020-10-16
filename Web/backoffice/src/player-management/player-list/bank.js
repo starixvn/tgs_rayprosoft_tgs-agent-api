@@ -15,7 +15,7 @@ import {
   Stack,
   Flex,
   Box,
-  Card,
+  Card as _Card,
   Set,
   Button,
   Text,
@@ -34,9 +34,20 @@ import {
 import { FieldValues, TwoColumns } from "../../layout/Grid"
 import { Field as InputField } from "../../input/Field"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
-import { faTrash, faTrashAlt, faMinus, faEdit, faCog } from "@fortawesome/free-solid-svg-icons"
+import {
+  faTrash,
+  faTrashAlt,
+  faMinus,
+  faEdit,
+  faCog,
+  faPlus
+} from "@fortawesome/free-solid-svg-icons"
 import { SubmitCancel } from "../../button/ActionButtons"
-import { useEditPlayerBank, useDeletePlayerBank } from "./client"
+import {
+  useEditPlayerBank,
+  useDeletePlayerBank,
+  useAddPlayerBank
+} from "./client"
 import AlertDialog from "../../dialog/Alert"
 import Backdrop from "../../dialog/Backdrop"
 
@@ -51,27 +62,27 @@ export const Tab = ({ ...props }) => {
   )
 }
 
-export const Panel = ({ playerCode, banks = [], edit = false, onSubmitted, ...props }) => {
+export const Panel = ({
+  playerCode,
+  banks = [],
+  edit = false,
+  onSubmitted,
+  ...props
+}) => {
   return (
     <_TabPanel {...props} id={Key}>
       <TwoColumns>
-        {banks.map((bank, index) => <Bank key={index} 
-                                        edit={edit} 
-                                        onSubmitted={onSubmitted} 
-                                        playerCode={playerCode}
-                                        bank={bank} />)}
+        {banks.map((bank, index) => (
+          <Bank
+            key={index}
+            playerCode={playerCode}
+            bank={bank}
+            onSubmitted={onSubmitted}
+            edit={edit}
+          />
+        ))}
       </TwoColumns>
-      {edit && (
-        <Box>
-          <Card 
-            margin="major-1"
-            css={css`
-              flex: 1 50%;
-            `}>
-            TODO: add button
-          </Card>
-        </Box>
-        )}
+      {edit && <AddBank playerCode={playerCode} />}
     </_TabPanel>
   )
 }
@@ -82,22 +93,36 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
   let editDialog = Modal.useState()
 
   return (
-    <Card
-      variant="bordered"
-      margin="major-1"
-      css={css`
-        flex: 1 50%;
-      `}>
+    <Card>
       {edit && (
         <Set alignX="right">
-          <Modal.Disclosure use={Button} palette="danger" variant="outlined" {...deleteDialog}>
-            <Icon icon={faMinus} fontSize="300"  type="font-awesome" />
+          <Modal.Disclosure
+            use={Button}
+            palette="danger"
+            variant="outlined"
+            {...deleteDialog}
+          >
+            <Icon icon={faMinus} fontSize="300" type="font-awesome" />
           </Modal.Disclosure>
-          {deleteDialog.visible && <DeleteDialog playerCode={playerCode} bank={bank} onSubmitted={onSubmitted} dialog={deleteDialog}/>}
+          {deleteDialog.visible && (
+            <DeleteDialog
+              playerCode={playerCode}
+              bank={bank}
+              onSubmitted={onSubmitted}
+              dialog={deleteDialog}
+            />
+          )}
           <Modal.Disclosure use={Button} {...editDialog}>
-            <Icon icon={faCog} fontSize="300"  type="font-awesome" />
+            <Icon icon={faCog} fontSize="300" type="font-awesome" />
           </Modal.Disclosure>
-          {editDialog.visible && <EditDialog playerCode={playerCode} bank={bank} onSubmitted={onSubmitted} dialog={editDialog}/> }
+          {editDialog.visible && (
+            <EditDialog
+              playerCode={playerCode}
+              bank={bank}
+              onSubmitted={onSubmitted}
+              dialog={editDialog}
+            />
+          )}
         </Set>
       )}
       <FieldValues>
@@ -114,15 +139,55 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
   )
 }
 
+const AddBank = ({ playerCode, onSubmitted }) => {
+  let dialog = Modal.useState()
+  let finalFocusRef = useRef()
+  return (
+    <>
+      <TwoColumns>
+        <Card alignX="center">
+          <Modal.Disclosure use={Button} ref={finalFocusRef} {...dialog}>
+            <Icon icon={faPlus} fontSize="300" type="font-awesome" />
+          </Modal.Disclosure>
+        </Card>
+      </TwoColumns>
+      {dialog.visible && (
+        <AddDialog
+          playerCode={playerCode}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={finalFocusRef}
+        />
+      )}
+    </>
+  )
+}
+
+const Card = ({ children, ...props }) => (
+  <_Card
+    variant="bordered"
+    margin="major-1"
+    css={css`
+      flex: 1 50%;
+    `}
+    {...props}
+  >
+    {children}
+  </_Card>
+)
+
 const RealnameLabel = () => <Trans zh="真实姓名" en="Real name" />
 
 const BankLabel = () => <Trans zh="银行" en="Bank" />
 
 const BankAccount = () => <Trans zh="银行卡号" en="Bank Account" />
 
-const EditDialog = ({ playerCode, bank, onSubmitted, dialog, finalFocusRef }) => {
-  let [submitData, setSubmit] = useState()
-  let { result, isLoading, error } = useEditPlayerBank({ playerCode, id: bank?.id, data: submitData })
+const AddDialog = ({ playerCode, onSubmitted, dialog, finalFocusRef }) => {
+  let [submitData, setSubmitData] = useState()
+  let { result, isLoading, error } = useAddPlayerBank({
+    playerCode,
+    data: submitData
+  })
   useEffect(() => {
     if (result && !error) {
       onSubmitted && onSubmitted()
@@ -130,58 +195,119 @@ const EditDialog = ({ playerCode, bank, onSubmitted, dialog, finalFocusRef }) =>
     }
   }, [result])
 
-  const submit = data => {
-    setSubmit(data)
-  }
+  const reset = () => setSubmitData(null)
+  return (
+    <FormDialog
+      onSubmit={setSubmitData}
+      isLoading={isLoading}
+      error={error}
+      reset={reset}
+      dialog={dialog}
+      finalFocusRef={finalFocusRef}
+    />
+  )
+}
 
-  const clearResult = () => {
-    setSubmit(null)
-  }
+const EditDialog = ({
+  playerCode,
+  bank,
+  onSubmitted,
+  dialog,
+  finalFocusRef
+}) => {
+  let [submitData, setSubmitData] = useState()
+  let { result, isLoading, error } = useEditPlayerBank({
+    playerCode,
+    id: bank?.id,
+    data: submitData
+  })
+  useEffect(() => {
+    if (result && !error) {
+      onSubmitted && onSubmitted()
+      dialog.hide()
+    }
+  }, [result])
 
+  const reset = () => setSubmitData(null)
+
+  return (
+    <FormDialog
+      bank={bank}
+      onSubmit={setSubmitData}
+      isLoading={isLoading}
+      error={error}
+      reset={reset}
+      dialog={dialog}
+      finalFocusRef={finalFocusRef}
+    />
+  )
+}
+
+const FormDialog = ({
+  bank = {},
+  onSubmit,
+  isLoading,
+  error,
+  reset,
+  dialog,
+  finalFocusRef
+}) => {
   let { realName, bankName, bankAccount } = bank
   return (
     <Backdrop {...dialog}>
-      <Dialog.Modal 
-        hideOnClickOutside={false} 
+      <Dialog.Modal
+        hideOnClickOutside={false}
         unstable_finalFocusRef={finalFocusRef}
-        {...dialog}>
-        {error && <AlertDialog {...error} onClickClose={clearResult}/>}
-        <Formik 
+        {...dialog}
+      >
+        {error && <AlertDialog {...error} onClickClose={reset} />}
+        <Formik
           initialValues={{
             realName: realName ?? "",
             bankName: bankName ?? "",
             bankAccount: bankAccount ?? ""
           }}
-          onSubmit={submit}
-          >
-            {formikProps => (
-              <form onReset={formikProps.handleReset} onSubmit={formikProps.handleSubmit} >
-                <FieldValues margin="major-1">
-                  <RealnameLabel />
-                  <InputField name="realName" />
-
-                  <BankLabel />
-                  <InputField name="bankName" />
-
-                  <BankAccount />
-                  <InputField name="bankAccount" />
-                </FieldValues>
-                <Box alignX="right" spacing="major-1">
-                  <SubmitCancel 
-                    isLoading={isLoading}
-                    onClickSubmit={formikProps.submitForm}
-                    onClickCancel={dialog.hide}
-                    />
-                </Box>
-              </form>
-            )}
+          onSubmit={onSubmit}
+        >
+          <FormBody isLoading={isLoading} onClickCancel={dialog.hide} />
         </Formik>
       </Dialog.Modal>
     </Backdrop>
   )
 }
 
-const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog, finalFocusRef }) => {
+const FormBody = ({ onClickCancel, isLoading }) => {
+  let { submitForm } = useFormikContext()
+  return (
+    <Form>
+      <FieldValues margin="major-1">
+        <RealnameLabel />
+        <InputField name="realName" />
+
+        <BankLabel />
+        <InputField name="bankName" />
+
+        <BankAccount />
+        <InputField name="bankAccount" />
+      </FieldValues>
+      <Box alignX="right" spacing="major-1">
+        <SubmitCancel
+          isLoading={isLoading}
+          onClickSubmit={submitForm}
+          onClickCancel={onClickCancel}
+        />
+      </Box>
+    </Form>
+  )
+}
+
+const DeleteDialog = ({
+  playerCode,
+  bank,
+  onSubmitted,
+  dialog,
+  finalFocusRef
+}) => {
   let [id, setDeleteId] = useState()
   let { result, isLoading, error } = useDeletePlayerBank({ playerCode, id })
   useEffect(() => {
@@ -193,22 +319,26 @@ const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog, finalFocusRef }) 
 
   return (
     <Backdrop {...dialog}>
-      <Dialog.Modal 
-        hideOnClickOutside={false} 
+      <Dialog.Modal
+        hideOnClickOutside={false}
         unstable_finalFocusRef={finalFocusRef}
-        {...dialog}>
-        {error && <AlertDialog {...error} onClickClose={clearResult}/>}
+        {...dialog}
+      >
+        {error && <AlertDialog {...error} onClickClose={clearResult} />}
         <Box alignX="center" margin="major-1">
-          <Trans zh="是否删除此银行卡？" en="Do you want to delete this card?" />
+          <Trans
+            zh="是否删除此银行卡？"
+            en="Do you want to delete this card?"
+          />
         </Box>
         <Box alignX="right" spacing="major-1">
-          <SubmitCancel 
+          <SubmitCancel
             isLoading={isLoading}
             onClickSubmit={() => {
               setDeleteId(bank.id)
             }}
             onClickCancel={dialog.hide}
-            />
+          />
         </Box>
       </Dialog.Modal>
     </Backdrop>

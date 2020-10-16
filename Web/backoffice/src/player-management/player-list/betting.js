@@ -30,6 +30,7 @@ import {
   Table,
   useClassName
 } from "bumbag"
+import { Trans } from "../../i18n"
 
 export const Key = "betting"
 
@@ -37,7 +38,7 @@ export const Tab = ({ ...props }) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      {title()}
+      <Trans zh="投注记录" en="Betting records" />
     </_Tab>
   )
 }
@@ -45,10 +46,7 @@ export const Tab = ({ ...props }) => {
 export const Panel = ({ playerCode, ...props }) => {
   return (
     <_TabPanel {...props} id={Key}>
-      TODO: async betting table
+      TODO
     </_TabPanel>
   )
 }
-
-//TODO: i18n
-const title = () => "投注记录"

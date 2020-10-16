@@ -16,6 +16,7 @@ import {
   Overlay,
   Portal
 } from "bumbag"
+import { Trans } from "../i18n"
 
 const BumbagZIndex = 19900410
 
@@ -45,7 +46,7 @@ export default ({
               `}
             >
               <Modal.Disclosure use={Button} onClick={onClickClose}>
-                {close()}
+                <Trans zh="关闭" en="Close" />
               </Modal.Disclosure>
             </Flex>
           }
@@ -63,6 +64,3 @@ export default ({
     </Modal.State>
   )
 }
-
-//TODO: i18n
-const close = () => "关闭"
