@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
 import { Menu as _Menu, findlLabel } from "../menu"
 import { Code as AdminCode, codeLabelPair as adminPair } from "./admins/menu"
-import { Code as GroupCode, codeLabelPair as rolePair } from "./groups/menu"
+import { Code as GroupCode, codeLabelPair as rolePair } from "./roles/menu"
 import {
   Code as DepartmentCode,
   codeLabelPair as departmentPair

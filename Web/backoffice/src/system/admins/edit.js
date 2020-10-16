@@ -27,7 +27,7 @@ import {
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Field as DepartmentSelectField } from "../departments/select"
-import { Field as RoleSelectField } from "../groups/select"
+import { Field as RoleSelectField } from "../roles/select"
 import {
   Field as InputField,
   Password as PasswordField

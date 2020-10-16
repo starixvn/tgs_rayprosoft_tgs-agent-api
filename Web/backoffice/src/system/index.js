@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
 import { CodeContentPair as AdminPair } from "./admins"
-import { CodeContentPair as GroupPair } from "./groups"
+import { CodeContentPair as GroupPair } from "./roles"
 import { CodeContentPair as DepartmentPair } from "./departments"
 import { Switch } from "../content"
 import { Code, DefaultCodePath, Menu } from "./menu"
