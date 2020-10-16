@@ -22,7 +22,7 @@ namespace TGS.Apis.LogApi.Loggers
         {
             var logs = events
                 .Select(Convert)
-                .ToList();
+                .ToArray();
 
             return _logRepository.AddAdminLogsAsync(logs);
         }

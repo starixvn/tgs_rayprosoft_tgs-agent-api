@@ -11,13 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DataService\Commands\**" />
-    <Content Remove="DataService\Commands\**" />
-    <EmbeddedResource Remove="DataService\Commands\**" />
-    <None Remove="DataService\Commands\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
     <None Remove="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLogs.sql" />
   </ItemGroup>

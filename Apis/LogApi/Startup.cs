@@ -38,26 +38,26 @@ namespace TGS.Apis.LogApi
             services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
             
             services.AddRedis()
-                .AddNats(Configuration)
-                .AddWebApiServices()
-                .AddTgsLog();
+                    .AddNats(Configuration)
+                    .AddWebApiServices()
+                    .AddTgsLog();
             
             services.AddSingleton<IMessageHandler, NatsMessageHandler>();
 
-            services.AddSingleton<ApiLogWriter>();
-            services.AddSingleton<LogRecordWriter>();
-            services.AddSingleton<AdminLogWriter>();
+            services.AddScoped<ApiLogWriter>();
+            services.AddScoped<LogRecordWriter>();
+            services.AddScoped<AdminLogWriter>();
 
             services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
-            {
-                return key switch
-                {
-                    nameof(ApiLogEvent) => serviceProvider.GetService<ApiLogWriter>(),
-                    nameof(LogRecordEvent) => serviceProvider.GetService<LogRecordWriter>(),
-                    nameof(AdminLogEvent) => serviceProvider.GetService<AdminLogWriter>(),
-                    _ => throw new KeyNotFoundException()
-                };
-            });
+              {
+                  return key switch
+                  {
+                      nameof(ApiLogEvent) => serviceProvider.GetRequiredService<ApiLogWriter>(),
+                      nameof(LogRecordEvent) => serviceProvider.GetRequiredService<LogRecordWriter>(),
+                      nameof(AdminLogEvent) => serviceProvider.GetRequiredService<AdminLogWriter>(),
+                      _ => throw new KeyNotFoundException()
+                  };
+              });
 
             services
                 .AddControllers(options =>
