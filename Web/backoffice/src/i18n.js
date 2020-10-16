@@ -23,7 +23,7 @@ export const Provider = ({ value = Locales.zh, children }) => {
 }
 
 export const useLocale = () => {
-  let { locale } = useContext(Store)
+  let { locale } = useContext(Store) ?? {}
   return locale ?? defaultLocale
 }
 
@@ -71,5 +71,5 @@ export const FormattedNumber = ({ value }) => {
   return Number.isFinite(value) && <Text>{numeral(value).format("0,0")}</Text>
 }
 
-export const getTrans = (messages = {}, locale = Locales.zh) => 
+export const getTrans = (messages = {}, locale = Locales.zh) =>
   Reflect.get(messages, locale) ?? ""

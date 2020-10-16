@@ -1,17 +1,22 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/core"
-import { Menu as _Menu, findMenuLabel } from "../menu"
+import { Menu as _Menu, findlLabel } from "../menu"
 import {
   Code as AnnouncementCode,
-  label as announcementLabel
+  codeLabelPair as announcementPair
 } from "./announcement/menu"
 import {
   Code as StationLetterCode,
-  label as stationLetterLabel
+  codeLabelPair as stationLetterPair
 } from "./station-letter/menu"
+import { getTrans, useTrans } from "../i18n"
 
-//TODO: i18n
-export const name = () => "平台管理"
+export const Name = () => useTrans(nameMessage)
+
+export const nameMessage = {
+  zh: "平台管理",
+  en: "Platform"
+}
 
 export const Code = "platform"
 
@@ -20,7 +25,7 @@ export const DefaultUrl = `/${Code}`
 export const DefaultPaths = [Code]
 
 export const Menu = ({
-  title = name(),
+  title = <Name />,
   url = DefaultUrl,
   codes,
   paths = DefaultPaths,
@@ -31,28 +36,40 @@ export const Menu = ({
     url={url}
     codes={codes}
     codePaths={paths}
-    itemLabel={toLabel}
+    itemLabel={labelOf}
   />
 )
 
-const subMenuList = () => [
-  [AnnouncementCode, announcementLabel],
-  [StationLetterCode, stationLetterLabel]
-]
-
-export const label = (codes = []) => {
-  let findLabelBy = findMenuLabel(toLabel, subMenuList)
-  return findLabelBy(codes)
-}
-
-//TODO: i18n
-export const toLabel = (code = "") => {
+const labelOf = ({ locale, code }) => {
   switch (code) {
     case AnnouncementCode:
-      return "公告管理"
+      return getTrans(
+        {
+          zh: "公告管理",
+          en: "Announcements"
+        },
+        locale
+      )
     case StationLetterCode:
-      return "站内信"
+      return getTrans(
+        {
+          zh: "站内信",
+          en: "Station Letters"
+        },
+        locale
+      )
     default:
       return ""
   }
 }
+
+export const codeLabelPair = [
+  Code,
+  ({ locale, codes }) =>
+    findlLabel({
+      locale,
+      codes,
+      label: labelOf,
+      subLabelPairs: [announcementPair, stationLetterPair]
+    })
+]
