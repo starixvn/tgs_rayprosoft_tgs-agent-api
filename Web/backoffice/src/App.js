@@ -24,7 +24,8 @@ import {
   Button,
   Text,
   Alert,
-  Modal
+  Modal,
+  Icon
 } from "bumbag"
 import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
@@ -33,6 +34,7 @@ import { AllMenus } from "./menu"
 import { AllContents } from "./content"
 import { useUsername, useDeauth } from "./user/context"
 import { SWRConfig } from "swr"
+import { Trans, useLocale, Locales, useEnglish, useChinese } from "./i18n"
 
 function App() {
   let isUserAuthed = useUserIsAuthed()
@@ -100,7 +102,9 @@ const Header = () => {
         <TopNav.Item>
           <DropdownMenu
             menu={
-              <DropdownMenu.Item onClick={logout}>Logout</DropdownMenu.Item>
+              <DropdownMenu.Item onClick={logout}>
+                <Trans zh="登出" en="Logout" />
+              </DropdownMenu.Item>
             }
           >
             <Button variant="ghost" iconAfter="chevron-down">
@@ -108,8 +112,35 @@ const Header = () => {
             </Button>
           </DropdownMenu>
         </TopNav.Item>
+        <LangItem />
       </TopNav.Section>
     </TopNav>
+  )
+}
+
+const LangItem = ({}) => {
+  let locale = useLocale()
+  let chinese = "中文"
+  let english = "English"
+
+  let useEn = useEnglish()
+  let useZh = useChinese()
+  return (
+    <TopNav.Item>
+      <DropdownMenu
+        menu={
+          <>
+            <DropdownMenu.Item onClick={useZh}>{chinese}</DropdownMenu.Item>
+            <DropdownMenu.Item onClick={useEn}>{english}</DropdownMenu.Item>
+          </>
+        }
+      >
+        <Button variant="ghost" iconAfter="chevron-down">
+          {locale === Locales.zh && chinese}
+          {locale === Locales.en && english}
+        </Button>
+      </DropdownMenu>
+    </TopNav.Item>
   )
 }
 

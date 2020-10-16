@@ -34,14 +34,7 @@ import {
 import { FieldValues, TwoColumns } from "../../layout/Grid"
 import { Field as InputField } from "../../input/Field"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
-import {
-  faTrash,
-  faTrashAlt,
-  faMinus,
-  faEdit,
-  faCog,
-  faPlus
-} from "@fortawesome/free-solid-svg-icons"
+import { faMinus, faCog, faPlus } from "@fortawesome/free-solid-svg-icons"
 import { SubmitCancel } from "../../button/ActionButtons"
 import {
   useEditPlayerBank,
@@ -280,23 +273,25 @@ const FormBody = ({ onClickCancel, isLoading }) => {
   let { submitForm } = useFormikContext()
   return (
     <Form>
-      <FieldValues margin="major-1">
-        <RealnameLabel />
-        <InputField name="realName" />
+      <Stack spacing="major-2">
+        <FieldValues>
+          <RealnameLabel />
+          <InputField name="realName" />
 
-        <BankLabel />
-        <InputField name="bankName" />
+          <BankLabel />
+          <InputField name="bankName" />
 
-        <BankAccount />
-        <InputField name="bankAccount" />
-      </FieldValues>
-      <Box alignX="right" spacing="major-1">
-        <SubmitCancel
-          isLoading={isLoading}
-          onClickSubmit={submitForm}
-          onClickCancel={onClickCancel}
-        />
-      </Box>
+          <BankAccount />
+          <InputField name="bankAccount" />
+        </FieldValues>
+        <Box alignX="right">
+          <SubmitCancel
+            isLoading={isLoading}
+            onClickSubmit={submitForm}
+            onClickCancel={onClickCancel}
+          />
+        </Box>
+      </Stack>
     </Form>
   )
 }

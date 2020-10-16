@@ -26,6 +26,8 @@ import { Code } from "./menu"
 import { Field as StatusField } from "../status"
 import { Field as VipLevelField } from "../../vip-level/field"
 import { ViewButton, EditButton } from "./button"
+import { Trans, useTrans } from "../../i18n"
+import SearchButton from "../../button/Search"
 
 export { Code }
 
@@ -69,7 +71,7 @@ const AsyncContent = () => {
 
   return (
     <PageContent
-      title={title()}
+      title={<Trans zh="玩家列表" en="Players" />}
       actionBar={
         <SearchForm
           search={(data) => {
@@ -96,6 +98,7 @@ const AsyncContent = () => {
 }
 
 const SearchForm = ({ search, isPending, ...props }) => {
+  let usernameInputPlaceholder = useSearchInputPlaceHolder()
   return (
     <Formik
       initialValues={{ status: "", vipId: "", username: "" }}
@@ -116,12 +119,10 @@ const SearchForm = ({ search, isPending, ...props }) => {
                   X
                 </Button>
               }
-              placeholder={searchInputPlaceHolder()}
+              placeholder={usernameInputPlaceholder}
               autocomplete="off"
             />
-            <Button type="submit" isLoading={isPending}>
-              {searchButtonLabel()}
-            </Button>
+            <SearchButton isLoading={isPending} />
           </Set>
         </form>
       )}
@@ -129,20 +130,14 @@ const SearchForm = ({ search, isPending, ...props }) => {
   )
 }
 
-//TODO: i18n
-const title = () => "玩家列表"
-
-//TODO: i18n
-const searchInputPlaceHolder = () => "用户名输入框"
-
-//TODO: i18n
-const searchButtonLabel = () => "搜索"
+const useSearchInputPlaceHolder = () =>
+  useTrans({ zh: "用户名输入框", en: "Input user name" })
 
 const useTableColumns = ({ fetchData } = {}) => {
   let columns = [
     sequenceColumn(),
     {
-      Header: "用户名",
+      Header: <Trans zh="用户名" en="User name" />,
       accessor: "username",
       disableSortBy: true,
       headCell: {
@@ -153,7 +148,7 @@ const useTableColumns = ({ fetchData } = {}) => {
       }
     },
     {
-      Header: "VIP 等级",
+      Header: <Trans zh="VIP 等级" en="VIP Level" />,
       disableSortBy: true,
       accessor: "vipLevel",
       headCell: {
@@ -165,7 +160,7 @@ const useTableColumns = ({ fetchData } = {}) => {
     },
     {
       disableSortBy: true,
-      Header: "状态",
+      Header: <Trans zh="状态" en="Status" />,
       accessor: "status",
       headCell: {
         textAlign: "center"
@@ -180,8 +175,9 @@ const useTableColumns = ({ fetchData } = {}) => {
   let hasAnyMenu = useHasSubMenuByRoute()
   if (hasAnyMenu) {
     columns.push({
+      id: "actions",
       disableSortBy: true,
-      Header: "操作",
+      Header: <Trans zh="操作" en="Actions" />,
       headCell: {
         textAlign: "center"
       },
@@ -196,7 +192,7 @@ const useTableColumns = ({ fetchData } = {}) => {
           <Box alignX="center">
             <Set>
               <ViewButton player={value} />
-              <EditButton player={value} onSubmitted={fetchData}/>
+              <EditButton player={value} onSubmitted={fetchData} />
             </Set>
           </Box>
         )

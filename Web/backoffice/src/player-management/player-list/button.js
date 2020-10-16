@@ -32,7 +32,11 @@ import {
   EditPanel as PlayerEditTab,
   Key as PlayerId
 } from "./player"
-import { Tab as ContractTab, Panel as ContractPanel, EditPanel as ContractEditPanel } from "./contact"
+import {
+  Tab as ContractTab,
+  Panel as ContractPanel,
+  EditPanel as ContractEditPanel
+} from "./contact"
 import { Tab as BankTab, Panel as BankPanel } from "./bank"
 import { Tab as BettingTab, Panel as BettingPanel } from "./betting"
 import { Tab as OperationTab, Panel as OperationPanel } from "./operation"
@@ -61,7 +65,7 @@ export const ViewButton = ({ player, ...props }) => {
         `}
         {...dialog}
       >
-        <Trans zh="查看" en="View"/>
+        <Trans zh="查看" en="View" />
       </Modal.Disclosure>
       {dialog.visible && (
         <TabsDialog
@@ -93,9 +97,9 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
         `}
         {...dialog}
       >
-        <Trans zh="修改" en="Edit"/>
+        <Trans zh="修改" en="Edit" />
       </Modal.Disclosure>
-      {dialog.visible && 
+      {dialog.visible && (
         <TabsDialog
           edit={true}
           playerCode={player.playerCode}
@@ -103,13 +107,18 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
           dialog={dialog}
           finalFocusRef={disclosureRef}
         />
-      }
-      
+      )}
     </>
   )
 }
 
-const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef, ...props }) => {
+const TabsDialog = ({
+  playerCode,
+  edit = false,
+  dialog,
+  finalFocusRef,
+  ...props
+}) => {
   const readonly = !edit
   let tab = useTabState({
     selectedId: PlayerId
@@ -120,7 +129,9 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef, ...props 
     en: "Player info"
   })
 
-  const { player, isLoading, isError, error, mutate } = usePlayer({ playerCode })
+  const { player, isLoading, isError, error, mutate } = usePlayer({
+    playerCode
+  })
 
   const onSubmitted = () => {
     props?.onSubmitted()
@@ -155,14 +166,19 @@ const TabsDialog = ({ playerCode, edit = false, dialog, finalFocusRef, ...props 
             }
           `}
         >
-          {readonly && <ViewTabs playerCode={playerCode} player={player} tab={tab}/>}
-          {edit && <EditTabs 
-                    playerCode={playerCode} 
-                    player={player} 
-                    tab={tab} 
-                    onSubmitted={onSubmitted} 
-                    onBankSubmitted={onBankSubmitted}
-                    onClickClose={onClickClose}/>}
+          {readonly && (
+            <ViewTabs playerCode={playerCode} player={player} tab={tab} />
+          )}
+          {edit && (
+            <EditTabs
+              playerCode={playerCode}
+              player={player}
+              tab={tab}
+              onSubmitted={onSubmitted}
+              onBankSubmitted={onBankSubmitted}
+              onClickClose={onClickClose}
+            />
+          )}
         </Dialog.Modal>
       )}
     </>
@@ -188,19 +204,44 @@ const ViewTabs = ({ playerCode, player, tab }) => {
   )
 }
 
-const EditTabs = ({ playerCode, player, tab, onSubmitted, onBankSubmitted, onClickClose }) => {
+const EditTabs = ({
+  playerCode,
+  player,
+  tab,
+  onSubmitted,
+  onBankSubmitted,
+  onClickClose
+}) => {
   return (
     <_Tabs use={Box} isFitted css={css``}>
       <_Tabs.List use={TabList} {...tab}>
         <PlayerTab {...tab} />
         <ContractTab {...tab} />
         <BankTab {...tab} />
-        <PasswordTab {...tab}/>
+        <PasswordTab {...tab} />
       </_Tabs.List>
-      <PlayerEditTab player={player} playerCode={playerCode} onSubmitted={onSubmitted} onClickClose={onClickClose} {...tab}/>
-      <ContractEditPanel player={player} playerCode={playerCode} onSubmitted={onSubmitted} onClickClose={onClickClose} {...tab} />
-      <BankPanel playerCode={playerCode} banks={player.banks} edit={true} onSubmitted={onBankSubmitted} {...tab} />
-      <PasswordPanel player={player} {...tab}/>
+      <PlayerEditTab
+        player={player}
+        playerCode={playerCode}
+        onSubmitted={onSubmitted}
+        onClickClose={onClickClose}
+        {...tab}
+      />
+      <ContractEditPanel
+        player={player}
+        playerCode={playerCode}
+        onSubmitted={onSubmitted}
+        onClickClose={onClickClose}
+        {...tab}
+      />
+      <BankPanel
+        playerCode={playerCode}
+        banks={player.banks}
+        edit={true}
+        onSubmitted={onBankSubmitted}
+        {...tab}
+      />
+      <PasswordPanel player={player} {...tab} />
     </_Tabs>
   )
 }
