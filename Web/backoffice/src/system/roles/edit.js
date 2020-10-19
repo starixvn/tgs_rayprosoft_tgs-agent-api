@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react"
+import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/core"
 import Async from "react-async"
 import { useLocation, useRouteMatch } from "react-router-dom"
@@ -29,6 +29,7 @@ import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
+import { useLabel as useMenuLabel } from "../../menu"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   const deferFn = () =>
@@ -345,8 +346,8 @@ const MenuTable = ({ menus = [], setChecked } = {}) => {
 
 const MenuTableContent = ({ menu = {}, setChecked }) => {
   let { code: moduleCode, subMenus = [] } = menu
-  let label = menuLabel([moduleCode])
-  if (label === "") {
+  let label = useMenuLabel({ codes: [moduleCode] })
+  if (!label) {
     return null
   }
 
@@ -398,7 +399,7 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
 
   let { code } = menu
   let menuPath = [...path, code]
-  let label = menuLabel(menuPath)
+  let label = useMenuLabel({ codes: menuPath })
   if (!label) {
     return null
   }
@@ -415,7 +416,9 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
       css={css`
         white-space: nowrap;
       `}
-    ></Checkbox>
+    >
+
+    </Checkbox>
   )
 }
 

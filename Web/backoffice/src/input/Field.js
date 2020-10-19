@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
 import { Formik, Field as _Field, Form, useFormikContext } from "formik"
+import { useTrans } from "../i18n"
 import SuperExpressive from "super-expressive"
 import {
   Spinner,
@@ -75,6 +76,54 @@ export const Password = ({
     />
   )
 }
+
+const EmailReg = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+export const Email = ({ type = "mail", ...props }) => {
+  let invalidEmail = useInvalidEmailLabel()
+  return (
+    <Field
+      type={type}
+      validate={(value) => {
+        if (value && !EmailReg.test(value)) {
+          return invalidEmail
+        }
+
+        return ""
+      }}
+      {...props}
+    />
+  )
+}
+
+const useInvalidEmailLabel = () => useTrans({
+  zh: "无效邮箱",
+  en: "Invalid email"
+})
+
+const PhoneReg = /^\+(?:[0-9] ?){6,14}[0-9]$/ //Refer to https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s03.html
+export const Phone = ({ type = "tel", ...props }) => {
+  let invalidPhoneNumber = useInvalidPhoneNumberLabel()
+  return (
+    <Field
+      type={type}
+      validate={(value) => {
+        /*
+        if (!PhoneReg.test(value)) {
+          return invalidPhoneNumber
+        }
+        */
+
+        return ""
+      }}
+      {...props}
+    />
+  )
+}
+
+const useInvalidPhoneNumberLabel = () => useTrans({
+  zh: "无效电话",
+  en: "Invalid phone number"
+})
 
 const InputMinHeight = 2.75
 const InputPadding = 0.4

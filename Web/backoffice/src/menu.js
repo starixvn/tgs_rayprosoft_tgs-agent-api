@@ -12,7 +12,18 @@ import { SideNav } from "bumbag"
 import memoize from "fast-memoize"
 import { codeMenuContentPair as platformPair } from "./platform"
 import { codeMenuContentPair as playerManagementPair } from "./player-management"
+import {
+  Code as PlayerManagementCode,
+  nameMessages as PlayerManagementNameMessages,
+  codeLabelPair as playerManagementLabelPair
+} from "./player-management/menu"
 import { codeMenuContentPair as systemPair } from "./system"
+import {
+  Code as SystemCode,
+  nameMessages as SystemNameMessages,
+  codeLabelPair as systemLabelPair
+} from "./system/menu"
+import { useLocale, getTrans } from "./i18n"
 
 export const Menu = ({ title, url, codes, codePaths, itemLabel }) => {
   let authCodes = useMenuCodes(codePaths)
@@ -36,6 +47,7 @@ export const Menu = ({ title, url, codes, codePaths, itemLabel }) => {
 
 const MenuItem = ({ code, path, itemLabel, ...props }) => {
   let ref = useRef()
+  let locale = useLocale()
   let { pathname } = useLocation()
   let isActive = path == pathname
 
@@ -46,7 +58,7 @@ const MenuItem = ({ code, path, itemLabel, ...props }) => {
   return (
     <SideNav.Item navId={path} isActive={isActive}>
       <Link ref={ref} to={path}>
-        {itemLabel(code)}
+        {itemLabel({ code, locale })}
       </Link>
     </SideNav.Item>
   )
@@ -63,6 +75,43 @@ export const AllMenus = ({ codes }) => {
   codes = codes ?? authCodes
   let list = pairs()
   return codes.map((code) => <MenuByCode key={code} code={code} pairs={list} />)
+}
+
+export const useLabel = ({ codes = [] }) => {
+  let locale = useLocale()
+  let label = moduleLabel
+  let subLabelPairs = [playerManagementLabelPair, systemLabelPair]
+  return findlLabel({
+    locale,
+    codes,
+    label,
+    subLabelPairs
+  })
+}
+
+//TODO: cache?
+export const findlLabel = ({ locale, codes = [], label, subLabelPairs }) => {
+  let [code = "", ...rest] = codes
+  code = code.toLowerCase()
+
+  if (rest.length === 0) {
+    return label({ locale, code })
+  }
+
+  let [, subLabel] = subLabelPairs.find(([id]) => id === code) ?? []
+
+  return subLabel && subLabel({ locale, code, codes: rest })
+}
+
+const moduleLabel = ({ code = "", locale }) => {
+  switch (code) {
+    case PlayerManagementCode:
+      return getTrans(PlayerManagementNameMessages, locale)
+    case SystemCode:
+      return getTrans(SystemNameMessages, locale)
+    default:
+      return ""
+  }
 }
 
 const MenuByCode = ({ code = "", pairs = [] }) => {
@@ -89,6 +138,7 @@ export const find = (path = [], list = []) => {
 
 export const memoizedFind = memoize(find)
 
+//TODO: rm
 export const findMenuLabel = (toLabel, subMenuList) => (codes = []) => {
   let [code, ...subMenuCodes] = codes
   code = code.toLowerCase()

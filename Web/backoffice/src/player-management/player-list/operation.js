@@ -32,6 +32,7 @@ import {
 import { useTable, Table, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useOperations } from "./client"
+import { Trans } from "../../i18n"
 
 export const Key = "operation"
 
@@ -39,7 +40,7 @@ export const Tab = ({ ...props }) => {
   let tabProps = _Tabs.Tab.useProps()
   return (
     <_Tab {...tabProps} {...props} id={Key}>
-      {title()}
+      <Trans zh="操作记录" en="Operating records" />
     </_Tab>
   )
 }
@@ -64,31 +65,31 @@ export const Panel = ({ playerCode, ...props }) => {
 
   return (
     <_TabPanel {...props} id={Key}>
-      <Table
-        columns={columns}
-        data={data?.items}
-        pageCount={pageCount(pageSize, data?.totalCount)}
-        setPageIndex={setPageIndex}
-        setSortOrder={setSortOrder}
-        initialState={state}
-        isLoading={isLoading}
-      />
+      <Stack margin="major-1">
+        <Box>TODO: date range input</Box>
+        <Table
+          columns={columns}
+          data={data?.items}
+          pageCount={pageCount(pageSize, data?.totalCount)}
+          setPageIndex={setPageIndex}
+          setSortOrder={setSortOrder}
+          initialState={state}
+          isLoading={isLoading}
+        />
+      </Stack>
     </_TabPanel>
   )
 }
 
-//TODO: i18n
-const title = () => "操作记录"
-
 const useColumns = () =>
   useMemo(() => [
     dateTimeColumn({
-      Header: "操作时间",
-      accessor: "lastLoginTime",
+      Header: <Trans zh="操作时间" en="Operation Time" />,
+      accessor: "createdOn",
       disableSortBy: true
     }),
     {
-      Header: "操作项",
+      Header: <Trans zh="操作项" en="Operation Item" />,
       accessor: "operation",
       disableSortBy: true,
       headCell: {
@@ -100,8 +101,8 @@ const useColumns = () =>
       }
     },
     {
-      Header: "操作者",
-      accessor: "operator",
+      Header: <Trans zh="操作者" en="Operator" />,
+      accessor: "createdByUsername",
       disableSortBy: true,
       headCell: {
         textAlign: "center"
