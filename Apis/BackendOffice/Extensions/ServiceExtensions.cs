@@ -42,7 +42,8 @@ namespace TGS.Apis.BackendOffice.Extensions
             
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
-
+            
+            services.AddTransient<IStreamToString, StreamToString>();
             services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));

@@ -1,4 +1,8 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -7,21 +11,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Tests.BackendOffice.UnitTests.Controllers;
-using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
     [TestFixture, Parallelizable]
     public class StartupTests : BaseTests
     {
-
         [Test]
         public void Can_Run_Startup()
         {
@@ -64,7 +62,6 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 controller.Should().NotBe(null);
             }
         }
-
 
         private void SetupHttpContext()
         {
