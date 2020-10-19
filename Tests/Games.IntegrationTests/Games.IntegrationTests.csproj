@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+
+    <AssemblyName>TGS.Tests.Games.IntegrationTests</AssemblyName>
+
+    <RootNamespace>TGS.Tests.Games.IntegrationTests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.7" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="SpecFlow" Version="3.4.14" />
+    <PackageReference Include="SpecFlow.NUnit" Version="3.4.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
+    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <ProjectReference Include="..\Tests.ApiClients\Tests.ApiClients.csproj" />
+    <ProjectReference Include="..\TestsCommon\TestsCommon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

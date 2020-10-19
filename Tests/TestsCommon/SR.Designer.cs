@@ -97,6 +97,42 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Licensee.
+        /// </summary>
+        public static string Licensee {
+            get {
+                return ResourceManager.GetString("Licensee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LoginTime.
+        /// </summary>
+        public static string LoginTime {
+            get {
+                return ResourceManager.GetString("LoginTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PlayerCode.
+        /// </summary>
+        public static string PlayerCode {
+            get {
+                return ResourceManager.GetString("PlayerCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Response.
+        /// </summary>
+        public static string Response {
+            get {
+                return ResourceManager.GetString("Response", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RoundClosed.
         /// </summary>
         public static string RoundClosed {

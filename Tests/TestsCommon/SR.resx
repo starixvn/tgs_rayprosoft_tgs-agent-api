@@ -129,6 +129,18 @@
   <data name="ErrorResponse" xml:space="preserve">
     <value>ErrorResponse</value>
   </data>
+  <data name="Licensee" xml:space="preserve">
+    <value>Licensee</value>
+  </data>
+  <data name="LoginTime" xml:space="preserve">
+    <value>LoginTime</value>
+  </data>
+  <data name="PlayerCode" xml:space="preserve">
+    <value>PlayerCode</value>
+  </data>
+  <data name="Response" xml:space="preserve">
+    <value>Response</value>
+  </data>
   <data name="RoundClosed" xml:space="preserve">
     <value>RoundClosed</value>
   </data>

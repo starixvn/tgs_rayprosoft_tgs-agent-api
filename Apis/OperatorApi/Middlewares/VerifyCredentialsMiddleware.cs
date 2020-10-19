@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var licenseeId = await licenseeOperations.GetLicenseeIdByClientIdAsync(clientId);
             if (licenseeId == Guid.Empty)
             {
-                throw new ClientIdNotFoundException($"Lincesee is not found with client id: {clientId}");
+                throw new ClientIdNotFoundException($"Licensee is not found with client id: {clientId}");
             }
 
             await statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
