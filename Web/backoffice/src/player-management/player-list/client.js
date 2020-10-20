@@ -116,15 +116,16 @@ export const useDeletePlayerBank = ({ playerCode, id }) => {
   }
 }
 
-export const useEditPlayerPassword = ({ player }) => {
+export const useEditPlayerPassword = ({ playerCode, data }) => {
+  const fetchData = playerCode && data?.password
   const { data: result, error, isValidating, mutate } = useSWR(
-    player ? `/api/player/${player.playerCode}/password` : null,
-    (url) => put(url, { data: player })
+    fetchData ? [`/api/player/${playerCode}/password`, data] : null,
+    (url, data) => put(url, { data })
   )
 
   return {
     result,
-    isLoading: !error && !result,
+    isLoading: !error && !result && fetchData,
     isValidating,
     error,
     isError: error,

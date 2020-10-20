@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useMemo } from "react"
-import client from "../../client"
-import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
-import { Heading, Stack, Table, Button, InputField, Set } from "bumbag"
+import { Heading, Stack, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
 import { AddButton, EditButton, EditPasswordButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import AsyncTable, { useTableState } from "../../table/async"
-import { label as statusLabel } from "./status"
+import { Label as StatusLabel } from "./status"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code } from "./menu"
 import { useList } from "./client"
+import { useTable, Table, pageCount } from "../../table"
+import { Trans, useTrans } from "../../i18n"
+import SearchButton from "../../button/Search"
 
 export { Code }
 
@@ -29,61 +29,49 @@ export const Content = () => {
 
 export const CodeContentPair = [Code, Content]
 
-const AsyncContent = ({}) => {
-  let { state, setState, headSortBy, headOrderBy } = useTableState({
-    username: "",
-    searchCount: 0
-  })
-  let { pageIndex, pageSize, username = "", searchCount } = state
-
-  const deferFn = () =>
-    client.get("/api/users", {
-      searchParams: {
-        page: pageIndex + 1,
-        rows: pageSize,
-        username,
-        sortby: headSortBy(),
-        orderby: headOrderBy()
-      }
-    })
-
-  let async = useAsync({ deferFn })
-  let { run: fetchTable, promise, isPending } = async
-
-  let columns = useTableColumns({
-    fetchTable
+const AsyncContent = () => {
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    username: ""
   })
 
-  useEffect(() => {
-    fetchTable()
-  }, [pageIndex, pageSize, username, searchCount])
+  let { pageIndex, pageSize, sortby, orderby, username = "" } = state
+
+  let { data, isLoading, mutate } = useList({
+    page: pageIndex + 1,
+    rows: pageSize,
+    sortby,
+    orderby,
+    username
+  })
+  const fetchTable = mutate
+  let columns = useTableColumns({ fetchTable })
 
   return (
     <PageContent
-      title={title()}
+      title={<Trans zh="管理员列表" en="Admins" />}
       actionBar={
         <>
           <SearchForm
             search={(data) => {
               setState({
-                page: 0,
-                searchCount: searchCount + 1,
+                pageIndex: 0,
                 ...data
               })
             }}
-            isPending={isPending}
+            isPending={isLoading}
           />
           <AddButton onSubmitted={fetchTable} />
         </>
       }
     >
-      <AsyncTable
-        state={state}
-        onStateChange={setState}
-        promise={promise}
-        head
-        body
+      <Table
+        controlledState={state}
         columns={columns}
+        data={data?.items}
+        pageCount={pageCount(pageSize, data?.totalCount)}
+        setPageIndex={setPageIndex}
+        setSortOrder={setSortOrder}
+        isLoading={isLoading}
       />
     </PageContent>
   )
@@ -111,9 +99,7 @@ const SearchForm = ({ search, isPending, ...props }) => {
               placeholder={searchInputPlaceHolder()}
               autocomplete="off"
             />
-            <Button type="submit" isLoading={isPending}>
-              {searchButtonLabel()}
-            </Button>
+            <SearchButton isLoading={isPending} />
           </Set>
         </form>
       )}
@@ -121,21 +107,19 @@ const SearchForm = ({ search, isPending, ...props }) => {
   )
 }
 
-//TODO: i18n
-const searchButtonLabel = () => "搜索"
-
-//TODO: i18n
-const searchInputPlaceHolder = () => "管理员用户名输入框"
-
-//TODO: i18n
-const title = () => "管理员列表"
+const searchInputPlaceHolder = () =>
+  useTrans({
+    zh: "管理员用户名输入框",
+    en: "Input admin user name"
+  })
 
 const useTableColumns = ({ fetchTable }) => {
   let columns = [
     sequenceColumn(),
     {
-      Header: "用户名",
+      Header: <Trans zh="用户名" en="Username" />,
       accessor: "username",
+      disableSortBy: true,
       headCell: {
         textAlign: "center"
       },
@@ -144,7 +128,7 @@ const useTableColumns = ({ fetchTable }) => {
       }
     },
     {
-      Header: "姓名",
+      Header: <Trans zh="姓名" en="Name" />,
       accessor: "name",
       disableSortBy: true,
       headCell: {
@@ -155,7 +139,7 @@ const useTableColumns = ({ fetchTable }) => {
       }
     },
     {
-      Header: "部门",
+      Header: <Trans zh="部门" en="Department" />,
       accessor: "departmentName",
       disableSortBy: true,
       headCell: {
@@ -167,7 +151,7 @@ const useTableColumns = ({ fetchTable }) => {
       }
     },
     {
-      Header: "权限组",
+      Header: <Trans zh="权限组" en="Role" />,
       accessor: "role",
       disableSortBy: true,
       headCell: {
@@ -179,7 +163,7 @@ const useTableColumns = ({ fetchTable }) => {
       }
     },
     {
-      Header: "最近登入IP",
+      Header: <Trans zh="最近登入IP" en="Last Login IP" />,
       accessor: "lastLoginIp",
       disableSortBy: true,
       headCell: {
@@ -190,18 +174,18 @@ const useTableColumns = ({ fetchTable }) => {
       }
     },
     dateTimeColumn({
-      Header: "最近登入时间",
+      Header: <Trans zh="最近登入时间" en="Last Login Time" />,
       accessor: "lastLoginTime",
       disableSortBy: true
     }),
     dateTimeColumn({
-      Header: "创建时间",
+      Header: <Trans zh="创建时间" en="Created On" />,
       accessor: "createdOn",
       disableSortBy: true
     }),
     {
       disableSortBy: true,
-      Header: "状态",
+      Header: <Trans zh="状态" en="Status" />,
       accessor: "status",
       headCell: {
         textAlign: "center"
@@ -209,17 +193,16 @@ const useTableColumns = ({ fetchTable }) => {
       cell: {
         textAlign: "center"
       },
-      Cell: ({ value }) => {
-        return statusLabel(value)
-      }
+      Cell: ({ value }) => <StatusLabel value={value} />
     }
   ]
 
   let hasAnyMenu = useHasSubMenuByRoute()
   if (hasAnyMenu) {
     columns.push({
+      id: "actions",
       disableSortBy: true,
-      Header: "操作",
+      Header: <Trans zh="操作" en="Actions" />,
       headCell: {
         textAlign: "center"
       },

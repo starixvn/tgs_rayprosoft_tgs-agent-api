@@ -241,7 +241,11 @@ const EditTabs = ({
         onSubmitted={onBankSubmitted}
         {...tab}
       />
-      <PasswordPanel player={player} {...tab} />
+      <PasswordPanel
+        playerCode={playerCode}
+        onSubmitted={onSubmitted}
+        {...tab}
+      />
     </_Tabs>
   )
 }

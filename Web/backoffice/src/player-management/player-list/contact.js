@@ -115,10 +115,9 @@ export const EditPanel = ({
 
 const FormBody = ({ onClickClose }) => {
   let { submitForm } = useFormikContext()
-  //TODO: any required fields?
   return (
-    <>
-      <FieldValues margin="major-1">
+    <Stack spacing="major-1" margin="major-1">
+      <FieldValues>
         <MobileLabel />
         <PhoneField name="phone" />
 
@@ -134,7 +133,7 @@ const FormBody = ({ onClickClose }) => {
       <Box alignX="right">
         <SubmitCancel onClickSubmit={submitForm} onClickCancel={onClickClose} />
       </Box>
-    </>
+    </Stack>
   )
 }
 

@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/core"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../client"
-import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
 import { Box, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"
-import AsyncTable, { useTableState } from "../../table/async"
 import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
 import { CopyButton } from "./copy"
 import { DeleteButton } from "./delete"
-import { useIsDisplayMenuByRoute } from "../../user/context"
+import {
+  useIsDisplayMenuByRoute,
+  useHasSubMenuByRoute
+} from "../../user/context"
 import { Code } from "./menu"
+import { useList } from "./client"
+import { useTable, Table, pageCount } from "../../table"
+import { Trans, useTrans } from "../../i18n"
+import SearchButton from "../../button/Search"
 
 export { Code }
 
@@ -27,63 +30,47 @@ export const Content = ({}) => {
 
 export const CodeContentPair = [Code, Content]
 
-export const AsyncContent = () => {
-  let { state, setState, headSortBy, headOrderBy } = useTableState({
-    name: "",
-    searchCount: 0
+const AsyncContent = () => {
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    name: ""
   })
-  let { pageIndex, pageSize, name = "", searchCount } = state
+  let { pageIndex, pageSize, sortby, orderby, name = "" } = state
+  let { data, isLoading, mutate } = useList({
+    page: pageIndex + 1,
+    rows: pageSize,
+    sortby,
+    orderby,
+    name
+  })
 
-  const deferFn = () =>
-    client.get("/api/role", {
-      searchParams: {
-        page: pageIndex + 1,
-        rows: pageSize,
-        name,
-        sortby: headSortBy(),
-        orderby: headOrderBy()
-      }
-    })
-
-  let async = useAsync({ deferFn })
-  let { run: fetchTable, promise, isPending } = async
-
-  let columns = useMemo(() =>
-    tableColumns({
-      fetchTable
-    })
-  )
-
-  useEffect(() => {
-    fetchTable()
-  }, [pageIndex, pageSize, name, searchCount])
-
+  const fetchTable = mutate
+  let columns = useTableColumns({ fetchTable })
   return (
     <PageContent
-      title={title()}
+      title={<Trans zh="权限组管理" en="Roles" />}
       actionBar={
         <>
           <SearchForm
             search={(data) => {
               setState({
                 page: 0,
-                searchCount: searchCount + 1,
                 ...data
               })
             }}
-            isPending={isPending}
+            isPending={isLoading}
           />
           <AddButton onSubmitted={fetchTable} />
         </>
       }
     >
-      <AsyncTable
-        state={state}
-        onStateChange={setState}
-        promise={promise}
-        head
-        body
+      <Table
+        controlledState={state}
         columns={columns}
+        data={data?.items}
+        pageCount={pageCount(pageSize, data?.totalCount)}
+        setPageIndex={setPageIndex}
+        setSortOrder={setSortOrder}
+        isLoading={isLoading}
       />
     </PageContent>
   )
@@ -111,9 +98,7 @@ const SearchForm = ({ search, isPending, ...props }) => {
               placeholder={searchInputPlaceHolder()}
               autocomplete="off"
             />
-            <Button type="submit" isLoading={isPending}>
-              {searchButtonLabel()}
-            </Button>
+            <SearchButton isLoading={isPending} />
           </Set>
         </form>
       )}
@@ -121,54 +106,60 @@ const SearchForm = ({ search, isPending, ...props }) => {
   )
 }
 
-//TODO: i18n
-const title = () => "权限组管理"
+const searchInputPlaceHolder = () =>
+  useTrans({
+    zh: "权限组名称输入框",
+    en: "Input role name"
+  })
 
-//TODO: i18n
-const searchButtonLabel = () => "搜索"
-
-//TODO: i18n
-const searchInputPlaceHolder = () => "权限组名称输入框"
-const tableColumns = ({ fetchTable }) => [
-  sequenceColumn(),
-  {
-    Header: "权限组名称",
-    id: "name",
-    accessor: "name",
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    },
-    width: 400
-  },
-  {
-    disableSortBy: true,
-    accessor: (row) => {
-      return {
-        id: row.id,
-        name: row.name
-      }
-    },
-    Header: "操作",
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    },
-    Cell: ({ value }) => {
-      let { id, name } = value
-      return (
-        <Box alignX="center">
-          <Set>
-            <EditButton id={id} onSubmitted={fetchTable} />
-            <CopyButton id={id} name={name} onSubmitted={fetchTable} />
-            <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
-          </Set>
-        </Box>
-      )
+const useTableColumns = ({ fetchTable }) => {
+  let columns = [
+    sequenceColumn(),
+    {
+      Header: "权限组名称",
+      id: "name",
+      accessor: "name",
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      width: 400
     }
+  ]
+
+  let hasAnyMenu = useHasSubMenuByRoute()
+  if (hasAnyMenu) {
+    columns.push({
+      disableSortBy: true,
+      accessor: (row) => {
+        return {
+          id: row.id,
+          name: row.name
+        }
+      },
+      Header: "操作",
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        let { id, name } = value
+        return (
+          <Box alignX="center">
+            <Set>
+              <EditButton id={id} onSubmitted={fetchTable} />
+              <CopyButton id={id} name={name} onSubmitted={fetchTable} />
+              <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
+            </Set>
+          </Box>
+        )
+      }
+    })
   }
-]
+
+  return useMemo(() => columns)
+}

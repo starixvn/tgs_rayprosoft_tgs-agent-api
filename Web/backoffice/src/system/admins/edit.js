@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Spinner,
@@ -32,9 +29,13 @@ import {
   Field as InputField,
   Password as PasswordField
 } from "../../input/Field"
+import { Trans, useTrans } from "../../i18n"
 import { Select as StatusSelect, from as statusFrom } from "./status"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
+import { useAddAdmin, useEditAdmin, useEditPassword } from "./client"
+import { ConfirmCancel } from "../../button/ActionButtons"
+import { FieldValues } from "../../layout/Grid"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -55,10 +56,10 @@ export const AddButton = ({ onSubmitted, ...props }) => {
         `}
         {...dialog}
       >
-        {add()}
+        <Trans zh="新增" en="Add" />
       </Modal.Disclosure>
       {dialog.visible && (
-        <SubmitDialog
+        <AddDialog
           onSubmitted={onSubmitted}
           dialog={dialog}
           finalFocusRef={disclosureRef}
@@ -88,10 +89,10 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
         `}
         {...dialog}
       >
-        {edit()}
+        <Trans zh="修改" en="Edit" />
       </Modal.Disclosure>
       {dialog.visible && (
-        <SubmitDialog
+        <EditDialog
           user={user}
           onSubmitted={onSubmitted}
           dialog={dialog}
@@ -122,14 +123,16 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
         `}
         {...dialog}
       >
-        {editPassword()}
+        <Trans zh="修改密码" en="Change Password" />
       </Modal.Disclosure>
-      <PasswordDialog
-        user={user}
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-      />
+      {dialog.visible && (
+        <PasswordDialog
+          user={user}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={disclosureRef}
+        />
+      )}
     </>
   )
 }
@@ -141,355 +144,327 @@ const PasswordDialog = ({
   finalFocusRef,
   ...props
 }) => {
-  const deferFn = ([data]) =>
-    client.put(`/api/users/${user.id}/password`, { data })
-  const asyncSubmit = useAsync({ deferFn })
+  let [submitData, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useEditPassword({
+    id: user?.id,
+    data: submitData
+  })
+  useEffect(() => {
+    if (result && !error) {
+      onSubmitted && onSubmitted()
+      dialog.hide()
+    }
+  }, [result])
+
+  const clearResult = () => {
+    setSubmit(null)
+  }
 
   return (
-    <>
+    <Dialog.Modal
+      title={usePasswordTitle()}
+      hideOnClickOutside={false}
+      unstable_finalFocusRef={finalFocusRef}
+      {...dialog}
+    >
+      {error && <AlertDialog {...error} onClickClose={clearResult} />}
       <Formik
         initialValues={{
           password: "",
           confirmPassword: ""
         }}
-        onSubmit={asyncSubmit.run}
+        onSubmit={setSubmit}
       >
-        <PasswordFormDialog dialog={dialog} />
+        <PasswordFormDialog isLoading={isLoading} dialog={dialog} />
       </Formik>
-      <IfRejected state={asyncSubmit}>
-        {(error) => <AlertDialog {...error} />}
-      </IfRejected>
-      <IfFulfilled state={asyncSubmit}>
-        {(_) => {
-          useEffect(() => {
-            dialog.hide()
-            onSubmitted && onSubmitted()
-          }, [dialog.visible])
-
-          return null
-        }}
-      </IfFulfilled>
-    </>
-  )
-}
-
-const PasswordFormDialog = ({ dialog, finalFocusRef, ...props }) => {
-  const { submitForm, resetForm, isPending } = useFormikContext()
-
-  return (
-    <Dialog.Modal
-      title={passwordTitle()}
-      showActionButtons
-      actionButtonsProps={{
-        isLoading: isPending,
-        submitText: confirmLabel(),
-        cancelText: cancelLabel(),
-        onClickSubmit: submitForm,
-        onClickCancel: resetForm
-      }}
-      hideOnClickOutside={false}
-      unstable_finalFocusRef={finalFocusRef}
-      {...dialog}
-    >
-      <Form>
-        <Box
-          css={css`
-            display: grid;
-            grid-template-rows: auto;
-            grid-template-areas:
-              "password passwordField"
-              "confirmPassword confirmPasswordField";
-          `}
-        >
-          <PasswordLabelInput />
-          <ConfirmPasswordLabelInput />
-        </Box>
-      </Form>
     </Dialog.Modal>
   )
 }
 
-const SubmitDialog = ({
+const PasswordFormDialog = ({ isLoading, dialog, finalFocusRef, ...props }) => {
+  const { values, submitForm, resetForm } = useFormikContext()
+
+  return (
+    <Form>
+      <Stack spacing="major-3" margin="major-1">
+        <FieldValues>
+          <Label
+            htmlFor="password"
+            css={css`
+              line-height: unset;
+            `}
+          >
+            <Trans zh="密码" en="Password" />
+            <Text color="danger">*</Text>
+          </Label>
+          <PasswordField
+            autoFocus={true}
+            name="password"
+            autoComplete="new-password"
+          />
+
+          <Label
+            htmlFor="confirmassword"
+            css={css`
+              line-height: unset;
+            `}
+          >
+            <Trans zh="确认密码" en="Confirm Password" />
+            <Text color="danger">*</Text>
+          </Label>
+          <PasswordField
+            name="confirmPassword"
+            matchPassword={values?.password ?? ""}
+            autoComplete="new-password"
+          />
+        </FieldValues>
+        <Box alignX="right">
+          <ConfirmCancel
+            onClickSubmit={submitForm}
+            onClickCancel={dialog.hide}
+          />
+        </Box>
+      </Stack>
+    </Form>
+  )
+}
+
+const AddDialog = ({
   user = {},
   onSubmitted,
   dialog,
   finalFocusRef,
   ...props
 }) => {
-  let { id } = user
-  let isUpdate = !!id
-  let isCreate = !isUpdate
-
-  const create = (data) =>
-    client.post(`/api/users`, {
-      data
-    })
-
-  const update = (data) =>
-    client.put(`/api/users/${id}`, {
-      data
-    })
-
-  const deferFn = ([data]) => {
-    data = {
-      ...data,
-      status: statusFrom(data.status)
+  let [submitData, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useAddAdmin({
+    data: submitData
+  })
+  useEffect(() => {
+    if (result && !error) {
+      onSubmitted && onSubmitted()
+      dialog.hide()
     }
-    return isUpdate ? update(data) : create(data)
+  }, [result])
+
+  const clearResult = () => {
+    setSubmit(null)
   }
 
-  let initialValues = isCreate
-    ? {
-        username: "",
-        departmentId: "",
-        roleId: "",
-        name: "",
-        password: "",
-        confirmPassword: ""
-      }
-    : {
-        departmentId: user.departmentId,
-        roleId: user.roleId,
-        name: user.name,
-        status: statusFrom(user.status)
-      }
-
-  let asyncSubmit = useAsync({ deferFn })
-  return (
-    <>
-      <Formik initialValues={initialValues} onSubmit={asyncSubmit.run}>
-        <FormDialog user={user} dialog={dialog}></FormDialog>
-      </Formik>
-      <IfRejected state={asyncSubmit}>
-        {(error) => <AlertDialog {...error} />}
-      </IfRejected>
-      <IfFulfilled state={asyncSubmit}>
-        {(_) => {
-          useEffect(() => {
-            dialog.hide()
-            onSubmitted && onSubmitted()
-          })
-
-          return null
-        }}
-      </IfFulfilled>
-    </>
-  )
-}
-
-const FormDialog = ({
-  user = {},
-  dialog,
-  inputRef,
-  finalFocusRef,
-  ...props
-}) => {
-  const { submitForm, resetForm, isPending } = useFormikContext()
-
-  let { id } = user
-  let isUpdate = !!id
-  let isCreate = !isUpdate
-  /*
-  useEffect(() => {
-    if (dialog.visible) {
-      inputRef?.current?.focus()
-    }
-  }, [dialog.visible])
-  */
-
+  let title = useCreateTitle()
   return (
     <Dialog.Modal
-      title={isCreate ? createTitle() : updateTitle()}
-      showActionButtons
-      actionButtonsProps={{
-        isLoading: isPending,
-        submitText: confirmLabel(),
-        cancelText: cancelLabel(),
-        onClickSubmit: submitForm,
-        onClickCancel: resetForm
-      }}
+      title={title}
       hideOnClickOutside={false}
       unstable_finalFocusRef={finalFocusRef}
       {...dialog}
     >
-      <Form>
-        <Box
-          css={css`
-            display: grid;
-            grid-template-rows: auto;
-            grid-template-areas:
-              "username usernameField"
-              "departmentId departmentIdField"
-              "roleId roleIdField"
-              "name nameField"
-              "password passwordField"
-              "confirmPassword confirmPasswordField"
-              "status statusField";
-          `}
-        >
-          <UernameLabelInput
-            user={user}
-            isCreate={isCreate}
-            isUpdate={isUpdate}
-          />
-          <DepartmentLabelSelect />
-          <RoleLabelSelect />
-          <NameLabelInput />
-          {isCreate && <PasswordLabelInput />}
-          {isCreate && <ConfirmPasswordLabelInput />}
-          {isUpdate && <StatusLabelSelect />}
-        </Box>
-      </Form>
+      {error && <AlertDialog {...error} onClickClose={clearResult} />}
+      <Formik
+        initialValues={{
+          username: "",
+          departmentId: "",
+          roleId: "",
+          name: "",
+          password: "",
+          confirmPassword: ""
+        }}
+        onSubmit={setSubmit}
+      >
+        <AddForm
+          isLoading={isLoading}
+          dialog={dialog}
+          onClickCancel={dialog.hide}
+        />
+      </Formik>
     </Dialog.Modal>
   )
 }
 
-const LabelBox = ({ name = "", label = "", required = true }) => {
+const AddForm = ({ onClickCancel }) => {
+  const { values, submitForm, resetForm } = useFormikContext()
+
   return (
-    <Box
-      css={css`
-        grid-area: ${name};
-      `}
-      margin="major-1"
+    <Form>
+      <Stack spacing="major-3" margin="major-1">
+        <FieldValues>
+          <UsernameLabel required />
+          <InputField name="username" autoFocus required />
+
+          <DepartmentLabel />
+          <DepartmentSelectField name="departmentId" required />
+
+          <RoleLabel />
+          <RoleSelectField name="roleId" required />
+
+          <NameLabel />
+          <InputField name="name" required />
+
+          <Label htmlFor="password">
+            <Trans zh="密码" en="Password" />
+            <Text color="danger">*</Text>
+          </Label>
+          <PasswordField name="password" autoComplete="new-password" />
+
+          <Label htmlFor="confirmPassword">
+            <Trans zh="确认密码" en="Confirm Password" />
+            <Text color="danger">*</Text>
+          </Label>
+          <PasswordField
+            name="confirmPassword"
+            matchPassword={values?.password ?? ""}
+            autoComplete="new-password"
+          />
+        </FieldValues>
+        <Box alignX="right">
+          <ConfirmCancel
+            onClickSubmit={submitForm}
+            onClickCancel={onClickCancel}
+          />
+        </Box>
+      </Stack>
+    </Form>
+  )
+}
+
+const UsernameLabel = ({ name = "username", required }) => (
+  <Label htmlFor={name}>
+    <Trans zh="用户名" en="Username" />
+    {required && <Text color="danger">*</Text>}
+  </Label>
+)
+
+const DepartmentLabel = ({ name = "departmentId" }) => (
+  <Label htmlFor={name}>
+    <Trans zh="部门" en="Department" />
+    <Text color="danger">*</Text>
+  </Label>
+)
+
+const RoleLabel = ({ name = "roleId" }) => (
+  <Label htmlFor={name}>
+    <Trans zh="权限组" en="Role" />
+    <Text color="danger">*</Text>
+  </Label>
+)
+
+const NameLabel = ({ name = "name" }) => (
+  <Label htmlFor={name}>
+    <Trans zh="姓名" en="Name" />
+    <Text color="danger">*</Text>
+  </Label>
+)
+
+const EditDialog = ({
+  user = {},
+  onSubmitted,
+  dialog,
+  finalFocusRef,
+  ...props
+}) => {
+  let [submitData, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useEditAdmin({
+    id: user?.id,
+    data: submitData
+  })
+  useEffect(() => {
+    if (result && !error) {
+      onSubmitted && onSubmitted()
+      dialog.hide()
+    }
+  }, [result])
+
+  const submit = (data) => {
+    data = {
+      ...data,
+      status: statusFrom(data.status)
+    }
+    setSubmit(data)
+  }
+
+  const clearResult = () => {
+    setSubmit(null)
+  }
+
+  let title = useUpdateTitle()
+  return (
+    <Dialog.Modal
+      title={title}
+      hideOnClickOutside={false}
+      unstable_finalFocusRef={finalFocusRef}
+      {...dialog}
     >
-      <Label
-        htmlFor={name}
-        marginTop="major-1"
-        css={css`
-          line-height: unset;
-        `}
+      {error && <AlertDialog {...error} onClickClose={clearResult} />}
+      <Formik
+        initialValues={{
+          departmentId: user.departmentId,
+          roleId: user.roleId,
+          name: user.name,
+          status: user.status
+        }}
+        onSubmit={submit}
       >
-        {label}
-        {required && <Text color="danger">*</Text>}
-      </Label>
-    </Box>
-  )
-}
-
-const FieldBox = ({ name, children, ...props }) => {
-  return (
-    <Box
-      css={css`
-        grid-area: ${name}Field;
-      `}
-      margin="major-1"
-      marginBottom="0"
-    >
-      {children}
-    </Box>
-  )
-}
-
-const UernameLabelInput = ({ user, name = "username", isCreate, isUpdate }) => {
-  return (
-    <>
-      <LabelBox name={name} label={username()} required={isCreate} />
-      <FieldBox name={name}>
-        {isCreate && <InputField name={name} required />}
-        {isUpdate && <InputField name={name} value={user?.username} disabled />}
-      </FieldBox>
-    </>
-  )
-}
-
-const DepartmentLabelSelect = ({ name = "departmentId" }) => {
-  return (
-    <>
-      <LabelBox name={name} label={departmentName()} />
-      <FieldBox name={name}>
-        <DepartmentSelectField name={name} required />
-      </FieldBox>
-    </>
-  )
-}
-
-const RoleLabelSelect = ({ name = "roleId" }) => {
-  return (
-    <>
-      <LabelBox name={name} label={role()} />
-      <FieldBox name={name}>
-        <RoleSelectField name={name} required />
-      </FieldBox>
-    </>
-  )
-}
-
-const NameLabelInput = ({ name = "name" }) => {
-  return (
-    <>
-      <LabelBox name={name} label={firstNameLastName()} />
-      <FieldBox name={name}>
-        <InputField name={name} required />
-      </FieldBox>
-    </>
-  )
-}
-
-const PasswordLabelInput = ({ name = "password" }) => {
-  return (
-    <>
-      <LabelBox name={name} label={password()} />
-      <FieldBox name={name}>
-        <PasswordField name={name} autoComplete="new-password" />
-      </FieldBox>
-    </>
-  )
-}
-
-const ConfirmPasswordLabelInput = ({ name = "confirmPassword" }) => {
-  const { values = {} } = useFormikContext()
-  return (
-    <>
-      <LabelBox name={name} label={confirmPassword()} />
-      <FieldBox name={name}>
-        <PasswordField
-          name={name}
-          matchPassword={values?.password ?? ""}
-          autoComplete="new-password"
+        <EditForm
+          user={user}
+          isLoading={isLoading}
+          dialog={dialog}
+          onClickCancel={dialog.hide}
         />
-      </FieldBox>
-    </>
+      </Formik>
+    </Dialog.Modal>
   )
 }
 
-const StatusLabelSelect = ({ name = "status" }) => {
+const EditForm = ({ user, onClickCancel }) => {
+  const { values, submitForm, resetForm } = useFormikContext()
+
   return (
-    <>
-      <LabelBox name={name} label={status()} />
-      <FieldBox name={name}>
-        <StatusSelect name={name} required />
-      </FieldBox>
-    </>
+    <Form>
+      <Stack spacing="major-3" margin="major-1">
+        <FieldValues>
+          <UsernameLabel />
+          <InputField name="username" value={user?.username} disabled />
+
+          <DepartmentLabel />
+          <DepartmentSelectField name="departmentId" required />
+
+          <RoleLabel />
+          <RoleSelectField name="roleId" required />
+
+          <NameLabel />
+          <InputField name="name" required />
+
+          <Label htmlFor="status">
+            <Trans zh="状态" en="Status" />
+            <Text color="danger">*</Text>
+          </Label>
+          <StatusSelect name="status" required />
+        </FieldValues>
+        <Box alignX="right">
+          <ConfirmCancel
+            onClickSubmit={submitForm}
+            onClickCancel={onClickCancel}
+          />
+        </Box>
+      </Stack>
+    </Form>
   )
 }
 
-//TODO: i18n
-const createTitle = () => "新增管理员"
+const useCreateTitle = () =>
+  useTrans({
+    zh: "新增管理员",
+    en: "Add Admin"
+  })
 
-const updateTitle = () => "修改"
+const useUpdateTitle = () =>
+  useTrans({
+    zh: "修改",
+    en: "Edit"
+  })
 
-const passwordTitle = () => "修改密码"
-
-const add = () => "新增"
-
-const edit = () => "修改"
-
-const editPassword = () => "修改密码"
-
-const username = () => "用户名"
-
-const departmentName = () => "部门"
-
-const role = () => "权限组"
-
-const firstNameLastName = () => "姓名"
-
-const password = () => "密码"
-
-const confirmPassword = () => "确认密码"
-
-const status = () => "状态"
-
-const confirmLabel = () => "确定"
-
-const cancelLabel = () => "取消"
+const usePasswordTitle = () =>
+  useTrans({
+    zh: "修改密码",
+    en: "Change Password"
+  })

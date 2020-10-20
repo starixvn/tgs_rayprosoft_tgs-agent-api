@@ -95,10 +95,11 @@ export const Email = ({ type = "mail", ...props }) => {
   )
 }
 
-const useInvalidEmailLabel = () => useTrans({
-  zh: "无效邮箱",
-  en: "Invalid email"
-})
+const useInvalidEmailLabel = () =>
+  useTrans({
+    zh: "无效邮箱",
+    en: "Invalid email"
+  })
 
 const PhoneReg = /^\+(?:[0-9] ?){6,14}[0-9]$/ //Refer to https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s03.html
 export const Phone = ({ type = "tel", ...props }) => {
@@ -120,15 +121,17 @@ export const Phone = ({ type = "tel", ...props }) => {
   )
 }
 
-const useInvalidPhoneNumberLabel = () => useTrans({
-  zh: "无效电话",
-  en: "Invalid phone number"
-})
+const useInvalidPhoneNumberLabel = () =>
+  useTrans({
+    zh: "无效电话",
+    en: "Invalid phone number"
+  })
 
 const InputMinHeight = 2.75
 const InputPadding = 0.4
 const FieldValidationTextHeight = 0.875
-export const FieldMinHeight = InputMinHeight + InputPadding + FieldValidationTextHeight
+export const FieldMinHeight =
+  InputMinHeight + InputPadding + FieldValidationTextHeight
 export const Field = ({ name, required, validate, ...props }) => {
   return (
     <_Field
@@ -147,9 +150,7 @@ export const Field = ({ name, required, validate, ...props }) => {
 
         //minHeight={`${FieldMinHeight}rem`}
         return (
-          <FieldWrapper
-            state={state}
-            validationText={validationText}>
+          <FieldWrapper state={state} validationText={validationText}>
             <Input id={name} {...field} {...props} />
           </FieldWrapper>
         )

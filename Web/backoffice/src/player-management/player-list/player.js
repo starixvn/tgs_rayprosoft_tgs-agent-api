@@ -51,9 +51,18 @@ export const Tab = ({ ...props }) => {
   )
 }
 
-export const EditPanel = ({ playerCode = "", player = {}, onSubmitted, onClickClose, ...props }) => {
+export const EditPanel = ({
+  playerCode = "",
+  player = {},
+  onSubmitted,
+  onClickClose,
+  ...props
+}) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate } = useEditPlayerInfo({ playerCode, data: submitData })
+  let { result, error, mutate, isLoading } = useEditPlayerInfo({
+    playerCode,
+    data: submitData
+  })
   useEffect(() => {
     if (result && !error) {
       onSubmitted && onSubmitted()
@@ -75,22 +84,16 @@ export const EditPanel = ({ playerCode = "", player = {}, onSubmitted, onClickCl
   }
 
   let {
-    username = "",
     realName = "",
     vipId = "",
     parentUsername = "",
-    registeredOn,
-    balance,
     status,
     hasAgent
   } = player
-
-  let turnOnLabel = useTurnOnLabel()
-  let turnOffLabel = useTurnOffLabel()
   return (
     <_TabPanel {...props} id={Key}>
-      {error && <AlertDialog {...error} onClickClose={clearResult}/>}
-      <Formik 
+      {error && <AlertDialog {...error} onClickClose={clearResult} />}
+      <Formik
         initialValues={{
           realName: realName ?? "",
           vipId,
@@ -99,63 +102,83 @@ export const EditPanel = ({ playerCode = "", player = {}, onSubmitted, onClickCl
           hasAgent: hasAgent.toString()
         }}
         onSubmit={submit}
-        >
-          {formikProps => (
-            <form onReset={formikProps.handleReset} onSubmit={formikProps.handleSubmit} >
-              <FieldValues margin="major-1">
-                <UserNameLabel />
-                <Text>{username}</Text>
-
-                <RealNameLabel />
-                <Box>
-                  <InputField name="realName" required />
-                </Box>
-                
-                <VIPLevelLabel />
-                <Box>
-                  <VipLevelField name="vipId" required/>
-                </Box>
-                
-                <ParentUsernameLabel />
-                <Box>
-                  <InputField name="parentUsername"  />
-                </Box>
-
-                <RegistrationLabel />
-                <Box>
-                  <FormattedDateTime value={registeredOn} />
-                </Box>
-
-                <BalanceLabel />
-                <Box>
-                  <FormattedNumber value={balance} />
-                </Box>
-                
-                <StatusLabel />
-                <Box>
-                  <StatusField name="status" required/>
-                </Box>
-                
-                <AgentLabel />
-                <Box>
-                    <_Field name="hasAgent" required>
-                      {(props) => <_Select options={[
-                        { label: turnOnLabel, value: "true" }, 
-                        { label: turnOffLabel, value: "false" }
-                        ]} {...props} />}                  
-                    </_Field>
-                </Box>
-              </FieldValues>      
-              <Box alignX="right">
-                <SubmitCancel 
-                  onClickSubmit={formikProps.submitForm}
-                  onClickCancel={onClickClose}
-                  /> 
-              </Box>  
-            </form>
-          )}
+      >
+        <EditForm
+          player={player}
+          isLoading={isLoading}
+          onClickClose={onClickClose}
+        />
       </Formik>
     </_TabPanel>
+  )
+}
+
+const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
+  let { submitForm } = useFormikContext()
+  let { username = "", registeredOn, balance } = player
+
+  let turnOnLabel = useTurnOnLabel()
+  let turnOffLabel = useTurnOffLabel()
+  return (
+    <Form>
+      <Stack spacing="major-1" margin="major-1">
+        <FieldValues>
+          <UserNameLabel />
+          <Text>{username}</Text>
+
+          <RealNameLabel />
+          <Box>
+            <InputField name="realName" required />
+          </Box>
+
+          <VIPLevelLabel />
+          <Box>
+            <VipLevelField name="vipId" required />
+          </Box>
+
+          <ParentUsernameLabel />
+          <Box>
+            <InputField name="parentUsername" />
+          </Box>
+
+          <RegistrationLabel />
+          <Box>
+            <FormattedDateTime value={registeredOn} />
+          </Box>
+
+          <BalanceLabel />
+          <Box>
+            <FormattedNumber value={balance} />
+          </Box>
+
+          <StatusLabel />
+          <Box>
+            <StatusField name="status" required />
+          </Box>
+
+          <AgentLabel />
+          <Box>
+            <_Field name="hasAgent" required>
+              {(props) => (
+                <_Select
+                  options={[
+                    { label: turnOnLabel, value: "true" },
+                    { label: turnOffLabel, value: "false" }
+                  ]}
+                  {...props}
+                />
+              )}
+            </_Field>
+          </Box>
+        </FieldValues>
+        <Box alignX="right">
+          <SubmitCancel
+            onClickSubmit={submitForm}
+            onClickCancel={onClickClose}
+          />
+        </Box>
+      </Stack>
+    </Form>
   )
 }
 
@@ -170,54 +193,53 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
     status,
     hasAgent
   } = player
-  
 
   let turnOnLabel = useTurnOnLabel()
   let turnOffLabel = useTurnOffLabel()
   return (
     <_TabPanel {...props} id={Key}>
       <FieldValues margin="major-1">
-          <UserNameLabel />
-          <Text>{username}</Text>
+        <UserNameLabel />
+        <Text>{username}</Text>
 
-          <RealNameLabel />
-          <Box>
-            <Text>{realName}</Text>
-          </Box>
-          
-          <VIPLevelLabel />
-          <Box>
-            <Text>{vipLevel}</Text>
-          </Box>
-          
-          <ParentUsernameLabel />
-          <Box>
-            <Text>{parentUsername}</Text>
-          </Box>
+        <RealNameLabel />
+        <Box>
+          <Text>{realName}</Text>
+        </Box>
 
-          <RegistrationLabel />
-          <Box>
-            <FormattedDateTime value={registeredOn} />
-          </Box>
+        <VIPLevelLabel />
+        <Box>
+          <Text>{vipLevel}</Text>
+        </Box>
 
-          <BalanceLabel />
-          <Box>
-            <FormattedNumber value={balance} />
-          </Box>
-          
-          <StatusLabel />
-          <Box>
-            <StatusLabel value={status} />
-          </Box>
-          
-          <AgentLabel />
-          <Box>
-            <Text>
-              {hasAgent && turnOnLabel}
-              {!hasAgent && turnOffLabel}
-            </Text>
-          </Box>
-        </FieldValues>
+        <ParentUsernameLabel />
+        <Box>
+          <Text>{parentUsername}</Text>
+        </Box>
+
+        <RegistrationLabel />
+        <Box>
+          <FormattedDateTime value={registeredOn} />
+        </Box>
+
+        <BalanceLabel />
+        <Box>
+          <FormattedNumber value={balance} />
+        </Box>
+
+        <StatusLabel />
+        <Box>
+          <StatusLabel value={status} />
+        </Box>
+
+        <AgentLabel />
+        <Box>
+          <Text>
+            {hasAgent && turnOnLabel}
+            {!hasAgent && turnOffLabel}
+          </Text>
+        </Box>
+      </FieldValues>
     </_TabPanel>
   )
 }
@@ -238,12 +260,14 @@ const StatusLabel = () => <Trans zh="状态" en="Status" />
 
 const AgentLabel = () => <Trans zh="代理功能" en="Agent" />
 
-const useTurnOnLabel = () => useTrans({
-  zh: "开启",
-  en: "Turn on"
-})
+const useTurnOnLabel = () =>
+  useTrans({
+    zh: "开启",
+    en: "Turn on"
+  })
 
-const useTurnOffLabel = () => useTrans({
-  zh: "关闭",
-  en: "Turn off"
-})
+const useTurnOffLabel = () =>
+  useTrans({
+    zh: "关闭",
+    en: "Turn off"
+  })
