@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice.Services
     {
        async Task<string> IStreamToString.GetString(Stream stream)
         {
-            using var sr = new StreamReader(stream);
+            var sr = new StreamReader(stream);
             return await sr.ReadToEndAsync();
         }
     }
