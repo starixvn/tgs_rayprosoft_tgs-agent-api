@@ -97,6 +97,33 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ExternalRoundId.
+        /// </summary>
+        public static string ExternalRoundId {
+            get {
+                return ResourceManager.GetString("ExternalRoundId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ExternalTransactionId.
+        /// </summary>
+        public static string ExternalTransactionId {
+            get {
+                return ResourceManager.GetString("ExternalTransactionId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GameAction.
+        /// </summary>
+        public static string GameAction {
+            get {
+                return ResourceManager.GetString("GameAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Licensee.
         /// </summary>
         public static string Licensee {
@@ -120,6 +147,15 @@ namespace TGS.Tests.TestsCommon {
         public static string PlayerCode {
             get {
                 return ResourceManager.GetString("PlayerCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request.
+        /// </summary>
+        public static string Request {
+            get {
+                return ResourceManager.GetString("Request", resourceCulture);
             }
         }
         

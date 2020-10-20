@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TechTalk.SpecFlow;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Core.DataServices;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -76,20 +79,32 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         protected async Task SetPlayerBalanceAsync(ServiceProvider serviceProvider, decimal balance)
         {
-            var (db, wallet) = await GetPlayerWalletAsync(serviceProvider);
+            var playerCode = Get<string>(SR.PlayerCode);
+            var db = GetDb<ITgsRepository>(serviceProvider);
 
-            wallet.Balance = balance;
-
-            await db.SaveChangesAsync();
+            var sql = "UPDATE Wallets SET Balance=@balance WHERE PlayerCode=@playerCode";
+            await db.ExecuteSqlCommandAsync(sql, CommandType.Text, parameters: new SqlParameter[]
+            {
+                new()
+                {
+                   ParameterName = "@balance",
+                   Value = balance,
+                   DbType = DbType.Decimal
+                },
+                new()
+                {
+                    ParameterName = "@playerCode",
+                    Value = playerCode,
+                    DbType = DbType.String
+                },
+            });
         }
 
-        protected async Task<(ITgsRepository db, Wallet wallet)> GetPlayerWalletAsync(ServiceProvider serviceProvider)
+        protected Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
         {
-            var db = GetDb<ITgsRepository>(serviceProvider);
+            var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
             var playerCode = Get<string>(SR.PlayerCode);
-            var wallet = await db.Wallets.FirstAsync(w => w.PlayerCode == playerCode);
-
-            return (db, wallet);
+            return db.Wallets.FirstAsync(w => w.PlayerCode == playerCode);
         }
 
         protected static async Task<T> GetSettingAsync<T>(ServiceProvider serviceProvider, string key)

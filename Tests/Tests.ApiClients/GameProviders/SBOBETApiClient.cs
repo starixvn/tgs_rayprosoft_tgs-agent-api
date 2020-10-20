@@ -12,6 +12,7 @@ namespace TGS.Tests.ApiClients.GameProviders
     public interface ISBOBETApiClient
     {
         Task<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
+        Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
     }
 
     public sealed class SBOBETApiClient :  BaseApiClient, ISBOBETApiClient
@@ -23,5 +24,8 @@ namespace TGS.Tests.ApiClients.GameProviders
 
         Task<GetBalanceResponse> ISBOBETApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
             ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, "api/GetBalance", request);
+
+        Task<PlaceBetResponse> ISBOBETApiClient.PlaceBetAsync(PlaceBetRequest request) => 
+            ExecuteJsonRequestAsync<PlaceBetRequest, PlaceBetResponse>(HttpMethod.Post, "api/Deduct", request);
     }
 }
