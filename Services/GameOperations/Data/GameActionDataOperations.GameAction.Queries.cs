@@ -3,13 +3,12 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.GameOperations.Models.Data;
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations
     {
         private static Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(Db db, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
         {

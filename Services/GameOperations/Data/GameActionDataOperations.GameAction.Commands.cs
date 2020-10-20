@@ -7,7 +7,7 @@ using TGS.Services.GameOperations.Models.Data;
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations
     {
         private static Task<decimal> AtomicUpdateBalanceAsync(Db db, string playerCode, Guid walletId, decimal amount, DateTimeOffset updatedOn)
         {

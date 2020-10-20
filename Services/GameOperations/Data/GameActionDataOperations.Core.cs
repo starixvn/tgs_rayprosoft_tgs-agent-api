@@ -18,7 +18,7 @@ using GameActionResult = TGS.Services.GameOperations.Models.Data.GameActionResul
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations
     {
         private async Task<BetResult> ExecuteGameActionAsync(BetData data)
         {
