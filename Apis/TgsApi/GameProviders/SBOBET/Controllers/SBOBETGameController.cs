@@ -1,4 +1,6 @@
-﻿using System;
+﻿// ReSharper disable InconsistentNaming
+
+using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         private readonly ISBOBETGameControllerMapper _map;
         private readonly ISBOBETServices _services;
 
-        private static readonly GameActionType[] SettleGameActionTypes = new [] { WinBet, LoseBet, TieBet, FreeBet };
+        private static readonly GameActionType[] SettleGameActionTypes = { WinBet, LoseBet, TieBet, FreeBet };
 
         public SBOBETGameController(
             IGamePlayActions actions,

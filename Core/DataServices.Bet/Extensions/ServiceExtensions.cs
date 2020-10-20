@@ -9,8 +9,6 @@ namespace TGS.Core.DataServices.Bet.Extensions
         public static IServiceCollection AddBetRepository(this IServiceCollection services, IConfiguration configuration, string connectionName)
         {
             services.AddRepository<IBetRepository, BetRepository>(configuration, connectionName);
-            services.AddRepository<IBetNoDetectChangesRepository, BetNoDetectChangesRepository>(configuration, connectionName);
-
             return services;
         }
     }
