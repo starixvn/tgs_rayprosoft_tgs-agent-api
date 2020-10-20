@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -22,13 +23,15 @@ namespace TGS.Apis.BackendOffice.Middlewares
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly ITgsLog _tgsLog;
         private readonly IJsonSerializationProvider _json;
+        private readonly IStreamToString _streamToString;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
 
-        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json)
+        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json, IStreamToString streamToString)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
             _json = json;
+            _streamToString = streamToString;
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
 
@@ -105,8 +108,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 sw.Stop();
                 var ms = (int)sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
-                using var sr = new StreamReader(context.Response.Body);
-                var message = await sr.ReadToEndAsync();
+                var message = await _streamToString.GetString(context.Response.Body);
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 await context.Response.Body.CopyToAsync(originalBodyStream);
                 return (message, ms);

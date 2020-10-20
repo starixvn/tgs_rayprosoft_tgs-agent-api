@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -10,10 +11,12 @@ using Microsoft.AspNetCore.Http.Features;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 {
@@ -23,6 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
         private readonly Mock<IRequestAnalyzer> _requestAnalyzerMock = new Mock<IRequestAnalyzer>();
         private readonly Mock<ITgsLog> _tgsLogMock = new Mock<ITgsLog>();
         private readonly Mock<IJsonSerializationProvider> _json = new Mock<IJsonSerializationProvider>();
+        private readonly Mock<IStreamToString> _streamToString = new Mock<IStreamToString>();
         private readonly string _requestString = "Hello World Request!!";
         private readonly string _responseString = "Hello World Response!!";
         private RequestDelegate _requestDelegate;
@@ -32,7 +36,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
         public void Setup()
         {
             _requestDelegate = (innerContext) => Task.FromResult(0);
-            _target = new ExceptionMiddleware(_requestAnalyzerMock.Object, _tgsLogMock.Object, _json.Object);
+            _target = new ExceptionMiddleware(_requestAnalyzerMock.Object, _tgsLogMock.Object, _json.Object, _streamToString.Object);
         }
 
         ///TODO: fix  cannot pass   using var sr = new StreamReader(context.Response.Body);
@@ -110,6 +114,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
             mockHttpContext.Setup(p => p.Features)
                 .Returns(fc);
 
+            _streamToString.Setup(p => p.GetString(It.IsAny<Stream>()))
+                .Returns(Task.FromResult("test"));
+
+            _json.Setup(p => p.SerializeToString(It.IsAny<ErrorDetails>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns("test");
             return mockHttpContext;
         }
     }
