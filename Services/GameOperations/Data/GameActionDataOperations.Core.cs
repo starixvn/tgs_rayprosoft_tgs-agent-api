@@ -82,7 +82,7 @@ namespace TGS.Services.GameOperations.Data
                     GameProvider = gameProvider,
                     GameProviderConfigurationId = data.GameProviderConfigurationId,
                     BatchId = data.BatchId,
-                    PlatformType = data.PlatformType ?? PlatformType.Desktop,
+                    PlatformType = data.PlatformType,
                     HasWalletUpdate = hasWalletUpdate,
                     MustHaveExistingRound = transactionSettings.MustHaveExistingRound,
                     MustHaveReferencedTransaction = transactionSettings.MustHaveReferencedTransaction,
@@ -103,7 +103,7 @@ namespace TGS.Services.GameOperations.Data
                 Balance = player.Wallet.Balance,
                 CurrencyCode = player.Wallet.CurrencyCode,
                 Transactions = transactionResults.ToArray(),
-                PlatformType = (int)data.PlatformType.Value,
+                PlatformType = (int)data.PlatformType,
                 Error = TgsApiError.None,
             };
         }

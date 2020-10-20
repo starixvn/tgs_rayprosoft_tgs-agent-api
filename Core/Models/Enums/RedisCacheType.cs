@@ -16,6 +16,7 @@
         PlayerLoginRecords,
         LicenseeGames,
         Games,  
+        SubGames,
         UsernameToPlayerCode,
         Setting
     }
