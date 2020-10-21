@@ -11,22 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DataService\Commands\**" />
-    <Content Remove="DataService\Commands\**" />
-    <EmbeddedResource Remove="DataService\Commands\**" />
-    <None Remove="DataService\Commands\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
-    <None Remove="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLogs.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="DataService\SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EFCore.BulkExtensions" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.7">
@@ -49,6 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Log\DataServices.Log.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
   </ItemGroup>
 

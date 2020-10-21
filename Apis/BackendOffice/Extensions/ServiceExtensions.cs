@@ -24,6 +24,7 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Log;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -39,7 +40,8 @@ namespace TGS.Apis.BackendOffice.Extensions
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
             services.AddRepository<ITgsRepository, TgsRepository>(configuration, "Tgs");
-            
+            services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
+
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
             
@@ -48,6 +50,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
+            services.AddTransient(typeof(ILogQueries<>), typeof(LogQueries<>));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();

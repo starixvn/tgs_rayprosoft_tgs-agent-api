@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using TGS.Apis.LogApi.DataService;
-using TGS.Apis.LogApi.DataService.Models;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Services;
+using TGS.Core.DataServices.Log;
+using TGS.Core.DataServices.Log.Models;
 using TGS.Core.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
