@@ -8,35 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DbContextFactory.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="appsettings.json" />
-    <None Remove="DataInitializers\Games\RT.csv" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
-    <None Remove="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
-    <None Remove="SqlScripts\SP\usp_Licensee_GetLicenseeForCache.sql" />
-    <None Remove="SqlScripts\SP\usp_Player_Deauthorize.sql" />
-    <None Remove="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
-    <None Remove="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />
-    <None Remove="SqlScripts\SP\usp_Round_GetExternalRoundIdByExternalTransactionId.sql" />
-    <None Remove="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
-    <None Remove="SqlScripts\SP\usp_Round_InsertRound.sql" />
-    <None Remove="SqlScripts\SP\usp_Round_UpdateRound.sql" />
-    <None Remove="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
-    <None Remove="SqlScripts\SP\usp_Wallet_UpdateWalletBalance.sql" />
-    <None Remove="SqlScripts\TYPE\IntValuesType.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -45,13 +16,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_GetGameActionsInSameRound.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetSubGameIdMaps.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLicenseeGameProviderConfigurationForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLicenseeGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_Deauthorize.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />

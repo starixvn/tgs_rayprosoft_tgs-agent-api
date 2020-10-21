@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Tests.ApiClients</AssemblyName>
+    <RootNamespace>TGS.Tests.ApiClients</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Apis\OperatorApi\OperatorApi.csproj" />
+    <ProjectReference Include="..\..\Apis\TgsApi.GameModels\TgsApi.GameModels.csproj" />
+  </ItemGroup>
+
+</Project>

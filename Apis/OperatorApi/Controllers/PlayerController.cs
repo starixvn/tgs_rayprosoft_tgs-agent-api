@@ -22,6 +22,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
+using ContextItems = TGS.Core.Models.Consts.ContextItems;
 using PlayerConsts = TGS.Core.Models.Consts.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -76,6 +77,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var licenseeId = GetLicenseeIdFromHttpContext();
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+
             return new CheckPlayerResponse
             {
                 Exists = playerCode.IsNotNullOrEmpty(),
@@ -123,7 +125,11 @@ namespace TGS.Apis.OperatorApi.Controllers
                 HasAgent = request.HasAgent
             });
 
-            return new CreatePlayerResponse { IsNew = true, PlayerCode = playerCode };
+            return new CreatePlayerResponse
+            {
+                IsNew = true,
+                PlayerCode = playerCode
+            };
         }
 
         /// <summary>
@@ -166,7 +172,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             });
 
             await SignInAsync(username);
-            return new LoginResponse { LoginTime = createdOn };
+
+            return new LoginResponse
+            {
+                PlayerCode = playerCode,
+                LoginTime = createdOn
+            };
         }
 
         /// <summary>
@@ -203,7 +214,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Get player information
         /// </summary>
-        [AllowAnonymous, IgnoreAntiforgeryToken]        
+        [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpGet, Route("{username}")]
         public async Task<GetPlayerResponse> GetPlayerAsync(string username)
         {
@@ -316,12 +327,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        private Guid GetLicenseeIdFromHttpContext()
-        {
-            return HttpContext.Items.TryGetValue(Consts.ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
-        }
+        private Guid GetLicenseeIdFromHttpContext() =>
+            HttpContext.Items.TryGetValue(ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
 
-        private async Task SignInAsync(string username)
+        private Task SignInAsync(string username)
         {
             var claims = new List<Claim>
             {
@@ -336,7 +345,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            await HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+            return HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.EntityTypeConfigurations;
@@ -11,6 +13,17 @@ using TGS.Core.DataServices.Bet.Models;
 
 namespace TGS.Core.DataServices.Bet
 {
+    public interface IBetRepository : IBaseRepository
+    {
+        DbSet<Round> Rounds { get; set; }
+
+        DbSet<RoundDetail> RoundDetails { get; set; }
+
+        DbSet<GameAction> GameActions { get; set; }
+
+        DbSet<GameActionBatch> GameActionBatches { get; set; }
+    }
+
     public class BetRepository : DbContext, IBetRepository
     {
         DbSet<Round> IBetRepository.Rounds { get; set; }
@@ -58,13 +71,27 @@ namespace TGS.Core.DataServices.Bet
             return SaveChangesAsync();
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
-        void IBaseRepository.SaveChanges()
+
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            SaveChanges();
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        }
+
+        Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        {
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                           Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                return Database.MigrateAsync();
+            }
+            
+            return Task.CompletedTask;
         }
     }
 }

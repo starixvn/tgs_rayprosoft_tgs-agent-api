@@ -120,7 +120,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                   s.Content == request.Content &&
                   s.AssignedAllPlayers == request.AssignedAllPlayers)));
 
-            _playerCommandsMock.Verify(p => p.BatchInsert(It.Is<StationLetterPlayer[]>(s =>
+            _playerCommandsMock.Verify(p => p.BatchInsertAsync(It.Is<StationLetterPlayer[]>(s =>
                 s.Length == request.PlayerUsernames.Length)));
         }
 

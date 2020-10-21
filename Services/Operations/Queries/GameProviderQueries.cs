@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Generics;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
@@ -31,6 +32,8 @@ namespace TGS.Services.Operations.Queries
         Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
+
+        Task<IdMap[]> GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -164,6 +167,28 @@ namespace TGS.Services.Operations.Queries
                 ParameterName = "@gameProviderId",
                 Value = gameProviderId,
                 DbType = DbType.Guid
+            });
+
+            return r.ToArray();
+        }
+
+        async Task<IdMap[]> IGameProviderQueries.GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType)
+        {
+            const string spName = "usp_GameProvider_GetSubGameIdMaps";
+            var r = await _repository.SqlQueryMultipleAsync<IdMap>(spName, parameters: new SqlParameter[]
+            {
+                new()
+                {
+                    ParameterName = "@gameProviderId",
+                    Value = gameProviderId,
+                    DbType = DbType.Guid
+                },
+                new()
+                {
+                    ParameterName = "@platformType",
+                    Value = platformType,
+                    DbType = DbType.Int16
+                }
             });
 
             return r.ToArray();

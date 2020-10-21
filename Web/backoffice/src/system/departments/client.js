@@ -14,3 +14,37 @@ export const useList = (searchParams) => {
     mutate
   }
 }
+
+export const useAddDepartment = ({ data }) => {
+  let fetchData = !!data
+  const { data: result, error, isValidating, mutate } = useSWR(
+    fetchData ? [`/api/department/`, data] : null,
+    (url, data) => post(url, { data })
+  )
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}
+
+export const useEditDepartment = ({ id, data }) => {
+  let fetchData = id && !!data
+  const { data: result, error, isValidating, mutate } = useSWR(
+    fetchData ? [`/api/department/${id}`, data] : null,
+    (url, data) => put(url, { data })
+  )
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}

@@ -29,7 +29,7 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_GetBalance"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_UpdateBalance"));
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Wallet_UpdateWalletBalance"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeForCache"));
             migrationBuilder.SqlResource(assembly,
@@ -38,6 +38,8 @@ namespace TGS.Core.DataServices.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderForCache"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderConfigurationForCache"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGamesForCache"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetLanguagesByInternalCode"));
             migrationBuilder.SqlResource(assembly,
@@ -59,7 +61,11 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
             migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_InsertGameAction"));
+            migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_Deauthorize"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetSubGameIdMaps"));
 
             #endregion Store Procedure
 

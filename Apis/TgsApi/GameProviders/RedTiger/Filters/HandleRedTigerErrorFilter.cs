@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TGS.Core.Infrastructures.Filters;
@@ -18,9 +19,10 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Filters
 
         }
 
-        protected override IActionResult CreateResponse(ActionExecutedContext context, int statusCode, int error)
+        protected override Task<IActionResult> CreateResponseAsync(ActionExecutedContext context, int statusCode, int errorCode)
         {
-            return new JsonResult(statusCode);
+            IActionResult r = new JsonResult(statusCode);
+            return Task.FromResult(r);
         }
     }
 }

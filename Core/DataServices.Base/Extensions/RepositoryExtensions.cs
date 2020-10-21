@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,10 +10,12 @@ namespace TGS.Core.DataServices.Base.Extensions
     public static class RepositoryExtensions
     {
         public static IServiceCollection AddRepository<TInterface, TRepository>(this IServiceCollection services,
-            IConfiguration configuration, string connectionName, int commandTimeout = 180, int maxRetryCount = 3)
+            IConfiguration configuration, string connectionName, int commandTimeout = 180)
             where TInterface : class
             where TRepository : DbContext, TInterface
         {
+            const int PoolSize = 64;
+
             services.AddDbContextPool<TRepository>((option) =>
             {
 #if DEBUG
@@ -33,23 +32,11 @@ namespace TGS.Core.DataServices.Base.Extensions
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(commandTimeout);
-                    //serverOption.EnableRetryOnFailure(maxRetryCount);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                 });
+            }, PoolSize);
 
-                var options = (DbContextOptions<TRepository>)option.Options;
-                using var db = (DbContext)Activator.CreateInstance(typeof(TRepository), options);
-
-                var isMigrate = !db.Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                                db.Database.GetPendingMigrations().Any();
-
-                if (isMigrate)
-                {
-                    db.Database.Migrate();
-                }
-            }, 128);
-
-            services.AddScoped<TInterface, TRepository>();
+            services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
             services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());
 
             return services;

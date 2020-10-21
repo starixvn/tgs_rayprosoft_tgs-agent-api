@@ -27,7 +27,7 @@
         public static class GameProvider
         {
             public const string RedTiger = "RT";
-            public const string Evolution = "EVO";
+            public const string SBOBET = "SBO";
         }
 
         public static class EnvironmentVariable
@@ -35,6 +35,14 @@
             public const string Environment = "ASPNETCORE_ENVIRONMENT";
             public const string GameProviderCode = "GameProviderCode";
             public const string GameProviderName = "GameProviderName";
+        }
+
+        public static class ContextItems
+        {
+            public const string LicenseeId = "licenseeId";
+            public const string GameProviderId = "gameProviderId";
+            public const string GameProviderConfigurationId = "gameProviderConfigurationId";
+            public const string PlatformType = "platformType";
         }
 
         public const string DefualtCultureCode = "en-US";

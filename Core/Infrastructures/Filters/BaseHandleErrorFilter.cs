@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -11,7 +12,7 @@ using TGS.Core.Models.Interfaces;
 
 namespace TGS.Core.Infrastructures.Filters
 {
-    public abstract class BaseHandleErrorFilter : IActionFilter
+    public abstract class BaseHandleErrorFilter : IAsyncActionFilter
     {
         protected abstract string LoggerName { get; }
 
@@ -20,35 +21,36 @@ namespace TGS.Core.Infrastructures.Filters
 
         private IDictionary<string, object> _actionArguments;
 
-        public BaseHandleErrorFilter(Func<string, IErrorMapper> mapper, string mapperKey,  ITgsLog log)
+        public BaseHandleErrorFilter(Func<string, IErrorMapper> mapper, string mapperKey, ITgsLog log)
         {
             ErrorMapper = mapper(mapperKey);
             Log = log.SetLogger(LoggerName);
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
+        async Task IAsyncActionFilter.OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             _actionArguments = context.ActionArguments;
-        }
 
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-            var exception = context.Exception;
-            if (exception == null || context.ExceptionHandled)
+            var aec = await next();
+
+            var exception = aec.Exception;
+            if (exception == null || aec.ExceptionHandled)
+            {
                 return;
+            }
 
-            context.ExceptionHandled = true;
+            aec.ExceptionHandled = true;
 
             var error = ErrorMapper.GetApiErrorByException(exception);
             var statusCode = ErrorMapper.GetHttpStatusByException(exception);
 
-            var message = GetErrorMessage(context, "Tgs Api Error", error.ToString(), statusCode);
-            Log.LogError(message, context.Exception);
+            var message = GetErrorMessage(aec, "Tgs Api Error", error.ToString(), statusCode);
+            Log.LogError(message, aec.Exception);
 
-            context.Result = CreateResponse(context, statusCode, error);
+            aec.Result = await CreateResponseAsync(aec, statusCode, error);
         }
 
-        protected abstract IActionResult CreateResponse(ActionExecutedContext context, int statusCode, int error);
+        protected abstract Task<IActionResult> CreateResponseAsync(ActionExecutedContext context, int statusCode, int error);
 
         #region Private Methods
 
@@ -81,7 +83,7 @@ namespace TGS.Core.Infrastructures.Filters
             .ToJson();
         }
 
-        private string GetRequestHeadersAsString(HttpRequest request)
+        private static string GetRequestHeadersAsString(HttpRequest request)
         {
             return request.Headers
                 .Aggregate(new StringBuilder(), (b, p) => b.AppendLine($"{p.Key}={p.Value.JoinAsStringBySemicolon()}"))

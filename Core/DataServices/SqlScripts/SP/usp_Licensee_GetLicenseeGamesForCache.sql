@@ -17,6 +17,7 @@ BEGIN
 		g.[GameProviderId],
 		g.[Id] AS [GameId],
 		g.[ExternalId] as [ExternalGameId],
+		g.[PlatformType],
 		g.[SubGame]
 	FROM dbo.[LicenseeGames] bg
 	JOIN dbo.[Games] g ON bg.[GameId] = g.[Id]

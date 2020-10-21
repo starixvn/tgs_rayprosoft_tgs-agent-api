@@ -28,10 +28,11 @@ namespace TGS.Services.GameOperations
         private readonly IExpirationValidator _expirationValidator;
         private readonly IValidStatus<Status> _validStatus;
         private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IGamePlayActions _interface;
 
         public GamePlayActions(
             IPlayerOperations playerOperations,
-            ILicenseeOperations LicenseeOperations,
+            ILicenseeOperations licenseeOperations,
             IGameProviderOperations gameProviderOperations,
             ILicenseeGameProviderOperations licenseeGameProviderOpertaions,
             IGameActionDataOperations operations,
@@ -42,7 +43,7 @@ namespace TGS.Services.GameOperations
             IValidStatus<GameStatus> validGameStatus)
         {
             _playerOperations = playerOperations;
-            _licenseeOperations = LicenseeOperations;
+            _licenseeOperations = licenseeOperations;
             _gameProviderOperations = gameProviderOperations;
             _LicenseeGameProviderOpertaions = licenseeGameProviderOpertaions;
             _currencyMapper = currencyMapper;
@@ -53,6 +54,9 @@ namespace TGS.Services.GameOperations
             _operations = operations;
         }
 
+        /// <summary>
+        /// Validate player for single game api
+        /// </summary>
         async Task<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
@@ -60,7 +64,7 @@ namespace TGS.Services.GameOperations
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
             var gameProviderConfigurationId = await _licenseeOperations.GetLicenseeGameProviderConfigurationIdAsync(licenseeId, gameProviderId);
 
-            await ValidtePlayerAysnc(player, gameProviderId, gameProviderConfigurationId, false);
+            await ValidtePlayerAysnc(player, gameProviderId, gameProviderConfigurationId, data.PlatformType, false);
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
             var lang = await _LicenseeGameProviderOpertaions.MapCultureAsync(gameProviderId, licenseeId, player.CultureCode);
@@ -82,11 +86,14 @@ namespace TGS.Services.GameOperations
             };
         }
 
-        private async Task ValidtePlayerAysnc(CachedPlayer player, Guid gameProviderId, Guid gameProviderConfigurationId, bool ignoreExpired = false)
+        /// <summary>
+        /// Validate player on betting if needed.
+        /// </summary>
+        private async Task ValidtePlayerAysnc(CachedPlayer player, Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType? platform, bool ignoreExpired = false)
         {
             if (!ignoreExpired)
             {
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(player.PlayerCode);
+                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(player.PlayerCode, platform);
             }
 
             var licenseeId = player.LicenseeId;

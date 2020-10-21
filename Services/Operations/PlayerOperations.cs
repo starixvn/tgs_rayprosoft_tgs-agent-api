@@ -21,7 +21,7 @@ namespace TGS.Services.Operations
 
         Task<decimal> GetPlayerBalanceAsync(Guid defaultWalletId, bool dirtyRead);
 
-        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform);
+        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform = null);
 
         Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
 
@@ -38,6 +38,10 @@ namespace TGS.Services.Operations
         Task PlayerLoginAsync(PlayerLoginData data);
 
         Task PlayerLogoutAsync(PlayerLogoutData data);
+
+        Task<Guid> GetLicenseeIdByPlayerCodeAsync(string playerCode);
+
+        Task<Guid> GetMainWalletIdByPlayerIdAsync(string playerCode);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -153,6 +157,30 @@ namespace TGS.Services.Operations
             return _playerQueriesFactory().GetPlayerByPlayerCodeAsync(licenseeId, username);
         }
 
+        async Task<Guid> IPlayerOperations.GetLicenseeIdByPlayerCodeAsync(string playerCode)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, CachedPlayerFields.LicenseeId);
+            if (value.HasValue)
+            {
+                return Guid.Parse(value);
+            }
+
+            var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
+            return cachedPlayer?.LicenseeId ?? Guid.Empty;
+        }
+
+        async Task<Guid> IPlayerOperations.GetMainWalletIdByPlayerIdAsync(string playerCode)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, CachedPlayerFields.DefaultWalletId);
+            if (value.HasValue)
+            {
+                return Guid.Parse(value);
+            }
+
+            var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
+            return cachedPlayer?.DefaultWalletId ?? Guid.Empty;
+        }
+
         #region Private Methods
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
@@ -177,15 +205,15 @@ namespace TGS.Services.Operations
                 {
                     PlayerCode = playerCode,
                     LicenseeId = Guid.Parse(values[0]),
-                    Status = (PlayerStatus)(int)values[2],
-                    Type = (PlayerTypes)(int)values[3],
-                    Username = values[4],
-                    DefaultWalletId = Guid.Parse(values[5]),
-                    CultureCode = values[6],
-                    BetLimitGroupId = (int)values[7],
-                    LicenseeCode = values[8],
-                    DefaultWalletCurrencyCode = values[9],
-                    ExternalCurrencyCode = values[10]
+                    Status = (PlayerStatus)(int)values[1],
+                    Type = (PlayerTypes)(int)values[2],
+                    Username = values[3],
+                    DefaultWalletId = Guid.Parse(values[4]),
+                    CultureCode = values[5],
+                    BetLimitGroupId = (int)values[6],
+                    LicenseeCode = values[7],
+                    DefaultWalletCurrencyCode = values[8],
+                    ExternalCurrencyCode = values[9]
                 };
             }
 

@@ -170,6 +170,10 @@ namespace TGS.Core.DataServices.Bet.Migrations
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
+            
+            // TYPE
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.TypeSqlForamt, "IntValuesType"));
 
             // SP
             migrationBuilder.SqlResource(assembly,
@@ -182,6 +186,18 @@ namespace TGS.Core.DataServices.Bet.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_InsertRound"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Round_UpdateRound"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_InsertGameAction"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetValidGameActionExternalIds"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetGameActionExternalIds"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_GetValidGameActionsByExternalRoundId"));
+
+            // View
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.ViewSqlForamt, "vw_ValidGameActions"));
 
             #endregion Store Procedure
         }

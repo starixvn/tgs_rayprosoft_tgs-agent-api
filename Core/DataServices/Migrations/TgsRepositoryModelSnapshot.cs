@@ -148,7 +148,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()

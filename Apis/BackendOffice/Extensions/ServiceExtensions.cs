@@ -6,7 +6,6 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,17 +14,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Log;
-using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.DataServices.Bet.Extensions;
+using TGS.Core.DataServices.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -36,11 +33,13 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
+        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
-            services.AddRepository<ITgsRepository, TgsRepository>(configuration, "Tgs");
+            
             services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
+            services.AddTgsRepository(configuration, "Tgs")
+                    .AddBetRepository(configuration, "Bet");
 
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
@@ -82,12 +81,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddHealthChecks()
                 .AddCheck<HealthCheck>("example_health_check");
 
-            services.AddLogging(config =>
-            {
-                config.AddDebug();
-                config.AddConsole();
-            });
-
             services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
@@ -107,7 +100,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                         return Task.CompletedTask;
                     };
                 });
-
             
             services.Configure<RequestLocalizationOptions>(options =>
             {
@@ -126,11 +118,6 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                 options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context => await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
             });
-
-            if (env.IsDevelopmentOrDocker())
-            {
-                services.AddScoped<IDataInitializer, DataInitializer>();
-            }
 
             return services;
         }

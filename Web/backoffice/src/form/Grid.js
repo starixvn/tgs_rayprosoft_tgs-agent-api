@@ -26,7 +26,7 @@ import {
 } from "bumbag"
 import Grid from "../layout/Grid"
 
-export const LabelBox = ({ name = "", children, ...props }) => {
+export const AreaLabelBox = ({ name = "", children, ...props }) => {
   return (
     <Box
       css={css`
@@ -47,7 +47,7 @@ export const LabelBox = ({ name = "", children, ...props }) => {
   )
 }
 
-export const FieldBox = ({ name = "", children, ...props }) => {
+export const AreaFieldBox = ({ name = "", children, ...props }) => {
   return (
     <Box
       css={css`

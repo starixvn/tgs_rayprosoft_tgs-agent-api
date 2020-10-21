@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Json;
@@ -7,13 +8,14 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
     public partial class DataInitializer
     {
-        private void GenerateSettings()
+        private Task GenerateSettingsAsync()
         {
             var configurations = new[]
             {
                 CreateSetting(SettingConst.Menus, _jsonSerialization.SerializeToString(GetMenuSettings()), "For menus used")
             };
-            _repository.BulkInsert(configurations);
+
+            return _repository.BulkInsertAsync(configurations);
         }
 
         private readonly IJsonSerializationProvider _jsonSerialization = new JsonSerializationProvider();

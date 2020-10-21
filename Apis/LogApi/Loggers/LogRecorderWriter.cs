@@ -16,20 +16,22 @@ namespace TGS.Apis.LogApi.Loggers
         private readonly ILogRepository _logRepository;
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
         public LogRecordWriter(
-            ILogRepository ugsRepository,
+            Func<ILogRepository> repoFactory,
             IOptions<LoggerServiceConfig> loggerServiceConfig)
         {
-            _logRepository = ugsRepository;
+            _logRepository = repoFactory();
             _loggerServiceConfig = loggerServiceConfig;
         }
 
         Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
         {
+            var config = _loggerServiceConfig.Value;
+
             var logs = events
                 .Select(Convert)
-                .Where(r => r.Level >= _loggerServiceConfig.Value.LogLevel ||
-                            _loggerServiceConfig.Value.UnrestrictedLoggers.Contains(r.Logger))
-                .ToList();
+                .Where(r => r.Level >= config.LogLevel ||
+                            config.UnrestrictedLoggers.Contains(r.Logger))
+                .ToArray();
 
             return _logRepository.AddLogRecordsAsync(logs);
         }
