@@ -24,7 +24,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("admin")]
-        public async Task<PagedResponse<AdminLogModel>> GetAdminLogs([FromQuery] AdminLogRequest request)
+        public async Task<PagedResponse<AdminLogModel>> GetAdminLogsAsync([FromQuery] AdminLogRequest request)
         {
             var logs = await _logQueries.GetAdminLogsAsync(request);
             
@@ -48,7 +48,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("api")]
-        public async Task<PagedResponse<ApiLogModel>> GetApiLogs([FromQuery] ApiLogRequest request)
+        public async Task<PagedResponse<ApiLogModel>> GetApiLogsAsync([FromQuery] ApiLogRequest request)
         {
             var logs = await _logQueries.GetApiLogsAsync(request);
 
