@@ -2,6 +2,10 @@
 {
     internal static class Consts
     {
-        internal const string StoreProcedureSqlForamt = "TGS.Core.DataServices.Bet.SqlScripts.SP.{0}.sql";
+        private const string Namespace = "TGS.Core.DataServices.Bet.SqlScripts";
+
+        internal static readonly string TypeSqlForamt = $"{Namespace}.TYPE.{{0}}.sql";
+        internal static readonly string StoreProcedureSqlForamt = $"{Namespace}.SP.{{0}}.sql";
+        internal static readonly string ViewSqlForamt = $"{Namespace}.View.{{0}}.sql";
     }
 }

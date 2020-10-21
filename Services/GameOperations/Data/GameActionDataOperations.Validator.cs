@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -8,10 +7,11 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
+using GameActionResult = TGS.Services.GameOperations.Models.Data.GameActionResult;
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations
     {        
         private void ThrowIfPlayerDisableToPlaceBet(TransactionData[] transactions, PlayerStatus playerStatus)
         {
@@ -58,9 +58,9 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(ITgsRepository repo, string externalRoundId, string externalTransactionId)
+        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(Db db, string externalRoundId, string externalTransactionId)
         {
-            var foundExternalRoundId = await GetExternalRoundIdAsync(repo, externalTransactionId);
+            var foundExternalRoundId = await GetExternalRoundIdAsync(db, externalTransactionId);
             if (foundExternalRoundId.IsNotNullOrEmpty() && foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
             {
                 throw new InvalidGameActionException(
@@ -69,7 +69,7 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private GameActionResult ValidateReferenceAction(GameActionState s)
+        private static GameActionResult ValidateReferenceAction(GameActionState s)
         {
             var action = s.PreviousActions?.FirstOrDefault(pa => pa.ExternalId == s.ExternalTransactionId);
 

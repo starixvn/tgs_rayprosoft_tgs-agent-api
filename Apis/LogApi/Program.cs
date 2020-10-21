@@ -1,41 +1,31 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using TGS.Apis.LogApi.DataService;
 
 namespace TGS.Apis.LogApi
 {
     public class Program
     {
-
-        public static Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            return CreateHostBuilder(args).Build().RunAsync();
+            var host = CreateHostBuilder(args).Build();
+            
+            await ExecuteMigrationAndSeedingAsync(host.Services);
+
+            await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureHostConfiguration((config) =>
-                {
-                    config.AddEnvironmentVariables();
-                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                })
-                .ConfigureAppConfiguration((hostContext, config) =>
-                {
-                    config.SetBasePath(System.IO.Directory.GetCurrentDirectory());
-                    config.AddJsonFile("appsettings.json", false, true)
-                        .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true)
-                        .AddEnvironmentVariables();
-
-                    if (args != null)
-                    {
-                        config.AddCommandLine(args);
-                    }
                 })
                 .ConfigureLogging((hostContext, logging) =>
                 {
@@ -45,8 +35,13 @@ namespace TGS.Apis.LogApi
                         logging.AddConsole();
                         logging.SetMinimumLevel(LogLevel.Error);
                     }
-
-                    logging.AddConfiguration();
                 });
+
+        private static async Task ExecuteMigrationAndSeedingAsync(IServiceProvider provider)
+        {
+            using var scope = provider.CreateScope();
+            await using var repo = scope.ServiceProvider.GetRequiredService<ILogRepository>();
+            await repo.ExecuteMigrationAndSeedingAsync();
+        }
     }
 }

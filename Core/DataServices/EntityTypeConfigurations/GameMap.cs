@@ -12,6 +12,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.ToTable("Games", "dbo");
             BaseConfigureProperties(builder);
 
+            builder.Property(c => c.Code)
+                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .IsRequired();
+
             builder.Property(c => c.Status)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();

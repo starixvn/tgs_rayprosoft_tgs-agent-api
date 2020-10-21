@@ -1,17 +1,25 @@
 using System;
-using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using EnvironmentVariable = TGS.Core.Models.Consts.EnvironmentVariable;
+using Microsoft.Extensions.Logging;
+using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Core.DataServices;
+using TGS.Core.DataServices.Bet;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var host = CreateHostBuilder(args).Build();
+            
+            await ExecuteMigraionsAndSeedingsAsync(host.Services);
+
+            await host.RunAsync();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -20,18 +28,33 @@ namespace TGS.Apis.BackendOffice
                 {
                     webBuilder.UseStartup<Startup>();
                 })
-                .ConfigureAppConfiguration((hostContext, config) =>
+                .ConfigureLogging(builder=> 
                 {
-                    var env = Environment.GetEnvironmentVariable(EnvironmentVariable.Environment);
-                    config.SetBasePath(Directory.GetCurrentDirectory());
-                    config.AddJsonFile("appsettings.json", true, true)
-                        .AddJsonFile($"appsettings.{env}.json", true)
-                        .AddEnvironmentVariables();
-
-                    if (args != null)
-                    {
-                        config.AddCommandLine(args);
-                    }
+                    builder.AddDebug();
+                    builder.AddConsole();
                 });
+
+        private static async Task ExecuteMigraionsAndSeedingsAsync(IServiceProvider services)
+        {
+            using var scope = services.CreateScope();
+            var sp = scope.ServiceProvider;
+            var env = sp.GetRequiredService<IWebHostEnvironment>();
+            var isDevelopmentOrDocker = env.IsDevelopmentOrDocker();
+
+            await using (var tgsRepo = sp.GetRequiredService<ITgsRepository>())
+            {
+                await tgsRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
+            }
+
+            await using (var betRepo = sp.GetRequiredService<IBetRepository>())
+            {
+                await betRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
+            }
+
+            await using (var backOfficeRepo = sp.GetRequiredService<IBackendOfficeRepository>())
+            { 
+                await backOfficeRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
+            }
+        }
     }
 }

@@ -11,10 +11,5 @@
         {
             public const string UsernameKey = "Username";
         }
-
-        public static class ContextItems
-        {
-            public const string LicenseeId = "licenseeId";
-        }
     }
 }

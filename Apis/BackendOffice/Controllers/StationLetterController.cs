@@ -152,7 +152,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }).ToArray();
 
             await _commands.CreateAsync(stationLetter);
-            _playerCommands.BatchInsert(players);
+            await _playerCommands.BatchInsertAsync(players);
 
             return CreateValidResponse<MessageResponse>();
         }

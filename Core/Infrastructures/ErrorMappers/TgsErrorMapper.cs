@@ -5,30 +5,40 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
+using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 
 namespace TGS.Core.Infrastructures.ErrorMappers
 {
     public sealed class TgsErrorMapper : IErrorMapper
     {
-        internal static readonly IDictionary<Type, TgsApiError> TgsApiErrorByException =
+        private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
             new Dictionary<Type, TgsApiError>
             {
                 { typeof(PlayerDisabledException), TgsApiError.UserBlocked },
-                { typeof(PlayerNotFoundException), TgsApiError.PlayerNotFound }, 
+                { typeof(PlayerNotFoundException), TgsApiError.PlayerNotFound },
                 { typeof(ArgumentException), TgsApiError.InvalidArguments },
                 { typeof(FormatException), TgsApiError.IncorrectFormat },
                 { typeof(InvalidAmountException), TgsApiError.InvalidAmount },
                 { typeof(InvalidOperationException), TgsApiError.SystemError },
                 { typeof(InvalidStatusException), TgsApiError.SystemError },
-                { typeof(InvalidGameActionException), TgsApiError.InvalidGameAction },               
+                { typeof(InvalidGameActionException), TgsApiError.InvalidGameAction },
                 { typeof(GameProviderUnderMaintenanceException), TgsApiError.UnderMaintenance },
                 { typeof(GameUnderMaintenanceException), TgsApiError.UnderMaintenance },
                 { typeof(InvalidCredentialsException), TgsApiError.InvalidCredentials },
                 { typeof(ClientIdNotFoundException), TgsApiError.ClientIdNotFound },
-                { typeof(InvalidCaptchaException), TgsApiError.InvalidCaptcha }
+                { typeof(InvalidCaptchaException), TgsApiError.InvalidCaptcha },
             };
 
-        internal static readonly IDictionary<TgsApiError, int> HttpCodeByException =
+        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, TgsApiError> TgsApiErrorByInvalidGameActionErrorCode =
+            new Dictionary<InvalidGameActionErrorCode, TgsApiError>
+            {
+                { Duplicate, TgsApiError.DuplicateTransaction },
+                { TransactionNotFound, TgsApiError.TransactionIdNotFound },
+                { TransactionBeingCancelledNotFound, TgsApiError.TransactionIdNotFound },
+                { TransactionBeingReferencedNotFound, TgsApiError.TransactionIdNotFound }
+            };
+
+        private static readonly IReadOnlyDictionary<TgsApiError, int> HttpCodeByException =
            new Dictionary<TgsApiError, int>
            {
                { TgsApiError.InvalidArguments, StatusCodes.Status500InternalServerError},
@@ -53,13 +63,19 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 return (int)TgsApiError.None;
             }
 
-            var type = exception.GetType();
-            if (TgsApiErrorByException.TryGetValue(type, out var error))
+            if (exception is InvalidGameActionException e &&
+                TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out TgsApiError error))
             {
                 return (int)error;
             }
 
-            return (int)TgsApiError.SystemError;
+            var type = exception.GetType();
+            if (!TgsApiErrorByException.TryGetValue(type, out error))
+            {
+                error = TgsApiError.SystemError;
+            }
+
+            return (int)error;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception)
@@ -69,14 +85,19 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 return StatusCodes.Status200OK;
             }
 
-            var type = exception.GetType();
-            if (TgsApiErrorByException.TryGetValue(type, out var error) && 
-                HttpCodeByException.TryGetValue(error, out var code))
+            if (exception is not InvalidGameActionException e ||
+                !TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
-                return code;
+                var type = exception.GetType();
+                if (!TgsApiErrorByException.TryGetValue(type, out error))
+                {
+                    return StatusCodes.Status500InternalServerError;
+                }
             }
 
-            return StatusCodes.Status500InternalServerError;
+            return HttpCodeByException.TryGetValue(error, out var statusCode) ?
+                statusCode :
+                StatusCodes.Status500InternalServerError;
         }
 
         string IErrorMapper.GetMessageByException(Exception exception)

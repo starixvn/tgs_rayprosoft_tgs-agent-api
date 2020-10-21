@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameProviders.RedTiger.Filters;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Controllers
 {
-    [FeatureGate(Consts.GameProvider.RedTiger)]
+    [FeatureGate(GameProvider.RedTiger)]
     [AllowAnonymous]
     [Route("api")]
     [ApiController] 

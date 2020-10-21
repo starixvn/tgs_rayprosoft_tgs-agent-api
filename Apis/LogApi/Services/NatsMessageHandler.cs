@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NATS.Client;
 using TGS.Apis.LogApi.Interfaces;
@@ -30,7 +31,7 @@ namespace TGS.Apis.LogApi.Services
 
     public class NatsMessageHandler : IMessageHandler
     {
-        private readonly Func<string, ILoggerWriter> _logWriterFactory;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IServiceLog<NatsMessageHandler> _serviceLog;
         private readonly INatsManager _natsManager;
         private IAsyncSubscription _apiLogSubscription;
@@ -43,17 +44,18 @@ namespace TGS.Apis.LogApi.Services
         private string _lastError;
         private IDisposable _subscription;
         private readonly ConcurrentDictionary<string, uint> _logReceivedCount = new ConcurrentDictionary<string, uint>();
-        private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
+        private readonly LoggerServiceConfig _loggerServiceConfig;
+
         public NatsMessageHandler(
-            Func<string, ILoggerWriter> logWriterFactory,
+            IServiceProvider serviceProvider,
             IServiceLog<NatsMessageHandler> serviceLog,
             IOptions<LoggerServiceConfig> loggerServiceConfig,
             INatsManager natsManager)
         {
-            _logWriterFactory = logWriterFactory;
+            _serviceProvider = serviceProvider;
             _serviceLog = serviceLog;
             _natsManager = natsManager;
-            _loggerServiceConfig = loggerServiceConfig;
+            _loggerServiceConfig = loggerServiceConfig.Value;
         }
 
         void IMessageHandler.StartReceiveMessages()
@@ -86,7 +88,7 @@ namespace TGS.Apis.LogApi.Services
                 from logs in Observable.FromEvent<LogBusEvent>(
                         ev => ApiLogReceived += ev,
                         ev => ApiLogReceived -= ev)
-                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
+                    .Buffer(_loggerServiceConfig.BatchInsertWaitingSeconds, _loggerServiceConfig.BatchInsertCounts)
                 where logs.Count > 0
                 select logs;
 
@@ -99,7 +101,7 @@ namespace TGS.Apis.LogApi.Services
                     CountReceivedLogs(now, nameof(ApiLogEvent), logs.Count);
                     await WriteLogsAsync(nameof(ApiLogEvent), logs);
                 },
-                ex => _serviceLog.LogError("error occurred when RX executed:" + ex));
+                ex => _serviceLog.LogError($"error occurred when RX executed: {ex}"));
         }
 
         private void SubscribeAdminLogReceived()
@@ -118,7 +120,7 @@ namespace TGS.Apis.LogApi.Services
                 from logs in Observable.FromEvent<LogBusEvent>(
                         ev => AdminLogReceived += ev,
                         ev => AdminLogReceived -= ev)
-                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
+                    .Buffer(_loggerServiceConfig.BatchInsertWaitingSeconds, _loggerServiceConfig.BatchInsertCounts)
                 where logs.Count > 0
                 select logs;
 
@@ -151,7 +153,7 @@ namespace TGS.Apis.LogApi.Services
                 from logs in Observable.FromEvent<LogBusEvent>(
                         ev => LogRecordReceived += ev,
                         ev => LogRecordReceived -= ev)
-                    .Buffer(_loggerServiceConfig.Value.BatchInsertWaitingSeconds, _loggerServiceConfig.Value.BatchInsertCounts)
+                    .Buffer(_loggerServiceConfig.BatchInsertWaitingSeconds, _loggerServiceConfig.BatchInsertCounts)
                 where logs.Count > 0
                 select logs;
 
@@ -161,7 +163,7 @@ namespace TGS.Apis.LogApi.Services
                     async logs =>
                     {
                         var now = DateTimeOffset.UtcNow;
-                        CountReceivedLogs(now, nameof(LogRecordEvent), logs.Cast<LogRecordEvent>().Count(log => log.level >= _loggerServiceConfig.Value.LogLevel || _loggerServiceConfig.Value.UnrestrictedLoggers.Contains(log.logger)));
+                        CountReceivedLogs(now, nameof(LogRecordEvent), logs.Cast<LogRecordEvent>().Count(log => log.level >= _loggerServiceConfig.LogLevel || _loggerServiceConfig.UnrestrictedLoggers.Contains(log.logger)));
                         await WriteLogsAsync(nameof(LogRecordEvent), logs);
                     },
                     ex => _serviceLog.LogError("error occurred when RX executed:" + ex));
@@ -172,7 +174,7 @@ namespace TGS.Apis.LogApi.Services
             _apiLogSubscription?.Dispose();
             _logRecordSubscription?.Dispose();
             _adminLogSubscription?.Dispose();
-            Task.WaitAll(Task.Delay(_loggerServiceConfig.Value.BatchInsertWaitingSeconds.Add(TimeSpan.FromSeconds(3))));
+            Task.WaitAll(Task.Delay(_loggerServiceConfig.BatchInsertWaitingSeconds.Add(TimeSpan.FromSeconds(3))));
             _subscription?.Dispose();
         }
 
@@ -192,9 +194,14 @@ namespace TGS.Apis.LogApi.Services
         {
             if (eventType.IsNullOrEmpty() || events == null)
                 await Task.FromResult(0);
+
+            using var scope = _serviceProvider.CreateScope();
+
             try
             {
-                var logger = _logWriterFactory(eventType);
+                var factory = scope.ServiceProvider.GetRequiredService<Func<string, ILoggerWriter>>();
+
+                var logger = factory(eventType);
                 await logger.SaveLogsAsync(events);
                 _lastInsertTime = DateTimeOffset.UtcNow;
             }

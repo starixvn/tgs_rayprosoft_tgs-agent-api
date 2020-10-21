@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -55,10 +58,14 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
         {
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
+        }
 
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        {
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
 
         EntityEntry<T> IBaseRepository.Entry<T>(T entity)
@@ -76,9 +83,21 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             return SaveChangesAsync();
         }
 
-        void IBaseRepository.SaveChanges()
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
-            SaveChanges();
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                          Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                await Database.MigrateAsync();
+            }
+
+            if (addSeeding)
+            {
+                IDataInitializer data = new DataInitializer(this);
+                await data.SetInitialDataAsync();
+            }
         }
     }
 }

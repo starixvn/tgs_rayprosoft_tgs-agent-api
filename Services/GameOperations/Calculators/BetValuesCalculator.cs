@@ -88,7 +88,7 @@ namespace TGS.Services.GameOperations.Calculators
             return closingAction;
         }
 
-        private (decimal Turnover, decimal WinLoss, decimal UnsettleBets) ReversePreviouslyClosedBetValues(BetActionData previouslyClosed)
+        private static (decimal Turnover, decimal WinLoss, decimal UnsettleBets) ReversePreviouslyClosedBetValues(BetActionData previouslyClosed)
         {
             var turnover = previouslyClosed.Turnover.Negate();
             var winloss = previouslyClosed.WinLoss.Negate();
@@ -97,7 +97,7 @@ namespace TGS.Services.GameOperations.Calculators
             return (turnover, winloss, unsettleBets);
         }
 
-        private (decimal BetAmount, decimal TiebetAdjustment, decimal Turnover, decimal WinLoss, decimal UnsettleBets)
+        private static (decimal BetAmount, decimal TiebetAdjustment, decimal Turnover, decimal WinLoss, decimal UnsettleBets)
             CalculateClosingActionBetValues(bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions)
         {
             var allActions = previousActions.Concat(new[] { current }).ToArray();

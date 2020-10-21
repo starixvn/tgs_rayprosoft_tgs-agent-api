@@ -2,18 +2,17 @@
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.GameOperations.Models.Data;
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed partial class GameActionDataOperations
     {
-        private Task<decimal> AtomicUpdateBalanceAsync(ITgsRepository repo, string playerCode, Guid walletId, decimal amount, DateTimeOffset updatedOn)
+        private static Task<decimal> AtomicUpdateBalanceAsync(Db db, string playerCode, Guid walletId, decimal amount, DateTimeOffset updatedOn)
         {
             const string sql = "usp_Wallet_UpdateWalletBalance";
-            return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
+            return db.Repository.SqlQuerySingleAsync<decimal>(sql, transaction: db.Transaction, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -35,17 +34,17 @@ namespace TGS.Services.GameOperations.Data
                 },
                 new()
                 {
-                    ParameterName = "@lastUpdatedOn",
+                    ParameterName = "@updatedOn",
                     Value = updatedOn,
                     DbType = DbType.DateTimeOffset
                 }
             });
         }
 
-        private Task InsertNewRoundAsync(ITgsRepository repo, RoundData roundData)
+        private static Task InsertNewRoundAsync(Db db, RoundData roundData)
         {
             const string sql = "usp_Round_InsertRound";
-            return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
+            return db.Repository.SqlQuerySingleAsync<decimal>(sql, transaction: db.Transaction, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -193,18 +192,18 @@ namespace TGS.Services.GameOperations.Data
                 },
             });
         }
-                
-        private Task UpdateRoundAsync(ITgsRepository repo, RoundData roundData)
+
+        private static Task UpdateRoundAsync(Db db, RoundData roundData)
         {
-             const string sql = "usp_Round_UpdateRound";
-            return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
+            const string sql = "usp_Round_UpdateRound";
+            return db.Repository.SqlQuerySingleAsync<decimal>(sql, transaction: db.Transaction, parameters: new SqlParameter[]
             {
                 new()
                 {
                     ParameterName = "@roundId",
                     Value = roundData.Id,
                     DbType = DbType.Guid
-                },               
+                },
                 new()
                 {
                     ParameterName = "@status",
@@ -243,8 +242,8 @@ namespace TGS.Services.GameOperations.Data
                 },
                 new()
                 {
-                    ParameterName = "@betAmount",
-                    Value = roundData.BetAmount,
+                    ParameterName = "@winLoss",
+                    Value = roundData.WinLoss,
                     DbType = DbType.Decimal
                 },
                 new()
@@ -255,7 +254,7 @@ namespace TGS.Services.GameOperations.Data
                 },
                 new()
                 {
-                    ParameterName = "@commssion",
+                    ParameterName = "@commission",
                     Value = roundData.Commission,
                     DbType = DbType.Decimal
                 },
@@ -274,10 +273,10 @@ namespace TGS.Services.GameOperations.Data
             });
         }
 
-        private Task InsertGameActionAsync(ITgsRepository repo, GameActionData gameActionData)
+        private static Task InsertGameActionAsync(Db db, GameActionData gameActionData)
         {
             const string sql = "usp_GameAction_InsertGameAction";
-            return repo.SqlQuerySingleAsync<decimal>(sql, parameters: new SqlParameter[]
+            return db.Repository.SqlQuerySingleAsync<decimal>(sql, transaction: db.Transaction, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -296,13 +295,13 @@ namespace TGS.Services.GameOperations.Data
                     ParameterName = "@walletId",
                     Value = gameActionData.WalletId,
                     DbType = DbType.Guid
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@roundId",
                     Value = gameActionData.RoundId,
                     DbType = DbType.Guid
-                },  
+                },
                 new()
                 {
                     ParameterName = "@externalTransactionId",
@@ -350,55 +349,55 @@ namespace TGS.Services.GameOperations.Data
                     ParameterName = "@betType",
                     Value = gameActionData.BetType,
                     DbType = DbType.String
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@externalBetId",
                     Value = gameActionData.ExternalBetId,
                     DbType = DbType.String
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@externalGameActionGroupId",
                     Value = gameActionData.ExternalGameActionGroupId,
                     DbType = DbType.String
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@referencedGameActionId",
                     Value = gameActionData.ReferencedGameActionId,
                     DbType = DbType.Guid
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@gameActionBatchId",
                     Value = gameActionData.GameActionBatchId,
                     DbType = DbType.Guid
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@recordedOn",
                     Value = gameActionData.RecordedOn,
                     DbType = DbType.DateTimeOffset
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@sentOn",
                     Value = gameActionData.SentOn,
                     DbType = DbType.DateTimeOffset
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@isClosingRound",
                     Value = gameActionData.IsClosingRound,
                     DbType = DbType.Boolean
-                }, 
+                },
                 new()
                 {
-                    ParameterName = "@closingRoundExplicitRequest,",
+                    ParameterName = "@closingRoundExplicitRequest",
                     Value = gameActionData.ClosingRoundExplicitRequest,
                     DbType = DbType.Boolean
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@licenseeId",
@@ -410,19 +409,19 @@ namespace TGS.Services.GameOperations.Data
                     ParameterName = "@playerCode",
                     Value = gameActionData.PlayerCode,
                     DbType = DbType.String
-                }, 
+                },
                 new()
                 {
                     ParameterName = "@playerIp",
                     Value = gameActionData.PlayerIp,
                     DbType = DbType.String
-                },                
+                },
                 new()
                 {
                     ParameterName = "@description",
                     Value = gameActionData.Description,
                     DbType = DbType.String
-                }                 
+                }
             });
         }
     }

@@ -5,7 +5,9 @@ using StackExchange.Redis;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Generics;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Services.Data;
 using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations
@@ -35,6 +37,8 @@ namespace TGS.Services.Operations
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, Guid gameId);
 
         Task<GameStatus?> GetGameStatusAsync(Guid gameProviderId, Guid gameId);
+
+        Task<IdMap[]> GetSubGameIdsAsync(Guid gameProviderId, PlatformType platformType);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -71,7 +75,7 @@ namespace TGS.Services.Operations
                 Name = r.Name,
                 Description = r.Description,
                 Status = r.Status,
-                AutoClosedRound = r.AutoClosedRound,
+                AutoCloseRound = r.AutoCloseRound,
                 SupportTestPlayer = r.SupportTestPlayer,
                 PlaceBetTimeout = r.PlaceBetTimeout,
                 SettleBetTimeout = r.SettleBetTimeout
@@ -222,6 +226,19 @@ namespace TGS.Services.Operations
             var game = await _interface.GetCachedGameAsync(gameProviderId, gameId);
             return game?.Status;
         }
+        
+        async Task<IdMap[]> IGameProviderOperations.GetSubGameIdsAsync(Guid gameProviderId, PlatformType platformType)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.SubGames, gameProviderId,
+                platformType.ToString());
+
+            if (value.HasValue)
+            {
+                return _json.DeserializeFromString<IdMap[]>(value);
+            }
+
+            return await GetAndCachedSubGameIdMapsAsync(gameProviderId, platformType);
+        }
 
         #region Private Methods
 
@@ -232,9 +249,9 @@ namespace TGS.Services.Operations
                 CachedGameProviderFields.GameProviderId,       
                 CachedGameProviderFields.GameProviderCode,
                 CachedGameProviderFields.GameProviderName,
-                CachedGameProviderFields.Decription,
                 CachedGameProviderFields.Status,
-                CachedGameProviderFields.AutoClosedRound,
+                CachedGameProviderFields.Description,
+                CachedGameProviderFields.AutoCloseRound,
                 CachedGameProviderFields.SupportTestPlayer,
                 CachedGameProviderFields.PlaceBetTimeout,
                 CachedGameProviderFields.SettleBetTimeout
@@ -249,7 +266,7 @@ namespace TGS.Services.Operations
                     Name = values[2],
                     Status = (Status)(int)values[3],
                     Description = values[4],
-                    AutoClosedRound = (bool)values[5],
+                    AutoCloseRound = (bool)values[5],
                     SupportTestPlayer = (bool)values[6],
                     PlaceBetTimeout = (int)values[7],
                     SettleBetTimeout = (int)values[8]
@@ -267,8 +284,8 @@ namespace TGS.Services.Operations
                 new (CachedGameProviderFields.GameProviderCode, gameProvider.Code),
                 new (CachedGameProviderFields.GameProviderName, gameProvider.Name),
                 new (CachedGameProviderFields.Status, (int)gameProvider.Status),
-                new (CachedGameProviderFields.Decription, gameProvider.Description),
-                new (CachedGameProviderFields.AutoClosedRound, gameProvider.AutoClosedRound),
+                new (CachedGameProviderFields.Description, gameProvider.Description),
+                new (CachedGameProviderFields.AutoCloseRound, gameProvider.AutoCloseRound),
                 new (CachedGameProviderFields.SupportTestPlayer, gameProvider.SupportTestPlayer),
                 new (CachedGameProviderFields.PlaceBetTimeout, gameProvider.PlaceBetTimeout),
                 new (CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout)
@@ -281,12 +298,7 @@ namespace TGS.Services.Operations
         {
             var data = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, gameProviderConfigurationId.ToString());
 
-            if (data.HasValue)
-            {
-                return _json.DeserializeFromString<CachedGameProviderConfiguration>(data);
-            }
-
-            return null;
+            return data.HasValue ? _json.DeserializeFromString<CachedGameProviderConfiguration>(data) : null;
         }
 
         private async Task CacheGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId, CachedGameProviderConfiguration gpc)
@@ -309,6 +321,20 @@ namespace TGS.Services.Operations
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Games, gameProviderId, fields, TimeSpan.FromHours(2));
             return games;
         }
+        
+        private async Task<IdMap[]> GetAndCachedSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType)
+        {
+            var games = await _gameProviderQueriesFactory().GetSubGameIdMapsAsync(gameProviderId, platformType);
+
+            var fields = new HashEntry[]
+            {
+                new(platformType.ToString(), _json.SerializeToString(games))
+            };
+
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.SubGames, gameProviderId, fields, TimeSpan.FromHours(2));
+
+            return games;
+        }
 
         private static class CachedGameProviderFields
         {
@@ -316,8 +342,8 @@ namespace TGS.Services.Operations
             public const string GameProviderCode = "gameProviderCode";
             public const string GameProviderName = "gameProviderName";
             public const string Status = "status";
-            public const string Decription = "description";
-            public const string AutoClosedRound = "autoClosedRound";
+            public const string Description = "description";
+            public const string AutoCloseRound = "autoClosedRound";
             public const string SupportTestPlayer = "supportTestPlayer";
             public const string PlaceBetTimeout = "placeBetTimeout";
             public const string SettleBetTimeout = "settleBetTimeout";

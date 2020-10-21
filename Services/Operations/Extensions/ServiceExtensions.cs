@@ -13,14 +13,15 @@ namespace TGS.Services.Operations.Extensions
     {
         /// <summary>
         /// Dependency Injection of Operations, need to add the following dependencies beforehead:
-        /// 1. AddRedis() in Infrastructures.Redis        
+        /// 1. AddRepository of Tgs, Bet database
+        /// 2. AddRedis() in Infrastructures.Redis        
         /// </summary>
         public static IServiceCollection AddOperations(this IServiceCollection services)
         {            
             #region Code Mappers
 
-            services.AddSingleton<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
-            services.AddSingleton<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
+            services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
+            services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
 
             #endregion
 
@@ -31,6 +32,8 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
             services.AddFactory<ISettingQueries, SettingQueries>();
+
+            services.AddFactory<IGameActionQueries, GameActionQueries>();
 
             #endregion
 

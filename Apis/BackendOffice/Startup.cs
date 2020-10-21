@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBackendOfficeServices(_configuration, _env);
+            services.AddBackendOfficeServices(_configuration);
         }
 
         public void Configure(IApplicationBuilder app)
@@ -30,7 +30,6 @@ namespace TGS.Apis.BackendOffice
             if (_env.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
-                app.SeedData();
             }
 
             app.UseMiddleware<ExceptionMiddleware>();

@@ -12,7 +12,7 @@ using TGS.Tests.TestsCommon.Extensions;
 namespace Tgs.UnitTests.Operations.Bets.Steps
 {
     [Binding, Scope(Tag = "RoundStatusValidation")]
-    public sealed class RoundStatusValidation : SpecFlowUnitTestBase
+    public sealed class RoundStatusValidation : SpecFlowBase
     {
         public RoundStatusValidation(ScenarioContext context)
             : base(context)

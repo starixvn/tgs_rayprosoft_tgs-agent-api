@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Apis.TgsApi.GameModels</AssemblyName>
+    <RootNamespace>TGS.Apis.TgsApi.GameModels</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="SBOBET\Outgoing\" />
+  </ItemGroup>
+
+</Project>

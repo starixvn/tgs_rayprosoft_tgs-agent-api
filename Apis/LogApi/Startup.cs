@@ -36,31 +36,38 @@ namespace TGS.Apis.LogApi
         {
             services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
             services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
-            services.AddRedis();
-            services.AddNats(Configuration);
-            services.AddWebApiServices();
-            services.AddTgsLog();
-
-            services.AddScoped<IMessagePackProvider, MessagePackProvider>();
-            services.AddScoped<IMessageHandler, NatsMessageHandler>();
+            
+            services.AddRedis()
+                    .AddNats(Configuration)
+                    .AddWebApiServices()
+                    .AddTgsLog();
+            
+            services.AddSingleton<IMessageHandler, NatsMessageHandler>();
 
             services.AddScoped<ApiLogWriter>();
             services.AddScoped<LogRecordWriter>();
             services.AddScoped<AdminLogWriter>();
 
-            services.AddScoped<Func<string, ILoggerWriter>>(serviceProvider => key =>
-            {
-                return key switch
-                {
-                    nameof(ApiLogEvent) => serviceProvider.GetService<ApiLogWriter>(),
-                    nameof(LogRecordEvent) => serviceProvider.GetService<LogRecordWriter>(),
-                    nameof(AdminLogEvent) => serviceProvider.GetService<AdminLogWriter>(),
-                    _ => throw new KeyNotFoundException()
-                };
-            });
+            services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
+              {
+                  return key switch
+                  {
+                      nameof(ApiLogEvent) => serviceProvider.GetRequiredService<ApiLogWriter>(),
+                      nameof(LogRecordEvent) => serviceProvider.GetRequiredService<LogRecordWriter>(),
+                      nameof(AdminLogEvent) => serviceProvider.GetRequiredService<AdminLogWriter>(),
+                      _ => throw new KeyNotFoundException()
+                  };
+              });
 
-            services.AddControllers(options =>
-                    options.Filters.Add(new HttpResponseExceptionFilter()))
+            services
+                .AddControllers(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                    options.Filters.Add(new HttpResponseExceptionFilter());
+                })
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     options.InvalidModelStateResponseFactory = context =>
@@ -74,33 +81,25 @@ namespace TGS.Apis.LogApi
                         return result;
                     };
                 });
-
-            services.AddMvcCore(options =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-                options.Filters.Add(new HttpResponseExceptionFilter());
-            });
         }
 
         protected void OnApplicationStarted(IServiceProvider serviceProvider)
         {
-            var scope = serviceProvider.CreateScope();
-            var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler>();
+            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StartReceiveMessages();
         }
 
         protected void OnApplicationStopped(IServiceProvider serviceProvider)
         {
-            var scope = serviceProvider.CreateScope();
-            var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler>();
+            var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StopReceiveMessages();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
-        {
+        public void Configure(
+            IApplicationBuilder app, 
+            IWebHostEnvironment env, 
+            IHostApplicationLifetime appLifetime)
+        {            
             appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
 

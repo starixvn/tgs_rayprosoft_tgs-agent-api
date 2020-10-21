@@ -19,11 +19,13 @@ namespace TGS.Core.DataServices.Base.Interfaces
 
         IDbConnection GetDbConnection();
 
-        void BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
+        Task BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
+
+        Task BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
 
         Task SaveChangesAsync();
 
-        void SaveChanges();
+        Task ExecuteMigrationAndSeedingAsync(bool addSeeding = false);
 
         DbSet<T> Set<T>() where T : class;
 

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Apis.LogApi.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -108,14 +111,27 @@ namespace TGS.Apis.LogApi.DataService
             await SaveChangesAsync();
         }
 
-        void IBaseRepository.BulkInsert<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            this.BulkInsertOrUpdate(entities, bulkConfig, progress);
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        void IBaseRepository.SaveChanges()
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
         {
-            SaveChanges();
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        }
+
+        Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        {
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                          Database.GetPendingMigrations().Any();
+
+            if (isMigrate)
+            {
+                return Database.MigrateAsync();
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

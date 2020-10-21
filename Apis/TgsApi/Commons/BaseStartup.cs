@@ -7,8 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using NLog;
-using TGS.Apis.TgsApi.Extensions;
-using TGS.Core.DataServices.DataInitializers;
+using TGS.Core.DataServices.Bet.Extensions;
+using TGS.Core.DataServices.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -42,8 +42,10 @@ namespace TGS.Apis.TgsApi.Commons
         {
             services.AddSingleton<Func<string>>(c => () => LogPrefix);
 
-            services.AddRepositories(Configuration)
-                    .AddNats(Configuration)
+            services.AddTgsRepository(Configuration, "Tgs")
+                    .AddBetRepository(Configuration, "Bet");
+
+            services.AddNats(Configuration)
                     .AddWebApiServices()
                     .AddTgsLog()
                     .AddJson()
@@ -53,20 +55,16 @@ namespace TGS.Apis.TgsApi.Commons
                     .AddTimeZone()
                     .AddGameOperations();
 
+            services.AddHttpContextAccessor();
+            services.AddScoped<ApiLoggerMiddleware>();
+
             AddCustomDependencyServices(services);
 
             services.AddFeatureManagement();
 
-            if (Environment.IsDevelopmentOrDocker())
-            {
-                services.AddScoped<IDataInitializer, DataInitializer>();
-            }
-
-            services.AddScoped<ApiLoggerMiddleware>();
-
             var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
-            services.AddMvcCore(options =>
+            services.AddControllers(options =>
             {
                 AddCustomFilters(options);
             })
@@ -76,8 +74,6 @@ namespace TGS.Apis.TgsApi.Commons
                 {
                     var result = new BadRequestObjectResult(context.ModelState);
                     result.ContentTypes.Add(MediaTypeNames.Application.Json);
-                    result.ContentTypes.Add(MediaTypeNames.Application.Xml);
-
                     return result;
                 };
             });
@@ -89,19 +85,18 @@ namespace TGS.Apis.TgsApi.Commons
             if (Environment.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
-                app.SeedData();
             }
             else
             {
                 app.UseGlobalExceptionHandler();
             }
 
-            UseCustomMiddlewares(app);
-
             app.UseApiLogger();
 
+            UseCustomMiddlewares(app);
+
             app
-                //.UseHttpsRedirection()
+                .UseHttpsRedirection()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
                 {

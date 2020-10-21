@@ -12,21 +12,26 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
-    "TgsApi-Evolution": {
+    "TgsApi-SBO": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/status",
       "environmentVariables": {
-        "GameProviderCode": "EVO",
-        "GameProviderName": "Evolution",
+        "GameProviderCode": "SBO",
+        "GameProviderName": "SBOBET",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:62331"
+      "applicationUrl": "https://localhost:62330"
     },
-    "Docker": {
+    "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
+      "environmentVariables": {
+        "GameProviderCode": "SBO",
+        "GameProviderName": "SBOBET",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
       "publishAllPorts": true,
       "useSSL": true
     }
