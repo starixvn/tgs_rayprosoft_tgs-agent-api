@@ -36,6 +36,41 @@ namespace TGS.Core.DataServices.Base.Extensions
                 Items = pagedResult.Items
             };
         }
+        public static Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IEnumerable<TModel> query,
+            PageableRequest request)
+        {
+            var result = query.AsQueryable().OrderBy(request.GetSortOption());
+
+            if (request.ShowAll)
+            {
+                var allResult = result.ToArray();
+                return Task.FromResult(new PagedResponse<TModel>
+                {
+                    Valid = true,
+                    TotalCount = allResult.Length,
+                    Items = allResult
+                });
+            }
+
+            var pagedResult = result.ToPagedArray(request.Page, request.Rows);
+
+            return Task.FromResult(new PagedResponse<TModel>
+            {
+                Valid = true,
+                TotalCount = pagedResult.TotalCount,
+                Items = pagedResult.Items
+            });
+        }
+
+        public static PagedArray<T> ToPagedArray<T>(this IQueryable<T> query, int page, int pageSize)
+        {
+            var totalCount = query.Count();
+            page = page <= 0 ? 0 : page - 1;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+            var items = query.Skip(page * pageSize).Take(pageSize).ToArray();
+            return new PagedArray<T>(totalCount, items);
+        }
+
 
         public static async Task<PagedArray<T>> ToPagedArrayAsync<T>(this IQueryable<T> query, int page, int pageSize)
         {

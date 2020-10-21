@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Core.DataServices.Log</AssemblyName>
+    <RootNamespace>TGS.Core.DataServices.Log</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SqlScripts\SP\usp_AdminLogs_GetLogs.sql" />
+    <None Remove="SqlScripts\SP\usp_ApiLogs_GetLogs.sql" />
+    <None Remove="SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SqlScripts\SP\usp_ServiceLogs_InsertServiceLog.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_ApiLogs_GetLogs.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_AdminLogs_GetLogs.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataServices.Base\DataServices.Base.csproj" />
+    <ProjectReference Include="..\Infrastructures\Infrastructures.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -8,7 +8,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public DateTimeOffset? From { get; set; }
         public DateTimeOffset? To { get; set; }
         public Guid? TrackingId { get; set; }
-        public string IP { get; set; }
+        public string Ip { get; set; }
         public string Path { get; set; }
         public string Method { get; set; }
     }

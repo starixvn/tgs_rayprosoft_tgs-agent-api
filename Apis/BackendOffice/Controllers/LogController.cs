@@ -14,26 +14,21 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class LogController : BaseContextController
     {
-        private readonly ILogQueries<AdminLog> _adminLogQueries;
-        private readonly ILogQueries<ApiLog> _apiLogQueries;
+        private readonly ILogQueries _logQueries;
 
         public LogController(
-            ILogQueries<AdminLog> logQueries,
-            ILogQueries<ApiLog> apiLogQueries,
+            ILogQueries logQueries,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _adminLogQueries = logQueries;
-            _apiLogQueries = apiLogQueries;
+            _logQueries = logQueries;
         }
 
         [HttpGet("admin")]
-        public Task<PagedResponse<AdminLogModel>> GetAdminLogs([FromQuery] AdminLogRequest request)
+        public async Task<PagedResponse<AdminLogModel>> GetAdminLogs([FromQuery] AdminLogRequest request)
         {
-            return _adminLogQueries.GetQueries()
-                .Where(request.From, q => request.From >= q.RecordedOn)
-                .Where(request.To, q => request.From <= q.RecordedOn)
-                .Where(request.TrackingId, q => request.TrackingId == q.TrackingId)
-                .Select(q => new AdminLogModel
+            var logs = await _logQueries.GetAdminLogsAsync(request);
+            
+            return await logs.Select(q => new AdminLogModel
                 {
                     TrackingId = q.TrackingId,
                     Id = q.Id,
@@ -53,19 +48,18 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("api")]
-        public Task<PagedResponse<ApiLogModel>> GetAPILogs([FromQuery] ApiLogRequest request)
+        public async Task<PagedResponse<ApiLogModel>> GetApiLogs([FromQuery] ApiLogRequest request)
         {
-            return _apiLogQueries.GetQueries()
-                .Where(request.From, q => request.From >= q.RecordedOn)
-                .Where(request.To, q => request.From <= q.RecordedOn)
-                .Where(request.TrackingId, q => request.TrackingId == q.TrackingId)
-                .Select(q => new ApiLogModel
-                {
+            var logs = await _logQueries.GetApiLogsAsync(request);
+
+            return await logs.Select(q => new ApiLogModel
+            {
                     TrackingId = q.TrackingId,
                     Id = q.Id,
                     Ip = q.Ip,
                     Path = q.Path,
                     Method = q.Method,
+                    Prefix = q.Prefix,
                     ServerName = q.ServerName,
                     RequestHeaders = q.RequestHeaders,
                     RequestContent = q.RequestContent,

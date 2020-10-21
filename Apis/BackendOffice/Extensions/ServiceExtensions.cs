@@ -49,7 +49,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
-            services.AddTransient(typeof(ILogQueries<>), typeof(LogQueries<>));
+            services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
