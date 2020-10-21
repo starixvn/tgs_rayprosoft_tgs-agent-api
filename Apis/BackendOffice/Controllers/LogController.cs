@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Log.Models;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -27,7 +26,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<PagedResponse<AdminLogModel>> GetAdminLogsAsync([FromQuery] AdminLogRequest request)
         {
             var logs = await _logQueries.GetAdminLogsAsync(request);
-            
+
             return await logs.Select(q => new AdminLogModel
                 {
                     TrackingId = q.TrackingId,
@@ -53,7 +52,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var logs = await _logQueries.GetApiLogsAsync(request);
 
             return await logs.Select(q => new ApiLogModel
-            {
+                {
                     TrackingId = q.TrackingId,
                     Id = q.Id,
                     Ip = q.Ip,

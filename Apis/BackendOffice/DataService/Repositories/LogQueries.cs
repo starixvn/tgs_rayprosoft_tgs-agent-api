@@ -1,12 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Log;
@@ -27,20 +26,23 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         {
             return _repository.Set<T>().AsQueryable();
         }
+
         Task<bool> ILogQueries.ExistsAsync<T>(Expression<Func<T, bool>> predicate)
         {
             return _repository.Set<T>().AnyAsync(predicate);
         }
 
-        Task<T> ILogQueries.GetSingleAsync<T>(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> preQuery)
+        Task<T> ILogQueries.GetSingleAsync<T>(Expression<Func<T, bool>> predicate,
+            Func<IQueryable<T>, IQueryable<T>> preQuery)
         {
             preQuery ??= c => c;
             return preQuery(_repository.Set<T>()).FirstOrDefaultAsync(predicate);
         }
+
         Task<IEnumerable<AdminLog>> ILogQueries.GetAdminLogsAsync(AdminLogRequest request)
         {
             const string spName = "usp_AdminLogs_GetLogs";
-            return _repository.SqlQueryMultipleAsync<AdminLog>(spName, parameters: new []
+            return _repository.SqlQueryMultipleAsync<AdminLog>(spName, parameters: new[]
             {
                 new SqlParameter
                 {
@@ -124,6 +126,5 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
                 }
             });
         }
-
     }
 }
