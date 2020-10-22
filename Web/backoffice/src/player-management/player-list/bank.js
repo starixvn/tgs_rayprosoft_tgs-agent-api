@@ -64,7 +64,7 @@ export const Panel = ({
 }) => {
   return (
     <_TabPanel {...props} id={Key}>
-      <TwoColumns>
+      <TwoColumns margin="major-1">
         {banks.map((bank, index) => (
           <Bank
             key={index}

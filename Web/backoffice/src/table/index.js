@@ -124,6 +124,9 @@ export const Table = ({
               gotoPage(pageIndex)
             }}
             numberOfPages={pageCount}
+            css={css`
+              z-index: 0;
+            `}
           />
         )}
       </Set>
