@@ -16,6 +16,8 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
 
         Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
         Task<(IEnumerable<AdminLogModel>, int)> GetAdminLogsAsync(AdminLogRequest request);
+        Task<LogDetailModel> GetAdminLogAsync(Guid trackingId);
         Task<(IEnumerable<ApiLogModel>, int)> GetApiLogsAsync(ApiLogRequest request);
+        Task<LogDetailModel> GetApiLogAsync(Guid trackingId);
     }
 }

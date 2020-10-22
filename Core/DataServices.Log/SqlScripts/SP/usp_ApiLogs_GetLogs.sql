@@ -32,10 +32,6 @@ BEGIN
 		Method NVarchar(255) NOT NULL,
 		Prefix NVarchar(255) NOT NULL,
 		ServerName NVarchar(30) NOT NULL,
-		RequestHeaders NVarchar(4000) NOT NULL,
-		RequestContent NVarchar(4000) NOT NULL,
-		ResponseHeaders NVarchar(4000) NOT NULL,
-		ResponseContent NVarchar(4000) NOT NULL,
 		ResponseCode smallint NOT NULL,
 		ExecutionTimeMs int NOT NULL,
 		TotalCount int NOT NULL
@@ -51,10 +47,6 @@ BEGIN
         a.Method,
         a.Prefix,
 		a.ServerName,
-		a.RequestHeaders,
-		a.RequestContent,
-		a.ResponseHeaders,
-		a.ResponseContent,
 		a.ResponseCode,
 		a.ExecutionTimeMs
     FROM dbo.ApiLogs a WITH ( NOLOCK )
@@ -72,14 +64,14 @@ BEGIN
 	INSERT INTO #temptable
     SELECT * FROM Main_CTE,Count_CTE
     ORDER BY
-			CASE WHEN @isDesc = 0 AND @sortBy = 'RecordedOn'			THEN RecordedOn		END ASC,
-			CASE WHEN @isDesc = 0 AND @sortBy = 'Method'			THEN Method		END ASC,
-			CASE WHEN @isDesc = 0 AND @sortBy = 'Ip'			THEN Ip		END ASC,
-			CASE WHEN @isDesc = 0 AND @sortBy = 'Path'			THEN Path		END ASC,
-			CASE WHEN @isDesc = 1 AND @sortBy = 'RecordedOn'			THEN RecordedOn		END DESC,
-			CASE WHEN @isDesc = 1 AND @sortBy = 'Method'			THEN Method		END DESC,
-			CASE WHEN @isDesc = 1 AND @sortBy = 'Ip'			THEN Ip		END DESC,
-			CASE WHEN @isDesc = 1 AND @sortBy = 'Path'			THEN Path		END DESC
+			CASE WHEN @isDesc = 0 AND @sortBy = 'RecordedOn'	THEN RecordedOn		END ASC,
+			CASE WHEN @isDesc = 0 AND @sortBy = 'Method'		THEN Method			END ASC,
+			CASE WHEN @isDesc = 0 AND @sortBy = 'Ip'			THEN Ip				END ASC,
+			CASE WHEN @isDesc = 0 AND @sortBy = 'Path'			THEN Path			END ASC,
+			CASE WHEN @isDesc = 1 AND @sortBy = 'RecordedOn'	THEN RecordedOn		END DESC,
+			CASE WHEN @isDesc = 1 AND @sortBy = 'Method'		THEN Method			END DESC,
+			CASE WHEN @isDesc = 1 AND @sortBy = 'Ip'			THEN Ip				END DESC,
+			CASE WHEN @isDesc = 1 AND @sortBy = 'Path'			THEN Path			END DESC
             OFFSET @pageSize * (@pageNumber - 1) ROWS FETCH NEXT @pageSize ROWS ONLY
 
 	SELECT RecordedOn, 
@@ -89,10 +81,6 @@ BEGIN
         Path,
         Method,
 		ServerName,
-		RequestHeaders,
-		RequestContent,
-		ResponseHeaders,
-		ResponseContent,
 		ResponseCode,
 		ExecutionTimeMs from #temptable
 

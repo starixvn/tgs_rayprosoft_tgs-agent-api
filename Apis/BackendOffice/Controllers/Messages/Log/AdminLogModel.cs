@@ -13,10 +13,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public string Exception { get; set; }
         public string StackTrace { get; set; }
         public string ServerName { get; set; }
-        public string RequestHeaders { get; set; }
-        public string RequestContent { get; set; }
-        public string ResponseHeaders { get; set; }
-        public string ResponseContent { get; set; }
         public int ResponseCode { get; set; }
         public int ExecutionTimeMs { get; set; }
         public DateTimeOffset RecordedOn { get; set; }

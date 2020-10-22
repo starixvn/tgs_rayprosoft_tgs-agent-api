@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
 {
@@ -15,10 +11,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public string Method { get; set; }
         public string Prefix { get; set; }
         public string ServerName { get; set; }
-        public string RequestHeaders { get; set; }
-        public string RequestContent { get; set; }
-        public string ResponseHeaders { get; set; }
-        public string ResponseContent { get; set; }
         public int ResponseCode { get; set; }
         public int ExecutionTimeMs { get; set; }
         public DateTimeOffset RecordedOn { get; set; }

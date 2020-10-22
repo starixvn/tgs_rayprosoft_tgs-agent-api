@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
 using TGS.Core.DataServices.Base.Extensions;
 
@@ -29,6 +25,10 @@ namespace TGS.Core.DataServices.Log.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_AdminLogs_GetLogs"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_ApiLogs_GetLogs"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_AdminLogs_GetLog"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_ApiLogs_GetLog"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_ServiceLogs_InsertServiceLog"));
         }

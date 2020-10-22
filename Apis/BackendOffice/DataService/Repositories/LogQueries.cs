@@ -149,5 +149,33 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
                 }
             });
         }
+
+        Task<LogDetailModel> ILogQueries.GetAdminLogAsync(Guid trackingId)
+        {
+            const string spName = "usp_AdminLogs_GetLog";
+            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new[]
+            {
+                new SqlParameter
+                {
+                    ParameterName = "@trackingId",
+                    Value = trackingId,
+                    DbType = DbType.Guid
+                }
+            });
+        }
+
+        Task<LogDetailModel> ILogQueries.GetApiLogAsync(Guid trackingId)
+        {
+            const string spName = "usp_ApiLogs_GetLog";
+            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new[]
+            {
+                new SqlParameter
+                {
+                    ParameterName = "@trackingId",
+                    Value = trackingId,
+                    DbType = DbType.Guid
+                }
+            });
+        }
     }
 }
