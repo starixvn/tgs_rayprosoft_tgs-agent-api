@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Log;
-using TGS.Core.DataServices.Log.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
@@ -39,10 +38,10 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             return preQuery(_repository.Set<T>()).FirstOrDefaultAsync(predicate);
         }
 
-        Task<IEnumerable<AdminLog>> ILogQueries.GetAdminLogsAsync(AdminLogRequest request)
+        Task<(IEnumerable<AdminLogModel>, int)> ILogQueries.GetAdminLogsAsync(AdminLogRequest request)
         {
             const string spName = "usp_AdminLogs_GetLogs";
-            return _repository.SqlQueryMultipleAsync<AdminLog>(spName, parameters: new[]
+            return _repository.SqlQueryByPagingAsync<AdminLogModel>(spName, parameters: new[]
             {
                 new SqlParameter
                 {
@@ -79,14 +78,38 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
                     ParameterName = "@method",
                     Value = request.Method,
                     DbType = DbType.String
+                },
+                new SqlParameter
+                {
+                    ParameterName = "@pageSize",
+                    Value = request.ShowAll ? int.MaxValue : request.Rows,
+                    DbType = DbType.Int32
+                },
+                new SqlParameter
+                {
+                    ParameterName = "@pageNumber",
+                    Value = request.ShowAll ? 1 : request.Page,
+                    DbType = DbType.Int32
+                },
+                new SqlParameter
+                {
+                    ParameterName = "@sortBy",
+                    Value = request.SortBy,
+                    DbType = DbType.String
+                },
+                new SqlParameter
+                {
+                    ParameterName = "@isDesc",
+                    Value = request.IsDesc,
+                    DbType = DbType.Boolean
                 }
             });
         }
 
-        Task<IEnumerable<ApiLog>> ILogQueries.GetApiLogsAsync(ApiLogRequest request)
+        Task<(IEnumerable<ApiLogModel>, int)> ILogQueries.GetApiLogsAsync(ApiLogRequest request)
         {
             const string spName = "usp_ApiLogs_GetLogs";
-            return _repository.SqlQueryMultipleAsync<ApiLog>(spName, parameters: new[]
+            return _repository.SqlQueryByPagingAsync<ApiLogModel>(spName, parameters: new[]
             {
                 new SqlParameter
                 {

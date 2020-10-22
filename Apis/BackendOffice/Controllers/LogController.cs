@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
@@ -25,47 +24,17 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpGet("admin")]
         public async Task<PagedResponse<AdminLogModel>> GetAdminLogsAsync([FromQuery] AdminLogRequest request)
         {
-            var logs = await _logQueries.GetAdminLogsAsync(request);
+            var (logs, totalCount) = await _logQueries.GetAdminLogsAsync(request);
 
-            return await logs.Select(q => new AdminLogModel
-                {
-                    TrackingId = q.TrackingId,
-                    Id = q.Id,
-                    Ip = q.Ip,
-                    Path = q.Path,
-                    Method = q.Method,
-                    Description = q.Description,
-                    Exception = q.Exception,
-                    StackTrace = q.StackTrace,
-                    ServerName = q.ServerName,
-                    RequestHeaders = q.RequestHeaders,
-                    RequestContent = q.RequestContent,
-                    ResponseContent = q.ResponseContent,
-                    ResponseHeaders = q.ResponseHeaders
-                })
-                .CreatePagedResponseAsync(request);
+            return await logs.CreatePagedResponseAsync(totalCount);
         }
 
         [HttpGet("api")]
         public async Task<PagedResponse<ApiLogModel>> GetApiLogsAsync([FromQuery] ApiLogRequest request)
         {
-            var logs = await _logQueries.GetApiLogsAsync(request);
+            var (logs, totalCount) = await _logQueries.GetApiLogsAsync(request);
 
-            return await logs.Select(q => new ApiLogModel
-                {
-                    TrackingId = q.TrackingId,
-                    Id = q.Id,
-                    Ip = q.Ip,
-                    Path = q.Path,
-                    Method = q.Method,
-                    Prefix = q.Prefix,
-                    ServerName = q.ServerName,
-                    RequestHeaders = q.RequestHeaders,
-                    RequestContent = q.RequestContent,
-                    ResponseContent = q.ResponseContent,
-                    ResponseHeaders = q.ResponseHeaders
-                })
-                .CreatePagedResponseAsync(request);
+            return await logs.CreatePagedResponseAsync(totalCount);
         }
     }
 }

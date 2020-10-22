@@ -52,28 +52,13 @@ namespace TGS.Core.DataServices.Base.Extensions
         }
 
         public static Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IEnumerable<TModel> query,
-            PageableRequest request)
+            int totalCount)
         {
-            var result = query.AsQueryable().OrderBy(request.GetSortOption());
-
-            if (request.ShowAll)
-            {
-                var allResult = result.ToArray();
-                return Task.FromResult(new PagedResponse<TModel>
-                {
-                    Valid = true,
-                    TotalCount = allResult.Length,
-                    Items = allResult
-                });
-            }
-
-            var pagedResult = result.ToPagedArray(request.Page, request.Rows);
-
             return Task.FromResult(new PagedResponse<TModel>
             {
                 Valid = true,
-                TotalCount = pagedResult.TotalCount,
-                Items = pagedResult.Items
+                TotalCount = totalCount,
+                Items = query.ToArray()
             });
         }
 

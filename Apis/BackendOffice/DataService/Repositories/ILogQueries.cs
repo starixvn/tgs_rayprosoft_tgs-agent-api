@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
-using TGS.Core.DataServices.Log.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
@@ -16,7 +15,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             Func<IQueryable<T>, IQueryable<T>> preQuery = null) where T : class;
 
         Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
-        Task<IEnumerable<AdminLog>> GetAdminLogsAsync(AdminLogRequest request);
-        Task<IEnumerable<ApiLog>> GetApiLogsAsync(ApiLogRequest request);
+        Task<(IEnumerable<AdminLogModel>, int)> GetAdminLogsAsync(AdminLogRequest request);
+        Task<(IEnumerable<ApiLogModel>, int)> GetApiLogsAsync(ApiLogRequest request);
     }
 }
