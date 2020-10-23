@@ -22,10 +22,7 @@ import {
   FieldStack,
   FieldWrapper,
   SelectField,
-  Tabs as _Tabs,
-  Dialog,
-  Modal,
-  useClassName
+  Tabs as _Tabs
 } from "bumbag"
 import { useTable, Table, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -33,7 +30,7 @@ import { useOperations } from "./client"
 import { Trans } from "../../i18n"
 import format from "../../date/format"
 import { pastWeek } from "../../date/range"
-import RangeInput from "../../date/RangeInput"
+import DateTimeRangeInput from "../../date/RangeInput"
 import SearchButton from "../../button/Search"
 
 export const Key = "operation"
@@ -48,6 +45,8 @@ export const Tab = ({ ...props }) => {
 }
 
 export const Panel = ({ playerCode, ...props }) => {
+  let { selectedId } = props
+  let isActive = selectedId === Key
   let dateRange = pastWeek()
   let { state, setState, setPageIndex, setSortOrder } = useTable({
     from: dateRange.start,
@@ -55,7 +54,7 @@ export const Panel = ({ playerCode, ...props }) => {
   })
   let { pageIndex, pageSize, sortby, orderby, from, to } = state
   let { data = {}, isLoading, mutate } = useOperations({
-    playerCode,
+    playerCode: isActive && playerCode,
     searchParams: {
       page: pageIndex + 1,
       rows: pageSize,
@@ -110,7 +109,7 @@ const SearchBar = ({
 
   return (
     <Set>
-      <RangeInput
+      <DateTimeRangeInput
         start={start}
         end={end}
         validate
