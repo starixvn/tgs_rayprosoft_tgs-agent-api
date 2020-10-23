@@ -1,9 +1,12 @@
-DECLARE @i int = 0
-DECLARE @the_date as datetimeoffset
-WHILE @i < 1000000 
-BEGIN
-	SET @the_date = DATEADD(ns ,FLOOR(RAND()*10000) ,SYSDATETIMEOFFSET())
-	INSERT INTO dbo.AdminLogs values(@the_date,NEWID(),NEWID(),'127.0.0.1','path','get','Description','Exception','StackTrace','ServerName','Connection: keep-alive
+DECLARE @count INT = 1000000
+;WITH tmp(tmpId,recordedOn) AS
+(
+	SELECT 1 tmpId, SYSDATETIMEOFFSET() recordedOn
+	UNION ALL
+	SELECT tmpId+1, DATEADD(ns ,CONVERT(int, tmpId*(1000)*RAND()) ,SYSDATETIMEOFFSET()) recordedOn FROM tmp WHERE tmpId < @count
+)
+INSERT INTO dbo.AdminLogs
+SELECT recordedOn,NEWID(),NEWID(),'127.0.0.1','path','get','Description','Exception','StackTrace','ServerName','Connection: keep-alive
 Content-Type: application/json
 Accept: */*
 Accept-Encoding: gzip, deflate, br
@@ -18,6 +21,5 @@ Postman-Token: f50c57a1-5e6e-4c3a-9ae5-7095cf624d07','{
     "pageNumber": "1",
     "sortBy": "recordedOn",
     "isDesc": "true"
-}','','{"totalCount":0,"items":[],"valid":true,"message":"","errors":[]}',200,5)
-    SET @i = @i + 1
-END
+}','','{"totalCount":0,"items":[],"valid":true,"message":"","errors":[]}',200,5 FROM tmp 
+OPTION (MAXRECURSION 0)
