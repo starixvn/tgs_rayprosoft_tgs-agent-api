@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import { Formik, Field, Form, useFormikContext } from "formik"
+import { Formik, Field } from "formik"
 import {
   useTabState,
   Tab as _Tab,
@@ -33,6 +31,10 @@ import { useTable, Table, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useOperations } from "./client"
 import { Trans } from "../../i18n"
+import format from "../../date/format"
+import { pastWeek } from "../../date/range"
+import RangeInput from "../../date/RangeInput"
+import SearchButton from "../../button/Search"
 
 export const Key = "operation"
 
@@ -46,27 +48,42 @@ export const Tab = ({ ...props }) => {
 }
 
 export const Panel = ({ playerCode, ...props }) => {
-  //TODO: default start & end time
-  let { state, setPageIndex, setSortOrder } = useTable({
-    start,
-    end
+  let dateRange = pastWeek()
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    from: dateRange.start,
+    to: dateRange.end
   })
-  let { pageIndex, pageSize, sortby, orderby, start, end } = state
-  let { data = {}, isLoading } = useOperations({
+  let { pageIndex, pageSize, sortby, orderby, from, to } = state
+  let { data = {}, isLoading, mutate } = useOperations({
     playerCode,
     searchParams: {
       page: pageIndex + 1,
       rows: pageSize,
       sortby,
-      orderby
+      orderby,
+      from: format(from),
+      to: format(to)
     }
   })
   let columns = useColumns()
 
   return (
     <_TabPanel {...props} id={Key}>
-      <Stack margin="major-1">
-        <Box>TODO: date range input</Box>
+      <Stack margin="major-2" spacing="major-2">
+        <SearchBar
+          start={from}
+          end={to}
+          search={({ start, end }) => {
+            if (from === start && to === end) {
+              mutate()
+            }
+            setState({
+              from: start,
+              to: end
+            })
+          }}
+          isLoading={isLoading}
+        />
         <Table
           columns={columns}
           data={data?.items}
@@ -78,6 +95,39 @@ export const Panel = ({ playerCode, ...props }) => {
         />
       </Stack>
     </_TabPanel>
+  )
+}
+
+const SearchBar = ({
+  start: startDate,
+  end: endDate,
+  search,
+  isLoading,
+  ...props
+}) => {
+  let [start, setStart] = useState(startDate)
+  let [end, setEnd] = useState(endDate)
+
+  return (
+    <Set>
+      <RangeInput
+        start={start}
+        end={end}
+        validate
+        onChangeStart={(date) => {
+          setStart(date)
+        }}
+        onChangeEnd={(date) => {
+          setEnd(date)
+        }}
+      />
+      <SearchButton
+        isLoading={isLoading}
+        onClick={() => {
+          search({ start, end })
+        }}
+      />
+    </Set>
   )
 }
 

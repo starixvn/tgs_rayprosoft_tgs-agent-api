@@ -54,7 +54,7 @@ export const Panel = ({ player = {}, ...props }) => {
   let { phone, email, qq, weChat } = player
   return (
     <_TabPanel {...props} id={Key}>
-      <FieldValues margin="major-1">
+      <FieldValues margin="major-2" spacing="major-2">
         <MobileLabel />
         <Text>{phone}</Text>
 

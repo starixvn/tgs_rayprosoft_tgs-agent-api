@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useState } from "react"
 import { Text } from "bumbag"
+//TODO: use date-fns instead
 import dayjs from "dayjs"
 import numeral from "numeral"
+import { registerLocale, setDefaultLocale } from "react-datepicker"
+import en from "date-fns/locale/en-US"
+import zh from "date-fns/locale/zh-CN"
+registerLocale("en", en)
+registerLocale("zh", zh)
 
 const DefaultDateFormat = "YYYY/MM/DD"
 const DefaultTimeFormat = "HH:mm:ss"
@@ -18,8 +24,16 @@ const Store = createContext()
 //TODO: default locale from cookie?
 export const Provider = ({ value = Locales.zh, children }) => {
   let [locale, set] = useState(value)
+  setDefaultLocale(locale)
 
-  return <Store.Provider value={{ locale, set }}>{children}</Store.Provider>
+  const setLocale = (locale) => {
+    set(locale)
+    setDefaultLocale(locale)
+  }
+
+  return (
+    <Store.Provider value={{ locale, setLocale }}>{children}</Store.Provider>
+  )
 }
 
 export const useLocale = () => {
@@ -28,13 +42,13 @@ export const useLocale = () => {
 }
 
 export const useEnglish = () => {
-  let { set } = useContext(Store)
-  return () => set(Locales.en)
+  let { setLocale } = useContext(Store)
+  return () => setLocale(Locales.en)
 }
 
 export const useChinese = () => {
-  let { set } = useContext(Store)
-  return () => set(Locales.zh)
+  let { setLocale } = useContext(Store)
+  return () => setLocale(Locales.zh)
 }
 
 export const useTrans = (messages = {}) => {

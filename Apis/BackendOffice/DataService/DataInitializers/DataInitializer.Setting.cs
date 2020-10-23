@@ -185,7 +185,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                                 new MenuSetting("Update")
                             }
                         },
-                        new MenuSetting( "Groups")
+                        new MenuSetting( "Roles")
                         {
                             SubMenus = new[]
                             {

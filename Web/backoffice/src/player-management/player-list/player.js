@@ -198,7 +198,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
   let turnOffLabel = useTurnOffLabel()
   return (
     <_TabPanel {...props} id={Key}>
-      <FieldValues margin="major-1">
+      <FieldValues margin="major-2" spacing="major-2">
         <UserNameLabel />
         <Text>{username}</Text>
 
