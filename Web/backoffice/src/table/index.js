@@ -62,6 +62,7 @@ export const Table = ({
   isLoading,
   head = true,
   body = true,
+  foot = false,
   children,
   ...props
 }) => {
@@ -113,6 +114,7 @@ export const Table = ({
           {head === true && <Head table={table} />}
           {body === true && <Body table={table} />}
           {children}
+          {foot === true && <Foot table={table} />}
         </_Table>
         {pageCount > 0 && (
           <Pagination
@@ -124,6 +126,9 @@ export const Table = ({
               gotoPage(pageIndex)
             }}
             numberOfPages={pageCount}
+            css={css`
+              z-index: 0;
+            `}
           />
         )}
       </Set>
@@ -161,6 +166,25 @@ const Head = ({ table }) => {
         </_Table.Row>
       ))}
     </_Table.Head>
+  )
+}
+
+const Foot = ({ table }) => {
+  let { footerGroups } = table
+  return (
+    <_Table.Foot fontWeight="semibold">
+      {footerGroups.map((group) => (
+        <_Table.Row {...group.getFooterGroupProps()}>
+          {group.headers.map((column) => (
+            <_Table.Cell
+              {...column.getFooterProps({ ...column?.footerCellProps })}
+            >
+              {column.render("Footer")}
+            </_Table.Cell>
+          ))}
+        </_Table.Row>
+      ))}
+    </_Table.Foot>
   )
 }
 

@@ -1,14 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
-import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
-} from "reakit/Tab"
 import {
   Spinner,
   Stack,
@@ -36,13 +28,13 @@ import AlertDialog from "../../dialog/Alert"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 import { useEditPlayerPassword } from "./client"
 import { SubmitCancel } from "../../button/ActionButtons"
+import { Tab as _Tab, TabPanel } from "../../tab"
 
 export const Key = "password"
 
 export const Tab = (props = {}) => {
-  let tabProps = _Tabs.Tab.useProps()
   return (
-    <_Tab {...tabProps} {...props} id={Key}>
+    <_Tab tabId={Key} {...props}>
       <Trans zh="修改密码" en="Update Password" />
     </_Tab>
   )
@@ -74,7 +66,7 @@ export const Panel = ({
   }
 
   return (
-    <_TabPanel {...props} id={Key}>
+    <TabPanel tabId={Key} {...props}>
       {error && <AlertDialog {...error} onClickClose={clearResult} />}
       <Formik
         initialValues={{
@@ -85,7 +77,7 @@ export const Panel = ({
       >
         <EditForm isLoading={isLoading} onClickClose={onClickClose} />
       </Formik>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 

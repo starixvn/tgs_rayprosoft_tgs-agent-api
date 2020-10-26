@@ -129,6 +129,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.Name = request.Name;
             user.RoleId = request.RoleId;
             user.DepartmentId = request.DepartmentId;
+            user.Status = request.Status;
             user.UpdatedByUsername = Username;
             user.UpdatedOn = DateTimeOffset.Now;
 
