@@ -81,8 +81,8 @@ export const FormattedDateTime = ({
   return <Text>{formatted}</Text>
 }
 
-export const FormattedNumber = ({ value }) => {
-  return Number.isFinite(value) && <Text>{numeral(value).format("0,0")}</Text>
+export const FormattedNumber = ({ value, format = "0,0" }) => {
+  return Number.isFinite(value) && <Text>{numeral(value).format(format)}</Text>
 }
 
 export const getTrans = (messages = {}, locale = Locales.zh) =>

@@ -149,3 +149,20 @@ export const useOperations = ({ playerCode, searchParams = {} }) => {
     mutate
   }
 }
+
+export const useBettings = ({ playerCode, searchParams = {} }) => {
+  let url = playerCode
+    ? urlWith(searchParams, `/api/player/${playerCode}/bettings`)
+    : null
+
+  const { data, error, isValidating, mutate } = useSWR(url, get)
+
+  return {
+    data: data ?? {},
+    isLoading: !error && !data,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}
