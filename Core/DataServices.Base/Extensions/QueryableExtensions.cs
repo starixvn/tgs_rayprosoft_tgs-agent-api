@@ -11,19 +11,15 @@ namespace TGS.Core.DataServices.Base.Extensions
 {
     public static class QueryableExtensions
     {
-        private static readonly MethodInfo OrderByMethod =
-            (from x in typeof(Queryable).GetMethods()
-                where x.Name == "OrderBy"
+        private static MethodInfo OrderByMethod(bool isDesc)
+        {
+            var name = isDesc ? "OrderByDescending" : "OrderBy";
+            return (from x in typeof(Queryable).GetMethods()
+                where x.Name == name
                 let pars = x.GetParameters()
                 where pars.Length == 2
                 select x).Single();
-
-        private static readonly MethodInfo OrderByDescendingMethod =
-            (from x in typeof(Queryable).GetMethods()
-                where x.Name == "OrderByDescending"
-                let pars = x.GetParameters()
-                where pars.Length == 2
-                select x).Single();
+        }
 
         public static async Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IQueryable<TModel> query,
             PageableRequest request)
@@ -96,12 +92,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
             var lambda = Expression.Lambda(orderByProperty, parameter);
 
-            MethodInfo genericMethod;
-
-            if (descending)
-                genericMethod = OrderByDescendingMethod.MakeGenericMethod(typeof(TSource), orderByProperty.Type);
-            else
-                genericMethod = OrderByMethod.MakeGenericMethod(typeof(TSource), orderByProperty.Type);
+            var genericMethod = OrderByMethod(descending).MakeGenericMethod(typeof(TSource), orderByProperty.Type);
 
             var result = genericMethod.Invoke(null, new object[] {source, lambda});
 
