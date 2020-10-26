@@ -1,14 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
-import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
-} from "reakit/Tab"
 import {
   Icon,
   Spinner,
@@ -22,10 +14,6 @@ import {
   Label,
   Input,
   Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Tabs as _Tabs,
   Dialog,
   Modal,
   Table,
@@ -43,13 +31,13 @@ import {
 } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import Backdrop from "../../dialog/Backdrop"
+import { Tab as _Tab, TabPanel } from "../../tab"
 
 export const Key = "banks"
 
 export const Tab = ({ ...props }) => {
-  let tabProps = _Tabs.Tab.useProps()
   return (
-    <_Tab {...tabProps} {...props} id={Key}>
+    <_Tab tabId={Key} {...props}>
       <Trans zh="银行卡信息" en="Bank" />
     </_Tab>
   )
@@ -63,8 +51,8 @@ export const Panel = ({
   ...props
 }) => {
   return (
-    <_TabPanel {...props} id={Key}>
-      <TwoColumns margin="major-1">
+    <TabPanel tabId={Key} {...props}>
+      <TwoColumns>
         {banks.map((bank, index) => (
           <Bank
             key={index}
@@ -76,7 +64,7 @@ export const Panel = ({
         ))}
       </TwoColumns>
       {edit && <AddBank playerCode={playerCode} />}
-    </_TabPanel>
+    </TabPanel>
   )
 }
 

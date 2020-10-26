@@ -3,12 +3,6 @@ import { css, Global } from "@emotion/core"
 import { useEditPlayerContact } from "./client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
-} from "reakit/Tab"
-import {
   Spinner,
   Stack,
   Flex,
@@ -20,13 +14,6 @@ import {
   Label,
   Input,
   Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Tabs as _Tabs,
-  Dialog,
-  Modal,
-  Table,
   useClassName
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
@@ -38,13 +25,13 @@ import {
 } from "../../input/Field"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
+import { Tab as _Tab, TabPanel } from "../../tab"
 
 export const Key = "contact"
 
 export const Tab = ({ ...props }) => {
-  let tabProps = _Tabs.Tab.useProps()
   return (
-    <_Tab {...tabProps} {...props} id={Key}>
+    <_Tab tabId={Key} {...props}>
       <Trans zh="联系信息" en="Contact Info" />
     </_Tab>
   )
@@ -53,8 +40,8 @@ export const Tab = ({ ...props }) => {
 export const Panel = ({ player = {}, ...props }) => {
   let { phone, email, qq, weChat } = player
   return (
-    <_TabPanel {...props} id={Key}>
-      <FieldValues margin="major-2" spacing="major-2">
+    <TabPanel tabId={Key} {...props}>
+      <FieldValues spacing="major-2">
         <MobileLabel />
         <Text>{phone}</Text>
 
@@ -67,7 +54,7 @@ export const Panel = ({ player = {}, ...props }) => {
         <WeChatLabel />
         <Text>{weChat}</Text>
       </FieldValues>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 
@@ -94,7 +81,7 @@ export const EditPanel = ({
   const clearResult = () => setSubmit(null)
   let { phone, email, qq, weChat } = player
   return (
-    <_TabPanel {...props} id={Key}>
+    <TabPanel tabId={Key} {...props}>
       {error && <AlertDialog {...error} onClickClose={clearResult} />}
       <Formik
         initialValues={{
@@ -109,7 +96,7 @@ export const EditPanel = ({
           <FormBody onClickClose={onClickClose} />
         </Form>
       </Formik>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 

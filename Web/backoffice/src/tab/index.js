@@ -1,42 +1,50 @@
 import React, { useState, useEffect, useMemo, useRef, useContext } from "react"
 import { css, Global } from "@emotion/core"
-import useSWR from "swr"
-import { useEditPlayerInfo } from "./client"
-import { Formik, Field, Form, useFormikContext } from "formik"
-/*
 import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
+  useTabState as useReakitTabState,
+  Tab as ReakitTab,
+  TabList as ReakitTabList,
+  TabPanel as ReakitTabPanel
 } from "reakit/Tab"
-*/
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Label,
-  Input,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  Select as _Select,
-  Tabs as _Tabs,
-  Dialog,
-  Modal,
-  Table,
-  useClassName,
-  ActionButtons
-} from "bumbag"
-export { Panel } from "./Panel"
+import { Box, Tabs as BumbagTabs, useClassName } from "bumbag"
 
-export const useTabsState = _Tabs.useState
+export const useTabState = useReakitTabState
 
-//export const useTabsProps = _Tabs.useProps
+export const Tabs = ({ use = Box, children, ...props }) => {
+  return (
+    <BumbagTabs use={use} {...props}>
+      {children}
+    </BumbagTabs>
+  )
+}
 
-export const Tabs = _Tabs
+export const TabList = ({ use = TabList, children, ...props }) => {
+  return (
+    <BumbagTabs.List use={ReakitTabList} {...props}>
+      {children}
+    </BumbagTabs.List>
+  )
+}
+
+export const Tab = ({ tabId, children, ...props }) => {
+  let tabProps = BumbagTabs.Tab.useProps({ tabId })
+  return (
+    <ReakitTab {...tabProps} {...props}>
+      {children}
+    </ReakitTab>
+  )
+}
+
+export const TabPanel = ({
+  tabId,
+  padding = "major-2",
+  children,
+  ...props
+}) => {
+  let panelProps = BumbagTabs.Panel.useProps({ tabId, padding })
+  return (
+    <ReakitTabPanel {...panelProps} {...props}>
+      {children}
+    </ReakitTabPanel>
+  )
+}

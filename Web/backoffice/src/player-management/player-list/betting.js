@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
-import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
-} from "reakit/Tab"
 import { Spinner, Stack, Text, Box, Button, Set, Tabs as _Tabs } from "bumbag"
 import { Trans, FormattedNumber } from "../../i18n"
 import format from "../../date/format"
@@ -21,12 +14,13 @@ import { useBettings } from "./client"
 import equals from "fast-deep-equal"
 import dateTimeColumn from "../../table/column/dateTime"
 import BettingDetail from "./BettingDetailButton"
+import { Tab as _Tab, TabPanel } from "../../tab"
+
 export const Key = "betting"
 
 export const Tab = ({ ...props }) => {
-  let tabProps = _Tabs.Tab.useProps()
   return (
-    <_Tab {...tabProps} {...props} id={Key}>
+    <_Tab tabId={Key} {...props}>
       <Trans zh="投注记录" en="Betting records" />
     </_Tab>
   )
@@ -69,8 +63,8 @@ export const Panel = ({ playerCode, ...props }) => {
   let columns = useColumns()
 
   return (
-    <_TabPanel {...props} id={Key}>
-      <Stack margin="major-2" spacing="major-2">
+    <TabPanel tabId={Key} {...props}>
+      <Stack spacing="major-2">
         {isActive && (
           <SearchBar
             gameType={gameType}
@@ -111,7 +105,7 @@ export const Panel = ({ playerCode, ...props }) => {
           foot
         />
       </Stack>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 

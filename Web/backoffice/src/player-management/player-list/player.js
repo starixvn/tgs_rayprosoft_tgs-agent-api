@@ -4,12 +4,6 @@ import useSWR from "swr"
 import { useEditPlayerInfo } from "./client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
-} from "reakit/Tab"
-import {
   Spinner,
   Stack,
   Flex,
@@ -24,12 +18,10 @@ import {
   FieldStack,
   FieldWrapper,
   Select as _Select,
-  Tabs as _Tabs,
   Dialog,
   Modal,
   Table,
-  useClassName,
-  ActionButtons
+  useClassName
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
@@ -39,13 +31,13 @@ import { Field as VipLevelField } from "../../vip-level/field"
 import { Field as _Field, FieldMinHeight } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
+import { Tab as _Tab, TabPanel } from "../../tab"
 
 export const Key = "player"
 
 export const Tab = ({ ...props }) => {
-  let tabProps = _Tabs.Tab.useProps()
   return (
-    <_Tab {...tabProps} {...props} id={Key}>
+    <_Tab tabId={Key} {...props}>
       <Trans zh="玩家信息" en="Player" />
     </_Tab>
   )
@@ -91,7 +83,7 @@ export const EditPanel = ({
     hasAgent
   } = player
   return (
-    <_TabPanel {...props} id={Key}>
+    <TabPanel tabId={Key} {...props}>
       {error && <AlertDialog {...error} onClickClose={clearResult} />}
       <Formik
         initialValues={{
@@ -109,7 +101,7 @@ export const EditPanel = ({
           onClickClose={onClickClose}
         />
       </Formik>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 
@@ -197,8 +189,8 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
   let turnOnLabel = useTurnOnLabel()
   let turnOffLabel = useTurnOffLabel()
   return (
-    <_TabPanel {...props} id={Key}>
-      <FieldValues margin="major-2" spacing="major-2">
+    <TabPanel tabId={Key} {...props}>
+      <FieldValues spacing="major-2">
         <UserNameLabel />
         <Text>{username}</Text>
 
@@ -240,7 +232,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
           </Text>
         </Box>
       </FieldValues>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 

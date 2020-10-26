@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
-import { useTabState, Tab, TabList, TabPanel } from "reakit/Tab"
-import { Box, Tabs as _Tabs } from "bumbag"
+import { Box } from "bumbag"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
@@ -27,6 +26,7 @@ import { usePlayer } from "./client"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
+import { Tabs, TabList, useTabState } from "../../tab"
 
 export const ViewButton = ({ player, ...props }) => {
   let dialog = useModalState()
@@ -153,20 +153,20 @@ const TabsDialog = ({
 
 const ViewTabs = ({ playerCode, player, tab }) => {
   return (
-    <_Tabs use={Box} isFitted css={css``}>
-      <_Tabs.List use={TabList} {...tab}>
+    <Tabs isFitted>
+      <TabList use={TabList} {...tab}>
         <PlayerTab {...tab} />
         <ContractTab {...tab} />
         <BankTab {...tab} />
         <BettingTab {...tab} />
         <OperationTab {...tab} />
-      </_Tabs.List>
+      </TabList>
       <PlayerPanel player={player} {...tab} />
       <ContractPanel player={player} {...tab} />
       <BankPanel banks={player.banks} {...tab} />
       <BettingPanel playerCode={playerCode} {...tab} />
       <OperationPanel playerCode={playerCode} {...tab} />
-    </_Tabs>
+    </Tabs>
   )
 }
 
@@ -179,13 +179,13 @@ const EditTabs = ({
   onClickClose
 }) => {
   return (
-    <_Tabs use={Box} isFitted>
-      <_Tabs.List use={TabList} {...tab}>
+    <Tabs isFitted>
+      <TabList use={TabList} {...tab}>
         <PlayerTab {...tab} />
         <ContractTab {...tab} />
         <BankTab {...tab} />
         <PasswordTab {...tab} />
-      </_Tabs.List>
+      </TabList>
       <PlayerEditTab
         player={player}
         playerCode={playerCode}
@@ -212,6 +212,6 @@ const EditTabs = ({
         onSubmitted={onSubmitted}
         {...tab}
       />
-    </_Tabs>
+    </Tabs>
   )
 }
