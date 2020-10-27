@@ -23,13 +23,18 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         private const string MarketDepartment = "市場";
         private const string ProductDepartment = "產品";
 
+        private static readonly Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
+        {
+            {MarketDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB")},
+            {ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA")}
+        };
+
         private readonly IHashProvider _hashProvider;
         private readonly IBackendOfficeRepository _repository;
 
-        private static readonly Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
+        private readonly IRole[] _roles =
         {
-            { MarketDepartment , new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB") },
-            { ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA") }
+            new AdminRole(), new ResellerAdminRole()
         };
 
         public DataInitializer(IBackendOfficeRepository repository)
@@ -40,22 +45,17 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             _hashProvider = new HashProvider(config);
         }
 
-        private readonly IRole[] _roles =
-        {
-            new AdminRole(), new ResellerAdminRole()
-        };
-
         async Task IDataInitializer.SetInitialDataAsync()
         {
-            if (_repository.Users.Any())
-            {
-                return;
-            }
+            if (_repository.Users.Any()) return;
 
             await GenerateDepartmentsAsync();
             await GenerateRolesAsync();
             await GenerateUsersAsync();
             await GenerateSettingsAsync();
+            await GeneratePaymentVendorsAsync();
+            //await GeneratePaymentMethodsAsync();
+            //await GeneratePaymentChannelsAsync();
         }
 
         private Task GenerateDepartmentsAsync()
@@ -107,16 +107,18 @@ VALUES
             {
                 var args = new[]
                 {
-                    new SqlParameter { ParameterName = "@id", Value = role.Id, DbType = DbType.Guid },
-                    new SqlParameter { ParameterName = "@roleType", Value = (int)role.RoleType, DbType = DbType.Int16 },
-                    new SqlParameter { ParameterName = "@name", Value = role.Name, DbType = DbType.String },
-                    new SqlParameter { ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String },
-                    new SqlParameter { ParameterName = "@displayName", Value = role.Name, DbType = DbType.String },
+                    new SqlParameter {ParameterName = "@id", Value = role.Id, DbType = DbType.Guid},
+                    new SqlParameter {ParameterName = "@roleType", Value = (int) role.RoleType, DbType = DbType.Int16},
+                    new SqlParameter {ParameterName = "@name", Value = role.Name, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@displayName", Value = role.Name, DbType = DbType.String},
 
-                    new SqlParameter { ParameterName = "@description", Value = role.DisplayName, DbType = DbType.String },
-                    new SqlParameter { ParameterName = "@status", Value = role.Status, DbType = DbType.String },
-                    new SqlParameter { ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String },
-                    new SqlParameter { ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String }
+                    new SqlParameter {ParameterName = "@description", Value = role.DisplayName, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@status", Value = role.Status, DbType = DbType.String},
+                    new SqlParameter
+                        {ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String},
+                    new SqlParameter
+                        {ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String}
                 };
 
                 await _repository.ExecuteSqlCommandAsync(command, CommandType.Text, parameters: args);
@@ -157,8 +159,9 @@ VALUES
                 CreateUser("admin.locked", UserStatus.Locked, Roles.Admin, Departments[ProductDepartment])
             };
 
-            users.AddRange(usernames.Select(username => CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
-            
+            users.AddRange(usernames.Select(username =>
+                CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
+
             return _repository.BulkInsertAsync(users);
         }
     }

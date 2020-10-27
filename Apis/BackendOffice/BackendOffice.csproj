@@ -56,6 +56,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Common.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\PaymentChannel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PaymentChannel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\PaymentMethod.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PaymentMethod.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\PaymentVendor.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PaymentVendor.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Player.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -92,6 +107,18 @@
     <EmbeddedResource Update="Resources\Department.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Department.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PaymentChannel.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PaymentChannel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PaymentMethod.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PaymentMethod.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PaymentVendor.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PaymentVendor.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\StationLetter.resx">
       <LastGenOutput>StationLetter.Designer.cs</LastGenOutput>

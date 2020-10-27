@@ -13,7 +13,6 @@ using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
-using Setting = TGS.Apis.BackendOffice.DataService.Models.Setting;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
@@ -28,6 +27,11 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         DbSet<Role> IBackendOfficeRepository.Roles { get; set; }
         DbSet<Setting> IBackendOfficeRepository.Settings { get; set; }
         DbSet<Department> IBackendOfficeRepository.Departments { get; set; }
+        DbSet<PaymentVendor> IBackendOfficeRepository.PaymentVendors { get; set; }
+        DbSet<PaymentMethod> IBackendOfficeRepository.PaymentMethods { get; set; }
+        DbSet<PaymentChannel> IBackendOfficeRepository.PaymentChannels { get; set; }
+        DbSet<Payment> IBackendOfficeRepository.Payments { get; set; }
+        DbSet<UserPaymentAccessControl> IBackendOfficeRepository.UserPaymentAccessControls { get; set; }
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
@@ -49,21 +53,14 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             Database.SetCommandTimeout(seconds);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.ApplyConfiguration(new UserMap());
-            modelBuilder.ApplyConfiguration(new RoleMap());
-            modelBuilder.ApplyConfiguration(new SettingMap());
-            modelBuilder.ApplyConfiguration(new DepartmentMap());
-        }
-
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+            where T : class
         {
             return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
+            Action<decimal> progress) where T : class
         {
             return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
@@ -86,18 +83,30 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                          Database.GetPendingMigrations().Any();
+                            Database.GetPendingMigrations().Any();
 
-            if (isMigrate)
-            {
-                await Database.MigrateAsync();
-            }
+            if (isMigrate) await Database.MigrateAsync();
 
             if (addSeeding)
             {
                 IDataInitializer data = new DataInitializer(this);
                 await data.SetInitialDataAsync();
             }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("dbo");
+            modelBuilder.ApplyConfiguration(new UserMap());
+            modelBuilder.ApplyConfiguration(new RoleMap());
+            modelBuilder.ApplyConfiguration(new SettingMap());
+            modelBuilder.ApplyConfiguration(new DepartmentMap());
+            modelBuilder.ApplyConfiguration(new PaymentVendorMap());
+            modelBuilder.ApplyConfiguration(new PaymentMethodMap());
+            modelBuilder.ApplyConfiguration(new PaymentChannelMap());
+            modelBuilder.ApplyConfiguration(new PaymentMap());
+
+            modelBuilder.Entity<UserPaymentAccessControl>();
         }
     }
 }
