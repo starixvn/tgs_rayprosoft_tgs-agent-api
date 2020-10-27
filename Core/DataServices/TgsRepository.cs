@@ -20,7 +20,7 @@ namespace TGS.Core.DataServices
         DbSet<Game> ITgsRepository.Games { get; set; }
         DbSet<GameProvider> ITgsRepository.GameProviders { get; set; }
         DbSet<GameProviderConfiguration> ITgsRepository.GameProviderConfigurations { get; set; }
-        DbSet<LicenseeGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
+        DbSet<LicenseeGameProvider> ITgsRepository.LicenseeGameProviders { get; set; }
         DbSet<ResellerCurrency> ITgsRepository.ResellerCurrencies { get; set; }
         DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
         DbSet<Currency> ITgsRepository.Currencies { get; set; }

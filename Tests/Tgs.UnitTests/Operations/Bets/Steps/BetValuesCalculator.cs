@@ -156,9 +156,14 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
         private static bool? ParseNullableBool(TableRow row, string name)
         {
             var s = row[name].ToLowerInvariant().Trim();
-            if (s == "yes" || s == "true") return true;
-            if (s == "no" || s == "false") return false;
-            return null;
+            return s switch
+            {
+                "yes"   => true,
+                "true"  => true,
+                "no"    => false,
+                "false" => false,
+                _       => null
+            };
         }
 
         private static void ValidateTotals(IList<BetActionData> previousInput, IList<BetValuesResult> previousOutput, BetValuesCalculatorRow current)

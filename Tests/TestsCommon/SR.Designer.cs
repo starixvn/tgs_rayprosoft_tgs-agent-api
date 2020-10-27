@@ -97,6 +97,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ExternalGameId.
+        /// </summary>
+        public static string ExternalGameId {
+            get {
+                return ResourceManager.GetString("ExternalGameId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ExternalRoundId.
         /// </summary>
         public static string ExternalRoundId {
@@ -133,11 +142,38 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LicenseeCode.
+        /// </summary>
+        public static string LicenseeCode {
+            get {
+                return ResourceManager.GetString("LicenseeCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LoginTime.
         /// </summary>
         public static string LoginTime {
             get {
                 return ResourceManager.GetString("LoginTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PlaceBetRequest.
+        /// </summary>
+        public static string PlaceBetRequest {
+            get {
+                return ResourceManager.GetString("PlaceBetRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PlatformType.
+        /// </summary>
+        public static string PlatformType {
+            get {
+                return ResourceManager.GetString("PlatformType", resourceCulture);
             }
         }
         
@@ -210,6 +246,15 @@ namespace TGS.Tests.TestsCommon {
         public static string UserBalance {
             get {
                 return ResourceManager.GetString("UserBalance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        public static string Username {
+            get {
+                return ResourceManager.GetString("Username", resourceCulture);
             }
         }
     }

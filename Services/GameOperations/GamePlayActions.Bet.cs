@@ -117,11 +117,18 @@ namespace TGS.Services.GameOperations
                         $"Licensee {player.LicenseeCode} doesn't have game with id '{id}'");
                 }
 
-                if (validGameStatus.All(s => s != cachedGame.Status))
+                if (validGameStatus.Any(s => s == cachedGame.Status))
                 {
-                    throw new InvalidOperationException(
-                        $"Licensee {player.LicenseeCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}'");
+                    continue;
                 }
+
+                if (cachedGame.Status == GameStatus.Maintenance)
+                {
+                    throw new GameUnderMaintenanceException(cachedGame.ExternalId);
+                }
+
+                throw new InvalidOperationException(
+                    $"Licensee {player.LicenseeCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}' but game status is '{cachedGame.Status}'");
             }
         }
 
