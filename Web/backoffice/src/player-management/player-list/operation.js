@@ -2,12 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import { Formik, Field } from "formik"
 import {
-  useTabState,
-  Tab as _Tab,
-  TabList,
-  TabPanel as _TabPanel
-} from "reakit/Tab"
-import {
   Spinner,
   Stack,
   Flex,
@@ -18,14 +12,7 @@ import {
   Text,
   Label,
   Input,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Tabs as _Tabs,
-  Dialog,
-  Modal,
-  useClassName
+  Checkbox
 } from "bumbag"
 import { useTable, Table, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -33,21 +20,23 @@ import { useOperations } from "./client"
 import { Trans } from "../../i18n"
 import format from "../../date/format"
 import { pastWeek } from "../../date/range"
-import RangeInput from "../../date/RangeInput"
+import DateTimeRangeInput from "../../date/RangeInput"
 import SearchButton from "../../button/Search"
+import { Tab as _Tab, TabPanel } from "../../tab"
 
 export const Key = "operation"
 
 export const Tab = ({ ...props }) => {
-  let tabProps = _Tabs.Tab.useProps()
   return (
-    <_Tab {...tabProps} {...props} id={Key}>
+    <_Tab tabId={Key} {...props}>
       <Trans zh="操作记录" en="Operating records" />
     </_Tab>
   )
 }
 
 export const Panel = ({ playerCode, ...props }) => {
+  let { selectedId } = props
+  let isActive = selectedId === Key
   let dateRange = pastWeek()
   let { state, setState, setPageIndex, setSortOrder } = useTable({
     from: dateRange.start,
@@ -55,7 +44,7 @@ export const Panel = ({ playerCode, ...props }) => {
   })
   let { pageIndex, pageSize, sortby, orderby, from, to } = state
   let { data = {}, isLoading, mutate } = useOperations({
-    playerCode,
+    playerCode: isActive && playerCode,
     searchParams: {
       page: pageIndex + 1,
       rows: pageSize,
@@ -68,8 +57,8 @@ export const Panel = ({ playerCode, ...props }) => {
   let columns = useColumns()
 
   return (
-    <_TabPanel {...props} id={Key}>
-      <Stack margin="major-2" spacing="major-2">
+    <TabPanel tabId={Key} {...props}>
+      <Stack spacing="major-2">
         <SearchBar
           start={from}
           end={to}
@@ -94,7 +83,7 @@ export const Panel = ({ playerCode, ...props }) => {
           isLoading={isLoading}
         />
       </Stack>
-    </_TabPanel>
+    </TabPanel>
   )
 }
 
@@ -110,7 +99,7 @@ const SearchBar = ({
 
   return (
     <Set>
-      <RangeInput
+      <DateTimeRangeInput
         start={start}
         end={end}
         validate

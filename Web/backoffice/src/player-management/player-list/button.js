@@ -2,28 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
 import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
-import { useTabState, Tab, TabList, TabPanel } from "reakit/Tab"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button as _Button,
-  Text,
-  Label,
-  Input,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Tabs as _Tabs,
-  Dialog,
-  Modal,
-  Table,
-  useClassName
-} from "bumbag"
+import { Box } from "bumbag"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
@@ -45,9 +24,12 @@ import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { usePlayer } from "./client"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
+import Disclosure from "../../dialog/Disclosure"
+import { Modal, useModalState } from "../../dialog/Modal"
+import { Tabs, TabList, useTabState } from "../../tab"
 
 export const ViewButton = ({ player, ...props }) => {
-  let dialog = Modal.useState()
+  let dialog = useModalState()
   let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
@@ -57,16 +39,9 @@ export const ViewButton = ({ player, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={_Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        {...dialog}
-      >
+      <Disclosure ref={disclosureRef} {...dialog}>
         <Trans zh="查看" en="View" />
-      </Modal.Disclosure>
+      </Disclosure>
       {dialog.visible && (
         <TabsDialog
           playerCode={player.playerCode}
@@ -79,7 +54,7 @@ export const ViewButton = ({ player, ...props }) => {
 }
 
 export const EditButton = ({ player, onSubmitted, ...props }) => {
-  let dialog = Modal.useState()
+  let dialog = useModalState()
   let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -89,16 +64,9 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={_Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        {...dialog}
-      >
+      <Disclosure ref={disclosureRef} {...dialog}>
         <Trans zh="修改" en="Edit" />
-      </Modal.Disclosure>
+      </Disclosure>
       {dialog.visible && (
         <TabsDialog
           edit={true}
@@ -150,19 +118,17 @@ const TabsDialog = ({
       {isLoading && <LoadingBackdrop />}
       {isError && <AlertDialog {...error} onClickClose={onClickClose} />}
       {player && (
-        <Dialog.Modal
+        <Modal
           title={title}
-          showCloseButton={true}
-          hideOnClickOutside={false}
-          unstable_finalFocusRef={finalFocusRef}
+          finalFocusRef={finalFocusRef}
           placement="top"
           {...dialog}
           css={css`
             min-width: 80vw;
-            min-height: 80vh;
+            min-height: 85vh;
 
             & .bb-DialogContent {
-              min-height: 80vh;
+              min-height: 85vh;
             }
           `}
         >
@@ -179,7 +145,7 @@ const TabsDialog = ({
               onClickClose={onClickClose}
             />
           )}
-        </Dialog.Modal>
+        </Modal>
       )}
     </>
   )
@@ -187,20 +153,20 @@ const TabsDialog = ({
 
 const ViewTabs = ({ playerCode, player, tab }) => {
   return (
-    <_Tabs use={Box} isFitted css={css``}>
-      <_Tabs.List use={TabList} {...tab}>
+    <Tabs isFitted>
+      <TabList use={TabList} {...tab}>
         <PlayerTab {...tab} />
         <ContractTab {...tab} />
         <BankTab {...tab} />
         <BettingTab {...tab} />
         <OperationTab {...tab} />
-      </_Tabs.List>
+      </TabList>
       <PlayerPanel player={player} {...tab} />
       <ContractPanel player={player} {...tab} />
       <BankPanel banks={player.banks} {...tab} />
       <BettingPanel playerCode={playerCode} {...tab} />
       <OperationPanel playerCode={playerCode} {...tab} />
-    </_Tabs>
+    </Tabs>
   )
 }
 
@@ -213,13 +179,13 @@ const EditTabs = ({
   onClickClose
 }) => {
   return (
-    <_Tabs use={Box} isFitted css={css``}>
-      <_Tabs.List use={TabList} {...tab}>
+    <Tabs isFitted>
+      <TabList use={TabList} {...tab}>
         <PlayerTab {...tab} />
         <ContractTab {...tab} />
         <BankTab {...tab} />
         <PasswordTab {...tab} />
-      </_Tabs.List>
+      </TabList>
       <PlayerEditTab
         player={player}
         playerCode={playerCode}
@@ -246,6 +212,6 @@ const EditTabs = ({
         onSubmitted={onSubmitted}
         {...tab}
       />
-    </_Tabs>
+    </Tabs>
   )
 }

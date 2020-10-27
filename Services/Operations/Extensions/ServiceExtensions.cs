@@ -34,6 +34,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<ISettingQueries, SettingQueries>();
 
             services.AddFactory<IGameActionQueries, GameActionQueries>();
+            services.AddFactory<IRoundQueries, RoundQueries>();
 
             #endregion
 

@@ -1,98 +1,114 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import { Select as _Select, Text } from "bumbag"
+import { Select as _Select } from "bumbag"
 import { Field as _Field } from "../../select/Field"
-import { useTrans } from "../../i18n"
+import { Trans, useTrans } from "../../i18n"
 
 const Disabled = 0
-
-const DisabledString = "Disabled"
+const DisabledName = "Disabled"
+const DisabledTrans = {
+  zh: "封锁",
+  en: DisabledName
+}
 
 const Enabled = 1
-
-const EnabledString = "Enabled"
+const EnabledName = "Enabled"
+const EnabledTrans = {
+  zh: "活跃",
+  en: "Enabled"
+}
 
 const Archived = 2
-
-const ArchivedString = "Archived"
+const ArchivedName = "Archived"
+const ArchivedTrans = {
+  zh: "封存",
+  en: "Archived"
+}
 
 const Locked = 3
+const LockedName = "Locked"
+const LockedTrans = {
+  zh: "锁定",
+  en: "Locked"
+}
 
-const LockedString = "Locked"
-
+//string -> number
 export const from = (value) => {
-  if (value === DisabledString || value === `${Disabled}`) {
-    return Disabled
+  switch (value) {
+    case DisabledName:
+    case `${Disabled}`:
+      return Disabled
+
+    case EnabledName:
+    case `${Enabled}`:
+      return Enabled
+
+    case ArchivedName:
+    case `${Archived}`:
+      return Archived
+
+    case LockedName:
+    case `${Locked}`:
+      return Locked
+
+    default:
+      return value
   }
-  if (value === EnabledString || value === `${Enabled}`) {
-    return Enabled
+}
+
+export const Label = ({ value }) => {
+  switch (value) {
+    case Disabled:
+    case DisabledName:
+      return <Trans {...DisabledTrans} />
+
+    case Enabled:
+    case EnabledName:
+      return <Trans {...EnabledTrans} />
+
+    case Archived:
+    case ArchivedName:
+      return <Trans {...ArchivedTrans} />
+
+    case Locked:
+    case LockedName:
+      return <Trans {...LockedTrans} />
+
+    default:
+      return value
   }
-  return value
 }
 
 export const Select = ({ name, required, ...props }) => {
-  let enabledString = useEnabledLabel()
   let enabled = {
-    label: enabledString,
-    value: EnabledString
+    label: useTrans(EnabledTrans),
+    value: EnabledName
   }
 
-  let disabledString = useDisabledLabel()
   let disabled = {
-    label: disabledString,
-    value: DisabledString
+    label: useTrans(DisabledTrans),
+    value: DisabledName
+  }
+
+  let locked = {
+    label: useTrans(LockedTrans),
+    value: LockedName
   }
 
   let options = required
-    ? [enabled, disabled]
+    ? [enabled, disabled, locked]
     : [
         {
           label: "",
           value: null
         },
         enabled,
-        disabled
+        disabled,
+        locked
       ]
   return (
     <_Field name={name} required={required}>
       {(props) => <_Select options={options} {...props} />}
     </_Field>
   )
-}
-
-const useEnabledLabel = () =>
-  useTrans({
-    zh: "活跃",
-    en: EnabledString
-  })
-
-const useDisabledLabel = () =>
-  useTrans({
-    zh: "封锁",
-    en: DisabledString
-  })
-
-export const Label = ({ value }) => {
-  let enabledLabel = useEnabledLabel()
-  let disabledLabel = useDisabledLabel()
-
-  if (value === EnabledString) {
-    return <Text.Block>{enabledLabel}</Text.Block>
-  }
-
-  if (value === DisabledString) {
-    return <Text.Block>{disabledLabel}</Text.Block>
-  }
-
-  if (value === ArchivedString) {
-    //TODO: i18n
-    return <Text.Block>{ArchivedString}</Text.Block>
-  }
-
-  if (value === LockedString) {
-    //TODO: i18n
-    return <Text.Block>{LockedString}</Text.Block>
-  }
-
-  return ""
 }
