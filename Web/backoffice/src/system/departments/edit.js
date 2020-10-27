@@ -1,27 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import { Formik, Field, Form, useFormikContext } from "formik"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Input,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Dialog,
-  Modal,
-  Hide,
-  useClassName
-} from "bumbag"
-import LoadingBackdrop from "../../dialog/LoadingBackdrop"
-import AlertDialog from "../../dialog/Alert"
+import { Stack, Modal } from "bumbag"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Field as InputField } from "../../input/Field"
@@ -30,11 +9,10 @@ import { useAddDepartment, useEditDepartment } from "./client"
 import Label from "../../form/Label"
 import { FieldValues } from "../../layout/Grid"
 import FormDialog from "../../form/Dialog"
+import Disclosure from "../../dialog/Disclosure"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
-
   let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
     return null
@@ -42,28 +20,17 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        {...dialog}
-      >
+      <Disclosure {...dialog}>
         <Trans zh="新增" en="Add" />
-      </Modal.Disclosure>
-      <AddDialog
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-      />
+      </Disclosure>
+      <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
     </>
   )
 }
 
-const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
+const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useAddDepartment({
+  let { result, error, isLoading } = useAddDepartment({
     data: submitData
   })
 
@@ -89,7 +56,6 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
     >
       <EditBody />
     </FormDialog>
@@ -107,8 +73,6 @@ const EditBody = () => (
 
 export const EditButton = ({ id = "", name = "", onSubmitted, ...props }) => {
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
-
   let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
   if (!isDisplay) {
     return null
@@ -116,37 +80,22 @@ export const EditButton = ({ id = "", name = "", onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        {...dialog}
-      >
+      <Disclosure {...dialog}>
         <Trans zh="修改" en="Edit" />
-      </Modal.Disclosure>
+      </Disclosure>
       <EditDialog
         id={id}
         name={name}
         onSubmitted={onSubmitted}
         dialog={dialog}
-        finalFocusRef={disclosureRef}
       />
     </>
   )
 }
 
-const EditDialog = ({
-  id,
-  name = "",
-  dialog,
-  onSubmitted,
-  finalFocusRef,
-  ...props
-}) => {
+const EditDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useEditDepartment({
+  let { result, error, isLoading } = useEditDepartment({
     id,
     data: submitData
   })
@@ -163,7 +112,7 @@ const EditDialog = ({
   return (
     <FormDialog
       initialValues={{
-        name: ""
+        name
       }}
       onSubmit={setSubmit}
       isLoading={isLoading}
@@ -173,7 +122,6 @@ const EditDialog = ({
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
     >
       <EditBody />
     </FormDialog>

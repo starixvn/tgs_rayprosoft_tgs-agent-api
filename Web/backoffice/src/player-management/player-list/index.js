@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
-import { useLocation, useRouteMatch } from "react-router-dom"
 import {
   Heading,
   Stack,

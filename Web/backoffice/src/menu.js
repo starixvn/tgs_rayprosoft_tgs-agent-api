@@ -11,6 +11,11 @@ import { useMenuCodes } from "./user/context"
 import { SideNav } from "bumbag"
 import memoize from "fast-memoize"
 import { codeMenuContentPair as platformPair } from "./platform"
+import {
+  Code as PlatformCode,
+  nameMessage as PlatformNameMessages,
+  codeLabelPair as platformLabelPair
+} from "./platform/menu"
 import { codeMenuContentPair as playerManagementPair } from "./player-management"
 import {
   Code as PlayerManagementCode,
@@ -64,11 +69,7 @@ const MenuItem = ({ code, path, itemLabel, ...props }) => {
   )
 }
 
-const pairs = () => [
-  // platformPair,
-  playerManagementPair,
-  systemPair
-]
+const pairs = () => [platformPair, playerManagementPair, systemPair]
 
 export const AllMenus = ({ codes }) => {
   let authCodes = useMenuCodes()
@@ -80,7 +81,11 @@ export const AllMenus = ({ codes }) => {
 export const useLabel = ({ codes = [] }) => {
   let locale = useLocale()
   let label = moduleLabel
-  let subLabelPairs = [playerManagementLabelPair, systemLabelPair]
+  let subLabelPairs = [
+    playerManagementLabelPair,
+    systemLabelPair,
+    platformLabelPair
+  ]
   return findlLabel({
     locale,
     codes,
@@ -105,6 +110,8 @@ export const findlLabel = ({ locale, codes = [], label, subLabelPairs }) => {
 
 const moduleLabel = ({ code = "", locale }) => {
   switch (code) {
+    case PlatformCode:
+      return getTrans(PlatformNameMessages, locale)
     case PlayerManagementCode:
       return getTrans(PlayerManagementNameMessages, locale)
     case SystemCode:
@@ -137,16 +144,3 @@ export const find = (path = [], list = []) => {
 }
 
 export const memoizedFind = memoize(find)
-
-//TODO: rm
-export const findMenuLabel = (toLabel, subMenuList) => (codes = []) => {
-  let [code, ...subMenuCodes] = codes
-  code = code.toLowerCase()
-  if (subMenuCodes.length === 0) {
-    return toLabel(code)
-  }
-
-  let subMenuCodeLabelList = subMenuList()
-  let [, subMenuLabel] = subMenuCodeLabelList.find(([id]) => id === code) ?? []
-  return (subMenuLabel && subMenuLabel(subMenuCodes)) ?? ""
-}
