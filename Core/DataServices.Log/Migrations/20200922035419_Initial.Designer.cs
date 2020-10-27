@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TGS.Apis.LogApi.DataService;
+using TGS.Core.DataServices.Log;
 
-namespace TGS.Apis.LogApi.Migrations
+namespace TGS.Core.DataServices.Log.Migrations
 {
     [DbContext(typeof(LogRepository))]
     [Migration("20200922035419_Initial")]

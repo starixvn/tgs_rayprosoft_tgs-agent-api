@@ -11,6 +11,16 @@ namespace TGS.Core.DataServices.Base.Extensions
 {
     public static class QueryableExtensions
     {
+        private static MethodInfo OrderByMethod(bool isDesc)
+        {
+            var name = isDesc ? "OrderByDescending" : "OrderBy";
+            return (from x in typeof(Queryable).GetMethods()
+                where x.Name == name
+                let pars = x.GetParameters()
+                where pars.Length == 2
+                select x).Single();
+        }
+
         public static async Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IQueryable<TModel> query,
             PageableRequest request)
         {
@@ -37,6 +47,27 @@ namespace TGS.Core.DataServices.Base.Extensions
             };
         }
 
+        public static Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IEnumerable<TModel> query,
+            int totalCount)
+        {
+            return Task.FromResult(new PagedResponse<TModel>
+            {
+                Valid = true,
+                TotalCount = totalCount,
+                Items = query.ToArray()
+            });
+        }
+
+        public static PagedArray<T> ToPagedArray<T>(this IQueryable<T> query, int page, int pageSize)
+        {
+            var totalCount = query.Count();
+            page = page <= 0 ? 0 : page - 1;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+            var items = query.Skip(page * pageSize).Take(pageSize).ToArray();
+            return new PagedArray<T>(totalCount, items);
+        }
+
+
         public static async Task<PagedArray<T>> ToPagedArrayAsync<T>(this IQueryable<T> query, int page, int pageSize)
         {
             var totalCount = await query.CountAsync();
@@ -49,58 +80,31 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption)
         {
             if (!string.IsNullOrEmpty(sortOption.PropertyName))
-            {
                 return query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending);
-            }
             return query;
         }
 
-        public static IQueryable<TSource> OrderByProperty<TSource>(this IQueryable<TSource> source, string propertyName, bool descending)
+        public static IQueryable<TSource> OrderByProperty<TSource>(this IQueryable<TSource> source, string propertyName,
+            bool descending)
         {
-            ParameterExpression parameter = Expression.Parameter(typeof(TSource), "t");
+            var parameter = Expression.Parameter(typeof(TSource), "t");
             Expression orderByProperty = Expression.Property(parameter, propertyName);
 
-            LambdaExpression lambda = Expression.Lambda(orderByProperty, new[] { parameter });
+            var lambda = Expression.Lambda(orderByProperty, parameter);
 
-            MethodInfo genericMethod;
+            var genericMethod = OrderByMethod(descending).MakeGenericMethod(typeof(TSource), orderByProperty.Type);
 
-            if (@descending)
-            {
-                genericMethod = OrderByDescendingMethod.MakeGenericMethod(typeof(TSource), orderByProperty.Type);
-            }
-            else
-            {
-                genericMethod = OrderByMethod.MakeGenericMethod(typeof(TSource), orderByProperty.Type);
-            }
+            var result = genericMethod.Invoke(null, new object[] {source, lambda});
 
-            object result = genericMethod.Invoke(null, new object[] { source, lambda });
-
-            return (IQueryable<TSource>)result;
+            return (IQueryable<TSource>) result;
         }
-
-        private static readonly MethodInfo OrderByMethod =
-            (from x in typeof(Queryable).GetMethods()
-             where x.Name == "OrderBy"
-             let pars = x.GetParameters()
-             where pars.Length == 2
-             select x).Single();
-
-        private static readonly MethodInfo OrderByDescendingMethod =
-            (from x in typeof(Queryable).GetMethods()
-             where x.Name == "OrderByDescending"
-             let pars = x.GetParameters()
-             where pars.Length == 2
-             select x).Single();
 
 
         // Where extension for filters of any nullable type
         public static IQueryable<TSource> Where<TSource, TFilter>(this IQueryable<TSource> source, TFilter? filter,
             Expression<Func<TSource, bool>> predicate) where TFilter : struct
         {
-            if (filter.HasValue)
-            {
-                source = source.Where(predicate);
-            }
+            if (filter.HasValue) source = source.Where(predicate);
 
             return source;
         }
@@ -109,22 +113,17 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<TSource> Where<TSource>(this IQueryable<TSource> source, string filter,
             Expression<Func<TSource, bool>> predicate)
         {
-            if (!string.IsNullOrWhiteSpace(filter))
-            {
-                source = source.Where(predicate);
-            }
+            if (!string.IsNullOrWhiteSpace(filter)) source = source.Where(predicate);
 
             return source;
         }
 
         // Where extension for collection filters
-        public static IQueryable<TSource> Where<TSource, TFilter>(this IQueryable<TSource> source, IEnumerable<TFilter> filter,
+        public static IQueryable<TSource> Where<TSource, TFilter>(this IQueryable<TSource> source,
+            IEnumerable<TFilter> filter,
             Expression<Func<TSource, bool>> predicate)
         {
-            if (filter != null && filter.Any())
-            {
-                source = source.Where(predicate);
-            }
+            if (filter != null && filter.Any()) source = source.Where(predicate);
 
             return source;
         }
@@ -132,10 +131,7 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<TSource> Where<TSource>(this IQueryable<TSource> source, bool isFiltered,
             Expression<Func<TSource, bool>> predicate)
         {
-            if (isFiltered)
-            {
-                source = source.Where(predicate);
-            }
+            if (isFiltered) source = source.Where(predicate);
 
             return source;
         }
