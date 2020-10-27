@@ -14,7 +14,7 @@ namespace TGS.Core.DataServices
 
         DbSet<Reseller> Resellers { get; set; }
 
-        DbSet<LicenseeGameProvider> ResellerGameProviders { get; set; }
+        DbSet<LicenseeGameProvider> LicenseeGameProviders { get; set; }
 
         DbSet<ResellerCurrency> ResellerCurrencies { get; set; }
 
