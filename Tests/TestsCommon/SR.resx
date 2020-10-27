@@ -129,6 +129,9 @@
   <data name="ErrorResponse" xml:space="preserve">
     <value>ErrorResponse</value>
   </data>
+  <data name="ExternalGameId" xml:space="preserve">
+    <value>ExternalGameId</value>
+  </data>
   <data name="ExternalRoundId" xml:space="preserve">
     <value>ExternalRoundId</value>
   </data>
@@ -141,8 +144,17 @@
   <data name="Licensee" xml:space="preserve">
     <value>Licensee</value>
   </data>
+  <data name="LicenseeCode" xml:space="preserve">
+    <value>LicenseeCode</value>
+  </data>
   <data name="LoginTime" xml:space="preserve">
     <value>LoginTime</value>
+  </data>
+  <data name="PlaceBetRequest" xml:space="preserve">
+    <value>PlaceBetRequest</value>
+  </data>
+  <data name="PlatformType" xml:space="preserve">
+    <value>PlatformType</value>
   </data>
   <data name="PlayerCode" xml:space="preserve">
     <value>PlayerCode</value>
@@ -167,5 +179,8 @@
   </data>
   <data name="UserBalance" xml:space="preserve">
     <value>UserBalance</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
   </data>
 </root>

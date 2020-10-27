@@ -3,7 +3,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore.Migrations;
 using TGS.Core.DataServices.Base.Extensions;
 
-namespace TGS.Apis.LogApi.Migrations
+namespace TGS.Core.DataServices.Log.Migrations
 {
     public partial class Initial : Migration
     {

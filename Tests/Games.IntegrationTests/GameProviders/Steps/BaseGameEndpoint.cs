@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,9 +12,11 @@ using TechTalk.SpecFlow;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Bet;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
@@ -29,8 +33,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
         }
 
-        protected async Task PlayerLoginAsync(string username, PlatformType platformType, string licenseeCode,
-            IServiceProvider serviceProvider)
+        protected async Task PlayerLoginAsync(IServiceProvider serviceProvider, string username,
+            PlatformType platformType, string licenseeCode)
         {
             var loginTimeCacheKey = $"{SR.LoginTime}:{username}:{platformType}";
 
@@ -73,7 +77,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlatformType = platformType
             }, headers);
 
+            Set(SR.LicenseeCode, licenseeCode);
             Set(SR.PlayerCode, res.PlayerCode);
+            Set(SR.Username, username);
+            Set(SR.PlatformType, platformType);
             Set(loginTimeCacheKey, res.LoginTime);
         }
 
@@ -85,18 +92,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var sql = "UPDATE Wallets SET Balance=@balance WHERE PlayerCode=@playerCode";
             await db.ExecuteSqlCommandAsync(sql, CommandType.Text, parameters: new SqlParameter[]
             {
-                new()
+                new ()
                 {
-                   ParameterName = "@balance",
-                   Value = balance,
-                   DbType = DbType.Decimal
+                    ParameterName = "@balance",
+                    Value = balance,
+                    DbType = DbType.Decimal
                 },
-                new()
+                new ()
                 {
                     ParameterName = "@playerCode",
                     Value = playerCode,
                     DbType = DbType.String
-                },
+                }
             });
         }
 
@@ -114,6 +121,129 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var json = serviceProvider.GetRequiredService<IJsonSerializationProvider>();
             return json.DeserializeFromString<T>(setting.Value);
+        }
+
+        protected static async Task DeauthorizePlayerAsync(IServiceProvider serviceProvider, string playerCode)
+        {
+            var db = GetDb<ITgsRepository>(serviceProvider);
+
+            var records = await db.PlayerLoginRecords
+                .Where(r => r.PlayerCode == playerCode).ToArrayAsync();
+
+            foreach (var r in records)
+            {
+                r.Status = LoginStatus.Deauthorized;
+            }
+
+            await db.SaveChangesAsync();
+
+            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+            await cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, playerCode);
+        }
+
+        protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)
+        {
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var db = GetDb<IBetRepository>(serviceProvider);
+            var status = await db.Rounds.Where(r => r.ExternalRoundId == externalRoundId)
+                .Select(r => r.Status)
+                .FirstAsync();
+
+            status.Should().Be(expectedStatus);
+        }
+
+        protected async Task ChangeGameProviderStatusAsync(IServiceProvider serviceProvider,
+            string gameProviderCode, Status status)
+        {
+            if (!HasTag("ChangeGameProviderStatus"))
+            {
+                return;
+            }
+
+            var db = GetDb<ITgsRepository>(serviceProvider);
+
+            var gameProvider = await db.GameProviders.FirstAsync(gp => gp.Code == gameProviderCode);
+            gameProvider.Status = status;
+
+            await db.SaveChangesAsync();
+
+            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+            await cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
+        }
+        
+        protected async Task ChangeGameProviderConfigurationStatusAsync(IServiceProvider serviceProvider, string gameProviderCode, Status status)
+        {
+            if (!HasTag("ChangeGameProviderConfigurationStatus"))
+            {
+                return;
+            }
+
+            var licenseeCode = Get<string>(SR.LicenseeCode);
+
+            var db = GetDb<ITgsRepository>(serviceProvider);
+
+            var gameProviderConfiguration = await (
+                from lgpc in db.LicenseeGameProviderConfigurations
+                join licensee in from l in db.Licensees where l.Code == licenseeCode select l
+                    on lgpc.LicenseeId equals licensee.Id
+                join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
+                    on lgpc.GameProviderId equals gameProvider.Id
+                join gpc in db.GameProviderConfigurations
+                    on lgpc.GameProviderConfigurationId equals gpc.Id
+                select gpc).FirstAsync();
+
+            gameProviderConfiguration.Status = status;
+
+            await db.SaveChangesAsync();
+
+            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+            await cacheManager.ClearCacheAsync(RedisCacheType.GameProviderConfiguration, gameProviderConfiguration.GameProviderId);
+        }
+        
+        protected async Task ChangeGameStatusAsync(IServiceProvider serviceProvider, string gameProviderCode, string externalGameId, GameStatus gameStatus)
+        {
+            if (!HasTag("ChangeGameStatus"))
+            {
+                return;
+            }
+
+            var platformType = Get<PlatformType>(SR.PlatformType);
+
+            var db = GetDb<ITgsRepository>(serviceProvider);
+
+            var game = await (
+                from g in db.Games 
+                join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
+                    on g.GameProviderId equals gameProvider.Id
+                where g.ExternalId == externalGameId && g.PlatformType == platformType
+                select g).FirstAsync();
+
+            game.Status = gameStatus;
+
+            await db.SaveChangesAsync();
+
+            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+            await cacheManager.ClearCacheAsync(RedisCacheType.Games, game.GameProviderId);
+        }
+
+        protected async Task ChangeLicenseeStatusAsync(IServiceProvider serviceProvider, Status status)
+        {
+            if (!HasTag("ChangeLicenseeStatus"))
+            {
+                return;
+            }
+
+            var licenseeCode = Get<string>(SR.LicenseeCode);
+
+            var db = GetDb<ITgsRepository>(serviceProvider);
+
+            var licensee = await db.Licensees.FirstAsync(l => l.Code == licenseeCode);
+            licensee.Status = status;
+
+            await db.SaveChangesAsync();
+
+            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+            await cacheManager.ClearCacheAsync(RedisCacheType.Licensee, licensee.Id);
         }
 
         #region Private Methods

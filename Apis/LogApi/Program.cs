@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
-using TGS.Apis.LogApi.DataService;
+using TGS.Core.DataServices.Log;
 
 namespace TGS.Apis.LogApi
 {

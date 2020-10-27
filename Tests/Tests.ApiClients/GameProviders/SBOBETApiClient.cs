@@ -13,11 +13,15 @@ namespace TGS.Tests.ApiClients.GameProviders
     {
         Task<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
         Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
+        Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request);
+        Task<CancelBetResponse> CancelBetAsync(CancelBetRequest request);
+        Task<RollbackResponse> CancelSettleAsync(RollbackRequest request);
+        Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request);
     }
 
-    public sealed class SBOBETApiClient :  BaseApiClient, ISBOBETApiClient
+    public sealed class SBOBETApiClient : BaseApiClient, ISBOBETApiClient
     {
-        public SBOBETApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) 
+        public SBOBETApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
             : base(client, logger, json)
         {
         }
@@ -25,7 +29,20 @@ namespace TGS.Tests.ApiClients.GameProviders
         Task<GetBalanceResponse> ISBOBETApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
             ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, "api/GetBalance", request);
 
-        Task<PlaceBetResponse> ISBOBETApiClient.PlaceBetAsync(PlaceBetRequest request) => 
+        Task<PlaceBetResponse> ISBOBETApiClient.PlaceBetAsync(PlaceBetRequest request) =>
             ExecuteJsonRequestAsync<PlaceBetRequest, PlaceBetResponse>(HttpMethod.Post, "api/Deduct", request);
+
+        Task<SettleBetResponse> ISBOBETApiClient.SettleBetAsync(SettleBetRequest request) =>
+            ExecuteJsonRequestAsync<SettleBetRequest, SettleBetResponse>(HttpMethod.Post, "api/Settle", request);
+
+        Task<CancelBetResponse> ISBOBETApiClient.CancelBetAsync(CancelBetRequest request) =>
+            ExecuteJsonRequestAsync<CancelBetRequest, CancelBetResponse>(HttpMethod.Post, "api/Cancel", request);
+
+        Task<RollbackResponse> ISBOBETApiClient.CancelSettleAsync(RollbackRequest request) =>
+            ExecuteJsonRequestAsync<RollbackRequest, RollbackResponse>(HttpMethod.Post, "api/Rollback", request);
+
+        Task<GetBetStatusResponse> ISBOBETApiClient.GetBetStatusAsync(GetBetStatusRequest request) =>
+            ExecuteJsonRequestAsync<GetBetStatusRequest, GetBetStatusResponse>(HttpMethod.Post, "api/GetBetStatus",
+                request);
     }
 }
