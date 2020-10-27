@@ -17,7 +17,8 @@ using TGS.Tests.BackendOffice.UnitTests.Controllers;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     public class StartupTests : BaseTests
     {
         [Test]
@@ -30,16 +31,17 @@ namespace TGS.Tests.BackendOffice.UnitTests
             configurationSectionStub.Setup(x => x["Tgs"])
                 .Returns("server=localhost;database=Tgs;user=sa;password=1qaz2wsx!@");
 
+            configurationSectionStub.Setup(x => x["Log"])
+                .Returns("server=localhost;database=Tgs;user=sa;password=1qaz2wsx!@");
+
             var urls = new Mock<IConfigurationSection>();
             configurationSectionStub.Setup(x => x["Urls"])
                 .Returns("nats://localhost:4222");
 
             var configurationStub = new Mock<IConfiguration>();
-            configurationStub.Setup(x => x.GetSection("ConnectionStrings")).
-                Returns(configurationSectionStub.Object);
+            configurationStub.Setup(x => x.GetSection("ConnectionStrings")).Returns(configurationSectionStub.Object);
 
-            configurationStub.Setup(x => x.GetSection("NatsSetting")).
-                Returns(urls.Object);
+            configurationStub.Setup(x => x.GetSection("NatsSetting")).Returns(urls.Object);
 
             var envStub = new Mock<IWebHostEnvironment>();
             var services = new ServiceCollection();
@@ -57,10 +59,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var serviceProvider = services.BuildServiceProvider();
 
-            foreach (var controller in controllers.Select(controllerType => serviceProvider.GetRequiredService(controllerType)))
-            {
-                controller.Should().NotBe(null);
-            }
+            foreach (var controller in controllers.Select(controllerType =>
+                serviceProvider.GetRequiredService(controllerType))) controller.Should().NotBe(null);
         }
 
         private void SetupHttpContext()
@@ -93,11 +93,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
         {
             _authServiceMock = new Mock<IAuthenticationService>();
             _authServiceMock
-                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(),
+                    It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
             _authServiceMock
-                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
+                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
             var serviceProviderMock = new Mock<IServiceProvider>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using TechTalk.SpecFlow;
 
 namespace TGS.Tests.TestsCommon
@@ -20,11 +21,14 @@ namespace TGS.Tests.TestsCommon
 
         protected T Set<T>(string key, T value)
         {
-            _context.Add(key, value);
+            _context[key] = value;
             return value;
         }
 
         protected bool Remove(string key) =>
             _context.Remove(key);
+
+        protected bool HasTag(string tag) =>
+            _context.ScenarioInfo.Tags.Contains(tag);
     }
 }

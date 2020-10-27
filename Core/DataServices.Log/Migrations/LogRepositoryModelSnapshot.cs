@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TGS.Apis.LogApi.DataService;
+using TGS.Core.DataServices.Log;
 
-namespace TGS.Apis.LogApi.Migrations
+namespace TGS.Core.DataServices.Log.Migrations
 {
     [DbContext(typeof(LogRepository))]
     partial class LogRepositoryModelSnapshot : ModelSnapshot
@@ -20,7 +20,7 @@ namespace TGS.Apis.LogApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.AdminLog", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Log.Models.AdminLog", b =>
                 {
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("datetimeoffset");
@@ -79,7 +79,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("nvarchar(128)")
                         .IsUnicode(true);
 
                     b.Property<string>("StackTrace")
@@ -94,7 +94,7 @@ namespace TGS.Apis.LogApi.Migrations
                     b.ToTable("AdminLogs","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ApiLog", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Log.Models.ApiLog", b =>
                 {
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("datetimeoffset");
@@ -150,7 +150,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("nvarchar(128)")
                         .IsUnicode(true);
 
                     b.Property<Guid>("TrackingId")
@@ -161,7 +161,7 @@ namespace TGS.Apis.LogApi.Migrations
                     b.ToTable("ApiLogs","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.LogRecord", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Log.Models.LogRecord", b =>
                 {
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("datetimeoffset");
@@ -188,7 +188,7 @@ namespace TGS.Apis.LogApi.Migrations
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(64)")
+                        .HasColumnType("nvarchar(128)")
                         .IsUnicode(true);
 
                     b.Property<Guid>("TrackingId")
@@ -199,7 +199,7 @@ namespace TGS.Apis.LogApi.Migrations
                     b.ToTable("LogRecords","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Apis.LogApi.DataService.Models.ServiceLog", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Log.Models.ServiceLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

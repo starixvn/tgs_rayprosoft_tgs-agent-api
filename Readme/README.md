@@ -11,7 +11,7 @@ add-migration <MigrationName> -c TgsRepository -p DataServices -s TgsApi
 add-migration <MigrationName> -c BetRepository -p  DataServices.Bet -s TgsApi
 
 #Log
-add-migration <MigrationName> -c LogRepository -p LogApi -s LogApi
+add-migration <MigrationName> -c LogRepository -p DataServices.Log -s LogApi
 
 #Backend Office
 add-migration <MigrationName> -c BackendOfficeRepository -p BackendOffice -s BackendOffice

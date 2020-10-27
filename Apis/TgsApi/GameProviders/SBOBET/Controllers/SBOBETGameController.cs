@@ -1,4 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
+// ReSharper disable IdentifierTypo
 
 using System;
 using System.Net.Mime;
@@ -6,10 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -25,11 +28,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
     [FeatureGate(GameProviderConst.SBOBET)]
     public sealed class SBOBETGameController : ControllerBase
     {
+        private static readonly GameActionType[] SettleGameActionTypes = {WinBet, LoseBet, TieBet, FreeBet};
         private readonly IGamePlayActions _actions;
         private readonly ISBOBETGameControllerMapper _map;
         private readonly ISBOBETServices _services;
-
-        private static readonly GameActionType[] SettleGameActionTypes = { WinBet, LoseBet, TieBet, FreeBet };
 
         public SBOBETGameController(
             IGamePlayActions actions,
@@ -62,9 +64,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         public async Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
+            var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
 
-            var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(data.GameProviderId, request.PlayerCode, externalRoundId, SettleGameActionTypes);
+            var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, externalRoundId);
+            var gameActionExternalIds = roundStatus == RoundStatus.Closed
+                ? Array.Empty<GameActionExternalIds>()
+                : await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
+                    SettleGameActionTypes);
 
             var betData = _map.Request(data, externalRoundId, request, gameActionExternalIds);
             var r = await _actions.SettleBetAsync(betData);
@@ -83,11 +90,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 
         [Route("Rollback")]
         public async Task<RollbackResponse> CancelSettleAsync(RollbackRequest request)
-        { 
+        {
             var data = await _services.GetGameProviderConfigurationDataAsync();
 
+            var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
-            var gameActionExternalIds = await _services.GetValidGameActionExternalIdsAsync(data.GameProviderId, request.PlayerCode, externalRoundId);
+
+            var gameActionExternalIds =
+                await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode,
+                    externalRoundId, SettleGameActionTypes);
 
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);
@@ -98,7 +109,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         public async Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
-            var ga = await _services.GetValidGameActionsAsync(data.GameProviderId, request.PlayerCode, request.ExternalRoundId);
+            var ga = await _services.GetValidGameActionsAsync(data.GameProviderId, request.PlayerCode,
+                request.ExternalRoundId);
 
             if (ga == null)
             {
@@ -108,21 +120,33 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             }
 
             return _map.Response(request, ga);
-        }        
+        }
 
         #region Private Methods
 
-        private async Task<CancelBetResponse> CancelBetAsync(GameProviderConfigurationData data, CancelBetRequest request)
+        private async Task<CancelBetResponse> CancelBetAsync(GameProviderConfigurationData data,
+            CancelBetRequest request)
         {
             var betData = _map.Request(data, request);
             var r = await _actions.CancelTransactionAsync(betData);
             return _map.Response(request, r);
         }
 
-        private async Task<CancelBetResponse> VoidRoundAsync(GameProviderConfigurationData data, CancelBetRequest request)
+        private async Task<CancelBetResponse> VoidRoundAsync(GameProviderConfigurationData data,
+            CancelBetRequest request)
         {
-            var gameActionExternalIds = await _services.GetValidGameActionExternalIdsAsync(data.GameProviderId, request.PlayerCode, request.ExternalRoundId);
+            var gameProviderId = data.GameProviderId;
+            var externalRoundId = request.ExternalRoundId;
+            var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, externalRoundId);
+            var gameActionExternalIds =
+                await _services.GetValidGameActionExternalIdsAsync(gameProviderId, request.PlayerCode,
+                    request.ExternalRoundId);
 
+            if (roundStatus == RoundStatus.Closed && gameActionExternalIds.Length == 0)
+            {
+                return _map.Response<CancelBetResponse>(request.PlayerCode, GameApiError.BetAlreadyCanceled);
+            }
+            
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);
             return _map.Response(request, r);

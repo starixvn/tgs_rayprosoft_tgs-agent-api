@@ -22,7 +22,7 @@ namespace TGS.Tests.TestsCommon.Extensions
         public static IEnumerable<T> CreateList<T>(this Table table, Func<TableRow, T> methodToCreateEachInstance)
         {
             return table.Rows
-                .Select(row => methodToCreateEachInstance(row));
+                .Select(methodToCreateEachInstance);
         }
     }
 
