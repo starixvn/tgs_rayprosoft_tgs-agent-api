@@ -47,9 +47,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet, Description("Get station letters")]
-        public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] PageableRequest request)
+        public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
         {
             return _queries.GetQueries()
+                .Where(p=>p.Status == request.Status)
                 .Select(a => new StationLetterModel
                 {
                     Id = a.Id,

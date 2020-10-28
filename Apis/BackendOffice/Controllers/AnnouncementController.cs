@@ -32,9 +32,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet, Description("Get announcements")]
-        public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] PageableRequest request)
+        public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
             return _queries.GetQueries()
+                .Where(p=>p.Status == request.Status)
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
