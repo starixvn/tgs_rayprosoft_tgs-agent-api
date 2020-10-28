@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Generics;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 
@@ -20,6 +22,14 @@ namespace TGS.Services.Operations.Queries
         Task<CachedLicenseeGame[]> GetLicenseeGamesAsync(Guid licenseeId);
 
         Task<Guid> GetLicenseeIdByClientIdAsync(string clientId);
+
+        Task<Dictionary<string, string>> GetLicenseeLanguagesByExternalCodeAsync(Guid licenseeId);
+        
+        Task<Dictionary<string, string>> GetLicenseeLanguagesByInternalCodeAsync(Guid licenseeId);
+        
+        Task<Dictionary<string, string>> GetLicenseeCurrenciesByExternalCodeAsync(Guid licenseeId);
+        
+        Task<Dictionary<string, string>> GetLicenseeCurrenciesByInternalCodeAsync(Guid licenseeId);
     }
 
     public sealed class LicenseeQueries : ILicenseeQueries
@@ -80,6 +90,61 @@ namespace TGS.Services.Operations.Queries
         {
             return _repository.Licensees.Where(l => l.ClientId == clientId)
                 .Select(l => l.Id).FirstOrDefaultAsync();
+        }
+
+        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeLanguagesByExternalCodeAsync(Guid licenseeId)
+        {
+            const string spName = "usp_Licensee_GetLanguagesByExternalCode";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@licenseeId",
+                Value = licenseeId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
+        }
+
+        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeLanguagesByInternalCodeAsync(Guid licenseeId)
+        {
+            const string spName = "usp_Licensee_GetLanguagesByInternalCode";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@licenseeId",
+                Value = licenseeId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
+
+        }
+
+        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeCurrenciesByExternalCodeAsync(Guid licenseeId)
+        {
+            const string spName = "usp_Licensee_GetCurrenciesByExternalCode";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@licenseeId",
+                Value = licenseeId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
+
+        }
+
+        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeCurrenciesByInternalCodeAsync(Guid licenseeId)
+        {
+            const string spName = "usp_Licensee_GetCurrenciesByInternalCode";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
+            {
+                ParameterName = "@licenseeId",
+                Value = licenseeId,
+                DbType = DbType.Guid
+            });
+
+            return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
+
         }
     }
 }

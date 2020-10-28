@@ -22,6 +22,8 @@ namespace TGS.Services.Operations.Extensions
 
             services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
             services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
+            services.AddScoped<ILicenseeCurrencyCodeMapper, LicenseeCurrencyCodeMapper>();
+            services.AddScoped<ILicenseeLanguageCodeMapper, LicenseeLanguageCodeMapper>();
 
             #endregion
 
