@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Bet.Models
         public Guid GameProviderConfigurationId { get; set; }
         public Guid WalletId { get; set; }
         public Guid RoundId { get; set; }
-        public Round Round { get; set; }
+        public virtual Round Round { get; set; }
         public string ExternalTransactionId { get; set; }
         public GameActionType Type { get; set; }
         public decimal Amount { get; set; }
@@ -22,9 +22,9 @@ namespace TGS.Core.DataServices.Bet.Models
         public string ExternalBetId { get; set; }
         public string ExternalGameActionGroupId { get; set; }
         public Guid? ReferencedGameActionId { get; set; }
-        public GameAction ReferencedGameAction { get; set; }
+        public virtual GameAction ReferencedGameAction { get; set; }
         public Guid? GameActionBatchId { get; set; }
-        public GameActionBatch GameActionBatch { get; set; }
+        public virtual GameActionBatch GameActionBatch { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
         public DateTimeOffset? SentOn { get; set; }
         public bool IsClosingRound { get; set; }

@@ -6,10 +6,10 @@ namespace TGS.Core.DataServices.Models
     {
         public int BetLimitGroupId { get; set; }
 
-        public BetLimitGroup BetLimitGroup { get; set; }
+        public virtual BetLimitGroup BetLimitGroup { get; set; }
 
         public Guid LicenseeId { get; set; }
 
-        public Licensee Licensee { get; set; }
+        public virtual Licensee Licensee { get; set; }
     }
 }

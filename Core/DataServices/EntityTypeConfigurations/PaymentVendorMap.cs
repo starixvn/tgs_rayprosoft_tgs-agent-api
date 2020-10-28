@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Models;
 
-namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class PaymentMethodMap : IEntityTypeConfiguration<PaymentMethod>
+    public class PaymentVendorMap : IEntityTypeConfiguration<PaymentVendor>
     {
-        void IEntityTypeConfiguration<PaymentMethod>.Configure(EntityTypeBuilder<PaymentMethod> builder)
+        void IEntityTypeConfiguration<PaymentVendor>.Configure(EntityTypeBuilder<PaymentVendor> builder)
         {
-            builder.ToTable("PaymentMethods", "dbo");
+            builder.ToTable("PaymentVendors", "dbo");
 
             builder.HasKey(p => p.Id);
 
@@ -22,8 +22,14 @@ namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
                 .IsRequired();
 
             builder.HasMany(p => p.PaymentChannels)
-                .WithOne(p => p.PaymentMethod)
-                .HasForeignKey(p => p.PaymentMethodId);
+                .WithOne(u => u.PaymentVendor)
+                .HasForeignKey(p => p.PaymentVendorId)
+                .IsRequired().OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(p => p.PaymentMethods)
+                .WithOne(p => p.PaymentVendor)
+                .HasForeignKey(p => p.PaymentVendorId)
+                .IsRequired().OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))

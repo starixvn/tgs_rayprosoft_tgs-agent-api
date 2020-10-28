@@ -4,16 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentVendor;
-using TGS.Apis.BackendOffice.DataService.Commands;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -21,19 +17,16 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class PaymentChannelController : BaseContextController
     {
-        private readonly IBackendOfficeCommands<PaymentChannel> _commands;
-        private readonly IPaymentVendorCommands _paymentVendorCommands;
-        private readonly IBackendOfficeQueries<PaymentChannel> _queries;
+        private readonly ITgsCommands<PaymentChannel> _commands;
+        private readonly ITgsQueries<PaymentChannel> _queries;
 
         public PaymentChannelController(
-            IBackendOfficeQueries<PaymentChannel> queries,
-            IBackendOfficeCommands<PaymentChannel> commands,
-            IPaymentVendorCommands paymentVendorCommands,
+            ITgsQueries<PaymentChannel> queries,
+            ITgsCommands<PaymentChannel> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
             _commands = commands;
-            _paymentVendorCommands = paymentVendorCommands;
         }
 
 
@@ -42,23 +35,33 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<PaymentChannelModel>> GetPaymentChannelsAsync(
             [FromQuery] PaymentChannelsRequest request)
         {
-            return _queries.GetQueries().Select(q => new PaymentChannelModel
-            {
-                Id = q.Id,
-                Code = q.Code,
-                Description = q.Description,
-                CreatedByUsername = q.CreatedByUsername,
-                UpdatedByUsername = q.UpdatedByUsername,
-                CreatedOn = q.CreatedOn,
-                UpdatedOn = q.UpdatedOn
-            }).CreatePagedResponseAsync(request);
+            return _queries.GetQueries()
+                .Include(pc => pc.PaymentVendor)
+                .Include(pc => pc.PaymentMethod)
+                .Where(request.Code, q => q.Code == request.Code)
+                .Select(q => new PaymentChannelModel
+                {
+                    Id = q.Id,
+                    Code = q.Code,
+                    Name = q.Name,
+                    PaymentVendorCode = q.PaymentVendor.Code,
+                    PaymentMethodCode = q.PaymentMethod.Code,
+                    Description = q.Description,
+                    CreatedByUsername = q.CreatedByUsername,
+                    UpdatedByUsername = q.UpdatedByUsername,
+                    CreatedOn = q.CreatedOn,
+                    UpdatedOn = q.UpdatedOn
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
         [Description("Get a PaymentChannel")]
         public async Task<GetPaymentChannelResponse> GetPaymentChannelAsync(Guid id)
         {
-            var channel = await _queries.GetSingleAsync(q => q.Id == id);
+            var channel = await _queries.GetSingleAsync(q => q.Id == id,
+                p => p
+                    .Include(pc => pc.PaymentVendor)
+                    .Include(pc => pc.PaymentMethod));
 
             return new GetPaymentChannelResponse
             {
@@ -67,6 +70,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     Id = channel.Id,
                     Code = channel.Code,
+                    Name = channel.Name,
+                    PaymentVendorCode = channel.PaymentVendor.Code,
+                    PaymentMethodCode = channel.PaymentMethod.Code,
                     Description = channel.Description,
                     CreatedOn = channel.CreatedOn,
                     UpdatedOn = channel.UpdatedOn,

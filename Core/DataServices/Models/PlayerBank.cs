@@ -9,6 +9,6 @@ namespace TGS.Core.DataServices.Models
         public string Username { get; set; }
         public string BankName { get; set; }
         public string BankAccount { get; set; }
-        public Player Player { get; set; }
+        public virtual Player Player { get; set; }
     }
 }

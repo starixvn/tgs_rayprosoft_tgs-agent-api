@@ -29,24 +29,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PaymentVendors",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentVendors", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Roles",
                 schema: "dbo",
                 columns: table => new
@@ -84,32 +66,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Settings", x => x.Key);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PaymentChannels",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    PaymentVendorId = table.Column<Guid>(nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentChannels", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PaymentChannels_PaymentVendors_PaymentVendorId",
-                        column: x => x.PaymentVendorId,
-                        principalSchema: "dbo",
-                        principalTable: "PaymentVendors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,12 +112,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PaymentChannels_PaymentVendorId",
-                schema: "dbo",
-                table: "PaymentChannels",
-                column: "PaymentVendorId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_DepartmentId",
                 schema: "dbo",
                 table: "Users",
@@ -177,19 +127,11 @@ namespace TGS.Apis.BackendOffice.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PaymentChannels",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
                 name: "Settings",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "Users",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "PaymentVendors",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

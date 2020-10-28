@@ -53,9 +53,6 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             await GenerateRolesAsync();
             await GenerateUsersAsync();
             await GenerateSettingsAsync();
-            await GeneratePaymentVendorsAsync();
-            //await GeneratePaymentMethodsAsync();
-            //await GeneratePaymentChannelsAsync();
         }
 
         private Task GenerateDepartmentsAsync()

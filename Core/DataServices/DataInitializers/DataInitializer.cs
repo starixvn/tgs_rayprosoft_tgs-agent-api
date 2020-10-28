@@ -18,12 +18,7 @@ namespace TGS.Core.DataServices.DataInitializers
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : IDataInitializer
     {
-        private readonly ITgsRepository _repository;
-        private readonly IHashProvider _hashProvider;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
-
-        private readonly StringBuilder _logBuilder = new StringBuilder();
 
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
@@ -38,7 +33,26 @@ namespace TGS.Core.DataServices.DataInitializers
             new TgsReseller()
         };
 
-        private readonly IDictionary<string, GameProvider> _gameProvidersCreated = new Dictionary<string, GameProvider>();
+        private readonly IDictionary<string, GameProvider> _gameProvidersCreated =
+            new Dictionary<string, GameProvider>();
+
+        private readonly IHashProvider _hashProvider;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+
+        private readonly StringBuilder _logBuilder = new StringBuilder();
+        private readonly ITgsRepository _repository;
+
+        private readonly VipLevel[] _vipLevels =
+        {
+            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A"},
+            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B"},
+            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C"},
+            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D"},
+            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E"},
+            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
+        };
+
+        private Player[] players;
 
         public DataInitializer(ITgsRepository repository)
         {
@@ -51,10 +65,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         async Task IDataInitializer.SetInitialDataAsync()
         {
-            if (_repository.Players.Any())
-            {
-                return;
-            }
+            if (_repository.Players.Any()) return;
 
             var timer = new Stopwatch();
             timer.Start();
@@ -67,6 +78,7 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateResellersAndLicenseesAsync, _logBuilder);
             await LogSeedingTimeAsync(GeneratePlayersAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
+            await LogSeedingTimeAsync(GeneratePaymentAsync, _logBuilder);
 
             timer.Stop();
 
@@ -77,46 +89,39 @@ namespace TGS.Core.DataServices.DataInitializers
         private Task GenerateCurrenciesAsync()
         {
             var currencies = new[]
-            {
-                new { Code = "CNY", Name = "Yuan", NativeName = "元", Symbol ="¥" },
-                new { Code = "EUR", Name = "Euro", NativeName = "Euro", Symbol ="€" },
-                new { Code = "GBP", Name = "Pound Sterling", NativeName = "Pound Sterling", Symbol ="£" },
-                new { Code = "IDR", Name = "Indonesian rupiah", NativeName = "rupiah Indonesia", Symbol ="Rp" },
-                new { Code = "IDR_1000", Name = "Indonesian rupiah", NativeName = "rupiah Indonesia", Symbol ="Rp" },
-                new { Code = "INR", Name = "Indian Rupee", NativeName = "भारतीय रुपये", Symbol ="₹" },
-                new { Code = "JPY", Name = "Japanese Yen", NativeName = "円", Symbol ="¥" },
-                new { Code = "KRW", Name = "Korean won", NativeName = "Korean won", Symbol ="₩" },
-                new { Code = "MYR", Name = "Malaysian Ringgit", NativeName = "Malaysian Ringgit", Symbol ="RM" },
-                new { Code = "SGD", Name = "Singapore Dollar", NativeName = "Singapore Dollar", Symbol ="$" },
-                new { Code = "THB", Name = "Thai Baht", NativeName = "บาท",Symbol ="฿" },
-                new { Code = "USD", Name = "United States Dollar", NativeName = "United States Dollar", Symbol ="$" },
-                new { Code = "VND", Name = "Vietnamese Dong", NativeName ="đồng", Symbol ="₫" },
-                new { Code = "VND_1000", Name = "Vietnamese Dong", NativeName ="đồng", Symbol ="₫" }
-            }
-            .Select(c => new Currency
-            {
-                Code = c.Code,
-                Name = c.Name,
-                NativeName = c.NativeName,
-                Symbol = c.Symbol,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = _now,
-                UpdatedOn = _now
-            }).ToArray();
+                {
+                    new {Code = "CNY", Name = "Yuan", NativeName = "元", Symbol = "¥"},
+                    new {Code = "EUR", Name = "Euro", NativeName = "Euro", Symbol = "€"},
+                    new {Code = "GBP", Name = "Pound Sterling", NativeName = "Pound Sterling", Symbol = "£"},
+                    new {Code = "IDR", Name = "Indonesian rupiah", NativeName = "rupiah Indonesia", Symbol = "Rp"},
+                    new {Code = "IDR_1000", Name = "Indonesian rupiah", NativeName = "rupiah Indonesia", Symbol = "Rp"},
+                    new {Code = "INR", Name = "Indian Rupee", NativeName = "भारतीय रुपये", Symbol = "₹"},
+                    new {Code = "JPY", Name = "Japanese Yen", NativeName = "円", Symbol = "¥"},
+                    new {Code = "KRW", Name = "Korean won", NativeName = "Korean won", Symbol = "₩"},
+                    new {Code = "MYR", Name = "Malaysian Ringgit", NativeName = "Malaysian Ringgit", Symbol = "RM"},
+                    new {Code = "SGD", Name = "Singapore Dollar", NativeName = "Singapore Dollar", Symbol = "$"},
+                    new {Code = "THB", Name = "Thai Baht", NativeName = "บาท", Symbol = "฿"},
+                    new
+                    {
+                        Code = "USD", Name = "United States Dollar", NativeName = "United States Dollar", Symbol = "$"
+                    },
+                    new {Code = "VND", Name = "Vietnamese Dong", NativeName = "đồng", Symbol = "₫"},
+                    new {Code = "VND_1000", Name = "Vietnamese Dong", NativeName = "đồng", Symbol = "₫"}
+                }
+                .Select(c => new Currency
+                {
+                    Code = c.Code,
+                    Name = c.Name,
+                    NativeName = c.NativeName,
+                    Symbol = c.Symbol,
+                    CreatedByUsername = AdminUsername,
+                    UpdatedByUsername = AdminUsername,
+                    CreatedOn = _now,
+                    UpdatedOn = _now
+                }).ToArray();
 
             return _repository.BulkInsertAsync(currencies);
         }
-
-        private readonly VipLevel[] _vipLevels = new[]
-        {
-            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A" },
-            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B" },
-            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C" },
-            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D" },
-            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E" },
-            new VipLevel { Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F" }
-        };
 
         private Task GenerateVipLevelAsync()
         {
@@ -134,27 +139,42 @@ namespace TGS.Core.DataServices.DataInitializers
         private Task GenerateLanguagesAsync()
         {
             var languages = new[]
-            {
-                new { CultureCode = "en-US", LanguageCode = "en", Name = "English", LocalizedName = "English" },
-                new { CultureCode = "id-ID", LanguageCode = "id", Name ="Indonesian", LocalizedName ="bahasa Indonesia" },
-                new { CultureCode = "ja-JP", LanguageCode = "ja", Name ="Japanese", LocalizedName ="日本語" },
-                new { CultureCode = "ko-KR", LanguageCode = "ko", Name ="Korean", LocalizedName ="한국어 / 조선말" },
-                new { CultureCode = "th-TH", LanguageCode = "th", Name ="Thai", LocalizedName ="ภาษาไทย" },
-                new { CultureCode = "vi-VN", LanguageCode = "vi", Name ="Vietnamese", LocalizedName ="ngôn ngữ tiếng Việt" },
-                new { CultureCode = "zh-CN", LanguageCode = "zh", Name ="Simplified Chinese", LocalizedName = "简体中文" },
-                new { CultureCode = "zh-TW", LanguageCode = "zh", Name ="Traditional Chinese", LocalizedName =" 繁體中文" }
-            }
-            .Select(p => new Language
-            {
-                CultureCode = p.CultureCode,
-                LanguageCode = p.LanguageCode,
-                Name = p.Name,
-                LocalizedName = p.LocalizedName,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = _now,
-                UpdatedOn = _now
-            }).ToArray();
+                {
+                    new {CultureCode = "en-US", LanguageCode = "en", Name = "English", LocalizedName = "English"},
+                    new
+                    {
+                        CultureCode = "id-ID", LanguageCode = "id", Name = "Indonesian",
+                        LocalizedName = "bahasa Indonesia"
+                    },
+                    new {CultureCode = "ja-JP", LanguageCode = "ja", Name = "Japanese", LocalizedName = "日本語"},
+                    new {CultureCode = "ko-KR", LanguageCode = "ko", Name = "Korean", LocalizedName = "한국어 / 조선말"},
+                    new {CultureCode = "th-TH", LanguageCode = "th", Name = "Thai", LocalizedName = "ภาษาไทย"},
+                    new
+                    {
+                        CultureCode = "vi-VN", LanguageCode = "vi", Name = "Vietnamese",
+                        LocalizedName = "ngôn ngữ tiếng Việt"
+                    },
+                    new
+                    {
+                        CultureCode = "zh-CN", LanguageCode = "zh", Name = "Simplified Chinese", LocalizedName = "简体中文"
+                    },
+                    new
+                    {
+                        CultureCode = "zh-TW", LanguageCode = "zh", Name = "Traditional Chinese",
+                        LocalizedName = " 繁體中文"
+                    }
+                }
+                .Select(p => new Language
+                {
+                    CultureCode = p.CultureCode,
+                    LanguageCode = p.LanguageCode,
+                    Name = p.Name,
+                    LocalizedName = p.LocalizedName,
+                    CreatedByUsername = AdminUsername,
+                    UpdatedByUsername = AdminUsername,
+                    CreatedOn = _now,
+                    UpdatedOn = _now
+                }).ToArray();
 
             return _repository.BulkInsertAsync(languages);
         }
@@ -195,22 +215,43 @@ namespace TGS.Core.DataServices.DataInitializers
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
 
-            var tmpPlayer = new[] 
+            var tmpPlayer = new[]
             {
-                new { Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer },
-                new { Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer },
-                new { Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN", CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer },
-                new { Username = "RP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer },
-                new { Username = "RP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US", CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer },
+                new
+                {
+                    Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
+                    CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer
+                },
+                new
+                {
+                    Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
+                    CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer
+                },
+                new
+                {
+                    Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN",
+                    CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer
+                },
+                new
+                {
+                    Username = "RP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
+                    CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer
+                },
+                new
+                {
+                    Username = "RP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
+                    CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer
+                }
             };
 
-            var players = tmpPlayer.Select(p =>
+            players = tmpPlayer.Select(p =>
             {
                 var playerCode = PlayerCodeGenerator.NewId();
                 var vipId = _vipLevels[rnd.Next(0, 6)].Id;
                 var invitationCode = Generator.RandomString(6);
 
-                return CreatePlayer(playerCode, p.Username, p.RealName, salt, password, p.CultureCode, p.CurrencyCode, vipId, p.Type, invitationCode);
+                return CreatePlayer(playerCode, p.Username, p.RealName, salt, password, p.CultureCode, p.CurrencyCode,
+                    vipId, p.Type, invitationCode);
             }).ToArray();
 
             var randomPlayers = Enumerable.Range(1, 100)
@@ -220,10 +261,12 @@ namespace TGS.Core.DataServices.DataInitializers
                     var cultureCode = "en-US";
 
                     var playerCode = PlayerCodeGenerator.NewId();
-                    var parentPlayerCode = playerCodes.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : playerCodes[rnd.Next(0, playerCodes.Count - 1)];
+                    var parentPlayerCode = playerCodes.Count == 0 ? null :
+                        rnd.NextDouble() > 0.5 ? null : playerCodes[rnd.Next(0, playerCodes.Count - 1)];
 
                     var invitationCode = Generator.RandomString(6);
-                    var parentInvitationCode = invitationCodes.Count == 0 ? null : rnd.NextDouble() > 0.5 ? null : invitationCodes[rnd.Next(0, invitationCodes.Count - 1)];
+                    var parentInvitationCode = invitationCodes.Count == 0 ? null :
+                        rnd.NextDouble() > 0.5 ? null : invitationCodes[rnd.Next(0, invitationCodes.Count - 1)];
 
                     playerCodes.Add(playerCode);
                     invitationCodes.Add(invitationCode);
@@ -232,7 +275,8 @@ namespace TGS.Core.DataServices.DataInitializers
                     var realName = Generator.RandomString(12);
                     var vipId = _vipLevels[rnd.Next(0, 6)].Id;
 
-                    return CreatePlayer(playerCode, username, realName, salt, password, cultureCode, currencyCode, vipId, 
+                    return CreatePlayer(playerCode, username, realName, salt, password, cultureCode, currencyCode,
+                        vipId,
                         PlayerTypes.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
                 }).ToArray();
 
@@ -243,8 +287,10 @@ namespace TGS.Core.DataServices.DataInitializers
             await _repository.BulkInsertAsync(players.SelectMany(p => p.Banks).ToArray());
         }
 
-        private static Player CreatePlayer(string playerCode, string username, string realName, byte[] salt, byte[] password, 
-            string cultureCode, string currencyCode, Guid vipId, PlayerTypes playerType, string invitationCode, string parentPlayerCode = null, 
+        private static Player CreatePlayer(string playerCode, string username, string realName, byte[] salt,
+            byte[] password,
+            string cultureCode, string currencyCode, Guid vipId, PlayerTypes playerType, string invitationCode,
+            string parentPlayerCode = null,
             string parentInvitationCode = null)
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
@@ -297,8 +343,8 @@ namespace TGS.Core.DataServices.DataInitializers
                         PlayerCode = playerCode,
                         Username = Generator.RandomString(4),
                         BankName = Generator.RandomString(12),
-                        BankAccount = Generator.RandomIntString(20),
-                    },
+                        BankAccount = Generator.RandomIntString(20)
+                    }
                 }
             };
         }
@@ -359,7 +405,7 @@ namespace TGS.Core.DataServices.DataInitializers
                         {
                             GameProviderId = gameProvider.Id,
                             CurrencyCode = curr.Code,
-                            GameProviderCurrencyCode = curr.ExternalCode,
+                            GameProviderCurrencyCode = curr.ExternalCode
                         }).ToHashSet(),
                 Languages = gameProvider.Languages.Select(lang =>
                     new GameProviderLanguage
@@ -370,23 +416,24 @@ namespace TGS.Core.DataServices.DataInitializers
                     }).ToHashSet()
             };
 
-            gp.GameProviderConfigurations = gameProvider.GameProviderConfigurations.Select((gpc, idx) => new GameProviderConfiguration
-            {
-                Id = gpc.Id,
-                Name = gpc.Name,
-                ClientId = gpc.ClientId,
-                SecretKey = gpc.SecretKey,
-                DesktopEndpoint = gpc.DesktopEndpoint,
-                MobileEndpoint = gpc.MobileEndpoint,
-                Description = gp.Name,
-                GameProviderId = gp.Id,
-                CreatedOn = _now,
-                UpdatedOn = _now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                ConfigurationData = gpc.ConfigurationData,
-                IsDefault = idx == 0
-            }).ToHashSet();
+            gp.GameProviderConfigurations = gameProvider.GameProviderConfigurations.Select((gpc, idx) =>
+                new GameProviderConfiguration
+                {
+                    Id = gpc.Id,
+                    Name = gpc.Name,
+                    ClientId = gpc.ClientId,
+                    SecretKey = gpc.SecretKey,
+                    DesktopEndpoint = gpc.DesktopEndpoint,
+                    MobileEndpoint = gpc.MobileEndpoint,
+                    Description = gp.Name,
+                    GameProviderId = gp.Id,
+                    CreatedOn = _now,
+                    UpdatedOn = _now,
+                    CreatedByUsername = AdminUsername,
+                    UpdatedByUsername = AdminUsername,
+                    ConfigurationData = gpc.ConfigurationData,
+                    IsDefault = idx == 0
+                }).ToHashSet();
 
             gp.Games = gameProvider.Games.Select(g => new Models.Game
             {
@@ -436,7 +483,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     ResellerId = reseller.Id,
                     CultureCode = lang.Code
                 }).ToHashSet(),
-                Licensees = reseller.Licensees.Select(l => CreateLicensee(reseller, l)).ToHashSet(),
+                Licensees = reseller.Licensees.Select(l => CreateLicensee(reseller, l)).ToHashSet()
             };
         }
 
@@ -482,17 +529,17 @@ namespace TGS.Core.DataServices.DataInitializers
                     GameId = g.Id
                 }).ToHashSet(),
                 GameProviderConfigurations = gameProviders.SelectMany(gp => gp.GameProviderConfigurations)
-                                .Where(gpc => gpc.IsDefault).Select(gpc => new LicenseeGameProviderConfiguration
-                                {
-                                    Id = Guid.NewGuid(),
-                                    LicenseeId = licensee.Id,
-                                    GameProviderId = gpc.GameProviderId,
-                                    GameProviderConfigurationId = gpc.Id,
-                                    DefaultLanguageCode = "en-US",
-                                    DesktopQueryString = string.Empty,
-                                    MobileQueryString = string.Empty
-                                })
-                                .ToHashSet()
+                    .Where(gpc => gpc.IsDefault).Select(gpc => new LicenseeGameProviderConfiguration
+                    {
+                        Id = Guid.NewGuid(),
+                        LicenseeId = licensee.Id,
+                        GameProviderId = gpc.GameProviderId,
+                        GameProviderConfigurationId = gpc.Id,
+                        DefaultLanguageCode = "en-US",
+                        DesktopQueryString = string.Empty,
+                        MobileQueryString = string.Empty
+                    })
+                    .ToHashSet()
             };
         }
 

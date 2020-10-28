@@ -4,14 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentVendor;
-using TGS.Apis.BackendOffice.DataService.Commands;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
-using PaymentMethodsRequest = TGS.Apis.BackendOffice.Controllers.Messages.PaymentVendor.PaymentMethodsRequest;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,42 +19,44 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class PaymentMethodController : BaseContextController
     {
-        private readonly IBackendOfficeCommands<PaymentMethod> _commands;
-        private readonly IPaymentVendorCommands _paymentVendorCommands;
-        private readonly IBackendOfficeQueries<PaymentMethod> _queries;
+        private readonly ITgsCommands<PaymentMethod> _commands;
+        private readonly ITgsQueries<PaymentMethod> _queries;
 
         public PaymentMethodController(
-            IBackendOfficeQueries<PaymentMethod> queries,
-            IBackendOfficeCommands<PaymentMethod> commands,
-            IPaymentVendorCommands paymentVendorCommands,
+            ITgsQueries<PaymentMethod> queries,
+            ITgsCommands<PaymentMethod> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
             _commands = commands;
-            _paymentVendorCommands = paymentVendorCommands;
         }
 
         [HttpGet]
         [Description("Get PaymentMethods")]
         public Task<PagedResponse<PaymentMethodModel>> GetPaymentMethodsAsync([FromQuery] PaymentMethodsRequest request)
         {
-            return _queries.GetQueries().Select(q => new PaymentMethodModel
-            {
-                Id = q.Id,
-                Code = q.Code,
-                Description = q.Description,
-                CreatedByUsername = q.CreatedByUsername,
-                UpdatedByUsername = q.UpdatedByUsername,
-                CreatedOn = q.CreatedOn,
-                UpdatedOn = q.UpdatedOn
-            }).CreatePagedResponseAsync(request);
+            return _queries.GetQueries()
+                .Include(p => p.PaymentVendor)
+                .Where(request.Code, q => q.Code == request.Code)
+                .Select(q => new PaymentMethodModel
+                {
+                    Id = q.Id,
+                    Code = q.Code,
+                    Description = q.Description,
+                    PaymentVendorCode = q.PaymentVendor.Code,
+                    CreatedByUsername = q.CreatedByUsername,
+                    UpdatedByUsername = q.UpdatedByUsername,
+                    CreatedOn = q.CreatedOn,
+                    UpdatedOn = q.UpdatedOn
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
         [Description("Get a PaymentMethod")]
         public async Task<GetPaymentMethodResponse> GetPaymentMethodAsync(Guid id)
         {
-            var vendor = await _queries.GetSingleAsync(q => q.Id == id);
+            var vendor = await _queries.GetSingleAsync(q => q.Id == id,
+                p => p.Include(pm => pm.PaymentVendor));
 
             return new GetPaymentMethodResponse
             {
@@ -66,6 +66,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Id = vendor.Id,
                     Code = vendor.Code,
                     Description = vendor.Description,
+                    PaymentVendorCode = vendor.PaymentVendor.Code,
                     CreatedOn = vendor.CreatedOn,
                     UpdatedOn = vendor.UpdatedOn,
                     CreatedByUsername = vendor.CreatedByUsername,

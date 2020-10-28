@@ -10,10 +10,5 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         DbSet<Role> Roles { get; set; }
         DbSet<Setting> Settings { get; set; }
         DbSet<Department> Departments { get; set; }
-        DbSet<PaymentVendor> PaymentVendors { get; set; }
-        DbSet<PaymentMethod> PaymentMethods { get; set; }
-        DbSet<PaymentChannel> PaymentChannels { get; set; }
-        DbSet<Payment> Payments { get; set; }
-        DbSet<UserPaymentAccessControl> UserPaymentAccessControls { get; set; }
     }
 }

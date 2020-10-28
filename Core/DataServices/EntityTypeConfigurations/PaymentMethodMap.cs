@@ -1,29 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Models;
 
-namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class PaymentMap : IEntityTypeConfiguration<Payment>
+    public class PaymentMethodMap : IEntityTypeConfiguration<PaymentMethod>
     {
-        void IEntityTypeConfiguration<Payment>.Configure(EntityTypeBuilder<Payment> builder)
+        void IEntityTypeConfiguration<PaymentMethod>.Configure(EntityTypeBuilder<PaymentMethod> builder)
         {
-            builder.ToTable("Payments", "dbo");
+            builder.ToTable("PaymentMethods", "dbo");
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.ChannelName)
+            builder.Property(c => c.Code)
                 .HasColumnType(ColumnTypes.Nvarchar(50))
                 .IsRequired();
 
-            builder.Property(c => c.Reason)
-                .HasColumnType(ColumnTypes.Nvarchar(4000))
+            builder.Property(c => c.Description)
+                .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
-            builder.HasMany(p => p.UserPaymentAccessControls)
-                .WithOne(u => u.Payment)
-                .HasForeignKey(u => u.PaymentId);
+            builder.HasMany(p => p.PaymentChannels)
+                .WithOne(p => p.PaymentMethod)
+                .HasForeignKey(p => p.PaymentMethodId)
+                .IsRequired().OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))

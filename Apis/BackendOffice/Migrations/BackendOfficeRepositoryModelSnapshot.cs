@@ -33,7 +33,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
@@ -53,77 +53,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.ToTable("Departments","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.PaymentChannel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<Guid>("PaymentVendorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentVendorId");
-
-                    b.ToTable("PaymentChannels","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.PaymentVendor", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PaymentVendors","dbo");
-                });
-
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -137,7 +66,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DisplayName")
@@ -183,7 +112,7 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(256)")
                         .IsUnicode(true);
 
@@ -275,15 +204,6 @@ namespace TGS.Apis.BackendOffice.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.PaymentChannel", b =>
-                {
-                    b.HasOne("TGS.Apis.BackendOffice.DataService.Models.PaymentVendor", "PaymentVendor")
-                        .WithMany("PaymentChannels")
-                        .HasForeignKey("PaymentVendorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Apis.BackendOffice.DataService.Models.User", b =>

@@ -27,11 +27,6 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         DbSet<Role> IBackendOfficeRepository.Roles { get; set; }
         DbSet<Setting> IBackendOfficeRepository.Settings { get; set; }
         DbSet<Department> IBackendOfficeRepository.Departments { get; set; }
-        DbSet<PaymentVendor> IBackendOfficeRepository.PaymentVendors { get; set; }
-        DbSet<PaymentMethod> IBackendOfficeRepository.PaymentMethods { get; set; }
-        DbSet<PaymentChannel> IBackendOfficeRepository.PaymentChannels { get; set; }
-        DbSet<Payment> IBackendOfficeRepository.Payments { get; set; }
-        DbSet<UserPaymentAccessControl> IBackendOfficeRepository.UserPaymentAccessControls { get; set; }
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
         {
@@ -101,12 +96,6 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             modelBuilder.ApplyConfiguration(new RoleMap());
             modelBuilder.ApplyConfiguration(new SettingMap());
             modelBuilder.ApplyConfiguration(new DepartmentMap());
-            modelBuilder.ApplyConfiguration(new PaymentVendorMap());
-            modelBuilder.ApplyConfiguration(new PaymentMethodMap());
-            modelBuilder.ApplyConfiguration(new PaymentChannelMap());
-            modelBuilder.ApplyConfiguration(new PaymentMap());
-
-            modelBuilder.Entity<UserPaymentAccessControl>();
         }
     }
 }

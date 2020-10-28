@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Models
 
         public Guid GameProviderId { get; set; }
 
-        public GameProvider GameProvider { get; set; }
+        public virtual GameProvider GameProvider { get; set; }
 
         public GameType Type { get; set; }
 

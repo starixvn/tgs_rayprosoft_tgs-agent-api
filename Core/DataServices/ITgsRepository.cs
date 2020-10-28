@@ -67,5 +67,11 @@ namespace TGS.Core.DataServices
         DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
 
         DbSet<StationLetter> StationLetters { get; set; }
+        DbSet<PaymentVendor> PaymentVendors { get; set; }
+        DbSet<PaymentMethod> PaymentMethods { get; set; }
+        DbSet<PaymentChannel> PaymentChannels { get; set; }
+        DbSet<Payment> Payments { get; set; }
+        DbSet<PaymentUserAccessControl> UserPaymentAccessControls { get; set; }
+        DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
     }
 }

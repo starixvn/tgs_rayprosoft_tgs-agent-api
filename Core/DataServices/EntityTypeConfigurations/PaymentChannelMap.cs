@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Models;
 
-namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
     public class PaymentChannelMap : IEntityTypeConfiguration<PaymentChannel>
     {

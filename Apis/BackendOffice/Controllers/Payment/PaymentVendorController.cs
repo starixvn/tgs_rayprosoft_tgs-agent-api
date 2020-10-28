@@ -6,13 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentVendor;
-using TGS.Apis.BackendOffice.DataService.Commands;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -20,35 +17,34 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class PaymentVendorController : BaseContextController
     {
-        private readonly IBackendOfficeCommands<PaymentVendor> _commands;
-        private readonly IPaymentVendorCommands _paymentVendorCommands;
-        private readonly IBackendOfficeQueries<PaymentVendor> _queries;
+        private readonly ITgsCommands<PaymentVendor> _commands;
+        private readonly ITgsQueries<PaymentVendor> _queries;
 
         public PaymentVendorController(
-            IBackendOfficeQueries<PaymentVendor> queries,
-            IBackendOfficeCommands<PaymentVendor> commands,
-            IPaymentVendorCommands paymentVendorCommands,
+            ITgsQueries<PaymentVendor> queries,
+            ITgsCommands<PaymentVendor> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
             _commands = commands;
-            _paymentVendorCommands = paymentVendorCommands;
         }
 
         [HttpGet]
         [Description("Get PaymentVendors")]
-        public Task<PagedResponse<PaymentVendorModel>> GetPaymentVendorsAsync([FromQuery] PaymentMethodsRequest request)
+        public Task<PagedResponse<PaymentVendorModel>> GetPaymentVendorsAsync([FromQuery] PaymentVendorsRequest request)
         {
-            return _queries.GetQueries().Select(q => new PaymentVendorModel
-            {
-                Id = q.Id,
-                Code = q.Code,
-                Description = q.Description,
-                CreatedByUsername = q.CreatedByUsername,
-                UpdatedByUsername = q.UpdatedByUsername,
-                CreatedOn = q.CreatedOn,
-                UpdatedOn = q.UpdatedOn
-            }).CreatePagedResponseAsync(request);
+            return _queries.GetQueries()
+                .Where(request.Code, q => q.Code == request.Code)
+                .Select(q => new PaymentVendorModel
+                {
+                    Id = q.Id,
+                    Code = q.Code,
+                    Description = q.Description,
+                    CreatedByUsername = q.CreatedByUsername,
+                    UpdatedByUsername = q.UpdatedByUsername,
+                    CreatedOn = q.CreatedOn,
+                    UpdatedOn = q.UpdatedOn
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]

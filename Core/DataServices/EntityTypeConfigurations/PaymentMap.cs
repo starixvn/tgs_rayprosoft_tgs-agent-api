@@ -1,29 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Models;
 
-namespace TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations
+namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    public class PaymentVendorMap : IEntityTypeConfiguration<PaymentVendor>
+    public class PaymentMap : IEntityTypeConfiguration<Payment>
     {
-        void IEntityTypeConfiguration<PaymentVendor>.Configure(EntityTypeBuilder<PaymentVendor> builder)
+        void IEntityTypeConfiguration<Payment>.Configure(EntityTypeBuilder<Payment> builder)
         {
-            builder.ToTable("PaymentVendors", "dbo");
+            builder.ToTable("Payments", "dbo");
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.Code)
+            builder.Property(c => c.ChannelName)
                 .HasColumnType(ColumnTypes.Nvarchar(50))
                 .IsRequired();
 
-            builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+            builder.Property(c => c.Reason)
+                .HasColumnType(ColumnTypes.Nvarchar(4000))
                 .IsRequired();
-
-            builder.HasMany(p => p.PaymentMethods)
-                .WithOne(p => p.PaymentVendor)
-                .HasForeignKey(p => p.PaymentVendorId);
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
