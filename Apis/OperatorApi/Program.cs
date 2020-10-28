@@ -14,7 +14,7 @@ namespace TGS.Apis.OperatorApi
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            await ExecuteMigraionsAndSeedingsAsync(host.Services);
+            await ExecuteMigrationsAndSeedingsAsync(host.Services);
             await host.RunAsync();
         }
 
@@ -25,7 +25,7 @@ namespace TGS.Apis.OperatorApi
                     webBuilder.UseStartup<Startup>();
                 });
 
-        private static async Task ExecuteMigraionsAndSeedingsAsync(IServiceProvider services)
+        private static async Task ExecuteMigrationsAndSeedingsAsync(IServiceProvider services)
         {
             using var scope = services.CreateScope();
             var sp = scope.ServiceProvider;
