@@ -20,6 +20,10 @@
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_GetGameActionsInSameRound.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetCurrenciesByInternalCode.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetCurrenciesByExternalCode.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLanguagesByInternalCode.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLanguagesByExternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetSubGameIdMaps.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />

@@ -469,7 +469,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 {
                     LicenseeId = licensee.Id,
                     CultureCode = lang.Code,
-                    LicenseeLanguageCode = lang.ExternalCode
+                    LicenseeCultureCode = lang.ExternalCode
                 }).ToHashSet(),
                 GameProviders = gameProviders.Select(gp => new LicenseeGameProvider
                 {

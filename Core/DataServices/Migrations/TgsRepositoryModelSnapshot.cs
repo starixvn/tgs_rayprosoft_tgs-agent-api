@@ -258,7 +258,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                        .HasAnnotation("SqlServer:Clustered", true);
 
                     b.ToTable("GameProviders","dbo");
                 });
@@ -606,7 +606,7 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(6)")
                         .IsUnicode(true);
 
-                    b.Property<string>("LicenseeLanguageCode")
+                    b.Property<string>("LicenseeCultureCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(6)");
 
@@ -619,25 +619,22 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.LocalizedString", b =>
                 {
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<string>("Context")
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("CultureCode")
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("LanguageCultureCode")
                         .HasColumnType("nvarchar(6)");
 
                     b.Property<string>("Translation")
                         .IsRequired()
                         .HasColumnType("nvarchar(1024)");
 
-                    b.HasKey("Context", "CultureCode", "Code");
+                    b.HasKey("Key", "Context", "CultureCode");
 
-                    b.HasIndex("LanguageCultureCode");
+                    b.HasIndex("CultureCode");
 
                     b.ToTable("LocalizedStrings","dbo");
                 });
@@ -1307,8 +1304,10 @@ namespace TGS.Core.DataServices.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Models.LocalizedString", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
-                        .WithMany()
-                        .HasForeignKey("LanguageCultureCode");
+                        .WithMany("LocalizedStrings")
+                        .HasForeignKey("CultureCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>

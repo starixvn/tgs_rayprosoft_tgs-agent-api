@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<GameProvider>.Configure(EntityTypeBuilder<GameProvider> builder)
         {
             builder.ToTable("GameProviders", "dbo");
-            BaseConfigureProperties(builder);
+            BaseConfigureProperties(builder, true);
 
             builder.Property(p => p.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(128));

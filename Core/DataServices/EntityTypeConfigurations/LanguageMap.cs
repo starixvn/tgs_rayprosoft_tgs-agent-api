@@ -59,6 +59,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasMany(l => l.LicenseeGameProviderConfigurations)
                 .WithOne(bgpc => bgpc.DefaultLanguage)
                 .HasForeignKey(bgpc => bgpc.DefaultLanguageCode);
+
+            builder.HasMany(l => l.LocalizedStrings)
+                .WithOne(ls => ls.Language)
+                .HasForeignKey(ls => ls.CultureCode);
         }
     }
 }
