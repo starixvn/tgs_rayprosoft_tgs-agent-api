@@ -7,6 +7,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Generics;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
@@ -17,19 +19,23 @@ namespace TGS.Services.Operations.Queries
     {
         Task<GetCachedLicenseeResult> GetCachedLicenseeAsync(Guid licenseeId);
 
-        Task<GetCachedLicenseeGameProviderConfigurationResult> GetCachedLicenseeGameProviderConfigurationAsync(Guid licenseeId, Guid gameProviderId);
+        Task<GetCachedLicenseeGameProviderConfigurationResult> GetCachedLicenseeGameProviderConfigurationAsync(
+            Guid licenseeId, Guid gameProviderId);
 
         Task<CachedLicenseeGame[]> GetLicenseeGamesAsync(Guid licenseeId);
 
         Task<Guid> GetLicenseeIdByClientIdAsync(string clientId);
 
         Task<Dictionary<string, string>> GetLicenseeLanguagesByExternalCodeAsync(Guid licenseeId);
-        
+
         Task<Dictionary<string, string>> GetLicenseeLanguagesByInternalCodeAsync(Guid licenseeId);
-        
+
         Task<Dictionary<string, string>> GetLicenseeCurrenciesByExternalCodeAsync(Guid licenseeId);
-        
+
         Task<Dictionary<string, string>> GetLicenseeCurrenciesByInternalCodeAsync(Guid licenseeId);
+
+        Task<CachedLicenseeGameProvider[]> GetLicenseeGameProvidersAsync(Guid licenseeId, string currencyCode, PlatformType platformType,
+            GameType[] gameTypes);
     }
 
     public sealed class LicenseeQueries : ILicenseeQueries
@@ -52,25 +58,26 @@ namespace TGS.Services.Operations.Queries
             });
         }
 
-        Task<GetCachedLicenseeGameProviderConfigurationResult> ILicenseeQueries.GetCachedLicenseeGameProviderConfigurationAsync(Guid licenseeId, Guid gameProviderId)
+        Task<GetCachedLicenseeGameProviderConfigurationResult> ILicenseeQueries.
+            GetCachedLicenseeGameProviderConfigurationAsync(Guid licenseeId, Guid gameProviderId)
         {
             const string spName = "usp_Licensee_GetLicenseeGameProviderConfigurationForCache";
             return _repository.SqlQuerySingleAsync<GetCachedLicenseeGameProviderConfigurationResult>(spName, parameters:
-            new SqlParameter[]
-            {
-                new()
+                new SqlParameter[]
                 {
-                    ParameterName = "@licenseeId",
-                    Value = licenseeId,
-                    DbType = DbType.Guid
-                },
-                new()
-                {
-                    ParameterName = "@gameProviderId",
-                    Value = gameProviderId,
-                    DbType = DbType.Guid
-                }
-            });
+                    new ()
+                    {
+                        ParameterName = "@licenseeId",
+                        Value = licenseeId,
+                        DbType = DbType.Guid
+                    },
+                    new ()
+                    {
+                        ParameterName = "@gameProviderId",
+                        Value = gameProviderId,
+                        DbType = DbType.Guid
+                    }
+                });
         }
 
         async Task<CachedLicenseeGame[]> ILicenseeQueries.GetLicenseeGamesAsync(Guid licenseeId)
@@ -116,10 +123,10 @@ namespace TGS.Services.Operations.Queries
             });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
-
         }
 
-        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeCurrenciesByExternalCodeAsync(Guid licenseeId)
+        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeCurrenciesByExternalCodeAsync(
+            Guid licenseeId)
         {
             const string spName = "usp_Licensee_GetCurrenciesByExternalCode";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
@@ -130,10 +137,10 @@ namespace TGS.Services.Operations.Queries
             });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
-
         }
 
-        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeCurrenciesByInternalCodeAsync(Guid licenseeId)
+        async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeCurrenciesByInternalCodeAsync(
+            Guid licenseeId)
         {
             const string spName = "usp_Licensee_GetCurrenciesByInternalCode";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
@@ -144,7 +151,41 @@ namespace TGS.Services.Operations.Queries
             });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
+        }
 
+        async Task<CachedLicenseeGameProvider[]> ILicenseeQueries.GetLicenseeGameProvidersAsync(Guid licenseeId,
+            string currencyCode, PlatformType platformType, GameType[] gameTypes)
+        {
+            const string spName = "usp_Licensee_GetLicenseeGameProviders";
+            var r = await _repository.SqlQueryMultipleAsync<CachedLicenseeGameProvider>(spName, parameters: new SqlParameter[]
+            {
+                new ()
+                {
+                    ParameterName = "@licenseeId",
+                    Value = licenseeId,
+                    DbType = DbType.Guid
+                },
+                new ()
+                {
+                    ParameterName = "@currencyCode",
+                    Value = currencyCode,
+                    DbType = DbType.String
+                },
+                new ()
+                {
+                    ParameterName = "@platformType",
+                    Value = platformType,
+                    DbType = DbType.Int16
+                },
+                new ()
+                {
+                    ParameterName = "@gameTypes",
+                    Value = gameTypes.Select(s => new {Value = (int) s}).ToDataTable(),
+                    SqlDbType = SqlDbType.Structured
+                }
+            });
+
+            return r.ToArray();
         }
     }
 }

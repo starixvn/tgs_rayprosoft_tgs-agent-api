@@ -206,7 +206,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", false);
 
-                    b.HasIndex("GameProviderId");
+                    b.HasIndex("GameProviderId")
+                        .HasAnnotation("SqlServer:Include", new[] { "Id", "Code", "Name", "ExternalId", "PlatformType", "Type", "Status", "Description", "EndpointPath", "SubGame", "HasTurnoverOnTieBet", "RuleUrl" });
 
                     b.ToTable("Games","dbo");
                 });
@@ -1249,7 +1250,7 @@ namespace TGS.Core.DataServices.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Models.LicenseeGameProvider", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
-                        .WithMany("Licensee")
+                        .WithMany("Licensees")
                         .HasForeignKey("GameProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1276,7 +1277,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.GameProvider", "GameProvider")
                         .WithMany("LicenseeGameProviderConfigurations")
                         .HasForeignKey("GameProviderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Models.Licensee", "Licensee")

@@ -25,9 +25,8 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt);
 
             builder.HasMany(p => p.LicenseeGameProviderConfigurations)
-                .WithOne(p => p.GameProvider)
-                .HasForeignKey(bgpc => bgpc.GameProviderId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .WithOne(lgpc => lgpc.GameProvider)
+                .HasForeignKey(lgpc => lgpc.GameProviderId);
         }
     }
 }

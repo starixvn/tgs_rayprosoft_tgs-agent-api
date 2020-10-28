@@ -579,7 +579,7 @@ namespace TGS.Core.DataServices.Migrations
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_LicenseeGameProviderConfigurations_Licensees_LicenseeId",
                         column: x => x.LicenseeId,
@@ -936,7 +936,8 @@ namespace TGS.Core.DataServices.Migrations
                 name: "IX_Games_GameProviderId",
                 schema: "dbo",
                 table: "Games",
-                column: "GameProviderId");
+                column: "GameProviderId")
+                .Annotation("SqlServer:Include", new[] { "Id", "Code", "Name", "ExternalId", "PlatformType", "Type", "Status", "Description", "EndpointPath", "SubGame", "HasTurnoverOnTieBet", "RuleUrl" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_LicenseeBetLimits_BetLimitGroupId",

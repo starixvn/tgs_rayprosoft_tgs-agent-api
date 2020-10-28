@@ -17,6 +17,7 @@ BEGIN
         [Id],
         [Code],
         [Name],
+        [Description],
         [Status],
         [ExternalId],
         [SubGame],

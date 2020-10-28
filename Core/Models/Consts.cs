@@ -49,5 +49,13 @@
             public const string GameProviderConfigurationId = "gameProviderConfigurationId";
             public const string PlatformType = "platformType";
         }
+
+        public static class LocalizationContext
+        {
+            public const string GameProviderName = "GameProvider.Name";
+            public const string GameProviderDescription = "GameProvider.Description";
+            public const string GameName = "Game.Name";
+            public const string GameDescription = "Game.Description";
+        }
     }
 }

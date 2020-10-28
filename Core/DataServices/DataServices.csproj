@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SqlScripts\SP\usp_Licensee_GetLicenseeGameProviders.sql" />
+    <None Remove="SqlScripts\SP\usp_Localization_GetLocalizationByGameProviderId.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -32,6 +37,8 @@
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLicenseeGameProviderConfigurationForCache.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Localization_GetLocalizationByGameProviderId.sql" />
+    <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLicenseeGameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Licensee_GetLicenseeGamesForCache.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_Deauthorize.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />

@@ -86,6 +86,7 @@ namespace TGS.Apis.OperatorApi
                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TGS Operator API", Version = "v1" }); 
 
                     c.OperationFilter<SwaggerHeaderFilter>();
+                    c.SchemaFilter<SwaggerEnumDescriptionFilter>();
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);

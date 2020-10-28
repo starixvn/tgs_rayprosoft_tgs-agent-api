@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(bc => new { bc.LicenseeId, bc.GameProviderId });
             builder
                 .HasOne(bc => bc.GameProvider)
-                .WithMany(c => c.Licensee)
+                .WithMany(c => c.Licensees)
                 .HasForeignKey(bc => bc.GameProviderId);
 
             builder

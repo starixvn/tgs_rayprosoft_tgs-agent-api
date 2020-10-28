@@ -14,6 +14,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class StatusController : ControllerBase
     {
         private readonly ITgsRepository _repository;

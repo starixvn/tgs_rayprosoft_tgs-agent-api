@@ -34,10 +34,11 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
             services.AddFactory<ISettingQueries, SettingQueries>();
+            services.AddFactory<ILocalizationStringQueries, LocalizationStringQueries>();
 
             services.AddFactory<IGameActionQueries, GameActionQueries>();
             services.AddFactory<IRoundQueries, RoundQueries>();
-
+            
             #endregion
 
             #region Commands
@@ -53,11 +54,13 @@ namespace TGS.Services.Operations.Extensions
             services.AddScoped<IPlayerOperations, PlayerOperations>();
             services.AddScoped<ILicenseeGameProviderOperations, LicenseeGameProviderOperations>();
             services.AddScoped<ISettingOperations, SettingOperations>();
+            services.AddScoped<ILocalizationOperations, LocalizationOperations>();
 
             #endregion
 
             services.AddSingleton<IValidStatus<Status>, ValidStatus>();
             services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
+
             services.AddSingleton<IAmountValidator, AmountValidator>();
 
             services.AddScoped<IStatusValidator, StatusValidator>();
@@ -73,7 +76,7 @@ namespace TGS.Services.Operations.Extensions
             where TServices : class, TInterface
         {
             services.AddScoped<TInterface, TServices>();
-            services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());
+            services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
         }
     }
 }
