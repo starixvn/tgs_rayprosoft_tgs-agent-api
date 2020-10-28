@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/core"
-import Async from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import client from "../../client"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Spinner,
@@ -13,9 +10,7 @@ import {
   Set,
   Button,
   Text,
-  Label,
   Input,
-  InputField,
   Checkbox,
   FieldStack,
   FieldWrapper,
@@ -29,77 +24,135 @@ import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { useLabel as useMenuLabel } from "../../menu"
+import { useLabel as useMenuLabel, find as findMenu } from "../../menu"
+import { useMenus, useAddRole, useEditRole, useRole } from "./client"
+import Disclosure from "../../dialog/Disclosure"
+import { Trans, useTrans } from "../../i18n"
+import { FieldValues } from "../../layout/Grid"
+import Label from "../../form/Label"
+import InputField from "../../input/Field"
+import _FormDialog from "../../form/Dialog"
+import cloneDeep from "clone-deep"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
-  const deferFn = () =>
-    client.post("/api/role/menus").then(({ menus = [] }) => {
-      return resetIsDisplay(false, menus)
-    })
-
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
+  let {
+    menus,
+    isLoading: isLoadingMenus,
+    error: fetchMenusError,
+    mutate
+  } = useMenus({
+    shouldFetch: dialog.visible
+  })
 
+  useEffect(() => {
+    if (!dialog.visible) {
+      mutate()
+    }
+  }, [dialog.visible])
+
+  let disclosureRef = useRef()
   let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
     return null
   }
 
   return (
-    <Async deferFn={deferFn}>
-      {(async) => {
-        return (
-          <>
-            <Modal.Disclosure
-              use={Button}
-              ref={disclosureRef}
-              onClick={async.run}
-              css={css`
-                flex: unset;
-              `}
-              {...dialog}
-            >
-              {add()}
-            </Modal.Disclosure>
-            <Async.Pending>
-              <LoadingBackdrop />
-            </Async.Pending>
-            <Async.Rejected>
-              {(error) => (
-                <AlertDialog {...error} finalFocusRef={disclosureRef} />
-              )}
-            </Async.Rejected>
-            <Async.Fulfilled>
-              {(menus) => {
-                return (
-                  dialog.visible && (
-                    <SubmitDialog
-                      role={{
-                        name: "",
-                        menus
-                      }}
-                      onSubmitted={() => {
-                        dialog.hide()
-                        onSubmitted && onSubmitted()
-                      }}
-                      dialog={dialog}
-                      disclosureRef={disclosureRef}
-                    />
-                  )
-                )
-              }}
-            </Async.Fulfilled>
-          </>
-        )
-      }}
-    </Async>
+    <>
+      <Disclosure ref={disclosureRef} {...dialog}>
+        <Trans zh="新增" en="Add" />
+      </Disclosure>
+      <AddDialog
+        menus={menus}
+        onSubmitted={onSubmitted}
+        dialog={dialog}
+        finalFocusRef={disclosureRef}
+        visible={dialog.visible && !isLoadingMenus}
+      />
+      {dialog.visible && isLoadingMenus && <LoadingBackdrop visible={true} />}
+      {dialog.visible && fetchMenusError && (
+        <AlertDialog {...fetchMenusError} onClickClose={dialog.hide} />
+      )}
+    </>
   )
 }
 
-export const EditButton = ({ id, onSubmitted, ...props }) => {
-  const deferFn = () =>
-    client.get(`/api/role/${id}`).then(({ role = {} }) => role)
+const AddDialog = ({ menus = [], dialog, onSubmitted, finalFocusRef }) => {
+  let [menusState, setMenus] = useState()
+  let [submitData, setSubmit] = useState()
+  let { result, error, isLoading } = useAddRole({
+    data: submitData
+  })
 
+  useEffect(() => {
+    setMenus(cloneDeep(menus))
+  }, [JSON.stringify(menus)])
+
+  let title = useTrans({
+    zh: "新增权限组",
+    en: "Add Role"
+  })
+
+  const clearResult = () => {
+    setSubmit(null)
+  }
+
+  return (
+    <>
+      <_FormDialog
+        initialValues={{
+          name: ""
+        }}
+        onSubmit={(data) => {
+          setSubmit({
+            menus: menusState,
+            ...data
+          })
+        }}
+        isLoading={isLoading}
+        result={result}
+        error={error}
+        onCloseErrorAlert={clearResult}
+        onSubmitted={onSubmitted}
+        title={title}
+        dialog={dialog}
+        placement="top"
+        finalFocusRef={finalFocusRef}
+      >
+        <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
+      </_FormDialog>
+    </>
+  )
+}
+
+const DialogBody = ({ menus, setMenus, dialog }) => {
+  return (
+    <FieldValues>
+      <Label name="name" required>
+        <Trans zh="权限组名称" en="Name" />
+      </Label>
+      <InputField name="name" />
+
+      <Label>
+        <Trans zh="权限管理" en="Role" />
+      </Label>
+      <MenusBody menus={menus} setMenus={setMenus} />
+    </FieldValues>
+  )
+}
+
+const MenusBody = ({ menus = [], setMenus }) => {
+  const setChecked = (path = [], checked) => {
+    let item = findMenu(path, menus)
+    item.isDisplay = checked
+
+    setMenus(menus)
+  }
+
+  return <MenuTable menus={menus} setChecked={setChecked} />
+}
+
+export const EditButton = ({ id, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
@@ -109,226 +162,110 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
   }
 
   return (
-    <Async deferFn={deferFn}>
-      {(fetchRole) => (
-        <>
-          <Modal.Disclosure
-            ref={disclosureRef}
-            use={Button}
-            onClick={fetchRole.run}
-            css={css`
-              flex: unset;
-            `}
-            {...dialog}
-          >
-            {edit()}
-          </Modal.Disclosure>
-          <Async.Pending>
-            <LoadingBackdrop />
-          </Async.Pending>
-          <Async.Rejected>
-            {(error) => (
-              <AlertDialog {...error} finalFocusRef={disclosureRef} />
-            )}
-          </Async.Rejected>
-          <Async.Fulfilled>
-            {(role) =>
-              dialog.visible && (
-                <SubmitDialog
-                  role={role}
-                  onSubmitted={() => {
-                    dialog.hide()
-                    onSubmitted && onSubmitted()
-                  }}
-                  dialog={dialog}
-                  finalFocusRef={disclosureRef}
-                />
-              )
-            }
-          </Async.Fulfilled>
-        </>
+    <>
+      <Disclosure ref={disclosureRef} {...dialog}>
+        <Trans zh="修改" en="Edit" />
+      </Disclosure>
+      {dialog.visible && (
+        <AsyncRoleDialog
+          id={id}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={disclosureRef}
+        />
       )}
-    </Async>
+    </>
   )
 }
 
-const SubmitDialog = ({
-  role = {},
-  onClickCancel,
-  onSubmitted,
-  dialog,
-  finalFocusRef,
-  children,
-  ...props
-}) => {
-  let { id } = role
-  let [menus = [], setMenus] = useState(role.menus)
+const AsyncRoleDialog = ({ id, dialog, onSubmitted, finalFocusRef }) => {
+  let { role, isLoading, isValidating, error, mutate } = useRole({
+    id: dialog.visible && id
+  })
 
-  const create = (data) =>
-    client.post(`/api/role`, {
-      data
-    })
+  if (isLoading) {
+    return <LoadingBackdrop visible={true} />
+  }
 
-  const update = (data) =>
-    client.put(`/api/role/${id}`, {
-      data: {
-        ...role,
-        ...data
-      }
-    })
-
-  const deferFn = ([data]) => {
-    return id ? update(data) : create(data)
+  if (error) {
+    return <AlertDialog {...error} onClickClose={dialog.hide} />
   }
 
   return (
-    <Async deferFn={deferFn}>
-      {(submit) => (
-        <>
-          <Formik
-            initialValues={{ name: role.name }}
-            onSubmit={(form) => {
-              let data = {
-                ...form,
-                menus
-              }
-
-              submit.run(data)
-            }}
-          >
-            <FormDialog
-              menus={menus}
-              setMenus={setMenus}
-              dialog={dialog}
-              finalFocusRef={finalFocusRef}
-            />
-          </Formik>
-          <Async.Rejected>
-            {(error) => <AlertDialog {...error} />}
-          </Async.Rejected>
-          <Async.Fulfilled>
-            {(_) => {
-              useEffect(() => {
-                dialog.hide()
-                onSubmitted && onSubmitted()
-              }, [dialog.visible])
-
-              return null
-            }}
-          </Async.Fulfilled>
-        </>
-      )}
-    </Async>
+    <EditDialog
+      id={id}
+      name={role.name}
+      menus={role.menus}
+      dialog={dialog}
+      onSubmitted={onSubmitted}
+      finalFocusRef={finalFocusRef}
+    />
   )
 }
 
-const FormDialog = ({ menus, setMenus, dialog, finalFocusRef, ...props }) => {
-  const { values, submitForm, resetForm, isPending } = useFormikContext()
-  let nameInputRef = useRef()
-
-  const setChecked = (path = [], checked) => {
-    let item = findMenu(path, menus)
-    item.isDisplay = checked
-    setMenus(menus)
-  }
+const EditDialog = ({
+  id,
+  name,
+  menus,
+  dialog,
+  onSubmitted,
+  finalFocusRef
+}) => {
+  let [menusState, setMenus] = useState()
+  let [submitData, setSubmit] = useState()
+  let { result, error, isLoading } = useEditRole({
+    id,
+    data: submitData
+  })
 
   useEffect(() => {
-    if (dialog.visible) {
-      nameInputRef?.current?.focus()
-    }
-  }, [dialog.visible])
+    setMenus(cloneDeep(menus))
+  }, [menus])
+
+  let title = useTrans({
+    zh: "修改权限组",
+    en: "Edit Role"
+  })
+
+  const clearResult = () => {
+    setSubmit(null)
+  }
 
   return (
-    <Dialog.Modal
-      title={title()}
-      showActionButtons
-      actionButtonsProps={{
-        isLoading: isPending,
-        onClickSubmit: submitForm,
-        onClickCancel: resetForm
+    <_FormDialog
+      initialValues={{
+        name
       }}
-      hideOnClickOutside={false}
-      unstable_finalFocusRef={finalFocusRef}
-      {...dialog}
+      onSubmit={(data) => {
+        setSubmit({
+          menus: menusState,
+          ...data
+        })
+      }}
+      isLoading={isLoading}
+      result={result}
+      error={error}
+      onCloseErrorAlert={clearResult}
+      onSubmitted={onSubmitted}
+      title={title}
+      dialog={dialog}
+      placement="top"
+      finalFocusRef={finalFocusRef}
     >
-      <Form>
-        <div
-          css={css`
-            display: grid;
-            grid-template-rows: auto;
-            grid-template-areas:
-              "name input"
-              "group table";
-          `}
-        >
-          <Box
-            css={css`
-              grid-area: name;
-            `}
-            margin="major-1"
-          >
-            <Label
-              htmlFor="name"
-              marginTop="major-1"
-              css={css`
-                line-height: unset;
-              `}
-            >
-              {name()}
-            </Label>
-          </Box>
+      {({ resetForm, ...formProps }) => {
+        useEffect(() => {
+          resetForm({
+            values: {
+              name
+            }
+          })
+        }, [name])
 
-          <Box
-            css={css`
-              grid-area: input;
-            `}
-            margin="major-1"
-          >
-            <Field
-              name="name"
-              validate={(value) => {
-                if (!value) {
-                  return "required"
-                }
-              }}
-            >
-              {({ field, form, meta }) => {
-                let state = meta.error && "danger"
-                return (
-                  <FieldWrapper state={state}>
-                    <Input id="name" inputRef={nameInputRef} {...field} />
-                  </FieldWrapper>
-                )
-              }}
-            </Field>
-          </Box>
-          <Box
-            css={css`
-              grid-area: group;
-            `}
-            margin="major-1"
-          >
-            <Label
-              htmlFor="name"
-              marginTop="major-1"
-              css={css`
-                line-height: unset;
-              `}
-            >
-              {control()}
-            </Label>
-          </Box>
-          <Box
-            css={css`
-              grid-area: table;
-            `}
-            margin="major-1"
-          >
-            <MenuTable menus={menus} setChecked={setChecked} />
-          </Box>
-        </div>
-      </Form>
-    </Dialog.Modal>
+        return (
+          <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
+        )
+      }}
+    </_FormDialog>
   )
 }
 
@@ -397,6 +334,10 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
 const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
   let [checked, set] = useState(menu.isDisplay)
 
+  useEffect(() => {
+    set(menu.isDisplay)
+  }, [menu.isDisplay])
+
   let { code } = menu
   let menuPath = [...path, code]
   let label = useMenuLabel({ codes: menuPath })
@@ -416,29 +357,6 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
       css={css`
         white-space: nowrap;
       `}
-    >
-
-    </Checkbox>
+    ></Checkbox>
   )
 }
-
-const resetIsDisplay = (isDisplay, menus = []) => {
-  return menus.map((menu) => {
-    menu.isDisplay = isDisplay
-    if (menu.subMenus) {
-      menu.subMenus = resetIsDisplay(isDisplay, menu.subMenus)
-    }
-    return menu
-  })
-}
-
-//TODO: i18n
-const add = () => "新增"
-
-const edit = () => "修改"
-
-const title = () => "新增权限组"
-
-const name = () => "权限组名称"
-
-const control = () => "权限管理"

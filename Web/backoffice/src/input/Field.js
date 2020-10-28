@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
 import { Formik, Field as _Field, Form, useFormikContext } from "formik"
 import { useTrans } from "../i18n"
 import SuperExpressive from "super-expressive"

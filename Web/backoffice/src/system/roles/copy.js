@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import Async from "react-async"
-import client from "../../client"
 import { Formik, Form, Field, useFormikContext } from "formik"
 import {
   Stack,
@@ -20,13 +17,16 @@ import {
   SelectField,
   Dialog,
   Modal,
-  Table,
   useClassName
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Copy as CopyMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
+import Disclosure from "../../dialog/Disclosure"
+import FormDialog from "../../form/Dialog"
+import { useCopyRole } from "./client"
+import { Trans, useTrans } from "../../i18n"
 
 export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -39,18 +39,11 @@ export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        {...dialog}
-      >
-        {copy()}
-      </Modal.Disclosure>
+      <Disclosure {...dialog}>
+        <Trans zh="复制" en="Copy" />
+      </Disclosure>
       {dialog.visible && (
-        <SubmitDialog
+        <CopyDialog
           id={id}
           name={name}
           onSubmitted={onSubmitted}
@@ -62,6 +55,57 @@ export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
   )
 }
 
+const CopyDialog = ({
+  id,
+  name = "",
+  onSubmitted,
+  dialog,
+  finalFocusRef,
+  ...props
+}) => {
+  let [submitData, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useCopyRole({
+    id,
+    data: submitData
+  })
+
+  const clearResult = () => {
+    setSubmit(null)
+    //mutate()
+  }
+
+  let title = useTrans({
+    zh: "复制权限组",
+    en: "Copy Role"
+  })
+  let inputRef = useRef()
+  return (
+    <FormDialog
+      initialValues={{
+        name
+      }}
+      onSubmit={setSubmit}
+      isLoading={isLoading}
+      result={result}
+      error={error}
+      onCloseErrorAlert={clearResult}
+      onSubmitted={onSubmitted}
+      title={title}
+      dialog={dialog}
+      finalFocusRef={finalFocusRef}
+    >
+      <Field
+        name="name"
+        isRequired
+        component={InputField.Formik}
+        label={<Trans zh="新权限组名称" en="New role name" />}
+        inputRef={inputRef}
+      />
+    </FormDialog>
+  )
+}
+
+/*
 const SubmitDialog = ({
   id,
   name = "",
@@ -152,9 +196,4 @@ const CopyFormDialog = ({ dialog, inputRef, finalFocusRef, ...props }) => {
     </Dialog.Modal>
   )
 }
-
-const copy = () => "复制"
-
-const title = () => "复制权限组"
-
-const inputLabel = () => "新权限组名称"
+*/
