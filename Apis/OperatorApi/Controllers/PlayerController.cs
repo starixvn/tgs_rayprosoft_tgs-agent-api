@@ -206,7 +206,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedOn = updatedOn,
             });
 
-            await HttpContext?.SignOutAsync();
+            await HttpContext.SignOutAsync();
 
             return new LogoutResponse { UpdateTime = updatedOn };
         }
