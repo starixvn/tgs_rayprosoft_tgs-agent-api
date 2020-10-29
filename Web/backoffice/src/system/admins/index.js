@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react"
+import { css, Global } from "@emotion/core"
 import { Formik, Field } from "formik"
-import { Heading, Stack, Button, InputField, Set } from "bumbag"
+import { Heading, Stack, Button, InputField, Set, Text } from "bumbag"
 import PageContent from "../../page/Content"
 import { AddButton, EditButton, EditPasswordButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
@@ -15,6 +16,7 @@ import { useList } from "./client"
 import { useTable, Table, pageCount } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/Search"
+import equals from "fast-deep-equal"
 
 export { Code }
 
@@ -53,6 +55,13 @@ const AsyncContent = () => {
         <>
           <SearchForm
             search={(data) => {
+              let newState = {
+                pageIndex: 0,
+                username: data?.username
+              }
+              if (equals(newState, { pageIndex, username })) {
+                mutate()
+              }
               setState({
                 pageIndex: 0,
                 ...data
@@ -193,7 +202,15 @@ const useTableColumns = ({ fetchTable }) => {
       cell: {
         textAlign: "center"
       },
-      Cell: ({ value }) => <StatusLabel value={value} />
+      Cell: ({ value }) => (
+        <Text.Block
+          css={css`
+            white-space: nowrap;
+          `}
+        >
+          <StatusLabel value={value} />
+        </Text.Block>
+      )
     }
   ]
 

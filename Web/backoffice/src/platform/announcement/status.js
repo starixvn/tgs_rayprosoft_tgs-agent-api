@@ -91,3 +91,6 @@ export const Label = ({ value }) => {
       return value
   }
 }
+
+// Effective <-> Invalid toggle
+export const ToggleButton = () => {}
