@@ -146,7 +146,7 @@ VALUES
         {
             string[] usernames =
             {
-                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng"
+                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng", "rico.lin"
             };
 
             var users = new List<User>
