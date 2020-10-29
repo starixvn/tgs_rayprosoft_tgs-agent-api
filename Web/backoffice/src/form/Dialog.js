@@ -17,6 +17,8 @@ export const Dialog = ({
   title,
   cancelText = <CancelText />,
   submitText = <SubmitText />,
+  clickSubmit,
+  addonButtons,
   children,
   dialog,
   hideOnClickOutside,
@@ -49,10 +51,16 @@ export const Dialog = ({
               showActionButtons
               actionButtonsProps={{
                 isLoading: isLoading,
-                onClickSubmit: submitForm,
+                onClickSubmit: clickSubmit
+                  ? clickSubmit(formProps)
+                  : submitForm,
                 onClickCancel: reset,
                 cancelText,
-                submitText
+                submitText,
+                addonButtons:
+                  typeof addonButtons === "function"
+                    ? addonButtons(formProps)
+                    : addonButtons
               }}
               hideOnClickOutside={false}
               unstable_finalFocusRef={finalFocusRef}

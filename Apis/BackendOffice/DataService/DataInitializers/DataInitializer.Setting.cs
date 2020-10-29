@@ -36,7 +36,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
                                 new MenuSetting("View"),
-                                new MenuSetting("Audit")
+                                new MenuSetting("Verify")
                             }
                         },
                         new MenuSetting( "StationLetter")
@@ -45,7 +45,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                             {
                                 new MenuSetting("Create"),
                                 new MenuSetting("View"),
-                                new MenuSetting("Audit")
+                                new MenuSetting("Verify")
                             }
                         }
                     }
