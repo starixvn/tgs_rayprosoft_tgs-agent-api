@@ -8,6 +8,7 @@ export const Disclosure = forwardRef(
       use={use}
       css={css`
         flex: unset;
+        white-space: nowrap;
       `}
       {...props}
     >

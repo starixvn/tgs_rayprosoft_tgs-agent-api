@@ -1,0 +1,24 @@
+using System;
+using System.Collections.Generic;
+using TGS.Apis.TgsApi.GameProviders.SBOBET;
+using TGS.Core.Models;
+
+namespace TGS.Apis.TgsApi
+{
+    public partial class Program
+    {
+        // TODO: RedTiger is temporary used only since it has no implementation, would be removed or refactored in the future
+
+        private static readonly IReadOnlyDictionary<string, Type> StartupMap = new Dictionary<string, Type>
+        {
+            {Consts.GameProvider.SBOBET, typeof(SBOBETStartup)}
+            //{ Consts.GameProvider.RedTiger, typeof(RedTigerStartup) },
+        };
+
+        private static readonly IReadOnlyDictionary<string, string> ConfigFileMap = new Dictionary<string, string>
+        {
+            {Consts.GameProvider.SBOBET, "SBOBET/sbobet.json"}
+            //{ Consts.GameProvider.RedTiger, "RedTiger/redtiger.json" }
+        };
+    }
+}

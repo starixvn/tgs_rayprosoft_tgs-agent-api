@@ -21,16 +21,22 @@ import {
   Portal
 } from "bumbag"
 
-export default ({ state, ...props }) => {
+const BumbagZIndex = 19900410
+
+export default ({ ...props }) => {
+  let zIndexString = `${BumbagZIndex + 100}`
   return (
-    <Modal.State {...state}>
-      <Modal.Backdrop {...props}>
-        <Box alignY="center" height="100%">
-          <Box alignX="center">
-            <Spinner size="large" />
-          </Box>
+    <Modal.Backdrop
+      css={css`
+        z-index: ${zIndexString};
+      `}
+      {...props}
+    >
+      <Box alignY="center" height="100%">
+        <Box alignX="center">
+          <Spinner size="large" />
         </Box>
-      </Modal.Backdrop>
-    </Modal.State>
+      </Box>
+    </Modal.Backdrop>
   )
 }

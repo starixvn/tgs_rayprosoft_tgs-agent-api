@@ -53,7 +53,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [TestCase(false)]
         public async Task Can_Get_List(bool showAll)
         {
-            var request = new PageableRequest
+            var request = new GetStationLettersRequest
             {
                 Page = 1,
                 Rows = 10,

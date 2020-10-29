@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import client from "../../client"
 import { Alert, Button, Text, Modal } from "bumbag"
 import { Delete as DeleteMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import AsyncFormSubmitModal from "../../dialog/AsyncFormSubmitModal"
+import Disclosure from "../../dialog/Disclosure"
+import FormDialog from "../../form/Dialog"
+import { Trans, useTrans } from "../../i18n"
+import { useDeleteRole } from "./client"
 
 export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -17,29 +19,23 @@ export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        palette="danger"
-        {...dialog}
-      >
-        {deleteLabel()}
-      </Modal.Disclosure>
-      <SubmitDialog
-        id={id}
-        name={name}
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-      />
+      <Disclosure palette="danger" {...dialog}>
+        <Trans zh="删除" en="Delete" />
+      </Disclosure>
+      {dialog.visible && (
+        <DeleteDialog
+          id={id}
+          name={name}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={disclosureRef}
+        />
+      )}
     </>
   )
 }
 
-const SubmitDialog = ({
+const DeleteDialog = ({
   id,
   name = "",
   dialog,
@@ -47,31 +43,48 @@ const SubmitDialog = ({
   finalFocusRef,
   ...props
 }) => {
-  const deferFn = ([_data]) => {
-    return client.delete(`/api/role/${id}`)
+  let [deleteId, setDelete] = useState()
+  let { result, error, isLoading } = useDeleteRole({ id: deleteId })
+
+  const submit = () => setDelete(id)
+
+  const clearResult = () => {
+    setDelete(null)
   }
 
+  let title = useTrans({
+    zh: "删除权限组",
+    en: "Delete Role"
+  })
   return (
-    <AsyncFormSubmitModal
-      deferFn={deferFn}
-      title={title(name)}
-      dialog={dialog}
+    <FormDialog
+      onSubmit={submit}
+      isLoading={isLoading}
+      result={result}
+      error={error}
+      onCloseErrorAlert={clearResult}
       onSubmitted={onSubmitted}
+      title={title}
+      dialog={dialog}
       finalFocusRef={finalFocusRef}
     >
-      <Alert title={warningTitle(name)} type="warning" variant="">
-        <Text color="danger">{warningContent}</Text>
+      <Alert
+        title={
+          <Trans
+            zh={`确认删除 “${name}” 权限组？`}
+            en={`Confirm delete the “${name}”？`}
+          />
+        }
+        type="warning"
+        variant=""
+      >
+        <Text color="danger">
+          <Trans
+            zh="如果仍有管理员正使用此权限组，该权限组将不能够被删除"
+            en="If an administrator is still using this role, it cannot be deleted"
+          />
+        </Text>
       </Alert>
-    </AsyncFormSubmitModal>
+    </FormDialog>
   )
 }
-
-//TODO: i18n
-const deleteLabel = () => "删除"
-
-const title = () => "删除权限组"
-
-const warningTitle = (name = "") => `确认删除 “${name}” 权限组？`
-
-const warningContent = () =>
-  "如果仍有管理员正使用此权限组，该权限组将不能够被删除"

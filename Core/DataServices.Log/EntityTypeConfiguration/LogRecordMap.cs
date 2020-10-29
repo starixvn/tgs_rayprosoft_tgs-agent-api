@@ -14,7 +14,7 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfiguration
             builder.HasKey(p => p.RecordedOn);
 
             builder.Property(c => c.ServerName)
-              .HasColumnType(ColumnTypes.Nvarchar(64))
+              .HasColumnType(ColumnTypes.Nvarchar(128))
               .IsRequired()
               .IsUnicode();
 

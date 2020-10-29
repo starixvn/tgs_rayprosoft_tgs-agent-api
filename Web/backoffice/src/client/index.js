@@ -7,6 +7,13 @@ export const urlWith = (searchParams = {}, url) => {
         return searchParams
       }
 
+      if (Array.isArray(value)) {
+        let result = value.reduce((result, item) => {
+          return result ? `${result}&${key}=${item}` : `${key}=${item}`
+        }, "")
+        return searchParams ? `${searchParams}&${result}` : result
+      }
+
       return searchParams
         ? `${searchParams}&${key}=${value}`
         : `${key}=${value}`
@@ -30,17 +37,14 @@ const fetchApi = (
   url,
   { body, data = {}, headers = {}, ...options } = {}
 ) => {
-  data = Object.entries(data).reduce(
-    (data, [key, value]) => {
-      if (isEmptyString(value) || isNilOrUndefined(value)) {
-        return data
-      }
-
-      data[key] = value
+  data = Object.entries(data).reduce((data, [key, value]) => {
+    if (isEmptyString(value) || isNilOrUndefined(value)) {
       return data
     }
-    , {}
-  )
+
+    data[key] = value
+    return data
+  }, {})
   return fetch(url, {
     method,
     headers: {
@@ -51,7 +55,6 @@ const fetchApi = (
     ...options
   }).then(toDataOrError)
 }
-  
 
 const isEmptyString = (value) => typeof value == "string" && value === ""
 

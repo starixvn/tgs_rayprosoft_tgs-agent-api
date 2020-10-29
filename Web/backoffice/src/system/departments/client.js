@@ -1,4 +1,4 @@
-import useSWR from "swr"
+import useSWR, { cache } from "swr"
 import client, { urlWith, get, put, post } from "../../client"
 
 export const useList = (searchParams) => {
@@ -46,5 +46,18 @@ export const useEditDepartment = ({ id, data }) => {
     error,
     isError: error,
     mutate
+  }
+}
+
+export const useDeleteDepartment = ({ id }) => {
+  let fetchData = !!id
+  let key = `/api/department/${id}`
+  const { data: result, error } = useSWR(fetchData ? key : null, client.delete)
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    error,
+    isError: error
   }
 }

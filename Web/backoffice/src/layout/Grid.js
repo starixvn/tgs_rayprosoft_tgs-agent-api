@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
-import { useLocation, useRouteMatch } from "react-router-dom"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { Box, space, styled } from "bumbag"
 
 export const Grid = ({ areas = "", children, ...props }) => {

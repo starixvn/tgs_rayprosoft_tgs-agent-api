@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync, IfRejected, IfFulfilled } from "react-async"
 import { Formik, Field as _Field, Form, useFormikContext } from "formik"
 import { useTrans } from "../i18n"
 import SuperExpressive from "super-expressive"
@@ -132,7 +131,8 @@ const InputPadding = 0.4
 const FieldValidationTextHeight = 0.875
 export const FieldMinHeight =
   InputMinHeight + InputPadding + FieldValidationTextHeight
-export const Field = ({ name, required, validate, ...props }) => {
+export const Field = ({ name, required, validate, children, ...props }) => {
+  let isChildrenFunction = typeof children === "function"
   return (
     <_Field
       name={name}
@@ -151,7 +151,10 @@ export const Field = ({ name, required, validate, ...props }) => {
         //minHeight={`${FieldMinHeight}rem`}
         return (
           <FieldWrapper state={state} validationText={validationText}>
-            <Input id={name} {...field} {...props} />
+            <>
+              {!children && <Input id={name} {...field} {...props} />}
+              {isChildrenFunction && children({ field, form, meta })}
+            </>
           </FieldWrapper>
         )
       }}

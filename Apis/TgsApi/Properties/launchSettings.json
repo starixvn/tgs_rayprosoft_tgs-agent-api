@@ -6,8 +6,7 @@
       "launchBrowser": true,
       "launchUrl": "api/status",
       "environmentVariables": {
-        "GameProviderCode": "RT",
-        "GameProviderName": "RedTiger",
+        "GameProviderCode": "SBO",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:62330"

@@ -19,7 +19,7 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfiguration
               .IsUnicode();
 
             builder.Property(c => c.ServerName)
-                .HasColumnType(ColumnTypes.Nvarchar(30))
+                .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired()
                 .IsUnicode();
 

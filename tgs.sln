@@ -38,14 +38,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestsCommon", "Tests\TestsC
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C67967CB-D962-4C3D-AA6C-203B0CBCC233}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{EC4CC831-10A3-4E58-A994-D3493FC5C158}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{F352EBA9-FF0F-4D40-8229-835E2F1E6BC1}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\dev\backoffice-api.yml = Deployment\dev\backoffice-api.yml
-		Deployment\dev\backoffice-ui.yml = Deployment\dev\backoffice-ui.yml
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.UnitTests", "Tests\Tgs.UnitTests\Tgs.UnitTests.csproj", "{B92347FB-E471-4185-9A87-1F608D74B52F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice", "Apis\BackendOffice\BackendOffice.csproj", "{5BBAD8B6-C9CB-449C-8D21-6BAB46A0891A}"
@@ -72,13 +64,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogApi", "Apis\LogApi\LogAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperatorApi", "Apis\OperatorApi\OperatorApi.csproj", "{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataServices.Log", "Core\DataServices.Log\DataServices.Log.csproj", "{B8D51663-D569-433D-A400-FF55306E1EC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Log", "Core\DataServices.Log\DataServices.Log.csproj", "{B8D51663-D569-433D-A400-FF55306E1EC1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TgsApi.GameModels", "Apis\TgsApi.GameModels\TgsApi.GameModels.csproj", "{1B57C935-5B7F-4715-9C5D-04169137C2CA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.ApiClients", "Tests\Tests.ApiClients\Tests.ApiClients.csproj", "{6C17C092-7A55-416A-A9A2-E8DA2B627FC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Games.IntegrationTests", "Tests\Games.IntegrationTests\Games.IntegrationTests.csproj", "{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Games.IntegrationTests", "Tests\Games.IntegrationTests\Games.IntegrationTests.csproj", "{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -189,7 +181,6 @@ Global
 		{5C1CCE46-0C09-41B5-A6CE-44256B44492F} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{EB47CAF6-6410-4F88-B220-41A1B61DBBE3} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
-		{F352EBA9-FF0F-4D40-8229-835E2F1E6BC1} = {EC4CC831-10A3-4E58-A994-D3493FC5C158}
 		{B92347FB-E471-4185-9A87-1F608D74B52F} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{5BBAD8B6-C9CB-449C-8D21-6BAB46A0891A} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 		{94BB3B92-E24B-4C66-AD2C-037185F13F77} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}

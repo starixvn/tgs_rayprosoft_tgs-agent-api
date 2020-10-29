@@ -145,15 +145,13 @@ VALUES
         {
             string[] usernames =
             {
-                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng"
+                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng", "rico.lin"
             };
 
             var users = new List<User>
             {
                 CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin, Departments[MarketDepartment]),
-                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment]),
-                CreateUser("admin.archived", UserStatus.Archived, Roles.Admin, Departments[MarketDepartment]),
-                CreateUser("admin.locked", UserStatus.Locked, Roles.Admin, Departments[ProductDepartment])
+                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment])
             };
 
             users.AddRange(usernames.Select(username =>

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import Async, { useAsync } from "react-async"
 import { Formik, Field } from "formik"
-import { useLocation, useRouteMatch } from "react-router-dom"
 import {
   Heading,
   Stack,
@@ -28,6 +26,7 @@ import { Field as VipLevelField } from "../../vip-level/field"
 import { ViewButton, EditButton } from "./button"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/Search"
+import equals from "fast-deep-equal"
 
 export { Code }
 
@@ -75,6 +74,15 @@ const AsyncContent = () => {
       actionBar={
         <SearchForm
           search={(data) => {
+            let newState = {
+              pageIndex: 0,
+              status: data.status,
+              vipId: data.vipId,
+              username: data.username
+            }
+            if (equals(newState, { pageIndex, status, vipId, username })) {
+              mutate()
+            }
             setState({
               pageIndex: 0,
               ...data
