@@ -18,20 +18,6 @@ const EnabledTrans = {
   en: "Enabled"
 }
 
-const Archived = 2
-const ArchivedName = "Archived"
-const ArchivedTrans = {
-  zh: "封存",
-  en: "Archived"
-}
-
-const Locked = 3
-const LockedName = "Locked"
-const LockedTrans = {
-  zh: "锁定",
-  en: "Locked"
-}
-
 //string -> number
 export const from = (value) => {
   switch (value) {
@@ -42,14 +28,6 @@ export const from = (value) => {
     case EnabledName:
     case `${Enabled}`:
       return Enabled
-
-    case ArchivedName:
-    case `${Archived}`:
-      return Archived
-
-    case LockedName:
-    case `${Locked}`:
-      return Locked
 
     default:
       return value
@@ -65,14 +43,6 @@ export const Label = ({ value }) => {
     case Enabled:
     case EnabledName:
       return <Trans {...EnabledTrans} />
-
-    case Archived:
-    case ArchivedName:
-      return <Trans {...ArchivedTrans} />
-
-    case Locked:
-    case LockedName:
-      return <Trans {...LockedTrans} />
 
     default:
       return value
@@ -90,21 +60,15 @@ export const Select = ({ name, required, ...props }) => {
     value: DisabledName
   }
 
-  let locked = {
-    label: useTrans(LockedTrans),
-    value: LockedName
-  }
-
   let options = required
-    ? [enabled, disabled, locked]
+    ? [enabled, disabled]
     : [
         {
           label: "",
           value: null
         },
         enabled,
-        disabled,
-        locked
+        disabled
       ]
   return (
     <_Field name={name} required={required}>
