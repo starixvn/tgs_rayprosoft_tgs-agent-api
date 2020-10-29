@@ -1,9 +1,8 @@
 
 docker login registry.gitlab.com
 
-docker build -f Dockerfiles\Dockerfile.BackofficeApi -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev01 .
+docker build -f Dockerfiles\Dockerfile.BackOfficeApi -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev01 .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev01
-
 
 docker build -f Dockerfiles\Dockerfile.LogApi -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/log-api:dev01 .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/log-api:dev01
