@@ -54,7 +54,7 @@ export const useAddRole = ({ data }) => {
 
 export const useEditRole = ({ id, data }) => {
   let fetchData = id && !!data
-  let keys = fetchData && [`/api/role/${id}`, data]
+  let keys = fetchData ? [`/api/role/${id}`, data] : null
   let { data: result, error, isValidating, mutate } = useSWR(
     keys,
     (url, data) => put(url, { data })

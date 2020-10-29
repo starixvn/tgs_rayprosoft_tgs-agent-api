@@ -7,7 +7,7 @@ export const Create = "create"
 
 export const Update = "update"
 
-export const Audit = "audit"
+export const Verify = "verify"
 
 export const View = "view"
 
@@ -32,11 +32,11 @@ export const label = ({ codes = [], locale = Locales.zh }) => {
         },
         locale
       )
-    case Audit:
+    case Verify:
       return getTrans(
         {
           zh: "审核公告",
-          en: "Audit announcement"
+          en: "Verify announcement"
         },
         locale
       )

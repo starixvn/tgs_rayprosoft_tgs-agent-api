@@ -16,10 +16,10 @@ import { useAddAdmin, useEditAdmin, useEditPassword } from "./client"
 import { FieldValues } from "../../layout/Grid"
 import FormDialog from "../../form/Dialog"
 import Label from "../../form/Label"
+import Disclosure from "../../dialog/Disclosure"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
@@ -28,28 +28,16 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
-        css={css`
-          flex: unset;
-        `}
-        {...dialog}
-      >
+      <Disclosure {...dialog}>
         <Trans zh="新增" en="Add" />
-      </Modal.Disclosure>
-      <AddDialog
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-      />
+      </Disclosure>
+      <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
     </>
   )
 }
 
 export const EditButton = ({ user, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
   if (!isDisplay) {
@@ -58,30 +46,21 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
+      <Disclosure
         css={css`
-          flex: unset;
           white-space: nowrap;
         `}
         {...dialog}
       >
         <Trans zh="修改" en="Edit" />
-      </Modal.Disclosure>
-      <EditDialog
-        user={user}
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-      />
+      </Disclosure>
+      <EditDialog user={user} onSubmitted={onSubmitted} dialog={dialog} />
     </>
   )
 }
 
 export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
   if (!isDisplay) {
@@ -90,23 +69,15 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Modal.Disclosure
-        use={Button}
-        ref={disclosureRef}
+      <Disclosure
         css={css`
-          flex: unset;
           white-space: nowrap;
         `}
         {...dialog}
       >
         <Trans zh="修改密码" en="Change Password" />
-      </Modal.Disclosure>
-      <PasswordDialog
-        user={user}
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-      />
+      </Disclosure>
+      <PasswordDialog user={user} onSubmitted={onSubmitted} dialog={dialog} />
     </>
   )
 }
