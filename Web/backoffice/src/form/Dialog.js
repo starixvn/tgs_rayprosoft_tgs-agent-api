@@ -15,6 +15,8 @@ export const Dialog = ({
   onCloseErrorAlert,
   onSubmitted,
   title,
+  footer,
+  showActionButtons = true,
   cancelText = <CancelText />,
   submitText = <SubmitText />,
   clickSubmit,
@@ -48,7 +50,8 @@ export const Dialog = ({
           <>
             <_Dialog.Modal
               title={title}
-              showActionButtons
+              footer={footer}
+              showActionButtons={showActionButtons}
               actionButtonsProps={{
                 isLoading: isLoading,
                 onClickSubmit: clickSubmit

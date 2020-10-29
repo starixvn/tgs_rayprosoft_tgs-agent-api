@@ -35,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
             return _queries.GetQueries()
-                .Where(p=>p.Status == request.Status)
+                .Where(p=> request.Status == null || request.Status.Contains(p.Status))
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
@@ -122,7 +122,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
             }
 
-            if (announcement.Status != AnnounceStatus.Invalid)
+            if (announcement.Status != AnnounceStatus.Effective && announcement.Status != AnnounceStatus.Invalid)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.CannotUpdateDueToInvalidStatus);
             }

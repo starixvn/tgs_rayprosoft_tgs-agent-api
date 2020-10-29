@@ -33,8 +33,8 @@ const ExpiredTrans = {
 export const Rejected = 4
 export const RejectedName = "Rejected"
 const RejectedTrans = {
-  zh: "过期",
-  en: "Expired"
+  zh: "拒绝",
+  en: "Rejected"
 }
 
 //string -> number

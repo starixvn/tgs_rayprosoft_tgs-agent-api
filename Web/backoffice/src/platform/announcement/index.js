@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import { Box, Set, Button } from "bumbag"
+import { Box, Set, Button, Text, Switch } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
@@ -23,9 +23,9 @@ import {
   Expired,
   ExpiredName,
   Rejected,
-  RejectedName
+  RejectedName,
+  InvalidName
 } from "./status"
-import Disclosure from "../../dialog/Disclosure"
 import { AddButton, VerifyButton, EditButton, ViewButton } from "./edit"
 import {
   Verify as VerifyMenu,
@@ -57,7 +57,10 @@ const AsyncContentBody = ({}) => {
     rows: pageSize,
     sortby,
     orderby,
-    status: statusFrom(statusName)
+    status:
+      statusName === EffectiveName
+        ? [statusFrom(EffectiveName), statusFrom(InvalidName)]
+        : statusFrom(statusName)
   })
 
   let tab = useTabState({
@@ -74,15 +77,7 @@ const AsyncContentBody = ({}) => {
   return (
     <PageContent
       title={<Trans zh="公告管理" en="Announcements" />}
-      actionBar={
-        <ActionBar
-          mutate={() => {
-            if (hasVerifyAuth && statusName === InVerifyName) {
-              mutate()
-            }
-          }}
-        />
-      }
+      actionBar={<ActionBar mutate={mutate} />}
     >
       <Tabs>
         <TabList {...tab}>
@@ -119,10 +114,11 @@ const AsyncContentBody = ({}) => {
               setPageIndex={setPageIndex}
               setSortOrder={setSortOrder}
               isLoading={isLoading}
+              mutate={mutate}
             />
           </TabPanel>
         )}
-        <TabPanel tabId={EffectiveName} {...tab}>
+        {/*<TabPanel tabId={EffectiveName} {...tab}>
           <AsyncTable
             statusName={statusName}
             data={data}
@@ -130,6 +126,7 @@ const AsyncContentBody = ({}) => {
             setPageIndex={setPageIndex}
             setSortOrder={setSortOrder}
             isLoading={isLoading}
+            mutate={mutate}
           />
         </TabPanel>
         <TabPanel tabId={ExpiredName} {...tab}>
@@ -140,6 +137,7 @@ const AsyncContentBody = ({}) => {
             setPageIndex={setPageIndex}
             setSortOrder={setSortOrder}
             isLoading={isLoading}
+            mutate={mutate}
           />
         </TabPanel>
         <TabPanel tabId={RejectedName} {...tab}>
@@ -150,8 +148,9 @@ const AsyncContentBody = ({}) => {
             setPageIndex={setPageIndex}
             setSortOrder={setSortOrder}
             isLoading={isLoading}
+            mutate={mutate}
           />
-        </TabPanel>
+        </TabPanel> */}
       </Tabs>
     </PageContent>
   )
@@ -239,6 +238,26 @@ const useColumns = ({ mutate, statusName }) => {
       },
       cell: {
         textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        //TODO: change state
+        if (statusName === EffectiveName) {
+          return (
+            <Button>
+              <StatusLabel value={value} />
+            </Button>
+          )
+        }
+
+        return (
+          <Text.Block
+            css={css`
+              white-space: nowrap;
+            `}
+          >
+            <StatusLabel value={value} />
+          </Text.Block>
+        )
       }
     }
   ]
@@ -273,10 +292,12 @@ const useColumns = ({ mutate, statusName }) => {
               {statusName === InVerifyName && (
                 <VerifyButton record={value} onSubmitted={mutate} />
               )}
-              {statusName === EffectiveName && <EditButton />}
+              {statusName === EffectiveName && (
+                <EditButton record={value} onSubmitted={mutate} />
+              )}
               {(statusName === EffectiveName ||
                 statusName === ExpiredName ||
-                statusName === RejectedName) && <ViewButton />}
+                statusName === RejectedName) && <ViewButton record={value} />}
             </Set>
           </Box>
         )
