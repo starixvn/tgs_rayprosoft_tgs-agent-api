@@ -1,17 +1,22 @@
-﻿namespace TGS.Core.Models.Enums
+﻿// ReSharper disable IdentifierTypo
+
+namespace TGS.Core.Models.Enums
 {
     public enum GameType
     {
-        Slot = 0,
-        TableGame = 1,
-        LiveDealer = 2,
-        Lobby = 3,
-        Instant = 4,
-        Lottery = 5,
-        Sports = 6,
-        CardGame = 7,
-        CardGameLobby = 8,
-        Fishing = 9,
-        FishingLobby = 10
+        Sportsbook = 1,
+        VirtualSports = 2,
+        ESports = 3,
+        LiveDealer = 4,
+        LiveDealerLobby = 5,
+        CardGame = 6,
+        CardGameLobby = 7,
+        Fishing = 8,
+        FishingLobby = 9,
+        Arcade = 10,
+        ArcadeLobby = 11,
+        Slot = 12,
+        Lottery = 13,
+        TableGame = 14
     }
 }
