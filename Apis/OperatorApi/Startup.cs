@@ -103,7 +103,7 @@ namespace TGS.Apis.OperatorApi
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseVerifyCredentialsMiddleware();
 
