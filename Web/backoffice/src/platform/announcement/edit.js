@@ -24,12 +24,17 @@ import { FieldValues } from "../../layout/Grid"
 import FormDialog from "../../form/Dialog"
 import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
-import { useAddAnnouncement, useVerifyAnnouncement } from "./client"
+import {
+  useAddAnnouncement,
+  useEditAnnouncement,
+  useVerifyAnnouncement
+} from "./client"
 import { Trans, useTrans } from "../../i18n"
 import { Field as InputField } from "../../input/Field"
 import DateField from "../../date/Field"
 import ModalDialog from "../../dialog/Modal"
 import parseDate from "date-fns/fp/parseISO"
+import { CancelText } from "../../button/ActionButtons"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -125,12 +130,86 @@ export const ViewButton = ({ record, ...props }) => {
   )
 }
 
-const ViewDialog = ({ dialog, finalFocusRef, ...props }) => {
-  return null
+const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
+  let from = parseDate(record.from)
+  let to = parseDate(record.to)
+
+  let title = useTrans({
+    zh: "查看公告",
+    en: "View Announcement"
+  })
+  return (
+    <FormDialog
+      initialValues={{
+        ...record,
+        from,
+        to
+      }}
+      title={title}
+      placement="top"
+      css={DialogCss}
+      dialog={dialog}
+      showActionButtons={false}
+      footer={
+        <Box alignX="right" width="100%">
+          <Button onClick={dialog.hide}>
+            <CancelText />
+          </Button>
+        </Box>
+      }
+    >
+      <VerifyBody readonly />
+    </FormDialog>
+  )
 }
 
-const EditDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
-  return null
+const EditDialog = ({
+  record,
+  onSubmitted,
+  dialog,
+  finalFocusRef,
+  ...props
+}) => {
+  let { id } = record
+  let [submitData, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useEditAnnouncement({
+    id,
+    data: submitData
+  })
+
+  const clearResult = () => {
+    setSubmit(null)
+  }
+
+  let title = useTrans({
+    zh: "修改公告",
+    en: "Edit Announcement"
+  })
+
+  let from = parseDate(record.from)
+  let to = parseDate(record.to)
+  return (
+    <FormDialog
+      initialValues={{
+        ...record,
+        from,
+        to
+      }}
+      onSubmit={setSubmit}
+      isLoading={isLoading}
+      result={result}
+      error={error}
+      onCloseErrorAlert={clearResult}
+      onSubmitted={onSubmitted}
+      title={title}
+      dialog={dialog}
+      finalFocusRef={finalFocusRef}
+      placement="top"
+      css={DialogCss}
+    >
+      <EditBody />
+    </FormDialog>
+  )
 }
 
 const EditBody = ({ readonly = false }) => {
@@ -283,16 +362,26 @@ const VerifyDialog = ({
       css={DialogCss}
       dialog={dialog}
     >
-      <Stack spacing="major-2">
-        <EditBody readonly={true} />
-        <Box border="default" height="1px" width="100%"></Box>
-        <FieldValues>
-          <Label name="remarks">
-            <Trans zh="备注" en="Remarks" />
-          </Label>
-          <Field component={TextareaField.Formik} name="remarks" />
-        </FieldValues>
-      </Stack>
+      <VerifyBody />
     </FormDialog>
+  )
+}
+
+const VerifyBody = ({ readonly = false }) => {
+  return (
+    <Stack spacing="major-2">
+      <EditBody readonly={true} />
+      <Box border="default" height="1px" width="100%"></Box>
+      <FieldValues>
+        <Label name="remarks">
+          <Trans zh="备注" en="Remarks" />
+        </Label>
+        <Field
+          name="remarks"
+          component={TextareaField.Formik}
+          disabled={readonly}
+        />
+      </FieldValues>
+    </Stack>
   )
 }
