@@ -51,7 +51,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     UpdatedByUsername = q.UpdatedByUsername,
                     CreatedOn = q.CreatedOn,
                     UpdatedOn = q.UpdatedOn
-                }).CreatePagedResponseAsync(request);
+                }).AsNoTracking().CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
@@ -61,7 +61,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             var channel = await _queries.GetSingleAsync(q => q.Id == id,
                 p => p
                     .Include(pc => pc.PaymentVendor)
-                    .Include(pc => pc.PaymentMethod));
+                    .Include(pc => pc.PaymentMethod)
+                    .AsNoTracking());
 
             return new GetPaymentChannelResponse
             {
@@ -84,13 +85,14 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPost]
         [Description("Create a PaymentChannel")]
-        public async Task<MessageResponse> CreateAsync([FromBody] CreateUpdatePaymentChannelRequest request)
+        public async Task<MessageResponse> CreateAsync(CreateUpdatePaymentChannelRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Code == request.Code))
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.CodeExists);
             await _commands.CreateAsync(new PaymentChannel
             {
                 Id = Guid.NewGuid(),
+                Name = request.Name,
                 Code = request.Code,
                 PaymentVendorId = request.PaymentVendorId,
                 PaymentMethodId = request.PaymentMethodId,
@@ -103,13 +105,16 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [Description("Update a PaymentChannel")]
-        public async Task<MessageResponse> UpdateAsync([FromBody] CreateUpdatePaymentChannelRequest request)
+        public async Task<MessageResponse> UpdateAsync(Guid id, CreateUpdatePaymentChannelRequest request)
         {
-            var channel = await _queries.GetSingleAsync(p => p.Id == request.Id);
+            var channel = await _queries.GetSingleAsync(p => p.Id == id);
 
             if (channel == null) return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.NotFound);
+
+            if (channel.Code == request.Code)
+                return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.CodeExists);
 
             channel.PaymentVendorId = request.PaymentVendorId;
             channel.PaymentMethodId = request.PaymentMethodId;

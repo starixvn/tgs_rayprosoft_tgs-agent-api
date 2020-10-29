@@ -55,7 +55,7 @@ namespace TGS.Core.DataServices
         DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
         DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
         DbSet<Payment> ITgsRepository.Payments { get; set; }
-        DbSet<PaymentUserAccessControl> ITgsRepository.UserPaymentAccessControls { get; set; }
+        DbSet<PaymentUserAccessControl> ITgsRepository.PaymentUserAccessControls { get; set; }
         DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
 
         Task<bool> IBaseRepository.CanConnectionAsync()

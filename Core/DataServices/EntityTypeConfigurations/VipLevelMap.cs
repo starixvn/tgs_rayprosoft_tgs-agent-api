@@ -39,10 +39,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasMany(p => p.Players)
                 .WithOne(p => p.Vip)
                 .HasForeignKey(p => p.VipId);
-
-            builder.HasMany(p => p.PaymentVipLevels)
-                .WithOne(p => p.VipLevel)
-                .HasForeignKey(p => p.VipLevelId);
         }
     }
 }

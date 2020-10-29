@@ -18,8 +18,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
-                .IsRequired();
+                .HasColumnType(ColumnTypes.Nvarchar(128));
 
             builder.HasMany(p => p.PaymentChannels)
                 .WithOne(p => p.PaymentMethod)

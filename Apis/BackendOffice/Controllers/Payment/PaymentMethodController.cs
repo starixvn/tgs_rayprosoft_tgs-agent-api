@@ -11,8 +11,6 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/[controller]")]
@@ -41,6 +39,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Select(q => new PaymentMethodModel
                 {
                     Id = q.Id,
+                    Name = q.Name,
                     Code = q.Code,
                     Description = q.Description,
                     PaymentVendorCode = q.PaymentVendor.Code,
@@ -48,36 +47,39 @@ namespace TGS.Apis.BackendOffice.Controllers
                     UpdatedByUsername = q.UpdatedByUsername,
                     CreatedOn = q.CreatedOn,
                     UpdatedOn = q.UpdatedOn
-                }).CreatePagedResponseAsync(request);
+                }).AsNoTracking().CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
         [Description("Get a PaymentMethod")]
         public async Task<GetPaymentMethodResponse> GetPaymentMethodAsync(Guid id)
         {
-            var vendor = await _queries.GetSingleAsync(q => q.Id == id,
-                p => p.Include(pm => pm.PaymentVendor));
+            var method = await _queries.GetSingleAsync(q => q.Id == id,
+                p => p
+                    .Include(pm => pm.PaymentVendor)
+                    .AsNoTracking());
 
             return new GetPaymentMethodResponse
             {
                 Valid = true,
                 PaymentMethod = new PaymentMethodModel
                 {
-                    Id = vendor.Id,
-                    Code = vendor.Code,
-                    Description = vendor.Description,
-                    PaymentVendorCode = vendor.PaymentVendor.Code,
-                    CreatedOn = vendor.CreatedOn,
-                    UpdatedOn = vendor.UpdatedOn,
-                    CreatedByUsername = vendor.CreatedByUsername,
-                    UpdatedByUsername = vendor.UpdatedByUsername
+                    Id = method.Id,
+                    Name = method.Name,
+                    Code = method.Code,
+                    Description = method.Description,
+                    PaymentVendorCode = method.PaymentVendor.Code,
+                    CreatedOn = method.CreatedOn,
+                    UpdatedOn = method.UpdatedOn,
+                    CreatedByUsername = method.CreatedByUsername,
+                    UpdatedByUsername = method.UpdatedByUsername
                 }
             };
         }
 
         [HttpPost]
         [Description("Create a PaymentMethod")]
-        public async Task<MessageResponse> CreateAsync([FromBody] CreateUpdatePaymentMethodRequest request)
+        public async Task<MessageResponse> CreateAsync(CreateUpdatePaymentMethodRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Code == request.Code))
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.CodeExists);
@@ -85,6 +87,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             await _commands.CreateAsync(new PaymentMethod
             {
                 Id = Guid.NewGuid(),
+                Name = request.Name,
                 Code = request.Code,
                 PaymentVendorId = request.PaymentVendorId,
                 CreatedByUsername = Username,
@@ -96,14 +99,18 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [Description("Update a PaymentMethod")]
-        public async Task<MessageResponse> UpdateAsync([FromBody] CreateUpdatePaymentMethodRequest request)
+        public async Task<MessageResponse> UpdateAsync(Guid id, CreateUpdatePaymentMethodRequest request)
         {
-            var method = await _queries.GetSingleAsync(p => p.Id == request.Id);
+            var method = await _queries.GetSingleAsync(p => p.Id == id);
 
             if (method == null) return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.NotFound);
 
+            if (method.Code == request.Code)
+                return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.CodeExists);
+
+            method.Name = request.Name;
             method.PaymentVendorId = request.PaymentVendorId;
             method.Description = request.Description;
             method.UpdatedByUsername = Username;

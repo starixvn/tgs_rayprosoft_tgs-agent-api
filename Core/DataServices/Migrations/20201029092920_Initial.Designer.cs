@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201028035237_Initial")]
+    [Migration("20201029092920_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -673,6 +673,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<bool>("DepositedAmountUnlimited")
                         .HasColumnType("bit");
 
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit");
 
@@ -749,7 +752,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
@@ -795,7 +797,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
@@ -860,7 +861,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
@@ -887,6 +887,8 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("PaymentId", "VipLevelId");
+
+                    b.HasIndex("VipLevelId");
 
                     b.ToTable("PaymentVipLevels","dbo");
                 });
@@ -1628,7 +1630,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasOne("TGS.Core.DataServices.Models.VipLevel", "VipLevel")
                         .WithMany("PaymentVipLevels")
-                        .HasForeignKey("PaymentId")
+                        .HasForeignKey("VipLevelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

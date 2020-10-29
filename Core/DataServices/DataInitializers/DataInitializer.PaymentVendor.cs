@@ -114,6 +114,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 new Payment
                 {
                     Id = paymentId,
+                    DisplayOrder = 1,
                     PaymentVendorId = PaymentVendors[Help2Pay],
                     PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
                     PaymentChannelId = PaymentChannels[BankTransfer].Item1,

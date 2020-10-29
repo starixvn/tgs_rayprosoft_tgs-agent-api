@@ -6,6 +6,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
     public class PaymentModel
     {
         public Guid Id { get; set; }
+        public int Number { get; set; }
         public string PaymentVendorName { get; set; }
         public string PaymentMethodName { get; set; }
         public string PaymentChannelName { get; set; }
@@ -23,7 +24,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public bool Enabled { get; set; }
         public string Reason { get; set; }
         public PaymentHandlingFeeModel PaymentHandlingFee { get; set; }
-        public PaymentUserAccessControlModel[] PaymentUserAccessControls { get; set; }
+        public PaymentUserAccessControlModel[] Whitelist { get; set; }
+        public PaymentUserAccessControlModel[] Blacklist { get; set; }
         public Guid[] VipLevelIds { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }

@@ -17,7 +17,6 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using VerifyRequest = TGS.Apis.BackendOffice.Controllers.Messages.StationLetter.VerifyRequest;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -25,10 +24,18 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class StationLetterController : BaseContextController
     {
-        private readonly ITgsQueries<StationLetter> _queries;
-        private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsCommands<StationLetter> _commands;
         private readonly ITgsCommands<StationLetterPlayer> _playerCommands;
+        private readonly ITgsQueries<Player> _playerQueries;
+        private readonly ITgsQueries<StationLetter> _queries;
+
+        private readonly Dictionary<string, StationLetterStatus> _typeDictionary =
+            new Dictionary<string, StationLetterStatus>
+            {
+                {"pass", StationLetterStatus.Published},
+                {"reject", StationLetterStatus.Rejected}
+            };
+
         private readonly IUploadService _uploadService;
 
         public StationLetterController(
@@ -46,7 +53,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             _uploadService = uploadService;
         }
 
-        [HttpGet, Description("Get station letters")]
+        [HttpGet]
+        [Description("Get station letters")]
         public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] PageableRequest request)
         {
             return _queries.GetQueries()
@@ -64,30 +72,18 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .CreatePagedResponseAsync(request);
         }
 
-        private readonly Dictionary<string, StationLetterStatus> _typeDictionary = new Dictionary<string, StationLetterStatus>()
-        {
-            { "pass", StationLetterStatus.Published},
-            { "reject", StationLetterStatus.Rejected}
-        };
-
-        [HttpPut("{id}/{type}"), Description("Verify a station letter")]
+        [HttpPut("{id}/{type}")]
+        [Description("Verify a station letter")]
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
             if (!_typeDictionary.ContainsKey(type))
-            {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidUrl);
-            }
 
             var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-            if (stationLetter == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
+            if (stationLetter == null) return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
 
             if (stationLetter.Status != StationLetterStatus.InVerify)
-            {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidStatus);
-            }
 
             var targetStatus = _typeDictionary
                 .FirstOrDefault(t => t.Key == type);
@@ -102,14 +98,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut("{id}"), Description("Update a station letter")]
+        [HttpPut("{id}")]
+        [Description("Update a station letter")]
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] StationLetterRequest request)
         {
             var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-            if (stationLetter == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
+            if (stationLetter == null) return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
 
             stationLetter.Subject = request.Subject;
             stationLetter.Content = request.Content;
@@ -120,7 +114,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost, Description("Create a station letter")]
+        [HttpPost]
+        [Description("Create a station letter")]
         public async Task<MessageResponse> CreateAsync([FromBody] StationLetterRequest request)
         {
             var stationLetter = new StationLetter
@@ -141,9 +136,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ToArrayAsync();
 
             if (!request.AssignedAllPlayers)
-            {
                 allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
-            }
 
             var players = allPlayers.Select(p => new StationLetterPlayer
             {
@@ -152,12 +145,13 @@ namespace TGS.Apis.BackendOffice.Controllers
             }).ToArray();
 
             await _commands.CreateAsync(stationLetter);
-            await _playerCommands.BatchInsertAsync(players);
+            await _playerCommands.BatchInsertOrUpdateAsync(players);
 
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost("upload"), Description("Upload player file")]
+        [HttpPost("upload")]
+        [Description("Upload player file")]
         public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
         {
             var uploadedResult = await _uploadService.GetUploadedExcelAsync(file);
@@ -168,14 +162,14 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ToArrayAsync();
 
             var players = from u in users
-                          join p in allPlayers on u equals p.Username
-                              into tmpU
-                          from p in tmpU.DefaultIfEmpty()
-                          select new GetPlayerFromFileResponse.PlayerModel
-                          {
-                              Username = u,
-                              Exists = p != null
-                          };
+                join p in allPlayers on u equals p.Username
+                    into tmpU
+                from p in tmpU.DefaultIfEmpty()
+                select new GetPlayerFromFileResponse.PlayerModel
+                {
+                    Username = u,
+                    Exists = p != null
+                };
 
             return new GetPlayerFromFileResponse
             {
@@ -184,7 +178,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPost("export"), Description("Export player file")]
+        [HttpPost("export")]
+        [Description("Export player file")]
         public async Task<HttpResponseMessage> ExportAsync()
         {
             var wb = await Task.Run(() =>

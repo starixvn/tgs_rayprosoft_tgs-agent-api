@@ -38,6 +38,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Select(q => new PaymentVendorModel
                 {
                     Id = q.Id,
+                    Name = q.Name,
                     Code = q.Code,
                     Description = q.Description,
                     CreatedByUsername = q.CreatedByUsername,
@@ -60,6 +61,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 PaymentVendor = new PaymentVendorModel
                 {
                     Id = vendor.Id,
+                    Name = vendor.Name,
                     Code = vendor.Code,
                     Description = vendor.Description,
                     CreatedOn = vendor.CreatedOn,
@@ -72,7 +74,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPost]
         [Description("Create a PaymentVendor")]
-        public async Task<MessageResponse> CreateAsync([FromBody] CreateUpdatePaymentVendorRequest request)
+        public async Task<MessageResponse> CreateAsync(CreateUpdatePaymentVendorRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Code == request.Code))
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentVendor.CodeExists);
@@ -80,6 +82,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             await _commands.CreateAsync(new PaymentVendor
             {
                 Id = Guid.NewGuid(),
+                Name = request.Name,
                 Code = request.Code,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
@@ -90,14 +93,18 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [Description("Update a PaymentVendor")]
-        public async Task<MessageResponse> UpdateAsync([FromBody] CreateUpdatePaymentVendorRequest request)
+        public async Task<MessageResponse> UpdateAsync(Guid id, CreateUpdatePaymentVendorRequest request)
         {
-            var vendor = await _queries.GetSingleAsync(p => p.Id == request.Id);
+            var vendor = await _queries.GetSingleAsync(p => p.Id == id);
 
             if (vendor == null) return CreateInvalidResponse<MessageResponse>(Resources.PaymentVendor.NotFound);
 
+            if (vendor.Code == request.Code)
+                return CreateInvalidResponse<MessageResponse>(Resources.PaymentVendor.CodeExists);
+
+            vendor.Name = request.Name;
             vendor.Description = request.Description;
             vendor.UpdatedByUsername = Username;
             vendor.UpdatedOn = DateTimeOffset.Now;
