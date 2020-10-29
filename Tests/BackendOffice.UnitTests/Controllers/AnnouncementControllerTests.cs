@@ -39,7 +39,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [TestCase(false)]
         public async Task Can_Get_Announcements(bool showAll)
         {
-            var request = new PageableRequest
+            var request = new GetAnnouncementsRequest
             {
                 Page = 1,
                 Rows = 10,

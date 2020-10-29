@@ -12,8 +12,9 @@ COPY ["Core/DataServices/DataServices.csproj", "Core/DataServices/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
 COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
-COPY ["Services/GameOperations/GameOperations.csproj", "Services/GameOperations/"]
 COPY ["Core/DataServices.Bet/DataServices.Bet.csproj", "Core/DataServices.Bet/"]
+COPY ["Apis/TgsApi.GameModels/TgsApi.GameModels.csproj", "Apis/TgsApi.GameModels/"]
+COPY ["Services/GameOperations/GameOperations.csproj", "Services/GameOperations/"]
 RUN dotnet restore "Apis/TgsApi/TgsApi.csproj"
 COPY . .
 WORKDIR "/src/Apis/TgsApi"
