@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import { Box, Set, Button, Text } from "bumbag"
+import { Box, Set, Button, Text, Switch } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
@@ -118,7 +118,7 @@ const AsyncContentBody = ({}) => {
             />
           </TabPanel>
         )}
-        <TabPanel tabId={EffectiveName} {...tab}>
+        {/*<TabPanel tabId={EffectiveName} {...tab}>
           <AsyncTable
             statusName={statusName}
             data={data}
@@ -150,7 +150,7 @@ const AsyncContentBody = ({}) => {
             isLoading={isLoading}
             mutate={mutate}
           />
-        </TabPanel>
+        </TabPanel> */}
       </Tabs>
     </PageContent>
   )
@@ -240,7 +240,15 @@ const useColumns = ({ mutate, statusName }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        //TODO: switch btn if effective tab
+        //TODO: change state
+        if (statusName === EffectiveName) {
+          return (
+            <Button>
+              <StatusLabel value={value} />
+            </Button>
+          )
+        }
+
         return (
           <Text.Block
             css={css`
