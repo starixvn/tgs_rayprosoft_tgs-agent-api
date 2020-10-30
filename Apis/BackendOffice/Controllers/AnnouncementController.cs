@@ -69,7 +69,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
             return _queries.GetQueries()
-                .Where(p=> request.Status == null || request.Status.Contains(p.Status))
+                .Where(p => request.Status == null || request.Status.Contains(p.Status))
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
@@ -157,9 +157,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-
-        [HttpPost("ChangeOrders")]
-        [Description("Change Payment Order")]
+        [HttpPut("ChangeOrders")]
+        [Description("Change Announcement Order")]
         public async Task<MessageResponse> ChangeOrder(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);

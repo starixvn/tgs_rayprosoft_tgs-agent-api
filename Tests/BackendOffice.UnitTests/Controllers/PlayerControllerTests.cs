@@ -13,26 +13,13 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Players;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
-using Player = TGS.Core.DataServices.Models.Player;
-using Resources = TGS.Apis.BackendOffice.Resources;
-using VipLevel = TGS.Core.DataServices.Models.VipLevel;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     public class PlayerControllerTests : BaseTests
     {
-        private PlayerController _controller;
-
-        private readonly Mock<ITgsQueries<Player>> _queriesMock = new Mock<ITgsQueries<Player>>();
-        private readonly Mock<ITgsQueries<PlayerAuditLog>> _auditLogQueriesMock = new Mock<ITgsQueries<PlayerAuditLog>>();
-        private readonly Mock<ITgsQueries<PlayerBank>> _bankQueriesMock = new Mock<ITgsQueries<PlayerBank>>();
-        private readonly Mock<ITgsCommands<Player>> _commandsMock = new Mock<ITgsCommands<Player>>();
-        private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new Mock<ITgsCommands<PlayerBank>>();
-        private readonly Mock<ITgsCommands<PlayerAuditLog>> _auditLogCommandsMock = new Mock<ITgsCommands<PlayerAuditLog>>();
-        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
-
         [SetUp]
         public override void Setup()
         {
@@ -47,6 +34,22 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _auditLogCommandsMock.Object,
                 HttpContextAccessorMock.Object);
         }
+
+        private PlayerController _controller;
+
+        private readonly Mock<ITgsQueries<Player>> _queriesMock = new Mock<ITgsQueries<Player>>();
+
+        private readonly Mock<ITgsQueries<PlayerAuditLog>> _auditLogQueriesMock =
+            new Mock<ITgsQueries<PlayerAuditLog>>();
+
+        private readonly Mock<ITgsQueries<PlayerBank>> _bankQueriesMock = new Mock<ITgsQueries<PlayerBank>>();
+        private readonly Mock<ITgsCommands<Player>> _commandsMock = new Mock<ITgsCommands<Player>>();
+        private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new Mock<ITgsCommands<PlayerBank>>();
+
+        private readonly Mock<ITgsCommands<PlayerAuditLog>> _auditLogCommandsMock =
+            new Mock<ITgsCommands<PlayerAuditLog>>();
+
+        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -69,9 +72,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.Username);
 
-            var expectedPlayers = showAll ?
-                orderedPlayers.ToArray() :
-                orderedPlayers.Skip(skip).Take(take).ToArray();
+            var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
 
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
@@ -114,9 +115,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
 
-            var expectedPlayers = showAll ?
-                orderedPlayers.ToArray() :
-                orderedPlayers.Skip(skip).Take(take).ToArray();
+            var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
 
             _auditLogQueriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
@@ -138,19 +137,21 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Get_Player_Not_Found()
         {
             var playerCode = Generator.RandomString(12);
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult<Player>(null));
 
             var response = await _controller.GetSingleAsync(playerCode);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Player.NotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.NotFound);
         }
 
         [Test]
         public async Task Can_Get_Player()
         {
             var player = CreatePlayerFixture().Create<Player>();
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult(player));
 
             var response = await _controller.GetSingleAsync(player.PlayerCode);
@@ -183,7 +184,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var player = CreatePlayerFixture().Create<Player>();
             var parnetPlayer = CreatePlayerFixture().Create<Player>();
 
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult(player))
                 .Returns(Task.FromResult(parnetPlayer));
 
@@ -192,11 +194,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeTrue();
 
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                  a.RealName == request.RealName &&
-                  a.VipId == request.VipId &&
-                  a.ParentInvitationCode == parnetPlayer.InvitationCode &&
-                  a.Status == request.Status &&
-                  a.HasAgent == request.HasAgent)));
+                a.RealName == request.RealName &&
+                a.VipId == request.VipId &&
+                a.ParentInvitationCode == parnetPlayer.InvitationCode &&
+                a.Status == request.Status &&
+                a.HasAgent == request.HasAgent)));
 
             _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
                 a.Username == player.PlayerCode)));
@@ -208,7 +210,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var player = CreatePlayerFixture().Create<Player>();
             var parnetPlayer = CreatePlayerFixture().Create<Player>();
 
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult(player))
                 .Returns(Task.FromResult(parnetPlayer));
 
@@ -232,7 +235,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var player = CreatePlayerFixture().Create<Player>();
             var parnetPlayer = CreatePlayerFixture().Create<Player>();
 
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult(player))
                 .Returns(Task.FromResult(parnetPlayer));
 
@@ -260,7 +264,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_Player_With_Invalid_Update_Type()
         {
             var playerCode = Generator.RandomString(12);
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult<Player>(null))
                 .Returns(Task.FromResult<Player>(null));
 
@@ -274,7 +279,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(playerCode, "info2", request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Player.UpdateTypeNotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.UpdateTypeNotFound);
 
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
                 a.Password == password &&
@@ -289,7 +294,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_Player_Not_Found()
         {
             var playerCode = Generator.RandomString(12);
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult<Player>(null))
                 .Returns(Task.FromResult<Player>(null));
 
@@ -303,7 +309,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Player.NotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.NotFound);
 
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
                 a.Password == password &&
@@ -319,7 +325,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var player = CreatePlayerFixture().Create<Player>();
             var playerCode = Generator.RandomString(12);
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(), It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
                 .Returns(Task.FromResult(player))
                 .Returns(Task.FromResult<Player>(null));
 
@@ -333,7 +340,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Player.ParentPlayerNotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.ParentPlayerNotFound);
 
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
                 a.Password == password &&
@@ -348,23 +355,26 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Player>(u => u
-                .With(s => s.Vip, new VipLevel { Id = Guid.NewGuid(), Name = "Vip" })
+                .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Name = "Vip"})
                 .With(s => s.Language, new Language())
                 .With(s => s.Licensee, new Licensee())
                 .With(s => s.ParentPlayer, new Player())
                 .With(s => s.BetLimitGroup, new BetLimitGroup())
-
                 .With(s => s.SubPlayers, new Player[] { })
-                .With(s => s.Banks, new[] { new PlayerBank
+                .With(s => s.Banks, new[]
                 {
-                    Id = Guid.NewGuid(),
-                    Username = Generator.RandomString(5),
-                    BankName = Generator.RandomString(20),
-                    BankAccount = Generator.RandomIntString(20),
-                }})
+                    new PlayerBank
+                    {
+                        Id = Guid.NewGuid(),
+                        Username = Generator.RandomString(5),
+                        BankName = Generator.RandomString(20),
+                        BankAccount = Generator.RandomIntString(20)
+                    }
+                })
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new[] { new Wallet { Balance = 0 } }));
+                .With(s => s.Wallets, new[] {new Wallet {Balance = 0}}));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }

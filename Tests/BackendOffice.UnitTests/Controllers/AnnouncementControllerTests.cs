@@ -15,7 +15,6 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -165,7 +164,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_Announcement_With_Invalid_Status()
         {
             var announcement = CreateAnnouncementFixture().Create<Announcement>();
-            announcement.Status = AnnounceStatus.Effective;
+            announcement.Status = AnnounceStatus.Expired;
             var request = new Fixture().Create<AnnouncementRequest>();
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),

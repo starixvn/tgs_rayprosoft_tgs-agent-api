@@ -11,12 +11,9 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
 using TGS.Apis.BackendOffice.DataService.Commands.TGS.Apis.BackendOffice.DataService.Commands;
-using TGS.Apis.BackendOffice.Resources;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
-using Payment = TGS.Core.DataServices.Models.Payment;
-using Player = TGS.Core.DataServices.Models.Player;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -97,7 +94,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreatePaymentAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Department.NameExists);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.NameExists);
         }
 
         [Test]

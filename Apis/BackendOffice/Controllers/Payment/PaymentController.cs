@@ -334,7 +334,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 };
         }
 
-        [HttpPost("ChangeOrders")]
+        [HttpPut("ChangeOrders")]
         [Description("Change Payment Order")]
         public async Task<MessageResponse> ChangeOrder(ChangeOrderRequest request)
         {

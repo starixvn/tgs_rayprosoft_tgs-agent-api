@@ -17,7 +17,6 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -55,6 +54,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new GetStationLettersRequest
             {
+                Status = StationLetterStatus.InVerify,
                 Page = 1,
                 Rows = 10,
                 SortBy = "CreatedOn",
@@ -66,6 +66,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .CreateMany<StationLetter>(105)
                 .AsQueryable()
                 .BuildMock().Object;
+
+            list = list.Where(q => q.Status == request.Status);
 
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
@@ -290,6 +292,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
                 .With(s => s.Wallets, new[] {new Wallet {Balance = 0}}));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }
