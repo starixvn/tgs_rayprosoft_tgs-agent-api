@@ -72,7 +72,7 @@ const Layout = ({ children }) => {
       <PageWithSidebar
         sidebar={<Sidebar />}
         sidebarPlacement="left"
-        sidebarWidth="270px"
+        sidebarWidth="250px"
         css={css``}
       >
         {children}

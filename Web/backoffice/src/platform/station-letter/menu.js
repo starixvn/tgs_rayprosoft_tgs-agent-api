@@ -5,7 +5,7 @@ export const Code = "stationletter"
 
 export const Create = "create"
 
-export const Audit = "audit"
+export const Verify = "verify"
 
 export const View = "view"
 
@@ -22,7 +22,7 @@ export const label = ({ codes = [], locale = Locales.zh }) => {
         },
         locale
       )
-    case Audit:
+    case Verify:
       return getTrans(
         {
           zh: "审核站内信",

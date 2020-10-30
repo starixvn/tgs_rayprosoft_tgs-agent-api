@@ -164,9 +164,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_Announcement_With_Invalid_Status()
         {
             var announcement = CreateAnnouncementFixture().Create<Announcement>();
-            announcement.Status = AnnounceStatus.Expired;
+            announcement.Status = AnnounceStatus.InVerify;
             var request = new Fixture().Create<AnnouncementRequest>();
-
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
                 .Returns(Task.FromResult(announcement));
