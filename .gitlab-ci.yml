@@ -19,18 +19,12 @@ before_script:
 
 build:
   stage: build
-  variables:
   script:
     - "dotnet build $solution"
 
 tests:
   stage: test
   script:
-    - 'dotnet test $solution --filter Unit --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+    - 'dotnet test $solution --filter Unit /p:CollectCoverage=true' 
   artifacts:
     when: always
-    paths:
-        - ./**/*test-result.xml
-    reports:
-      junit:
-        - ./**/*test-result.xml
