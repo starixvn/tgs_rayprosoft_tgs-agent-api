@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -14,6 +13,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
+using TGS.Services.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
@@ -22,19 +22,24 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous, IgnoreAntiforgeryToken]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     public class GameController : ControllerBase
     {
-        private readonly ILicenseeOperations _licenseeOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ILicenseeLanguageCodeMapper _licenseeLanguageCodeMapper;
         private readonly IRedisCacheManager _cacheManger;
+        private readonly IExpirationValidator _expirationValidator;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
-        private readonly IValidStatus<Status> _validStatus;
+        private readonly ILicenseeLanguageCodeMapper _licenseeLanguageCodeMapper;
+        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IPluggalbeGameProviderApiClient _pluggableApiClient;
+        private readonly IPluggableOperations _pluggableOperations;
+        private readonly IStatusValidator _statusValidator;
         private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IValidStatus<Status> _validStatus;
 
         public GameController(
             ILicenseeOperations licenseeOperations,
@@ -44,7 +49,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus)
+            IValidStatus<GameStatus> validGameStatus,
+            IStatusValidator statusValidator,
+            IExpirationValidator expirationValidator,
+            IPluggalbeGameProviderApiClient pluggableApiClient,
+            IPluggableOperations pluggableOperations)
         {
             _licenseeOperations = licenseeOperations;
             _gameProviderOperations = gameProviderOperations;
@@ -54,16 +63,21 @@ namespace TGS.Apis.OperatorApi.Controllers
             _json = json;
             _validStatus = validStatus;
             _validGameStatus = validGameStatus;
+            _statusValidator = statusValidator;
+            _expirationValidator = expirationValidator;
+            _pluggableApiClient = pluggableApiClient;
+            _pluggableOperations = pluggableOperations;
         }
 
-        [HttpPost, Route("list")]
+        [HttpPost]
+        [Route("list")]
         public async Task<GetGamesResponse> GetGamesAsync(GetGamesRequest request)
         {
             var licenseeId = HttpContext.Items.GetLicenseeId();
             var cultureCode = await _licenseeLanguageCodeMapper.ExternalToInternalAsync(request.Language, licenseeId);
 
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
-            
+
             var platform = request.PlatformType;
             var username = request.UserName;
             CachedPlayer cachedPlayer = null;
@@ -76,8 +90,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             var cacheKey = $"{licenseeId}";
             var field = cachedPlayer == null
                 ? $"{platform}:{gameProviderId}:{cultureCode}:general:"
-                : $"{platform}:{gameProviderId}:{cultureCode}:{cachedPlayer.DefaultWalletCurrencyCode}:{(int)cachedPlayer.Type}";
-            
+                : $"{platform}:{gameProviderId}:{cultureCode}:{cachedPlayer.DefaultWalletCurrencyCode}:{(int) cachedPlayer.Type}";
+
             var value =
                 await _cacheManger.SafeGetHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, licenseeId, field);
 
@@ -94,7 +108,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await _cacheManger.SafeCacheHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, cacheKey, new HashEntry[]
             {
-                new(field, _json.SerializeToString(gameModels))
+                new (field, _json.SerializeToString(gameModels))
             }, TimeSpan.FromHours(1));
 
             return new GetGamesResponse
@@ -103,7 +117,50 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        private async Task<GetGamesResponse.GameModel[]> GetGameModelsAsync(Guid gameProviderId, CachedLicenseeGame[] licenseeGames, CachedPlayer cachedPlayer)
+        [HttpPost]
+        [Route("geturl")]
+        public async Task<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request)
+        {
+            var licenseeId = HttpContext.Items.GetLicenseeId();
+            var platformType = request.PlatformType;
+
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+
+            _statusValidator.ThrowIfPlayerDisabled(player.Status);
+            await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platformType);
+
+            var gameProviderCode = request.GameProviderCode;
+            var gameCode = request.GameCode;
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
+            var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
+            var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameCode, platformType);
+
+            var statuses = _validStatus.GetStatus(player.Type);
+            var gameStatuses = _validGameStatus.GetStatus(player.Type);
+            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(gameProviderId, game.Id, gameCode,
+                statuses, gameStatuses);
+
+            var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(gameProviderCode);
+            var r = await _pluggableApiClient.GetGameUrlAsync(serviceUrl, new ()
+            {
+                Player = player,
+                GameProvider = gameProvider,
+                Game = game
+            });
+
+            return new GetGameUrlResponse
+            {
+                Error = r.Error,
+                ErrorMessage = r.ErrorMessage,
+                Url = r.Url
+            };
+        }
+
+        #region Private Methods
+
+        private async Task<GetGamesResponse.GameModel[]> GetGameModelsAsync(Guid gameProviderId,
+            CachedLicenseeGame[] licenseeGames, CachedPlayer cachedPlayer)
         {
             var statuses = ValidStatus.Default;
             var gameStatuses = ValidGameStatus.Default;
@@ -142,5 +199,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         IsActive = statuses.Contains(cachedGameProvider.Status) && gameStatuses.Contains(gg.Status)
                     }).ToArray();
         }
+
+        #endregion
     }
 }

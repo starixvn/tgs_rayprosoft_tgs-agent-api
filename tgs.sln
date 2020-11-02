@@ -70,6 +70,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.ApiClients", "Tests\T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Games.IntegrationTests", "Tests\Games.IntegrationTests\Games.IntegrationTests.csproj", "{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clients", "Services\Clients\Clients.csproj", "{76576324-B7AE-42F2-86F3-7BCD48DB6234}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -160,6 +162,10 @@ Global
 		{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76576324-B7AE-42F2-86F3-7BCD48DB6234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76576324-B7AE-42F2-86F3-7BCD48DB6234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76576324-B7AE-42F2-86F3-7BCD48DB6234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76576324-B7AE-42F2-86F3-7BCD48DB6234}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -187,6 +193,7 @@ Global
 		{1B57C935-5B7F-4715-9C5D-04169137C2CA} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 		{6C17C092-7A55-416A-A9A2-E8DA2B627FC6} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{EAAEF4D4-C441-4F0C-89B7-2F269991BA97} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
+		{76576324-B7AE-42F2-86F3-7BCD48DB6234} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
