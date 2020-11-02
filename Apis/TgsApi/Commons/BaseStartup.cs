@@ -96,7 +96,7 @@ namespace TGS.Apis.TgsApi.Commons
             UseCustomMiddlewares(app);
 
             app
-                .UseHttpsRedirection()
+                //.UseHttpsRedirection()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
                 {
