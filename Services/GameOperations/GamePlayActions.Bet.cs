@@ -44,7 +44,7 @@ namespace TGS.Services.GameOperations
         async Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
-            await ValidtePlayerAysnc(player, data.GameProviderId, data.GameProviderConfigurationId, data.PlatformType);
+            await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId, data.PlatformType);
             await ThrowIfGameIsNotTakenByLicenseeAsync(player, data);
             data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
             var r = await _operations.PlaceBetAsync(data);
