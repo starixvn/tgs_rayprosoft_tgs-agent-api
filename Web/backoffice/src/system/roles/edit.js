@@ -146,10 +146,52 @@ const MenusBody = ({ menus = [], setMenus }) => {
     let item = findMenu(path, menus)
     item.isDisplay = checked
 
-    setMenus(menus)
+    setSubMenusDisplay(item.isDisplay, item)
+    syncMenuDisplay(path.slice(0, path.length - 1), menus)
+
+    setMenus([...menus])
   }
 
   return <MenuTable menus={menus} setChecked={setChecked} />
+}
+
+const setSubMenusDisplay = (display, menu = {}) => {
+  let subMenus = menu?.subMenus ?? []
+  subMenus.forEach((menu) => {
+    menu.isDisplay = display
+    setSubMenusDisplay(display, menu)
+  })
+}
+
+const syncMenuDisplay = (path = [], menus) => {
+  if (!path || path.length === 0) {
+    return
+  }
+
+  let menu = findMenu(path, menus) ?? {}
+  let subMenus = menu.subMenus ?? []
+  let { isSameDisplay, isDisplay } = subMenus.reduce(
+    (context, menu, index) => {
+      if (index === 0) {
+        context.isDisplay = menu.isDisplay
+      }
+      if (context.isDisplay != menu.isDisplay) {
+        context.isSameDisplay = false
+      }
+      return context
+    },
+    {
+      isSameDisplay: true,
+      isDisplay
+    }
+  )
+
+  if (isSameDisplay) {
+    menu.isDisplay = isDisplay
+    if (path.length > 1) {
+      syncMenuDisplay(path.slice(0, path.length - 1), menus)
+    }
+  }
 }
 
 export const EditButton = ({ id, onSubmitted, ...props }) => {
@@ -179,7 +221,7 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 }
 
 const AsyncRoleDialog = ({ id, dialog, onSubmitted, finalFocusRef }) => {
-  let { role, isLoading, isValidating, error, mutate } = useRole({
+  let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole({
     id: dialog.visible && id
   })
 
@@ -197,7 +239,13 @@ const AsyncRoleDialog = ({ id, dialog, onSubmitted, finalFocusRef }) => {
       name={role.name}
       menus={role.menus}
       dialog={dialog}
-      onSubmitted={onSubmitted}
+      onSubmitted={(data) => {
+        mutate({
+          ...role,
+          ...data
+        })
+        onSubmitted && onSubmitted()
+      }}
       finalFocusRef={finalFocusRef}
     />
   )
@@ -211,7 +259,7 @@ const EditDialog = ({
   onSubmitted,
   finalFocusRef
 }) => {
-  let [menusState, setMenus] = useState()
+  let [menusState, setMenus] = useState(cloneDeep(menus))
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useEditRole({
     id,
@@ -246,7 +294,9 @@ const EditDialog = ({
       result={result}
       error={error}
       onCloseErrorAlert={clearResult}
-      onSubmitted={onSubmitted}
+      onSubmitted={() => {
+        onSubmitted && onSubmitted(submitData)
+      }}
       title={title}
       dialog={dialog}
       placement="top"
@@ -332,12 +382,6 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
 }
 
 const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
-  let [checked, set] = useState(menu.isDisplay)
-
-  useEffect(() => {
-    set(menu.isDisplay)
-  }, [menu.isDisplay])
-
   let { code } = menu
   let menuPath = [...path, code]
   let label = useMenuLabel({ codes: menuPath })
@@ -348,10 +392,9 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
   return (
     <Checkbox
       label={label}
-      checked={checked}
+      checked={menu.isDisplay}
       onChange={(event) => {
         let isChecked = event.target.checked
-        set(isChecked)
         setChecked(menuPath, isChecked)
       }}
       css={css`

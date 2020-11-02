@@ -7,7 +7,13 @@ import { Provider as BumbagProvider } from "bumbag"
 import { Provider as UserProvider } from "./user/context"
 import { BrowserRouter as Router } from "react-router-dom"
 import { Provider as I18nProvider } from "./i18n"
-import { faTrash, faTrashAlt, faMinus, faEdit, faCog } from "@fortawesome/free-solid-svg-icons"
+import {
+  faTrash,
+  faTrashAlt,
+  faMinus,
+  faEdit,
+  faCog
+} from "@fortawesome/free-solid-svg-icons"
 
 const theme = {
   PageContent: {
@@ -19,8 +25,8 @@ const theme = {
     iconSets: [
       {
         icons: [faTrash, faTrashAlt, faMinus, faEdit, faCog],
-        prefix: 'solid-',
-        type: 'font-awesome'
+        prefix: "solid-",
+        type: "font-awesome"
       }
     ]
   }

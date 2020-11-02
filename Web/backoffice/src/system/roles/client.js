@@ -18,7 +18,7 @@ export const useList = (searchParams) => {
 export const useRole = ({ id, shouldFetch = true } = {}) => {
   let fetchData = shouldFetch && !!id
   let key = `/api/role/${id}`
-  const { data: role, error, isValidating } = useSWR(
+  const { data: role, error, isValidating, mutate } = useSWR(
     fetchData ? key : null,
     (url) => get(url).then(({ role, ...response }) => role)
   )
@@ -29,9 +29,8 @@ export const useRole = ({ id, shouldFetch = true } = {}) => {
     isValidating,
     error,
     isError: error,
-    mutate: () => {
-      cache.delete(key)
-    }
+    mutate,
+    deleteCache: () => cache.delete(key)
   }
 }
 
