@@ -33,7 +33,8 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeForCache"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeGameProviderConfigurationForCache"));
+                string.Format(Consts.StoreProcedureSqlForamt,
+                    "usp_Licensee_GetLicenseeGameProviderConfigurationForCache"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetGameProviderForCache"));
             migrationBuilder.SqlResource(assembly,
@@ -67,8 +68,11 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetSubGameIdMaps"));
 
-            #endregion Store Procedure
+            //Trigger
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.TriggerSqlForamt, "PaymentAuditLog"));
 
+            #endregion Store Procedure
         }
     }
 }

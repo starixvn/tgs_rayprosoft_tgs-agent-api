@@ -15,10 +15,10 @@ namespace TGS.Core.DataServices.Models
         public Guid PaymentChannelId { get; set; }
         public virtual PaymentChannel PaymentChannel { get; set; }
         public string ChannelName { get; set; }
-        public bool Enabled { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
-        public MeetTransferCondition TransferCondition { get; set; }
+        public PlayerListCondition PlayerListCondition { get; set; }
         public bool AllPlayer { get; set; }
         public bool IdentityVerification { get; set; }
         public bool PhoneVerification { get; set; }
@@ -26,14 +26,14 @@ namespace TGS.Core.DataServices.Models
         public decimal DepositedAmountFrom { get; set; }
         public decimal DepositedAmountTo { get; set; }
         public string Reason { get; set; }
-        public decimal? HandlingFeePercentage { get; set; }
-        public decimal? LowestHandlingFee { get; set; }
-        public decimal? HighestHandlingFee { get; set; }
+        public decimal? FeePercentage { get; set; }
+        public decimal? LowestFee { get; set; }
+        public decimal? HighestFee { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
-        public virtual ICollection<PaymentUserAccessControl> PaymentUserAccessControls { get; set; }
+        public virtual ICollection<PaymentPlayerList> PaymentPlayerList { get; set; }
         public virtual ICollection<PaymentVipLevel> VipLevels { get; set; }
     }
 }

@@ -55,8 +55,9 @@ namespace TGS.Core.DataServices
         DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
         DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
         DbSet<Payment> ITgsRepository.Payments { get; set; }
-        DbSet<PaymentUserAccessControl> ITgsRepository.PaymentUserAccessControls { get; set; }
+        DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
+        DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
 
         Task<bool> IBaseRepository.CanConnectionAsync()
         {
@@ -160,8 +161,9 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new PaymentVendorMap());
             modelBuilder.ApplyConfiguration(new PaymentMethodMap());
             modelBuilder.ApplyConfiguration(new PaymentChannelMap());
-            modelBuilder.ApplyConfiguration(new PaymentUserAccessControlMap());
+            modelBuilder.ApplyConfiguration(new PaymentPlayerListMap());
             modelBuilder.ApplyConfiguration(new PaymentVipLevelMap());
+            modelBuilder.ApplyConfiguration(new PaymentAuditLogMap());
         }
     }
 }

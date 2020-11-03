@@ -2,10 +2,9 @@
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
 {
-    public class PaymentUserAccessControlModel
+    public class PaymentPlayerListModel
     {
         public ListType ListType { get; set; }
-        public string PlayerCode { get; set; }
-        public string PlayerName { get; set; }
+        public string Username { get; set; }
     }
 }

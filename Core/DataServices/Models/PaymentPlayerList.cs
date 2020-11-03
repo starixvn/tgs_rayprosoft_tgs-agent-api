@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class PaymentUserAccessControl
+    public class PaymentPlayerList
     {
         public Guid Id { get; set; }
         public ListType ListType { get; set; }

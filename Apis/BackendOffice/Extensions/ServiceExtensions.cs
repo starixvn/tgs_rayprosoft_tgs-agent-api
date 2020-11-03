@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Apis.BackendOffice.DataService.Commands.TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;

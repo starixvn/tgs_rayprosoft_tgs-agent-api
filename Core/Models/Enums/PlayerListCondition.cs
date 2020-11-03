@@ -1,6 +1,6 @@
 ﻿namespace TGS.Core.Models.Enums
 {
-    public enum MeetTransferCondition
+    public enum PlayerListCondition
     {
         All = 0,
         Someone = 1

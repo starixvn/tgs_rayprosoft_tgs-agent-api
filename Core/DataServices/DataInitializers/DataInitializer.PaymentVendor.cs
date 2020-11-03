@@ -119,10 +119,10 @@ namespace TGS.Core.DataServices.DataInitializers
                     PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
                     PaymentChannelId = PaymentChannels[BankTransfer].Item1,
                     ChannelName = "阿里pay",
-                    Enabled = true,
+                    PaymentStatus = PaymentStatus.Enabled,
                     TransferLimitFrom = 10,
                     TransferLimitTo = 100000,
-                    TransferCondition = MeetTransferCondition.All,
+                    PlayerListCondition = PlayerListCondition.All,
                     AllPlayer = true,
                     IdentityVerification = true,
                     PhoneVerification = true,
@@ -130,19 +130,19 @@ namespace TGS.Core.DataServices.DataInitializers
                     DepositedAmountFrom = 100,
                     DepositedAmountTo = 1000,
                     Reason = "Reason",
-                    HandlingFeePercentage = 50,
-                    LowestHandlingFee = 50,
-                    HighestHandlingFee = 500,
-                    PaymentUserAccessControls = new[]
+                    FeePercentage = 50,
+                    LowestFee = 50,
+                    HighestFee = 500,
+                    PaymentPlayerList = new[]
                     {
-                        new PaymentUserAccessControl
+                        new PaymentPlayerList
                         {
                             Id = Guid.NewGuid(),
                             PlayerCode = players[0].PlayerCode,
                             ListType = ListType.White,
                             PaymentId = paymentId
                         },
-                        new PaymentUserAccessControl
+                        new PaymentPlayerList
                         {
                             Id = Guid.NewGuid(),
                             PlayerCode = players[1].PlayerCode,
@@ -171,7 +171,7 @@ namespace TGS.Core.DataServices.DataInitializers
             };
             await _repository.BulkInsertAsync(payment);
             await _repository.BulkInsertAsync(payment.SelectMany(p => p.VipLevels).ToArray());
-            await _repository.BulkInsertAsync(payment.SelectMany(p => p.PaymentUserAccessControls).ToArray());
+            await _repository.BulkInsertAsync(payment.SelectMany(p => p.PaymentPlayerList).ToArray());
         }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.DataService.Commands.TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -46,10 +46,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<PaymentModel>> GetPaymentsAsync(PaymentsRequest request)
         {
             return _queries.GetQueries()
-                .Where(request.Enabled, p => p.Enabled == request.Enabled)
-                .Where(request.Filter, p => p.PaymentVendor.Name.Contains(request.Filter) ||
-                                            p.PaymentMethod.Name.Contains(request.Filter) ||
-                                            p.PaymentChannel.Name.Contains(request.Filter))
+                .Where(request.PaymentStatus.ToString(), p => p.PaymentStatus == request.PaymentStatus)
+                .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
+                                             p.PaymentMethod.Name.Contains(request.Keyword) ||
+                                             p.PaymentChannel.Name.Contains(request.Keyword))
                 .Select(q => new PaymentModel
                 {
                     Id = q.Id,
@@ -58,21 +58,21 @@ namespace TGS.Apis.BackendOffice.Controllers
                     PaymentMethodName = q.PaymentMethod.Name,
                     PaymentChannelName = q.PaymentChannel.Name,
                     ChannelName = q.ChannelName,
-                    TransferCondition = q.TransferCondition,
+                    PlayerListCondition = q.PlayerListCondition,
                     AllPlayer = q.AllPlayer,
                     DepositedAmountFrom = q.DepositedAmountFrom,
                     DepositedAmountTo = q.DepositedAmountTo,
                     IdentityVerification = q.IdentityVerification,
                     PhoneVerification = q.PhoneVerification,
-                    DesignatedUser = q.PaymentUserAccessControls.Count > 0,
+                    DesignatedUser = q.PaymentPlayerList.Count > 0,
                     TransferLimitFrom = q.TransferLimitFrom,
                     TransferLimitTo = q.TransferLimitTo,
-                    Enabled = q.Enabled,
-                    PaymentHandlingFee = new PaymentHandlingFeeModel
+                    PaymentStatus = q.PaymentStatus,
+                    PaymentFee = new PaymentFeeModel
                     {
-                        HandlingFeePercentage = q.HandlingFeePercentage,
-                        HighestHandlingFee = q.HighestHandlingFee,
-                        LowestHandlingFee = q.LowestHandlingFee
+                        FeePercentage = q.FeePercentage,
+                        HighestFee = q.HighestFee,
+                        LowestFee = q.LowestFee
                     },
                     CreatedByUsername = q.CreatedByUsername,
                     UpdatedByUsername = q.UpdatedByUsername,
@@ -90,7 +90,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     .Include(pm => pm.PaymentVendor)
                     .Include(pm => pm.PaymentMethod)
                     .Include(pm => pm.PaymentChannel)
-                    .Include(pm => pm.PaymentUserAccessControls)
+                    .Include(pm => pm.PaymentPlayerList)
                     .ThenInclude(pp => pp.Player)
                     .Include(pm => pm.VipLevels)
                     .ThenInclude(pp => pp.VipLevel)
@@ -108,29 +108,27 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ChannelName = payment.ChannelName,
                     TransferLimitFrom = payment.TransferLimitFrom,
                     TransferLimitTo = payment.TransferLimitTo,
-                    TransferCondition = payment.TransferCondition,
+                    PlayerListCondition = payment.PlayerListCondition,
                     AllPlayer = payment.AllPlayer,
                     IdentityVerification = payment.IdentityVerification,
                     PhoneVerification = payment.PhoneVerification,
                     DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
                     DepositedAmountFrom = payment.DepositedAmountFrom,
                     DepositedAmountTo = payment.DepositedAmountTo,
-                    DesignatedUser = payment.PaymentUserAccessControls.Count > 0,
-                    Enabled = payment.Enabled,
+                    DesignatedUser = payment.PaymentPlayerList.Count > 0,
+                    PaymentStatus = payment.PaymentStatus,
                     Reason = payment.Reason,
-                    Whitelist = payment.PaymentUserAccessControls.Where(p => p.ListType == ListType.White).Select(p =>
-                        new PaymentUserAccessControlModel
+                    Whitelist = payment.PaymentPlayerList.Where(p => p.ListType == ListType.White).Select(p =>
+                        new PaymentPlayerListModel
                         {
                             ListType = p.ListType,
-                            PlayerCode = p.PlayerCode,
-                            PlayerName = p.Player.RealName
+                            Username = p.Player.Username
                         }).ToArray(),
-                    Blacklist = payment.PaymentUserAccessControls.Where(p => p.ListType == ListType.Black).Select(p =>
-                        new PaymentUserAccessControlModel
+                    Blacklist = payment.PaymentPlayerList.Where(p => p.ListType == ListType.Black).Select(p =>
+                        new PaymentPlayerListModel
                         {
                             ListType = p.ListType,
-                            PlayerCode = p.PlayerCode,
-                            PlayerName = p.Player.RealName
+                            Username = p.Player.Username
                         }).ToArray(),
                     VipLevelIds = payment.VipLevels.Select(p => p.VipLevelId).ToArray(),
                     CreatedByUsername = payment.CreatedByUsername,
@@ -143,18 +141,18 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("{id}/handingFee")]
         [Description("Get a Payment handing Fee")]
-        public async Task<GetPaymentHandlingFeeResponse> GetPaymentHandingFeeAsync(Guid id)
+        public async Task<GetPaymentFeeResponse> GetPaymentHandingFeeAsync(Guid id)
         {
             var payment = await _queries.GetSingleAsync(q => q.Id == id, p => p.AsNoTracking());
 
-            return new GetPaymentHandlingFeeResponse
+            return new GetPaymentFeeResponse
             {
                 Valid = true,
-                PaymentHandlingFee = new PaymentHandlingFeeModel
+                PaymentFee = new PaymentFeeModel
                 {
-                    HandlingFeePercentage = payment.HandlingFeePercentage,
-                    HighestHandlingFee = payment.HighestHandlingFee,
-                    LowestHandlingFee = payment.LowestHandlingFee
+                    FeePercentage = payment.FeePercentage,
+                    HighestFee = payment.HighestFee,
+                    LowestFee = payment.LowestFee
                 }
             };
         }
@@ -171,7 +169,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     {
                         Valid = false,
                         Message = Resources.Payment.WhiteSameAsBlack,
-                        Players = samePlayers
+                        DuplicatePlayers = samePlayers
                     };
             }
 
@@ -189,7 +187,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 ChannelName = request.ChannelName,
                 TransferLimitFrom = request.TransferLimitFrom,
                 TransferLimitTo = request.TransferLimitTo,
-                TransferCondition = request.TransferCondition,
+                PlayerListCondition = request.PlayerListCondition,
                 AllPlayer = request.AllPlayer,
                 IdentityVerification = request.IdentityVerification,
                 PhoneVerification = request.PhoneVerification,
@@ -203,20 +201,20 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            var whitelist = request.Whitelist?.Select(code => new PaymentUserAccessControl
+            var whitelist = request.Whitelist?.Select(code => new PaymentPlayerList
             {
                 Id = Guid.NewGuid(),
                 ListType = ListType.White,
                 PaymentId = paymentId,
                 PlayerCode = code
-            }).ToArray() ?? Array.Empty<PaymentUserAccessControl>();
-            var blacklist = request.Blacklist?.Select(code => new PaymentUserAccessControl
+            }).ToArray() ?? Array.Empty<PaymentPlayerList>();
+            var blacklist = request.Blacklist?.Select(code => new PaymentPlayerList
             {
                 Id = Guid.NewGuid(),
                 ListType = ListType.Black,
                 PaymentId = paymentId,
                 PlayerCode = code
-            }).ToArray() ?? Array.Empty<PaymentUserAccessControl>();
+            }).ToArray() ?? Array.Empty<PaymentPlayerList>();
             var players = whitelist.Union(blacklist).ToArray();
 
             var vipLevels = request.VipLevelIds.Select(id => new PaymentVipLevel
@@ -235,13 +233,13 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<CreateUpdatePaymentResponse> UpdatePaymentAsync(Guid paymentId,
             UpdatePaymentRequest request)
         {
-            var samePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
-            if (samePlayers.Any())
+            var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
+            if (duplicatePlayers.Any())
                 return new CreateUpdatePaymentResponse
                 {
                     Valid = false,
                     Message = Resources.Payment.WhiteSameAsBlack,
-                    Players = samePlayers
+                    DuplicatePlayers = duplicatePlayers
                 };
 
             var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
@@ -254,7 +252,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
             payment.TransferLimitTo = request.TransferLimitTo;
-            payment.TransferCondition = request.TransferCondition;
+            payment.PlayerListCondition = request.PlayerListCondition;
             payment.AllPlayer = request.AllPlayer;
             payment.IdentityVerification = request.IdentityVerification;
             payment.PhoneVerification = request.PhoneVerification;
@@ -265,14 +263,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             payment.UpdatedByUsername = Username;
             payment.UpdatedOn = DateTimeOffset.Now;
 
-            var whitelist = request.Whitelist.Select(code => new PaymentUserAccessControl
+            var whitelist = request.Whitelist.Select(code => new PaymentPlayerList
             {
                 Id = Guid.NewGuid(),
                 ListType = ListType.White,
                 PaymentId = paymentId,
                 PlayerCode = code
             }).ToArray();
-            var blacklist = request.Blacklist.Select(code => new PaymentUserAccessControl
+            var blacklist = request.Blacklist.Select(code => new PaymentPlayerList
             {
                 Id = Guid.NewGuid(),
                 ListType = ListType.Black,
@@ -295,12 +293,12 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPut("{paymentId:guid}/handingFee")]
         [Description("Update a Payment handing Fee")]
         public async Task<MessageResponse> UpdatePaymentHandlingFeeAsync(Guid paymentId,
-            UpdatePaymentHandlingFeeRequest request)
+            UpdatePaymentFeeRequest request)
         {
             var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
-            payment.HandlingFeePercentage = request.HandlingFeePercentage;
-            payment.LowestHandlingFee = request.LowestHandlingFee;
-            payment.HighestHandlingFee = request.HighestHandlingFee;
+            payment.FeePercentage = request.FeePercentage;
+            payment.LowestFee = request.LowestFee;
+            payment.HighestFee = request.HighestFee;
             await _commands.UpdateAsync(payment);
             return CreateValidResponse<MessageResponse>();
         }

@@ -71,7 +71,8 @@ namespace TGS.Core.DataServices
         DbSet<PaymentMethod> PaymentMethods { get; set; }
         DbSet<PaymentChannel> PaymentChannels { get; set; }
         DbSet<Payment> Payments { get; set; }
-        DbSet<PaymentUserAccessControl> PaymentUserAccessControls { get; set; }
+        DbSet<PaymentPlayerList> PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
+        DbSet<PaymentAuditLog> PaymentAuditLogs { get; set; }
     }
 }

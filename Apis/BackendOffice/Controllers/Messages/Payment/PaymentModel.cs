@@ -13,7 +13,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public string ChannelName { get; set; }
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
-        public MeetTransferCondition TransferCondition { get; set; }
+        public PlayerListCondition PlayerListCondition { get; set; }
         public bool AllPlayer { get; set; }
         public bool IdentityVerification { get; set; }
         public bool PhoneVerification { get; set; }
@@ -21,11 +21,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public bool DepositedAmountUnlimited { get; set; }
         public decimal DepositedAmountFrom { get; set; }
         public decimal DepositedAmountTo { get; set; }
-        public bool Enabled { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
         public string Reason { get; set; }
-        public PaymentHandlingFeeModel PaymentHandlingFee { get; set; }
-        public PaymentUserAccessControlModel[] Whitelist { get; set; }
-        public PaymentUserAccessControlModel[] Blacklist { get; set; }
+        public PaymentFeeModel PaymentFee { get; set; }
+        public PaymentPlayerListModel[] Whitelist { get; set; }
+        public PaymentPlayerListModel[] Blacklist { get; set; }
         public Guid[] VipLevelIds { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }

@@ -10,7 +10,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.DataService.Commands.TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
@@ -104,7 +104,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             request.Whitelist[0] = request.Blacklist[0];
             var response = await _controller.CreatePaymentAsync(request);
             response.Valid.Should().BeFalse();
-            response.Players[0].Should().Be(request.Whitelist[0]);
+            response.DuplicatePlayers[0].Should().Be(request.Whitelist[0]);
             response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.WhiteSameAsBlack);
         }
 
@@ -122,7 +122,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()));
             _paymentCommandsMock.Verify(p => p.CreateAsync(It.Is<Payment>(r =>
                     r.ChannelName == request.ChannelName),
-                It.Is<PaymentUserAccessControl[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
+                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
                 It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)));
         }
 
@@ -146,7 +146,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 It.IsAny<Func<IQueryable<Payment>, IQueryable<Payment>>>()));
             _paymentCommandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
                     r.ChannelName == payment.ChannelName),
-                It.Is<PaymentUserAccessControl[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
+                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
                 It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)));
         }
 
@@ -176,7 +176,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     IQueryable<Payment>>>()));
             _paymentCommandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
                     r.ChannelName == payment.ChannelName),
-                It.Is<PaymentUserAccessControl[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
+                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
                 It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)), Times.Never);
         }
 
@@ -206,7 +206,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     IQueryable<Payment>>>()));
             _paymentCommandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
                     r.ChannelName == payment.ChannelName),
-                It.Is<PaymentUserAccessControl[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
+                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
                 It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)), Times.Never);
         }
 
@@ -214,7 +214,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Payment>(u => u
-                .With(s => s.PaymentUserAccessControls, new PaymentUserAccessControl[] { })
+                .With(s => s.PaymentPlayerList, new PaymentPlayerList[] { })
                 .With(s => s.VipLevels, new PaymentVipLevel[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;

@@ -6,54 +6,51 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.Commands
 {
-    namespace TGS.Apis.BackendOffice.DataService.Commands
+    public interface IPaymentCommands
     {
-        public interface IPaymentCommands
-        {
-            Task CreateAsync(Payment payment, PaymentUserAccessControl[] paymentUserAccessControls,
-                PaymentVipLevel[] vipLevels);
+        Task CreateAsync(Payment payment, PaymentPlayerList[] paymentPlayerList,
+            PaymentVipLevel[] vipLevels);
 
-            Task UpdateAsync(Payment payment, PaymentUserAccessControl[] paymentUserAccessControls,
-                PaymentVipLevel[] vipLevels);
+        Task UpdateAsync(Payment payment, PaymentPlayerList[] paymentPlayerList,
+            PaymentVipLevel[] vipLevels);
+    }
+
+    public class PaymentCommands : IPaymentCommands
+    {
+        private readonly ITgsRepository _repository;
+
+        public PaymentCommands(ITgsRepository repository)
+        {
+            _repository = repository;
         }
 
-        public class PaymentCommands : IPaymentCommands
+        Task IPaymentCommands.CreateAsync(Payment payment,
+            PaymentPlayerList[] paymentPlayerList,
+            PaymentVipLevel[] vipLevels)
         {
-            private readonly ITgsRepository _repository;
+            _repository.Payments.AddAsync(payment);
+            _repository.BulkInsertAsync(vipLevels);
+            _repository.BulkInsertAsync(paymentPlayerList);
+            return _repository.SaveChangesAsync();
 
-            public PaymentCommands(ITgsRepository repository)
-            {
-                _repository = repository;
-            }
+            //await tran.CommitAsync();
+        }
 
-            Task IPaymentCommands.CreateAsync(Payment payment,
-                PaymentUserAccessControl[] paymentUserAccessControls,
-                PaymentVipLevel[] vipLevels)
-            {
-                _repository.Payments.AddAsync(payment);
-                _repository.BulkInsertAsync(vipLevels);
-                _repository.BulkInsertAsync(paymentUserAccessControls);
-                return _repository.SaveChangesAsync();
+        async Task IPaymentCommands.UpdateAsync(Payment payment,
+            PaymentPlayerList[] paymentPlayerList,
+            PaymentVipLevel[] vipLevels)
+        {
+            await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            _repository.Entry(payment).State = EntityState.Modified;
+            _repository.PaymentPlayerList.RemoveRange(payment.PaymentPlayerList);
+            _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
+            await _repository.SaveChangesAsync();
 
-                //await tran.CommitAsync();
-            }
+            await _repository.BulkInsertAsync(paymentPlayerList);
+            await _repository.BulkInsertAsync(vipLevels);
+            await _repository.SaveChangesAsync();
 
-            async Task IPaymentCommands.UpdateAsync(Payment payment,
-                PaymentUserAccessControl[] paymentUserAccessControls,
-                PaymentVipLevel[] vipLevels)
-            {
-                await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-                _repository.Entry(payment).State = EntityState.Modified;
-                _repository.PaymentUserAccessControls.RemoveRange(payment.PaymentUserAccessControls);
-                _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
-                await _repository.SaveChangesAsync();
-
-                await _repository.BulkInsertAsync(paymentUserAccessControls);
-                await _repository.BulkInsertAsync(vipLevels);
-                await _repository.SaveChangesAsync();
-
-                await tran.CommitAsync();
-            }
+            await tran.CommitAsync();
         }
     }
 }
