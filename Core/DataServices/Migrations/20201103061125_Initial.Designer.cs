@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201030023246_Initial")]
+    [Migration("20201103061125_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -625,17 +625,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Key")
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<string>("Context")
-                        .HasColumnType("nvarchar(64)");
-
                     b.Property<string>("CultureCode")
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<string>("Context")
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Translation")
                         .IsRequired()
                         .HasColumnType("nvarchar(1024)");
 
-                    b.HasKey("Key", "Context", "CultureCode");
+                    b.HasKey("Key", "CultureCode", "Context");
 
                     b.HasIndex("CultureCode");
 

@@ -390,7 +390,7 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LocalizedStrings", x => new { x.Key, x.Context, x.CultureCode });
+                    table.PrimaryKey("PK_LocalizedStrings", x => new { x.Key, x.CultureCode, x.Context });
                     table.ForeignKey(
                         name: "FK_LocalizedStrings_Languages_CultureCode",
                         column: x => x.CultureCode,

@@ -623,17 +623,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Key")
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<string>("Context")
-                        .HasColumnType("nvarchar(64)");
-
                     b.Property<string>("CultureCode")
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<string>("Context")
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Translation")
                         .IsRequired()
                         .HasColumnType("nvarchar(1024)");
 
-                    b.HasKey("Key", "Context", "CultureCode");
+                    b.HasKey("Key", "CultureCode", "Context");
 
                     b.HasIndex("CultureCode");
 

@@ -10,8 +10,7 @@ GO
 ALTER PROCEDURE [dbo].[usp_Licensee_GetLicenseeGameProviders]
       @licenseeId    UNIQUEIDENTIFIER,
 	  @currencyCode  NVARCHAR(6),
-	  @platformType  SMALLINT,
-	  @gameTypes     IntValuesType READONLY
+	  @platformType  SMALLINT
 AS 
 BEGIN
     SET NOCOUNT ON
@@ -21,10 +20,10 @@ BEGIN
 	(
 		SELECT 
 			g.Id,
-			g.GameProviderId
+			g.GameProviderId,
+			g.[Type]
 		FROM dbo.[Games] g
 		WHERE PlatformType = @platformType
-		AND g.[Type] IN (SELECT [Value] FROM @gameTypes)
 	),
 	licenseeGames
 	AS
@@ -40,7 +39,8 @@ BEGIN
         gp.[Code],
         gp.[Name],
         gp.[Status],
-        gp.[Description]
+        gp.[Description],
+		g.[Type] AS [GameType]
     FROM dbo.[GameProviders] gp
     JOIN licenseeGames g ON g.[GameProviderId] = gp.[Id]
     JOIN [GameProviderCurrencies] c ON c.[GameProviderId] = gp.[Id]

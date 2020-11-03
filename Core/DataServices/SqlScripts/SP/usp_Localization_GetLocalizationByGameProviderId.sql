@@ -27,7 +27,7 @@ BEGIN
         CultureCode,
         Translation
     FROM dbo.[LocalizedStrings] ls WITH (NOLOCK)
-    WHERE ls.[Key] IN (SELECT [Value] FROM #temp)
+    JOIN #temp t ON ls.[Key] = t.[Value]
 
 	DROP TABLE #temp
 	
