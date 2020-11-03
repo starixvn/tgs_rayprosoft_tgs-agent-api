@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,9 @@ namespace TGS.Apis.OperatorApi.Middlewares
     {
         private readonly IHashProvider _hashProvider;
         private readonly RequestDelegate _next;
+
+        private const double TimestampLimitSeconds = 60 * 2;
+        private const string Iso8601Format = @"yyyy-MM-dd\THH:mm:ssK";
 
         public VerifyCredentialsMiddleware(
             IHashProvider hashProvider,
@@ -37,6 +41,16 @@ namespace TGS.Apis.OperatorApi.Middlewares
             if (clientId.IsNullOrEmpty() || timestamp.IsNullOrEmpty() || authCode.IsNullOrEmpty())
             {
                 throw new ArgumentException("Required header parameters are missing");
+            }
+
+            if (!DateTimeOffset.TryParseExact(timestamp, Iso8601Format, CultureInfo.InvariantCulture, styles: DateTimeStyles.None, out var time))
+            {
+                throw new ArgumentException("Invalid format of timestamp");
+            }
+
+            if (time.AddSeconds(TimestampLimitSeconds) < DateTimeOffset.Now)
+            {
+                throw new InvalidCredentialsException("The timestamp is exceeded the limit time");
             }
 
             var licenseeId = await licenseeOperations.GetLicenseeIdByClientIdAsync(clientId);

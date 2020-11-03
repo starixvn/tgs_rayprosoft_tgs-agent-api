@@ -21,6 +21,8 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
 
+        public virtual ICollection<LocalizedString> LocalizedStrings { get; set; }
+
         public virtual ICollection<Player> Players { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }

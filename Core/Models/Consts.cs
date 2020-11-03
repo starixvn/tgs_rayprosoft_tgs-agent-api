@@ -2,10 +2,15 @@
 {
     public static class Consts
     {
+        public const string DefualtCultureCode = "en-US";
+        public const string Default = "default";
+
         public static class CachePrefix
         {
             public const string GameProviderToTgsMap = "GameProviderToTgsMap";
             public const string TgsToGameProviderMap = "TgsToGameProviderMap";
+            public const string LicenseeToTgsMap = "LicenseeToTgsMap";
+            public const string TgsToLicenseeMap = "TgsToLicenseeMap";
         }
 
         public static class Nats
@@ -45,7 +50,12 @@
             public const string PlatformType = "platformType";
         }
 
-        public const string DefualtCultureCode = "en-US";
-        public const string Default = "default";
+        public static class LocalizationContext
+        {
+            public const string GameProviderName = "GameProvider.Name";
+            public const string GameProviderDescription = "GameProvider.Description";
+            public const string GameName = "Game.Name";
+            public const string GameDescription = "Game.Description";
+        }
     }
 }

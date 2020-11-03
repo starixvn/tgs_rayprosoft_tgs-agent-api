@@ -14,7 +14,7 @@ namespace TGS.Core.Infrastructures.WebApiServices
     public static class ApplicationBuilderExtensions
     {
         /// <summary>
-        /// Global Exception Handler Middleware, needs to add the following dependencies beforehead:
+        /// Global Exception Handler Middleware, needs to add the following dependencies beforehand:
         /// 1. AddTgsLog() in Infrastructure.Log
         /// 2. AddErrorMappers() in Infrastructure.ErrorMapper
         /// </summary>

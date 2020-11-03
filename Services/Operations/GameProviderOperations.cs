@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
@@ -35,6 +36,8 @@ namespace TGS.Services.Operations
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, Guid gameId);
+
+        Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, string gameCode, PlatformType platformType);
 
         Task<GameStatus?> GetGameStatusAsync(Guid gameProviderId, Guid gameId);
 
@@ -219,6 +222,13 @@ namespace TGS.Services.Operations
 
             var games = await GetAndCacheGamesAsync(gameProviderId);
             return games.FirstOrDefault(g => g.Id == gameId);
+        }
+
+        async Task<CachedGame> IGameProviderOperations.GetCachedGameAsync(Guid gameProviderId, string gameCode,
+            PlatformType platformType)
+        {
+            var games = await _interface.GetCachedGamesAsync(gameProviderId);
+            return games.FirstOrDefault(g => g.Code == gameCode && g.PlatformType == platformType);
         }
 
         async Task<GameStatus?> IGameProviderOperations.GetGameStatusAsync(Guid gameProviderId, Guid gameId)

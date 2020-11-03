@@ -18,8 +18,7 @@ namespace TGS.Core.DataServices.DataInitializers
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : IDataInitializer
     {
-        private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
-
+        private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
@@ -28,7 +27,7 @@ namespace TGS.Core.DataServices.DataInitializers
             new RedTigerGameProvider(), new SBOGameProvider()
         };
 
-        private static readonly IList<IReseller> Resellers = new[]
+        private static readonly IList<IReseller> Resellers = new IReseller[]
         {
             new TgsReseller()
         };
@@ -78,6 +77,7 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateResellersAndLicenseesAsync, _logBuilder);
             await LogSeedingTimeAsync(GeneratePlayersAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, _logBuilder);
             await LogSeedingTimeAsync(GeneratePaymentAsync, _logBuilder);
 
             timer.Stop();
@@ -116,8 +116,8 @@ namespace TGS.Core.DataServices.DataInitializers
                     Symbol = c.Symbol,
                     CreatedByUsername = AdminUsername,
                     UpdatedByUsername = AdminUsername,
-                    CreatedOn = _now,
-                    UpdatedOn = _now
+                    CreatedOn = Now,
+                    UpdatedOn = Now
                 }).ToArray();
 
             return _repository.BulkInsertAsync(currencies);
@@ -129,8 +129,8 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 vip.CreatedByUsername = AdminUsername;
                 vip.UpdatedByUsername = AdminUsername;
-                vip.CreatedOn = _now;
-                vip.UpdatedOn = _now;
+                vip.CreatedOn = Now;
+                vip.UpdatedOn = Now;
             }
 
             return _repository.BulkInsertOrUpdateAsync(_vipLevels);
@@ -156,7 +156,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     },
                     new
                     {
-                        CultureCode = "zh-CN", LanguageCode = "zh", Name = "Simplified Chinese", LocalizedName = "简体中文"
+                        CultureCode = "zh-CN", LanguageCode = "cn", Name = "Simplified Chinese", LocalizedName = "简体中文"
                     },
                     new
                     {
@@ -172,8 +172,8 @@ namespace TGS.Core.DataServices.DataInitializers
                     LocalizedName = p.LocalizedName,
                     CreatedByUsername = AdminUsername,
                     UpdatedByUsername = AdminUsername,
-                    CreatedOn = _now,
-                    UpdatedOn = _now
+                    CreatedOn = Now,
+                    UpdatedOn = Now
                 }).ToArray();
 
             return _repository.BulkInsertAsync(languages);
@@ -189,8 +189,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 Description = description,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                CreatedOn = _now,
-                UpdatedOn = _now
+                CreatedOn = Now,
+                UpdatedOn = Now
             };
         }
 
@@ -317,9 +317,9 @@ namespace TGS.Core.DataServices.DataInitializers
                 ParentInvitationCode = parentInvitationCode,
                 HasAgent = false,
                 VipId = vipId,
-                RegisteredOn = _now,
-                LastActiveOn = _now,
-                UpdatedOn = _now,
+                RegisteredOn = Now,
+                LastActiveOn = Now,
+                UpdatedOn = Now,
                 UpdatedByUsername = username,
                 LicenseeId = Resellers[0].Licensees[0].Id,
                 Wallets = new[]
@@ -331,8 +331,8 @@ namespace TGS.Core.DataServices.DataInitializers
                         CurrencyCode = currencyCode,
                         ExternalCurrencyCode = currencyCode,
                         Balance = 1000,
-                        CreatedOn = _now,
-                        UpdatedOn = _now
+                        CreatedOn = Now,
+                        UpdatedOn = Now
                     }
                 },
                 Banks = new[]
@@ -367,7 +367,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private async Task GenerateResellersAndLicenseesAsync()
         {
-            var resellers = Resellers.Select(r => CreateResellerWithLicensee(r)).ToArray();
+            var resellers = Resellers.Select(CreateResellerWithLicensee).ToArray();
 
             // resellers
             await _repository.BulkInsertAsync(resellers);
@@ -381,7 +381,30 @@ namespace TGS.Core.DataServices.DataInitializers
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Currencies).ToArray());
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Languages).ToArray());
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviderConfigurations).ToArray());
+            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviders).ToArray());
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Games).ToArray());
+        }
+        
+        private Task GenerateLocalizedStringsAsync()
+        {
+            var localizedStrings = new List<LocalizedString>();
+
+            foreach (var gp in _gameProvidersCreated.Values)
+            {
+                foreach (var cultureCode in gp.Languages.Select(l => l.CultureCode))
+                {
+                    var gpData = GetGameProviderLocalizedStrings(gp, cultureCode);
+                    localizedStrings.AddRange(gpData);
+
+                    foreach (var g in gp.Games)
+                    {
+                        var gameData = GetGameLocalizedStrings(g, cultureCode);
+                        localizedStrings.AddRange(gameData);
+                    }
+                }
+            }
+
+            return _repository.BulkInsertAsync(localizedStrings);
         }
 
         private static GameProvider CreateGameProvider(IGameProvider gameProvider)
@@ -395,8 +418,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 AutoCloseRound = gameProvider.AutoClosedRound,
                 Status = Status.Active,
                 SupportTestPlayer = gameProvider.SupportTestPlayer,
-                CreatedOn = _now,
-                UpdatedOn = _now,
+                CreatedOn = Now,
+                UpdatedOn = Now,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 Currencies =
@@ -427,8 +450,8 @@ namespace TGS.Core.DataServices.DataInitializers
                     MobileEndpoint = gpc.MobileEndpoint,
                     Description = gp.Name,
                     GameProviderId = gp.Id,
-                    CreatedOn = _now,
-                    UpdatedOn = _now,
+                    CreatedOn = Now,
+                    UpdatedOn = Now,
                     CreatedByUsername = AdminUsername,
                     UpdatedByUsername = AdminUsername,
                     ConfigurationData = gpc.ConfigurationData,
@@ -451,8 +474,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 PlatformType = g.PlatformType,
                 HasTurnoverOnTieBet = g.HasTurnoverOnTieBet,
                 SubGame = g.SubGame,
-                CreatedOn = _now,
-                UpdatedOn = _now,
+                CreatedOn = Now,
+                UpdatedOn = Now,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername
             }).ToHashSet();
@@ -471,8 +494,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 Description = string.Empty,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                CreatedOn = _now,
-                UpdatedOn = _now,
+                CreatedOn = Now,
+                UpdatedOn = Now,
                 Currencies = reseller.Currencies.Select(curr => new ResellerCurrency
                 {
                     ResellerId = reseller.Id,
@@ -489,7 +512,9 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private Licensee CreateLicensee(IReseller reseller, ILicensee licensee)
         {
-            var gameProviders = licensee.GameProviders.Select(code => _gameProvidersCreated[code]);
+            var gameProviders = licensee.GameProviders
+                .Select(code => _gameProvidersCreated[code])
+                .ToArray();
 
             return new Licensee
             {
@@ -499,8 +524,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 Status = Status.Active,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                CreatedOn = _now,
-                UpdatedOn = _now,
+                CreatedOn = Now,
+                UpdatedOn = Now,
                 ResellerId = reseller.Id,
                 TimeZoneId = licensee.TimeZoneId,
                 Description = string.Empty,
@@ -516,12 +541,12 @@ namespace TGS.Core.DataServices.DataInitializers
                 {
                     LicenseeId = licensee.Id,
                     CultureCode = lang.Code,
-                    LicenseeLanguageCode = lang.ExternalCode
+                    LicenseeCultureCode = lang.ExternalCode
                 }).ToHashSet(),
                 GameProviders = gameProviders.Select(gp => new LicenseeGameProvider
                 {
                     GameProviderId = gp.Id,
-                    LicenseeId = reseller.Id
+                    LicenseeId = licensee.Id
                 }).ToHashSet(),
                 Games = gameProviders.SelectMany(gp => gp.Games).Select(g => new LicenseeGame
                 {
@@ -540,6 +565,49 @@ namespace TGS.Core.DataServices.DataInitializers
                         MobileQueryString = string.Empty
                     })
                     .ToHashSet()
+            };
+        }
+
+        
+        private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
+        {
+            return new LocalizedString[]
+            {
+                new ()
+                {
+                    Context = "GameProvider.Name",
+                    Key = gp.Id.ToString(),
+                    CultureCode = cultureCode,
+                    Translation = gp.Name
+                },
+                new ()
+                {
+                    Context = "GameProvider.Description",
+                    Key = gp.Id.ToString(),
+                    CultureCode = cultureCode,
+                    Translation = gp.Description
+                }
+            };
+        }
+
+        private static IEnumerable<LocalizedString> GetGameLocalizedStrings(Models.Game g, string cultureCode)
+        {
+            return new LocalizedString[]
+            {
+                new ()
+                {
+                    Context = "Game.Name",
+                    Key = g.Id.ToString(),
+                    CultureCode = cultureCode,
+                    Translation = g.Name
+                },
+                new ()
+                {
+                    Context = "Game.Description",
+                    Key = g.Id.ToString(),
+                    CultureCode = cultureCode,
+                    Translation = g.Description
+                }
             };
         }
 

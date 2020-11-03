@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Services.Clients</AssemblyName>
+    <RootNamespace>TGS.Services.Clients</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+  </ItemGroup>
+
+</Project>

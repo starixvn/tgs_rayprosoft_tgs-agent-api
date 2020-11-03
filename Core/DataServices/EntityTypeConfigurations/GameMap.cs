@@ -48,10 +48,26 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.HasTurnoverOnTieBet)
                 .IsRequired()
                 .HasDefaultValue(false);
-            
+
             builder.HasOne(p => p.GameProvider)
                 .WithMany(p => p.Games)
                 .HasForeignKey(p => p.GameProviderId);
+
+            builder.HasIndex(c => c.GameProviderId).IncludeProperties(c => new
+            {
+                c.Id,
+                c.Code,
+                c.Name,
+                c.ExternalId,
+                c.PlatformType,
+                c.Type,
+                c.Status,
+                c.Description,
+                c.EndpointPath,
+                c.SubGame,
+                c.HasTurnoverOnTieBet,
+                c.RuleUrl
+            });
         }
     }
 }

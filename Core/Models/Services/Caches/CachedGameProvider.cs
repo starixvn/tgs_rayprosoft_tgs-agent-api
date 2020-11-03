@@ -5,14 +5,14 @@ namespace TGS.Core.Models.Services.Caches
 {
     public record CachedGameProvider
     {
-        public Guid Id { get; set; }
-        public string Code { get; set; }
-        public string Name { get; set; }
-        public Status Status { get; set; }
-        public string Description { get; set; }
-        public bool AutoCloseRound { get; set; }
-        public bool SupportTestPlayer { get; set; }
-        public int PlaceBetTimeout { get; set; }
-        public int SettleBetTimeout { get; set; }
+        public Guid Id { get; init; }
+        public string Code { get; init; }
+        public string Name { get; init; }
+        public Status Status { get; init; }
+        public string Description { get; init; }
+        public bool AutoCloseRound { get; init; }
+        public bool SupportTestPlayer { get; init; }
+        public int PlaceBetTimeout { get; init; }
+        public int SettleBetTimeout { get; init; }
     }
 }
