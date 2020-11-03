@@ -8,6 +8,7 @@ namespace TGS.Core.Models.Services.Caches
         public Guid Id { get; init; }
         public string Code { get; init; }
         public string Name { get; init; }
+        public string Description { get; init; }
         public GameStatus Status { get; init; }
         public string ExternalId { get; init; }
         public bool SubGame { get; init; }

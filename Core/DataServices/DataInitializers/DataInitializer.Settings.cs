@@ -31,8 +31,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 Description = description,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                CreatedOn = _now,
-                UpdatedOn = _now
+                CreatedOn = Now,
+                UpdatedOn = Now
             };
         }
     }

@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<GameProvider>.Configure(EntityTypeBuilder<GameProvider> builder)
         {
             builder.ToTable("GameProviders", "dbo");
-            BaseConfigureProperties(builder);
+            BaseConfigureProperties(builder, true);
 
             builder.Property(p => p.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(128));
@@ -25,9 +25,8 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt);
 
             builder.HasMany(p => p.LicenseeGameProviderConfigurations)
-                .WithOne(p => p.GameProvider)
-                .HasForeignKey(bgpc => bgpc.GameProviderId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .WithOne(lgpc => lgpc.GameProvider)
+                .HasForeignKey(lgpc => lgpc.GameProviderId);
         }
     }
 }

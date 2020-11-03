@@ -1,0 +1,11 @@
+﻿using System.Text.Json.Serialization;
+using TGS.Core.Models.Messages;
+
+namespace TGS.Apis.OperatorApi.Models.Messages.Games
+{
+    public record GetGameUrlResponse : TgsResponse
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; init; }
+    }
+}

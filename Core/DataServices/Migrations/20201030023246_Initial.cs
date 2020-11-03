@@ -96,7 +96,7 @@ namespace TGS.Core.DataServices.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GameProviders", x => x.Id)
-                        .Annotation("SqlServer:Clustered", false);
+                        .Annotation("SqlServer:Clustered", true);
                 });
 
             migrationBuilder.CreateTable(
@@ -383,22 +383,21 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
-                    Context = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    CultureCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
-                    Translation = table.Column<string>(type: "nvarchar(1024)", nullable: false),
-                    LanguageCultureCode = table.Column<string>(nullable: true)
+                    Context = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    Key = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
+                    Translation = table.Column<string>(type: "nvarchar(1024)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LocalizedStrings", x => new { x.Context, x.CultureCode, x.Code });
+                    table.PrimaryKey("PK_LocalizedStrings", x => new { x.Key, x.Context, x.CultureCode });
                     table.ForeignKey(
-                        name: "FK_LocalizedStrings_Languages_LanguageCultureCode",
-                        column: x => x.LanguageCultureCode,
+                        name: "FK_LocalizedStrings_Languages_CultureCode",
+                        column: x => x.CultureCode,
                         principalSchema: "dbo",
                         principalTable: "Languages",
                         principalColumn: "CultureCode",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -580,7 +579,7 @@ namespace TGS.Core.DataServices.Migrations
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_LicenseeGameProviderConfigurations_Licensees_LicenseeId",
                         column: x => x.LicenseeId,
@@ -651,7 +650,7 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     LicenseeId = table.Column<Guid>(nullable: false),
                     CultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
-                    LicenseeLanguageCode = table.Column<string>(type: "nvarchar(6)", nullable: false)
+                    LicenseeCultureCode = table.Column<string>(type: "nvarchar(6)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -937,7 +936,8 @@ namespace TGS.Core.DataServices.Migrations
                 name: "IX_Games_GameProviderId",
                 schema: "dbo",
                 table: "Games",
-                column: "GameProviderId");
+                column: "GameProviderId")
+                .Annotation("SqlServer:Include", new[] { "Id", "Code", "Name", "ExternalId", "PlatformType", "Type", "Status", "Description", "EndpointPath", "SubGame", "HasTurnoverOnTieBet", "RuleUrl" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_LicenseeBetLimits_BetLimitGroupId",
@@ -994,10 +994,10 @@ namespace TGS.Core.DataServices.Migrations
                 column: "ResellerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LocalizedStrings_LanguageCultureCode",
+                name: "IX_LocalizedStrings_CultureCode",
                 schema: "dbo",
                 table: "LocalizedStrings",
-                column: "LanguageCultureCode");
+                column: "CultureCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerBanks_PlayerCode",

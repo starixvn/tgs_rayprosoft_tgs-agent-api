@@ -10,7 +10,7 @@ namespace TGS.Core.Infrastructures.Log
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injections of Infrastructure.Log, needs to add the following dependencies beforehead:
+        /// Dependency Injections of Infrastructure.Log, needs to add the following dependencies beforehand:
         /// 1. AddWebApiServices() in Infrastructure.WebApiServices
         /// </summary>
         public static IServiceCollection AddTgsLog(this IServiceCollection services)

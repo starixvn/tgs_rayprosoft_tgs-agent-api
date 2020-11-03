@@ -17,6 +17,7 @@ using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
+using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -24,6 +25,7 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.Clients.Extensions;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.OperatorApi
@@ -53,7 +55,9 @@ namespace TGS.Apis.OperatorApi
                     .AddJson()
                     .AddSecurity()
                     .AddOperations()
-                    .AddErrorMappers();
+                    .AddErrorMappers()
+                    .AddApiClient()
+                    .AddPluggalbeGameProviderApiClient();
 
             services.AddHttpContextAccessor();
 
@@ -86,6 +90,7 @@ namespace TGS.Apis.OperatorApi
                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TGS Operator API", Version = "v1" }); 
 
                     c.OperationFilter<SwaggerHeaderFilter>();
+                    c.SchemaFilter<SwaggerEnumDescriptionFilter>();
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);

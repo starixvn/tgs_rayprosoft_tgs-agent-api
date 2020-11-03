@@ -11,9 +11,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         public BaseContextController(IHttpContextAccessor httpContextAccessor)
         {
-            _userInfoMap = httpContextAccessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
+            _userInfoMap = httpContextAccessor.HttpContext?.User.Claims
+                .ToDictionary(p => p.Type, p => p.Value);
         }
 
-        protected string Username => _userInfoMap[Consts.UserInfo.UsernameKey];
+        protected string Username => _userInfoMap?[Consts.UserInfo.UsernameKey];
     }
 }

@@ -16,14 +16,14 @@ namespace TGS.Services.Operations.CodeMappers
 
     public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProviderCurrencyCodeMapper
     {
-        private readonly Func<IGameProviderQueries> _gameProviderQueriesFactory;
+        private readonly IGameProviderQueries _gameProviderQueries;
 
         public GameProviderCurrencyCodeMapper(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
-            Func<IGameProviderQueries> gameProviderQueriesFactory) : base(cacheManager, json)
+            IGameProviderQueries gameProviderQueries) : base(cacheManager, json)
         {
-            _gameProviderQueriesFactory = gameProviderQueriesFactory;
+            _gameProviderQueries = gameProviderQueries;
         }
 
         async Task<string> ICodeMapper.ExternalToInternalAsync(string externalCode, Guid gameProviderId)
@@ -35,12 +35,12 @@ namespace TGS.Services.Operations.CodeMappers
                 Consts.CachePrefix.GameProviderToTgsMap,
                 "currency",
                 30,
-                id => _gameProviderQueriesFactory().GetGameProviderCurrenciesByExternalCodeAsync(id));
+                id => _gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
 
             if (!found)
             {
                 throw new InvalidOperationException(
-                    $"Not found code \'{externalCode}\' for \'{Consts.CachePrefix.GameProviderToTgsMap}\' used for \'currency\' with filter id {gameProviderId} (intended to be cached as {RedisCacheType.Currencies})");
+                    $"Not found code '{externalCode}' for '{Consts.CachePrefix.GameProviderToTgsMap}' used for 'currency' with filter id '{gameProviderId}' (intended to be cached as {RedisCacheType.Currencies})");
             }
 
             return code;
@@ -55,12 +55,12 @@ namespace TGS.Services.Operations.CodeMappers
                 Consts.CachePrefix.TgsToGameProviderMap,
                 "currency",
                 30,
-                id => _gameProviderQueriesFactory().GetGameProviderCurrenciesByInternalCodeAsync(id));
+                id => _gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
 
             if (!found)
             {
                 throw new InvalidOperationException(
-                    $"Not found code \'{internalCode}\' for \'{Consts.CachePrefix.TgsToGameProviderMap}\' used for \'currency\' with filter id {gameProviderId} (intended to be cached as {RedisCacheType.Currencies})");
+                    $"Not found code '{internalCode}' for '{Consts.CachePrefix.TgsToGameProviderMap}' used for 'currency' with filter id '{gameProviderId}' (intended to be cached as {RedisCacheType.Currencies})");
             }
 
             return code;
