@@ -70,3 +70,21 @@ export const useEditAnnouncement = ({ id, data }) => {
     mutate
   }
 }
+
+export const useChangeAnnouncementOrders = ({ data }) => {
+  let fetchData = !!data
+  let keys = fetchData ? [`${API}/changeorders`, data] : null
+  let { data: result, error, isValidating, mutate } = useSWR(
+    keys,
+    (url, data) => put(url, { data })
+  )
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate
+  }
+}

@@ -36,4 +36,6 @@ export const Field = ({ required, validate, children, ...props }) => {
   )
 }
 
+export default Field
+
 const requiredField = () => "必填栏"

@@ -31,7 +31,9 @@ export const AddButton = ({ onSubmitted, ...props }) => {
       <Disclosure {...dialog}>
         <Trans zh="新增" en="Add" />
       </Disclosure>
-      <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+      )}
     </>
   )
 }
@@ -54,7 +56,9 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
       >
         <Trans zh="修改" en="Edit" />
       </Disclosure>
-      <EditDialog user={user} onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <EditDialog user={user} onSubmitted={onSubmitted} dialog={dialog} />
+      )}
     </>
   )
 }
@@ -77,7 +81,9 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
       >
         <Trans zh="修改密码" en="Change Password" />
       </Disclosure>
-      <PasswordDialog user={user} onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <PasswordDialog user={user} onSubmitted={onSubmitted} dialog={dialog} />
+      )}
     </>
   )
 }

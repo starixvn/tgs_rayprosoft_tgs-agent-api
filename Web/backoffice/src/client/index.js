@@ -1,4 +1,5 @@
 import { toDataOrError } from "./response"
+import useSWR, { cache } from "swr"
 
 export const urlWith = (searchParams = {}, url) => {
   let urlSearchParams = Object.entries(searchParams).reduce(
@@ -54,6 +55,66 @@ const fetchApi = (
     body: body ?? JSON.stringify(data),
     ...options
   }).then(toDataOrError)
+}
+
+export const useGet = (url) => {
+  let fetchData = !!url
+  let key = fetchData ? url : null
+  const { data, error, isValidating, mutate } = useSWR(key, get)
+
+  const clear = cache.clear(url)
+
+  return {
+    data,
+    isLoading: !error && !data,
+    isValidating,
+    error,
+    isError: error,
+    mutate,
+    clear
+  }
+}
+
+export const useCreatePost = (url, data) => {
+  let fetchData = !!url && !!data
+  let keys = fetchData ? [url, data] : null
+  let { data: result, error, isValidating, mutate } = useSWR(
+    keys,
+    (url, data) => post(url, { data })
+  )
+
+  const clear = cache.clear(url)
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate,
+    clear
+  }
+}
+
+export const useUpdatePut = (url, data) => {
+  let fetchData = !!url && !!data
+  let keys = fetchData ? [url, data] : null
+  let { data: result, error, isValidating, mutate } = useSWR(
+    keys,
+    (url, data) => put(url, { data })
+  )
+
+  const clear = cache.clear(url)
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate,
+    clear
+  }
 }
 
 const isEmptyString = (value) => typeof value == "string" && value === ""

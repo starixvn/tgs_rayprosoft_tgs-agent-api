@@ -32,7 +32,6 @@ import {
 import { Trans, useTrans } from "../../i18n"
 import { Field as InputField } from "../../input/Field"
 import DateField from "../../date/Field"
-import ModalDialog from "../../dialog/Modal"
 import parseDate from "date-fns/fp/parseISO"
 import { CancelText } from "../../button/ActionButtons"
 
@@ -49,7 +48,9 @@ export const AddButton = ({ onSubmitted, ...props }) => {
       <Disclosure {...dialog} {...props}>
         <Trans zh="新增" en="Add" />
       </Disclosure>
-      <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+      )}
     </>
   )
 }
@@ -107,7 +108,9 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
       <Disclosure {...dialog} {...props}>
         <Trans zh="修改" en="Edit" />
       </Disclosure>
-      <EditDialog record={record} onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <EditDialog record={record} onSubmitted={onSubmitted} dialog={dialog} />
+      )}
     </>
   )
 }
@@ -125,7 +128,7 @@ export const ViewButton = ({ record, ...props }) => {
       <Disclosure {...dialog} {...props}>
         <Trans zh="查看" en="View" />
       </Disclosure>
-      <ViewDialog record={record} dialog={dialog} />
+      {dialog.visible && <ViewDialog record={record} dialog={dialog} />}
     </>
   )
 }
@@ -142,6 +145,7 @@ const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
     <FormDialog
       initialValues={{
         ...record,
+        remarks: record.remarks ?? "",
         from,
         to
       }}
@@ -286,7 +290,13 @@ export const VerifyButton = ({ record, onSubmitted, ...props }) => {
       <Disclosure {...dialog} {...props}>
         <Trans zh="审核" en="Verify" />
       </Disclosure>
-      <VerifyDialog record={record} onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <VerifyDialog
+          record={record}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+        />
+      )}
     </>
   )
 }
