@@ -8,7 +8,7 @@ using TGS.Services.GameOperations.Models.Data;
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations
+    internal sealed partial class GameActionProcessor
     {
         private static Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(Db db, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
         {
