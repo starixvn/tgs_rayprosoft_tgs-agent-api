@@ -31,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
-    public partial class PlayerController : BaseContextController
+    public class PlayerController : BaseContextController
     {
         private readonly IPlayerOperations _playerOperations;
         private readonly IRequestAnalyzer _requestAnalyzer;

@@ -36,9 +36,7 @@ namespace TGS.Services.Operations
 
         Task<string> GetLicenseeSecretKeyAsync(Guid licenseeId);
 
-        Task<CachedLicenseeGameProvider[]> GetLicenseeGameProvidersAsync(Guid licenseeId, string currencyCode,
-            PlatformType platformType,
-            GameType[] gameTypes);
+        Task<CachedLicenseeGameProvider[]> GetLicenseeGameProvidersAsync(Guid licenseeId, string currencyCode, PlatformType platformType);
     }
 
     public sealed class LicenseeOperations : ILicenseeOperations
@@ -217,11 +215,11 @@ namespace TGS.Services.Operations
         }
 
         async Task<CachedLicenseeGameProvider[]> ILicenseeOperations.GetLicenseeGameProvidersAsync(Guid licenseeId,
-            string currencyCode, PlatformType platformType, GameType[] gameTypes)
+            string currencyCode, PlatformType platformType)
         {
             var cacheType = RedisCacheType.LicenseeGameProviders;
             var fieldName =
-                $"{licenseeId}:{currencyCode}:{platformType}:{gameTypes.Cast<int>().OrderBy(t => t).ToArray().JoinAsStringByColon()}";
+                $"{licenseeId}:{currencyCode}:{platformType}";
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, null, fieldName);
             if (value.HasValue)
             {
@@ -229,7 +227,7 @@ namespace TGS.Services.Operations
             }
 
             var gameProviders = await
-                _licenseeQueries.GetLicenseeGameProvidersAsync(licenseeId, currencyCode, platformType, gameTypes);
+                _licenseeQueries.GetLicenseeGameProvidersAsync(licenseeId, currencyCode, platformType);
 
             var fields = new HashEntry[]
             {

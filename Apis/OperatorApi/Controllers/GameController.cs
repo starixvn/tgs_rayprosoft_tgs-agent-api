@@ -23,7 +23,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    [IgnoreAntiforgeryToken]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     public class GameController : ControllerBase
@@ -93,7 +92,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 : $"{platform}:{gameProviderId}:{cultureCode}:{cachedPlayer.DefaultWalletCurrencyCode}:{(int) cachedPlayer.Type}";
 
             var value =
-                await _cacheManger.SafeGetHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, licenseeId, field);
+                await _cacheManger.SafeGetHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, cacheKey, field);
 
             if (value.HasValue)
             {

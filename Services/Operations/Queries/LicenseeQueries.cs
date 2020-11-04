@@ -34,8 +34,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<Dictionary<string, string>> GetLicenseeCurrenciesByInternalCodeAsync(Guid licenseeId);
 
-        Task<CachedLicenseeGameProvider[]> GetLicenseeGameProvidersAsync(Guid licenseeId, string currencyCode, PlatformType platformType,
-            GameType[] gameTypes);
+        Task<CachedLicenseeGameProvider[]> GetLicenseeGameProvidersAsync(Guid licenseeId, string currencyCode, PlatformType platformType);
     }
 
     public sealed class LicenseeQueries : ILicenseeQueries
@@ -154,10 +153,10 @@ namespace TGS.Services.Operations.Queries
         }
 
         async Task<CachedLicenseeGameProvider[]> ILicenseeQueries.GetLicenseeGameProvidersAsync(Guid licenseeId,
-            string currencyCode, PlatformType platformType, GameType[] gameTypes)
+            string currencyCode, PlatformType platformType)
         {
             const string spName = "usp_Licensee_GetLicenseeGameProviders";
-            var r = await _repository.SqlQueryMultipleAsync<CachedLicenseeGameProvider>(spName, parameters: new SqlParameter[]
+            var result = await _repository.SqlQueryMultipleAsync<GetLicenseeGameProviderResult>(spName, parameters: new SqlParameter[]
             {
                 new ()
                 {
@@ -176,16 +175,21 @@ namespace TGS.Services.Operations.Queries
                     ParameterName = "@platformType",
                     Value = platformType,
                     DbType = DbType.Int16
-                },
-                new ()
-                {
-                    ParameterName = "@gameTypes",
-                    Value = gameTypes.Select(s => new {Value = (int) s}).ToDataTable(),
-                    SqlDbType = SqlDbType.Structured
                 }
             });
 
-            return r.ToArray();
+            return (from r in result
+                    group r.GameType by new {r.Id, r.Code, r.Name, r.Status, r.Description}
+                    into g
+                    select new CachedLicenseeGameProvider
+                    {
+                        Id = g.Key.Id,
+                        Code = g.Key.Code,
+                        Name = g.Key.Name,
+                        Status = g.Key.Status,
+                        Description = g.Key.Description,
+                        GameTypes = g.ToArray()
+                    }).ToArray();
         }
     }
 }

@@ -7,10 +7,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages.GameProviders
     public record GetGameProvidersRequest
     {
         [Required]
-        [JsonPropertyName("gametypes")]
-        public GameType[] GameTypes { get; init; }
-
-        [Required]
         [JsonPropertyName("platformtype")]
         public PlatformType PlatformType { get; init; }
 
@@ -22,7 +18,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages.GameProviders
         [JsonPropertyName("currency")]
         public string CurrencyCode { get; init; }
 
-        [JsonPropertyName("includeMaintenance")]
-        public bool IncludeMaintenance { get; init; } = false;
+        [JsonPropertyName("playercode")]
+        public string PlayerCode { get; init; }
     }
 }
