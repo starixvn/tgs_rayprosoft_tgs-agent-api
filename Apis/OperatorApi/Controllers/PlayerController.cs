@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Apis.OperatorApi.Services;
@@ -22,7 +23,6 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
-using ContextItems = TGS.Core.Models.Consts.ContextItems;
 using PlayerConsts = TGS.Core.Models.Consts.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -31,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
-    public partial class PlayerController : BaseContextController
+    public class PlayerController : BaseContextController
     {
         private readonly IPlayerOperations _playerOperations;
         private readonly IRequestAnalyzer _requestAnalyzer;
@@ -75,7 +75,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost, Route("checkUsername")]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
 
             return new CheckPlayerResponse
@@ -98,7 +98,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             //    throw new InvalidOperationException(result.Message);
             //}
 
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
@@ -140,7 +140,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
             var username = request.Username;
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
@@ -188,7 +188,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<LogoutResponse> LogoutAsync(LogoutRequest request)
         {
             var username = request.Username;
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
@@ -206,7 +206,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedOn = updatedOn,
             });
 
-            await HttpContext?.SignOutAsync();
+            await HttpContext.SignOutAsync();
 
             return new LogoutResponse { UpdateTime = updatedOn };
         }
@@ -218,7 +218,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet, Route("{username}")]
         public async Task<GetPlayerResponse> GetPlayerAsync(string username)
         {
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var player = await _playerOperations.GetPlayerByUsernameAsync(licenseeId, username);
@@ -258,7 +258,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut, Route("update")]
         public async Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request)
         {
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
@@ -294,7 +294,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut, Route("changePassword")]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
-            var licenseeId = GetLicenseeIdFromHttpContext();
+            var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
@@ -327,8 +327,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        private Guid GetLicenseeIdFromHttpContext() =>
-            HttpContext.Items.TryGetValue(ContextItems.LicenseeId, out var v) ? (Guid)v : Guid.Empty;
+        
 
         private Task SignInAsync(string username)
         {

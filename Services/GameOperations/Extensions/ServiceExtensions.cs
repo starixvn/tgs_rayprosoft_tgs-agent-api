@@ -8,7 +8,7 @@ namespace TGS.Services.GameOperations.Extensions
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of GameOperations, need to add dependencies beforehead:  
+        /// Dependency Injection of GameOperations, need to add dependencies beforehand:  
         /// 1. AddTimeZone() in Infrastructures.TimeZone
         /// 2. AddTgsLog() in Infrastructures.Log
         /// 3. AddOperations() in Operations project

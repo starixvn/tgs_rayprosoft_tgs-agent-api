@@ -7,7 +7,7 @@ namespace TGS.Core.DataServices.Migrations
     public partial class Initial
     {
         //InitAfterRun(migrationBuilder);
-        public void InitAfterRun(MigrationBuilder migrationBuilder)
+        public static void InitAfterRun(MigrationBuilder migrationBuilder)
         {
             #region Store Procedure
 
@@ -66,6 +66,18 @@ namespace TGS.Core.DataServices.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_Deauthorize"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetSubGameIdMaps"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLanguagesByInternalCode"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLanguagesByExternalCode"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetCurrenciesByInternalCode"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetCurrenciesByExternalCode"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Licensee_GetLicenseeGameProviders"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Localization_GetLocalizationByGameProviderId"));
 
             #endregion Store Procedure
 

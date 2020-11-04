@@ -6,7 +6,7 @@ namespace TGS.Core.Infrastructures.Redis
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of Redis, need to add the following dependencies beforehead:
+        /// Dependency Injection of Redis, need to add the following dependencies beforehand:
         /// 1. AddJson() in Infrastructures.Json
         /// 2. AddTgsLog() in Infrastructures.Log       
         /// </summary>

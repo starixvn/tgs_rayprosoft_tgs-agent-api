@@ -14,10 +14,13 @@
         GameProviderCurrencies,
         GameProviderBetLimitCode,
         PlayerLoginRecords,
+        LicenseeGameProviders,
         LicenseeGames,
+        LicenseeGamesByPlatform,
         Games,  
         SubGames,
         UsernameToPlayerCode,
-        Setting
+        Setting,
+        Localization,
     }
 }

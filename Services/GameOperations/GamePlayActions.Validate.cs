@@ -64,7 +64,7 @@ namespace TGS.Services.GameOperations
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
             var gameProviderConfigurationId = await _licenseeOperations.GetLicenseeGameProviderConfigurationIdAsync(licenseeId, gameProviderId);
 
-            await ValidtePlayerAysnc(player, gameProviderId, gameProviderConfigurationId, data.PlatformType, false);
+            await ValidatePlayerAsync(player, gameProviderId, gameProviderConfigurationId, data.PlatformType, false);
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
             var lang = await _LicenseeGameProviderOpertaions.MapCultureAsync(gameProviderId, licenseeId, player.CultureCode);
@@ -89,7 +89,7 @@ namespace TGS.Services.GameOperations
         /// <summary>
         /// Validate player on betting if needed.
         /// </summary>
-        private async Task ValidtePlayerAysnc(CachedPlayer player, Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType? platform, bool ignoreExpired = false)
+        private async Task ValidatePlayerAsync(CachedPlayer player, Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType? platform, bool ignoreExpired = false)
         {
             if (!ignoreExpired)
             {

@@ -10,21 +10,21 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<LocalizedString>.Configure(EntityTypeBuilder<LocalizedString> builder)
         {
             builder.ToTable("LocalizedStrings", "dbo");
-            builder.HasKey(bc => new { bc.Context, bc.CultureCode, bc.Code });
+            builder.HasKey(ls => new { ls.Key, ls.CultureCode, ls.Context });
 
-            builder.Property(c => c.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(200))
+            builder.Property(ls => ls.Key)
+                .HasColumnType(ColumnTypes.Nvarchar(64))
                 .IsRequired();
 
-            builder.Property(c => c.Context)
-                .HasColumnType(ColumnTypes.Nvarchar(200))
+            builder.Property(ls => ls.Context)
+                .HasColumnType(ColumnTypes.Nvarchar(64))
                 .IsRequired();
 
-            builder.Property(c => c.CultureCode)
-                .HasColumnType(ColumnTypes.Nvarchar(10))
+            builder.Property(ls => ls.CultureCode)
+                .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsRequired();
 
-            builder.Property(c => c.Translation)
+            builder.Property(ls => ls.Translation)
                 .HasColumnType(ColumnTypes.Nvarchar(1024))
                 .IsRequired();
         }

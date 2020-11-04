@@ -7,9 +7,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
     internal class BaseConfiguration
     {
-        protected static void BaseConfigureProperties<T>(EntityTypeBuilder<T> builder) where T : BaseEntity
+        protected static void BaseConfigureProperties<T>(EntityTypeBuilder<T> builder, bool primaryKeyClustered = false) where T : BaseEntity
         {
-            builder.HasKey(p => p.Id).IsClustered(false);
+            builder.HasKey(p => p.Id).IsClustered(primaryKeyClustered);
 
             builder.Property(c => c.Code)
                 .HasColumnType(ColumnTypes.Nvarchar(16))

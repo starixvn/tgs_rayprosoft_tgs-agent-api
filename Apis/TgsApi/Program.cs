@@ -32,7 +32,11 @@ namespace TGS.Apis.TgsApi
             return Host.CreateDefaultBuilder(args)
                     .ConfigureAppConfiguration(config =>
                     {
-                        var filePath = ConfigFileMap[gpCode];
+                        if (!ConfigFileMap.TryGetValue(gpCode, out var filePath))
+                        {
+                            filePath = ConfigFileMap.Values.ElementAt(0);
+                        }
+
                         var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}";
                         config.AddJsonFile(path, true);
                     })

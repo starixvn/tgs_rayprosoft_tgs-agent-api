@@ -29,7 +29,6 @@ namespace TGS.Core.Infrastructures.ApiClient
         {
             Logger = logger;
             Json = json;
-
             _client = client;
         }
 
@@ -45,6 +44,19 @@ namespace TGS.Core.Infrastructures.ApiClient
             IReadOnlyDictionary<string, string> headers = null,
             IReadOnlyDictionary<string, string> contentHeaders = null)
         {
+            var requestMessage = CreateHttpRequestMessage(path, method);
+            var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
+            var response = await SendAsync(httpRequestMessage);
+            return await ReadJsonContentAsync<TResponse>(response.Content);
+        }
+
+        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(
+            HttpMethod method, Uri apiUrl, string path, TRequest request,
+            IReadOnlyDictionary<string, string> headers = null,
+            IReadOnlyDictionary<string, string> contentHeaders = null)
+        {
+            _client.BaseAddress = apiUrl;
+
             var requestMessage = CreateHttpRequestMessage(path, method);
             var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
             var response = await SendAsync(httpRequestMessage);

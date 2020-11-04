@@ -31,7 +31,7 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private void ThrowIfHaveNoRequiredIds(GameActionState s)
+        private static void ThrowIfHaveNoRequiredIds(GameActionState s)
         {
             if (s.MustHaveReferencedTransaction && !s.HasExtRefTransactionId)
             {
@@ -88,7 +88,7 @@ namespace TGS.Services.GameOperations.Data
             return GetDuplicateTransactionResult(action.Id, s.ExternalTransactionId);
         }
 
-        private void ThrowIfReferenceGameActionOrRoundIsNotFound(GameActionState s)
+        private static void ThrowIfReferenceGameActionOrRoundIsNotFound(GameActionState s)
         {
             if (s.HasExtRefTransactionId && s.ReferencedGameAction == null)
             {

@@ -8,6 +8,6 @@ namespace TGS.Core.DataServices.Models
         public Licensee Licensee { get; set; }
         public string CultureCode { get; set; }
         public Language Language { get; set; }
-        public string LicenseeLanguageCode { get; set; }
+        public string LicenseeCultureCode { get; set; }
     }
 }

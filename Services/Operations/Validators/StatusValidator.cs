@@ -14,7 +14,7 @@ namespace TGS.Services.Operations.Validators
         Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, params Status[] statuses);
 
-        Task ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameId, string externalGameId,
+        Task ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameId, string idToThrow,
             Status[] statuses, GameStatus[] gameStatuses);
 
         void ThrowIfPlayerDisabled(PlayerStatus playerStatus);
@@ -86,7 +86,7 @@ namespace TGS.Services.Operations.Validators
         }
 
         async Task IStatusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameId,
-            string externalGameId, Status[] statuses, GameStatus[] gameStatuses)
+            string idToThrow, Status[] statuses, GameStatus[] gameStatuses)
         {
             EnsureStatus(statuses);
             EnsureStatus(gameStatuses);
@@ -116,8 +116,8 @@ namespace TGS.Services.Operations.Validators
 
             if (!gameStatuses.Contains(gameStatus.Value))
             {
-                var idToThrow = externalGameId.IsNullOrEmpty() ? gameId.ToString() : externalGameId;
-                throw new InvalidStatusException($"Game '{idToThrow}' doesn't exist or is not active");
+                var id = idToThrow.IsNullOrEmpty() ? gameId.ToString() : idToThrow;
+                throw new InvalidStatusException($"Game '{id}' doesn't exist or is not active");
             }
         }
 
