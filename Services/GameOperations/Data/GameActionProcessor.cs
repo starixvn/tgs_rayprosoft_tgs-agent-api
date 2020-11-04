@@ -152,6 +152,7 @@ namespace TGS.Services.GameOperations.Data
         {
             var roundData = await GetRoundByExternalRoundIdAsync(s.Db, s.GameProviderConfigurationId,
                 s.PlayerData.Wallet.Id, s.ExternalRoundId);
+
             if (s.MustHaveExistingRound && roundData == null)
             {
                 throw new InvalidGameActionException(
@@ -268,8 +269,8 @@ namespace TGS.Services.GameOperations.Data
         private static (IList<BetActionData>, BetActionData) GetPreviousActions(GameActionType currentActionType,
             Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
         {
-            BetActionData refGameAction = default;
-            List<BetActionData> actions = new ();
+            var refGameAction = default(BetActionData);
+            var actions = new List<BetActionData>();
 
             foreach (var act in actionMap.Values)
             {
@@ -304,13 +305,14 @@ namespace TGS.Services.GameOperations.Data
             SameRoundActionData[] actionsData)
         {
             var amount = s.PrepareAmount(s.Amount);
-            Guid? refGameActionInternalId = null;
-            SameRoundActionData refData = null;
-
+            
             if (actionsData.Length == 0)
             {
-                return (refData, refGameActionInternalId, amount);
+                return (null, null, amount);
             }
+
+            Guid? refGameActionInternalId = null;
+            SameRoundActionData refData = null;
 
             if (s.HasExtRefTransactionId)
             {
@@ -335,29 +337,25 @@ namespace TGS.Services.GameOperations.Data
                 }
             }
 
-            if (refData == null)
-            {
-                refData = actionsData[0];
-            }
+            refData ??= actionsData[0];
 
             return (refData, refGameActionInternalId, amount);
         }
 
-        private static bool ShouldGetPreviousActions(GameActionState s)
-        {
-            // get previous actions:
-            // 1. ForceGetPreviousActions = true
-            // 2. for settlement transactions
-            // 3. place bet is not slot games
-            // 4. not lock amount action
-            return s.ForceGetPreviousActions ||
-                s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
-                !BypassPreviousActionGameTypes.Contains(s.Game.Type);
-        }
+        /// <summary>
+        /// get previous actions:
+        /// 1. ForceGetPreviousActions = true
+        /// 2. for settlement transactions
+        /// 3. place bet is not slot games
+        /// 4. not lock amount action
+        /// </summary>
+        private static bool ShouldGetPreviousActions(GameActionState s) =>
+            s.ForceGetPreviousActions ||
+            s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
+            !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
-        private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId)
-        {
-            return new ()
+        private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId) =>
+            new ()
             {
                 TransactionResult = new ()
                 {
@@ -366,7 +364,6 @@ namespace TGS.Services.GameOperations.Data
                     IsDuplicate = true
                 }
             };
-        }
 
         private static void UpdateReferenceGameActionIsCancelled(GameActionType currentActionType,
             BetActionData reference)
@@ -418,12 +415,15 @@ namespace TGS.Services.GameOperations.Data
                 IsExplicitlyNotClosingRound = s.RoundClosed == false,
                 GameName = s.Game.Name,
                 GameProviderCode = s.GameProvider.Code,
-                BetType = s.BetType
+                BetType = s.BetType,
+                AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
             };
 
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
             if (error != null)
+            {
                 throw error;
+            }
 
             var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current, s.PreviousActions);
 
@@ -446,12 +446,9 @@ namespace TGS.Services.GameOperations.Data
             var db = s.Db;
             var walletId = s.PlayerData.Wallet.Id;
 
-            if (s.HasWalletUpdate && s.Amount != 0)
-            {
-                return AtomicUpdateBalanceAsync(db, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow);
-            }
-
-            return GetBalanceAsync(db, walletId);
+            return s.HasWalletUpdate && s.Amount != 0
+                ? AtomicUpdateBalanceAsync(db, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
+                : GetBalanceAsync(db, walletId);
         }
 
         private static async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
@@ -512,15 +509,15 @@ namespace TGS.Services.GameOperations.Data
             if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
             {
                 roundData = roundData with
-                    {
+                {
                     Status = s.NewRoundStatus,
                     IsReopen = true
-                    };
+                };
             }
             else if (s.NewRoundStatus == RoundStatus.Closed)
             {
                 roundData = roundData with
-                    {
+                {
                     Status = s.NewRoundStatus,
                     ClosedOn = s.UtcNow,
                     ExternalClosedOn = s.Timestamp,
@@ -528,7 +525,7 @@ namespace TGS.Services.GameOperations.Data
                     WinLoss = s.BetValueResult.WinLoss,
                     TieBetAdjustment = s.BetValueResult.TieBetAdjustment,
                     IsClosed = true
-                    };
+                };
             }
 
             await UpdateRoundAsync(s.Db, roundData);

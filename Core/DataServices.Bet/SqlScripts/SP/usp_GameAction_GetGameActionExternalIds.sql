@@ -24,7 +24,8 @@ BEGIN
         ga.ExternalGameActionGroupId,
         ga.[Type] AS GameActionType,
         ga.Amount,
-        ga.RecordedOn
+        ga.RecordedOn,
+        ExternalReferencedTransactionId = (SELECT ExternalTransactionId FROM GameActions WHERE ga.ReferencedGameActionId = Id)
     FROM dbo.GameActions ga --WITH ( NOLOCK )
     JOIN dbo.Rounds r --WITH ( NOLOCK ) 
     ON r.Id = ga.RoundId

@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// ReSharper disable InconsistentNaming
+// ReSharper disable IdentifierTypo
+
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
@@ -14,10 +17,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 {
     public sealed class AuthorizeSBOBETMiddleware : IMiddleware
     {
-        private readonly ISettingOperations _settingOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
 
         public AuthorizeSBOBETMiddleware(
             ISettingOperations settingOperations,
@@ -37,9 +40,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
                 .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET);
 
             context.Request.EnableBuffering();
-            
+
             var request = await context.Request.ReadFromJsonAsync<BaseRequest>();
-            
+
             context.Request.Body.Seek(0, SeekOrigin.Begin);
 
             if (request.CompanyKey.IsNullOrEmpty() || request.CompanyKey.NotEquals(configuration.CompanyKey))

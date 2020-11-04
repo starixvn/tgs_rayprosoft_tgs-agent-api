@@ -234,12 +234,17 @@ Scenario: 6.6 - CancelTransaction action cannot reference CancelTransaction acti
 	When it is referenced by "CancelTransaction" action
 	Then I will detect error containing "you cannot perform any action on action of type 'CancelTransaction' for reference"
 
-Scenario: 6.7 - LockAmount action cannot reference CancelTransaction action
+Scenario: 6.7 - CancelTransaction action can reference CancelTransaction action when allowCancelCancellation is true
+	Given initial action "CancelTransaction"
+	When it is referenced by "CancelTransaction" action with allowCancelCancellation is true
+	Then I will detect no errors	
+
+Scenario: 6.8 - LockAmount action cannot reference CancelTransaction action
 	Given initial action "CancelTransaction"
 	When it is referenced by "LockAmount" action
 	Then I will detect error containing "you cannot perform any action on action of type 'CancelTransaction' for reference"
 
-Scenario: 6.8 - UnlockAmount action cannot reference CancelTransaction action
+Scenario: 6.9 - UnlockAmount action cannot reference CancelTransaction action
 	Given initial action "CancelTransaction"
 	When it is referenced by "UnlockAmount" action
 	Then I will detect error containing "you cannot perform any action on action of type 'CancelTransaction' for reference"
