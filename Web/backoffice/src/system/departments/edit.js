@@ -23,7 +23,9 @@ export const AddButton = ({ onSubmitted, ...props }) => {
       <Disclosure {...dialog}>
         <Trans zh="新增" en="Add" />
       </Disclosure>
-      <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+      {dialog.visible && (
+        <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+      )}
     </>
   )
 }
@@ -83,12 +85,14 @@ export const EditButton = ({ id = "", name = "", onSubmitted, ...props }) => {
       <Disclosure {...dialog}>
         <Trans zh="修改" en="Edit" />
       </Disclosure>
-      <EditDialog
-        id={id}
-        name={name}
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-      />
+      {dialog.visible && (
+        <EditDialog
+          id={id}
+          name={name}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+        />
+      )}
     </>
   )
 }

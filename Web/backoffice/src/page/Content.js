@@ -14,9 +14,8 @@ import {
 } from "bumbag"
 
 export default ({ title, actionBar, children, ...props }) => {
-  //TODO: support actionBar fn?
   return (
-    <PageContent css={css``}>
+    <PageContent maxWidth="unset">
       <Stack orientation="vertical" spacing="major-2">
         {title && (
           <Box marginBottom="major-3">
