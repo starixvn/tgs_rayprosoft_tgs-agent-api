@@ -10,5 +10,6 @@ namespace TGS.Core.Models.Services.Caches
         public string Name { get; init; }
         public Status Status { get; init; }
         public string Description { get; init; }
+        public GameType[] GameTypes { get; init; }
     }
 }
