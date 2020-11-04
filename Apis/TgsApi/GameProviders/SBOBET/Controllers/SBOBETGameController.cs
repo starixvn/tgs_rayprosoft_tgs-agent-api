@@ -68,12 +68,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var externalRoundId = request.ExternalTransactionId;
 
             var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, externalRoundId);
-            var gameActionExternalIds = roundStatus == RoundStatus.Closed
-                ? Array.Empty<GameActionExternalIds>()
-                : await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
+            var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
                     SettleGameActionTypes);
 
-            var betData = _map.Request(data, externalRoundId, request, gameActionExternalIds);
+            var betData = _map.Request(data, externalRoundId, request, roundStatus, gameActionExternalIds);
             var r = await _actions.SettleBetAsync(betData);
             return _map.Response(request, r);
         }

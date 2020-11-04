@@ -1,4 +1,7 @@
-﻿using System;
+﻿// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Commons.Middlewares;

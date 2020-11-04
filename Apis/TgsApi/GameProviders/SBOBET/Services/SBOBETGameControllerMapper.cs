@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     {
         BetData Request(GameProviderConfigurationData data, PlaceBetRequest request);
 
-        BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request, GameActionExternalIds[] settleGameActionExternalIds);
+        BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request, RoundStatus? roundStatus, GameActionExternalIds[] settleGameActionExternalIds);
 
         BetData Request(GameProviderConfigurationData data, CancelBetRequest request);
 
@@ -71,18 +71,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request, GameActionExternalIds[] settleGameActionExternalIds)
+        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request, RoundStatus? roundStatus, GameActionExternalIds[] settleGameActionExternalIds)
         {
             var settleCount = settleGameActionExternalIds.Length;
-            var externalTransactionId = request.ExternalTransactionId;
+            var externalTransactionReferenceId = request.ExternalTransactionId;
+
+            var externalTransactionId = roundStatus == RoundStatus.Closed || settleCount == 0
+                ? $"{externalTransactionReferenceId}_settle"
+                : $"{externalTransactionReferenceId}_settle_{settleCount}";
 
             var transactions = new TransactionData[]
             {
                 new()
                 {
                     Amount = request.WinLoss,
-                    ExternalTransactionId = settleCount == 0 ? $"{externalTransactionId}_settle" : $"{externalTransactionId}_settle_{settleCount}",
-                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalTransactionReferenceId = externalTransactionReferenceId,
                     ExternalRoundId = externalRoundId,
                     ExternalBetId = request.ExternalTransactionId,
                     ExternalGameActionGroupId = externalRoundId,
@@ -97,17 +101,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, CancelBetRequest request)
         {
-            var externalTransactionId = request.ExternalTransactionId;
+            var externalTransactionReferenceId = request.ExternalTransactionId;
             var externalRoundId = request.ExternalRoundId;
 
             var transactions = new TransactionData[]
             {
                 new()
                 {
-                    ExternalTransactionId = $"{externalTransactionId}_cancel",
-                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalTransactionId = $"{externalTransactionReferenceId}_cancel",
+                    ExternalTransactionReferenceId = externalTransactionReferenceId,
                     ExternalRoundId = externalRoundId,
-                    ExternalBetId = externalTransactionId,
+                    ExternalBetId = externalTransactionReferenceId,
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.ExternalGameId,
                     GameActionType = CancelTransaction,
@@ -120,7 +124,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, CancelBetRequest request, GameActionExternalIds[] validGameActionExternalIds)
         {
-            var transactions = validGameActionExternalIds.OrderByDescending(ga => ga.RecordedOn)
+            var transactions = validGameActionExternalIds
+                .OrderByDescending(ga => ga.RecordedOn)
                 .Select((ga, idx) => new TransactionData
                 {
                     ExternalTransactionId = $"{ga.ExternalTransactionId}_cancel",
