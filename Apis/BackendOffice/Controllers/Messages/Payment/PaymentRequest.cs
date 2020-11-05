@@ -16,13 +16,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public bool AllPlayer { get; set; }
         public bool IdentityVerification { get; set; }
         public bool PhoneVerification { get; set; }
-        public bool DesignatedUser { get; set; }
         public bool DepositedAmountUnlimited { get; set; }
         public decimal DepositedAmountFrom { get; set; }
         public decimal DepositedAmountTo { get; set; }
-        public bool Enabled { get; set; }
         public string Reason { get; set; }
-        public PaymentFeeModel PaymentFee { get; set; }
         public string[] Whitelist { get; set; }
         public string[] Blacklist { get; set; }
         public Guid[] VipLevelIds { get; set; }

@@ -1,11 +1,11 @@
-﻿IF EXISTS (SELECT * FROM sys.objects WHERE [name] = N'PaymentAuditLog' AND [type] = 'TR')
+﻿IF EXISTS (SELECT * FROM sys.objects WHERE [name] = N'Tr_PaymentAuditLogs' AND [type] = 'TR')
 BEGIN
-      DROP TRIGGER [dbo].[PaymentAuditLog]
+      DROP TRIGGER [dbo].[Tr_PaymentAuditLogs]
 END
 GO
 
 -- Triggrt
-CREATE TRIGGER [dbo].[PaymentAuditLogs] ON [dbo].[Payments]
+CREATE TRIGGER [dbo].[Tr_PaymentAuditLogs] ON [dbo].[Payments]
 AFTER INSERT, UPDATE
 AS
 BEGIN
@@ -20,14 +20,14 @@ DECLARE @Operation char(1);
     IF NOT EXISTS(SELECT 1 FROM inserted) AND EXISTS(SELECT 1 FROM deleted)  
         SET @Operation = 2        --Delete 
 
-    SET NOCOUNT ON;
-    INSERT INTO [dbo].[PaymentAuditLogs] VALUES ( 
+    INSERT INTO [dbo].[PaymentAuditLogs] ( 
     Id,
+    PaymentId,
     ChannelName,
-    Enabled,
+    PaymentStatus,
     TransferLimitFrom,
     TransferLimitTo,
-    TransferCondition,
+    PlayerListCondition,
     AllPlayer,
     IdentityVerification,
     PhoneVerification,
@@ -35,9 +35,25 @@ DECLARE @Operation char(1);
     DepositedAmountFrom,
     DepositedAmountTo,
     Reason,
-    UpdateOn,
+    CreatedOn,
+    CreatedByUsername,
+    Operation)  
+        SELECT NEWID() Id,
+        Id AS PaymentId,
+    ChannelName,
+    PaymentStatus,
+    TransferLimitFrom,
+    TransferLimitTo,
+    PlayerListCondition,
+    AllPlayer,
+    IdentityVerification,
+    PhoneVerification,
+    DepositedAmountUnlimited,
+    DepositedAmountFrom,
+    DepositedAmountTo,
+    Reason,
+    UpdatedOn,
     UpdatedByUsername,
-    @Operation)  
-        SELECT * FROM inserted
+	@Operation FROM inserted
 END
 GO

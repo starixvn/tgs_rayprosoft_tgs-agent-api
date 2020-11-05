@@ -9,9 +9,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<PaymentPlayerList>.Configure(
             EntityTypeBuilder<PaymentPlayerList> builder)
         {
-            builder.ToTable("PaymentUserAccessControls", "dbo");
+            builder.ToTable("PaymentPlayerList", "dbo");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => new {p.PaymentId, p.PlayerCode});
 
             builder.HasOne(p => p.Payment)
                 .WithMany(u => u.PaymentPlayerList)

@@ -137,14 +137,12 @@ namespace TGS.Core.DataServices.DataInitializers
                     {
                         new PaymentPlayerList
                         {
-                            Id = Guid.NewGuid(),
                             PlayerCode = players[0].PlayerCode,
                             ListType = ListType.White,
                             PaymentId = paymentId
                         },
                         new PaymentPlayerList
                         {
-                            Id = Guid.NewGuid(),
                             PlayerCode = players[1].PlayerCode,
                             ListType = ListType.Black,
                             PaymentId = paymentId

@@ -6,8 +6,9 @@ namespace TGS.Core.DataServices.Models
     public class PaymentAuditLog
     {
         public Guid Id { get; set; }
+        public Guid PaymentId { get; set; }
         public string ChannelName { get; set; }
-        public bool Enabled { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
         public PlayerListCondition PlayerListCondition { get; set; }

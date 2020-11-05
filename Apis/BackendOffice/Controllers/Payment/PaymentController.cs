@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -21,7 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class PaymentController : BaseContextController
     {
         private readonly ITgsCommands<Payment> _commands;
-        private readonly IPaymentCommands _paymentCommands;
+        private readonly IPaymentService _paymentService;
         private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsQueries<Payment> _queries;
         private readonly IUploadService _uploadService;
@@ -30,15 +30,15 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsQueries<Payment> queries,
             ITgsCommands<Payment> commands,
             ITgsQueries<Player> playerQueries,
-            IPaymentCommands paymentCommands,
             IUploadService uploadService,
+            IPaymentService paymentService,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
             _commands = commands;
-            _paymentCommands = paymentCommands;
             _uploadService = uploadService;
             _playerQueries = playerQueries;
+            _paymentService = paymentService;
         }
 
         [HttpGet]
@@ -163,68 +163,20 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             if (request.Whitelist != null && request.Blacklist != null)
             {
-                var samePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
-                if (samePlayers.Any())
+                var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
+                if (duplicatePlayers.Any())
                     return new CreateUpdatePaymentResponse
                     {
                         Valid = false,
                         Message = Resources.Payment.WhiteSameAsBlack,
-                        DuplicatePlayers = samePlayers
+                        DuplicatePlayers = duplicatePlayers
                     };
             }
 
             if (await _queries.ExistsAsync(p => p.ChannelName == request.ChannelName))
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NameExists);
 
-            var paymentId = Guid.NewGuid();
-            var payment = new Payment
-            {
-                Id = paymentId,
-                DisplayOrder = 1,
-                PaymentVendorId = request.PaymentVendorId,
-                PaymentMethodId = request.PaymentMethodId,
-                PaymentChannelId = request.PaymentChannelId,
-                ChannelName = request.ChannelName,
-                TransferLimitFrom = request.TransferLimitFrom,
-                TransferLimitTo = request.TransferLimitTo,
-                PlayerListCondition = request.PlayerListCondition,
-                AllPlayer = request.AllPlayer,
-                IdentityVerification = request.IdentityVerification,
-                PhoneVerification = request.PhoneVerification,
-                DepositedAmountUnlimited = request.DepositedAmountUnlimited,
-                DepositedAmountFrom = request.DepositedAmountFrom,
-                DepositedAmountTo = request.DepositedAmountTo,
-                Reason = request.Reason,
-                CreatedByUsername = Username,
-                UpdatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            var whitelist = request.Whitelist?.Select(code => new PaymentPlayerList
-            {
-                Id = Guid.NewGuid(),
-                ListType = ListType.White,
-                PaymentId = paymentId,
-                PlayerCode = code
-            }).ToArray() ?? Array.Empty<PaymentPlayerList>();
-            var blacklist = request.Blacklist?.Select(code => new PaymentPlayerList
-            {
-                Id = Guid.NewGuid(),
-                ListType = ListType.Black,
-                PaymentId = paymentId,
-                PlayerCode = code
-            }).ToArray() ?? Array.Empty<PaymentPlayerList>();
-            var players = whitelist.Union(blacklist).ToArray();
-
-            var vipLevels = request.VipLevelIds.Select(id => new PaymentVipLevel
-            {
-                PaymentId = paymentId,
-                VipLevelId = id
-            }).ToArray();
-
-            await _paymentCommands.CreateAsync(payment, players, vipLevels);
-
+            await _paymentService.CreatePaymentAsync(request, Username);
             return CreateValidResponse<CreateUpdatePaymentResponse>();
         }
 
@@ -233,59 +185,27 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<CreateUpdatePaymentResponse> UpdatePaymentAsync(Guid paymentId,
             UpdatePaymentRequest request)
         {
-            var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
-            if (duplicatePlayers.Any())
-                return new CreateUpdatePaymentResponse
-                {
-                    Valid = false,
-                    Message = Resources.Payment.WhiteSameAsBlack,
-                    DuplicatePlayers = duplicatePlayers
-                };
+            if (request.Whitelist != null && request.Blacklist != null)
+            {
+                var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
+                if (duplicatePlayers.Any())
+                    return new CreateUpdatePaymentResponse
+                    {
+                        Valid = false,
+                        Message = Resources.Payment.WhiteSameAsBlack,
+                        DuplicatePlayers = duplicatePlayers
+                    };
+            }
 
             var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
 
             if (payment == null) return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NotFound);
 
-            if (payment.ChannelName == request.ChannelName)
+            if (await _queries.ExistsAsync(p => p.Id != paymentId && p.ChannelName == request.ChannelName))
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NameExists);
 
-            payment.ChannelName = request.ChannelName;
-            payment.TransferLimitFrom = request.TransferLimitFrom;
-            payment.TransferLimitTo = request.TransferLimitTo;
-            payment.PlayerListCondition = request.PlayerListCondition;
-            payment.AllPlayer = request.AllPlayer;
-            payment.IdentityVerification = request.IdentityVerification;
-            payment.PhoneVerification = request.PhoneVerification;
-            payment.DepositedAmountUnlimited = request.DepositedAmountUnlimited;
-            payment.DepositedAmountFrom = request.DepositedAmountFrom;
-            payment.DepositedAmountTo = request.DepositedAmountTo;
-            payment.Reason = request.Reason;
-            payment.UpdatedByUsername = Username;
-            payment.UpdatedOn = DateTimeOffset.Now;
 
-            var whitelist = request.Whitelist.Select(code => new PaymentPlayerList
-            {
-                Id = Guid.NewGuid(),
-                ListType = ListType.White,
-                PaymentId = paymentId,
-                PlayerCode = code
-            }).ToArray();
-            var blacklist = request.Blacklist.Select(code => new PaymentPlayerList
-            {
-                Id = Guid.NewGuid(),
-                ListType = ListType.Black,
-                PaymentId = paymentId,
-                PlayerCode = code
-            }).ToArray();
-            var players = whitelist.Union(blacklist).ToArray();
-
-            var vipLevels = request.VipLevelIds.Select(id => new PaymentVipLevel
-            {
-                PaymentId = payment.Id,
-                VipLevelId = id
-            }).ToArray();
-
-            await _paymentCommands.UpdateAsync(payment, players, vipLevels);
+            await _paymentService.UpdatePaymentAsync(payment, request, Username);
 
             return CreateValidResponse<CreateUpdatePaymentResponse>();
         }

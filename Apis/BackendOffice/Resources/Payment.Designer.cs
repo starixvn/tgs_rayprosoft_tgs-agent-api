@@ -61,6 +61,51 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   查詢類似 Channel name is required. 的當地語系化字串。
+        /// </summary>
+        public static string ChannelNameRequired {
+            get {
+                return ResourceManager.GetString("ChannelNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Deposited must be greater than 0. 的當地語系化字串。
+        /// </summary>
+        public static string DepositedGreaterZero {
+            get {
+                return ResourceManager.GetString("DepositedGreaterZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Fee percentage must be greater than or equal to  0. 的當地語系化字串。
+        /// </summary>
+        public static string FeePercentageGreaterEqualZero {
+            get {
+                return ResourceManager.GetString("FeePercentageGreaterEqualZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Highest fee must be greater than lowest fee. 的當地語系化字串。
+        /// </summary>
+        public static string HighestFeeGreaterLowestFee {
+            get {
+                return ResourceManager.GetString("HighestFeeGreaterLowestFee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Lowest fee must be greater than or equal to  0. 的當地語系化字串。
+        /// </summary>
+        public static string LowestFeeGreaterEqualZero {
+            get {
+                return ResourceManager.GetString("LowestFeeGreaterEqualZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查詢類似 Channel name exists already. 的當地語系化字串。
         /// </summary>
         public static string NameExists {
@@ -79,6 +124,33 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   查詢類似 Payment channel is required. 的當地語系化字串。
+        /// </summary>
+        public static string PaymentChannelRequired {
+            get {
+                return ResourceManager.GetString("PaymentChannelRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Payment method is required. 的當地語系化字串。
+        /// </summary>
+        public static string PaymentMethodRequired {
+            get {
+                return ResourceManager.GetString("PaymentMethodRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Payment vendor is required. 的當地語系化字串。
+        /// </summary>
+        public static string PaymentVendorRequired {
+            get {
+                return ResourceManager.GetString("PaymentVendorRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查詢類似 Player is not found. 的當地語系化字串。
         /// </summary>
         public static string PlayerNotFound {
@@ -93,6 +165,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         public static string PlayersNotFound {
             get {
                 return ResourceManager.GetString("PlayersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Transfer Limit must be greater than 0. 的當地語系化字串。
+        /// </summary>
+        public static string TransferLimitGreaterZero {
+            get {
+                return ResourceManager.GetString("TransferLimitGreaterZero", resourceCulture);
             }
         }
         

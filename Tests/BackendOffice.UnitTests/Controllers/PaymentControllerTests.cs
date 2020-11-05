@@ -10,10 +10,11 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.DataService.Commands;
+using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -29,12 +30,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _queriesMock.Object,
                 _commandsMock.Object,
                 _playerQueriesMock.Object,
-                _paymentCommandsMock.Object,
                 _uploadServiceMock.Object,
+                _paymentServiceMock.Object,
                 HttpContextAccessorMock.Object);
         }
 
         private PaymentController _controller;
+        private readonly Mock<IPaymentService> _paymentServiceMock = new Mock<IPaymentService>();
         private readonly Mock<ITgsQueries<Payment>> _queriesMock = new Mock<ITgsQueries<Payment>>();
 
         private readonly Mock<ITgsCommands<Payment>> _commandsMock =
@@ -43,7 +45,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock =
             new Mock<ITgsQueries<Player>>();
 
-        private readonly Mock<IPaymentCommands> _paymentCommandsMock = new Mock<IPaymentCommands>();
         private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
 
         [TestCase(true)]
@@ -52,6 +53,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new PaymentsRequest
             {
+                PaymentStatus = PaymentStatus.Enabled,
                 Page = 1,
                 Rows = 10,
                 SortBy = "updatedOn",
@@ -65,7 +67,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .BuildMock().Object;
 
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
+            var orderedRoles = list.Where(x => x.PaymentStatus == PaymentStatus.Enabled)
+                .OrderByDescending(p => p.UpdatedOn);
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
@@ -120,10 +123,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeTrue();
 
             _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()));
-            _paymentCommandsMock.Verify(p => p.CreateAsync(It.Is<Payment>(r =>
+            _paymentServiceMock.Verify(p => p.CreatePaymentAsync(It.Is<CreatePaymentRequest>(r =>
                     r.ChannelName == request.ChannelName),
-                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
-                It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)));
+                It.Is<string>(r => r == Username)));
         }
 
         [Test]
@@ -144,10 +146,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeTrue();
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Payment, bool>>>(),
                 It.IsAny<Func<IQueryable<Payment>, IQueryable<Payment>>>()));
-            _paymentCommandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
+            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<Payment>(r =>
                     r.ChannelName == payment.ChannelName),
-                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
-                It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)));
+                It.IsAny<UpdatePaymentRequest>(),
+                It.Is<string>(r => r == Username)));
         }
 
         [Test]
@@ -174,10 +176,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 It.IsAny<Expression<Func<Payment, bool>>>(),
                 It.IsAny<Func<IQueryable<Payment>,
                     IQueryable<Payment>>>()));
-            _paymentCommandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
+            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<Payment>(r =>
                     r.ChannelName == payment.ChannelName),
-                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
-                It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)), Times.Never);
+                It.IsAny<UpdatePaymentRequest>(),
+                It.Is<string>(r => r == Username)), Times.Never);
         }
 
         [Test]
@@ -204,10 +206,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 It.IsAny<Expression<Func<Payment, bool>>>(),
                 It.IsAny<Func<IQueryable<Payment>,
                     IQueryable<Payment>>>()));
-            _paymentCommandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
+            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<Payment>(r =>
                     r.ChannelName == payment.ChannelName),
-                It.Is<PaymentPlayerList[]>(r => r.Length == request.Whitelist.Length + request.Blacklist.Length),
-                It.Is<PaymentVipLevel[]>(r => r.Length == request.VipLevelIds.Length)), Times.Never);
+                It.IsAny<UpdatePaymentRequest>(),
+                It.Is<string>(r => r == Username)), Times.Never);
         }
 
         private Fixture CreatePaymentFixture()

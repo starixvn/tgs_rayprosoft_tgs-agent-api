@@ -142,6 +142,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var announcement = new Announcement
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                DisplayOrder = 99,
                 Subject = request.Subject,
                 Content = request.Content,
                 From = request.From,

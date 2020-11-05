@@ -132,4 +132,31 @@
   <data name="NotFound" xml:space="preserve">
     <value>找不到金流</value>
   </data>
+  <data name="ChannelNameRequired" xml:space="preserve">
+    <value>通道名称必填</value>
+  </data>
+  <data name="TransferLimitGreaterZero" xml:space="preserve">
+    <value>限额必须大于0</value>
+  </data>
+  <data name="DepositedGreaterZero" xml:space="preserve">
+    <value>累积存款必须大于0</value>
+  </data>
+  <data name="PaymentChannelRequired" xml:space="preserve">
+    <value>支付通道必填</value>
+  </data>
+  <data name="PaymentMethodRequired" xml:space="preserve">
+    <value>支付方式必填</value>
+  </data>
+  <data name="PaymentVendorRequired" xml:space="preserve">
+    <value>支付厂商必填</value>
+  </data>
+  <data name="HighestFeeGreaterLowestFee" xml:space="preserve">
+    <value>最高手续费必须大于最低手续费</value>
+  </data>
+  <data name="FeePercentageGreaterEqualZero" xml:space="preserve">
+    <value>手续费百分比必须大于或等于0</value>
+  </data>
+  <data name="LowestFeeGreaterEqualZero" xml:space="preserve">
+    <value>最低手续费必须大于或等于0</value>
+  </data>
 </root>

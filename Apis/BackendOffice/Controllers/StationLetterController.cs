@@ -58,13 +58,14 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
         {
             return _queries.GetQueries()
-                .Where(p=>p.Status == request.Status)
+                .Where(p => p.Status == request.Status)
                 .Select(a => new StationLetterModel
                 {
                     Id = a.Id,
                     Subject = a.Subject,
                     Content = a.Content,
                     Remarks = a.Remarks,
+                    AssignedAllPlayers = a.AssignedAllPlayers,
                     CreatedByUsername = a.CreatedByUsername,
                     VerifiedByUsername = a.VerifiedByUsername,
                     Status = a.Status.ToString(),

@@ -14,8 +14,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Apis.BackendOffice.DataService.Commands;
 using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
@@ -52,7 +52,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
-            services.AddTransient(typeof(IPaymentCommands), typeof(PaymentCommands));
+            services.AddTransient(typeof(IPaymentService), typeof(PaymentService));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -77,6 +77,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 })
                 .AddDataAnnotationsLocalization()
                 .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
+
+            services.AddTransient<IValidatorInterceptor, FluentValidationInterceptor>();
 
             services.AddHealthChecks()
                 .AddCheck<HealthCheck>("example_health_check");

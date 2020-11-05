@@ -14,8 +14,7 @@
     <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
     <PackageReference Include="EFCore.BulkExtensions" Version="3.1.5" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="9.2.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.2.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0-preview3" />
     <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
@@ -56,6 +55,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Common.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Paging.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Paging.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Payment.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -114,6 +118,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Department.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Paging.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Paging.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Payment.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Payment.Designer.cs</LastGenOutput>
@@ -171,6 +179,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DataService\Commands\" />
   </ItemGroup>
 
 

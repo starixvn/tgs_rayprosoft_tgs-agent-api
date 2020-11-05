@@ -5,7 +5,6 @@ namespace TGS.Core.DataServices.Models
 {
     public class PaymentPlayerList
     {
-        public Guid Id { get; set; }
         public ListType ListType { get; set; }
         public string PlayerCode { get; set; }
         public virtual Player Player { get; set; }
