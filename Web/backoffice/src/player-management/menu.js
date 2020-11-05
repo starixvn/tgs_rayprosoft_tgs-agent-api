@@ -32,11 +32,11 @@ export const Menu = ({
     url={url}
     codes={codes}
     codePaths={codePaths}
-    itemLabel={labelOf}
+    itemLabel={label}
   />
 )
 
-const labelOf = ({ locale, code }) => {
+const label = ({ locale, code }) => {
   switch (code) {
     case PlayerListCode:
       return getTrans(
@@ -57,7 +57,7 @@ export const codeLabelPair = [
     findlLabel({
       locale,
       codes,
-      label: labelOf,
+      label,
       subLabelPairs: [playerListPair]
     })
 ]
