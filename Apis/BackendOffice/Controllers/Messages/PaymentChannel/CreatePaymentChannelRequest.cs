@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel
 {
-    public class CreateUpdatePaymentChannelRequest
+    public class CreatePaymentChannelRequest
     {
         public string Name { get; set; }
         public string Code { get; set; }

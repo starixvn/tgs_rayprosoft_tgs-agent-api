@@ -76,7 +76,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Cannot_Create_PaymentChannel_With_Code_Exists()
         {
-            var request = new Fixture().Create<CreateUpdatePaymentChannelRequest>();
+            var request = new Fixture().Create<CreatePaymentChannelRequest>();
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()))
                 .Returns(Task.FromResult(true));
@@ -89,7 +89,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Create_PaymentChannel()
         {
-            var request = new Fixture().Create<CreateUpdatePaymentChannelRequest>();
+            var request = new Fixture().Create<CreatePaymentChannelRequest>();
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()))
                 .Returns(Task.FromResult(false));
@@ -106,7 +106,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update_PaymentChannel()
         {
             var payment = CreatePaymentChannelFixture().Create<PaymentChannel>();
-            var request = new Fixture().Create<CreateUpdatePaymentChannelRequest>();
+            var request = new Fixture().Create<UpdatePaymentChannelRequest>();
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>(),
                     It.IsAny<Func<IQueryable<PaymentChannel>, IQueryable<PaymentChannel>>>()))
@@ -128,7 +128,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update_PaymentChannel_Not_Found()
         {
             var payment = CreatePaymentChannelFixture().Create<PaymentChannel>();
-            var request = new Fixture().Create<CreateUpdatePaymentChannelRequest>();
+            var request = new Fixture().Create<UpdatePaymentChannelRequest>();
 
             _queriesMock.Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<PaymentChannel, bool>>>(),
@@ -156,7 +156,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_PaymentChannel_With_Code_Exists()
         {
             var payment = CreatePaymentChannelFixture().Create<PaymentChannel>();
-            var request = new Fixture().Create<CreateUpdatePaymentChannelRequest>();
+            var request = new Fixture().Create<UpdatePaymentChannelRequest>();
             request.Code = payment.Code;
             _queriesMock.Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<PaymentChannel, bool>>>(),

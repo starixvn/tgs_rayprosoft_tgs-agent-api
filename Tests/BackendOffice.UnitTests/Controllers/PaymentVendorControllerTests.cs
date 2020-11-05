@@ -76,7 +76,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Cannot_Create_PaymentVendor_With_Code_Exists()
         {
-            var request = new Fixture().Create<CreateUpdatePaymentVendorRequest>();
+            var request = new Fixture().Create<CreatePaymentVendorRequest>();
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentVendor, bool>>>()))
                 .Returns(Task.FromResult(true));
@@ -89,7 +89,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Create_PaymentVendor()
         {
-            var request = new Fixture().Create<CreateUpdatePaymentVendorRequest>();
+            var request = new Fixture().Create<CreatePaymentVendorRequest>();
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentVendor, bool>>>()))
                 .Returns(Task.FromResult(false));
@@ -106,7 +106,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update_PaymentVendor()
         {
             var payment = CreatePaymentVendorFixture().Create<PaymentVendor>();
-            var request = new Fixture().Create<CreateUpdatePaymentVendorRequest>();
+            var request = new Fixture().Create<UpdatePaymentVendorRequest>();
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<PaymentVendor, bool>>>(),
                     It.IsAny<Func<IQueryable<PaymentVendor>, IQueryable<PaymentVendor>>>()))
@@ -128,7 +128,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update_PaymentVendor_Not_Found()
         {
             var payment = CreatePaymentVendorFixture().Create<PaymentVendor>();
-            var request = new Fixture().Create<CreateUpdatePaymentVendorRequest>();
+            var request = new Fixture().Create<UpdatePaymentVendorRequest>();
 
             _queriesMock.Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<PaymentVendor, bool>>>(),
@@ -156,7 +156,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Update_PaymentVendor_With_Code_Exists()
         {
             var payment = CreatePaymentVendorFixture().Create<PaymentVendor>();
-            var request = new Fixture().Create<CreateUpdatePaymentVendorRequest>();
+            var request = new Fixture().Create<UpdatePaymentVendorRequest>();
             request.Code = payment.Code;
             _queriesMock.Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<PaymentVendor, bool>>>(),

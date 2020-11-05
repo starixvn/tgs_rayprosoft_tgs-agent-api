@@ -79,7 +79,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPost]
         [Description("Create a PaymentMethod")]
-        public async Task<MessageResponse> CreateAsync(CreateUpdatePaymentMethodRequest request)
+        public async Task<MessageResponse> CreateAsync(CreatePaymentMethodRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Code == request.Code))
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.CodeExists);
@@ -101,7 +101,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPut("{id}")]
         [Description("Update a PaymentMethod")]
-        public async Task<MessageResponse> UpdateAsync(Guid id, CreateUpdatePaymentMethodRequest request)
+        public async Task<MessageResponse> UpdateAsync(Guid id, UpdatePaymentMethodRequest request)
         {
             var method = await _queries.GetSingleAsync(p => p.Id == id);
 

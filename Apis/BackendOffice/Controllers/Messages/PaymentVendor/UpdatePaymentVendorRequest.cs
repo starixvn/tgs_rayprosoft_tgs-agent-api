@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.PaymentVendor
 {
-    public class CreateUpdatePaymentVendorRequest
+    public class UpdatePaymentVendorRequest
     {
         public string Name { get; set; }
         public string Code { get; set; }
