@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_GameAction_GetGameActionsInSameRound') IS NULL
-    EXEC('CREATE PROCEDURE [dbo].[usp_GameAction_GetGameActionsInSameRound] AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_GameAction_GetGameActionsInSameRound]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameAction_GetGameActionsInSameRound]
     @gameProviderConfigurationId    UNIQUEIDENTIFIER,
     @walletId                       UNIQUEIDENTIFIER,
     @externalRoundId                NVARCHAR(255)

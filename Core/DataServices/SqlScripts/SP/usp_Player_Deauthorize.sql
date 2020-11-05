@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Player_Deauthorize') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Player_Deauthorize AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Player_Deauthorize]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Player_Deauthorize]
       @playerCode    NVARCHAR(16),
       @platformType  smallint NULL
 AS 

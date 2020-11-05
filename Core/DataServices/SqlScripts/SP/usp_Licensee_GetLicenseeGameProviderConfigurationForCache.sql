@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Licensee_GetLicenseeGameProviderConfigurationForCache') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Licensee_GetLicenseeGameProviderConfigurationForCache AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Licensee_GetLicenseeGameProviderConfigurationForCache]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Licensee_GetLicenseeGameProviderConfigurationForCache]
       @licenseeId			UNIQUEIDENTIFIER,
 	  @gameProviderId	UNIQUEIDENTIFIER
 AS 

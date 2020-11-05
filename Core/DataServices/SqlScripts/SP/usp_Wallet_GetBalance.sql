@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Wallet_GetBalance') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Wallet_GetBalance AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Wallet_GetBalance]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Wallet_GetBalance]
       @walletId    UNIQUEIDENTIFIER,
 	  @isDirtyRead BIT
 AS 

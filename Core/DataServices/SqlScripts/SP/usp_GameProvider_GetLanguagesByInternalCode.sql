@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_GameProvider_GetLanguagesByInternalCode') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_GameProvider_GetLanguagesByInternalCode AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_GameProvider_GetLanguagesByInternalCode]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameProvider_GetLanguagesByInternalCode]
       @gameProviderId  uniqueidentifier
 AS 
 BEGIN

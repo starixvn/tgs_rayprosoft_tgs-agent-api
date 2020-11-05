@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Licensee_GetLicenseeGameProviders') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Licensee_GetLicenseeGameProviders AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Licensee_GetLicenseeGameProviders]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Licensee_GetLicenseeGameProviders]
       @licenseeId    UNIQUEIDENTIFIER,
 	  @currencyCode  NVARCHAR(6),
 	  @platformType  SMALLINT

@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_GameProvider_GetSubGameIdMaps') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_GameProvider_GetSubGameIdMaps AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_GameProvider_GetSubGameIdMaps]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameProvider_GetSubGameIdMaps]
       @gameProviderId  UNIQUEIDENTIFIER,
       @platformType    SMALLINT
 AS 
