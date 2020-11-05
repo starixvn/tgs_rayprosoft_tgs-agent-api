@@ -15,7 +15,7 @@ namespace TGS.Tests.ApiClients.GameProviders
         Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
         Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request);
         Task<CancelBetResponse> CancelBetAsync(CancelBetRequest request);
-        Task<RollbackResponse> CancelSettleAsync(RollbackRequest request);
+        Task<RollbackResponse> RollbackAsync(RollbackRequest request);
         Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request);
     }
 
@@ -38,7 +38,7 @@ namespace TGS.Tests.ApiClients.GameProviders
         Task<CancelBetResponse> ISBOBETApiClient.CancelBetAsync(CancelBetRequest request) =>
             ExecuteJsonRequestAsync<CancelBetRequest, CancelBetResponse>(HttpMethod.Post, "api/Cancel", request);
 
-        Task<RollbackResponse> ISBOBETApiClient.CancelSettleAsync(RollbackRequest request) =>
+        Task<RollbackResponse> ISBOBETApiClient.RollbackAsync(RollbackRequest request) =>
             ExecuteJsonRequestAsync<RollbackRequest, RollbackResponse>(HttpMethod.Post, "api/Rollback", request);
 
         Task<GetBetStatusResponse> ISBOBETApiClient.GetBetStatusAsync(GetBetStatusRequest request) =>

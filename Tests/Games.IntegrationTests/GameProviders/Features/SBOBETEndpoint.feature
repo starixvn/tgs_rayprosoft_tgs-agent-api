@@ -676,8 +676,123 @@ Scenario: 08.g - Resend cancel settle
 		And balance now being $90
 	When I resend cancel settlement transaction
 	Then I will receive rollback response of error "BetAlreadyRollback"
+
+# Note for 09 case:
+# When a void round is rollback, the place bet is accepted again and the orignal settlement is discarded
+Scenario: 09.a - Rollback void round
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	When I cancel the cancellation
+	Then I will receive rollback response of no error and balance of $90
+		And player wallet database record will be for $90
+		And the cancellation of game action recorded in the database will be canceled
+		And the round will be opened
+
+Scenario: 09.b - Rollback void round without player login
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	Given player logout
+	When I cancel the cancellation	
+	Then I will receive rollback response of no error and balance of $90
+		And player wallet database record will be for $90
+		And the cancellation of game action recorded in the database will be canceled
+		And the round will be opened
+
+@ChangeGameProviderStatus
+Scenario: 09.c - Can rollback void round with game provider status set to maintenance
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	Given game provider has status set to "Maintenance"
+	When I cancel the cancellation	
+	Then I will receive rollback response of no error and balance of $90
+		And player wallet database record will be for $90
+		And the cancellation of game action recorded in the database will be canceled
+		And the round will be opened
+
+@ChangeGameProviderConfigurationStatus
+Scenario: 09.d - Can rollback void round with game provider configuration status set to maintenance
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	Given game provider configuration has status set to "Maintenance"
+	When I cancel the cancellation	
+	Then I will receive rollback response of no error and balance of $90
+		And player wallet database record will be for $90
+		And the cancellation of game action recorded in the database will be canceled
+		And the round will be opened
+
+@ChangeGameStatus
+Scenario: 09.e - Can rollback void round with game status set to maintenance
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	Given game "1_1" has status set to "Maintenance"
+	When I cancel the cancellation	
+	Then I will receive rollback response of no error and balance of $90
+		And player wallet database record will be for $90
+		And the cancellation of game action recorded in the database will be canceled
+		And the round will be opened
+
+@ChangeLicenseeStatus
+Scenario: 09.f - Can rollback void round with licensee status set to maintenance
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	Given licensee has status set to "Maintenance"
+	When I cancel the cancellation	
+	Then I will receive rollback response of no error and balance of $90
+		And player wallet database record will be for $90
+		And the cancellation of game action recorded in the database will be canceled
+		And the round will be opened
+
+Scenario: 09.g - Cannot resend rollback void round 
+	Given player "RP01_cny_en-us" of licensee "TGS" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $20
+		And balance now being $110
+	Given I cancel all transactions
+		And balance now being $100
+	Given I cancel the cancellation	
+		And balance now being $90
+	When I resend cancel the cancellation transaction
+	Then I will receive rollback response of error "InvalidGameAction"
 	
-Scenario: 09.a - Get bet status of place bet
+Scenario: 10.a - Get bet status of place bet
 	Given player "TP01_cny_en-us" of licensee "TGS" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
@@ -689,7 +804,7 @@ Scenario: 09.a - Get bet status of place bet
 		| stake   | 10      |
 		| winloss | 0       |
 
-Scenario: 09.b - Get bet status of win bet
+Scenario: 10.b - Get bet status of win bet
 	Given player "TP01_cny_en-us" of licensee "TGS" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
@@ -703,7 +818,7 @@ Scenario: 09.b - Get bet status of win bet
 		| stake   | 10      |
 		| winloss | 20      |
 
-Scenario: 09.c - Get bet status of lose bet
+Scenario: 10.c - Get bet status of lose bet
 	Given player "TP01_cny_en-us" of licensee "TGS" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
@@ -717,7 +832,7 @@ Scenario: 09.c - Get bet status of lose bet
 		| stake   | 10      |
 		| winloss | 0       |
 
-Scenario: 09.d - Get bet status of cancel transaction
+Scenario: 10.d - Get bet status of cancel transaction
 	Given player "TP01_cny_en-us" of licensee "TGS" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
@@ -730,3 +845,5 @@ Scenario: 09.d - Get bet status of cancel transaction
 		| status  | void  |
 		| stake   | 0     |
 		| winloss | 0     |
+
+
