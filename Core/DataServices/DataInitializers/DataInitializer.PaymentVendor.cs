@@ -123,12 +123,12 @@ namespace TGS.Core.DataServices.DataInitializers
                     TransferLimitFrom = 10,
                     TransferLimitTo = 100000,
                     PlayerListCondition = PlayerListCondition.All,
-                    AllPlayer = true,
-                    IdentityVerification = true,
-                    PhoneVerification = true,
+                    AllPlayers = true,
+                    IdentityAuthentication = true,
+                    PhoneAuthentication = true,
                     DepositedAmountUnlimited = true,
-                    DepositedAmountFrom = 100,
-                    DepositedAmountTo = 1000,
+                    DepositedAmountMin = 100,
+                    DepositedAmountMax = 1000,
                     Reason = "Reason",
                     FeePercentage = 50,
                     LowestFee = 50,
@@ -138,13 +138,13 @@ namespace TGS.Core.DataServices.DataInitializers
                         new PaymentPlayerList
                         {
                             PlayerCode = players[0].PlayerCode,
-                            ListType = ListType.White,
+                            ListType = PlayerListType.White,
                             PaymentId = paymentId
                         },
                         new PaymentPlayerList
                         {
                             PlayerCode = players[1].PlayerCode,
-                            ListType = ListType.Black,
+                            ListType = PlayerListType.Black,
                             PaymentId = paymentId
                         }
                     },

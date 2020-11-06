@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
@@ -15,6 +16,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
     {
         Task CreatePaymentAsync(CreatePaymentRequest request, string username);
         Task UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username);
+        Task ChangeStatusAsync(Payment payment, PaymentStatus status, string username);
     }
 
     public class PaymentService : IPaymentService
@@ -40,12 +42,12 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 TransferLimitFrom = request.TransferLimitFrom,
                 TransferLimitTo = request.TransferLimitTo,
                 PlayerListCondition = request.PlayerListCondition,
-                AllPlayer = request.AllPlayer,
-                IdentityVerification = request.IdentityVerification,
-                PhoneVerification = request.PhoneVerification,
+                AllPlayers = request.AllPlayers,
+                IdentityAuthentication = request.IdentityAuthentication,
+                PhoneAuthentication = request.PhoneAuthentication,
                 DepositedAmountUnlimited = request.DepositedAmountUnlimited,
-                DepositedAmountFrom = request.DepositedAmountFrom,
-                DepositedAmountTo = request.DepositedAmountTo,
+                DepositedAmountMin = request.DepositedAmountMin,
+                DepositedAmountMax = request.DepositedAmountMax,
                 Reason = request.Reason,
                 CreatedByUsername = username,
                 UpdatedByUsername = username,
@@ -78,18 +80,20 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username)
         {
-            var beforePayment = GeneratePaymentAuditLog(payment, request, username);
+            var serializeSettings = new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Ignore};
+            var beforePayment =
+                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, serializeSettings));
 
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
             payment.TransferLimitTo = request.TransferLimitTo;
             payment.PlayerListCondition = request.PlayerListCondition;
-            payment.AllPlayer = request.AllPlayer;
-            payment.IdentityVerification = request.IdentityVerification;
-            payment.PhoneVerification = request.PhoneVerification;
+            payment.AllPlayers = request.AllPlayers;
+            payment.IdentityAuthentication = request.IdentityAuthentication;
+            payment.PhoneAuthentication = request.PhoneAuthentication;
             payment.DepositedAmountUnlimited = request.DepositedAmountUnlimited;
-            payment.DepositedAmountFrom = request.DepositedAmountFrom;
-            payment.DepositedAmountTo = request.DepositedAmountTo;
+            payment.DepositedAmountMin = request.DepositedAmountMin;
+            payment.DepositedAmountMax = request.DepositedAmountMax;
             payment.Reason = request.Reason;
             payment.UpdatedByUsername = username;
             payment.UpdatedOn = DateTimeOffset.Now;
@@ -120,11 +124,23 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             await _repository.SaveChangesAsync();
 
-            await _repository.PaymentAuditLogs.AddAsync(beforePayment);
+            await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
 
             await _repository.SaveChangesAsync();
 
             await tran.CommitAsync();
+        }
+
+        async Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
+        {
+            var serializeSettings = new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Ignore};
+            var beforePayment =
+                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, serializeSettings));
+
+            payment.PaymentStatus = status;
+            _repository.Entry(payment).State = EntityState.Modified;
+            await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            await _repository.SaveChangesAsync();
         }
 
         private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list)
@@ -135,42 +151,44 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 : Array.Empty<Player>();
             return playerWhitelist.Select(player => new PaymentPlayerList
             {
-                ListType = ListType.White,
+                ListType = PlayerListType.White,
                 PaymentId = paymentId,
                 PlayerCode = player.PlayerCode,
                 Player = player
             }).ToArray();
         }
 
-        private PaymentAuditLog GeneratePaymentAuditLog(Payment payment, UpdatePaymentRequest request, string username)
+        private PaymentAuditLog GeneratePaymentAuditLog(Payment payment, Payment beforePayment)
         {
             return new PaymentAuditLog
             {
                 Id = Guid.NewGuid(),
                 PaymentId = payment.Id,
-                BeforeChannelName = payment.ChannelName,
-                AfterChannelName = request.ChannelName,
-                BeforeTransferLimitFrom = payment.TransferLimitFrom,
-                AfterTransferLimitFrom = request.TransferLimitFrom,
-                BeforeTransferLimitTo = payment.TransferLimitTo,
-                AfterTransferLimitTo = request.TransferLimitTo,
-                BeforePlayerListCondition = payment.PlayerListCondition,
-                AfterPlayerListCondition = request.PlayerListCondition,
-                BeforeAllPlayer = payment.AllPlayer,
-                AfterAllPlayer = request.AllPlayer,
-                BeforeIdentityVerification = payment.IdentityVerification,
-                AfterIdentityVerification = request.IdentityVerification,
-                BeforePhoneVerification = payment.PhoneVerification,
-                AfterPhoneVerification = request.PhoneVerification,
-                BeforeDepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-                AfterDepositedAmountUnlimited = request.DepositedAmountUnlimited,
-                BeforeDepositedAmountFrom = payment.DepositedAmountFrom,
-                AfterDepositedAmountFrom = request.DepositedAmountFrom,
-                BeforeDepositedAmountTo = payment.DepositedAmountTo,
-                AfterDepositedAmountTo = request.DepositedAmountTo,
-                Reason = request.Reason,
+                BeforeChannelName = beforePayment.ChannelName,
+                AfterChannelName = payment.ChannelName,
+                BeforePaymentStatus = beforePayment.PaymentStatus,
+                AfterPaymentStatus = payment.PaymentStatus,
+                BeforeTransferLimitFrom = beforePayment.TransferLimitFrom,
+                AfterTransferLimitFrom = payment.TransferLimitFrom,
+                BeforeTransferLimitTo = beforePayment.TransferLimitTo,
+                AfterTransferLimitTo = payment.TransferLimitTo,
+                BeforePlayerListCondition = beforePayment.PlayerListCondition,
+                AfterPlayerListCondition = payment.PlayerListCondition,
+                BeforeAllPlayers = beforePayment.AllPlayers,
+                AfterAllPlayers = payment.AllPlayers,
+                BeforeIdentityAuthentication = beforePayment.IdentityAuthentication,
+                AfterIdentityAuthentication = payment.IdentityAuthentication,
+                BeforePhoneAuthentication = beforePayment.PhoneAuthentication,
+                AfterPhoneAuthentication = payment.PhoneAuthentication,
+                BeforeDepositedAmountUnlimited = beforePayment.DepositedAmountUnlimited,
+                AfterDepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                BeforeDepositedAmountMin = beforePayment.DepositedAmountMin,
+                AfterDepositedAmountMin = payment.DepositedAmountMin,
+                BeforeDepositedAmountMax = beforePayment.DepositedAmountMax,
+                AfterDepositedAmountMax = payment.DepositedAmountMax,
+                Reason = payment.Reason,
                 CreatedOn = DateTimeOffset.Now,
-                CreatedByUsername = username,
+                CreatedByUsername = payment.UpdatedByUsername,
                 Operation = AuditLogOperation.Update
             };
         }

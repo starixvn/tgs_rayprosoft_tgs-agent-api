@@ -19,12 +19,12 @@ namespace TGS.Core.DataServices.Models
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
         public PlayerListCondition PlayerListCondition { get; set; }
-        public bool AllPlayer { get; set; }
-        public bool IdentityVerification { get; set; }
-        public bool PhoneVerification { get; set; }
+        public bool AllPlayers { get; set; }
+        public bool IdentityAuthentication { get; set; }
+        public bool PhoneAuthentication { get; set; }
         public bool DepositedAmountUnlimited { get; set; }
-        public decimal DepositedAmountFrom { get; set; }
-        public decimal DepositedAmountTo { get; set; }
+        public decimal DepositedAmountMin { get; set; }
+        public decimal DepositedAmountMax { get; set; }
         public string Reason { get; set; }
         public decimal? FeePercentage { get; set; }
         public decimal? LowestFee { get; set; }

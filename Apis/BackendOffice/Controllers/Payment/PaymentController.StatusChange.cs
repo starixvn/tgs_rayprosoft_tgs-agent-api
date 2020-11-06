@@ -9,24 +9,18 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 {
     public partial class PaymentController
     {
-        [HttpPut("{paymentId:guid}/enable")]
-        [Description("Enable a Payment")]
-        public async Task<MessageResponse> EnablePaymentAsync(Guid paymentId)
+        [HttpPut("{paymentId:guid}/{status}")]
+        [Description("change a Payment's status")]
+        public async Task<MessageResponse> UpdatePaymentStatusAsync(Guid paymentId, PaymentStatus status)
         {
             var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
-            payment.PaymentStatus = PaymentStatus.Enabled;
-            await _commands.UpdateAsync(payment);
 
-            return CreateValidResponse<MessageResponse>();
-        }
+            if (payment == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Payment.PaymentNotFound);
+            }
 
-        [HttpPut("{paymentId:guid}/disable")]
-        [Description("Disable a Payment")]
-        public async Task<MessageResponse> DisablePaymentAsync(Guid paymentId)
-        {
-            var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
-            payment.PaymentStatus = PaymentStatus.Disabled;
-            await _commands.UpdateAsync(payment);
+            await _paymentService.ChangeStatusAsync(payment, status, Username);
 
             return CreateValidResponse<MessageResponse>();
         }

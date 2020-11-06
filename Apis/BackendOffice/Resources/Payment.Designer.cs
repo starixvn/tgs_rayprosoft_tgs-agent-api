@@ -142,6 +142,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   查詢類似 Payment is not found. 的當地語系化字串。
+        /// </summary>
+        public static string PaymentNotFound {
+            get {
+                return ResourceManager.GetString("PaymentNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查詢類似 Payment vendor is required. 的當地語系化字串。
         /// </summary>
         public static string PaymentVendorRequired {

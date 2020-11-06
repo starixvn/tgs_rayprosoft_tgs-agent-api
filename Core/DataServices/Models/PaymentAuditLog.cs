@@ -17,18 +17,18 @@ namespace TGS.Core.DataServices.Models
         public decimal AfterTransferLimitTo { get; set; }
         public PlayerListCondition BeforePlayerListCondition { get; set; }
         public PlayerListCondition AfterPlayerListCondition { get; set; }
-        public bool BeforeAllPlayer { get; set; }
-        public bool AfterAllPlayer { get; set; }
-        public bool BeforeIdentityVerification { get; set; }
-        public bool AfterIdentityVerification { get; set; }
-        public bool BeforePhoneVerification { get; set; }
-        public bool AfterPhoneVerification { get; set; }
+        public bool BeforeAllPlayers { get; set; }
+        public bool AfterAllPlayers { get; set; }
+        public bool BeforeIdentityAuthentication { get; set; }
+        public bool AfterIdentityAuthentication { get; set; }
+        public bool BeforePhoneAuthentication { get; set; }
+        public bool AfterPhoneAuthentication { get; set; }
         public bool BeforeDepositedAmountUnlimited { get; set; }
         public bool AfterDepositedAmountUnlimited { get; set; }
-        public decimal BeforeDepositedAmountFrom { get; set; }
-        public decimal AfterDepositedAmountFrom { get; set; }
-        public decimal BeforeDepositedAmountTo { get; set; }
-        public decimal AfterDepositedAmountTo { get; set; }
+        public decimal BeforeDepositedAmountMin { get; set; }
+        public decimal AfterDepositedAmountMin { get; set; }
+        public decimal BeforeDepositedAmountMax { get; set; }
+        public decimal AfterDepositedAmountMax { get; set; }
         public string Reason { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public string CreatedByUsername { get; set; }

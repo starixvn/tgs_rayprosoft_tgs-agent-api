@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201105065658_Initial")]
+    [Migration("20201106064423_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -648,7 +648,7 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllPlayer")
+                    b.Property<bool>("AllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("ChannelName")
@@ -662,10 +662,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<decimal>("DepositedAmountFrom")
+                    b.Property<decimal>("DepositedAmountMax")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("DepositedAmountTo")
+                    b.Property<decimal>("DepositedAmountMin")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("DepositedAmountUnlimited")
@@ -680,7 +680,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<decimal?>("HighestFee")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool>("IdentityVerification")
+                    b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("LowestFee")
@@ -698,7 +698,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("PaymentVendorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("PhoneVerification")
+                    b.Property<bool>("PhoneAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<int>("PlayerListCondition")
@@ -738,29 +738,29 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AfterAllPlayer")
+                    b.Property<bool>("AfterAllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("AfterChannelName")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal>("AfterDepositedAmountFrom")
+                    b.Property<decimal>("AfterDepositedAmountMax")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("AfterDepositedAmountTo")
+                    b.Property<decimal>("AfterDepositedAmountMin")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("AfterDepositedAmountUnlimited")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("AfterIdentityVerification")
+                    b.Property<bool>("AfterIdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<int>("AfterPaymentStatus")
                         .HasColumnType("int");
 
-                    b.Property<bool>("AfterPhoneVerification")
+                    b.Property<bool>("AfterPhoneAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<int>("AfterPlayerListCondition")
@@ -772,28 +772,28 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<decimal>("AfterTransferLimitTo")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool>("BeforeAllPlayer")
+                    b.Property<bool>("BeforeAllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("BeforeChannelName")
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal>("BeforeDepositedAmountFrom")
+                    b.Property<decimal>("BeforeDepositedAmountMax")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("BeforeDepositedAmountTo")
+                    b.Property<decimal>("BeforeDepositedAmountMin")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("BeforeDepositedAmountUnlimited")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("BeforeIdentityVerification")
+                    b.Property<bool>("BeforeIdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<int>("BeforePaymentStatus")
                         .HasColumnType("int");
 
-                    b.Property<bool>("BeforePhoneVerification")
+                    b.Property<bool>("BeforePhoneAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<int>("BeforePlayerListCondition")

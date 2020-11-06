@@ -105,18 +105,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
         [Test]
         public void Should_have_error_when_deposited_amount_to_is_null()
         {
-            var model = new PaymentRequest {DepositedAmountTo = 0};
+            var model = new PaymentRequest {DepositedAmountMax = 0};
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.DepositedAmountTo)
+            result.ShouldHaveValidationErrorFor(request => request.DepositedAmountMax)
                 .WithErrorMessage(Apis.BackendOffice.Resources.Payment.DepositedGreaterZero);
         }
 
         [Test]
         public void Should_not_have_error_when_deposited_amount_to_is_specified()
         {
-            var model = new PaymentRequest {DepositedAmountTo = 1};
+            var model = new PaymentRequest {DepositedAmountMax = 1};
             var result = _validator.TestValidate(model);
-            result.ShouldNotHaveValidationErrorFor(request => request.DepositedAmountTo);
+            result.ShouldNotHaveValidationErrorFor(request => request.DepositedAmountMax);
         }
     }
 }

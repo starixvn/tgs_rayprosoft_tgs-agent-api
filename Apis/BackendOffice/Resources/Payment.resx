@@ -139,4 +139,7 @@
   <data name="LowestFeeGreaterEqualZero" xml:space="preserve">
     <value>Lowest fee must be greater than or equal to  0.</value>
   </data>
+  <data name="PaymentNotFound" xml:space="preserve">
+    <value>Payment is not found.</value>
+  </data>
 </root>

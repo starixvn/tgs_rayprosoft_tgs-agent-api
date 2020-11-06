@@ -159,4 +159,7 @@
   <data name="LowestFeeGreaterEqualZero" xml:space="preserve">
     <value>最低手续费必须大于或等于0</value>
   </data>
+  <data name="PaymentNotFound" xml:space="preserve">
+    <value>找不到金流</value>
+  </data>
 </root>

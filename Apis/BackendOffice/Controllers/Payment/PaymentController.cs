@@ -62,12 +62,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     PaymentChannelName = q.PaymentChannel.Name,
                     ChannelName = q.ChannelName,
                     PlayerListCondition = q.PlayerListCondition,
-                    AllPlayer = q.AllPlayer,
-                    DepositedAmountFrom = q.DepositedAmountFrom,
-                    DepositedAmountTo = q.DepositedAmountTo,
-                    IdentityVerification = q.IdentityVerification,
-                    PhoneVerification = q.PhoneVerification,
-                    DesignatedUser = q.PaymentPlayerList.Count > 0,
+                    AllPlayer = q.AllPlayers,
+                    DepositedAmountFrom = q.DepositedAmountMin,
+                    DepositedAmountTo = q.DepositedAmountMax,
+                    IdentityVerification = q.IdentityAuthentication,
+                    PhoneVerification = q.PhoneAuthentication,
+                    DesignatedUsers = q.PaymentPlayerList.Count > 0,
                     TransferLimitFrom = q.TransferLimitFrom,
                     TransferLimitTo = q.TransferLimitTo,
                     PaymentStatus = q.PaymentStatus,
@@ -116,25 +116,25 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     TransferLimitFrom = payment.TransferLimitFrom,
                     TransferLimitTo = payment.TransferLimitTo,
                     PlayerListCondition = payment.PlayerListCondition,
-                    AllPlayer = payment.AllPlayer,
-                    IdentityVerification = payment.IdentityVerification,
-                    PhoneVerification = payment.PhoneVerification,
+                    AllPlayer = payment.AllPlayers,
+                    IdentityVerification = payment.IdentityAuthentication,
+                    PhoneVerification = payment.PhoneAuthentication,
                     DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-                    DepositedAmountFrom = payment.DepositedAmountFrom,
-                    DepositedAmountTo = payment.DepositedAmountTo,
-                    DesignatedUser = payment.PaymentPlayerList.Count > 0,
+                    DepositedAmountFrom = payment.DepositedAmountMin,
+                    DepositedAmountTo = payment.DepositedAmountMax,
+                    DesignatedUsers = payment.PaymentPlayerList.Count > 0,
                     PaymentStatus = payment.PaymentStatus,
                     Reason = payment.Reason,
-                    Whitelist = payment.PaymentPlayerList.Where(p => p.ListType == ListType.White).Select(p =>
+                    Whitelist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.White).Select(p =>
                         new PaymentPlayerListModel
                         {
-                            ListType = p.ListType,
+                            PlayerListType = p.ListType,
                             Username = p.Player.Username
                         }).ToArray(),
-                    Blacklist = payment.PaymentPlayerList.Where(p => p.ListType == ListType.Black).Select(p =>
+                    Blacklist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.Black).Select(p =>
                         new PaymentPlayerListModel
                         {
-                            ListType = p.ListType,
+                            PlayerListType = p.ListType,
                             Username = p.Player.Username
                         }).ToArray(),
                     VipLevelIds = payment.VipLevels.Select(p => p.VipLevelId).ToArray(),

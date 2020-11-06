@@ -27,7 +27,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Payment
                 .GreaterThan(0)
                 .WithMessage(Resources.Payment.TransferLimitGreaterZero);
 
-            RuleFor(x => x.DepositedAmountTo)
+            RuleFor(x => x.DepositedAmountMax)
                 .GreaterThan(0)
                 .WithMessage(Resources.Payment.DepositedGreaterZero);
         }
