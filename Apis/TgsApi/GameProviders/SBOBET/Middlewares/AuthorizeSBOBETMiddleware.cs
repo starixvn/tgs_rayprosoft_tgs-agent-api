@@ -2,6 +2,7 @@
 // ReSharper disable IdentifierTypo
 
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
@@ -51,12 +52,28 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             }
 
             var playerCode = request.PlayerCode;
-            var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode);
+            var externalGameId = request.ExternalGameId;
 
             var licenseeId = await _playerOperations.GetLicenseeIdByPlayerCodeAsync(playerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProvider.SBOBET);
             var lgpc = await _licenseeOperations.GetLicenseeGameProviderConfigurationAsync(licenseeId, gameProviderId);
-            var platformType = loginRecord?.PlatformType ?? PlatformType.Desktop;
+
+            PlatformType platformType;
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId);
+            if (games.Length == 1)
+            {
+                platformType = games[0].PlatformType;
+            }
+            else
+            {
+                var loginRecords = await _playerOperations.GetPlayerEnabledLoginRecordsAsync(playerCode);
+                platformType = (from rec in loginRecords
+                                join g in games on rec.PlatformType equals g.PlatformType
+                                orderby rec.ExpiredOn descending
+                                select rec.PlatformType)
+                    .DefaultIfEmpty(PlatformType.Desktop)
+                    .FirstOrDefault();
+            }
 
             context.Items.Add(ContextItems.LicenseeId, licenseeId);
             context.Items.Add(ContextItems.GameProviderId, gameProviderId);
