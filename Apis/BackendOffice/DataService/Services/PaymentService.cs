@@ -78,6 +78,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username)
         {
+            var beforePayment = GeneratePaymentAuditLog(payment, request, username);
+
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
             payment.TransferLimitTo = request.TransferLimitTo;
@@ -95,11 +97,13 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             _repository.PaymentPlayerList.RemoveRange(payment.PaymentPlayerList);
             _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
+
             await _repository.SaveChangesAsync();
 
             var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist);
             var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist);
             var playerList = whitelist.Union(blacklist).ToArray();
+
             payment.PaymentPlayerList = new HashSet<PaymentPlayerList>(playerList);
 
             var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
@@ -109,9 +113,15 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 VipLevelId = vip.Id,
                 VipLevel = vip
             }).ToArray();
+
             payment.VipLevels = new HashSet<PaymentVipLevel>(vipLevels);
 
             _repository.Entry(payment).State = EntityState.Modified;
+
+            await _repository.SaveChangesAsync();
+
+            await _repository.PaymentAuditLogs.AddAsync(beforePayment);
+
             await _repository.SaveChangesAsync();
 
             await tran.CommitAsync();
@@ -130,6 +140,39 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 PlayerCode = player.PlayerCode,
                 Player = player
             }).ToArray();
+        }
+
+        private PaymentAuditLog GeneratePaymentAuditLog(Payment payment, UpdatePaymentRequest request, string username)
+        {
+            return new PaymentAuditLog
+            {
+                Id = Guid.NewGuid(),
+                PaymentId = payment.Id,
+                BeforeChannelName = payment.ChannelName,
+                AfterChannelName = request.ChannelName,
+                BeforeTransferLimitFrom = payment.TransferLimitFrom,
+                AfterTransferLimitFrom = request.TransferLimitFrom,
+                BeforeTransferLimitTo = payment.TransferLimitTo,
+                AfterTransferLimitTo = request.TransferLimitTo,
+                BeforePlayerListCondition = payment.PlayerListCondition,
+                AfterPlayerListCondition = request.PlayerListCondition,
+                BeforeAllPlayer = payment.AllPlayer,
+                AfterAllPlayer = request.AllPlayer,
+                BeforeIdentityVerification = payment.IdentityVerification,
+                AfterIdentityVerification = request.IdentityVerification,
+                BeforePhoneVerification = payment.PhoneVerification,
+                AfterPhoneVerification = request.PhoneVerification,
+                BeforeDepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                AfterDepositedAmountUnlimited = request.DepositedAmountUnlimited,
+                BeforeDepositedAmountFrom = payment.DepositedAmountFrom,
+                AfterDepositedAmountFrom = request.DepositedAmountFrom,
+                BeforeDepositedAmountTo = payment.DepositedAmountTo,
+                AfterDepositedAmountTo = request.DepositedAmountTo,
+                Reason = request.Reason,
+                CreatedOn = DateTimeOffset.Now,
+                CreatedByUsername = username,
+                Operation = AuditLogOperation.Update
+            };
         }
     }
 }

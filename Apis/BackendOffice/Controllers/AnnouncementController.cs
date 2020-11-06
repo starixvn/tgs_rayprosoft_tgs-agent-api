@@ -91,17 +91,27 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
             if (!_typeDictionary.ContainsKey(type))
+            {
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.InvalidUrl);
+            }
 
             var announcement = await _queries.GetSingleAsync(p => p.Id == id);
-            if (announcement == null) return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            if (announcement == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            }
 
             foreach (var types in _typeDictionary.Where(types => types.Key == type))
             {
                 if (types.Value.AllowedStatus != announcement.Status)
+                {
                     return CreateInvalidResponse<MessageResponse>(types.Value.Message);
+                }
 
-                if (types.Value.CanRemarks) announcement.Remarks = request.Remarks;
+                if (types.Value.CanRemarks)
+                {
+                    announcement.Remarks = request.Remarks;
+                }
 
                 announcement.Status = types.Value.VerifiedStatus;
             }
@@ -118,10 +128,16 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] AnnouncementRequest request)
         {
             var announcement = await _queries.GetSingleAsync(p => p.Id == id);
-            if (announcement == null) return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            if (announcement == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            }
 
             if (announcement.Status != AnnounceStatus.Effective && announcement.Status != AnnounceStatus.Invalid)
+            {
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.CannotUpdateDueToInvalidStatus);
+            }
+
 
             announcement.Subject = request.Subject;
             announcement.Content = request.Content;

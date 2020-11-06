@@ -29,7 +29,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_Announcements", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Announcements", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 "BetLimitGroups",
@@ -66,7 +69,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_Currencies", x => x.Code); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Currencies", x => x.Code);
+                });
 
             migrationBuilder.CreateTable(
                 "GameProviders",
@@ -107,7 +113,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_Languages", x => x.CultureCode); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Languages", x => x.CultureCode);
+                });
 
             migrationBuilder.CreateTable(
                 "PaymentAuditLogs",
@@ -116,23 +125,37 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     PaymentId = table.Column<Guid>(nullable: false),
-                    ChannelName = table.Column<string>("nvarchar(50)", nullable: false),
-                    PaymentStatus = table.Column<int>(nullable: false),
-                    TransferLimitFrom = table.Column<decimal>(nullable: false),
-                    TransferLimitTo = table.Column<decimal>(nullable: false),
-                    PlayerListCondition = table.Column<int>(nullable: false),
-                    AllPlayer = table.Column<bool>(nullable: false),
-                    IdentityVerification = table.Column<bool>(nullable: false),
-                    PhoneVerification = table.Column<bool>(nullable: false),
-                    DepositedAmountUnlimited = table.Column<bool>(nullable: false),
-                    DepositedAmountFrom = table.Column<decimal>(nullable: false),
-                    DepositedAmountTo = table.Column<decimal>(nullable: false),
+                    BeforeChannelName = table.Column<string>("nvarchar(50)", nullable: true),
+                    AfterChannelName = table.Column<string>("nvarchar(50)", nullable: false),
+                    BeforePaymentStatus = table.Column<int>(nullable: false),
+                    AfterPaymentStatus = table.Column<int>(nullable: false),
+                    BeforeTransferLimitFrom = table.Column<decimal>(nullable: false),
+                    AfterTransferLimitFrom = table.Column<decimal>(nullable: false),
+                    BeforeTransferLimitTo = table.Column<decimal>(nullable: false),
+                    AfterTransferLimitTo = table.Column<decimal>(nullable: false),
+                    BeforePlayerListCondition = table.Column<int>(nullable: false),
+                    AfterPlayerListCondition = table.Column<int>(nullable: false),
+                    BeforeAllPlayer = table.Column<bool>(nullable: false),
+                    AfterAllPlayer = table.Column<bool>(nullable: false),
+                    BeforeIdentityVerification = table.Column<bool>(nullable: false),
+                    AfterIdentityVerification = table.Column<bool>(nullable: false),
+                    BeforePhoneVerification = table.Column<bool>(nullable: false),
+                    AfterPhoneVerification = table.Column<bool>(nullable: false),
+                    BeforeDepositedAmountUnlimited = table.Column<bool>(nullable: false),
+                    AfterDepositedAmountUnlimited = table.Column<bool>(nullable: false),
+                    BeforeDepositedAmountFrom = table.Column<decimal>(nullable: false),
+                    AfterDepositedAmountFrom = table.Column<decimal>(nullable: false),
+                    BeforeDepositedAmountTo = table.Column<decimal>(nullable: false),
+                    AfterDepositedAmountTo = table.Column<decimal>(nullable: false),
                     Reason = table.Column<string>("nvarchar(4000)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     Operation = table.Column<short>("smallint", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_PaymentAuditLogs", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentAuditLogs", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 "PaymentVendors",
@@ -148,7 +171,10 @@ namespace TGS.Core.DataServices.Migrations
                     UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     Description = table.Column<string>("nvarchar(128)", nullable: true)
                 },
-                constraints: table => { table.PrimaryKey("PK_PaymentVendors", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentVendors", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 "PlayerAuditLogs",
@@ -162,7 +188,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_PlayerAuditLogs", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerAuditLogs", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 "Resellers",
@@ -198,7 +227,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_Settings", x => x.Key); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Settings", x => x.Key);
+                });
 
             migrationBuilder.CreateTable(
                 "StationLetters",
@@ -217,7 +249,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_StationLetters", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StationLetters", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 "VipLevels",
@@ -232,7 +267,10 @@ namespace TGS.Core.DataServices.Migrations
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_VipLevels", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VipLevels", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 "GameProviderBetLimits",

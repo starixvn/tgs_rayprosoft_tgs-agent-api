@@ -80,10 +80,6 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_Localization_GetLocalizationByGameProviderId"));
 
-            //Trigger
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.TriggerSqlForamt, "PaymentAuditLog"));
-
             #endregion Store Procedure
         }
     }

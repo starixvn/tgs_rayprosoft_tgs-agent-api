@@ -8,8 +8,8 @@ using FluentAssertions;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
-using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
+using TGS.Apis.BackendOffice.Controllers.Payment;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -29,6 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller = new PaymentController(
                 _queriesMock.Object,
                 _commandsMock.Object,
+                _auditLogQueriesMock.Object,
                 _playerQueriesMock.Object,
                 _uploadServiceMock.Object,
                 _paymentServiceMock.Object,
@@ -38,6 +39,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private PaymentController _controller;
         private readonly Mock<IPaymentService> _paymentServiceMock = new Mock<IPaymentService>();
         private readonly Mock<ITgsQueries<Payment>> _queriesMock = new Mock<ITgsQueries<Payment>>();
+
+        private readonly Mock<ITgsQueries<PaymentAuditLog>> _auditLogQueriesMock =
+            new Mock<ITgsQueries<PaymentAuditLog>>();
 
         private readonly Mock<ITgsCommands<Payment>> _commandsMock =
             new Mock<ITgsCommands<Payment>>();

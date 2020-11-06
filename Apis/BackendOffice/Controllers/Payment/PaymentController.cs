@@ -14,21 +14,23 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers.Payment
 {
     [Route("api/[controller]")]
     [ApiController]
     public partial class PaymentController : BaseContextController
     {
-        private readonly ITgsCommands<Payment> _commands;
+        private readonly ITgsQueries<PaymentAuditLog> _auditLogQueries;
+        private readonly ITgsCommands<Core.DataServices.Models.Payment> _commands;
         private readonly IPaymentService _paymentService;
         private readonly ITgsQueries<Player> _playerQueries;
-        private readonly ITgsQueries<Payment> _queries;
+        private readonly ITgsQueries<Core.DataServices.Models.Payment> _queries;
         private readonly IUploadService _uploadService;
 
         public PaymentController(
-            ITgsQueries<Payment> queries,
-            ITgsCommands<Payment> commands,
+            ITgsQueries<Core.DataServices.Models.Payment> queries,
+            ITgsCommands<Core.DataServices.Models.Payment> commands,
+            ITgsQueries<PaymentAuditLog> auditLogQueries,
             ITgsQueries<Player> playerQueries,
             IUploadService uploadService,
             IPaymentService paymentService,
@@ -39,6 +41,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _uploadService = uploadService;
             _playerQueries = playerQueries;
             _paymentService = paymentService;
+            _auditLogQueries = auditLogQueries;
         }
 
         [HttpGet]
@@ -95,7 +98,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                     .Include(pm => pm.VipLevels)
                     .ThenInclude(pp => pp.VipLevel)
                     .AsNoTracking());
-            if (payment == null) return CreateInvalidResponse<GetPaymentResponse>(Resources.Payment.PlayerNotFound);
+            if (payment == null)
+            {
+                return CreateInvalidResponse<GetPaymentResponse>(Resources.Payment.PlayerNotFound);
+            }
+
             return new GetPaymentResponse
             {
                 Valid = true,
@@ -165,16 +172,20 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
                 if (duplicatePlayers.Any())
+                {
                     return new CreateUpdatePaymentResponse
                     {
                         Valid = false,
                         Message = Resources.Payment.WhiteSameAsBlack,
                         DuplicatePlayers = duplicatePlayers
                     };
+                }
             }
 
             if (await _queries.ExistsAsync(p => p.ChannelName == request.ChannelName))
+            {
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NameExists);
+            }
 
             await _paymentService.CreatePaymentAsync(request, Username);
             return CreateValidResponse<CreateUpdatePaymentResponse>();
@@ -189,20 +200,27 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
                 if (duplicatePlayers.Any())
+                {
                     return new CreateUpdatePaymentResponse
                     {
                         Valid = false,
                         Message = Resources.Payment.WhiteSameAsBlack,
                         DuplicatePlayers = duplicatePlayers
                     };
+                }
             }
 
             var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
 
-            if (payment == null) return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NotFound);
+            if (payment == null)
+            {
+                return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NotFound);
+            }
 
             if (await _queries.ExistsAsync(p => p.Id != paymentId && p.ChannelName == request.ChannelName))
+            {
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NameExists);
+            }
 
 
             await _paymentService.UpdatePaymentAsync(payment, request, Username);

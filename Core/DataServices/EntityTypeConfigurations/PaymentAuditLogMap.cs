@@ -15,7 +15,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.HasIndex(p => p.PaymentId);
 
-            builder.Property(c => c.ChannelName)
+            builder.Property(c => c.BeforeChannelName)
+                .HasColumnType(ColumnTypes.Nvarchar(50));
+
+            builder.Property(c => c.AfterChannelName)
                 .HasColumnType(ColumnTypes.Nvarchar(50))
                 .IsRequired();
 

@@ -7,17 +7,28 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid Id { get; set; }
         public Guid PaymentId { get; set; }
-        public string ChannelName { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
-        public decimal TransferLimitFrom { get; set; }
-        public decimal TransferLimitTo { get; set; }
-        public PlayerListCondition PlayerListCondition { get; set; }
-        public bool AllPlayer { get; set; }
-        public bool IdentityVerification { get; set; }
-        public bool PhoneVerification { get; set; }
-        public bool DepositedAmountUnlimited { get; set; }
-        public decimal DepositedAmountFrom { get; set; }
-        public decimal DepositedAmountTo { get; set; }
+        public string BeforeChannelName { get; set; }
+        public string AfterChannelName { get; set; }
+        public PaymentStatus BeforePaymentStatus { get; set; }
+        public PaymentStatus AfterPaymentStatus { get; set; }
+        public decimal BeforeTransferLimitFrom { get; set; }
+        public decimal AfterTransferLimitFrom { get; set; }
+        public decimal BeforeTransferLimitTo { get; set; }
+        public decimal AfterTransferLimitTo { get; set; }
+        public PlayerListCondition BeforePlayerListCondition { get; set; }
+        public PlayerListCondition AfterPlayerListCondition { get; set; }
+        public bool BeforeAllPlayer { get; set; }
+        public bool AfterAllPlayer { get; set; }
+        public bool BeforeIdentityVerification { get; set; }
+        public bool AfterIdentityVerification { get; set; }
+        public bool BeforePhoneVerification { get; set; }
+        public bool AfterPhoneVerification { get; set; }
+        public bool BeforeDepositedAmountUnlimited { get; set; }
+        public bool AfterDepositedAmountUnlimited { get; set; }
+        public decimal BeforeDepositedAmountFrom { get; set; }
+        public decimal AfterDepositedAmountFrom { get; set; }
+        public decimal BeforeDepositedAmountTo { get; set; }
+        public decimal AfterDepositedAmountTo { get; set; }
         public string Reason { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public string CreatedByUsername { get; set; }

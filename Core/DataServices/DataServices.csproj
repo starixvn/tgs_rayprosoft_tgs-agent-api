@@ -10,7 +10,6 @@
   <ItemGroup>
     <None Remove="SqlScripts\SP\usp_Licensee_GetLicenseeGameProviders.sql" />
     <None Remove="SqlScripts\SP\usp_Localization_GetLocalizationByGameProviderId.sql" />
-    <None Remove="SqlScripts\Trigger\PaymentAuditLog.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,7 +53,6 @@
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
     <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
-    <EmbeddedResource Include="SqlScripts\Trigger\PaymentAuditLog.sql" />
     <EmbeddedResource Include="SqlScripts\TYPE\IntValuesType.sql" />
   </ItemGroup>
 

@@ -11,7 +11,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers.Payment
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -88,7 +88,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> CreateAsync(CreatePaymentChannelRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Code == request.Code))
+            {
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.CodeExists);
+            }
+
             await _commands.CreateAsync(new PaymentChannel
             {
                 Id = Guid.NewGuid(),
@@ -111,10 +114,15 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var channel = await _queries.GetSingleAsync(p => p.Id == id);
 
-            if (channel == null) return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.NotFound);
+            if (channel == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.NotFound);
+            }
 
             if (channel.Code == request.Code)
+            {
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.CodeExists);
+            }
 
             channel.PaymentVendorId = request.PaymentVendorId;
             channel.PaymentMethodId = request.PaymentMethodId;
