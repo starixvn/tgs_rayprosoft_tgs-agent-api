@@ -233,7 +233,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .CreateMany<Player>(100)
                 .AsQueryable()
                 .BuildMock().Object;
-            ;
+
             var playerUsernames = players.Select(p => new List<string> {p.Username}).ToList();
             _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync(It.IsAny<IFormFile>()))
                 .Returns(Task.FromResult(playerUsernames));
