@@ -1,4 +1,4 @@
-image: mcr.microsoft.com/dotnet/sdk:5.0
+image: mcr.microsoft.com/dotnet/sdk:5.0.100-rc.2-focal-amd64
 
 stages:
   - build
