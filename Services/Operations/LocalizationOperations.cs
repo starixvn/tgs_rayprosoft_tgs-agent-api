@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
@@ -44,12 +45,14 @@ namespace TGS.Services.Operations
         async Task<Dictionary<string, Dictionary<string, string>>> ILocalizationOperations.
             GetLocalizationByGameProviderIdAsync(Guid gameProviderId, string cultureCode)
         {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Localization, gameProviderId,
-                cultureCode);
-            if (value.HasValue)
+            var sets = await _cacheManager.SafeGetAllHashSetAsync(RedisCacheType.Localization, gameProviderId);
+            if (sets.Length > 0)
             {
-                return _json.DeserializeFromString<Dictionary<string, Dictionary<string, string>>>(
-                    value);
+                var value = sets.Where(e => e.Name == cultureCode).Select(e => e.Value).FirstOrDefault();
+                return value.HasValue
+                    ? _json.DeserializeFromString<Dictionary<string, Dictionary<string, string>>>(
+                        value)
+                    : new Dictionary<string, Dictionary<string, string>>();
             }
 
             var r = await _localizationStringQueries.GetLocalizationByGameProviderIdAsync(gameProviderId);
@@ -78,7 +81,9 @@ namespace TGS.Services.Operations
                 return defaultValue;
             }
 
-            return items.TryGetValue(key, out var translation) ? translation : defaultValue;
+            return items.TryGetValue(key, out var translation) && translation.IsNotNullOrEmpty()
+                ? translation
+                : defaultValue;
         }
     }
 }

@@ -28,12 +28,6 @@ export const Field = ({
       {({ field, form, meta }) => {
         let { values } = form
         let value = Reflect.get(values, name)
-        //TODO: parse here?
-        /*
-        if (typeof value === "string") {
-          value = parseDateString(new Date(), value, DateTimeFormat)
-        }
-        */
         let [selected, setSelected] = useState(
           typeof value != "string" && isValid(value) ? value : null
         )

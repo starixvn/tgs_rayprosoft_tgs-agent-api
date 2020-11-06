@@ -62,13 +62,15 @@ export const AddButton = ({ onSubmitted, ...props }) => {
       <Disclosure ref={disclosureRef} {...dialog}>
         <Trans zh="新增" en="Add" />
       </Disclosure>
-      <AddDialog
-        menus={menus}
-        onSubmitted={onSubmitted}
-        dialog={dialog}
-        finalFocusRef={disclosureRef}
-        visible={dialog.visible && !isLoadingMenus}
-      />
+      {dialog.visible && (
+        <AddDialog
+          menus={menus}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+          finalFocusRef={disclosureRef}
+          visible={dialog.visible && !isLoadingMenus}
+        />
+      )}
       {dialog.visible && isLoadingMenus && <LoadingBackdrop visible={true} />}
       {dialog.visible && fetchMenusError && (
         <AlertDialog {...fetchMenusError} onClickClose={dialog.hide} />

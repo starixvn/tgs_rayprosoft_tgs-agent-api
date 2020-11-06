@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import { Box, Set, Button, Text, Switch } from "bumbag"
+import { Box, Set, Button, Text, Switch, Input, Stack } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
-import { useList } from "./client"
+import { useChangeAnnouncementOrders, useList } from "./client"
 import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
 import { useTable, Table, pageCount } from "../../table"
@@ -32,6 +32,8 @@ import {
   View as ViewMenu,
   Update as UpdateMenu
 } from "./menu"
+import AlertDialog from "../../dialog/Alert"
+import { ToggleButton as StatusToggleButton } from "./status"
 
 export { Code }
 
@@ -118,18 +120,15 @@ const AsyncContentBody = ({}) => {
             />
           </TabPanel>
         )}
-        {/*<TabPanel tabId={EffectiveName} {...tab}>
-          <AsyncTable
-            statusName={statusName}
-            data={data}
-            state={state}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            isLoading={isLoading}
-            mutate={mutate}
-          />
-        </TabPanel>
-        <TabPanel tabId={ExpiredName} {...tab}>
+        <EffectiveTab
+          data={data}
+          state={state}
+          setSortOrder={setSortOrder}
+          isLoading={isLoading}
+          mutate={mutate}
+          tab={tab}
+        />
+        {/* <TabPanel tabId={ExpiredName} {...tab}>
           <AsyncTable
             statusName={statusName}
             data={data}
@@ -189,9 +188,113 @@ const AsyncTable = ({
   )
 }
 
-const useColumns = ({ mutate, statusName }) => {
+const EffectiveTab = ({
+  statusName = EffectiveName,
+  tab,
+  state,
+  setSortOrder,
+  data,
+  isLoading,
+  mutate
+}) => {
+  let [displayOrders, setDisplayOrder] = useState({})
+  let [submitData, setSubmit] = useState()
+
+  let {
+    result,
+    isLoading: isChangingDisplayOrder,
+    error
+  } = useChangeAnnouncementOrders({
+    data: submitData
+  })
+
+  useEffect(() => {
+    if (result && !error) {
+      setDisplayOrder({})
+      setSubmit(null)
+      mutate()
+    }
+  }, [result, error])
+
+  const changeDisplayOrder = ({ id, value }) => {
+    let newDisplayOrders = {
+      ...displayOrders
+    }
+    Reflect.set(newDisplayOrders, id, value)
+    setDisplayOrder(newDisplayOrders)
+  }
+
+  let columns = useColumns({ mutate, changeDisplayOrder, statusName })
+  return (
+    <TabPanel tabId={EffectiveName} {...tab}>
+      {error && <AlertDialog {...error} onClickClose={() => setSubmit(null)} />}
+      <Stack spacing="minor-1">
+        <Table
+          columns={columns}
+          data={data?.items}
+          usePagination={false}
+          setSortOrder={setSortOrder}
+          initialState={state}
+          isLoading={isLoading}
+        />
+        <Button
+          isLoading={isChangingDisplayOrder}
+          onClick={() => {
+            let data = Object.entries(displayOrders).map(([key, value]) => ({
+              id: key,
+              displayOrder: value
+            }))
+            setSubmit(data)
+          }}
+        >
+          <Trans zh="确认排序" en="Confirm Order" />
+        </Button>
+      </Stack>
+    </TabPanel>
+  )
+}
+
+const useColumns = ({
+  mutate,
+  statusName: tabStatusName,
+  changeDisplayOrder
+}) => {
   let columns = [
-    sequenceColumn(),
+    tabStatusName != EffectiveName
+      ? sequenceColumn()
+      : {
+          id: "displayOrder",
+          accessor: (record) => record,
+          Header: <Trans zh="序" en="Order" />,
+          disableSortBy: true,
+          headCell: {
+            textAlign: "center"
+          },
+          cell: {
+            textAlign: "center"
+          },
+          Cell: ({ value }) => {
+            let { id, displayOrder = "" } = value
+            return (
+              <Input
+                type="number"
+                size="small"
+                width="5em"
+                defaultValue={displayOrder}
+                onChange={(event) => {
+                  let value = event.target.value
+                  let number = parseInt(value)
+                  if (Number.isFinite(number)) {
+                    changeDisplayOrder({
+                      id,
+                      value: number
+                    })
+                  }
+                }}
+              />
+            )
+          }
+        },
     {
       accessor: "subject",
       Header: <Trans zh="主题" en="Subject" />,
@@ -230,7 +333,8 @@ const useColumns = ({ mutate, statusName }) => {
       disableSortBy: true
     }),
     {
-      accessor: "status",
+      id: "status",
+      accessor: (record) => record,
       Header: <Trans zh="状态" en="Status" />,
       disableSortBy: true,
       headCell: {
@@ -240,13 +344,9 @@ const useColumns = ({ mutate, statusName }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        //TODO: change state
-        if (statusName === EffectiveName) {
-          return (
-            <Button>
-              <StatusLabel value={value} />
-            </Button>
-          )
+        let { status } = value
+        if (tabStatusName === EffectiveName) {
+          return <StatusToggleButton record={value} onSubmitted={mutate} />
         }
 
         return (
@@ -255,7 +355,7 @@ const useColumns = ({ mutate, statusName }) => {
               white-space: nowrap;
             `}
           >
-            <StatusLabel value={value} />
+            <StatusLabel value={status} />
           </Text.Block>
         )
       }
@@ -265,7 +365,7 @@ const useColumns = ({ mutate, statusName }) => {
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
   let hasAnyMenu = hasViewAuth
-  switch (statusName) {
+  switch (tabStatusName) {
     case InVerifyName:
       hasAnyMenu = hasVerifyAuth
       break
@@ -289,20 +389,22 @@ const useColumns = ({ mutate, statusName }) => {
         return (
           <Box alignX="center">
             <Set>
-              {statusName === InVerifyName && (
+              {tabStatusName === InVerifyName && (
                 <VerifyButton record={value} onSubmitted={mutate} />
               )}
-              {statusName === EffectiveName && (
+              {tabStatusName === EffectiveName && (
                 <EditButton record={value} onSubmitted={mutate} />
               )}
-              {(statusName === EffectiveName ||
-                statusName === ExpiredName ||
-                statusName === RejectedName) && <ViewButton record={value} />}
+              {(tabStatusName === EffectiveName ||
+                tabStatusName === ExpiredName ||
+                tabStatusName === RejectedName) && (
+                <ViewButton record={value} />
+              )}
             </Set>
           </Box>
         )
       }
     })
   }
-  return useMemo(() => columns, [statusName])
+  return useMemo(() => columns, [tabStatusName])
 }

@@ -25,7 +25,8 @@ import {
   Text,
   Alert,
   Modal,
-  Icon
+  Icon,
+  Flex
 } from "bumbag"
 import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
@@ -60,28 +61,42 @@ function App() {
   )
 }
 
+const HeaderHeight = "60px"
+const sidebarWidth = 250
+const FooterHeight = "30px"
+
 const Layout = ({ children }) => {
   return (
-    <PageWithHeader
-      sticky
-      header={<Header />}
-      css={css`
-        min-height: 100%;
-      `}
-    >
+    <PageWithHeader sticky header={<Header />} headerHeight={HeaderHeight}>
       <PageWithSidebar
+        id="pageWithSidebar"
+        minHeight="unset"
+        height={`calc(100vh - ${HeaderHeight})`}
         sidebar={<Sidebar />}
         sidebarPlacement="left"
-        sidebarWidth="250px"
-        css={css``}
+        sidebarWidth={`${sidebarWidth}px`}
+        css={css`
+          & .bb-PageWithSidebarSidebarExpandedWrapper {
+            width: ${getSidebarWidth()}px;
+          }
+
+          & .bb-PageWithSidebarContent {
+            height: 100%;
+          }
+        `}
       >
-        {children}
-        <PageContent>
-          <Footer />
-        </PageContent>
+        <Box minHeight={`calc(100% - ${FooterHeight})`}>{children}</Box>
+        <Footer />
       </PageWithSidebar>
     </PageWithHeader>
   )
+}
+
+export const getSidebarWidth = () => {
+  let sidebarWrapper = document.querySelector(
+    "#pageWithSidebar .bb-PageWithSidebarSidebarExpandedWrapper"
+  )
+  return sidebarWrapper?.offsetWidth ?? sidebarWidth
 }
 
 const Header = () => {
@@ -158,7 +173,7 @@ const Sidebar = () => {
 
 const Footer = () => {
   return (
-    <Box textAlign="center">
+    <Box textAlign="center" height={FooterHeight}>
       <Text fontWeight="500" fontSize="150">
         version {import.meta.env.SNOWPACK_PUBLIC_VERSION}
       </Text>

@@ -18,7 +18,7 @@ import {
 const theme = {
   PageContent: {
     defaultProps: {
-      breakpoint: "desktop"
+      breakpoint: "widescreen"
     }
   },
   Icon: {

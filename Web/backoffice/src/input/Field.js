@@ -131,7 +131,14 @@ const InputPadding = 0.4
 const FieldValidationTextHeight = 0.875
 export const FieldMinHeight =
   InputMinHeight + InputPadding + FieldValidationTextHeight
-export const Field = ({ name, required, validate, children, ...props }) => {
+export const Field = ({
+  name,
+  inputRef,
+  required,
+  validate,
+  children,
+  ...props
+}) => {
   let isChildrenFunction = typeof children === "function"
   return (
     <_Field
@@ -152,8 +159,10 @@ export const Field = ({ name, required, validate, children, ...props }) => {
         return (
           <FieldWrapper state={state} validationText={validationText}>
             <>
-              {!children && <Input id={name} {...field} {...props} />}
-              {isChildrenFunction && children({ field, form, meta })}
+              {!children && (
+                <Input inputRef={inputRef} id={name} {...field} {...props} />
+              )}
+              {isChildrenFunction && children({ field, form, meta, inputRef })}
             </>
           </FieldWrapper>
         )

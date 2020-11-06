@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
+import { Button } from "bumbag"
 import { Locales, Trans, useTrans } from "../../i18n"
+import AlertDialog from "../../dialog/Alert"
+import { useEditAnnouncement } from "./client"
 
 export const InVerify = 0
 export const InVerifyName = "InVerify"
@@ -92,5 +95,38 @@ export const Label = ({ value }) => {
   }
 }
 
+//TODO: mutate current record?
 // Effective <-> Invalid toggle
-export const ToggleButton = () => {}
+export const ToggleButton = ({ record, onSubmitted }) => {
+  let { id, status } = record
+  let [data, setSubmit] = useState()
+  //TODO: use another api for status change?
+  let { result, isLoading, error } = useEditAnnouncement({ id, data })
+  console.log("status", status)
+
+  useEffect(() => {
+    if (result && !error) {
+      onSubmitted && onSubmitted()
+    }
+  }, [result, error])
+
+  return (
+    <Button
+      isLoading={isLoading}
+      palette={status === InvalidName ? "danger" : "success"}
+      onClick={() => {
+        let newStatus = status === InvalidName ? Effective : Invalid
+        setSubmit({
+          ...record,
+          status: newStatus
+        })
+      }}
+      css={css`
+        white-space: nowrap;
+      `}
+    >
+      <Label value={record.status} />
+      {error && <AlertDialog {...error} onClickClose={() => setSubmit(null)} />}
+    </Button>
+  )
+}

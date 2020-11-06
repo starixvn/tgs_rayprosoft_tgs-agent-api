@@ -93,7 +93,7 @@ services:
   backoffice-api:
     build:
       context: .
-      dockerfile: Dockerfile.BackofficeApi
+      dockerfile: Apis/BackendOffice/Dockerfile
     image: backoffice-api
     labels:
       - traefik.enable=true
@@ -117,7 +117,7 @@ services:
   operator-api:
     build:
       context: .
-      dockerfile: Dockerfile.OperatorApi
+      dockerfile: Apis/OperatorApi/Dockerfile
     image: operator-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
@@ -135,7 +135,7 @@ services:
   tgs-api:
     build:
       context: .
-      dockerfile: Dockerfile.TgsApi
+      dockerfile: Apis/TgsApi/Dockerfile
     image: tgs-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
@@ -157,7 +157,7 @@ services:
   log-api:
     build:
       context: .
-      dockerfile: Dockerfile.LogApi
+      dockerfile: Apis/LogApi/Dockerfile
     image: log-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"

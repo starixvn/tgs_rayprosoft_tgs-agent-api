@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { css, Global } from "@emotion/core"
 import { Icon, Table as _Table, Pagination, Set } from "bumbag"
-import {
-  useTable as _useTable,
-  usePagination,
-  useSortBy,
-  useFilters
-} from "react-table"
+import ReactTable, { useTable as _useTable } from "react-table"
 import { fromIsDescending } from "./order"
 import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
@@ -51,14 +46,17 @@ export const useTable = (initialState = {}) => {
 export const Table = ({
   columns,
   data = [],
-  controlledState = {},
+  controlledState,
+  useSortBy = ReactTable.useSortBy,
   manualSortBy = true,
   setSortOrder,
   disableMultiSort = true,
-  manualPagination = true,
+  usePagination = ReactTable.usePagination,
   pageCount,
-  manualFilters = true,
   setPageIndex,
+  manualPagination = true,
+  useFilters = ReactTable.useFilters,
+  manualFilters = true,
   isLoading,
   head = true,
   body = true,
@@ -116,7 +114,7 @@ export const Table = ({
           {children}
           {foot === true && <Foot table={table} />}
         </_Table>
-        {pageCount > 0 && (
+        {usePagination && pageCount > 0 && (
           <Pagination
             currentPage={getPage()}
             onChangePage={(page) => {
