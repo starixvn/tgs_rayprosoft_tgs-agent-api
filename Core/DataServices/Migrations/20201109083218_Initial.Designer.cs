@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201106064423_Initial")]
+    [Migration("20201109083218_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -625,17 +625,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Key")
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<string>("Context")
-                        .HasColumnType("nvarchar(64)");
-
                     b.Property<string>("CultureCode")
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<string>("Context")
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Translation")
                         .IsRequired()
                         .HasColumnType("nvarchar(1024)");
 
-                    b.HasKey("Key", "Context", "CultureCode");
+                    b.HasKey("Key", "CultureCode", "Context");
 
                     b.HasIndex("CultureCode");
 
@@ -663,10 +663,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<decimal>("DepositedAmountMax")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("DepositedAmountMin")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("DepositedAmountUnlimited")
                         .HasColumnType("bit");
@@ -675,16 +675,19 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("FeePercentage")
-                        .HasColumnType("decimal(18,2)");
+                        .IsRequired()
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("HighestFee")
-                        .HasColumnType("decimal(18,2)");
+                        .IsRequired()
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("LowestFee")
-                        .HasColumnType("decimal(18,2)");
+                        .IsRequired()
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<Guid>("PaymentChannelId")
                         .HasColumnType("uniqueidentifier");
@@ -709,10 +712,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<decimal>("TransferLimitFrom")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("TransferLimitTo")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -746,10 +749,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("AfterDepositedAmountMax")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("AfterDepositedAmountMin")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("AfterDepositedAmountUnlimited")
                         .HasColumnType("bit");
@@ -767,10 +770,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("AfterTransferLimitFrom")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("AfterTransferLimitTo")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("BeforeAllPlayers")
                         .HasColumnType("bit");
@@ -779,10 +782,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("BeforeDepositedAmountMax")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("BeforeDepositedAmountMin")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("BeforeDepositedAmountUnlimited")
                         .HasColumnType("bit");
@@ -800,10 +803,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("BeforeTransferLimitFrom")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("BeforeTransferLimitTo")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
