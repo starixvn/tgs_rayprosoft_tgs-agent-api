@@ -12,6 +12,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
@@ -36,9 +37,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Announcement>> _queriesMock = new Mock<ITgsQueries<Announcement>>();
         private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new Mock<ITgsCommands<Announcement>>();
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Announcements(bool showAll)
+        [TestCase(true, new[] {AnnounceStatus.Effective, AnnounceStatus.Invalid})]
+        [TestCase(false, new[] {AnnounceStatus.Expired})]
+        public async Task Can_Get_Announcements(bool showAll, AnnounceStatus[] status)
         {
             var request = new GetAnnouncementsRequest
             {
@@ -46,7 +47,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Rows = 10,
                 SortBy = "UpdatedOn",
                 OrderBy = SortOrder.Descending,
-                ShowAll = showAll
+                ShowAll = showAll,
+                Status = status
             };
 
             var list = CreateAnnouncementFixture()
@@ -55,7 +57,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .BuildMock().Object;
 
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
+            var orderedRoles = list.Where(request.Status.Contains(AnnounceStatus.Expired),
+                    p => DateTimeOffset.Now > p.To)
+                .Where(!request.Status.Contains(AnnounceStatus.Expired),
+                    p => request.Status == null || request.Status.Contains(p.Status))
+                .OrderByDescending(p => p.UpdatedOn);
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
@@ -372,6 +378,19 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
                 d.Status == status)));
+        }
+
+        [Test]
+        public async Task Cannot_Change_Announcement_Status_Not_Found()
+        {
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
+                .Returns(Task.FromResult<Announcement>(null));
+
+            var response = await _controller.ChangeStatusAsync(Guid.NewGuid(), AnnounceStatus.Invalid);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.NotFound);
         }
 
 
