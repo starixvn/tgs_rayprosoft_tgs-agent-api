@@ -22,6 +22,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             announcement.Status = status;
+            announcement.UpdatedOn = DateTimeOffset.Now;
+            announcement.UpdatedByUsername = Username;
 
             await _commands.UpdateAsync(announcement);
 
