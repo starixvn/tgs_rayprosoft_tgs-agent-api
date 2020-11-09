@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record LogoutRequest : BaseRequest
+    public record LogoutRequest : BaseTokenRequest
     {
         [Required]
         [JsonPropertyName("platformtype")]

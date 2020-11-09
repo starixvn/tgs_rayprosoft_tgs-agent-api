@@ -78,7 +78,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             var platformType = request.PlatformType;
-            var playerType = cachedPlayer?.Type ?? PlayerTypes.RealPlayer;
+            var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
             var culture = await _licenseeLanguageCodeMapper.ExternalToInternalAsync(request.Language, licenseeId);
 
             var cacheType = RedisCacheType.LicenseeGameProviders;
@@ -107,7 +107,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         private async Task<GetGameProvidersResponse.GameProviderModel[]> GetGameProviderModels(Guid licenseeId,
             string currencyCode, PlatformType platformType,
-            PlayerTypes playerType, string culture)
+            PlayerType playerType, string culture)
         {
             var gameProviders = await _licenseeOperations.GetLicenseeGameProvidersAsync(licenseeId, currencyCode,
                 platformType);

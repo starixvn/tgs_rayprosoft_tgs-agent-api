@@ -34,6 +34,8 @@ namespace TGS.Services.Operations
 
         Task<Guid> GetLicenseeIdByClientIdAsync(string clientId);
 
+        Task<Guid> GetLicenseeIdByApiKeyAsync(string apiKey);
+
         Task<string> GetLicenseeSecretKeyAsync(Guid licenseeId);
 
         Task<CachedLicenseeGameProvider[]> GetLicenseeGameProvidersAsync(Guid licenseeId, string currencyCode, PlatformType platformType);
@@ -195,11 +197,13 @@ namespace TGS.Services.Operations
             return cachedLicensee?.TimeZoneId;
         }
 
-        Task<Guid> ILicenseeOperations.GetLicenseeIdByClientIdAsync(string clientId)
-        {
-            return _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Licensee, clientId, TimeSpan.FromHours(2),
+        Task<Guid> ILicenseeOperations.GetLicenseeIdByClientIdAsync(string clientId) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Licensee, clientId, TimeSpan.FromHours(2),
                 () => _licenseeQueries.GetLicenseeIdByClientIdAsync(clientId));
-        }
+
+        Task<Guid> ILicenseeOperations.GetLicenseeIdByApiKeyAsync(string apiKey) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Licensee, apiKey, TimeSpan.FromHours(2),
+                () => _licenseeQueries.GetLicenseeIdByApiKeyAsync(apiKey));
 
         async Task<string> ILicenseeOperations.GetLicenseeSecretKeyAsync(Guid licenseeId)
         {

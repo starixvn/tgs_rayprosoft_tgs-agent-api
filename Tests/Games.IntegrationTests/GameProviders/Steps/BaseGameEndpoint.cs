@@ -40,15 +40,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var loginTime = Get<DateTimeOffset?>(loginTimeCacheKey);
             if (loginTime.HasValue &&
-                loginTime.Value.AddSeconds(Consts.Player.LoginExpirationSeconds) >= DateTimeOffset.UtcNow)
+                loginTime.Value.AddSeconds(Consts.TokenExpireSeconds.PlayerLogin) >= DateTimeOffset.UtcNow)
+            {
                 return;
+            }
 
             var licenseeCacheKey = $"{SR.Licensee}:{licenseeCode}";
             var licensee = Get<Licensee>(licenseeCacheKey);
+            var db = GetDb<ITgsRepository>(serviceProvider);
 
             if (licensee == null)
             {
-                var db = GetDb<ITgsRepository>(serviceProvider);
                 licensee = await db.Licensees.FirstAsync(l => l.Code == licenseeCode);
                 Set(licenseeCacheKey, licensee);
             }
@@ -77,8 +79,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlatformType = platformType
             }, headers);
 
+            var playerCode = await db.Players.FirstAsync(p => p.Username == username);
+
             Set(SR.LicenseeCode, licenseeCode);
-            Set(SR.PlayerCode, res.PlayerCode);
+            Set(SR.PlayerCode, playerCode);
             Set(SR.Username, username);
             Set(SR.PlatformType, platformType);
             Set(loginTimeCacheKey, res.LoginTime);

@@ -25,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new PlayerController(
-                _hashProviderMock.Object,
+                _passwordHandlerMonk.Object,
                 _queriesMock.Object,
                 _auditLogQueriesMock.Object,
                 _bankQueriesMock.Object,
@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsCommands<PlayerAuditLog>> _auditLogCommandsMock =
             new Mock<ITgsCommands<PlayerAuditLog>>();
 
-        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
+        private readonly Mock<IPasswordHandler> _passwordHandlerMonk = new Mock<IPasswordHandler>();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -244,7 +244,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var salt = new Fixture().Create<byte[]>();
             var password = new Fixture().Create<byte[]>();
-            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
                 .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(player.PlayerCode, "password", request);
@@ -273,7 +273,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var salt = new Fixture().Create<byte[]>();
             var password = new Fixture().Create<byte[]>();
-            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
                 .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info2", request);
@@ -303,7 +303,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var salt = new Fixture().Create<byte[]>();
             var password = new Fixture().Create<byte[]>();
-            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
                 .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);
@@ -334,7 +334,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var salt = new Fixture().Create<byte[]>();
             var password = new Fixture().Create<byte[]>();
-            _hashProviderMock.Setup(p => p.GenerateCredential(It.IsAny<string>()))
+            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
                 .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);

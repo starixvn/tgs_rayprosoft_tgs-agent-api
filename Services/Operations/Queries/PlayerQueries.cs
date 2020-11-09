@@ -22,7 +22,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
 
-        Task<Player> GetPlayerByPlayerCodeAsync(Guid licenseeId, string username);
+        Task<Player> GetPlayerByUsernameAsync(Guid licenseeId, string username);
 
         Task<Player> GetPlayerByPlayerCodeAsync(string playerCode);
 
@@ -87,7 +87,7 @@ namespace TGS.Services.Operations.Queries
                 .FirstOrDefaultAsync();
         }
 
-        Task<Player> IPlayerQueries.GetPlayerByPlayerCodeAsync(Guid licenseeId, string username)
+        Task<Player> IPlayerQueries.GetPlayerByUsernameAsync(Guid licenseeId, string username)
         {
             return _repository.Players.
                     FirstOrDefaultAsync(p => p.LicenseeId == licenseeId && p.Username == username);

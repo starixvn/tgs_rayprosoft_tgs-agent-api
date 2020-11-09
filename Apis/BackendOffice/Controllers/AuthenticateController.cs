@@ -22,29 +22,26 @@ namespace TGS.Apis.BackendOffice.Controllers
     [Route("api")]
     public class AuthenticateController : BaseContextController
     {
-        private readonly IHashProvider _hashProvider;
+        private readonly IPasswordHandler _passwordHandler;
         private readonly IAntiforgery _antiForgery;
         private readonly IBackendOfficeQueries<User> _userQueries;
         private readonly IBackendOfficeCommands<User> _userCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthenticateController(
-            IHashProvider hashProvider,
+            IPasswordHandler passwordHandler,
             IAntiforgery antiForgery,
             IBackendOfficeQueries<User> userQueries,
             IBackendOfficeCommands<User> userCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _hashProvider = hashProvider;
+            _passwordHandler = passwordHandler;
             _antiForgery = antiForgery;
             _userQueries = userQueries;
             _userCommands = userCommands;
             _jsonSerializationProvider = jsonSerializationProvider;
-            _httpContextAccessor = httpContextAccessor;
         }
-
 
         [AllowAnonymous, IgnoreAntiforgeryToken]
         [HttpPost("auth"), Description("Authenticate user login")]
@@ -57,13 +54,15 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.NotFound);
             }
 
-            if (!_hashProvider.PasswordMatched(user.Password, user.Salt, request.Password))
+            if (!_passwordHandler.Verify(user.Password, user.Salt, request.Password))
             {
                 return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.InvalidPassword);
             }
 
-            if (_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress != null)
-                user.LastLoginIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+            if (HttpContext.Connection.RemoteIpAddress != null)
+            {
+                user.LastLoginIp = HttpContext.Connection.RemoteIpAddress.ToString();
+            }
 
             user.LastLoginTime = DateTimeOffset.Now;
 
@@ -85,15 +84,12 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost, Route("logout")]
-        public Task LogoutAsync()
-        {
-            return _httpContextAccessor.HttpContext?.SignOutAsync();
-        }
+        public Task LogoutAsync() => HttpContext.SignOutAsync();
 
         private void SetCsrfToken()
         {
             var tokens = _antiForgery.GetAndStoreTokens(HttpContext);
-            _httpContextAccessor.HttpContext.Response.Cookies.Append(
+            HttpContext.Response.Cookies.Append(
                 Consts.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
                 new CookieOptions
@@ -106,7 +102,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             );
         }
 
-        private async Task SignInAsync(User user)
+        private Task SignInAsync(User user)
         {
             SetCsrfToken();
 
@@ -124,9 +120,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20),
                 IsPersistent = true,
             };
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            await _httpContextAccessor.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            return HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
         }
     }
 }

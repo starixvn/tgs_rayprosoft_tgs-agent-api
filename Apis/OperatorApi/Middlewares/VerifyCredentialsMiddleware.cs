@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
@@ -16,64 +16,62 @@ namespace TGS.Apis.OperatorApi.Middlewares
 {
     public sealed class VerifyCredentialsMiddleware
     {
-        private readonly IHashProvider _hashProvider;
         private readonly RequestDelegate _next;
 
-        private const double TimestampLimitSeconds = 60 * 2;
-        private const string Iso8601Format = @"yyyy-MM-dd\THH:mm:ssK";
-
-        public VerifyCredentialsMiddleware(
-            IHashProvider hashProvider,
-            RequestDelegate next)
+        public VerifyCredentialsMiddleware(RequestDelegate next)
         {
-            _hashProvider = hashProvider;
             _next = next;
         }
 
         public async Task InvokeAsync(HttpContext context,
             ILicenseeOperations licenseeOperations,
             IStatusValidator statusValidator)
-        {           
-            var clientId = (string)context.Request.Headers["clientid"];
-            var timestamp = (string)context.Request.Headers["timestamp"];
-            var authCode = (string)context.Request.Headers["authcode"];
-
-            if (clientId.IsNullOrEmpty() || timestamp.IsNullOrEmpty() || authCode.IsNullOrEmpty())
+        {
+            if (!context.Request.Headers.TryGetValue("Authorization", out var values))
             {
-                throw new ArgumentException("Required header parameters are missing");
+                throw new MissingTokenException("Missing Authorization Header");
             }
 
-            if (!DateTimeOffset.TryParseExact(timestamp, Iso8601Format, CultureInfo.InvariantCulture, styles: DateTimeStyles.None, out var time))
+            var authorization = values.FirstOrDefault();
+            if (authorization == null || !authorization.StartsWith("Bearer", true, null))
             {
-                throw new ArgumentException("Invalid format of timestamp");
+                throw new MissingTokenException("Missing Authorization Bearer Header");
             }
 
-            if (time.AddSeconds(TimestampLimitSeconds) < DateTimeOffset.Now)
-            {
-                throw new InvalidCredentialsException("The timestamp is exceeded the limit time");
-            }
+            var token = authorization[6..].Trim();
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
 
-            var licenseeId = await licenseeOperations.GetLicenseeIdByClientIdAsync(clientId);
-            if (licenseeId == Guid.Empty)
+            var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            var currency = jwt.Claims.FirstOrDefault(x => x.Type == Consts.ClaimName.Currency)?.Value;
+
+            if (sub.IsNullOrEmpty() || !Guid.TryParse(sub, out var licenseeId))
             {
-                throw new ClientIdNotFoundException($"Licensee is not found with client id: {clientId}");
+                throw new InvalidCredentialsException("Licensee doesn't exist");
             }
 
             await statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
-
             var secretKey = await licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
+            var signature = $"{licenseeId}:{currency}:{secretKey}";
 
-            var hashedCode = _hashProvider.Hash(
-                $"{clientId}{secretKey}{timestamp}",
-                HashAlgorithmKind.Sha512,
-                HashStringKind.Hex,
-                Encoding.UTF8);
-
-            if (!hashedCode.Equals(authCode))
+            try
             {
-                throw new InvalidCredentialsException($"Fail to authorize licensee with client id: {clientId}");
+                handler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = Consts.Site,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out _);
             }
-            
+            catch (Exception ex)
+            {
+                throw new InvalidCredentialsException(ex.Message);
+            }
+
             context.Items.Add(ContextItems.LicenseeId, licenseeId);
 
             await _next(context);

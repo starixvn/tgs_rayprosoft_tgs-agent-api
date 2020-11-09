@@ -7,6 +7,13 @@
         public const string DefaultCulture = "zh-CN";
         public const string DefaultCurrency = "CNY";
 
+        public const string Site = "operator-api";
+
+        public static class ClaimName
+        {
+            public const string Currency = "curr";
+        }
+
         public static class UserInfo
         {
             public const string UsernameKey = "Username";

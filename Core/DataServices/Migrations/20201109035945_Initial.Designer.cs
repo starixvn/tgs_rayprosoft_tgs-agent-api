@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201106064423_Initial")]
+    [Migration("20201109035945_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -445,6 +445,10 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasColumnType("varchar(64)");
+
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasColumnType("varchar(128)");
@@ -472,7 +476,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(32)");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
@@ -625,17 +629,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Key")
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<string>("Context")
-                        .HasColumnType("nvarchar(64)");
-
                     b.Property<string>("CultureCode")
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<string>("Context")
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Translation")
                         .IsRequired()
                         .HasColumnType("nvarchar(1024)");
 
-                    b.HasKey("Key", "Context", "CultureCode");
+                    b.HasKey("Key", "CultureCode", "Context");
 
                     b.HasIndex("CultureCode");
 
@@ -982,7 +986,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("PaymentVipLevels","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Models.TokenExpireSeconds", b =>
                 {
                     b.Property<string>("PlayerCode")
                         .HasColumnType("varchar(16)");
@@ -1706,7 +1710,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
                         .WithMany("PaymentPlayerList")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1728,7 +1732,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Models.TokenExpireSeconds", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.BetLimitGroup", "BetLimitGroup")
                         .WithMany("Players")
@@ -1748,7 +1752,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
+                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "ParentPlayer")
                         .WithMany("SubPlayers")
                         .HasForeignKey("ParentPlayerCode");
 
@@ -1759,7 +1763,7 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerBank", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
                         .WithMany("Banks")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1774,7 +1778,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
                         .WithMany("PlayerLoginRecords")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1813,7 +1817,7 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.StationLetterPlayer", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
                         .WithMany("Letters")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1834,7 +1838,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
                         .WithMany("Wallets")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)

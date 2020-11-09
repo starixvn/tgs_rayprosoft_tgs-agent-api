@@ -12,16 +12,16 @@ namespace TGS.Services.Operations.Validators
 
     public sealed class ExpirationValidator : IExpirationValidator
     {
-        private readonly IPlayerOperations _playerOpertions;
+        private readonly IPlayerOperations _playerOperations;
 
         public ExpirationValidator(IPlayerOperations playerOperations)
         {
-            _playerOpertions = playerOperations;
+            _playerOperations = playerOperations;
         }
 
         async Task IExpirationValidator.ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform)
         {
-            var loginRecord = await _playerOpertions.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform);
+            var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform);
             if (loginRecord == null || loginRecord.ExpiredOn < DateTimeOffset.UtcNow)
             {
                 throw new PlayerLoginExpiredException(playerCode);
