@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_GameProvider_GetGameProviderBetLimitCode') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_GameProvider_GetGameProviderBetLimitCode AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_GameProvider_GetGameProviderBetLimitCode]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameProvider_GetGameProviderBetLimitCode]
       @gameProviderId   uniqueidentifier,
       @currencyCode     nvarchar(10),
       @betLimitGroupId  int      

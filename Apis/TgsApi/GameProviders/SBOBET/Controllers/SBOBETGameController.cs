@@ -12,7 +12,6 @@ using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -28,7 +27,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
     [FeatureGate(GameProviderConst.SBOBET)]
     public sealed class SBOBETGameController : ControllerBase
     {
-        private static readonly GameActionType[] SettleGameActionTypes = {WinBet, LoseBet, TieBet, FreeBet};
         private readonly IGamePlayActions _actions;
         private readonly ISBOBETGameControllerMapper _map;
         private readonly ISBOBETServices _services;
@@ -63,17 +61,18 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         [Route("Settle")]
         public async Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request)
         {
+            var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet};
+
             var data = await _services.GetGameProviderConfigurationDataAsync();
             var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
 
             var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, externalRoundId);
-            var gameActionExternalIds = roundStatus == RoundStatus.Closed
-                ? Array.Empty<GameActionExternalIds>()
-                : await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
-                    SettleGameActionTypes);
+            var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(gameProviderId,
+                request.PlayerCode, externalRoundId,
+                actionTypes);
 
-            var betData = _map.Request(data, externalRoundId, request, gameActionExternalIds);
+            var betData = _map.Request(data, externalRoundId, request, roundStatus, gameActionExternalIds);
             var r = await _actions.SettleBetAsync(betData);
             return _map.Response(request, r);
         }
@@ -89,8 +88,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         }
 
         [Route("Rollback")]
-        public async Task<RollbackResponse> CancelSettleAsync(RollbackRequest request)
+        public async Task<RollbackResponse> CancelSettleOrCancelCancelTransactionAsync(RollbackRequest request)
         {
+            var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet, CancelTransaction};
+
             var data = await _services.GetGameProviderConfigurationDataAsync();
 
             var gameProviderId = data.GameProviderId;
@@ -98,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 
             var gameActionExternalIds =
                 await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode,
-                    externalRoundId, SettleGameActionTypes);
+                    externalRoundId, actionTypes);
 
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);
@@ -146,7 +147,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             {
                 return _map.Response<CancelBetResponse>(request.PlayerCode, GameApiError.BetAlreadyCanceled);
             }
-            
+
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);
             return _map.Response(request, r);

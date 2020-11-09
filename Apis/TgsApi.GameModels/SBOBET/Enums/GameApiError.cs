@@ -47,5 +47,7 @@ namespace TGS.Apis.TgsApi.GameModels.SBOBET.Enums
         InvalidGameAction = 2008,
         UnderMaintenance = 2009,
         PlayerNotLogin = 2010,
+        [Description("Bet Already Exists")]
+        BetAlreadyExists = 2011,
     }
 }

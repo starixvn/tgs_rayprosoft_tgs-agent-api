@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Localization_GetLocalizationByGameProviderId') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Localization_GetLocalizationByGameProviderId AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Localization_GetLocalizationByGameProviderId]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Localization_GetLocalizationByGameProviderId]
       @gameProviderId  UNIQUEIDENTIFIER
 AS 
 BEGIN
