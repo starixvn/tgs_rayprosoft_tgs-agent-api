@@ -9,9 +9,8 @@ import {
   Modal,
   Textarea,
   TextareaField,
-  styled,
-  border,
-  palette
+  Input,
+  Set
 } from "bumbag"
 import {
   Create as CreateMenu,
@@ -25,7 +24,11 @@ import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
 import { Trans, useTrans, useLocale, Locales } from "../../i18n"
 import { Field as InputField } from "../../input/Field"
-import { useAddStationLetter, useVerifyStationLetter } from "./client"
+import {
+  useAddStationLetter,
+  useAddStationLetterWithFormData,
+  useVerifyStationLetter
+} from "./client"
 import { CancelText } from "../../button/ActionButtons"
 import TargetSelectField, {
   AllPlayers,
@@ -54,9 +57,13 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 //TODO: upload player list
 const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let [data, setSubmit] = useState()
-  let { result, isLoading, error } = useAddStationLetter({
-    data
-  })
+  let { result, isLoading, error } = useAddStationLetter(data)
+
+  // let [formData, setFormData] = useState()
+  // let {
+  //   result: formDataResult,
+  //   error: formDataError
+  // } = useAddStationLetterWithFormData(formData)
 
   const clearResult = () => {
     setSubmit(null)
@@ -74,15 +81,25 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
         subject: "",
         content: ""
       }}
-      onSubmit={({ target, ...data }) => {
+      onSubmit={({ target, playerUsernamesFile, subject, content }) => {
+        //TODO: use form data or json data
+        let data = { subject, content }
+
+        // let formData = new FormData()
+        // formData.append("subject", subject)
+        // formData.append("content", content)
+
         if (target === AllPlayers) {
           data.assignedAllPlayers = true
+          // formData.append("assignedAllPlayers", true)
         } else {
-          //TODO: set playerUsernames fields
+          //TODO: set playerUsernames fields or upload file to server?
           console.warn("TODO: playerUsernames")
+          //formData.append("playerUsernames", playerUsernamesFile, playerUsernamesFile.name)
         }
 
         setSubmit(data)
+        // setFormData(formData)
       }}
       isLoading={isLoading}
       result={result}
@@ -107,6 +124,12 @@ const DialogCss = css`
   & .bb-DialogContent {
     min-height: 65vh;
   }
+
+  .tox-fullscreen & {
+    top: 0;
+    left: 0;
+    transform: none;
+  }
 `
 
 const EditBody = ({ readonly = false, dialog }) => {
@@ -121,19 +144,32 @@ const EditBody = ({ readonly = false, dialog }) => {
   let locale = useLocale()
   let language = locale === Locales.zh ? "zh_CN" : ""
   let [editor, setEditor] = useState()
+  let uploadInputRef = useRef()
 
   const setupEditor = () => {
     if (!contentEditorRef.current) {
       return
     }
 
-    let selector = `.${contentEditorRef.current.className}`
+    let selector = `textarea.${contentEditorRef.current.className}`
     tinymce.remove(selector)
 
     let options = {
       selector,
       readonly,
       base_url: "/tinymce",
+      height: 300,
+      plugins:
+        "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
+      menubar: "file edit insert view format table upload",
+      menu: {
+        upload: { title: "Upload", items: "image", icon: "upload" }
+      },
+      toolbar: [
+        "searchreplace | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | undo redo | removeformat superscript subscript code codesample",
+        "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
+      ],
+      toolbar_mode: "sliding",
       setup: (editor) => {
         editor.on("Change", (event) => {
           let content = event.target.getContent()
@@ -161,11 +197,36 @@ const EditBody = ({ readonly = false, dialog }) => {
       <Label name="target" required={required}>
         <Trans zh="对象" en="Target" />
       </Label>
-      <TargetSelectField
-        name="target"
-        required={required}
-        disabled={readonly}
-      />
+      <Set>
+        <TargetSelectField
+          name="target"
+          required={required}
+          disabled={readonly}
+        />
+        {!readonly && values.target === DesignatedPlayers && (
+          <>
+            <input
+              ref={uploadInputRef}
+              type="file"
+              onChange={(event) => {
+                let [file] = event.target.files
+                setFieldValue("playerUsernamesFile", file)
+              }}
+              css={css`
+                display: none;
+              `}
+            />
+            <Button
+              type="button"
+              onClick={(event) => {
+                uploadInputRef?.current.click()
+              }}
+            >
+              <Trans zh="上传文件" en="Upload file" />
+            </Button>
+          </>
+        )}
+      </Set>
 
       <Label name="subject" required={required}>
         <Trans zh="主题" en="Subject" />
