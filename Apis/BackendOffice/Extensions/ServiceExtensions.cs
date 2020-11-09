@@ -15,14 +15,15 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Log;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
+using TGS.Core.DataServices.Log;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -33,33 +34,35 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
+            IConfiguration configuration)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
-            
+
             services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
             services.AddTgsRepository(configuration, "Tgs")
-                    .AddBetRepository(configuration, "Bet");
+                .AddBetRepository(configuration, "Bet");
 
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
-            
+
             services.AddTransient<IStreamToString, StreamToString>();
             services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
             services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
+            services.AddTransient(typeof(IPaymentService), typeof(PaymentService));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
 
             services.AddNats(configuration)
-                    .AddJson()
-                    .AddSecurity()
-                    .AddWebApiServices()
-                    .AddTgsLog();
-            
+                .AddJson()
+                .AddSecurity()
+                .AddWebApiServices()
+                .AddTgsLog();
+
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             services.AddHttpContextAccessor();
@@ -67,14 +70,14 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddControllers(options =>
                 {
                     var policy = new AuthorizationPolicyBuilder()
-                                    .RequireAuthenticatedUser()
-                                    .Build();
+                        .RequireAuthenticatedUser()
+                        .Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
                     options.Filters.Add(new ValidationFilter());
                 })
                 .AddDataAnnotationsLocalization()
                 .AddFluentValidation(c =>
-                {                    
+                {
                     c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                 });
 
@@ -100,7 +103,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                         return Task.CompletedTask;
                     };
                 });
-            
+
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var enUSCulture = "en-US";
@@ -112,11 +115,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                     new CultureInfo(zhCNCulture)
                 };
 
-                options.DefaultRequestCulture = new RequestCulture(culture: zhCNCulture, uiCulture: zhCNCulture);
+                options.DefaultRequestCulture = new RequestCulture(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 
-                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context => await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
+                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context =>
+                    await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
             });
 
             return services;

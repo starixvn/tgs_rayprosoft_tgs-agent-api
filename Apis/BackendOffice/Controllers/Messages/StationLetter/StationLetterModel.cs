@@ -8,6 +8,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
         public string Subject { get; set; }
         public string Content { get; set; }
         public string Remarks { get; set; }
+        public bool AssignedAllPlayers { get; set; }
         public string CreatedByUsername { get; set; }
         public string VerifiedByUsername { get; set; }
         public DateTimeOffset CreatedOn { get; set; }

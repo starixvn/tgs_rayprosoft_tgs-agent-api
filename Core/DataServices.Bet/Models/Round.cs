@@ -34,6 +34,6 @@ namespace TGS.Core.DataServices.Bet.Models
         public decimal? Commission { get; set; }
         public decimal? WinLoss { get; set; }
         public decimal? TieBetAdjustment { get; set; }
-        public RoundDetail RoundDetail { get; set; }
+        public virtual RoundDetail RoundDetail { get; set; }
     }
 }

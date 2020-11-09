@@ -8,15 +8,15 @@ namespace TGS.Core.DataServices.Models
 
         public Guid LicenseeId { get; set; }
 
-        public Licensee Licensee { get; set; }
-        
+        public virtual Licensee Licensee { get; set; }
+
         public string DefaultLanguageCode { get; set; }
 
-        public Language DefaultLanguage { get; set; }
+        public virtual Language DefaultLanguage { get; set; }
 
         public Guid GameProviderId { get; set; }
 
-        public GameProvider GameProvider { get; set; }
+        public virtual GameProvider GameProvider { get; set; }
 
         public string LicenseeLogoUrl { get; set; }
 
@@ -26,6 +26,6 @@ namespace TGS.Core.DataServices.Models
 
         public Guid GameProviderConfigurationId { get; set; }
 
-        public GameProviderConfiguration GameProviderConfiguration { get; set; }
+        public virtual GameProviderConfiguration GameProviderConfiguration { get; set; }
     }
 }

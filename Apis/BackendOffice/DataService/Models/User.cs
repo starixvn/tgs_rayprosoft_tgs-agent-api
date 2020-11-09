@@ -8,11 +8,11 @@ namespace TGS.Apis.BackendOffice.DataService.Models
         public Guid Id { get; set; }
         public UserStatus Status { get; set; }
         public Guid RoleId { get; set; }
-        public Role Role { get; set; }
+        public virtual Role Role { get; set; }
         public RoleType RoleType { get; set; }
 
         public Guid DepartmentId { get; set; }
-        public Department Department { get; set; }
+        public virtual Department Department { get; set; }
 
         public Guid? ResellerId { get; set; }
         public Guid? LicenseeId { get; set; }
