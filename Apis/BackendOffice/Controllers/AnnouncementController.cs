@@ -19,7 +19,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnnouncementController : BaseContextController
+    public partial class AnnouncementController : BaseContextController
     {
         private readonly ITgsCommands<Announcement> _commands;
         private readonly ITgsQueries<Announcement> _queries;
@@ -69,7 +69,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
             return _queries.GetQueries()
-                .Where(p => request.Status == null || request.Status.Contains(p.Status))
+                .Where(request.Status.Contains(AnnounceStatus.Expired), p => DateTimeOffset.Now > p.To)
+                .Where(!request.Status.Contains(AnnounceStatus.Expired),
+                    p => request.Status == null || request.Status.Contains(p.Status))
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
@@ -176,7 +178,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPut("ChangeOrders")]
         [Description("Change Announcement Order")]
-        public async Task<MessageResponse> ChangeOrder(ChangeOrderRequest request)
+        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);
             var payments = await _queries.GetQueries().Where(q => ids.Contains(q.Id)).ToListAsync();

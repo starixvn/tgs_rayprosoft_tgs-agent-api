@@ -342,7 +342,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
 
-            var response = await _controller.ChangeOrder(request);
+            var response = await _controller.ChangeOrderAsync(request);
 
             response.Valid.Should().BeTrue();
 
@@ -350,6 +350,28 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _commandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<Announcement[]>(d =>
                 d.Length == request.Orders.Length)));
+        }
+
+        [TestCase(AnnounceStatus.Effective)]
+        [TestCase(AnnounceStatus.Invalid)]
+        public async Task Can_Change_Announcement_Status(AnnounceStatus status)
+        {
+            var announcement = CreateAnnouncementFixture()
+                .Create<Announcement>();
+
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
+                .Returns(Task.FromResult(announcement));
+
+            var response = await _controller.ChangeStatusAsync(announcement.Id, status);
+
+            response.Valid.Should().BeTrue();
+
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
+                d.Status == status)));
         }
 
 
