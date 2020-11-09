@@ -76,9 +76,10 @@ namespace TGS.Apis.BackendOffice.Extensions
                     options.Filters.Add(new ValidationFilter());
                 })
                 .AddDataAnnotationsLocalization()
-                .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
-
-            services.AddTransient<IValidatorInterceptor, FluentValidationInterceptor>();
+                .AddFluentValidation(c =>
+                {
+                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                });
 
             services.AddHealthChecks()
                 .AddCheck<HealthCheck>("example_health_check");
