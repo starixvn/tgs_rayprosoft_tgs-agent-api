@@ -38,6 +38,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.Operation)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
+
             builder.Property(c => c.BeforeTransferLimitFrom)
                 .HasColumnType(ColumnTypes.Decimal(18, 6))
                 .IsRequired();
