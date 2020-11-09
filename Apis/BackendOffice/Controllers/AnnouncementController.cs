@@ -80,6 +80,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     VerifiedByUsername = a.VerifiedByUsername,
                     From = a.From,
                     To = a.To,
+                    DisplayOrder = a.DisplayOrder,
                     UpdatedOn = a.UpdatedOn,
                     Status = DateTimeOffset.Now > a.To ? AnnounceStatus.Expired.ToString() : a.Status.ToString()
                 })

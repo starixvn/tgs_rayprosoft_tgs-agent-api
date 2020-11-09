@@ -10,6 +10,7 @@ import { useChangeAnnouncementOrders, useAnnouncementList } from "./client"
 import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
 import { useTable, Table, pageCount } from "../../table"
+import { Ascending } from "../../table/order"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { Trans } from "../../i18n"
@@ -54,6 +55,7 @@ const AsyncContentBody = ({}) => {
   )
   let { state, setState, setPageIndex, setSortOrder } = useTable()
   let { pageIndex, pageSize, sortby, orderby } = state
+
   let {
     data = {},
     isLoading,
@@ -63,7 +65,7 @@ const AsyncContentBody = ({}) => {
   } = useAnnouncementList({
     page: pageIndex + 1,
     rows: pageSize,
-    sortby,
+    sortby: statusName === EffectiveName ? "displayOrder" : sortby,
     orderby,
     status:
       statusName === EffectiveName
@@ -137,6 +139,7 @@ const AsyncContentBody = ({}) => {
               setSortOrder={setSortOrder}
               isLoading={isLoading}
               mutate={mutate}
+              clearCache={clearCache}
               tab={tab}
             />
           )}
@@ -194,12 +197,13 @@ const AsyncTable = ({
 
   return (
     <Table
+      initialState={state}
+      controlledState={state}
       columns={columns}
       data={data?.items}
       pageCount={pageCount(pageSize, data?.totalCount)}
       setPageIndex={setPageIndex}
       setSortOrder={setSortOrder}
-      initialState={state}
       isLoading={isLoading}
     />
   )
@@ -211,7 +215,8 @@ const EffectiveTable = ({
   setSortOrder,
   data,
   isLoading,
-  mutate
+  mutate,
+  clearCache
 }) => {
   let [displayOrders, setDisplayOrder] = useState({})
   let [submitData, setSubmit] = useState()
@@ -248,27 +253,33 @@ const EffectiveTable = ({
     setDisplayOrder(newDisplayOrders)
   }
 
-  let columns = useColumns({ mutate, changeDisplayOrder, statusName })
+  let columns = useColumns({
+    mutate,
+    changeDisplayOrder,
+    statusName,
+    items: data?.items ?? []
+  })
   return (
     <>
       {error && <AlertDialog {...error} onClickClose={() => setSubmit(null)} />}
       <Stack spacing="minor-1">
         <Table
+          initialState={state}
+          controlledState={state}
           columns={columns}
           data={data?.items}
           usePagination={false}
           setSortOrder={setSortOrder}
-          initialState={state}
           isLoading={isLoading}
         />
         <Button
           isLoading={isChangingDisplayOrder}
           onClick={() => {
-            let data = Object.entries(displayOrders).map(([key, value]) => ({
+            let list = Object.entries(displayOrders).map(([key, value]) => ({
               id: key,
               displayOrder: value
             }))
-            setSubmit(data)
+            setSubmit({ orders: list })
           }}
         >
           <Trans zh="确认排序" en="Confirm Order" />
@@ -281,7 +292,8 @@ const EffectiveTable = ({
 const useColumns = ({
   mutate,
   statusName: tabStatusName,
-  changeDisplayOrder
+  changeDisplayOrder,
+  items = []
 }) => {
   let columns = [
     tabStatusName != EffectiveName
@@ -303,6 +315,8 @@ const useColumns = ({
               <Input
                 type="number"
                 size="small"
+                min="0"
+                minLength="1"
                 width="5em"
                 defaultValue={displayOrder}
                 onChange={(event) => {
@@ -430,5 +444,5 @@ const useColumns = ({
       }
     })
   }
-  return useMemo(() => columns, [tabStatusName])
+  return useMemo(() => columns, [tabStatusName, JSON.stringify(items)])
 }

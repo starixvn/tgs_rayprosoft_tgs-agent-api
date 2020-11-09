@@ -54,7 +54,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
   )
 }
 
-//TODO: upload player list
+//TODO: upload player list and download sample
 const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let [data, setSubmit] = useState()
   let { result, isLoading, error } = useAddStationLetter(data)
@@ -64,7 +64,7 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   //   result: formDataResult,
   //   error: formDataError
   // } = useAddStationLetterWithFormData(formData)
-
+  console.warn("TODO: upload player list and download sample")
   const clearResult = () => {
     setSubmit(null)
   }
@@ -158,7 +158,7 @@ const EditBody = ({ readonly = false, dialog }) => {
       selector,
       readonly,
       base_url: "/tinymce",
-      height: 300,
+      height: readonly ? 200 : 300,
       plugins:
         "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
       menubar: "file edit insert view format table upload",
@@ -304,12 +304,11 @@ const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
     en: "View Station Letter"
   })
 
-  //TODO: setup target filed
-  console.warn("TODO: setup target field")
   return (
     <FormDialog
       initialValues={{
-        ...record
+        ...record,
+        target: record.assignedAllPlayers ? AllPlayers : DesignatedPlayers
       }}
       title={title}
       placement="top"
@@ -377,12 +376,11 @@ const VerifyDialog = ({
     en: "Verify Station Letter"
   })
 
-  //TODO: setup target filed
-  console.warn("TODO: setup target field")
   return (
     <FormDialog
       initialValues={{
         ...record,
+        target: record.assignedAllPlayers ? AllPlayers : DesignatedPlayers,
         remarks: ""
       }}
       onSubmit={setSubmit}

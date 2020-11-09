@@ -69,10 +69,8 @@ export const useGet = (url) => {
   let key = fetchData ? url : null
   const { data, error, isValidating, mutate } = useSWR(key, get)
 
-  console.log("url", url, "data", data)
   const clearCache = () => {
     cache.clear(url)
-    console.log("clearCache", url)
   }
 
   return {
