@@ -1,0 +1,25 @@
+﻿using FluentValidation;
+using TGS.Apis.BackendOffice.Controllers.Messages.Users;
+using TGS.Apis.BackendOffice.Extensions;
+
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.User
+{
+    public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
+    {
+        public CreateUserRequestValidator()
+        {
+            RuleFor(p => p.Name)
+                .NotNull()
+                .NotEmpty()
+                .WithMessage(Resources.User.NameRequired);
+
+            RuleFor(p => p.Password)
+                .NotNull()
+                .WithMessage(Resources.User.PasswordRequired)
+                .Equal(p => p.ConfirmPassword)
+                .WithMessage(Resources.User.PasswordNotMatched)
+                .Password();
+            ;
+        }
+    }
+}

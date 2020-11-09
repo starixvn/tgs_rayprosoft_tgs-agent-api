@@ -16,6 +16,7 @@ namespace TGS.Services.GameOperations.Extensions
         public static IServiceCollection AddGameOperations(this IServiceCollection services)
         {  
             services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
+            services.AddScoped<IGameActionProcessor, GameActionProcessor>();
             services.AddScoped<IGamePlayActions, GamePlayActions>();
 
             services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();

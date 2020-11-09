@@ -1,0 +1,11 @@
+﻿using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
+
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
+{
+    public class PaymentsRequest : PageableRequest
+    {
+        public PaymentStatus PaymentStatus { get; set; }
+        public string Keyword { get; set; }
+    }
+}

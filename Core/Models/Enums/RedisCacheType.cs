@@ -18,6 +18,7 @@
         LicenseeGames,
         LicenseeGamesByPlatform,
         Games,  
+        GamesByExternalId,
         SubGames,
         UsernameToPlayerCode,
         Setting,

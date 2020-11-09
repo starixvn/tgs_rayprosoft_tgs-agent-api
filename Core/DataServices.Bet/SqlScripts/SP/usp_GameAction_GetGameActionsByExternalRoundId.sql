@@ -2,11 +2,8 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF OBJECT_ID('usp_GameAction_GetGameActionsByExternalRoundId') IS NULL
-    EXEC('CREATE PROCEDURE [dbo].[usp_GameAction_GetGameActionsByExternalRoundId] AS');
-GO
 
-ALTER PROCEDURE [dbo].[usp_GameAction_GetGameActionsByExternalRoundId]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameAction_GetGameActionsByExternalRoundId]
     @gameProviderId		    UNIQUEIDENTIFIER,
 	@playerCode			    VARCHAR(16),
 	@externalRoundId        NVARCHAR(255)

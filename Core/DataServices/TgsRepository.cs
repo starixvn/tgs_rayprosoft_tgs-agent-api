@@ -16,6 +16,10 @@ namespace TGS.Core.DataServices
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
+
         DbSet<Reseller> ITgsRepository.Resellers { get; set; }
         DbSet<Game> ITgsRepository.Games { get; set; }
         DbSet<GameProvider> ITgsRepository.GameProviders { get; set; }
@@ -47,11 +51,13 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
-        
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-
-        }
+        DbSet<PaymentVendor> ITgsRepository.PaymentVendors { get; set; }
+        DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
+        DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
+        DbSet<Payment> ITgsRepository.Payments { get; set; }
+        DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
+        DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
+        DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
 
         Task<bool> IBaseRepository.CanConnectionAsync()
         {
@@ -76,6 +82,36 @@ namespace TGS.Core.DataServices
         Task IBaseRepository.SaveChangesAsync()
         {
             return SaveChangesAsync();
+        }
+
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        {
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
+        }
+
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
+            Action<decimal> progress)
+        {
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        }
+
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        {
+            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
+                            Database.GetPendingMigrations().Any();
+
+            if (isMigrate) await Database.MigrateAsync();
+
+            if (addSeeding)
+            {
+                IDataInitializer data = new DataInitializer(this);
+                await data.SetInitialDataAsync();
+            }
+        }
+
+        DbSet<T> IBaseRepository.Set<T>()
+        {
+            return Set<T>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -120,38 +156,14 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new AnnouncementMap());
             modelBuilder.ApplyConfiguration(new StationLetterPlayerMap());
             modelBuilder.ApplyConfiguration(new StationLetterMap());
-        }
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
-        {
-            return this.BulkInsertAsync(entities, bulkConfig, progress);
-        }
-
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
-        {
-            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
-        }
-
-        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
-        {           
-            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                           Database.GetPendingMigrations().Any();
-
-            if (isMigrate)
-            {
-                await Database.MigrateAsync();
-            }
-
-            if (addSeeding)
-            {
-                IDataInitializer data = new DataInitializer(this);
-                await data.SetInitialDataAsync();
-            }
-        }
-
-        DbSet<T> IBaseRepository.Set<T>()
-        {
-            return Set<T>();
+            modelBuilder.ApplyConfiguration(new PaymentMap());
+            modelBuilder.ApplyConfiguration(new PaymentVendorMap());
+            modelBuilder.ApplyConfiguration(new PaymentMethodMap());
+            modelBuilder.ApplyConfiguration(new PaymentChannelMap());
+            modelBuilder.ApplyConfiguration(new PaymentPlayerListMap());
+            modelBuilder.ApplyConfiguration(new PaymentVipLevelMap());
+            modelBuilder.ApplyConfiguration(new PaymentAuditLogMap());
         }
     }
 }

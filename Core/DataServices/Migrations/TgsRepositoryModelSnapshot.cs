@@ -640,6 +640,346 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("LocalizedStrings","dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AllPlayers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ChannelName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<decimal>("DepositedAmountMax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DepositedAmountMin")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("DepositedAmountUnlimited")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("FeePercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("HighestFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IdentityAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("LowestFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("PaymentChannelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PaymentMethodId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PaymentVendorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("PhoneAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PlayerListCondition")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<decimal>("TransferLimitFrom")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TransferLimitTo")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentChannelId");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("PaymentVendorId");
+
+                    b.ToTable("Payments","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AfterAllPlayers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("AfterChannelName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("AfterDepositedAmountMax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AfterDepositedAmountMin")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("AfterDepositedAmountUnlimited")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AfterIdentityAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AfterPaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("AfterPhoneAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AfterPlayerListCondition")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("AfterTransferLimitFrom")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AfterTransferLimitTo")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("BeforeAllPlayers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BeforeChannelName")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("BeforeDepositedAmountMax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BeforeDepositedAmountMin")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("BeforeDepositedAmountUnlimited")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("BeforeIdentityAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BeforePaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("BeforePhoneAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BeforePlayerListCondition")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("BeforeTransferLimitFrom")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BeforeTransferLimitTo")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<short>("Operation")
+                        .HasColumnType("smallint");
+
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("PaymentAuditLogs","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentChannel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PaymentMethodId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PaymentVendorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("PaymentVendorId");
+
+                    b.ToTable("PaymentChannels","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentMethod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PaymentVendorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentVendorId");
+
+                    b.ToTable("PaymentMethods","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentPlayerList", b =>
+                {
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<int>("ListType")
+                        .HasColumnType("int");
+
+                    b.HasKey("PaymentId", "PlayerCode");
+
+                    b.HasIndex("PlayerCode");
+
+                    b.ToTable("PaymentPlayerList","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentVendor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentVendors","dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentVipLevel", b =>
+                {
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VipLevelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PaymentId", "VipLevelId");
+
+                    b.HasIndex("VipLevelId");
+
+                    b.ToTable("PaymentVipLevels","dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>
                 {
                     b.Property<string>("PlayerCode")
@@ -1307,6 +1647,81 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
                         .WithMany("LocalizedStrings")
                         .HasForeignKey("CultureCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Payment", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.PaymentChannel", "PaymentChannel")
+                        .WithMany()
+                        .HasForeignKey("PaymentChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.PaymentMethod", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.PaymentVendor", "PaymentVendor")
+                        .WithMany()
+                        .HasForeignKey("PaymentVendorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentChannel", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.PaymentMethod", "PaymentMethod")
+                        .WithMany("PaymentChannels")
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.PaymentVendor", "PaymentVendor")
+                        .WithMany("PaymentChannels")
+                        .HasForeignKey("PaymentVendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentMethod", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.PaymentVendor", "PaymentVendor")
+                        .WithMany("PaymentMethods")
+                        .HasForeignKey("PaymentVendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentPlayerList", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.Payment", "Payment")
+                        .WithMany("PaymentPlayerList")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
+                        .WithMany("PaymentPlayerList")
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentVipLevel", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.Payment", "Payment")
+                        .WithMany("VipLevels")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.VipLevel", "VipLevel")
+                        .WithMany("PaymentVipLevels")
+                        .HasForeignKey("VipLevelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

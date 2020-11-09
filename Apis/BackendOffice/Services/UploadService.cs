@@ -25,14 +25,11 @@ namespace TGS.Apis.BackendOffice.Services
                 stream.Position = 0;
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
-                    var rows = new List<string>();
                     var fieldCount = reader.FieldCount;
                     while (reader.Read()) //Each row of the file
                     {
-                        for (var i = 0; i < fieldCount; i++)
-                        {
-                            rows.Add(reader.GetValue(i).ToString());
-                        }
+                        var rows = new List<string>();
+                        for (var i = 0; i < fieldCount; i++) rows.Add(reader.GetValue(i).ToString());
                         result.Add(rows);
                     }
                 }

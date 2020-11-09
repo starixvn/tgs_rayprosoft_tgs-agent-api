@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_AdminLogs_GetLogs') IS NULL
-    EXEC('CREATE PROCEDURE [dbo].[usp_AdminLogs_GetLogs] AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_AdminLogs_GetLogs]
+CREATE OR ALTER PROCEDURE [dbo].[usp_AdminLogs_GetLogs]
     @from			datetimeoffset(7),
 	@to				datetimeoffset(7),
     @trackingId		UNIQUEIDENTIFIER NULL,

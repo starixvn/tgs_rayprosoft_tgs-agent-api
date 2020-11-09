@@ -108,6 +108,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
         public bool ForceGetPreviousActions { get; init; }
         public bool FreeBetAsSingleRound { get; init; }
+        public bool AllowCancelCancelTransaction { get; init; }
     }
 
     internal record Db(ITgsRepository Repository, IDbTransaction Transaction);

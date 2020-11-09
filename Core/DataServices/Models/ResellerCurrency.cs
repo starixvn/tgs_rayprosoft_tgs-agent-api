@@ -6,10 +6,10 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid ResellerId { get; set; }
 
-        public Reseller Reseller { get; set; }
+        public virtual Reseller Reseller { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public Currency Currency { get; set; }
+        public virtual Currency Currency { get; set; }
     }
 }

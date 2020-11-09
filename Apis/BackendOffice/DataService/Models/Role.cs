@@ -28,6 +28,6 @@ namespace TGS.Apis.BackendOffice.DataService.Models
 
         public string UpdatedByUsername { get; set; }
 
-        public ICollection<User> Users { get; set; }
+        public virtual ICollection<User> Users { get; set; }
     }
 }
