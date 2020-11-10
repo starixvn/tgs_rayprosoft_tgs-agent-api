@@ -7,10 +7,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
     {
         public PlayerBankRequestValidator()
         {
-            RuleFor(p => p.Username)
+            RuleFor(p => p.RealName)
                 .NotNull()
                 .NotEmpty()
-                .WithMessage(Resources.Player.BankUsernameRequired);
+                .WithMessage(Resources.Player.BankRealNameRequired);
 
             RuleFor(p => p.BankName)
                 .NotNull()

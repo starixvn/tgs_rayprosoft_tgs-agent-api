@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,13 +19,13 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public partial class PlayerController : BaseContextController
     {
-        private readonly ITgsQueries<Player> _queries;
+        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly ITgsQueries<PlayerAuditLog> _auditLogQueries;
+        private readonly ITgsCommands<PlayerBank> _bankCommands;
         private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsCommands<PlayerBank> _bankCommands;
-        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
         private readonly IHashProvider _hashProvider;
+        private readonly ITgsQueries<Player> _queries;
 
         public PlayerController(
             IHashProvider hashProvider,
@@ -48,7 +47,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("")]
-        [HttpGet, Description("Get player list")]
+        [HttpGet]
+        [Description("Get player list")]
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
         {
             return _queries.GetQueries()
@@ -66,7 +66,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("{playerCode}")]
-        [HttpGet, Description("Get player")]
+        [HttpGet]
+        [Description("Get player")]
         public async Task<GetPlayerResponse> GetSingleAsync(string playerCode)
         {
             var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode, p =>
@@ -99,7 +100,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Banks = player.Banks.Select(p => new PlayerModel.BankModel
                 {
                     Id = p.Id,
-                    RealName = p.Username,
+                    RealName = p.RealName,
                     BankName = p.BankName,
                     BankAccount = p.BankAccount
                 }).ToArray()
@@ -113,8 +114,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("{playerCode}/operations")]
-        [HttpGet, Description("Get player operation")]
-        public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode, [FromQuery] GetPlayerOperationRequest request)
+        [HttpGet]
+        [Description("Get player operation")]
+        public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode,
+            [FromQuery] GetPlayerOperationRequest request)
         {
             return _auditLogQueries.GetQueries()
                 .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == playerCode)
@@ -127,10 +130,12 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("{playerCode}/{type}")]
-        [HttpPut, Description("Update player")]
-        public async Task<MessageResponse> UpdateAsync(string playerCode, string type, [FromBody] UpdatePlayerRequest request)
+        [HttpPut]
+        [Description("Update player")]
+        public async Task<MessageResponse> UpdateAsync(string playerCode, string type,
+            [FromBody] UpdatePlayerRequest request)
         {
-            var updatePlayerType = new[] { "info", "contact", "password" };
+            var updatePlayerType = new[] {"info", "contact", "password"};
 
             if (!updatePlayerType.Contains(type))
             {
@@ -153,12 +158,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                     {
                         return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
                     }
+
                     player.ParentInvitationCode = parentPlayer.InvitationCode;
                     player.ParentPlayerCode = parentPlayer.PlayerCode;
                 }
 
                 player.RealName = request.RealName;
-                player.VipId = request.VipId;              
+                player.VipId = request.VipId;
                 player.Status = request.Status;
                 player.HasAgent = request.HasAgent;
             }

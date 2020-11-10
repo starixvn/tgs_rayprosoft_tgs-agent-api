@@ -118,6 +118,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     PaymentVendorId = PaymentVendors[Help2Pay],
                     PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
                     PaymentChannelId = PaymentChannels[BankTransfer].Item1,
+                    TransferType = PaymentTransferType.Deposit,
                     ChannelName = "阿里pay",
                     PaymentStatus = PaymentStatus.Enabled,
                     TransferLimitFrom = 10,

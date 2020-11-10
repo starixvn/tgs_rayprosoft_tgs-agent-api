@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using TGS.Apis.BackendOffice.Resources;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -8,12 +9,10 @@ namespace TGS.Apis.BackendOffice.Extensions
             int minimumLength = 8)
         {
             var options = ruleBuilder
-                .NotEmpty().WithMessage(Resources.User.PasswordRequired)
-                .MinimumLength(minimumLength).WithMessage(Resources.User.PasswordLengthAtLeast)
-                .Matches("[A-Z]").WithMessage(Resources.User.PasswordNeedUpperCaseLetter)
-                .Matches("[a-z]").WithMessage(Resources.User.PasswordNeedLowerCaseLetter)
-                .Matches("[0-9]").WithMessage(Resources.User.PasswordNeedNumber)
-                .Matches("[^a-zA-Z0-9]").WithMessage(Resources.User.PasswordNeedSpecialCharacter);
+                .NotEmpty().WithMessage(User.PasswordRequired)
+                .MinimumLength(minimumLength).WithMessage(User.PasswordLengthAtLeast)
+                .Matches("[0-9]").WithMessage(User.PasswordNeedNumber)
+                .Matches("[^a-zA-Z0-9]").WithMessage(User.PasswordNeedSpecialCharacter);
             return options;
         }
     }

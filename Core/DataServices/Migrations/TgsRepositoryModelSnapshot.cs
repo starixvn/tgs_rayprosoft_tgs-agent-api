@@ -715,6 +715,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<decimal>("TransferLimitTo")
                         .HasColumnType("decimal(18,6)");
 
+                    b.Property<int>("TransferType")
+                        .HasColumnType("int");
+
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -1130,7 +1133,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(16)");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("RealName")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
 

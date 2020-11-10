@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201109083218_Initial")]
+    [Migration("20201110030734_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -717,6 +717,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<decimal>("TransferLimitTo")
                         .HasColumnType("decimal(18,6)");
 
+                    b.Property<int>("TransferType")
+                        .HasColumnType("int");
+
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -1132,7 +1135,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(16)");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("RealName")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
 

@@ -909,6 +909,7 @@ namespace TGS.Core.DataServices.Migrations
                     PaymentVendorId = table.Column<Guid>(nullable: false),
                     PaymentMethodId = table.Column<Guid>(nullable: false),
                     PaymentChannelId = table.Column<Guid>(nullable: false),
+                    TransferType = table.Column<int>(nullable: false),
                     ChannelName = table.Column<string>("nvarchar(50)", nullable: false),
                     PaymentStatus = table.Column<int>(nullable: false),
                     TransferLimitFrom = table.Column<decimal>("decimal(18,6)", nullable: false),
@@ -962,7 +963,7 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     PlayerCode = table.Column<string>("varchar(16)", nullable: false),
-                    Username = table.Column<string>("nvarchar(32)", nullable: false),
+                    RealName = table.Column<string>("nvarchar(32)", nullable: false),
                     BankName = table.Column<string>("nvarchar(32)", nullable: false),
                     BankAccount = table.Column<string>("nvarchar(32)", nullable: false)
                 },

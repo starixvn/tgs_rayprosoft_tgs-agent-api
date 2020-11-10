@@ -172,7 +172,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             for (var i = 0; i < response.Player.Banks.Length; i++)
             {
                 response.Player.Banks[i].Id.Should().Be(player.Banks.ElementAt(i).Id);
-                response.Player.Banks[i].RealName.Should().Be(player.Banks.ElementAt(i).Username);
+                response.Player.Banks[i].RealName.Should().Be(player.Banks.ElementAt(i).RealName);
                 response.Player.Banks[i].BankName.Should().Be(player.Banks.ElementAt(i).BankName);
                 response.Player.Banks[i].BankAccount.Should().Be(player.Banks.ElementAt(i).BankAccount);
             }
@@ -366,7 +366,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     new PlayerBank
                     {
                         Id = Guid.NewGuid(),
-                        Username = Generator.RandomString(5),
+                        RealName = Generator.RandomString(5),
                         BankName = Generator.RandomString(20),
                         BankAccount = Generator.RandomIntString(20)
                     }
