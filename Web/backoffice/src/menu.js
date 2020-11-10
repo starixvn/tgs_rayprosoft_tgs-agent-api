@@ -22,6 +22,12 @@ import {
   nameMessages as PlayerManagementNameMessages,
   codeLabelPair as playerManagementLabelPair
 } from "./player-management/menu"
+import { codeMenuContentPair as gameManagementPair } from "./game"
+import {
+  Code as GameManagementCode,
+  nameMessages as GameManagementNameMessages,
+  codeLabelPair as gameManagementLabelPair
+} from "./game/menu"
 import { codeMenuContentPair as systemPair } from "./system"
 import {
   Code as SystemCode,
@@ -69,12 +75,17 @@ const MenuItem = ({ code, path, itemLabel, ...props }) => {
   )
 }
 
-const pairs = () => [platformPair, playerManagementPair, systemPair]
+export const allMenuContentPairs = () => [
+  platformPair,
+  playerManagementPair,
+  gameManagementPair,
+  systemPair
+]
 
 export const AllMenus = ({ codes }) => {
   let authCodes = useMenuCodes()
   codes = codes ?? authCodes
-  let list = pairs()
+  let list = allMenuContentPairs()
   return codes.map((code) => <MenuByCode key={code} code={code} pairs={list} />)
 }
 
@@ -84,6 +95,7 @@ export const useLabel = ({ codes = [] }) => {
   let subLabelPairs = [
     playerManagementLabelPair,
     systemLabelPair,
+    gameManagementLabelPair,
     platformLabelPair
   ]
   return findlLabel({
@@ -114,6 +126,8 @@ const moduleLabel = ({ code = "", locale }) => {
       return getTrans(PlatformNameMessages, locale)
     case PlayerManagementCode:
       return getTrans(PlayerManagementNameMessages, locale)
+    case GameManagementCode:
+      return getTrans(GameManagementNameMessages, locale)
     case SystemCode:
       return getTrans(SystemNameMessages, locale)
     default:

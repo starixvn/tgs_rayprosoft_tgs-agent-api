@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Base.Extensions
         {
             const int PoolSize = 64;
 
-            services.AddDbContextPool<TRepository>((option) =>
+            services.AddDbContextPool<TRepository>(option =>
             {
 #if DEBUG
                 option.UseLoggerFactory(LoggerFactory.Create(builder =>
@@ -29,6 +29,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
                 var connectionString = configuration.GetConnectionString(connectionName);
 
+                option.UseLazyLoadingProxies();
                 option.UseSqlServer(connectionString, serverOption =>
                 {
                     serverOption.CommandTimeout(commandTimeout);

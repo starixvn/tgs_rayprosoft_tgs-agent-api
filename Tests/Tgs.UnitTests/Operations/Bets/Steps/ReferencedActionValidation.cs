@@ -32,7 +32,15 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
         {
             var table = new Table("Action Type", "Referencing Action ID");
             table.AddRow(actionType.ToString(), "1");
-            ValidatAction(table);
+            ValidateAction(table);
+        }
+
+        [When(@"it is referenced by ""(.*)"" action with allowCancelCancellation is true")]
+        public void WhenItIsReferencedByActionWithAllowCancelCancellationIsTrue(GameActionType actionType)
+        {
+            var table = new Table("Action Type", "Referencing Action ID", "AllowCancelCancellation");
+            table.AddRow(actionType.ToString(), "1", "YES");
+            ValidateAction(table);
         }
 
         [Then(@"I will detect no errors")]
@@ -61,7 +69,7 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
             var actions = table.CreateList(ParseActionShortInfo());
             foreach (var action in actions)
             {
-                AddAction(action.ID, r => action.Amount, action.Type, action.IsClosingRound, action.ReferencedId);
+                AddAction(action.Id, r => action.Amount, action.Type, action.IsClosingRound, action.AllowCancelCancellation, action.ReferencedId);
             }
         }
 
@@ -69,22 +77,21 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
         {
             return row => new ActionShortInfo
             {
-                ID = int.TryParse(GetCell(row, "ID"), out var id) ? id : NewActionId,
+                Id = int.TryParse(GetCell(row, "ID"), out var id) ? id : NewActionId,
                 Type = AsType(row, "Action Type"),
                 Amount = decimal.TryParse(GetCell(row, "Amount"), out var amount) ? amount : 0,
                 ReferencedId = int.TryParse(GetCell(row, "Referencing Action ID"), out var refId) ? refId : 0,
-                IsClosingRound = GetCell(row, "Closeing Round?") == "YES"
+                IsClosingRound = GetCell(row, "Closeing Round?") == "YES",
+                AllowCancelCancellation = GetCell(row, "AllowCancelCancellation") == "YES"
             };
         }
 
-        private string GetCell(TableRow row, string name)
+        private static string GetCell(TableRow row, string name) => 
+            row.ContainsKey(name) ? row[name] : string.Empty;
+        
+        private static GameActionType AsType(TableRow row, string name)
         {
-            return row.ContainsKey(name) ? row[name] : "";
-        }
-
-        private GameActionType AsType(TableRow row, string name)
-        {
-            var cellValue = (GetCell(row, name) ?? "").Replace(" ", "");
+            var cellValue = (GetCell(row, name) ?? string.Empty).Replace(" ", string.Empty);
             if (string.IsNullOrEmpty(cellValue))
             {
                 throw new Exception($"Expecting GameActionType cell named {name}");
@@ -94,10 +101,11 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
             {
                 return type;
             }
+
             throw new Exception($"Unknown GameActionType {cellValue}");
         }
 
-        private BetActionData CreateAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type, bool isClosingRound, int refId = 0)
+        private BetActionData CreateAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type, bool isClosingRound, bool allowCancelCancellation, int refId = 0)
         {
             BetActionData refAction = null;
             if (refId > 0 && !ActionsById.TryGetValue(refId, out refAction))
@@ -112,11 +120,12 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
                 Amount = getAmount(refAction),
                 ExternalRoundId = Get<string>(SR.RoundId),
                 IsClosingRound = isClosingRound,
-                IsExplicitlyClosingRound = isClosingRound == true,
+                IsExplicitlyClosingRound = isClosingRound,
                 IsExplicitlyNotClosingRound = isClosingRound == false,
                 Type = type,
                 ReferenceId = refAction?.Id,
-                Reference = refAction
+                Reference = refAction,
+                AllowCancelCancelTransaction = allowCancelCancellation
             };
         }
 
@@ -126,13 +135,13 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
             ActionsById[id] = action;
         }
 
-        private void AddAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type, bool isClosingRound, int refId = 0)
+        private void AddAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type, bool isClosingRound, bool allowCancelCancellation, int refId = 0)
         {
-            var action = CreateAction(id, getAmount, type, isClosingRound, refId);
+            var action = CreateAction(id, getAmount, type, isClosingRound, allowCancelCancellation, refId);
             AddAction(id, action);
         }
 
-        private void ValidatAction(Table table)
+        private void ValidateAction(Table table)
         {
             var asi = table.CreateList(ParseActionShortInfo()).FirstOrDefault();
 
@@ -142,10 +151,10 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
             }
 
             var getAmount = asi.Type == GameActionType.CancelTransaction
-                        ? (r => r.Amount)
+                        ? r => r.Amount
                         : new Func<BetActionData, decimal>(r => asi.Amount);
 
-            var action = CreateAction(NewActionId, getAmount, asi.Type, asi.IsClosingRound, asi.ReferencedId);
+            var action = CreateAction(NewActionId, getAmount, asi.Type, asi.IsClosingRound, asi.AllowCancelCancellation, asi.ReferencedId);
             Validate(action);
         }
 
@@ -161,13 +170,14 @@ namespace Tgs.UnitTests.Operations.Bets.Steps
         private List<BetActionData> Actions => GetOrCreate(SR.Actions, () => new List<BetActionData>());
         private Dictionary<int, BetActionData> ActionsById => GetOrCreate(SR.ActionsById, () => new Dictionary<int, BetActionData>());
 
-        private class ActionShortInfo
+        private record ActionShortInfo
         {
-            public int ID { get; set; }
-            public GameActionType Type { get; set; }
-            public decimal Amount { get; set; }
-            public int ReferencedId { get; set; }
-            public bool IsClosingRound { get; set; }
+            public int Id { get; init; }
+            public GameActionType Type { get; init; }
+            public decimal Amount { get; init; }
+            public int ReferencedId { get; init; }
+            public bool IsClosingRound { get; init; }
+            public bool AllowCancelCancellation { get; init; }
         }
 
         #endregion Private Methods and Properties

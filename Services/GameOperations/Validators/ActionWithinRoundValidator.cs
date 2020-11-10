@@ -21,24 +21,41 @@ namespace TGS.Services.GameOperations.Validators
             previousActions ??= Array.Empty<BetActionData>();
 
             if (IsClosingRoundOnPlaceBet(current, out var error))
+            {
                 return error;
+            }
 
             if (IsFoundUnallowedReferencedActionType(current, out error))
+            {
                 return error;
+            }
 
             if (IsCurrentReferenceCancelled(current, previousActions, out error))
+            {
                 return error;
+            }
 
-            if (IsCancellingActionThatHasUncencelledReferences(current, previousActions, out error))
+            if (IsCancelCancelTransactionThatHasMoreThanOnce(current, previousActions, out error))
+            {
                 return error;
+            }
+
+            if (IsCancellingActionThatHasUncancelledReferences(current, previousActions, out error))
+            {
+                return error;
+            }
 
             var previouslyClosed = FindPreviouslyClosed(previousActions);
 
             if (IsExplicitlyClosingAlreadyClosedRound(current, previouslyClosed, out error))
+            {
                 return error;
+            }
 
             if (IsNotExplicitlyOpeningAlreadyClosedRound(current, previouslyClosed, out error))
+            {
                 return error;
+            }
 
             // no irregularities found
             return null;
@@ -49,9 +66,9 @@ namespace TGS.Services.GameOperations.Validators
             if (current.IsClosingRound && current.Type == PlaceBet)
             {
                 error = new InvalidGameActionException(
-                            $"Cannot close round on place bet action with ID='{current.ExternalId}' " +
-                            $"for round with ID='{current.ExternalRoundId}'",
-                            ActionProhibited);
+                    $"Cannot close round on place bet action with ID='{current.ExternalId}' " +
+                    $"for round with ID='{current.ExternalRoundId}'",
+                    ActionProhibited);
                 return true;
             }
 
@@ -75,11 +92,13 @@ namespace TGS.Services.GameOperations.Validators
             // no action is allowed with reference to CANCEL action
             // rows:Cancel
             // cols:ANY
-            if (refType == CancelTransaction)
+            // except: AllowCancelCancelTransaction = true and current game action type is CancelTransaction 
+            if (refType == CancelTransaction &&
+                !(current.AllowCancelCancelTransaction && gameActionType == CancelTransaction))
             {
                 error = new InvalidGameActionException(
-                        $"You cannot perform any action on action of type '{refType}' for reference with ID='{refId}'",
-                        ActionProhibited);
+                    $"You cannot perform any action on action of type '{refType}' for reference with ID='{refId}'",
+                    ActionProhibited);
                 return true;
             }
 
@@ -117,13 +136,24 @@ namespace TGS.Services.GameOperations.Validators
             return false;
         }
 
-        private static bool IsCurrentReferenceCancelled(BetActionData current, IList<BetActionData> previousActions, out Exception error)
+        private static bool IsCurrentReferenceCancelled(BetActionData current, IList<BetActionData> previousActions,
+            out Exception error)
         {
             error = null;
+
             // current action cannot be referencing another action that has been cancelled
             var cancellationOfReference = current.ReferenceId == null
-                    ? null
-                    : previousActions.FirstOrDefault(a => a.Type == CancelTransaction && a.ReferenceId == current.ReferenceId);
+                ? null
+                : previousActions.FirstOrDefault(a =>
+                    a.Type == CancelTransaction && a.ReferenceId == current.ReferenceId);
+
+            // should allow settlements after cancel cancellation
+            if (current.AllowCancelCancelTransaction && current.Type.IsSettleBet() &&
+                cancellationOfReference != null)
+            {
+                var previousCancellation = previousActions.FirstOrDefault(a => a.Type == CancelTransaction && a.ReferenceId == cancellationOfReference.ReferenceId);
+                cancellationOfReference = previousCancellation != null ? null : cancellationOfReference;
+            }
 
             if (cancellationOfReference != null)
             {
@@ -133,54 +163,97 @@ namespace TGS.Services.GameOperations.Validators
                     $"for round with ID='{current.ExternalRoundId}' " +
                     $"has a reference to action of type '{current.Reference.Type}' with ID='{current.Reference.ExternalId}' " +
                     $"that has been cancelled by action with ID='{cancellationOfReference.ExternalId}'",
-                    Cancelled);
+                    ActionProhibited);
             }
 
             return error != null;
         }
 
-        private static bool IsCancellingActionThatHasUncencelledReferences(BetActionData current, IList<BetActionData> previousActions, out Exception error)
+        private static bool IsCancelCancelTransactionThatHasMoreThanOnce(BetActionData current,
+            IList<BetActionData> previousActions, out Exception error)
         {
             error = null;
 
-            // if we cancel PlaceBet or LockAmount
-            if (current.Type == CancelTransaction && current.Reference.Type.IsOneOf(PlaceBet, LockAmount))
+            if (current.Type != CancelTransaction || !current.AllowCancelCancelTransaction)
             {
-                var referencesOfTheReference = previousActions
-                    .Where(ga => ga.Reference != null && ga.ReferenceId == current.ReferenceId)
-                    .ToArray();
+                return false;
+            }
 
-                var existingReferenceIds = referencesOfTheReference
-                    .Select(e => (Guid?)e.Id)
-                    .ToList();
+            var cancellationOfReference = previousActions.FirstOrDefault(a =>
+                a.Type == CancelTransaction && a.Id == current.ReferenceId);
 
-                var cancelledReferences = previousActions
-                    .Where(ga => existingReferenceIds.Contains(ga.ReferenceId) && ga.Type == CancelTransaction)
-                    .Select(ga => ga.ReferenceId)
-                    .ToHashSet();
+            if (cancellationOfReference == null || cancellationOfReference.Type != CancelTransaction)
+            {
+                return false;
+            }
 
-                // if some of the existing references of current action does not have cancelation:
-                // (if we have any referencesOfTheReference[...].Id not in cancelledReferences[...].Id)
-                // return error, because all references must be canceled, to cancel PlaceBet
-                var uncancelledReferences = referencesOfTheReference.FirstOrDefault(curr => !cancelledReferences.Contains(curr.Id));
+            var previousCancellationOfReference = previousActions.FirstOrDefault(a =>
+                a.Type == CancelTransaction && a.Id == cancellationOfReference.ReferenceId);
 
-                if (uncancelledReferences != null)
-                {
-                    var refId = current.Reference.Id;
-                    error = new InvalidGameActionException(
-                            $"Cannot cancel {current.Reference.Type} action with ID='{refId}' " +
-                            $"that is referenced by uncancelled action with ID='{uncancelledReferences.Id}' and Type='{uncancelledReferences.Type}'",
-                            Settled);
-                }
+            if (previousCancellationOfReference != null &&
+                previousCancellationOfReference.Type == CancelTransaction)
+            {
+                error = new InvalidGameActionException(
+                    "Cannot cancel reference action that cancelled other reference action. " +
+                    $"The current action with ID='{current.ExternalId}' " +
+                    $"for round with ID='{current.ExternalRoundId}' " +
+                    $"has a reference to action of type '{current.Reference.Type}' with ID='{current.Reference.ExternalId}' " +
+                    $"that has cancelled a reference action with ID='{previousCancellationOfReference.ExternalId}'",
+                    ActionProhibited);
             }
 
             return error != null;
+        }
+
+        private static bool IsCancellingActionThatHasUncancelledReferences(BetActionData current,
+            IList<BetActionData> previousActions, out Exception error)
+        {
+            error = null;
+
+            if (current.Type != CancelTransaction || current.Reference.Type.IsNotAllOf(PlaceBet, LockAmount))
+            {
+                return false;
+            }
+
+            var referencesOfTheReference = previousActions
+                .Where(ga => ga.Reference != null && ga.ReferenceId == current.ReferenceId)
+                .ToArray();
+
+            var existingReferenceIds = referencesOfTheReference
+                .Select(e => (Guid?) e.Id)
+                .ToList();
+
+            var cancelledReferences = previousActions
+                .Where(ga => existingReferenceIds.Contains(ga.ReferenceId) && ga.Type == CancelTransaction)
+                .Select(ga => ga.ReferenceId)
+                .ToHashSet();
+
+            // if some of the existing references of current action does not have cancellation:
+            // (if we have any referencesOfTheReference[...].Id not in cancelledReferences[...].Id)
+            // return error, because all references must be canceled, to cancel PlaceBet
+            var uncancelledReferences =
+                referencesOfTheReference.FirstOrDefault(curr => !cancelledReferences.Contains(curr.Id));
+
+            if (uncancelledReferences == null)
+            {
+                return false;
+            }
+
+            var refId = current.Reference.Id;
+            error = new InvalidGameActionException(
+                $"Cannot cancel {current.Reference.Type} action with ID='{refId}' " +
+                $"that is referenced by uncancelled action with ID='{uncancelledReferences.Id}' and Type='{uncancelledReferences.Type}'",
+                Settled);
+
+            return true;
         }
 
         private static BetActionData FindPreviouslyClosed(IList<BetActionData> actions)
         {
             if (actions.Count == 0)
+            {
                 return null;
+            }
 
             BetActionData closingAction = null;
             foreach (var a in actions)
@@ -198,31 +271,34 @@ namespace TGS.Services.GameOperations.Validators
             return closingAction;
         }
 
-        private static bool IsExplicitlyClosingAlreadyClosedRound(BetActionData current, BetActionData previouslyClosed, out Exception error)
+        private static bool IsExplicitlyClosingAlreadyClosedRound(BetActionData current, BetActionData previouslyClosed,
+            out Exception error)
         {
             error = null;
+
             if (previouslyClosed == null)
             {
                 return false;
             }
 
             // no explicit close if previously closed
-            if (current.IsExplicitlyClosingRound)
+            if (!current.IsExplicitlyClosingRound)
             {
-                error = new InvalidGameActionException(
-                    "Cannot explicitly close already closed round with 'roundclosed=true' " +
-                    $"Attempt to perform close action with ID='{current.ExternalId}' " +
-                    $"but within the same round with ID='{current.ExternalRoundId}' we already have " +
-                    $"another closing action with ID='{previouslyClosed.ExternalId}'",
-                    current.ExternalId == previouslyClosed.ExternalId ? Duplicate : ActionProhibited);
-
-                return true;
+                return false;
             }
 
-            return false;
+            error = new InvalidGameActionException(
+                "Cannot explicitly close already closed round with 'roundclosed=true' " +
+                $"Attempt to perform close action with ID='{current.ExternalId}' " +
+                $"but within the same round with ID='{current.ExternalRoundId}' we already have " +
+                $"another closing action with ID='{previouslyClosed.ExternalId}'",
+                current.ExternalId == previouslyClosed.ExternalId ? Duplicate : ActionProhibited);
+
+            return true;
         }
 
-        private static bool IsNotExplicitlyOpeningAlreadyClosedRound(BetActionData current, BetActionData previouslyClosed, out Exception error)
+        private static bool IsNotExplicitlyOpeningAlreadyClosedRound(BetActionData current,
+            BetActionData previouslyClosed, out Exception error)
         {
             error = null;
             if (previouslyClosed == null)
@@ -230,19 +306,20 @@ namespace TGS.Services.GameOperations.Validators
                 return false;
             }
 
-            // roundclosed=null or missing 'roundclosed' field
-            if (!current.IsExplicitlyClosingRound && !current.IsExplicitlyNotClosingRound)
+            if (current.IsExplicitlyClosingRound || current.IsExplicitlyNotClosingRound)
             {
-                error = new InvalidGameActionException(
-                    "Cannot perform action on already closed round, given that you are not reopening it 'roundclosed=null or missing' " +
-                    $"Attempt to perform action with ID='{current.ExternalId}' " +
-                    $"but within the same round with ID='{current.ExternalRoundId}' we already have " +
-                    $"another closing action with ID='{previouslyClosed.ExternalId}' and your action is not reopening the round with roundclosed=false",
-                    ActionProhibited);
-                return true;
+                return false;
             }
 
-            return false;
+            // roundclosed=null or missing 'roundclosed' field
+            error = new InvalidGameActionException(
+                "Cannot perform action on already closed round, given that you are not reopening it 'roundclosed=null or missing' " +
+                $"Attempt to perform action with ID='{current.ExternalId}' " +
+                $"but within the same round with ID='{current.ExternalRoundId}' we already have " +
+                $"another closing action with ID='{previouslyClosed.ExternalId}' and your action is not reopening the round with roundclosed=false",
+                ActionProhibited);
+
+            return true;
         }
     }
 }

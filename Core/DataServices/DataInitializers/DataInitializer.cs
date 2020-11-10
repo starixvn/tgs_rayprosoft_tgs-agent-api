@@ -19,7 +19,6 @@ namespace TGS.Core.DataServices.DataInitializers
     public sealed partial class DataInitializer : IDataInitializer
     {
         private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
-
         private static readonly object Locker = new object();
         private static readonly string AdminUsername = "admin.enabled";
 
@@ -52,6 +51,8 @@ namespace TGS.Core.DataServices.DataInitializers
             new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
         };
 
+        private Player[] players;
+
         public DataInitializer(ITgsRepository repository)
         {
             _repository = repository;
@@ -63,10 +64,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         async Task IDataInitializer.SetInitialDataAsync()
         {
-            if (_repository.Players.Any())
-            {
-                return;
-            }
+            if (_repository.Players.Any()) return;
 
             var timer = new Stopwatch();
             timer.Start();
@@ -80,6 +78,7 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GeneratePlayersAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, _logBuilder);
+            await LogSeedingTimeAsync(GeneratePaymentAsync, _logBuilder);
 
             timer.Stop();
 
@@ -245,7 +244,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 }
             };
 
-            var players = tmpPlayer.Select(p =>
+            players = tmpPlayer.Select(p =>
             {
                 var playerCode = PlayerCodeGenerator.NewId();
                 var vipId = _vipLevels[rnd.Next(0, 6)].Id;

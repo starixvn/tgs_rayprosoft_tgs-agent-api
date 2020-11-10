@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('dbo.vw_ValidGameActions', 'v') IS NULL
-    EXEC ('CREATE VIEW [dbo].[vw_ValidGameActions] AS SELECT 1 AS [1]');
-GO
-
-ALTER VIEW [dbo].[vw_ValidGameActions]
+CREATE OR ALTER VIEW [dbo].[vw_ValidGameActions]
 AS
     SELECT ga.Id, 
             ga.ExternalTransactionId, 

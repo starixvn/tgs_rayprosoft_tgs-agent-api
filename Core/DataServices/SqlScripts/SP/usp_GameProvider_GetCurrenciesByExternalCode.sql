@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_GameProvider_GetCurrenciesByExternalCode') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_GameProvider_GetCurrenciesByExternalCode AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_GameProvider_GetCurrenciesByExternalCode]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameProvider_GetCurrenciesByExternalCode]
       @gameProviderId  uniqueidentifier
 AS 
 BEGIN

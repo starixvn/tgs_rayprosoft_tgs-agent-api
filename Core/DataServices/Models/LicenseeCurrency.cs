@@ -6,11 +6,11 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid LicenseeId { get; set; }
 
-        public Licensee Licensee { get; set; }
+        public virtual Licensee Licensee { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public Currency Currency { get; set; }
+        public virtual Currency Currency { get; set; }
 
         public string LicenseeCurrencyCode { get; set; }
     }

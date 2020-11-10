@@ -6,10 +6,10 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid GameId { get; set; }
 
-        public Game Game { get; set; }
+        public virtual Game Game { get; set; }
 
         public Guid LicenseeId { get; set; }
 
-        public Licensee Licensee { get; set; }
+        public virtual Licensee Licensee { get; set; }
     }
 }

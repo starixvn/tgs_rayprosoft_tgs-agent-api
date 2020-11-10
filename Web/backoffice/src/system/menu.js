@@ -7,6 +7,10 @@ import {
   Code as DepartmentCode,
   codeLabelPair as departmentPair
 } from "./departments/menu"
+import {
+  Code as PaymentCode,
+  codeLabelPair as paymentPair
+} from "./payments/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const Code = "system"
@@ -64,6 +68,14 @@ const labelOf = ({ locale, code }) => {
         },
         locale
       )
+    case PaymentCode:
+      return getTrans(
+        {
+          zh: "金流管理",
+          en: "Payments"
+        },
+        locale
+      )
     default:
       return ""
   }
@@ -76,6 +88,6 @@ export const codeLabelPair = [
       locale,
       codes,
       label: labelOf,
-      subLabelPairs: [adminPair, rolePair, departmentPair]
+      subLabelPairs: [adminPair, rolePair, departmentPair, paymentPair]
     })
 ]

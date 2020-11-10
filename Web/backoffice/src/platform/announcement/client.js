@@ -1,90 +1,37 @@
 import useSWR, { cache } from "swr"
-import client, { urlWith, get, put, post } from "../../client"
+import client, {
+  urlWith,
+  get,
+  put,
+  post,
+  useGet,
+  useCreatePost,
+  useUpdatePut,
+  usePostFormData
+} from "../../client"
 
 let API = "/api/announcement"
 
-export const useList = (searchParams = {}) => {
-  let key = urlWith(searchParams, API)
-  const { data, error, isValidating, mutate } = useSWR(key, get)
-
-  return {
-    data,
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useAnnouncementList = (searchParams) => {
+  let url = searchParams ? urlWith(searchParams, API) : ""
+  return useGet(url)
 }
 
-export const useVerifyAnnouncement = ({ id, type, data }) => {
-  let fetchData = !!id && !!type && !!data
-  let keys = fetchData ? [`${API}/${id}/${type}`, data] : null
-  let { data: result, error, isValidating, mutate } = useSWR(
-    keys,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useVerifyAnnouncement = ({ id, type }, data) => {
+  let url = !!id && !!type ? `${API}/${id}/${type}` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useAddAnnouncement = ({ data }) => {
-  let fetchData = !!data
-  let keys = fetchData ? [API, data] : null
-  let { data: result, error, isValidating, mutate } = useSWR(
-    keys,
-    (url, data) => post(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useAddAnnouncement = (data) => {
+  return useCreatePost(API, data)
 }
 
-export const useEditAnnouncement = ({ id, data }) => {
-  let fetchData = id && !!data
-  let keys = fetchData ? [`${API}/${id}`, data] : null
-  let { data: result, error, isValidating, mutate } = useSWR(
-    keys,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditAnnouncement = (id, data) => {
+  let url = id ? `${API}/${id}` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useChangeAnnouncementOrders = ({ data }) => {
-  let fetchData = !!data
-  let keys = fetchData ? [`${API}/changeorders`, data] : null
-  let { data: result, error, isValidating, mutate } = useSWR(
-    keys,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useChangeAnnouncementOrders = (data) => {
+  let url = `${API}/changeorders`
+  return useUpdatePut(url, data)
 }

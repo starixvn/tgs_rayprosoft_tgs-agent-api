@@ -6,10 +6,10 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid ResellerId { get; set; }
 
-        public Reseller Reseller { get; set; }
+        public virtual Reseller Reseller { get; set; }
 
         public string CultureCode { get; set; }
 
-        public Language Language { get; set; }
+        public virtual Language Language { get; set; }
     }
 }

@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Player_GetPlayerForCache') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Player_GetPlayerForCache AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Player_GetPlayerForCache]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Player_GetPlayerForCache]
       @playerCode  NVARCHAR(16)
 AS 
 BEGIN

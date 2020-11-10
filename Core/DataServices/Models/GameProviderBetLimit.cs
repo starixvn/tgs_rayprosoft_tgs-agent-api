@@ -10,14 +10,14 @@ namespace TGS.Core.DataServices.Models
 
         public Guid GameProviderId { get; set; }
 
-        public GameProvider GameProvider { get; set; }
+        public virtual GameProvider GameProvider { get; set; }
 
         public int BetLimitGroupId { get; set; }
 
-        public BetLimitGroup BetLimitGroup { get; set; }
+        public virtual BetLimitGroup BetLimitGroup { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public Currency Currency { get; set; }
+        public virtual Currency Currency { get; set; }
     }
 }

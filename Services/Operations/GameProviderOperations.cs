@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
@@ -34,6 +35,8 @@ namespace TGS.Services.Operations
         Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
+
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, string externalGameId);
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, Guid gameId);
 
@@ -194,9 +197,10 @@ namespace TGS.Services.Operations
 
             var betLimitCode = await _gameProviderQueriesFactory().GetGameProviderBetLimitCodeAsync(gameProviderId, currencyCode, betLimitGroupId);
 
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderBetLimitCode, gameProviderId, new HashEntry[] {
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderBetLimitCode, gameProviderId, new HashEntry[] 
+            {
                  new (field, betLimitCode)
-                }, TimeSpan.FromHours(2));
+            }, TimeSpan.FromHours(2));
 
             return betLimitCode;
         }
@@ -204,12 +208,30 @@ namespace TGS.Services.Operations
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId)
         {
             var sets = await _cacheManager.SafeGetAllHashSetAsync(RedisCacheType.Games, gameProviderId);
-            if (sets.Length > 0)
+           
+            return sets.Length > 0
+                ? sets.Select(s => _json.DeserializeFromString<CachedGame>(s.Value)).ToArray()
+                : await GetAndCacheGamesAsync(gameProviderId);
+        }
+
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, string externalGameId)
+        {
+            var cacheType = RedisCacheType.GamesByExternalId;
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, externalGameId);
+            if (value.HasValue)
             {
-                return sets.Select(s => _json.DeserializeFromString<CachedGame>(s.Value)).ToArray();
+                return _json.DeserializeFromString<CachedGame[]>(value);
             }
 
-            return await GetAndCacheGamesAsync(gameProviderId);
+            var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
+            var games = cachedGames.Where(g => g.ExternalId.IgnoreCaseEquals(externalGameId)).ToArray();
+
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
+            {
+                new (externalGameId, _json.SerializeToString(games))
+            }, TimeSpan.FromHours(2));
+
+            return games;
         }
 
         async Task<CachedGame> IGameProviderOperations.GetCachedGameAsync(Guid gameProviderId, Guid gameId)

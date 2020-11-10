@@ -17,25 +17,13 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
-using Player = TGS.Core.DataServices.Models.Player;
-using Resources = TGS.Apis.BackendOffice.Resources;
-using StationLetter = TGS.Core.DataServices.Models.StationLetter;
-using VipLevel = TGS.Core.DataServices.Models.VipLevel;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     public class StationLetterControllerTests : BaseTests
     {
-        private StationLetterController _controller;
-
-        private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new Mock<ITgsQueries<Player>>();
-        private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new Mock<ITgsQueries<StationLetter>>();
-        private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new Mock<ITgsCommands<StationLetter>>();
-        private readonly Mock<ITgsCommands<StationLetterPlayer>> _playerCommandsMock = new Mock<ITgsCommands<StationLetterPlayer>>();
-        private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
-
         [SetUp]
         public override void Setup()
         {
@@ -49,12 +37,24 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 HttpContextAccessorMock.Object);
         }
 
+        private StationLetterController _controller;
+
+        private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new Mock<ITgsQueries<Player>>();
+        private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new Mock<ITgsQueries<StationLetter>>();
+        private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new Mock<ITgsCommands<StationLetter>>();
+
+        private readonly Mock<ITgsCommands<StationLetterPlayer>> _playerCommandsMock =
+            new Mock<ITgsCommands<StationLetterPlayer>>();
+
+        private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
+
         [TestCase(true)]
         [TestCase(false)]
         public async Task Can_Get_List(bool showAll)
         {
             var request = new GetStationLettersRequest
             {
+                Status = StationLetterStatus.InVerify,
                 Page = 1,
                 Rows = 10,
                 SortBy = "CreatedOn",
@@ -67,12 +67,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
+            list = list.Where(q => q.Status == request.Status);
+
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
 
-            var expectedPlayers = showAll ?
-                orderedPlayers.ToArray() :
-                orderedPlayers.Skip(skip).Take(take).ToArray();
+            var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
 
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
@@ -116,11 +116,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
             _commandsMock.Verify(p => p.CreateAsync(It.Is<StationLetter>(s =>
-                  s.Subject == request.Subject &&
-                  s.Content == request.Content &&
-                  s.AssignedAllPlayers == request.AssignedAllPlayers)));
+                s.Subject == request.Subject &&
+                s.Content == request.Content &&
+                s.AssignedAllPlayers == request.AssignedAllPlayers)));
 
-            _playerCommandsMock.Verify(p => p.BatchInsertAsync(It.Is<StationLetterPlayer[]>(s =>
+            _playerCommandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<StationLetterPlayer[]>(s =>
                 s.Length == request.PlayerUsernames.Length)));
         }
 
@@ -131,7 +131,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<StationLetterRequest>();
             var stationLetter = CreateStationLetterFixture().Create<StationLetter>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(), It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+                    It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult(stationLetter));
 
             var response = await _controller.UpdateAsync(stationLetterId, request);
@@ -147,12 +148,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var stationLetterId = Guid.NewGuid();
             var request = new Fixture().Create<StationLetterRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(), It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+                    It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult<StationLetter>(null));
 
             var response = await _controller.UpdateAsync(stationLetterId, request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.StationLetter.NotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.StationLetter.NotFound);
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<StationLetter>(s =>
                 s.Subject == request.Subject &&
                 s.Content == request.Content)), Times.Never);
@@ -166,7 +168,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var stationLetter = CreateStationLetterFixture().Create<StationLetter>();
             stationLetter.Status = StationLetterStatus.InVerify;
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(), It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+                    It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult(stationLetter));
 
             var response = await _controller.VerifyAsync(stationLetter.Id, type, request);
@@ -185,7 +188,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var stationLetterId = Guid.NewGuid();
             var response = await _controller.VerifyAsync(stationLetterId, "test", request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.StationLetter.InvalidUrl);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.StationLetter.InvalidUrl);
         }
 
         [Test]
@@ -194,12 +197,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<VerifyRequest>();
             var stationLetterId = Guid.NewGuid();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(), It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+                    It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult<StationLetter>(null));
 
             var response = await _controller.VerifyAsync(stationLetterId, "pass", request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.StationLetter.NotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.StationLetter.NotFound);
         }
 
         [TestCase("pass", StationLetterStatus.Rejected)]
@@ -213,12 +217,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var stationLetter = CreateStationLetterFixture().Create<StationLetter>();
             stationLetter.Status = status;
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(), It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+                    It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult(stationLetter));
 
             var response = await _controller.VerifyAsync(stationLetterId, type, request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.StationLetter.InvalidStatus);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.StationLetter.InvalidStatus);
         }
 
         [Test]
@@ -227,8 +232,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var players = CreatePlayerFixture()
                 .CreateMany<Player>(100)
                 .AsQueryable()
-                .BuildMock().Object; ;
-            var playerUsernames = players.Select(p => new List<string> { p.Username }).ToList();
+                .BuildMock().Object;
+
+            var playerUsernames = players.Select(p => new List<string> {p.Username}).ToList();
             _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync(It.IsAny<IFormFile>()))
                 .Returns(Task.FromResult(playerUsernames));
 
@@ -267,23 +273,26 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Player>(u => u
-                .With(s => s.Vip, new VipLevel { Id = Guid.NewGuid(), Name = "Vip" })
+                .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Name = "Vip"})
                 .With(s => s.Language, new Language())
                 .With(s => s.Licensee, new Licensee())
                 .With(s => s.ParentPlayer, new Player())
                 .With(s => s.BetLimitGroup, new BetLimitGroup())
-
                 .With(s => s.SubPlayers, new Player[] { })
-                .With(s => s.Banks, new[] { new PlayerBank
+                .With(s => s.Banks, new[]
                 {
-                    Id = Guid.NewGuid(),
-                    Username = Generator.RandomString(5),
-                    BankName = Generator.RandomString(20),
-                    BankAccount = Generator.RandomIntString(20),
-                }})
+                    new PlayerBank
+                    {
+                        Id = Guid.NewGuid(),
+                        Username = Generator.RandomString(5),
+                        BankName = Generator.RandomString(20),
+                        BankAccount = Generator.RandomIntString(20)
+                    }
+                })
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new[] { new Wallet { Balance = 0 } }));
+                .With(s => s.Wallets, new[] {new Wallet {Balance = 0}}));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }

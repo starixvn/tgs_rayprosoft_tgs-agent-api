@@ -13,7 +13,6 @@ using TGS.Apis.BackendOffice.DataService.DataInitializers;
 using TGS.Apis.BackendOffice.DataService.EntityTypeConfigurations;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.DataServices.Base.Interfaces;
-using Setting = TGS.Apis.BackendOffice.DataService.Models.Setting;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
@@ -49,21 +48,14 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             Database.SetCommandTimeout(seconds);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.ApplyConfiguration(new UserMap());
-            modelBuilder.ApplyConfiguration(new RoleMap());
-            modelBuilder.ApplyConfiguration(new SettingMap());
-            modelBuilder.ApplyConfiguration(new DepartmentMap());
-        }
-
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+            where T : class
         {
             return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) where T : class
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
+            Action<decimal> progress) where T : class
         {
             return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
@@ -86,18 +78,24 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                          Database.GetPendingMigrations().Any();
+                            Database.GetPendingMigrations().Any();
 
-            if (isMigrate)
-            {
-                await Database.MigrateAsync();
-            }
+            if (isMigrate) await Database.MigrateAsync();
 
             if (addSeeding)
             {
                 IDataInitializer data = new DataInitializer(this);
                 await data.SetInitialDataAsync();
             }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("dbo");
+            modelBuilder.ApplyConfiguration(new UserMap());
+            modelBuilder.ApplyConfiguration(new RoleMap());
+            modelBuilder.ApplyConfiguration(new SettingMap());
+            modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
     }
 }

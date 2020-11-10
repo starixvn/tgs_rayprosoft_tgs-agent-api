@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Wallet_UpdateWalletBalance') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Wallet_UpdateWalletBalance AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Wallet_UpdateWalletBalance]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Wallet_UpdateWalletBalance]
       @playerCode  NVARCHAR(16),
       @walletId    UNIQUEIDENTIFIER,
       @amount      DECIMAL(18, 6),
