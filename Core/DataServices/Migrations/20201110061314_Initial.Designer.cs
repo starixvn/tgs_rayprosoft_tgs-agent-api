@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201110030734_Initial")]
+    [Migration("20201110061314_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -675,18 +675,15 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("FeePercentage")
-                        .IsRequired()
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("HighestFee")
-                        .IsRequired()
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("LowestFee")
-                        .IsRequired()
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<Guid>("PaymentChannelId")

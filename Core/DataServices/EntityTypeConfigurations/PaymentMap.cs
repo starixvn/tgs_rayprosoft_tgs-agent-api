@@ -54,16 +54,13 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.FeePercentage)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
 
             builder.Property(c => c.LowestFee)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
 
             builder.Property(c => c.HighestFee)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
         }
     }
 }
