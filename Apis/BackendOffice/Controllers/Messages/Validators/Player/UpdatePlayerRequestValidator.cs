@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Apis.BackendOffice.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
 {
@@ -14,12 +13,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
                 .WithMessage(Resources.User.NameRequired);
 
             RuleFor(p => p.Password)
-                .NotNull()
-                .WithMessage(Resources.User.PasswordRequired)
-                .Equal(p => p.ConfirmedPassword)
+                .Equal(p => p.ConfirmedPassword).When(p => p.Password != null)
                 .WithMessage(Resources.User.PasswordNotMatched)
-                .Password();
-            ;
+                .NotEmpty().When(p => p.Password != null).WithMessage(Resources.User.PasswordRequired)
+                .MinimumLength(8).When(p => p.Password != null).WithMessage(Resources.User.PasswordLengthAtLeast)
+                .Matches("[0-9]").When(p => p.Password != null).WithMessage(Resources.User.PasswordNeedNumber)
+                .Matches("[^a-zA-Z0-9]").When(p => p.Password != null)
+                .WithMessage(Resources.User.PasswordNeedSpecialCharacter);
         }
     }
 }

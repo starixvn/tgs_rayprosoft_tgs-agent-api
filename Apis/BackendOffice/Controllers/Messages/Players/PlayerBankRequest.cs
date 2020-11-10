@@ -2,7 +2,7 @@
 {
     public class PlayerBankRequest
     {
-        public string Username { get; set; }
+        public string RealName { get; set; }
         public string BankName { get; set; }
         public string BankAccount { get; set; }
     }

@@ -49,6 +49,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         public Task<PagedResponse<PaymentModel>> GetPaymentsAsync(PaymentsRequest request)
         {
             return _queries.GetQueries()
+                .Where(request.TransferType.ToString(), p => p.TransferType == request.TransferType)
                 .Where(request.PaymentStatus.ToString(), p => p.PaymentStatus == request.PaymentStatus)
                 .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
                                              p.PaymentMethod.Name.Contains(request.Keyword) ||
@@ -60,13 +61,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     PaymentVendorName = q.PaymentVendor.Name,
                     PaymentMethodName = q.PaymentMethod.Name,
                     PaymentChannelName = q.PaymentChannel.Name,
+                    TransferType = q.TransferType,
                     ChannelName = q.ChannelName,
                     PlayerListCondition = q.PlayerListCondition,
                     AllPlayer = q.AllPlayers,
                     DepositedAmountFrom = q.DepositedAmountMin,
                     DepositedAmountTo = q.DepositedAmountMax,
-                    IdentityVerification = q.IdentityAuthentication,
-                    PhoneVerification = q.PhoneAuthentication,
+                    IdentityAuthentication = q.IdentityAuthentication,
+                    PhoneAuthentication = q.PhoneAuthentication,
                     DesignatedUsers = q.PaymentPlayerList.Count > 0,
                     TransferLimitFrom = q.TransferLimitFrom,
                     TransferLimitTo = q.TransferLimitTo,
@@ -117,8 +119,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     TransferLimitTo = payment.TransferLimitTo,
                     PlayerListCondition = payment.PlayerListCondition,
                     AllPlayer = payment.AllPlayers,
-                    IdentityVerification = payment.IdentityAuthentication,
-                    PhoneVerification = payment.PhoneAuthentication,
+                    IdentityAuthentication = payment.IdentityAuthentication,
+                    PhoneAuthentication = payment.PhoneAuthentication,
                     DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
                     DepositedAmountFrom = payment.DepositedAmountMin,
                     DepositedAmountTo = payment.DepositedAmountMax,

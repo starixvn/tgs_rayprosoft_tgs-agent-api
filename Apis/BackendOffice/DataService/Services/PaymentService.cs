@@ -138,6 +138,9 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, serializeSettings));
 
             payment.PaymentStatus = status;
+            payment.UpdatedOn = DateTimeOffset.Now;
+            payment.UpdatedByUsername = username;
+
             _repository.Entry(payment).State = EntityState.Modified;
             await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
             await _repository.SaveChangesAsync();
@@ -187,7 +190,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 BeforeDepositedAmountMax = beforePayment.DepositedAmountMax,
                 AfterDepositedAmountMax = payment.DepositedAmountMax,
                 Reason = payment.Reason,
-                CreatedOn = DateTimeOffset.Now,
+                CreatedOn = payment.UpdatedOn,
                 CreatedByUsername = payment.UpdatedByUsername,
                 Operation = AuditLogOperation.Update
             };

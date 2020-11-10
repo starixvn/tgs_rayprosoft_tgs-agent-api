@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varchar(16))
                 .IsRequired();
 
-            builder.Property(c => c.Username)
+            builder.Property(c => c.RealName)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
