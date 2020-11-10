@@ -24,9 +24,9 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static async Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IQueryable<TModel> query,
             PageableRequest request)
         {
-            var result = query.OrderBy(request.GetSortOption());
+            var result = request.SortBy == null ? query : query.OrderBy(request.GetSortOption());
 
-            if (request.ShowAll)
+            if (request.ShowAll || request.Rows == 0)
             {
                 var allResult = result.ToArray();
                 return new PagedResponse<TModel>
@@ -80,7 +80,10 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption)
         {
             if (!string.IsNullOrEmpty(sortOption.PropertyName))
+            {
                 return query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending);
+            }
+
             return query;
         }
 
@@ -104,7 +107,10 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<TSource> Where<TSource, TFilter>(this IQueryable<TSource> source, TFilter? filter,
             Expression<Func<TSource, bool>> predicate) where TFilter : struct
         {
-            if (filter.HasValue) source = source.Where(predicate);
+            if (filter.HasValue)
+            {
+                source = source.Where(predicate);
+            }
 
             return source;
         }
@@ -113,7 +119,10 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<TSource> Where<TSource>(this IQueryable<TSource> source, string filter,
             Expression<Func<TSource, bool>> predicate)
         {
-            if (!string.IsNullOrWhiteSpace(filter)) source = source.Where(predicate);
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                source = source.Where(predicate);
+            }
 
             return source;
         }
@@ -123,7 +132,10 @@ namespace TGS.Core.DataServices.Base.Extensions
             IEnumerable<TFilter> filter,
             Expression<Func<TSource, bool>> predicate)
         {
-            if (filter != null && filter.Any()) source = source.Where(predicate);
+            if (filter != null && filter.Any())
+            {
+                source = source.Where(predicate);
+            }
 
             return source;
         }
@@ -131,7 +143,10 @@ namespace TGS.Core.DataServices.Base.Extensions
         public static IQueryable<TSource> Where<TSource>(this IQueryable<TSource> source, bool isFiltered,
             Expression<Func<TSource, bool>> predicate)
         {
-            if (isFiltered) source = source.Where(predicate);
+            if (isFiltered)
+            {
+                source = source.Where(predicate);
+            }
 
             return source;
         }

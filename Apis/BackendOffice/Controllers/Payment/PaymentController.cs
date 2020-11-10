@@ -46,7 +46,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 
         [HttpGet]
         [Description("Get Payments")]
-        public Task<PagedResponse<PaymentModel>> GetPaymentsAsync(PaymentsRequest request)
+        public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] PaymentsRequest request)
         {
             return _queries.GetQueries()
                 .Where(request.TransferType.ToString(), p => p.TransferType == request.TransferType)
