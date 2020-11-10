@@ -673,18 +673,15 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("FeePercentage")
-                        .IsRequired()
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("HighestFee")
-                        .IsRequired()
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("LowestFee")
-                        .IsRequired()
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<Guid>("PaymentChannelId")
