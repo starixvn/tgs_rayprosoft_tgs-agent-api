@@ -28,7 +28,8 @@ namespace TGS.Apis.TgsApi
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ?? string.Empty;
-            
+            var env = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.Environment) ?? string.Empty;
+
             return Host.CreateDefaultBuilder(args)
                     .ConfigureAppConfiguration(config =>
                     {
@@ -37,8 +38,8 @@ namespace TGS.Apis.TgsApi
                             filePath = ConfigFileMap.Values.ElementAt(0);
                         }
 
-                        var path = $"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}";
-                        config.AddJsonFile(path, true);
+                        config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", true);
+                        config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", true);
                     })
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
