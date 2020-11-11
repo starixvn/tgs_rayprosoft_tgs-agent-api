@@ -30,7 +30,6 @@ import { Tabs, TabList, useTabState } from "../../tab"
 
 export const ViewButton = ({ player, ...props }) => {
   let dialog = useModalState()
-  let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
   if (!isDisplay) {
@@ -39,15 +38,11 @@ export const ViewButton = ({ player, ...props }) => {
 
   return (
     <>
-      <Disclosure ref={disclosureRef} {...dialog}>
+      <Disclosure {...dialog}>
         <Trans zh="查看" en="View" />
       </Disclosure>
       {dialog.visible && (
-        <TabsDialog
-          playerCode={player.playerCode}
-          dialog={dialog}
-          finalFocusRef={disclosureRef}
-        />
+        <TabsDialog playerCode={player.playerCode} dialog={dialog} />
       )}
     </>
   )
@@ -97,9 +92,7 @@ const TabsDialog = ({
     en: "Player info"
   })
 
-  const { player, isLoading, isError, error, mutate } = usePlayer({
-    playerCode
-  })
+  const { data, isLoading, isError, error, mutate } = usePlayer(playerCode)
 
   const onSubmitted = () => {
     props?.onSubmitted()
@@ -117,7 +110,7 @@ const TabsDialog = ({
     <>
       {isLoading && <LoadingBackdrop />}
       {isError && <AlertDialog {...error} onClickClose={onClickClose} />}
-      {player && (
+      {data && (
         <Modal
           title={title}
           finalFocusRef={finalFocusRef}
@@ -133,12 +126,12 @@ const TabsDialog = ({
           `}
         >
           {readonly && (
-            <ViewTabs playerCode={playerCode} player={player} tab={tab} />
+            <ViewTabs playerCode={playerCode} player={data} tab={tab} />
           )}
           {edit && (
             <EditTabs
               playerCode={playerCode}
-              player={player}
+              player={data}
               tab={tab}
               onSubmitted={onSubmitted}
               onBankSubmitted={onBankSubmitted}

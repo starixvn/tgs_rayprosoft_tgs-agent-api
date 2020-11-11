@@ -66,10 +66,7 @@ export const EditPanel = ({
   ...props
 }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate } = useEditPlayerContact({
-    playerCode,
-    data: submitData
-  })
+  let { result, error, mutate } = useEditPlayerContact(playerCode, submitData)
   useEffect(() => {
     if (result && !error) {
       onSubmitted && onSubmitted()

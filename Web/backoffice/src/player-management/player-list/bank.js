@@ -15,7 +15,6 @@ import {
   Input,
   Checkbox,
   Dialog,
-  Modal,
   Table,
   useClassName
 } from "bumbag"
@@ -32,6 +31,10 @@ import {
 import AlertDialog from "../../dialog/Alert"
 import Backdrop from "../../dialog/Backdrop"
 import { Tab as _Tab, TabPanel } from "../../tab"
+import Disclosure from "../../dialog/Disclosure"
+import { Modal, useModalState } from "../../dialog/Modal"
+import { CancelText, SubmitText } from "../../button/ActionButtons"
+import FormDialog from "../../form/Dialog"
 
 export const Key = "banks"
 
@@ -63,28 +66,23 @@ export const Panel = ({
           />
         ))}
       </TwoColumns>
-      {edit && <AddBank playerCode={playerCode} />}
+      {edit && <AddBank playerCode={playerCode} onSubmitted={onSubmitted} />}
     </TabPanel>
   )
 }
 
 const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
   let { realName = "", bankName = "", bankAccount = "" } = bank
-  let deleteDialog = Modal.useState()
-  let editDialog = Modal.useState()
+  let deleteDialog = useModalState()
+  let editDialog = useModalState()
 
   return (
     <Card>
       {edit && (
         <Set alignX="right">
-          <Modal.Disclosure
-            use={Button}
-            palette="danger"
-            variant="outlined"
-            {...deleteDialog}
-          >
+          <Disclosure palette="danger" variant="outlined" {...deleteDialog}>
             <Icon icon={faMinus} fontSize="300" type="font-awesome" />
-          </Modal.Disclosure>
+          </Disclosure>
           {deleteDialog.visible && (
             <DeleteDialog
               playerCode={playerCode}
@@ -93,9 +91,9 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
               dialog={deleteDialog}
             />
           )}
-          <Modal.Disclosure use={Button} {...editDialog}>
+          <Disclosure {...editDialog}>
             <Icon icon={faCog} fontSize="300" type="font-awesome" />
-          </Modal.Disclosure>
+          </Disclosure>
           {editDialog.visible && (
             <EditDialog
               playerCode={playerCode}
@@ -121,15 +119,14 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
 }
 
 const AddBank = ({ playerCode, onSubmitted }) => {
-  let dialog = Modal.useState()
-  let finalFocusRef = useRef()
+  let dialog = useModalState()
   return (
     <>
       <TwoColumns>
         <Card alignX="center">
-          <Modal.Disclosure use={Button} ref={finalFocusRef} {...dialog}>
+          <Disclosure {...dialog}>
             <Icon icon={faPlus} fontSize="300" type="font-awesome" />
-          </Modal.Disclosure>
+          </Disclosure>
         </Card>
       </TwoColumns>
       {dialog.visible && (
@@ -137,7 +134,6 @@ const AddBank = ({ playerCode, onSubmitted }) => {
           playerCode={playerCode}
           onSubmitted={onSubmitted}
           dialog={dialog}
-          finalFocusRef={finalFocusRef}
         />
       )}
     </>
@@ -164,166 +160,108 @@ const BankLabel = () => <Trans zh="银行" en="Bank" />
 const BankAccount = () => <Trans zh="银行卡号" en="Bank Account" />
 
 const AddDialog = ({ playerCode, onSubmitted, dialog, finalFocusRef }) => {
-  let [submitData, setSubmitData] = useState()
-  let { result, isLoading, error } = useAddPlayerBank({
-    playerCode,
-    data: submitData
-  })
-  useEffect(() => {
-    if (result && !error) {
-      onSubmitted && onSubmitted()
-      dialog.hide()
-    }
-  }, [result])
+  let [submitData, setSubmit] = useState()
+  let { result, isLoading, error } = useAddPlayerBank(playerCode, submitData)
 
-  const reset = () => setSubmitData(null)
-  return (
-    <FormDialog
-      onSubmit={setSubmitData}
-      isLoading={isLoading}
-      error={error}
-      reset={reset}
-      dialog={dialog}
-      finalFocusRef={finalFocusRef}
-    />
-  )
-}
+  const clearResult = () => setSubmit(undefined)
 
-const EditDialog = ({
-  playerCode,
-  bank,
-  onSubmitted,
-  dialog,
-  finalFocusRef
-}) => {
-  let [submitData, setSubmitData] = useState()
-  let { result, isLoading, error } = useEditPlayerBank({
-    playerCode,
-    id: bank?.id,
-    data: submitData
-  })
-  useEffect(() => {
-    if (result && !error) {
-      onSubmitted && onSubmitted()
-      dialog.hide()
-    }
-  }, [result])
-
-  const reset = () => setSubmitData(null)
-
-  return (
-    <FormDialog
-      bank={bank}
-      onSubmit={setSubmitData}
-      isLoading={isLoading}
-      error={error}
-      reset={reset}
-      dialog={dialog}
-      finalFocusRef={finalFocusRef}
-    />
-  )
-}
-
-const FormDialog = ({
-  bank = {},
-  onSubmit,
-  isLoading,
-  error,
-  reset,
-  dialog,
-  finalFocusRef
-}) => {
-  let { realName, bankName, bankAccount } = bank
   return (
     <Backdrop {...dialog}>
-      <Dialog.Modal
-        hideOnClickOutside={false}
-        unstable_finalFocusRef={finalFocusRef}
-        {...dialog}
+      <FormDialog
+        initialValues={{
+          realName: "",
+          bankName: "",
+          bankAccount: ""
+        }}
+        onSubmit={setSubmit}
+        isLoading={isLoading}
+        result={result}
+        error={error}
+        onCloseErrorAlert={clearResult}
+        onSubmitted={onSubmitted}
+        dialog={dialog}
       >
-        {error && <AlertDialog {...error} onClickClose={reset} />}
-        <Formik
-          initialValues={{
-            realName: realName ?? "",
-            bankName: bankName ?? "",
-            bankAccount: bankAccount ?? ""
-          }}
-          onSubmit={onSubmit}
-        >
-          <FormBody isLoading={isLoading} onClickCancel={dialog.hide} />
-        </Formik>
-      </Dialog.Modal>
+        <EditBody />
+      </FormDialog>
     </Backdrop>
   )
 }
 
-const FormBody = ({ onClickCancel, isLoading }) => {
-  let { submitForm } = useFormikContext()
+const EditDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
+  let [submitData, setSubmit] = useState()
+  let { result, isLoading, error } = useEditPlayerBank(
+    {
+      playerCode,
+      id: bank?.id
+    },
+    submitData
+  )
+
+  const clearResult = () => setSubmit(undefined)
+
   return (
-    <Form>
-      <Stack spacing="major-2">
-        <FieldValues>
-          <RealnameLabel />
-          <InputField name="realName" />
-
-          <BankLabel />
-          <InputField name="bankName" />
-
-          <BankAccount />
-          <InputField name="bankAccount" />
-        </FieldValues>
-        <Box alignX="right">
-          <SubmitCancel
-            isLoading={isLoading}
-            onClickSubmit={submitForm}
-            onClickCancel={onClickCancel}
-          />
-        </Box>
-      </Stack>
-    </Form>
+    <Backdrop {...dialog}>
+      <FormDialog
+        initialValues={{
+          ...bank
+        }}
+        onSubmit={setSubmit}
+        isLoading={isLoading}
+        result={result}
+        error={error}
+        onCloseErrorAlert={clearResult}
+        onSubmitted={onSubmitted}
+        dialog={dialog}
+      >
+        <EditBody />
+      </FormDialog>
+    </Backdrop>
   )
 }
 
-const DeleteDialog = ({
-  playerCode,
-  bank,
-  onSubmitted,
-  dialog,
-  finalFocusRef
-}) => {
+const EditBody = ({}) => {
+  return (
+    <FieldValues>
+      <RealnameLabel />
+      <InputField name="realName" />
+
+      <BankLabel />
+      <InputField name="bankName" />
+
+      <BankAccount />
+      <InputField name="bankAccount" />
+    </FieldValues>
+  )
+}
+
+const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
   let [id, setDeleteId] = useState()
-  let { result, isLoading, error } = useDeletePlayerBank({ playerCode, id })
+  let { result, isLoading, error } = useDeletePlayerBank(playerCode, id)
   useEffect(() => {
     if (result && !error) {
       onSubmitted && onSubmitted()
       dialog.hide()
     }
-  }, [result])
+  }, [result, error])
+
+  const clearResult = () => setDeleteId(undefined)
 
   return (
-    <Backdrop {...dialog}>
-      <Dialog.Modal
-        hideOnClickOutside={false}
-        unstable_finalFocusRef={finalFocusRef}
-        {...dialog}
-      >
-        {error && <AlertDialog {...error} onClickClose={clearResult} />}
-        <Box alignX="center" margin="major-1">
-          <Trans
-            zh="是否删除此银行卡？"
-            en="Do you want to delete this card?"
-          />
-        </Box>
-        <Box alignX="right" spacing="major-1">
-          <SubmitCancel
-            isLoading={isLoading}
-            onClickSubmit={() => {
-              setDeleteId(bank.id)
-            }}
-            onClickCancel={dialog.hide}
-          />
-        </Box>
-      </Dialog.Modal>
-    </Backdrop>
+    <Modal
+      showActionButtons
+      actionButtonsProps={{
+        isLoading,
+        onClickSubmit: () => setDeleteId(bank.id),
+        onClickCancel: dialog.hide,
+        cancelText: <CancelText />,
+        submitText: <SubmitText />
+      }}
+      {...dialog}
+    >
+      {error && <AlertDialog {...error} onClickClose={clearResult} />}
+      <Box alignX="center" margin="major-1">
+        <Trans zh="是否删除此银行卡？" en="Do you want to delete this card?" />
+      </Box>
+    </Modal>
   )
 }

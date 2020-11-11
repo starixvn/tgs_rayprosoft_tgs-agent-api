@@ -8,7 +8,7 @@ export const urlWith = (searchParams = {}, url) => {
         return searchParams
       }
 
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && value.length > 0) {
         let result = value.reduce((result, item) => {
           return result ? `${result}&${key}=${item}` : `${key}=${item}`
         }, "")
@@ -53,7 +53,12 @@ const fetchApi = (
   }).then(toDataOrError)
 }
 
-const dropEmptyValues = (record = {}) => {
+const dropEmptyValues = (record) => {
+  if (record === null || typeof record != "object") {
+    //Note. typeof null = "object"
+    return record
+  }
+
   return Object.entries(record).reduce((data, [key, value]) => {
     if (isEmptyString(value) || isNilOrUndefined(value)) {
       return data
@@ -75,7 +80,7 @@ export const useGet = (url) => {
 
   return {
     data,
-    isLoading: !error && !data,
+    isLoading: !error && !data && fetchData,
     isValidating,
     error,
     isError: error,
@@ -85,7 +90,7 @@ export const useGet = (url) => {
 }
 
 export const useCreatePost = (url, data) => {
-  let fetchData = !!url && !!data
+  let fetchData = !!url && data !== undefined
   let keys = fetchData ? [url, data] : null
   let { data: result, error, isValidating, mutate } = useSWR(
     keys,
@@ -138,6 +143,28 @@ export const useUpdatePut = (url, data) => {
   )
 
   const clearCache = () => cache.clear(url)
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate,
+    clearCache
+  }
+}
+
+export const useDelete = (url, options) => {
+  let fetchData = !!url
+  let key = fetchData ? url : null
+  const { data: result, error, isValidating, mutate } = useSWR(key, (url) =>
+    fetchApi("DELETE", url, options)
+  )
+
+  const clearCache = () => {
+    cache.clear(url)
+  }
 
   return {
     result,

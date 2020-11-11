@@ -12,8 +12,8 @@ import {
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code } from "./menu"
-import { useList } from "./client"
-import { useTable, Table, pageCount } from "../../table"
+import { useAdminList } from "./client"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/Search"
 import equals from "fast-deep-equal"
@@ -36,15 +36,9 @@ const AsyncContent = () => {
     username: ""
   })
 
-  let { pageIndex, pageSize, sortby, orderby, username = "" } = state
+  let { pageIndex, pageSize, username = "" } = state
 
-  let { data, isLoading, mutate } = useList({
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby,
-    orderby,
-    username
-  })
+  let { data, isLoading, mutate } = useAdminList(toApiParams(state))
   const fetchTable = mutate
   let columns = useTableColumns({ fetchTable })
 
@@ -62,10 +56,7 @@ const AsyncContent = () => {
               if (equals(newState, { pageIndex, username })) {
                 mutate()
               }
-              setState({
-                pageIndex: 0,
-                ...data
-              })
+              setState(newState)
             }}
             isPending={isLoading}
           />

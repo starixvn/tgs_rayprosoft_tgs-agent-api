@@ -46,6 +46,34 @@ export const useTable = (initialState = {}) => {
   }
 }
 
+/*
+ pageIndex -> page
+ pageSize -> rows
+*/
+export const toApiParams = (state) => {
+  if (!state) {
+    return undefined
+  }
+
+  let { pageIndex, pageSize, sortBy = [], ...restState } = state
+  let page = pageIndex + 1
+  let rows = pageSize
+  let [sort] = sortBy
+  let sortby = ""
+  let orderby = ""
+  if (sort) {
+    sortby = sort?.id
+    orderby = fromIsDescending(sort?.desc)
+  }
+  return {
+    ...restState,
+    page,
+    rows,
+    sortby,
+    orderby
+  }
+}
+
 export const Table = ({
   columns,
   data = [],
@@ -93,7 +121,12 @@ export const Table = ({
             pageSize,
             sortBy
           }),
-          [state, pageIndex, controlledState?.sortby, controlledState?.orderby]
+          [
+            JSON.stringify(state),
+            pageIndex,
+            controlledState?.sortby,
+            controlledState?.orderby
+          ]
         )
       },
       manualSortBy,

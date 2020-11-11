@@ -44,7 +44,7 @@ const DeleteDialog = ({
   ...props
 }) => {
   let [deleteId, setDelete] = useState()
-  let { result, error, isLoading } = useDeleteRole({ id: deleteId })
+  let { result, error, isLoading } = useDeleteRole(deleteId)
 
   const submit = () => setDelete(id)
 

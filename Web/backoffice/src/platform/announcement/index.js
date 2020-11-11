@@ -79,8 +79,9 @@ const AsyncContentBody = ({}) => {
   let { selectedId } = tab
 
   const setStatus = (newStatusName) => () => {
-    //clearCache()
-    mutate()
+    if (newStatusName === statusName) {
+      mutate()
+    }
     setStatusName(newStatusName)
   }
 
@@ -444,5 +445,7 @@ const useColumns = ({
       }
     })
   }
-  return useMemo(() => columns, [tabStatusName, JSON.stringify(items)])
+  return useMemo(() => {
+    return columns
+  }, [tabStatusName, JSON.stringify(items)])
 }

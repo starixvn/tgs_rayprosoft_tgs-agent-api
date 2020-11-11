@@ -1,168 +1,67 @@
-import useSWR from "swr"
-import client, { urlWith, get, put, post } from "../../client"
+import {
+  urlWith,
+  useGet,
+  useCreatePost,
+  useUpdatePut,
+  useDelete
+} from "../../client"
 
-export const useList = (searchParams = {}) => {
-  let url = urlWith(searchParams, `/api/player`)
-  const { data, error, isValidating, mutate } = useSWR(url, get)
+let API = "/api/player"
 
+export const usePlayerList = (searchParams) => {
+  let url = searchParams ? urlWith(searchParams, API) : ""
+  return useGet(url)
+}
+
+export const usePlayer = (playerCode) => {
+  let url = playerCode ? `${API}/${playerCode}` : ""
+  let { data, ...rest } = useGet(url)
   return {
-    data,
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
+    data: data?.player,
+    ...rest
   }
 }
 
-export const usePlayer = ({ playerCode }) => {
-  const { data, error, isValidating, mutate } = useSWR(
-    playerCode ? `/api/player/${playerCode}` : null,
-    (url) => get(url).then((data) => data.player)
-  )
-
-  return {
-    player: data,
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditPlayerInfo = (playerCode, data) => {
+  let url = playerCode ? `${API}/${playerCode}/info` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useEditPlayerInfo = ({ playerCode, data }) => {
-  let fetchData = playerCode && data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? `/api/player/${playerCode}/info` : null,
-    (url) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditPlayerContact = (playerCode, data) => {
+  let url = playerCode ? `${API}/${playerCode}/contact` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useEditPlayerContact = ({ playerCode, data }) => {
-  let fetchData = playerCode && data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? `/api/player/${playerCode}/contact` : null,
-    (url) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useAddPlayerBank = (playerCode, data) => {
+  let url = playerCode ? `${API}/${playerCode}/bank` : ""
+  return useCreatePost(url, data)
 }
 
-export const useAddPlayerBank = ({ playerCode, data }) => {
-  let fetchData = playerCode && data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? `/api/player/${playerCode}/bank` : null,
-    (url) => post(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditPlayerBank = ({ playerCode, id } = {}, data) => {
+  let url = playerCode && id ? `${API}/${playerCode}/bank/${id}` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useEditPlayerBank = ({ playerCode, id, data }) => {
-  let fetchData = playerCode && id && data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? `/api/player/${playerCode}/bank/${id}` : null,
-    (url) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useDeletePlayerBank = (playerCode, id) => {
+  let url = playerCode && id ? `${API}/${playerCode}/bank/${id}` : ""
+  return useDelete(url)
 }
 
-export const useDeletePlayerBank = ({ playerCode, id }) => {
-  let fetchData = playerCode && id
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? `/api/player/${playerCode}/bank/${id}` : null,
-    (url) => client.delete(url)
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditPlayerPassword = (playerCode, data) => {
+  let url = playerCode ? `${API}/${playerCode}/password` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useEditPlayerPassword = ({ playerCode, data }) => {
-  const fetchData = playerCode && data?.password
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/player/${playerCode}/password`, data] : null,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
-}
-
-export const useOperations = ({ playerCode, searchParams = {} }) => {
+export const useOperations = (playerCode, searchParams) => {
   let url = playerCode
-    ? urlWith(searchParams, `/api/player/${playerCode}/operations`)
-    : null
-
-  const { data, error, isValidating, mutate } = useSWR(url, get)
-
-  return {
-    data: data ?? {},
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+    ? urlWith(searchParams, `${API}/${playerCode}/operations`)
+    : ""
+  return useGet(url)
 }
 
-export const useBettings = ({ playerCode, searchParams = {} }) => {
+export const useBettings = (playerCode, searchParams) => {
   let url = playerCode
-    ? urlWith(searchParams, `/api/player/${playerCode}/bettings`)
-    : null
-
-  const { data, error, isValidating, mutate } = useSWR(url, get)
-
-  return {
-    data: data ?? {},
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+    ? urlWith(searchParams, `${API}/${playerCode}/bettings`)
+    : ""
+  return useGet(url)
 }

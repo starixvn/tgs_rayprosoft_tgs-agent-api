@@ -10,8 +10,8 @@ import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
 import { DeleteButton } from "./delete"
 import { Code } from "./menu"
-import { useList } from "./client"
-import { useTable, Table, pageCount } from "../../table"
+import { useDepartmentList } from "./client"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 
 export { Code }
@@ -32,12 +32,7 @@ const AsyncContent = () => {
 
   let { pageIndex, pageSize, sortby, orderby } = state
 
-  let { data, isLoading, mutate } = useList({
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby,
-    orderby
-  })
+  let { data, isLoading, mutate } = useDepartmentList(toApiParams(state))
   const fetchTable = mutate
   let columns = useTableColumns({ fetchTable })
 

@@ -46,18 +46,15 @@ export const Panel = ({ playerCode, ...props }) => {
     from,
     to
   } = state
-  let { data = {}, isLoading, mutate } = useBettings({
-    playerCode: isActive && playerCode,
-    searchParams: {
-      page: pageIndex + 1,
-      rows: pageSize,
-      sortby,
-      orderby,
-      gameType,
-      gameProvider,
-      from: format(from),
-      to: format(to)
-    }
+  let { data = {}, isLoading, mutate } = useBettings(playerCode, {
+    page: pageIndex + 1,
+    rows: pageSize,
+    sortby,
+    orderby,
+    gameType,
+    gameProvider,
+    from: format(from),
+    to: format(to)
   })
 
   let columns = useColumns()

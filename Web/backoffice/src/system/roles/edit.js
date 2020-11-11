@@ -41,9 +41,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
     isLoading: isLoadingMenus,
     error: fetchMenusError,
     mutate
-  } = useMenus({
-    shouldFetch: dialog.visible
-  })
+  } = useMenus(dialog.visible)
 
   useEffect(() => {
     if (!dialog.visible) {
@@ -82,9 +80,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 const AddDialog = ({ menus = [], dialog, onSubmitted, finalFocusRef }) => {
   let [menusState, setMenus] = useState()
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useAddRole({
-    data: submitData
-  })
+  let { result, error, isLoading } = useAddRole(submitData)
 
   useEffect(() => {
     setMenus(cloneDeep(menus))
@@ -223,9 +219,9 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 }
 
 const AsyncRoleDialog = ({ id, dialog, onSubmitted, finalFocusRef }) => {
-  let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole({
-    id: dialog.visible && id
-  })
+  let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole(
+    id
+  )
 
   if (isLoading) {
     return <LoadingBackdrop visible={true} />
@@ -263,10 +259,7 @@ const EditDialog = ({
 }) => {
   let [menusState, setMenus] = useState(cloneDeep(menus))
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useEditRole({
-    id,
-    data: submitData
-  })
+  let { result, error, isLoading } = useEditRole(id, submitData)
 
   useEffect(() => {
     setMenus(cloneDeep(menus))
