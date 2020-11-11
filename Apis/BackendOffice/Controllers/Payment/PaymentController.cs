@@ -100,7 +100,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     .AsNoTracking());
             if (payment == null)
             {
-                return CreateInvalidResponse<GetPaymentResponse>(Resources.Payment.PlayerNotFound);
+                return CreateInvalidResponse<GetPaymentResponse>(Resources.Payment.PaymentNotFound);
             }
 
             return new GetPaymentResponse

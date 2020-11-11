@@ -16,6 +16,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Infrastructures.File;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -34,6 +35,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _commandsMock.Object,
                 _playerCommandsMock.Object,
                 _uploadServiceMock.Object,
+                _fileServiceMock.Object,
                 HttpContextAccessorMock.Object);
         }
 
@@ -42,6 +44,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new Mock<ITgsQueries<Player>>();
         private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new Mock<ITgsQueries<StationLetter>>();
         private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new Mock<ITgsCommands<StationLetter>>();
+        private readonly Mock<IFileService> _fileServiceMock = new Mock<IFileService>();
 
         private readonly Mock<ITgsCommands<StationLetterPlayer>> _playerCommandsMock =
             new Mock<ITgsCommands<StationLetterPlayer>>();

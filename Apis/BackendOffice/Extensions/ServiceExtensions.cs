@@ -24,6 +24,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
 using TGS.Core.DataServices.Log;
+using TGS.Core.Infrastructures.File;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -53,6 +54,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
             services.AddTransient(typeof(IPaymentService), typeof(PaymentService));
+            services.AddTransient(typeof(IFileService), typeof(FileService));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -61,7 +63,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddJson()
                 .AddSecurity()
                 .AddWebApiServices()
-                .AddTgsLog();
+                .AddTgsLog()
+                .AddFile(configuration);
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

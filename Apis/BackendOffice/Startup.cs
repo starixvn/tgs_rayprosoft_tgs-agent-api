@@ -1,7 +1,9 @@
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Middlewares;
@@ -11,8 +13,8 @@ namespace TGS.Apis.BackendOffice
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -25,7 +27,7 @@ namespace TGS.Apis.BackendOffice
             services.AddBackendOfficeServices(_configuration);
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (_env.IsDevelopmentOrDocker())
             {
@@ -40,13 +42,21 @@ namespace TGS.Apis.BackendOffice
 
             app.UseAuthorization();
 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "Images")),
+                RequestPath = "/Images"
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
 
-            var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+            var requestLocalizationOptions =
+                app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
         }
     }
