@@ -10,7 +10,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     public partial class AnnouncementController
     {
-        [HttpPut("{id}/{status}/status")]
+        [HttpPut("{id}/status/{status}")]
         [Description("Change an announcement status")]
         public async Task<MessageResponse> ChangeStatusAsync(Guid id, AnnounceStatus status)
         {
