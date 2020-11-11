@@ -7,11 +7,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
     {
         public UpdatePlayerRequestValidator()
         {
-            RuleFor(p => p.RealName)
-                .NotNull()
-                .NotEmpty()
-                .WithMessage(Resources.User.NameRequired);
-
             RuleFor(p => p.Password)
                 .Equal(p => p.ConfirmedPassword).When(p => p.Password != null)
                 .WithMessage(Resources.User.PasswordNotMatched)
