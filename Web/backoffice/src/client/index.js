@@ -36,9 +36,25 @@ export const post = (url, options) => fetchApi("POST", url, options)
 const fetchApi = (
   method = "",
   url,
-  { body, data = {}, headers = {}, ...options } = {}
+  { headers = {}, body, data, ...options } = {}
 ) => {
-  data = Object.entries(data).reduce((data, [key, value]) => {
+  headers = data
+    ? {
+        "Content-Type": "application/json",
+        ...headers
+      }
+    : headers
+
+  return fetch(url, {
+    method,
+    headers,
+    body: body ?? JSON.stringify(dropEmptyValues(data)),
+    ...options
+  }).then(toDataOrError)
+}
+
+const dropEmptyValues = (record = {}) => {
+  return Object.entries(record).reduce((data, [key, value]) => {
     if (isEmptyString(value) || isNilOrUndefined(value)) {
       return data
     }
@@ -46,15 +62,6 @@ const fetchApi = (
     data[key] = value
     return data
   }, {})
-  return fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
-    body: body ?? JSON.stringify(data),
-    ...options
-  }).then(toDataOrError)
 }
 
 export const useGet = (url) => {
@@ -62,7 +69,9 @@ export const useGet = (url) => {
   let key = fetchData ? url : null
   const { data, error, isValidating, mutate } = useSWR(key, get)
 
-  const clear = cache.clear(url)
+  const clearCache = () => {
+    cache.clear(url)
+  }
 
   return {
     data,
@@ -71,7 +80,7 @@ export const useGet = (url) => {
     error,
     isError: error,
     mutate,
-    clear
+    clearCache
   }
 }
 
@@ -83,7 +92,7 @@ export const useCreatePost = (url, data) => {
     (url, data) => post(url, { data })
   )
 
-  const clear = cache.clear(url)
+  const clearCache = () => cache.clear(url)
 
   return {
     result,
@@ -92,7 +101,31 @@ export const useCreatePost = (url, data) => {
     error,
     isError: error,
     mutate,
-    clear
+    clearCache
+  }
+}
+
+export const usePostFormData = (url, formData) => {
+  let fetchData = !!url && !!formData
+  let keys = fetchData ? [url, formData] : null
+  let { data: result, error, isValidating, mutate } = useSWR(
+    keys,
+    (url, formData) =>
+      post(url, {
+        body: formData
+      })
+  )
+
+  const clearCache = () => cache.clear(url)
+
+  return {
+    result,
+    isLoading: !error && !result && fetchData,
+    isValidating,
+    error,
+    isError: error,
+    mutate,
+    clearCache
   }
 }
 
@@ -104,7 +137,7 @@ export const useUpdatePut = (url, data) => {
     (url, data) => put(url, { data })
   )
 
-  const clear = cache.clear(url)
+  const clearCache = () => cache.clear(url)
 
   return {
     result,
@@ -113,7 +146,7 @@ export const useUpdatePut = (url, data) => {
     error,
     isError: error,
     mutate,
-    clear
+    clearCache
   }
 }
 

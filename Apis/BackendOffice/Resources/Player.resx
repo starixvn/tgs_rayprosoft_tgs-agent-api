@@ -126,8 +126,8 @@
   <data name="BankNotFound" xml:space="preserve">
     <value>Bank is not found.</value>
   </data>
-  <data name="BankUsernameRequired" xml:space="preserve">
-    <value>Player bank username is required.</value>
+  <data name="BankRealNameRequired" xml:space="preserve">
+    <value>Player bank real name is required.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
     <value>Player not found.</value>

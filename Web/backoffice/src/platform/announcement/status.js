@@ -101,8 +101,7 @@ export const ToggleButton = ({ record, onSubmitted }) => {
   let { id, status } = record
   let [data, setSubmit] = useState()
   //TODO: use another api for status change?
-  let { result, isLoading, error } = useEditAnnouncement({ id, data })
-  console.log("status", status)
+  let { result, isLoading, error } = useEditAnnouncement(id, data)
 
   useEffect(() => {
     if (result && !error) {
@@ -110,10 +109,16 @@ export const ToggleButton = ({ record, onSubmitted }) => {
     }
   }, [result, error])
 
+  let palette =
+    status === InvalidName
+      ? "danger"
+      : status === EffectiveName
+      ? "success"
+      : "default"
   return (
     <Button
       isLoading={isLoading}
-      palette={status === InvalidName ? "danger" : "success"}
+      palette={palette}
       onClick={() => {
         let newStatus = status === InvalidName ? Effective : Invalid
         setSubmit({

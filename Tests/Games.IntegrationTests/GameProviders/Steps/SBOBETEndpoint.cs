@@ -253,7 +253,35 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalTransactionId = betRequest.ExternalTransactionId,
             };
 
-            var response = await client.CancelSettleAsync(request);
+            var response = await client.RollbackAsync(request);
+
+            var externalRoundId = betRequest.ExternalRoundId;
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        [Given(@"I cancel the cancellation")]
+        [When(@"I cancel the cancellation")]
+        public async Task WhenICancelTheCancellation()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var config = await GetSBOSetting();
+            
+            var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
+
+            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
+
+            var request = new RollbackRequest
+            {
+                CompanyKey = config.CompanyKey,
+                PlayerCode = playerCode,
+                GameType = betRequest.GameType,
+                ProductType = betRequest.ProductType,
+                ExternalTransactionId = betRequest.ExternalTransactionId,
+            };
+
+            var response = await client.RollbackAsync(request);
 
             var externalRoundId = betRequest.ExternalRoundId;
             Set(SR.ExternalRoundId, externalRoundId);
@@ -290,7 +318,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var request = Get<RollbackRequest>(SR.Request);
 
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
-            var response = await client.CancelSettleAsync(request);
+            var response = await client.RollbackAsync(request);
+
+            Set(SR.Response, response);
+        }
+
+        [When(@"I resend cancel the cancellation transaction")]
+        public async Task WhenIResendCancelTheCancellationTransactionAsync()
+        {
+            var request = Get<RollbackRequest>(SR.Request);
+
+            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
+            var response = await client.RollbackAsync(request);
 
             Set(SR.Response, response);
         }
@@ -360,7 +399,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
-                select act).FirstAsync();
+                select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
 
@@ -374,7 +413,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             var db = GetDb<IBetRepository>(_serviceProvider);
-            var platform = await db.Rounds.Where(r => r.ExternalRoundId == externalRoundId)
+            var platform = await db.Rounds
+                .Where(r => r.ExternalRoundId == externalRoundId)
+                .AsNoTracking()
                 .Select(r => r.PlatformType)
                 .FirstAsync();
 
@@ -391,7 +432,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId
-                select act).ToArrayAsync();
+                select act).AsNoTracking().ToArrayAsync();
 
             var lastSettleId = gameActions
                 .Where(ga => ga.Type.IsNotAllOf(GameActionType.PlaceBet, GameActionType.CancelTransaction))
@@ -399,6 +440,24 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var isCanceled = gameActions.Any(ga =>
                 ga.Type == GameActionType.CancelTransaction && ga.ReferencedGameActionId == lastSettleId);
+
+            isCanceled.Should().BeTrue();
+        }
+
+        [Then(@"the cancellation of game action recorded in the database will be canceled")]
+        public async Task  ThenTheCancellationOfGameActionRecordedInTheDatabaseWillBeCanceledAsync()
+        {
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var db = GetDb<IBetRepository>(_serviceProvider);
+
+            var gameActions = await (
+                from act in db.GameActions
+                join r in db.Rounds on act.RoundId equals r.Id
+                where r.ExternalRoundId == externalRoundId
+                select act).AsNoTracking().ToArrayAsync();
+
+            var last = gameActions.Last();
+            var isCanceled = gameActions.Any(ga => ga.Type == GameActionType.CancelTransaction && ga.Id == last.ReferencedGameActionId);
 
             isCanceled.Should().BeTrue();
         }

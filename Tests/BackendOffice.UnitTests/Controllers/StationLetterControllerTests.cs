@@ -287,7 +287,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     new PlayerBank
                     {
                         Id = Guid.NewGuid(),
-                        Username = Generator.RandomString(5),
+                        RealName = Generator.RandomString(5),
                         BankName = Generator.RandomString(20),
                         BankAccount = Generator.RandomIntString(20)
                     }

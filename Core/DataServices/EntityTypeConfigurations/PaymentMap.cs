@@ -36,6 +36,31 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.Property(c => c.TransferLimitFrom)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.TransferLimitTo)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.DepositedAmountMin)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.DepositedAmountMax)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.FeePercentage)
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
+
+            builder.Property(c => c.LowestFee)
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
+
+            builder.Property(c => c.HighestFee)
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
         }
     }
 }

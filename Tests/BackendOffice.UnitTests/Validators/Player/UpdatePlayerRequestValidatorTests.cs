@@ -34,12 +34,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         }
 
         [Test]
-        public void Should_have_error_password_is_null()
+        public void Should_not_have_error_when_password_is_null()
         {
             var model = new UpdatePlayerRequest {Password = null};
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordRequired);
+            result.ShouldNotHaveValidationErrorFor(request => request.Password);
         }
 
         [Test]
@@ -49,24 +48,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Password)
                 .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordLengthAtLeast);
-        }
-
-        [Test]
-        public void Should_not_have_error_when_password_have_not_upper_case_letter()
-        {
-            var model = new UpdatePlayerRequest {Password = "p@ssw0rd", ConfirmedPassword = "p@ssw0rd"};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedUpperCaseLetter);
-        }
-
-        [Test]
-        public void Should_not_have_error_when_password_have_not_lower_case_letter()
-        {
-            var model = new UpdatePlayerRequest {Password = "P@SSW0RD", ConfirmedPassword = "P@SSW0RD"};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedLowerCaseLetter);
         }
 
         [Test]

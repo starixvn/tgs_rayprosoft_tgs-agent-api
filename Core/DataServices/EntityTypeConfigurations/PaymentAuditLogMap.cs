@@ -38,6 +38,38 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.Operation)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
+
+            builder.Property(c => c.BeforeTransferLimitFrom)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.BeforeTransferLimitTo)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.BeforeDepositedAmountMin)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.BeforeDepositedAmountMax)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.AfterTransferLimitFrom)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.AfterTransferLimitTo)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.AfterDepositedAmountMin)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
+
+            builder.Property(c => c.AfterDepositedAmountMax)
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .IsRequired();
         }
     }
 }

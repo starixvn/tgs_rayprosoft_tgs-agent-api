@@ -14,6 +14,7 @@ namespace TGS.Core.Models.Services.Games
         public TransactionData[] Transactions { get; init; }
         public bool HasCurrencyFromGameProvider { get; init; } = true;
         public bool ForceGetPreviousActions { get; init; }
+        public bool AllowCancelCancelTransaction { get; set; }
         public bool FreeBetAsSingleRound { get; init; }
         public Guid? BatchId { get; init; }
     }

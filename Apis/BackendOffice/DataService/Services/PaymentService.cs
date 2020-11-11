@@ -80,9 +80,12 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username)
         {
-            var serializeSettings = new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Ignore};
             var beforePayment =
-                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, serializeSettings));
+                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                }));
 
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
@@ -133,11 +136,17 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
         {
-            var serializeSettings = new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Ignore};
             var beforePayment =
-                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, serializeSettings));
+                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                }));
 
             payment.PaymentStatus = status;
+            payment.UpdatedOn = DateTimeOffset.Now;
+            payment.UpdatedByUsername = username;
+
             _repository.Entry(payment).State = EntityState.Modified;
             await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
             await _repository.SaveChangesAsync();
@@ -187,7 +196,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 BeforeDepositedAmountMax = beforePayment.DepositedAmountMax,
                 AfterDepositedAmountMax = payment.DepositedAmountMax,
                 Reason = payment.Reason,
-                CreatedOn = DateTimeOffset.Now,
+                CreatedOn = payment.UpdatedOn,
                 CreatedByUsername = payment.UpdatedByUsername,
                 Operation = AuditLogOperation.Update
             };

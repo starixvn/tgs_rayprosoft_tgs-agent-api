@@ -29,5 +29,6 @@ namespace TGS.Services.GameOperations.Models.Data
         // (except in ApiCallLogs)
         public bool IsExplicitlyClosingRound { get; init; }
         public bool IsExplicitlyNotClosingRound { get; init; }
+        public bool AllowCancelCancelTransaction { get; init; }
     }
 }

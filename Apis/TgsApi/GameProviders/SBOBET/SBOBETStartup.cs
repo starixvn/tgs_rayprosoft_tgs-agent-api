@@ -1,3 +1,6 @@
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
     {
         protected override string LogPrefix => "sbo";
 
+        
         public SBOBETStartup(IConfiguration configuration, IWebHostEnvironment env) :
             base(configuration, env)
         {

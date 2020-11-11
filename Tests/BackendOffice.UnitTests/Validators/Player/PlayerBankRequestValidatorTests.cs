@@ -19,18 +19,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_have_error_when_username_is_null()
         {
-            var model = new PlayerBankRequest {Username = null};
+            var model = new PlayerBankRequest {RealName = null};
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Username)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Player.BankUsernameRequired);
+            result.ShouldHaveValidationErrorFor(request => request.RealName)
+                .WithErrorMessage(Apis.BackendOffice.Resources.Player.BankRealNameRequired);
         }
 
         [Test]
         public void Should_not_have_error_when_username_is_specified()
         {
-            var model = new PlayerBankRequest {Username = "Username"};
+            var model = new PlayerBankRequest {RealName = "Username"};
             var result = _validator.TestValidate(model);
-            result.ShouldNotHaveValidationErrorFor(request => request.Username);
+            result.ShouldNotHaveValidationErrorFor(request => request.RealName);
         }
 
         [Test]

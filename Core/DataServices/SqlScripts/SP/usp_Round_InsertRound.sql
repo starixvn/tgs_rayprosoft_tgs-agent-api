@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Round_InsertRound') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Round_InsertRound AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Round_InsertRound]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Round_InsertRound]
         @roundId                        uniqueidentifier,
         @externalRoundId                nvarchar(255),
         @walletId                       uniqueidentifier,

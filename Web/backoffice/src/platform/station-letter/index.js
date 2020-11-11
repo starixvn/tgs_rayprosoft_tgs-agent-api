@@ -34,7 +34,6 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
@@ -96,6 +95,22 @@ const Body = () => {
         </TabList>
         {hasVerifyAuth && (
           <TabPanel tabId={InVerifyName} {...tab}>
+            {statusName === InVerifyName && (
+              <Table
+                columns={columns}
+                data={data?.items}
+                pageCount={pageCount(pageSize, data?.totalCount)}
+                setPageIndex={setPageIndex}
+                setSortOrder={setSortOrder}
+                initialState={state}
+                isLoading={isLoading}
+              />
+            )}
+          </TabPanel>
+        )}
+
+        <TabPanel tabId={PublishedName} {...tab}>
+          {statusName === PublishedName && (
             <Table
               columns={columns}
               data={data?.items}
@@ -105,31 +120,21 @@ const Body = () => {
               initialState={state}
               isLoading={isLoading}
             />
-          </TabPanel>
-        )}
-
-        <TabPanel tabId={PublishedName} {...tab}>
-          <Table
-            columns={columns}
-            data={data?.items}
-            pageCount={pageCount(pageSize, data?.totalCount)}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            initialState={state}
-            isLoading={isLoading}
-          />
+          )}
         </TabPanel>
 
         <TabPanel tabId={RejectedName} {...tab}>
-          <Table
-            columns={columns}
-            data={data?.items}
-            pageCount={pageCount(pageSize, data?.totalCount)}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            initialState={state}
-            isLoading={isLoading}
-          />
+          {statusName === RejectedName && (
+            <Table
+              columns={columns}
+              data={data?.items}
+              pageCount={pageCount(pageSize, data?.totalCount)}
+              setPageIndex={setPageIndex}
+              setSortOrder={setSortOrder}
+              initialState={state}
+              isLoading={isLoading}
+            />
+          )}
         </TabPanel>
       </Tabs>
     </PageContent>

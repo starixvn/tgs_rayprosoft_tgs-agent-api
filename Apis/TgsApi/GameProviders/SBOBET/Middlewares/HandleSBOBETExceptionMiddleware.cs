@@ -1,4 +1,7 @@
-﻿using System;
+﻿// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Commons.Middlewares;
@@ -26,14 +29,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
         protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode, Exception exception)
         {
             var error = (GameApiError)errorCode;
-            var desc = error.Description();
+            var message = ErrorMapper.GetMessageByException(exception);
+            var desc = error.Description(message);
 
             var request = await context.Request.ReadFromJsonAsync<BaseRequest>();
 
             var res = new BaseResponse
             {
                 ErrorCode = (int)error,
-                ErrorMessage = desc.IsNotNullOrEmpty() ? desc : ErrorMapper.GetMessageByException(exception),
+                ErrorMessage = desc,
                 PlayerCode = request.PlayerCode
             };
 

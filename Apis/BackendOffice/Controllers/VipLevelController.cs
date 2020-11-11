@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.VipLevel;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -14,13 +13,12 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class VipLevelController : BaseContextController
     {
-        private readonly ITgsQueries<VipLevel> _queries;
         private readonly ITgsCommands<VipLevel> _commands;
+        private readonly ITgsQueries<VipLevel> _queries;
 
         public VipLevelController(
             ITgsQueries<VipLevel> queries,
@@ -31,20 +29,26 @@ namespace TGS.Apis.BackendOffice.Controllers
             _commands = commands;
         }
 
-        [HttpGet, Description("Get vip levels")]
-        public Task<PagedResponse<VipLevelModel>> GetListAsync([FromQuery] PageableRequest request)
+        [HttpGet]
+        [Description("Get vip levels")]
+        public async Task<VipLevelsResponse> GetListAsync()
         {
-            return _queries.GetQueries()
+            var vipLevels = await _queries.GetQueries()
                 .Select(d => new VipLevelModel
                 {
                     Id = d.Id,
                     Code = d.Code,
                     Name = d.Name
-                })
-                .CreatePagedResponseAsync(request);
+                }).ToArrayAsync();
+            return new VipLevelsResponse
+            {
+                Valid = true,
+                VipLevels = vipLevels
+            };
         }
 
-        [HttpPut("{id}"), Description("Update a vip level")]
+        [HttpPut("{id}")]
+        [Description("Update a vip level")]
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] VipLevelRequest request)
         {
             var vipLevel = await _queries.GetSingleAsync(p => p.Id == id);
@@ -72,7 +76,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpDelete("{id}"), Description("Delete a vip level")]
+        [HttpDelete("{id}")]
+        [Description("Delete a vip level")]
         public async Task<MessageResponse> DeleteAsync(Guid id)
         {
             var vipLevel = await _queries.GetSingleAsync(p => p.Id == id, d => d.Include(x => x.Players));
@@ -91,7 +96,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
 
-        [HttpPost, Description("Create a vip level")]
+        [HttpPost]
+        [Description("Create a vip level")]
         public async Task<MessageResponse> CreateAsync([FromBody] VipLevelRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Name == request.Name))

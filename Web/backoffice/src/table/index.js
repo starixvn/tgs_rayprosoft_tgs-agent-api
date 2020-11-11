@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react"
 import { css, Global } from "@emotion/core"
 import { Icon, Table as _Table, Pagination, Set } from "bumbag"
 import ReactTable, { useTable as _useTable } from "react-table"
-import { fromIsDescending } from "./order"
+import { fromIsDescending, equalsDescending } from "./order"
 import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
 const DefaultState = {
   pageIndex: 0,
   pageSize: 10,
   sortby: "",
-  orderby: ""
+  orderby: "",
+  sortBy: []
 }
 
 export const useTable = (initialState = {}) => {
@@ -31,7 +32,9 @@ export const useTable = (initialState = {}) => {
   }
 
   const setSortOrder = ({ sortby = "", orderby = "" }) => {
-    set((prevState) => ({ ...prevState, sortby, orderby }))
+    set((prevState) => {
+      return { ...prevState, sortby, orderby }
+    })
   }
 
   return {
@@ -46,6 +49,7 @@ export const useTable = (initialState = {}) => {
 export const Table = ({
   columns,
   data = [],
+  initialState,
   controlledState,
   useSortBy = ReactTable.useSortBy,
   manualSortBy = true,
@@ -68,17 +72,28 @@ export const Table = ({
     {
       columns,
       data,
+      initialState,
       useControlledState: (state) => {
         let pageIndex = controlledState?.pageIndex ?? state.pageIndex
         let pageSize = controlledState?.pageSize ?? state.pageSize
+        let sortBy = [...state.sortBy]
+        if (controlledState?.sortby) {
+          sortBy = [
+            {
+              id: controlledState?.sortby,
+              desc: equalsDescending(controlledState?.orderby)
+            }
+          ]
+        }
 
         return React.useMemo(
           () => ({
             ...state,
             pageIndex,
-            pageSize
+            pageSize,
+            sortBy
           }),
-          [state, pageIndex, pageSize]
+          [state, pageIndex, controlledState?.sortby, controlledState?.orderby]
         )
       },
       manualSortBy,

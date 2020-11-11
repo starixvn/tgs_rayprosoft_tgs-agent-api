@@ -4,23 +4,14 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
-using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
 using GameActionResult = TGS.Services.GameOperations.Models.Data.GameActionResult;
 
 namespace TGS.Services.GameOperations.Data
 {
-    internal sealed partial class GameActionDataOperations
-    {        
-        private void ThrowIfPlayerDisableToPlaceBet(TransactionData[] transactions, PlayerStatus playerStatus)
-        {
-            if (transactions.Any(t => t.GameActionType.IsOneOf(LockAmount, PlaceBet)))
-            {
-                _statusValidator.ThrowIfPlayerDisabledToPlaceBet(playerStatus);
-            }
-        }
-
+    internal sealed partial class GameActionProcessor
+    {  
         private void ValidateAmounts(GameActionState s)
         {
             s.ValidateAmount(nameof(s.Amount), s.Amount);

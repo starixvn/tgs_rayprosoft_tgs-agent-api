@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_Round_UpdateRound') IS NULL
-    EXEC('CREATE PROCEDURE dbo.usp_Round_UpdateRound AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_Round_UpdateRound]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Round_UpdateRound]
         @roundId            uniqueidentifier,        
         @status             smallint,        
         @closedOn           datetimeoffset,

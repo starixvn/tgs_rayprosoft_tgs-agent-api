@@ -126,7 +126,7 @@
   <data name="BankNotFound" xml:space="preserve">
     <value>找不到银行</value>
   </data>
-  <data name="BankUsernameRequired" xml:space="preserve">
+  <data name="BankRealNameRequired" xml:space="preserve">
     <value>银行用户名称为必填</value>
   </data>
   <data name="NotFound" xml:space="preserve">

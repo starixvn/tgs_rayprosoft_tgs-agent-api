@@ -3,11 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-IF OBJECT_ID('usp_GameAction_GetValidGameActionExternalIds') IS NULL
-    EXEC('CREATE PROCEDURE [dbo].[usp_GameAction_GetValidGameActionExternalIds] AS');
-GO
-
-ALTER PROCEDURE [dbo].[usp_GameAction_GetValidGameActionExternalIds]
+CREATE OR ALTER PROCEDURE [dbo].[usp_GameAction_GetValidGameActionExternalIds]
     @gameProviderId					UNIQUEIDENTIFIER,
 	@playerCode						VARCHAR(16),
 	@externalRoundId                NVARCHAR(255),
@@ -24,7 +20,8 @@ BEGIN
         ga.ExternalGameActionGroupId,
         ga.[Type] AS GameActionType,
         ga.Amount,
-        ga.RecordedOn
+        ga.RecordedOn,
+        ExternalReferencedTransactionId = (SELECT ExternalTransactionId FROM GameActions WHERE ga.ReferencedGameActionId = Id)
     FROM dbo.vw_ValidGameActions ga --WITH ( NOLOCK )
     JOIN dbo.Rounds r --WITH ( NOLOCK ) 
     ON r.Id = ga.RoundId

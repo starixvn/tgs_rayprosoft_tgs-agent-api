@@ -1,11 +1,11 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["Apis/OperatorApi/OperatorApi.csproj", "Apis/OperatorApi/"]
 COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
@@ -18,6 +18,8 @@ RUN dotnet restore "Apis/OperatorApi/OperatorApi.csproj"
 COPY . .
 WORKDIR "/src/Apis/OperatorApi"
 RUN dotnet build "OperatorApi.csproj" -c Release -o /app/build
+
+RUN dotnet dev-certs https --trust
 
 FROM build AS publish
 RUN dotnet publish "OperatorApi.csproj" -c Release -o /app/publish
