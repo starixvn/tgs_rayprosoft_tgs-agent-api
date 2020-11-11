@@ -56,9 +56,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
+            var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
+
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.Where(request.Status.Contains(AnnounceStatus.Expired),
-                    p => DateTimeOffset.Now > p.To)
+            var orderedRoles = list.Where(hasExpiredStatus, p => DateTimeOffset.Now > p.To)
+                .Where(!hasExpiredStatus, p => request.Status.Contains(p.Status) && DateTimeOffset.Now < p.To)
                 .Where(!request.Status.Contains(AnnounceStatus.Expired),
                     p => request.Status == null || request.Status.Contains(p.Status))
                 .OrderByDescending(p => p.UpdatedOn);

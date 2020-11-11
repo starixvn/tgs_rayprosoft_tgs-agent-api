@@ -13,8 +13,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
                 .NotEmpty().When(p => p.Password != null).WithMessage(Resources.User.PasswordRequired)
                 .MinimumLength(8).When(p => p.Password != null).WithMessage(Resources.User.PasswordLengthAtLeast)
                 .Matches("[0-9]").When(p => p.Password != null).WithMessage(Resources.User.PasswordNeedNumber)
-                .Matches("[^a-zA-Z0-9]").When(p => p.Password != null)
-                .WithMessage(Resources.User.PasswordNeedSpecialCharacter);
+                .Matches("[a-zA-Z]").When(p => p.Password != null)
+                .WithMessage(Resources.User.PasswordNeedCharacter);
         }
     }
 }
