@@ -20,8 +20,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
     {
         private readonly RequestDelegate _next;
 
-        public VerifyPlayerTokenMiddleware(
-            RequestDelegate next)
+        public VerifyPlayerTokenMiddleware(RequestDelegate next)
         {
             _next = next;
         }
@@ -32,7 +31,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
             IHashProvider hashProvider,
             IPlayerOperations playerOperations,
             ILicenseeOperations licenseeOperations,
-            IExpirationValidator expirationValidator)
+            IExpirationValidator expirationValidator,
+            IJwtTokenHandler handler)
         {
             var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizePlayerTokenAttribute>();
 
@@ -56,8 +56,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 return;
             }
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(token);
+            var jwt = handler.ReadToken(token);
 
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             if (sub.IsNullOrEmpty())
@@ -70,7 +69,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             var playerCode = data.PlayerCode;
             await expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, data.PlatformType);
-            
+
             if (!attribute.NeedAuthorize)
             {
                 await _next(context);
@@ -84,9 +83,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var payload = hashProvider.Hash($"{sub}:{jti}");
             var signature = $"{payload}:{secretKey}";
 
-            try
-            {
-                handler.ValidateToken(token, new TokenValidationParameters
+            handler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidIssuer = Consts.Site,
@@ -95,16 +92,9 @@ namespace TGS.Apis.OperatorApi.Middlewares
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                }, out _);
-            }
-            catch (SecurityTokenExpiredException)
-            {
-                throw new PlayerLoginExpiredException(playerCode);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidCredentialsException(e.Message);
-            }
+                },
+                exception => throw new InvalidCredentialsException(exception.Message),
+                _ => throw new PlayerLoginExpiredException(playerCode));
 
             await _next(context);
         }

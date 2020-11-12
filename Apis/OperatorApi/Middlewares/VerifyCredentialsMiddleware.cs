@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
-using ContextItems = TGS.Core.Models.Consts.ContextItems;
 
 namespace TGS.Apis.OperatorApi.Middlewares
 {
@@ -25,7 +25,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
         public async Task InvokeAsync(HttpContext context,
             ILicenseeOperations licenseeOperations,
-            IStatusValidator statusValidator)
+            IStatusValidator statusValidator,
+            IJwtTokenHandler handler)
         {
             if (!context.Request.Headers.TryGetValue("Authorization", out var values))
             {
@@ -39,8 +40,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             }
 
             var token = authorization[6..].Trim();
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(token);
+            var jwt = handler.ReadToken(token);
 
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             var currency = jwt.Claims.FirstOrDefault(x => x.Type == Consts.ClaimName.Currency)?.Value;
@@ -54,9 +54,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var secretKey = await licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
             var signature = $"{licenseeId}:{currency}:{secretKey}";
 
-            try
-            {
-                handler.ValidateToken(token, new TokenValidationParameters
+            handler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidIssuer = Consts.Site,
@@ -65,14 +63,11 @@ namespace TGS.Apis.OperatorApi.Middlewares
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                }, out _);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidCredentialsException(ex.Message);
-            }
+                },
+                exception => throw new InvalidCredentialsException(exception.Message),
+                _ => throw new InvalidCredentialsException("token expired"));
 
-            context.Items.Add(ContextItems.LicenseeId, licenseeId);
+            context.Items.Add(Core.Models.Consts.ContextItems.LicenseeId, licenseeId);
 
             await _next(context);
         }
