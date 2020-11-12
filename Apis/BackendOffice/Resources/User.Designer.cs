@@ -97,6 +97,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password need character..
+        /// </summary>
+        public static string PasswordNeedCharacter {
+            get {
+                return ResourceManager.GetString("PasswordNeedCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password need lower case letter..
         /// </summary>
         public static string PasswordNeedLowerCaseLetter {
@@ -111,15 +120,6 @@ namespace TGS.Apis.BackendOffice.Resources {
         public static string PasswordNeedNumber {
             get {
                 return ResourceManager.GetString("PasswordNeedNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Password need special character..
-        /// </summary>
-        public static string PasswordNeedSpecialCharacter {
-            get {
-                return ResourceManager.GetString("PasswordNeedSpecialCharacter", resourceCulture);
             }
         }
         
