@@ -38,7 +38,7 @@ export const Field = ({ required, validate, ...props }) => {
 }
 
 export const Select = ({ ...props }) => {
-  let { error, data = {}, isLoading } = useRoleList()
+  let { error, data = {}, isLoading } = useRoleList({ showAll: true })
   let { items = [] } = data
   let options = items.map(({ id, name }) => ({
     label: name,

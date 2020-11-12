@@ -37,7 +37,7 @@ export const Field = ({ required, validate, ...props }) => {
 }
 
 export const Select = ({ ...props }) => {
-  let { error, data = {}, isLoading } = useDepartmentList()
+  let { error, data = {}, isLoading } = useDepartmentList({ showAll: true })
   let { items = [] } = data
   let options = items.map(({ id, name }) => ({
     label: name,
