@@ -247,7 +247,7 @@ namespace TGS.Services.Operations.Commands
                 username,
                 async (repo, trans) =>
                 {
-                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType, trans.GetDbTransaction());
+                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.LoginRecordId, trans.GetDbTransaction());
 
                     CreateAuditLog(repo, username, $"Player '{username}' logout.", data.UpdatedOn);
 
@@ -274,9 +274,30 @@ namespace TGS.Services.Operations.Commands
         }
 
         private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode,
+            Guid loginRecordId, IDbTransaction transaction = null)
+        {
+            const string sql = "usp_Player_DeauthorizeByLoginRecordId";
+            return repo.ExecuteSqlCommandAsync(sql, transaction: transaction, parameters: new SqlParameter[]
+            {
+                new()
+                {
+                    ParameterName = "@playerCode",
+                    Value = playerCode,
+                    DbType = DbType.String
+                },
+                new()
+                {
+                    ParameterName = "@loginRecordId",
+                    Value = loginRecordId,
+                    DbType = DbType.Guid
+                }
+            });
+        }
+
+        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode,
             PlatformType? platformType, IDbTransaction transaction = null)
         {
-            const string sql = "usp_Player_Deauthorize";
+            const string sql = "usp_Player_DeauthorizeByPlatform";
             return repo.ExecuteSqlCommandAsync(sql, transaction: transaction, parameters: new SqlParameter[]
             {
                 new()

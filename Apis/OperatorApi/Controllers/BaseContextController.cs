@@ -15,6 +15,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ToDictionary(p => p.Type, p => p.Value);
         }
 
-        protected string Username => _userInfoMap?[Consts.UserInfo.UsernameKey];
+        protected string Username => _userInfoMap?[Consts.UserInfo.PlayerCodeKey];
     }
 }

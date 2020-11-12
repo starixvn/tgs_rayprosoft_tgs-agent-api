@@ -3,7 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[usp_Player_Deauthorize]
+CREATE OR ALTER PROCEDURE [dbo].[usp_Player_DeauthorizeByPlatform]
       @playerCode    NVARCHAR(16),
       @platformType  smallint NULL
 AS 

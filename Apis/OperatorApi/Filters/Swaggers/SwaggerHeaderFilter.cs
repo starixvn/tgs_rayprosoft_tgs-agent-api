@@ -2,7 +2,7 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace TGS.Apis.OperatorApi.Filters
+namespace TGS.Apis.OperatorApi.Filters.Swaggers
 {
     public sealed class SwaggerHeaderFilter : IOperationFilter
     {

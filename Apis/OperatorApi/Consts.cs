@@ -16,7 +16,7 @@
 
         public static class UserInfo
         {
-            public const string UsernameKey = "Username";
+            public const string PlayerCodeKey = "PlayerCode";
         }
     }
 }

@@ -7,12 +7,15 @@ namespace TGS.Apis.OperatorApi.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseVerifyCredentialsMiddleware(this IApplicationBuilder app)
-        {
-            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico", "/swagger", "/api/auth" };
+        private static readonly IList<string> BypassRouting = new[]
+            {"/api/status", "/favicon.ico", "/swagger", "/api/auth"};
 
-            app.UseWhen(context => bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)),
-                builder => builder.UseMiddleware<VerifyCredentialsMiddleware>());
+        public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app)
+        {
+            app.UseWhen(context => BypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)),
+                builder => builder
+                    .UseMiddleware<VerifyCredentialsMiddleware>()
+                    .UseMiddleware<VerifyPlayerTokenMiddleware>());
 
             return app;
         }

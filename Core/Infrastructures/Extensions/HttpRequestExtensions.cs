@@ -23,5 +23,16 @@ namespace TGS.Core.Infrastructures.Extensions
 
             return body;
         }
+
+        public static async Task<T> ReadAsObjectFromJsonAsync<T>(this HttpRequest request)
+        {
+            request.EnableBuffering();
+
+            var o = await request.ReadFromJsonAsync<T>();
+
+            request.Body.Seek(0, SeekOrigin.Begin);
+
+            return o;
+        }
     }
 }

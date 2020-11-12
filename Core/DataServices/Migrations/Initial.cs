@@ -64,7 +64,9 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameAction_InsertGameAction"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_Deauthorize"));
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_DeauthorizeByPlatform"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.StoreProcedureSqlForamt, "usp_Player_DeauthorizeByLoginRecordId"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_GameProvider_GetSubGameIdMaps"));
             migrationBuilder.SqlResource(assembly,

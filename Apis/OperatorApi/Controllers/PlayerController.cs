@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.IO;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
@@ -35,37 +40,49 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class PlayerController : BaseContextController
     {
         private readonly IPlayerOperations _playerOperations;
+        private readonly ILicenseeOperations _licenseeOperations;
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly ITokenProvider _tokenProvider;
+        private readonly IHashProvider _hashProvider;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IStatusValidator _statusValidator;
         private readonly IPlayerQueries _playerQueries;
         private readonly ICaptchaFactory _captchaFactory;
+        private readonly IJwtTokenHandler _jwtTokenHandler;
+        private readonly IJsonSerializationProvider _json;
 
         public PlayerController(
-            ITokenProvider tokenProvider,
-            IPasswordHandler passwordHandler,
-            IStatusValidator statusValidator,
             IPlayerQueries playerQueries,
             IPlayerOperations playerOperations,
-            IRequestAnalyzer requestAnalyzer,
+            ILicenseeOperations licenseeOperations,
             ICaptchaFactory captchaFactory,
+            IJwtTokenHandler jwtTokenHandler,
+            ITokenProvider tokenProvider,
+            IHashProvider hashProvider,
+            IPasswordHandler passwordHandler,
+            IJsonSerializationProvider json,
+            IStatusValidator statusValidator,
+            IRequestAnalyzer requestAnalyzer,
             IHttpContextAccessor httpContextAccessor) :
             base(httpContextAccessor)
         {
             _tokenProvider = tokenProvider;
+            _hashProvider = hashProvider;
             _passwordHandler = passwordHandler;
             _statusValidator = statusValidator;
             _playerQueries = playerQueries;
             _playerOperations = playerOperations;
+            _licenseeOperations = licenseeOperations;
             _requestAnalyzer = requestAnalyzer;
             _captchaFactory = captchaFactory;
+            _jwtTokenHandler = jwtTokenHandler;
+            _json = json;
         }
 
         /// <summary>
         /// Get captcha image, answer related information
         /// </summary>
-        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [AllowAnonymous]
         [HttpGet, Route("captcha")]
         public CaptchaInfo GetCaptcha()
         {
@@ -75,7 +92,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Check username exists
         /// </summary>
-        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [AllowAnonymous]
         [HttpPost, Route("checkUsername")]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
@@ -92,7 +109,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Create a player
         /// </summary>
-        [AllowAnonymous, IgnoreAntiforgeryToken]
+        [AllowAnonymous]
         [HttpPost, Route("create")]
         public async Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request)
         {
@@ -172,8 +189,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ExpiredOn = createdOn.AddSeconds(TokenExpireSeconds.PlayerLogin)
             });
 
-            await SignInAsync(username);
-
             var playerTokenData = new PlayerTokenData
             {
                 PlayerCode = playerCode,
@@ -181,10 +196,12 @@ namespace TGS.Apis.OperatorApi.Controllers
                 PlatformType = record.PlatformType,
                 ExpiredOn = record.ExpiredOn
             };
+            
+            var token = await GeneratePlayerJwtToken(licenseeId, playerTokenData);
 
             return new LoginResponse
             {
-                PlayerToken = _tokenProvider.Encrypt(playerTokenData),
+                PlayerToken = token,
                 LoginTime = createdOn
             };
         }
@@ -192,30 +209,30 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Player logout, player login is needed when use this
         /// </summary>
-        [Authorize]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [HttpPost, Route("logout")]
         public async Task<LogoutResponse> LogoutAsync(LogoutRequest request)
         {
-            var username = request.PlayerToken;
             var licenseeId = HttpContext.Items.GetLicenseeId();
             await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var playerCode = playerTokenData.PlayerCode;
 
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.PlayerToken);
-            if (playerCode.IsNullOrEmpty())
+            var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
+            if (cachedPlayer == null)
             {
-                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
+                throw new PlayerNotFoundException(playerCode, Resources.Player.NotFound);
             }
 
             var updatedOn = DateTimeOffset.UtcNow;
             await _playerOperations.PlayerLogoutAsync(new PlayerLogoutData
             {
-                Username = username,
+                Username = cachedPlayer.Username,
                 PlayerCode = playerCode,
-                PlatformType = request.PlatformType,
+                LoginRecordId = playerTokenData.LoginRecordId,
                 UpdatedOn = updatedOn,
             });
-
-            await HttpContext.SignOutAsync();
 
             return new LogoutResponse { UpdateTime = updatedOn };
         }
@@ -251,7 +268,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// TokenExpireSeconds forget password
+        /// Player forget password
         /// </summary>
         [AllowAnonymous]
         [HttpPost, Route("forgotPassword"), Description("Forgot passowrd")]
@@ -263,7 +280,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Update player information, player login is needed when use this
         /// </summary>
-        [Authorize(CookieAuthenticationDefaults.AuthenticationScheme)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [HttpPut, Route("update")]
         public async Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request)
         {
@@ -297,9 +314,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// TokenExpireSeconds change password, player login is needed when use this
+        /// Player change password, player login is needed when use this
         /// </summary>
-        [Authorize(CookieAuthenticationDefaults.AuthenticationScheme)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [HttpPut, Route("changePassword")]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
@@ -336,23 +353,23 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        private Task SignInAsync(string username)
+        private async Task<string> GeneratePlayerJwtToken(Guid licenseeId, PlayerTokenData playerTokenData)
         {
-            var claims = new List<Claim>
+            var data = _tokenProvider.Encrypt(playerTokenData);
+
+            var jti = Guid.NewGuid().ToString();
+            var identity = new ClaimsIdentity(new[]
             {
-                new Claim(Consts.UserInfo.UsernameKey, username),
-            };
+                new Claim(JwtRegisteredClaimNames.Sub, data),
+                new Claim(JwtRegisteredClaimNames.Jti, jti)
+            });
 
-            var authProperties = new AuthenticationProperties
-            {
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(TokenExpireSeconds.PlayerLogin),
-                IsPersistent = true,
-            };
+            var payload = _hashProvider.Hash($"{data}:{jti}");
+            var secretKey = await _licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
+            var signature = Encoding.UTF8.GetBytes($"{payload}:{secretKey}");
 
-            const string scheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            var claimsIdentity = new ClaimsIdentity(claims, scheme);
-
-            return HttpContext.SignInAsync(scheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+            return _jwtTokenHandler.GenerateToken(identity, signature, Consts.Site,
+                playerTokenData.ExpiredOn.DateTime);
         }
     }
 }
