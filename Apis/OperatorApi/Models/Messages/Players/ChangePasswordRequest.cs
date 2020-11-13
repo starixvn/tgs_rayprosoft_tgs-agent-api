@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record ChangePasswordRequest : BaseTokenRequest
+    public record ChangePasswordRequest
     {
         [Required]
         [JsonPropertyName("oldpwd")]

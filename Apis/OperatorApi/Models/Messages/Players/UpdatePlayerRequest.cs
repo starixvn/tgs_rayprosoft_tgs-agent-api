@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record UpdatePlayerRequest : BaseTokenRequest
+    public record UpdatePlayerRequest
     {
         [JsonPropertyName("realname")]
         public string RealName { get; init; }

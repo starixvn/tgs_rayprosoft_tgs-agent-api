@@ -1,11 +1,8 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -56,8 +53,6 @@ namespace TGS.Apis.OperatorApi
                     .AddErrorMappers()
                     .AddApiClient()
                     .AddPluggalbeGameProviderApiClient();
-
-            services.AddHttpContextAccessor();
 
             services.AddControllers();
 

@@ -8,6 +8,14 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Players
         [Required]
         [JsonPropertyName("username")]
         public string Username { get; init; }
+        
+        [Required]
+        [JsonPropertyName("currency")]
+        public string CurrencyCode { get; init;  }
+
+        [Required]
+        [JsonPropertyName("lang")]
+        public string Language { get; init; }
 
         [Required]
         [JsonPropertyName("pwd")]

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using TGS.Apis.OperatorApi.Attributes;
-using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
@@ -42,14 +41,13 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 return;
             }
 
-            var request = await context.Request.ReadAsObjectFromJsonAsync<BaseTokenRequest>();
+            var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
 
-            var token = request?.PlayerToken;
             if (token.IsNullOrEmpty())
             {
                 if (!attribute.AllowNullOrEmpty)
                 {
-                    throw new MissingTokenException("token is empty.");
+                    throw new MissingTokenException(Resources.Player.MissingPlayerToken);
                 }
 
                 await _next(context);
@@ -61,7 +59,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             if (sub.IsNullOrEmpty())
             {
-                throw new MissingTokenException("token is empty.");
+                throw new MissingTokenException(Resources.Player.MissingPlayerToken);
             }
 
             var data = tokenProvider.Decrypt<PlayerTokenData>(sub);

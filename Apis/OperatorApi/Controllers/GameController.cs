@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
+using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages.Games;
 using TGS.Core.Infrastructures.Extensions;
@@ -70,6 +71,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost]
         [Route("list")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async Task<GetGamesResponse> GetGamesAsync(GetGamesRequest request)
         {
             var licenseeId = HttpContext.Items.GetLicenseeId();
@@ -78,17 +80,15 @@ namespace TGS.Apis.OperatorApi.Controllers
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
             var platform = request.PlatformType;
-            var username = request.UserName;
-            CachedPlayer cachedPlayer = null;
-            if (username.IsNotNullOrEmpty())
-            {
-                var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, username);
-                cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerCode);
-            }
+
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var cachedPlayer = playerTokenData != null
+                ? await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode)
+                : null;
 
             var cacheKey = $"{licenseeId}";
             var field = cachedPlayer == null
-                ? $"{platform}:{gameProviderId}:{cultureCode}:general:"
+                ? $"{platform}:{gameProviderId}:{cultureCode}:general"
                 : $"{platform}:{gameProviderId}:{cultureCode}:{cachedPlayer.DefaultWalletCurrencyCode}:{(int) cachedPlayer.Type}";
 
             var value =
@@ -107,7 +107,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await _cacheManger.SafeCacheHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, cacheKey, new HashEntry[]
             {
-                new (field, _json.SerializeToString(gameModels))
+                new(field, _json.SerializeToString(gameModels))
             }, TimeSpan.FromHours(1));
 
             return new GetGamesResponse
@@ -118,15 +118,16 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost]
         [Route("geturl")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            var platformType = request.PlatformType;
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
-            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+            var platformType = playerTokenData.PlatformType;
+            var playerCode = playerTokenData.PlayerCode;
+            var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerCode);
 
-            _statusValidator.ThrowIfPlayerDisabled(player.Status);
+            _statusValidator.ThrowIfPlayerDisabled(cachedPlayer.Status);
             await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platformType);
 
             var gameProviderCode = request.GameProviderCode;
@@ -135,15 +136,15 @@ namespace TGS.Apis.OperatorApi.Controllers
             var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameCode, platformType);
 
-            var statuses = _validStatus.GetStatus(player.Type);
-            var gameStatuses = _validGameStatus.GetStatus(player.Type);
+            var statuses = _validStatus.GetStatus(cachedPlayer.Type);
+            var gameStatuses = _validGameStatus.GetStatus(cachedPlayer.Type);
             await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(gameProviderId, game.Id, gameCode,
                 statuses, gameStatuses);
 
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(gameProviderCode);
-            var r = await _pluggableApiClient.GetGameUrlAsync(serviceUrl, new ()
+            var r = await _pluggableApiClient.GetGameUrlAsync(serviceUrl, new()
             {
-                Player = player,
+                Player = cachedPlayer,
                 GameProvider = gameProvider,
                 Game = game
             });
@@ -176,6 +177,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 var isCurrencySupported =
                     await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
+
                 if (!isCurrencySupported)
                 {
                     return Array.Empty<GetGamesResponse.GameModel>();
