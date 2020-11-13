@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Extensions
     public static class ServiceExtensions
     {
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
-            IConfiguration configuration)
+            IConfiguration configuration, IWebHostEnvironment environment)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
 
@@ -64,7 +65,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddFile(configuration);
+                .AddFile(configuration)
+                .AddAwsService(configuration, environment);
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

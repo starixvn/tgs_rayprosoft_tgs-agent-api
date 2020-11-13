@@ -228,8 +228,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 // TinyMCE editor functions.
             }
 
-            var path = await _fileService.UploadFileAsync(request.FormFile);
-            var imageUrl = $"{Request.Scheme}://{Request.Host}/{path}";
+            var imageUrl = await _fileService.UploadFileAsync(request.FormFile);
 
             return new ImageUploadResponse
             {

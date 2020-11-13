@@ -24,7 +24,7 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBackendOfficeServices(_configuration);
+            services.AddBackendOfficeServices(_configuration, _env);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -45,8 +45,8 @@ namespace TGS.Apis.BackendOffice
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.ContentRootPath, "Images")),
-                RequestPath = "/Images"
+                    Path.Combine(env.ContentRootPath, "UploadImages")),
+                RequestPath = "/UploadImages"
             });
 
             app.UseEndpoints(endpoints =>
