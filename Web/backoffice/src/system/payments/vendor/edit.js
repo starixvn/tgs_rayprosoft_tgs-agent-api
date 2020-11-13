@@ -207,6 +207,8 @@ const AddChannelDialog = ({ onSubmitted, dialog, ...props }) => {
     setSubmit(null)
   }
 
+  //TODO: i18n
+  let title = "Add Channel"
   return (
     <FormDialog
       initialValues={{
