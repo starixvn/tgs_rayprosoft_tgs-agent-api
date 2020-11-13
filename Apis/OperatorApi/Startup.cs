@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -39,28 +40,45 @@ namespace TGS.Apis.OperatorApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs")
-                    .AddBetRepository(_configuration, "Bet");
+                .AddBetRepository(_configuration, "Bet");
 
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
 
             services.AddNats(_configuration)
-                    .AddWebApiServices()
-                    .AddTgsLog()
-                    .AddRedis()
-                    .AddJson()
-                    .AddSecurity()
-                    .AddOperations()
-                    .AddErrorMappers()
-                    .AddApiClient()
-                    .AddPluggalbeGameProviderApiClient();
+                .AddWebApiServices()
+                .AddTgsLog()
+                .AddRedis()
+                .AddJson()
+                .AddSecurity()
+                .AddOperations()
+                .AddErrorMappers()
+                .AddApiClient()
+                .AddPluggalbeGameProviderApiClient();
 
             services.AddControllers();
 
             if (!_env.IsProduction())
             {
-                services.AddSwaggerGen(c => 
+                services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TGS Operator API", Version = "v1" }); 
+                    c.SwaggerDoc("v1", new OpenApiInfo {Title = "TGS Operator API", Version = "v1"});
+
+                    var securityScheme = new OpenApiSecurityScheme
+                    {
+                        Name = "Api Authorization",
+                        Description = "authorized jwt token, get from api/auth/jwt",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        BearerFormat = "JWT",
+                        Scheme = "bearer",
+                        Reference = new OpenApiReference
+                        {
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme
+                        }
+                    };
+
+                    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
 
                     c.OperationFilter<SwaggerHeaderFilter>();
                     c.SchemaFilter<SwaggerEnumDescriptionFilter>();
@@ -81,15 +99,12 @@ namespace TGS.Apis.OperatorApi
                 app.UseHsts();
                 // app.UseHttpsRedirection();
             }
-            
+
             app.UseRouting();
 
             app.UseVerifyJwtTokenMiddlewares();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
             if (!_env.IsProduction())
             {
