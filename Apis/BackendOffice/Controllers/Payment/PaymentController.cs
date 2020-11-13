@@ -49,8 +49,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] PaymentsRequest request)
         {
             return _queries.GetQueries()
-                .Where(request.TransferType.ToString(), p => p.TransferType == request.TransferType)
-                .Where(request.PaymentStatus.ToString(), p => p.PaymentStatus == request.PaymentStatus)
+                .Where(request.TransferType, p => p.TransferType == request.TransferType)
+                .Where(request.PaymentStatus, p => p.PaymentStatus == request.PaymentStatus)
                 .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
                                              p.PaymentMethod.Name.Contains(request.Keyword) ||
                                              p.PaymentChannel.Name.Contains(request.Keyword))
