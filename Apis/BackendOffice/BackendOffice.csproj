@@ -17,24 +17,13 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
-    <PackageReference Include="EFCore.BulkExtensions" Version="3.1.5" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0-preview3" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.7">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.7">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
-    <PackageReference Include="MockQueryable.Moq" Version="3.1.3" />
+    <PackageReference Include="MockQueryable.Moq" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
