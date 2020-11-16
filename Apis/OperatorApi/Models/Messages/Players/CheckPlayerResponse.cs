@@ -7,9 +7,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Players
     {
         [JsonPropertyName("isexist")]
         public bool Exists { get; init; }
-
-        [JsonPropertyName("playercode")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string PlayerCode { get; init; }
     }
 }

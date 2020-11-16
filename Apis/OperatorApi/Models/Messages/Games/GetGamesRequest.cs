@@ -10,15 +10,12 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Games
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }
 
-        [JsonPropertyName("username")]
-        public string UserName { get; init; }
-
         [Required]
         [JsonPropertyName("platformtype")]
         public PlatformType PlatformType { get; init; }
 
         [Required]
-        [JsonPropertyName("lang")]
+        [JsonPropertyName("language")]
         public string Language { get; init; }
     }
 }

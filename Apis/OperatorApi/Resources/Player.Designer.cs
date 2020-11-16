@@ -115,6 +115,15 @@ namespace TGS.Apis.OperatorApi.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Player token is required..
+        /// </summary>
+        public static string MissingPlayerToken {
+            get {
+                return ResourceManager.GetString("MissingPlayerToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Player not found..
         /// </summary>
         public static string NotFound {

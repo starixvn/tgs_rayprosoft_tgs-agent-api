@@ -24,11 +24,11 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsCommands<PlayerBank> _bankCommands;
         private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly IHashProvider _hashProvider;
         private readonly ITgsQueries<Player> _queries;
+        private readonly IPasswordHandler _passwordHandler;
 
         public PlayerController(
-            IHashProvider hashProvider,
+            IPasswordHandler passwordHandler,
             ITgsQueries<Player> queries,
             ITgsQueries<PlayerAuditLog> auditLogQueries,
             ITgsQueries<PlayerBank> bankQueries,
@@ -37,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsCommands<PlayerAuditLog> auditLogCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _hashProvider = hashProvider;
+            _passwordHandler = passwordHandler;
             _queries = queries;
             _bankQueries = bankQueries;
             _auditLogQueries = auditLogQueries;
@@ -179,7 +179,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (type == updatePlayerType[2])
             {
-                var (salt, pwd) = _hashProvider.GenerateCredential(request.Password);
+                var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
                 player.Password = pwd;
                 player.Salt = salt;
             }

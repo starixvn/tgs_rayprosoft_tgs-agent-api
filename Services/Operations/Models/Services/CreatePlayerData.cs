@@ -15,7 +15,7 @@ namespace TGS.Services.Operations.Models.Services
         public string ParentPlayerCode { get; init; }
         public string ParentInvitationCode { get; init; }
         public int BetLimitGroup { get; init; }
-        public PlayerTypes Type { get; init; }
+        public PlayerType Type { get; init; }
         public bool HasAgent { get; init; }
     }
 }

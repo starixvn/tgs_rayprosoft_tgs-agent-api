@@ -135,6 +135,9 @@
   <data name="BankUsernameRequired" xml:space="preserve">
     <value>Player bank username is required.</value>
   </data>
+  <data name="MissingPlayerToken" xml:space="preserve">
+    <value>Player token is required.</value>
+  </data>
   <data name="NotFound" xml:space="preserve">
     <value>Player not found.</value>
   </data>

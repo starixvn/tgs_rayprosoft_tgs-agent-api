@@ -13,7 +13,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public WalletData Wallet { get; init; }
         public string PlayerUsername { get; init; }
         public string PlayerExternalId { get; init; }
-        public PlayerTypes PlayerType { get; init; }
+        public PlayerType PlayerType { get; init; }
         public string ExternalCurrencyCode { get; init; }
         public string LicenseeTimeZoneId { get; init; }
         public string PlayerIp { get; init; } = string.Empty;

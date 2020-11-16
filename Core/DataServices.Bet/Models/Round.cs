@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Bet.Models
         public string GameProviderName { get; set; }
         public string GameProviderCode { get; set; }
         public string PlayerCode { get; set; }
-        public PlayerTypes PlayerType { get; set; }
+        public PlayerType PlayerType { get; set; }
         public string CurrencyCode { get; set; }
         public PlatformType PlatformType { get; set; }
         public RoundStatus Status { get; set; }

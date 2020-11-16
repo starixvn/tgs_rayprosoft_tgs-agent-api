@@ -1,19 +1,15 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using TGS.Apis.OperatorApi.Extensions;
-using TGS.Apis.OperatorApi.Filters;
+using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
@@ -44,50 +40,45 @@ namespace TGS.Apis.OperatorApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs")
-                    .AddBetRepository(_configuration, "Bet");
+                .AddBetRepository(_configuration, "Bet");
 
             services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
 
             services.AddNats(_configuration)
-                    .AddWebApiServices()
-                    .AddTgsLog()
-                    .AddRedis()
-                    .AddJson()
-                    .AddSecurity()
-                    .AddOperations()
-                    .AddErrorMappers()
-                    .AddApiClient()
-                    .AddPluggalbeGameProviderApiClient();
+                .AddWebApiServices()
+                .AddTgsLog()
+                .AddRedis()
+                .AddJson()
+                .AddSecurity()
+                .AddOperations()
+                .AddErrorMappers()
+                .AddApiClient()
+                .AddPluggalbeGameProviderApiClient();
 
-            services.AddHttpContextAccessor();
-
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.LoginPath = new PathString("/api/auth");
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-                    options.Events.OnRedirectToLogin = context =>
-                    {
-                        context.Response.Headers["Location"] = context.RedirectUri;
-                        context.Response.StatusCode = 401;
-                        return Task.CompletedTask;
-                    };
-                });
-
-            services
-                .AddControllers(options =>
-                {
-                    var policy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .Build();
-                    options.Filters.Add(new AuthorizeFilter(policy));
-                });
+            services.AddControllers();
 
             if (!_env.IsProduction())
             {
-                services.AddSwaggerGen(c => 
+                services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TGS Operator API", Version = "v1" }); 
+                    c.SwaggerDoc("v1", new OpenApiInfo {Title = "TGS Operator API", Version = "v1"});
+
+                    var securityScheme = new OpenApiSecurityScheme
+                    {
+                        Name = "Api Authorization",
+                        Description = "authorized jwt token, get from api/auth/jwt",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        BearerFormat = "JWT",
+                        Scheme = "bearer",
+                        Reference = new OpenApiReference
+                        {
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme
+                        }
+                    };
+
+                    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
 
                     c.OperationFilter<SwaggerHeaderFilter>();
                     c.SchemaFilter<SwaggerEnumDescriptionFilter>();
@@ -106,22 +97,14 @@ namespace TGS.Apis.OperatorApi
             if (!_env.IsDevelopment())
             {
                 app.UseHsts();
+                // app.UseHttpsRedirection();
             }
-
-            //app.UseHttpsRedirection();
-
-            app.UseVerifyCredentialsMiddleware();
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            app.UseVerifyJwtTokenMiddlewares();
 
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
             if (!_env.IsProduction())
             {

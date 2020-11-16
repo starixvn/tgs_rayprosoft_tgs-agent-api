@@ -26,6 +26,8 @@ namespace TGS.Services.Operations.Queries
 
         Task<Guid> GetLicenseeIdByClientIdAsync(string clientId);
 
+        Task<Guid> GetLicenseeIdByApiKeyAsync(string apiKey);
+
         Task<Dictionary<string, string>> GetLicenseeLanguagesByExternalCodeAsync(Guid licenseeId);
 
         Task<Dictionary<string, string>> GetLicenseeLanguagesByInternalCodeAsync(Guid licenseeId);
@@ -92,11 +94,13 @@ namespace TGS.Services.Operations.Queries
             return r.ToArray();
         }
 
-        Task<Guid> ILicenseeQueries.GetLicenseeIdByClientIdAsync(string clientId)
-        {
-            return _repository.Licensees.Where(l => l.ClientId == clientId)
+        Task<Guid> ILicenseeQueries.GetLicenseeIdByClientIdAsync(string clientId) =>
+            _repository.Licensees.Where(l => l.ClientId == clientId)
                 .Select(l => l.Id).FirstOrDefaultAsync();
-        }
+
+        Task<Guid> ILicenseeQueries.GetLicenseeIdByApiKeyAsync(string apiKey) =>
+            _repository.Licensees.Where(l => l.ApiKey == apiKey)
+                .Select(l => l.Id).FirstOrDefaultAsync();
 
         async Task<Dictionary<string, string>> ILicenseeQueries.GetLicenseeLanguagesByExternalCodeAsync(Guid licenseeId)
         {

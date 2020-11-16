@@ -42,9 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 
             context.Request.EnableBuffering();
 
-            var request = await context.Request.ReadFromJsonAsync<BaseRequest>();
-
-            context.Request.Body.Seek(0, SeekOrigin.Begin);
+            var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
 
             if (request.CompanyKey.IsNullOrEmpty() || request.CompanyKey.NotEquals(configuration.CompanyKey))
             {

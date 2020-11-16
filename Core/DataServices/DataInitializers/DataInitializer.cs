@@ -36,6 +36,7 @@ namespace TGS.Core.DataServices.DataInitializers
             new Dictionary<string, GameProvider>();
 
         private readonly IHashProvider _hashProvider;
+        private readonly IPasswordHandler _passwordHandler;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
         private readonly StringBuilder _logBuilder = new StringBuilder();
@@ -57,8 +58,8 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             _repository = repository;
 
-            var config = new TgsHashConfig();
-            _hashProvider = new HashProvider(config);
+            _hashProvider = new HashProvider();
+            _passwordHandler = new PasswordHandler(_hashProvider);
             _jsonSerializationProvider = new JsonSerializationProvider();
         }
 
@@ -214,7 +215,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private async Task GeneratePlayersAsync()
         {
             var rnd = new Random();
-            var (salt, password) = _hashProvider.GenerateCredential("TgsP@ssw0rd");
+            var (salt, password) = _passwordHandler.GenerateCredential("TgsP@ssw0rd");
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
 
@@ -223,27 +224,27 @@ namespace TGS.Core.DataServices.DataInitializers
                 new
                 {
                     Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
                 },
                 new
                 {
                     Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
                 },
                 new
                 {
                     Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN",
-                    CurrencyCode = "CNY", Type = PlayerTypes.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
                 },
                 new
                 {
                     Username = "RP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.RealPlayer
                 },
                 new
                 {
                     Username = "RP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerTypes.RealPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.RealPlayer
                 }
             };
 
@@ -280,7 +281,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
                     return CreatePlayer(playerCode, username, realName, salt, password, cultureCode, currencyCode,
                         vipId,
-                        PlayerTypes.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
+                        PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
                 }).ToArray();
 
             players = players.Concat(randomPlayers).ToArray();
@@ -292,7 +293,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private static Player CreatePlayer(string playerCode, string username, string realName, byte[] salt,
             byte[] password,
-            string cultureCode, string currencyCode, Guid vipId, PlayerTypes playerType, string invitationCode,
+            string cultureCode, string currencyCode, Guid vipId, PlayerType playerType, string invitationCode,
             string parentPlayerCode = null,
             string parentInvitationCode = null)
         {
@@ -532,6 +533,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 Description = string.Empty,
                 ClientId = licensee.ClientId,
                 SecretKey = licensee.SecretKey,
+                ApiKey = licensee.ApiKey,
                 Currencies = licensee.Currencies.Select(curr => new LicenseeCurrency
                 {
                     LicenseeId = licensee.Id,

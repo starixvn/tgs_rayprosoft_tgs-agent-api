@@ -6,19 +6,13 @@ using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.Infrastructures.Security
 {
-    public interface IDESCryptoProvider
+    internal sealed class DESCryptoProvider : ISymmetricCryptoProvider
     {
-        string EncryptString(string original, string iv, string key, Encoding encoding = null);
-
-        string DecryptString(string encrypted, string iv, string key, Encoding encoding = null);
-    }
-
-    public sealed class DESCryptoProvider : IDESCryptoProvider
-    {        
-        string IDESCryptoProvider.DecryptString(string encrypted, string iv, string key, Encoding encoding)
+        string ISymmetricCryptoProvider.DecryptString(string encrypted, string iv, string key, CipherMode mode,
+            PaddingMode padding, Encoding encoding)
         {
             if (encrypted.IsNullOrEmpty())
-            { 
+            {
                 return encrypted;
             }
 
@@ -29,10 +23,12 @@ namespace TGS.Core.Infrastructures.Security
             using var des = new DESCryptoServiceProvider
             {
                 IV = encoding.GetBytes(iv),
-                Key = encoding.GetBytes(key)
+                Key = encoding.GetBytes(key),
+                Mode = mode,
+                Padding = padding
             };
 
-            using var ct = des.CreateEncryptor();
+            using var ct = des.CreateDecryptor();
             using var ms = new MemoryStream();
             using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
 
@@ -43,11 +39,12 @@ namespace TGS.Core.Infrastructures.Security
             return encoding.GetString(ms.ToArray());
         }
 
-        string IDESCryptoProvider.EncryptString(string original, string iv, string key, Encoding encoding)
+        string ISymmetricCryptoProvider.EncryptString(string original, string iv, string key, CipherMode mode,
+            PaddingMode padding, Encoding encoding)
         {
             if (original.IsNullOrEmpty())
             {
-                return  original;
+                return original;
             }
 
             ValidateIVAndKey(iv, key);
@@ -57,7 +54,9 @@ namespace TGS.Core.Infrastructures.Security
             using var des = new DESCryptoServiceProvider
             {
                 IV = encoding.GetBytes(iv),
-                Key = encoding.GetBytes(key)
+                Key = encoding.GetBytes(key),
+                Mode = mode,
+                Padding = padding
             };
 
             using var ct = des.CreateEncryptor();
@@ -65,9 +64,9 @@ namespace TGS.Core.Infrastructures.Security
             using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
 
             var bytes = encoding.GetBytes(original);
-            cs.Write(bytes, 0 , bytes.Length);
+            cs.Write(bytes, 0, bytes.Length);
             cs.FlushFinalBlock();
-            
+
             return Convert.ToBase64String(ms.ToArray());
         }
 
@@ -76,11 +75,6 @@ namespace TGS.Core.Infrastructures.Security
             if (iv.IsNullOrEmpty() || key.IsNullOrEmpty())
             {
                 throw new InvalidOperationException("IV and Key for DES should not be null or empty");
-            }
-
-            if (iv.Length != 8 || key.Length != 8)
-            {
-                throw new InvalidOperationException("IV and Key for DES should be 8 characters");
             }
         }
     }

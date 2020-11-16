@@ -13,7 +13,7 @@ namespace TGS.Core.Models.Services.Caches
         public PlayerStatus Status { get; init; }
         public string Username { get; init; }
         public string ExternalCurrencyCode { get; init; }
-        public PlayerTypes Type { get; init; }
+        public PlayerType Type { get; init; }
         public bool IsTestPlayer => Type.IsTestPlayer();
         public Guid DefaultWalletId { get; init; }
         public string DefaultWalletCurrencyCode { get; init; }

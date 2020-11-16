@@ -23,8 +23,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     public class UserControllerTests : BaseTests
     {
         private UserController _controller;
-        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
-        private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
+        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new Mock<IPasswordHandler>();
         private readonly Mock<IBackendOfficeQueries<User>> _userQueriesMock = new Mock<IBackendOfficeQueries<User>>();
         private readonly Mock<IBackendOfficeQueries<Department>> _departmentQueriesMock = new Mock<IBackendOfficeQueries<Department>>();
         private readonly Mock<IBackendOfficeQueries<Role>> _roleQueriesMock = new Mock<IBackendOfficeQueries<Role>>();
@@ -35,8 +34,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new UserController(
-                _hashProviderMock.Object,
-                _tgsHashConfigMock.Object,
+                _passwordHandlerMock.Object,
                 _userQueriesMock.Object,
                 _departmentQueriesMock.Object,
                 _roleQueriesMock.Object,
