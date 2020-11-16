@@ -13,6 +13,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Announcement
         public DateTimeOffset UpdatedOn { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
+        public int DisplayOrder { get; set; }
         public string Status { get; set; }
     }
 }

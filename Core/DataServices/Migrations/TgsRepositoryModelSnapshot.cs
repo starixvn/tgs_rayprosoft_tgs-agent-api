@@ -665,10 +665,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<decimal>("DepositedAmountMax")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("DepositedAmountMin")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("DepositedAmountUnlimited")
                         .HasColumnType("bit");
@@ -677,16 +677,16 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("FeePercentage")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("HighestFee")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("LowestFee")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<Guid>("PaymentChannelId")
                         .HasColumnType("uniqueidentifier");
@@ -711,10 +711,13 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<decimal>("TransferLimitFrom")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("TransferLimitTo")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<int>("TransferType")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -748,10 +751,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("AfterDepositedAmountMax")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("AfterDepositedAmountMin")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("AfterDepositedAmountUnlimited")
                         .HasColumnType("bit");
@@ -769,10 +772,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("AfterTransferLimitFrom")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("AfterTransferLimitTo")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("BeforeAllPlayers")
                         .HasColumnType("bit");
@@ -781,10 +784,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("BeforeDepositedAmountMax")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("BeforeDepositedAmountMin")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<bool>("BeforeDepositedAmountUnlimited")
                         .HasColumnType("bit");
@@ -802,10 +805,10 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("BeforeTransferLimitFrom")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("BeforeTransferLimitTo")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
@@ -984,7 +987,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("PaymentVipLevels","dbo");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Models.TokenExpireSeconds", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>
                 {
                     b.Property<string>("PlayerCode")
                         .HasColumnType("varchar(16)");
@@ -1131,7 +1134,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(16)");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("RealName")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
 
@@ -1708,7 +1711,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
                         .WithMany("PaymentPlayerList")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1730,7 +1733,7 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Models.TokenExpireSeconds", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Player", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.BetLimitGroup", "BetLimitGroup")
                         .WithMany("Players")
@@ -1750,7 +1753,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "ParentPlayer")
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
                         .WithMany("SubPlayers")
                         .HasForeignKey("ParentPlayerCode");
 
@@ -1761,7 +1764,7 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PlayerBank", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
                         .WithMany("Banks")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1776,7 +1779,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
                         .WithMany("PlayerLoginRecords")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1815,7 +1818,7 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.StationLetterPlayer", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
                         .WithMany("Letters")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1836,7 +1839,7 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.TokenExpireSeconds", "TokenExpireSeconds")
+                    b.HasOne("TGS.Core.DataServices.Models.Player", "Player")
                         .WithMany("Wallets")
                         .HasForeignKey("PlayerCode")
                         .OnDelete(DeleteBehavior.Cascade)

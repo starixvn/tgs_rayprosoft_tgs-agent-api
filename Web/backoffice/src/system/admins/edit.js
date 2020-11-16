@@ -48,12 +48,7 @@ export const EditButton = ({ user, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure
-        css={css`
-          white-space: nowrap;
-        `}
-        {...dialog}
-      >
+      <Disclosure {...dialog}>
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
@@ -73,12 +68,7 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure
-        css={css`
-          white-space: nowrap;
-        `}
-        {...dialog}
-      >
+      <Disclosure {...dialog}>
         <Trans zh="修改密码" en="Change Password" />
       </Disclosure>
       {dialog.visible && (
@@ -96,10 +86,10 @@ const PasswordDialog = ({
   ...props
 }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useEditPassword({
-    id: user?.id,
-    data: submitData
-  })
+  let { result, error, mutate, isLoading } = useEditPassword(
+    user?.id,
+    submitData
+  )
 
   const clearResult = () => {
     setSubmit(null)
@@ -153,9 +143,7 @@ const PasswordBody = ({ dialog }) => {
 
 const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useAddAdmin({
-    data: submitData
-  })
+  let { result, error, mutate, isLoading } = useAddAdmin(submitData)
 
   const clearResult = () => {
     setSubmit(null)
@@ -261,10 +249,7 @@ const EditDialog = ({
   ...props
 }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useEditAdmin({
-    id: user?.id,
-    data: submitData
-  })
+  let { result, error, mutate, isLoading } = useEditAdmin(user?.id, submitData)
 
   const submit = (data) => {
     data = {

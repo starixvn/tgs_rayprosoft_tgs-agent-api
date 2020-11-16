@@ -10,10 +10,7 @@ import {
 import { useMenuCodes } from "./user/context"
 import { Route as AuthRouter } from "./user/auth"
 import PageNotFound from "./page/NotFound"
-import memoize from "fast-memoize"
-import { codeMenuContentPair as platformPair } from "./platform"
-import { codeMenuContentPair as playerManagementPair } from "./player-management"
-import { codeMenuContentPair as systemPair } from "./system"
+import { allMenuContentPairs } from "./menu"
 import { PageContent } from "bumbag"
 
 export const Switch = ({ codes, path, pairs = [], ...props }) => {
@@ -40,7 +37,7 @@ export const Switch = ({ codes, path, pairs = [], ...props }) => {
 export const AllContents = ({ codes }) => {
   let authCodes = useMenuCodes()
   codes = codes ?? authCodes
-  let list = pairs()
+  let list = allMenuContentPairs()
   return (
     <_Switch>
       {codes.map((code) => {
@@ -59,8 +56,6 @@ export const AllContents = ({ codes }) => {
     </_Switch>
   )
 }
-
-const pairs = () => [platformPair, playerManagementPair, systemPair]
 
 const ValueByCode = ({ code = "", pairs = [] }) => {
   let [, Value] = pairs.find(([id]) => id === code) ?? []

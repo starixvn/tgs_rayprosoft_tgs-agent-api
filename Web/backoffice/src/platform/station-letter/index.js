@@ -9,7 +9,7 @@ import {
 import { useStationLetterList } from "./client"
 import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
-import { useTable, Table, pageCount } from "../../table"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { Trans } from "../../i18n"
@@ -34,37 +34,41 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
 const Body = () => {
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
-  let [statusName, setStatusName] = useState(
-    hasVerifyAuth ? InVerifyName : hasViewAuth ? PublishedName : null
-  )
-  let tab = useTabState({
-    selectedId: statusName
-  })
 
-  let { state, setState, setPageIndex, setSortOrder } = useTable()
-  let { pageIndex, pageSize, sortby, orderby } = state
-  let { data = {}, isLoading, isValidating, mutate } = useStationLetterList({
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby,
-    orderby,
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    statusName: hasVerifyAuth
+      ? InVerifyName
+      : hasViewAuth
+      ? PublishedName
+      : null
+  })
+  let { pageSize, statusName } = state
+  let { data = {}, isLoading, mutate } = useStationLetterList({
+    ...toApiParams(state),
     status: statusFrom(statusName)
   })
 
   let columns = useColumns({ mutate, statusName })
 
-  const setStatus = (newStatusName) => () => {
+  let tab = useTabState({
+    selectedId: statusName
+  })
+
+  const activeTab = (newStatusName) => () => {
     if (newStatusName === statusName) {
       mutate()
     }
-    setStatusName(newStatusName)
+    //TODO: reset sortBy?
+    setState({
+      pageIndex: 0,
+      statusName: newStatusName
+    })
   }
 
   return (
@@ -77,7 +81,7 @@ const Body = () => {
           {hasVerifyAuth && (
             <Tab
               tabId={InVerifyName}
-              onClick={setStatus(InVerifyName)}
+              onClick={activeTab(InVerifyName)}
               {...tab}
             >
               <StatusLabel value={InVerify} />
@@ -85,17 +89,33 @@ const Body = () => {
           )}
           <Tab
             tabId={PublishedName}
-            onClick={setStatus(PublishedName)}
+            onClick={activeTab(PublishedName)}
             {...tab}
           >
             <StatusLabel value={Published} />
           </Tab>
-          <Tab tabId={RejectedName} onClick={setStatus(RejectedName)} {...tab}>
+          <Tab tabId={RejectedName} onClick={activeTab(RejectedName)} {...tab}>
             <StatusLabel value={Rejected} />
           </Tab>
         </TabList>
         {hasVerifyAuth && (
           <TabPanel tabId={InVerifyName} {...tab}>
+            {statusName === InVerifyName && (
+              <Table
+                columns={columns}
+                data={data?.items}
+                pageCount={pageCount(pageSize, data?.totalCount)}
+                setPageIndex={setPageIndex}
+                setSortOrder={setSortOrder}
+                initialState={state}
+                isLoading={isLoading}
+              />
+            )}
+          </TabPanel>
+        )}
+
+        <TabPanel tabId={PublishedName} {...tab}>
+          {statusName === PublishedName && (
             <Table
               columns={columns}
               data={data?.items}
@@ -105,31 +125,21 @@ const Body = () => {
               initialState={state}
               isLoading={isLoading}
             />
-          </TabPanel>
-        )}
-
-        <TabPanel tabId={PublishedName} {...tab}>
-          <Table
-            columns={columns}
-            data={data?.items}
-            pageCount={pageCount(pageSize, data?.totalCount)}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            initialState={state}
-            isLoading={isLoading}
-          />
+          )}
         </TabPanel>
 
         <TabPanel tabId={RejectedName} {...tab}>
-          <Table
-            columns={columns}
-            data={data?.items}
-            pageCount={pageCount(pageSize, data?.totalCount)}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            initialState={state}
-            isLoading={isLoading}
-          />
+          {statusName === RejectedName && (
+            <Table
+              columns={columns}
+              data={data?.items}
+              pageCount={pageCount(pageSize, data?.totalCount)}
+              setPageIndex={setPageIndex}
+              setSortOrder={setSortOrder}
+              initialState={state}
+              isLoading={isLoading}
+            />
+          )}
         </TabPanel>
       </Tabs>
     </PageContent>

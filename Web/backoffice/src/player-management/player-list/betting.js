@@ -6,7 +6,7 @@ import { Trans, FormattedNumber } from "../../i18n"
 import format from "../../date/format"
 import { useTable, Table, pageCount } from "../../table"
 import { Select as GameTypeSelect } from "../../game/type"
-import GameProviderSelect from "../../game/provider/Select"
+import GameProviderSelect from "../../game/providers/Select"
 import { pastWeek } from "../../date/range"
 import DateTimeRangeInput from "../../date/RangeInput"
 import SearchButton from "../../button/Search"
@@ -46,18 +46,15 @@ export const Panel = ({ playerCode, ...props }) => {
     from,
     to
   } = state
-  let { data = {}, isLoading, mutate } = useBettings({
-    playerCode: isActive && playerCode,
-    searchParams: {
-      page: pageIndex + 1,
-      rows: pageSize,
-      sortby,
-      orderby,
-      gameType,
-      gameProvider,
-      from: format(from),
-      to: format(to)
-    }
+  let { data = {}, isLoading, mutate } = useBettings(playerCode, {
+    page: pageIndex + 1,
+    rows: pageSize,
+    sortby,
+    orderby,
+    gameType,
+    gameProvider,
+    from: format(from),
+    to: format(to)
   })
 
   let columns = useColumns()

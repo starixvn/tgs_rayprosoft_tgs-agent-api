@@ -6,7 +6,8 @@ import client, {
   post,
   useGet,
   useCreatePost,
-  useUpdatePut
+  useUpdatePut,
+  usePostFormData
 } from "../../client"
 
 const API = "/api/stationletter"
@@ -21,6 +22,10 @@ export const useVerifyStationLetter = ({ id, type, data } = {}) => {
   return useUpdatePut(url, data)
 }
 
-export const useAddStationLetter = ({ data } = {}) => {
+export const useAddStationLetter = (data) => {
   return useCreatePost(API, data)
+}
+
+export const useAddStationLetterWithFormData = (body) => {
+  return usePostFormData(API, body)
 }

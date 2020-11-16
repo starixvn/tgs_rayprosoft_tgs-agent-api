@@ -65,7 +65,10 @@ namespace TGS.Core.DataServices.DataInitializers
 
         async Task IDataInitializer.SetInitialDataAsync()
         {
-            if (_repository.Players.Any()) return;
+            if (_repository.Players.Any())
+            {
+                return;
+            }
 
             var timer = new Stopwatch();
             timer.Start();
@@ -342,7 +345,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     {
                         Id = GuidExtensions.NewSequentialGuid(),
                         PlayerCode = playerCode,
-                        Username = Generator.RandomString(4),
+                        RealName = Generator.RandomString(4),
                         BankName = Generator.RandomString(12),
                         BankAccount = Generator.RandomIntString(20)
                     }
@@ -385,23 +388,21 @@ namespace TGS.Core.DataServices.DataInitializers
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviders).ToArray());
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Games).ToArray());
         }
-        
+
         private Task GenerateLocalizedStringsAsync()
         {
             var localizedStrings = new List<LocalizedString>();
 
             foreach (var gp in _gameProvidersCreated.Values)
+            foreach (var cultureCode in gp.Languages.Select(l => l.CultureCode))
             {
-                foreach (var cultureCode in gp.Languages.Select(l => l.CultureCode))
-                {
-                    var gpData = GetGameProviderLocalizedStrings(gp, cultureCode);
-                    localizedStrings.AddRange(gpData);
+                var gpData = GetGameProviderLocalizedStrings(gp, cultureCode);
+                localizedStrings.AddRange(gpData);
 
-                    foreach (var g in gp.Games)
-                    {
-                        var gameData = GetGameLocalizedStrings(g, cultureCode);
-                        localizedStrings.AddRange(gameData);
-                    }
+                foreach (var g in gp.Games)
+                {
+                    var gameData = GetGameLocalizedStrings(g, cultureCode);
+                    localizedStrings.AddRange(gameData);
                 }
             }
 
@@ -570,7 +571,7 @@ namespace TGS.Core.DataServices.DataInitializers
             };
         }
 
-        
+
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
         {
             return new LocalizedString[]

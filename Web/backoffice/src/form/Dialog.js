@@ -67,6 +67,11 @@ export const Dialog = ({
               }}
               hideOnClickOutside={false}
               unstable_finalFocusRef={finalFocusRef}
+              css={css`
+                & .bb-DialogContent {
+                  position: relative;
+                }
+              `}
               {...dialog}
               {...props}
             >

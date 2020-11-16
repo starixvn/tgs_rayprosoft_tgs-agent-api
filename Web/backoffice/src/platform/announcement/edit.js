@@ -56,13 +56,11 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 }
 
 const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
-  let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useAddAnnouncement({
-    data: submitData
-  })
+  let [data, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useAddAnnouncement(data)
 
   const clearResult = () => {
-    setSubmit(null)
+    setSubmit(undefined)
   }
 
   let title = useTrans({
@@ -175,11 +173,8 @@ const EditDialog = ({
   ...props
 }) => {
   let { id } = record
-  let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useEditAnnouncement({
-    id,
-    data: submitData
-  })
+  let [data, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useEditAnnouncement(id, data)
 
   const clearResult = () => {
     setSubmit(null)
@@ -222,7 +217,7 @@ const EditBody = ({ readonly = false }) => {
   let maxDate = readonly ? null : Reflect.get(formContext?.values, "to")
 
   let required = !readonly
-  let textareaHeight = "15vh"
+  let textareaHeight = readonly ? "15vh" : "30vh"
   return (
     <FieldValues>
       <Label name="subject" required={required}>
@@ -318,12 +313,14 @@ const VerifyDialog = ({
   ...props
 }) => {
   let [type, setType] = useState()
-  let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useVerifyAnnouncement({
-    id: record?.id,
-    type,
-    data: submitData
-  })
+  let [data, setSubmit] = useState()
+  let { result, error, mutate, isLoading } = useVerifyAnnouncement(
+    {
+      id: record?.id,
+      type
+    },
+    data
+  )
 
   const clearResult = () => {
     setSubmit(null)

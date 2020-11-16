@@ -1,63 +1,29 @@
-import useSWR, { cache } from "swr"
-import client, { urlWith, get, put, post } from "../../client"
+import {
+  urlWith,
+  useGet,
+  useCreatePost,
+  useUpdatePut,
+  useDelete
+} from "../../client"
 
-export const useList = (searchParams) => {
-  let url = urlWith(searchParams, `/api/department`)
-  const { data, error, isValidating, mutate } = useSWR(url, get)
+const API = "/api/department"
 
-  return {
-    data,
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useDepartmentList = (searchParams) => {
+  let url = searchParams ? urlWith(searchParams, API) : ""
+  return useGet(url)
 }
 
-export const useAddDepartment = ({ data }) => {
-  let fetchData = !!data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/department/`, data] : null,
-    (url, data) => post(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useAddDepartment = (data) => {
+  let url = data ? API : ""
+  return useCreatePost(url, data)
 }
 
-export const useEditDepartment = ({ id, data }) => {
-  let fetchData = id && !!data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/department/${id}`, data] : null,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditDepartment = (id, data) => {
+  let url = id ? `${API}/${id}` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useDeleteDepartment = ({ id }) => {
-  let fetchData = !!id
-  let key = `/api/department/${id}`
-  const { data: result, error } = useSWR(fetchData ? key : null, client.delete)
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    error,
-    isError: error
-  }
+export const useDeleteDepartment = (id) => {
+  let url = id ? `${API}/${id}` : ""
+  return useDelete(url)
 }

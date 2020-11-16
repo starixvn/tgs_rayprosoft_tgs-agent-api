@@ -6,10 +6,11 @@ import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
-import { useChangeAnnouncementOrders, useList } from "./client"
+import { useChangeAnnouncementOrders, useAnnouncementList } from "./client"
 import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
-import { useTable, Table, pageCount } from "../../table"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
+import { Ascending } from "../../table/order"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { Trans } from "../../i18n"
@@ -49,15 +50,26 @@ export const Content = () => {
 const AsyncContentBody = ({}) => {
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
-  let [statusName, setStatusName] = useState(
-    hasVerifyAuth ? InVerifyName : hasViewAuth ? EffectiveName : null
-  )
-  let { state, setState, setPageIndex, setSortOrder } = useTable()
-  let { pageIndex, pageSize, sortby, orderby } = state
-  let { data = {}, isLoading, isValidating, mutate } = useList({
+
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    statusName: hasVerifyAuth
+      ? InVerifyName
+      : hasViewAuth
+      ? EffectiveName
+      : null
+  })
+  let { pageIndex, pageSize, statusName, sortby, orderby } = state
+
+  let {
+    data = {},
+    isLoading,
+    isValidating,
+    mutate,
+    clearCache
+  } = useAnnouncementList({
     page: pageIndex + 1,
     rows: pageSize,
-    sortby,
+    sortby: statusName === EffectiveName ? "displayOrder" : sortby,
     orderby,
     status:
       statusName === EffectiveName
@@ -69,11 +81,15 @@ const AsyncContentBody = ({}) => {
     selectedId: statusName
   })
 
-  const setStatus = (newStatusName) => () => {
+  const activeTab = (newStatusName) => () => {
     if (newStatusName === statusName) {
       mutate()
     }
-    setStatusName(newStatusName)
+    //TODO: reset sortBy?
+    setState({
+      pageIndex: 0,
+      statusName: newStatusName
+    })
   }
 
   return (
@@ -86,7 +102,7 @@ const AsyncContentBody = ({}) => {
           {hasVerifyAuth && (
             <Tab
               tabId={InVerifyName}
-              onClick={setStatus(InVerifyName)}
+              onClick={activeTab(InVerifyName)}
               {...tab}
             >
               <StatusLabel value={InVerify} />
@@ -95,20 +111,49 @@ const AsyncContentBody = ({}) => {
 
           <Tab
             tabId={EffectiveName}
-            onClick={setStatus(EffectiveName)}
+            onClick={activeTab(EffectiveName)}
             {...tab}
           >
             <StatusLabel value={Effective} />
           </Tab>
-          <Tab tabId={ExpiredName} onClick={setStatus(ExpiredName)} {...tab}>
+          <Tab tabId={ExpiredName} onClick={activeTab(ExpiredName)} {...tab}>
             <StatusLabel value={Expired} />
           </Tab>
-          <Tab tabId={RejectedName} onClick={setStatus(RejectedName)} {...tab}>
+          <Tab tabId={RejectedName} onClick={activeTab(RejectedName)} {...tab}>
             <StatusLabel value={Rejected} />
           </Tab>
         </TabList>
         {hasVerifyAuth && (
           <TabPanel tabId={InVerifyName} {...tab}>
+            {statusName === InVerifyName && (
+              <AsyncTable
+                statusName={statusName}
+                data={data}
+                state={state}
+                setPageIndex={setPageIndex}
+                setSortOrder={setSortOrder}
+                isLoading={isLoading}
+                mutate={mutate}
+              />
+            )}
+          </TabPanel>
+        )}
+        <TabPanel tabId={EffectiveName} {...tab}>
+          {statusName === EffectiveName && (
+            <EffectiveTable
+              statusName={statusName}
+              data={data}
+              state={state}
+              setSortOrder={setSortOrder}
+              isLoading={isLoading}
+              mutate={mutate}
+              clearCache={clearCache}
+              tab={tab}
+            />
+          )}
+        </TabPanel>
+        <TabPanel tabId={ExpiredName} {...tab}>
+          {statusName === ExpiredName && (
             <AsyncTable
               statusName={statusName}
               data={data}
@@ -118,38 +163,21 @@ const AsyncContentBody = ({}) => {
               isLoading={isLoading}
               mutate={mutate}
             />
-          </TabPanel>
-        )}
-        <EffectiveTab
-          data={data}
-          state={state}
-          setSortOrder={setSortOrder}
-          isLoading={isLoading}
-          mutate={mutate}
-          tab={tab}
-        />
-        {/* <TabPanel tabId={ExpiredName} {...tab}>
-          <AsyncTable
-            statusName={statusName}
-            data={data}
-            state={state}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            isLoading={isLoading}
-            mutate={mutate}
-          />
+          )}
         </TabPanel>
         <TabPanel tabId={RejectedName} {...tab}>
-          <AsyncTable
-            statusName={statusName}
-            data={data}
-            state={state}
-            setPageIndex={setPageIndex}
-            setSortOrder={setSortOrder}
-            isLoading={isLoading}
-            mutate={mutate}
-          />
-        </TabPanel> */}
+          {statusName === RejectedName && (
+            <AsyncTable
+              statusName={statusName}
+              data={data}
+              state={state}
+              setPageIndex={setPageIndex}
+              setSortOrder={setSortOrder}
+              isLoading={isLoading}
+              mutate={mutate}
+            />
+          )}
+        </TabPanel>
       </Tabs>
     </PageContent>
   )
@@ -177,25 +205,26 @@ const AsyncTable = ({
 
   return (
     <Table
+      initialState={state}
+      controlledState={state}
       columns={columns}
       data={data?.items}
       pageCount={pageCount(pageSize, data?.totalCount)}
       setPageIndex={setPageIndex}
       setSortOrder={setSortOrder}
-      initialState={state}
       isLoading={isLoading}
     />
   )
 }
 
-const EffectiveTab = ({
-  statusName = EffectiveName,
-  tab,
+const EffectiveTable = ({
+  statusName,
   state,
   setSortOrder,
   data,
   isLoading,
-  mutate
+  mutate,
+  clearCache
 }) => {
   let [displayOrders, setDisplayOrder] = useState({})
   let [submitData, setSubmit] = useState()
@@ -204,17 +233,25 @@ const EffectiveTab = ({
     result,
     isLoading: isChangingDisplayOrder,
     error
-  } = useChangeAnnouncementOrders({
-    data: submitData
-  })
+  } = useChangeAnnouncementOrders(submitData)
+
+  const reset = () => {
+    setDisplayOrder({})
+    setSubmit(null)
+  }
 
   useEffect(() => {
     if (result && !error) {
-      setDisplayOrder({})
-      setSubmit(null)
+      reset()
       mutate()
     }
   }, [result, error])
+
+  useEffect(() => {
+    if (statusName != EffectiveName) {
+      reset()
+    }
+  }, [statusName])
 
   const changeDisplayOrder = ({ id, value }) => {
     let newDisplayOrders = {
@@ -224,41 +261,49 @@ const EffectiveTab = ({
     setDisplayOrder(newDisplayOrders)
   }
 
-  let columns = useColumns({ mutate, changeDisplayOrder, statusName })
+  let columns = useColumns({
+    mutate,
+    changeDisplayOrder,
+    statusName,
+    items: data?.items ?? []
+  })
   return (
-    <TabPanel tabId={EffectiveName} {...tab}>
+    <>
       {error && <AlertDialog {...error} onClickClose={() => setSubmit(null)} />}
       <Stack spacing="minor-1">
         <Table
+          initialState={state}
+          controlledState={state}
           columns={columns}
           data={data?.items}
           usePagination={false}
           setSortOrder={setSortOrder}
-          initialState={state}
           isLoading={isLoading}
         />
         <Button
           isLoading={isChangingDisplayOrder}
           onClick={() => {
-            let data = Object.entries(displayOrders).map(([key, value]) => ({
+            let list = Object.entries(displayOrders).map(([key, value]) => ({
               id: key,
               displayOrder: value
             }))
-            setSubmit(data)
+            setSubmit({ orders: list })
           }}
         >
           <Trans zh="确认排序" en="Confirm Order" />
         </Button>
       </Stack>
-    </TabPanel>
+    </>
   )
 }
 
 const useColumns = ({
   mutate,
   statusName: tabStatusName,
-  changeDisplayOrder
+  changeDisplayOrder,
+  items = []
 }) => {
+  let hasUpdateAuth = useIsDisplayMenuByRoute([UpdateMenu])
   let columns = [
     tabStatusName != EffectiveName
       ? sequenceColumn()
@@ -279,6 +324,8 @@ const useColumns = ({
               <Input
                 type="number"
                 size="small"
+                min="0"
+                minLength="1"
                 width="5em"
                 defaultValue={displayOrder}
                 onChange={(event) => {
@@ -346,7 +393,13 @@ const useColumns = ({
       Cell: ({ value }) => {
         let { status } = value
         if (tabStatusName === EffectiveName) {
-          return <StatusToggleButton record={value} onSubmitted={mutate} />
+          return (
+            <StatusToggleButton
+              record={value}
+              onSubmitted={mutate}
+              disabled={!hasUpdateAuth}
+            />
+          )
         }
 
         return (
@@ -406,5 +459,7 @@ const useColumns = ({
       }
     })
   }
-  return useMemo(() => columns, [tabStatusName])
+  return useMemo(() => {
+    return columns
+  }, [tabStatusName, JSON.stringify(items)])
 }

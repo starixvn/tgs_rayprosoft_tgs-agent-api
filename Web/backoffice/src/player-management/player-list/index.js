@@ -13,7 +13,7 @@ import {
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import { useList } from "./client"
+import { usePlayerList } from "./client"
 import { useTable, Table, pageCount } from "../../table"
 import { Label as StatueLabel } from "../status"
 import {
@@ -56,7 +56,7 @@ const AsyncContent = () => {
     vipId,
     username = ""
   } = state
-  let { data = {}, isLoading, isValidating, mutate } = useList({
+  let { data = {}, isLoading, isValidating, mutate } = usePlayerList({
     page: pageIndex + 1,
     rows: pageSize,
     sortby,

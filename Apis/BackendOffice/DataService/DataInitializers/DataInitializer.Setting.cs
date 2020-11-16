@@ -151,11 +151,20 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting( "GameProviders")
+                        new MenuSetting("GameProviders")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View")
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Games")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
                             }
                         }
                     }
@@ -202,6 +211,14 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update"),
                                 new MenuSetting("Delete")
+                            }
+                        },
+                        new MenuSetting("Payments")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
                             }
                         }
                     }

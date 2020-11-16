@@ -52,24 +52,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.User
         }
 
         [Test]
-        public void Should_not_have_error_when_password_have_not_upper_case_letter()
-        {
-            var model = new CreateUserRequest {Password = "p@ssw0rd", ConfirmPassword = "p@ssw0rd"};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedUpperCaseLetter);
-        }
-
-        [Test]
-        public void Should_not_have_error_when_password_have_not_lower_case_letter()
-        {
-            var model = new CreateUserRequest {Password = "P@SSW0RD", ConfirmPassword = "P@SSW0RD"};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedLowerCaseLetter);
-        }
-
-        [Test]
         public void Should_not_have_error_when_password_have_not_number()
         {
             var model = new CreateUserRequest {Password = "P@ssword", ConfirmPassword = "P@ssword"};
@@ -81,10 +63,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.User
         [Test]
         public void Should_not_have_error_when_password_have_not_special_character()
         {
-            var model = new CreateUserRequest {Password = "Password", ConfirmPassword = "Password"};
+            var model = new CreateUserRequest {Password = "11111111", ConfirmPassword = "11111111"};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedSpecialCharacter);
+                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedCharacter);
         }
 
         [Test]

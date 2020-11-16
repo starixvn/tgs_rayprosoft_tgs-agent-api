@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -79,6 +80,11 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddFluentValidation(c =>
                 {
                     c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
             services.AddHealthChecks()

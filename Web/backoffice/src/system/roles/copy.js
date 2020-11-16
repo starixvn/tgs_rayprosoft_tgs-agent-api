@@ -64,10 +64,7 @@ const CopyDialog = ({
   ...props
 }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useCopyRole({
-    id,
-    data: submitData
-  })
+  let { result, error, mutate, isLoading } = useCopyRole(id, submitData)
 
   const clearResult = () => {
     setSubmit(null)
