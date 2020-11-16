@@ -14,7 +14,7 @@ namespace TGS.Core.DataServices.Base.Extensions
             where TInterface : class
             where TRepository : DbContext, TInterface
         {
-            const int PoolSize = 64;
+            const int poolSize = 64;
 
             services.AddDbContextPool<TRepository>(option =>
             {
@@ -35,7 +35,7 @@ namespace TGS.Core.DataServices.Base.Extensions
                     serverOption.CommandTimeout(commandTimeout);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                 });
-            }, PoolSize);
+            }, poolSize);
 
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
             services.AddTransient<Func<TInterface>>(c => () => c.GetRequiredService<TInterface>());

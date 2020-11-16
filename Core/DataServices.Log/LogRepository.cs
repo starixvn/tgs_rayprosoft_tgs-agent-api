@@ -1,18 +1,15 @@
-﻿
-
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Base.Interfaces;
-using Microsoft.EntityFrameworkCore.Storage;
 using EFCore.BulkExtensions;
-using TGS.Core.DataServices.Log.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Linq;
+using Microsoft.EntityFrameworkCore.Storage;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Log.Models;
 
 namespace TGS.Core.DataServices.Log
 {
@@ -65,12 +62,6 @@ namespace TGS.Core.DataServices.Log
             Database.SetCommandTimeout(seconds);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasDefaultSchema("dbo");
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        }
-
         Task ILogRepository.AddApiLogsAsync(IList<ApiLog> logs)
         {
             return this.BulkInsertAsync(logs);
@@ -97,6 +88,7 @@ namespace TGS.Core.DataServices.Log
             await LogRecords.AddAsync(log);
             await SaveChangesAsync();
         }
+
         Task IBaseRepository.SaveChangesAsync()
         {
             return SaveChangesAsync();
@@ -118,7 +110,8 @@ namespace TGS.Core.DataServices.Log
             return this.BulkInsertAsync(entities, bulkConfig, progress);
         }
 
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
+            Action<decimal> progress)
         {
             return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
         }
@@ -126,7 +119,7 @@ namespace TGS.Core.DataServices.Log
         Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
         {
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                           Database.GetPendingMigrations().Any();
+                Database.GetPendingMigrations().Any();
 
             if (isMigrate)
             {
@@ -134,6 +127,12 @@ namespace TGS.Core.DataServices.Log
             }
 
             return Task.CompletedTask;
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("dbo");
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }
