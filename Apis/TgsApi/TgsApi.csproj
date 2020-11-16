@@ -5,6 +5,7 @@
     <AssemblyName>TGS.Apis.TgsApi</AssemblyName>
     <RootNamespace>TGS.Apis.TgsApi</RootNamespace>
     <UserSecretsId>8becd8f5-1a79-4b6e-87c1-63da6719254c</UserSecretsId>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
@@ -40,6 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Content Update="nlog.Development.config">
       <DependentUpon>nlog.Development.config</DependentUpon>
     </Content>

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>59c8d32a-4883-48ff-ae1e-1c0ee1ab8a99</UserSecretsId>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AssemblyName>TGS.Apis.LogApi</AssemblyName>
     <RootNamespace>TGS.Apis.LogApi</RootNamespace>
@@ -32,6 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Compile Include="..\..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Log\DataServices.Log.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
