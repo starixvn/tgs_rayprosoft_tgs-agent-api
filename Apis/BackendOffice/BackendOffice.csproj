@@ -186,7 +186,6 @@
 
   <ItemGroup>
     <Folder Include="DataService\Commands\" />
-    <Folder Include="UploadImages\" />
   </ItemGroup>
 
 

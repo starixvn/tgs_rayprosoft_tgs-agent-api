@@ -6,7 +6,6 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +24,6 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
 using TGS.Core.DataServices.Log;
-using TGS.Core.Infrastructures.File;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -37,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Extensions
     public static class ServiceExtensions
     {
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
-            IConfiguration configuration, IWebHostEnvironment environment)
+            IConfiguration configuration)
         {
             services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
 
@@ -55,7 +53,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
             services.AddTransient(typeof(IPaymentService), typeof(PaymentService));
-            services.AddTransient(typeof(IFileService), typeof(FileService));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -64,9 +61,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddJson()
                 .AddSecurity()
                 .AddWebApiServices()
-                .AddTgsLog()
-                .AddFile(configuration)
-                .AddAwsService(configuration, environment);
+                .AddTgsLog();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

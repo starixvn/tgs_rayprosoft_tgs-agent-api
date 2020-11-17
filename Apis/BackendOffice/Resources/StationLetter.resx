@@ -126,7 +126,4 @@
   <data name="NotFound" xml:space="preserve">
     <value>Station letter is not found.</value>
   </data>
-  <data name="FileMaxLength" xml:space="preserve">
-    <value>The file is too large, can't greater than 2MB.</value>
-  </data>
 </root>

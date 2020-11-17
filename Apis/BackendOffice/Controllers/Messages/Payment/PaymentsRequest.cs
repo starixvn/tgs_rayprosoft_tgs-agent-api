@@ -5,8 +5,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
 {
     public class PaymentsRequest : PageableRequest
     {
-        public PaymentTransferType TransferType { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
+        public PaymentTransferType? TransferType { get; set; }
+        public PaymentStatus? PaymentStatus { get; set; }
         public string Keyword { get; set; }
     }
 }

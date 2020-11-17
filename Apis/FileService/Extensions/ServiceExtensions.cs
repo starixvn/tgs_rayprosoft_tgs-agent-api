@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TGS.Core.Infrastructures.File
+namespace FileService.Extensions
 {
     public static class ServiceExtensions
     {
@@ -9,7 +9,6 @@ namespace TGS.Core.Infrastructures.File
             string configSectionName = "FileSetting")
         {
             services.Configure<FileSetting>(configuration.GetSection(configSectionName));
-            services.AddSingleton<IFileService, FileService>();
 
             return services;
         }

@@ -16,23 +16,25 @@ namespace TGS.Apis.BackendOffice
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            
+
             await ExecuteMigrationsAndSeedingsAsync(host.Services);
 
             await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 })
-                .ConfigureLogging(builder=> 
+                .ConfigureLogging(builder =>
                 {
                     builder.AddDebug();
                     builder.AddConsole();
                 });
+        }
 
         private static async Task ExecuteMigrationsAndSeedingsAsync(IServiceProvider services)
         {
@@ -52,7 +54,7 @@ namespace TGS.Apis.BackendOffice
             }
 
             await using (var backOfficeRepo = sp.GetRequiredService<IBackendOfficeRepository>())
-            { 
+            {
                 await backOfficeRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
             }
         }

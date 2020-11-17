@@ -1,9 +1,7 @@
-using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Middlewares;
@@ -24,7 +22,7 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBackendOfficeServices(_configuration, _env);
+            services.AddBackendOfficeServices(_configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -41,13 +39,6 @@ namespace TGS.Apis.BackendOffice
             app.UseAuthentication();
 
             app.UseAuthorization();
-
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.ContentRootPath, "UploadImages")),
-                RequestPath = "/UploadImages"
-            });
 
             app.UseEndpoints(endpoints =>
             {

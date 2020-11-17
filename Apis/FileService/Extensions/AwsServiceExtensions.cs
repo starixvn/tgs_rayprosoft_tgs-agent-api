@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace TGS.Core.Infrastructures.File
+namespace FileService.Extensions
 {
     public static class AwsServiceExtensions
     {

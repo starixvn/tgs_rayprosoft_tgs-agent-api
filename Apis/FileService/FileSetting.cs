@@ -1,4 +1,4 @@
-﻿namespace TGS.Core.Infrastructures.File
+﻿namespace FileService
 {
     public class FileSetting
     {

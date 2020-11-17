@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators
+namespace FileService.Controllers.Messages.Validators
 {
     public class ImageFileSignature
     {

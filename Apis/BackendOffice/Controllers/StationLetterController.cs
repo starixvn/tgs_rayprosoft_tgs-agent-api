@@ -15,7 +15,6 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.File;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -26,7 +25,6 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class StationLetterController : BaseContextController
     {
         private readonly ITgsCommands<StationLetter> _commands;
-        private readonly IFileService _fileService;
         private readonly ITgsCommands<StationLetterPlayer> _playerCommands;
         private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsQueries<StationLetter> _queries;
@@ -46,7 +44,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsCommands<StationLetter> commands,
             ITgsCommands<StationLetterPlayer> playerCommands,
             IUploadService uploadService,
-            IFileService fileService,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
@@ -54,7 +51,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             _commands = commands;
             _playerCommands = playerCommands;
             _uploadService = uploadService;
-            _fileService = fileService;
         }
 
         [HttpGet]
@@ -210,31 +206,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return workbook;
             });
             return wb.Deliver("Player.xlsx");
-        }
-
-        [HttpPost("upload/image")]
-        [Description("Upload image")]
-        public async Task<ImageUploadResponse> UploadImage([FromForm] ImageUploadRequest request)
-        {
-            if (request.FormFile == null)
-            {
-                return CreateInvalidResponse<ImageUploadResponse>("");
-                // This is the point where we should persist the image bytes to a persistent store.
-                // This could be anything from storing the image in a database (MySql, SqlServer), disk,
-                // or object store (Amazon S3, Azure Blog Storage, Digital Ocean Spaces)
-
-                // Once the image is stored, we'll want to return the url of where the image is stored
-                // in the response. For the time being, this image url will be hardcoded so that the
-                // TinyMCE editor functions.
-            }
-
-            var imageUrl = await _fileService.UploadFileAsync(request.FormFile);
-
-            return new ImageUploadResponse
-            {
-                Valid = true,
-                Url = imageUrl
-            };
         }
     }
 }
