@@ -25,7 +25,7 @@ namespace TGS.Apis.BackendOffice
             services.AddBackendOfficeServices(_configuration);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             if (_env.IsDevelopmentOrDocker())
             {

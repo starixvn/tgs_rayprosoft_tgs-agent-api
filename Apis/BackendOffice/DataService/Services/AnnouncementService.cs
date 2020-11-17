@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices;
@@ -7,7 +7,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 {
     public interface IAnnouncementService
     {
-        Task CreateAnnouncement(Announcement announcement);
+        Task CreateAnnouncementAsync(Announcement announcement);
+        Task UpdateAnnouncementAsync(Announcement announcement);
     }
 
     public class AnnouncementService : IAnnouncementService
@@ -19,9 +20,16 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository = repository;
         }
 
-        async Task IAnnouncementService.CreateAnnouncement(Announcement announcement)
+        Task IAnnouncementService.CreateAnnouncementAsync(Announcement announcement)
         {
-            await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            //TODO: send a request to file service by nats
+            throw new NotImplementedException();
+        }
+
+        Task IAnnouncementService.UpdateAnnouncementAsync(Announcement announcement)
+        {
+            //TODO: send a request to file service by nats
+            throw new NotImplementedException();
         }
     }
 }
