@@ -24,9 +24,10 @@
             public const string Schema = "dbo";
         }
 
-        public static class Player
+        public static class TokenExpireSeconds
         {
-            public const int LoginExpirationSeconds = 3600 * 12; // 12 hours
+            public const int PlayerLogin = 3600 * 12; // 12 hours
+            public const int Jwt = 60 * 60;        // 1 hours
         }
 
         public static class GameProvider
@@ -48,6 +49,7 @@
             public const string GameProviderId = "gameProviderId";
             public const string GameProviderConfigurationId = "gameProviderConfigurationId";
             public const string PlatformType = "platformType";
+            public const string PlayerToken = "playerToken";
         }
 
         public static class LocalizationContext

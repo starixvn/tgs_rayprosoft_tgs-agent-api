@@ -63,10 +63,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.User
         [Test]
         public void Should_not_have_error_when_password_have_not_special_character()
         {
-            var model = new CreateUserRequest {Password = "Password", ConfirmPassword = "Password"};
+            var model = new CreateUserRequest {Password = "11111111", ConfirmPassword = "11111111"};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedSpecialCharacter);
+                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedCharacter);
         }
 
         [Test]

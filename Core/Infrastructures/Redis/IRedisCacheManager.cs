@@ -15,6 +15,8 @@ namespace TGS.Core.Infrastructures.Redis
 
         Task ClearCacheAsync(object cacheType, object key, bool fireAndForget = false);
 
+        Task<int> ClearCacheByBatchAsync(CacheKey[] keys, bool fireAndForget = false);
+
         /// <summary>
         /// Scans through all keys in redis database and deletes keys that matches some pattern.
         /// This pattern may contains special symbols like *?^ etc.

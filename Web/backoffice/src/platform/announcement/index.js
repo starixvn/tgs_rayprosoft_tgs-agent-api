@@ -9,7 +9,7 @@ import {
 import { useChangeAnnouncementOrders, useAnnouncementList } from "./client"
 import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
-import { useTable, Table, pageCount } from "../../table"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Ascending } from "../../table/order"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -50,11 +50,15 @@ export const Content = () => {
 const AsyncContentBody = ({}) => {
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
-  let [statusName, setStatusName] = useState(
-    hasVerifyAuth ? InVerifyName : hasViewAuth ? EffectiveName : null
-  )
-  let { state, setState, setPageIndex, setSortOrder } = useTable()
-  let { pageIndex, pageSize, sortby, orderby } = state
+
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    statusName: hasVerifyAuth
+      ? InVerifyName
+      : hasViewAuth
+      ? EffectiveName
+      : null
+  })
+  let { pageIndex, pageSize, statusName, sortby, orderby } = state
 
   let {
     data = {},
@@ -76,12 +80,16 @@ const AsyncContentBody = ({}) => {
   let tab = useTabState({
     selectedId: statusName
   })
-  let { selectedId } = tab
 
-  const setStatus = (newStatusName) => () => {
-    //clearCache()
-    mutate()
-    setStatusName(newStatusName)
+  const activeTab = (newStatusName) => () => {
+    if (newStatusName === statusName) {
+      mutate()
+    }
+    //TODO: reset sortBy?
+    setState({
+      pageIndex: 0,
+      statusName: newStatusName
+    })
   }
 
   return (
@@ -94,7 +102,7 @@ const AsyncContentBody = ({}) => {
           {hasVerifyAuth && (
             <Tab
               tabId={InVerifyName}
-              onClick={setStatus(InVerifyName)}
+              onClick={activeTab(InVerifyName)}
               {...tab}
             >
               <StatusLabel value={InVerify} />
@@ -103,15 +111,15 @@ const AsyncContentBody = ({}) => {
 
           <Tab
             tabId={EffectiveName}
-            onClick={setStatus(EffectiveName)}
+            onClick={activeTab(EffectiveName)}
             {...tab}
           >
             <StatusLabel value={Effective} />
           </Tab>
-          <Tab tabId={ExpiredName} onClick={setStatus(ExpiredName)} {...tab}>
+          <Tab tabId={ExpiredName} onClick={activeTab(ExpiredName)} {...tab}>
             <StatusLabel value={Expired} />
           </Tab>
-          <Tab tabId={RejectedName} onClick={setStatus(RejectedName)} {...tab}>
+          <Tab tabId={RejectedName} onClick={activeTab(RejectedName)} {...tab}>
             <StatusLabel value={Rejected} />
           </Tab>
         </TabList>
@@ -295,6 +303,7 @@ const useColumns = ({
   changeDisplayOrder,
   items = []
 }) => {
+  let hasUpdateAuth = useIsDisplayMenuByRoute([UpdateMenu])
   let columns = [
     tabStatusName != EffectiveName
       ? sequenceColumn()
@@ -384,7 +393,13 @@ const useColumns = ({
       Cell: ({ value }) => {
         let { status } = value
         if (tabStatusName === EffectiveName) {
-          return <StatusToggleButton record={value} onSubmitted={mutate} />
+          return (
+            <StatusToggleButton
+              record={value}
+              onSubmitted={mutate}
+              disabled={!hasUpdateAuth}
+            />
+          )
         }
 
         return (
@@ -444,5 +459,7 @@ const useColumns = ({
       }
     })
   }
-  return useMemo(() => columns, [tabStatusName, JSON.stringify(items)])
+  return useMemo(() => {
+    return columns
+  }, [tabStatusName, JSON.stringify(items)])
 }

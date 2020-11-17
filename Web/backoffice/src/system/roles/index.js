@@ -12,10 +12,11 @@ import {
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code } from "./menu"
-import { useList } from "./client"
-import { useTable, Table, pageCount } from "../../table"
+import { useRoleList } from "./client"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/Search"
+import equals from "fast-deep-equal"
 
 export { Code }
 
@@ -34,14 +35,8 @@ const AsyncContent = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable({
     name: ""
   })
-  let { pageIndex, pageSize, sortby, orderby, name = "" } = state
-  let { data, isLoading, mutate } = useList({
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby,
-    orderby,
-    name
-  })
+  let { pageIndex, pageSize, name } = state
+  let { data, isLoading, mutate } = useRoleList(toApiParams(state))
 
   const fetchTable = mutate
   let columns = useTableColumns({ fetchTable })
@@ -52,10 +47,14 @@ const AsyncContent = () => {
         <>
           <SearchForm
             search={(data) => {
-              setState({
-                page: 0,
-                ...data
-              })
+              let newState = {
+                pageIndex: 0,
+                name: data?.name
+              }
+              if (equals(newState, { pageIndex, name })) {
+                mutate()
+              }
+              setState(newState)
             }}
             isPending={isLoading}
           />

@@ -15,8 +15,6 @@ import {
   FieldStack,
   FieldWrapper,
   SelectField,
-  Dialog,
-  Modal,
   Table,
   useClassName
 } from "bumbag"
@@ -31,19 +29,18 @@ import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
 import InputField from "../../input/Field"
-import _FormDialog from "../../form/Dialog"
+import { Modal, useModalState } from "../../dialog/Modal"
+import FormDialog from "../../form/Dialog"
 import cloneDeep from "clone-deep"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
-  let dialog = Modal.useState()
+  let dialog = useModalState()
   let {
     menus,
     isLoading: isLoadingMenus,
     error: fetchMenusError,
     mutate
-  } = useMenus({
-    shouldFetch: dialog.visible
-  })
+  } = useMenus(dialog.visible)
 
   useEffect(() => {
     if (!dialog.visible) {
@@ -51,7 +48,6 @@ export const AddButton = ({ onSubmitted, ...props }) => {
     }
   }, [dialog.visible])
 
-  let disclosureRef = useRef()
   let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
     return null
@@ -59,7 +55,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure ref={disclosureRef} {...dialog}>
+      <Disclosure {...dialog}>
         <Trans zh="新增" en="Add" />
       </Disclosure>
       {dialog.visible && (
@@ -67,7 +63,6 @@ export const AddButton = ({ onSubmitted, ...props }) => {
           menus={menus}
           onSubmitted={onSubmitted}
           dialog={dialog}
-          finalFocusRef={disclosureRef}
           visible={dialog.visible && !isLoadingMenus}
         />
       )}
@@ -79,12 +74,10 @@ export const AddButton = ({ onSubmitted, ...props }) => {
   )
 }
 
-const AddDialog = ({ menus = [], dialog, onSubmitted, finalFocusRef }) => {
+const AddDialog = ({ menus = [], dialog, onSubmitted }) => {
   let [menusState, setMenus] = useState()
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useAddRole({
-    data: submitData
-  })
+  let { result, error, isLoading } = useAddRole(submitData)
 
   useEffect(() => {
     setMenus(cloneDeep(menus))
@@ -101,7 +94,7 @@ const AddDialog = ({ menus = [], dialog, onSubmitted, finalFocusRef }) => {
 
   return (
     <>
-      <_FormDialog
+      <FormDialog
         initialValues={{
           name: ""
         }}
@@ -119,21 +112,24 @@ const AddDialog = ({ menus = [], dialog, onSubmitted, finalFocusRef }) => {
         title={title}
         dialog={dialog}
         placement="top"
-        finalFocusRef={finalFocusRef}
+        maxWidth="none"
+        width="40vw"
       >
         <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
-      </_FormDialog>
+      </FormDialog>
     </>
   )
 }
 
 const DialogBody = ({ menus, setMenus, dialog }) => {
   return (
-    <FieldValues>
+    <FieldValues margin="major-1" height="100%">
       <Label name="name" required>
         <Trans zh="权限组名称" en="Name" />
       </Label>
-      <InputField name="name" />
+      <Box>
+        <InputField name="name" />
+      </Box>
 
       <Label>
         <Trans zh="权限管理" en="Role" />
@@ -148,8 +144,12 @@ const MenusBody = ({ menus = [], setMenus }) => {
     let item = findMenu(path, menus)
     item.isDisplay = checked
 
+    let parentPath = path.slice(0, path.length - 1)
     setSubMenusDisplay(item.isDisplay, item)
-    syncMenuDisplay(path.slice(0, path.length - 1), menus)
+    syncMenuDisplay(parentPath, menus)
+    if (checked) {
+      autoDisplayParentMenu(parentPath, menus)
+    }
 
     setMenus([...menus])
   }
@@ -196,9 +196,23 @@ const syncMenuDisplay = (path = [], menus) => {
   }
 }
 
+const autoDisplayParentMenu = (path = [], menus) => {
+  if (!path || path.length === 0) {
+    return
+  }
+
+  let menu = findMenu(path, menus) ?? {}
+  if (menu) {
+    menu.isDisplay = true
+  }
+
+  if (path.length > 1) {
+    autoDisplayParentMenu(path.slice(0, path.length - 1), menus)
+  }
+}
+
 export const EditButton = ({ id, onSubmitted, ...props }) => {
-  let dialog = Modal.useState()
-  let disclosureRef = useRef()
+  let dialog = useModalState()
 
   let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
   if (!isDisplay) {
@@ -207,25 +221,20 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure ref={disclosureRef} {...dialog}>
+      <Disclosure {...dialog}>
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
-        <AsyncRoleDialog
-          id={id}
-          onSubmitted={onSubmitted}
-          dialog={dialog}
-          finalFocusRef={disclosureRef}
-        />
+        <AsyncRoleDialog id={id} onSubmitted={onSubmitted} dialog={dialog} />
       )}
     </>
   )
 }
 
-const AsyncRoleDialog = ({ id, dialog, onSubmitted, finalFocusRef }) => {
-  let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole({
-    id: dialog.visible && id
-  })
+const AsyncRoleDialog = ({ id, dialog, onSubmitted }) => {
+  let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole(
+    id
+  )
 
   if (isLoading) {
     return <LoadingBackdrop visible={true} />
@@ -248,25 +257,14 @@ const AsyncRoleDialog = ({ id, dialog, onSubmitted, finalFocusRef }) => {
         })
         onSubmitted && onSubmitted()
       }}
-      finalFocusRef={finalFocusRef}
     />
   )
 }
 
-const EditDialog = ({
-  id,
-  name,
-  menus,
-  dialog,
-  onSubmitted,
-  finalFocusRef
-}) => {
+const EditDialog = ({ id, name, menus, dialog, onSubmitted }) => {
   let [menusState, setMenus] = useState(cloneDeep(menus))
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useEditRole({
-    id,
-    data: submitData
-  })
+  let { result, error, isLoading } = useEditRole(id, submitData)
 
   useEffect(() => {
     setMenus(cloneDeep(menus))
@@ -282,7 +280,7 @@ const EditDialog = ({
   }
 
   return (
-    <_FormDialog
+    <FormDialog
       initialValues={{
         name
       }}
@@ -302,7 +300,8 @@ const EditDialog = ({
       title={title}
       dialog={dialog}
       placement="top"
-      finalFocusRef={finalFocusRef}
+      maxWidth="none"
+      width="40vw"
     >
       {({ resetForm, ...formProps }) => {
         useEffect(() => {
@@ -317,13 +316,13 @@ const EditDialog = ({
           <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
         )
       }}
-    </_FormDialog>
+    </FormDialog>
   )
 }
 
 const MenuTable = ({ menus = [], setChecked } = {}) => {
   return (
-    <Table>
+    <Table hasDividers>
       {menus.map((menu, index) => {
         return (
           <MenuTableContent key={index} menu={menu} setChecked={setChecked} />
@@ -362,7 +361,7 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
                 />
               </Table.Cell>
               <Table.Cell>
-                <div>
+                <span>
                   {subMenuItems.map((subMenuItem, index) => {
                     return (
                       <MenuCheckbox
@@ -373,7 +372,7 @@ const MenuTableContent = ({ menu = {}, setChecked }) => {
                       />
                     )
                   })}
-                </div>
+                </span>
               </Table.Cell>
             </Table.Row>
           )
@@ -399,9 +398,9 @@ const MenuCheckbox = ({ path = [], menu = {}, setChecked }) => {
         let isChecked = event.target.checked
         setChecked(menuPath, isChecked)
       }}
-      css={css`
-        white-space: nowrap;
-      `}
+      whiteSpace="nowrap"
+      display="inline-flex"
+      marginRight="major-1"
     ></Checkbox>
   )
 }

@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             var message = ErrorMapper.GetMessageByException(exception);
             var desc = error.Description(message);
 
-            var request = await context.Request.ReadFromJsonAsync<BaseRequest>();
+            var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
 
             var res = new BaseResponse
             {

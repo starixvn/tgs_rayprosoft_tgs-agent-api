@@ -20,24 +20,21 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class UserController : BaseContextController
     {
-        private readonly IHashProvider _hashProvider;
-        private readonly ITgsHashConfig _tgsHashConfig;
+        private readonly IPasswordHandler _passwordHandler;
         private readonly IBackendOfficeQueries<User> _userQueries;
         private readonly IBackendOfficeQueries<Department> _departmentQueries;
         private readonly IBackendOfficeQueries<Role> _roleQueries;
         private readonly IBackendOfficeCommands<User> _userCommands;
 
         public UserController(
-            IHashProvider hashProvider,
-            ITgsHashConfig tgsHashConfig,
+            IPasswordHandler passwordHandler,
             IBackendOfficeQueries<User> userQueries,
             IBackendOfficeQueries<Department> departmentQueries,
             IBackendOfficeQueries<Role> roleQueries,
             IBackendOfficeCommands<User> userCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _hashProvider = hashProvider;
-            _tgsHashConfig = tgsHashConfig;
+            _passwordHandler = passwordHandler;
             _userQueries = userQueries;
             _departmentQueries = departmentQueries;
             _roleQueries = roleQueries;
@@ -87,7 +84,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
-            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
+            var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
             var user = new User
             {
                 Id = GuidExtensions.NewSequentialGuid(),
@@ -117,10 +114,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
             }
+
             if (await _roleQueries.GetSingleAsync(r => r.Id == request.RoleId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
+            
             if (await _departmentQueries.GetSingleAsync(p => p.Id == request.DepartmentId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
@@ -147,7 +146,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.User.NotFound);
             }
 
-            var (salt, password) = _hashProvider.GenerateCredential(request.Password);
+            var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
             user.Password = password;
             user.Salt = salt;
             user.UpdatedByUsername = Username;

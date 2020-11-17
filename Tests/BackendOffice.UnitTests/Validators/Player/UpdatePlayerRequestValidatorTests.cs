@@ -17,23 +17,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         private UpdatePlayerRequestValidator _validator;
 
         [Test]
-        public void Should_have_error_real_name_is_null()
-        {
-            var model = new UpdatePlayerRequest {RealName = null};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.RealName)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.NameRequired);
-        }
-
-        [Test]
-        public void Should_not_have_error_when_real_name_is_specified()
-        {
-            var model = new UpdatePlayerRequest {RealName = "RealName"};
-            var result = _validator.TestValidate(model);
-            result.ShouldNotHaveValidationErrorFor(request => request.RealName);
-        }
-
-        [Test]
         public void Should_not_have_error_when_password_is_null()
         {
             var model = new UpdatePlayerRequest {Password = null};
@@ -60,15 +43,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         }
 
         [Test]
-        public void Should_not_have_error_when_password_have_not_special_character()
-        {
-            var model = new UpdatePlayerRequest {Password = "Password", ConfirmedPassword = "Password"};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedSpecialCharacter);
-        }
-
-        [Test]
         public void Should_have_error_password_is_not_equal_to_confirmed_password()
         {
             var model = new UpdatePlayerRequest {Password = "Password", ConfirmedPassword = "ConfirmedPassword"};
@@ -80,7 +54,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_not_have_error_when_password_is_equal_to_confirmed_password()
         {
-            var model = new UpdatePlayerRequest {Password = "P@ssw0rd", ConfirmedPassword = "P@ssw0rd"};
+            var model = new UpdatePlayerRequest {Password = "password1", ConfirmedPassword = "password1"};
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.Password);
         }

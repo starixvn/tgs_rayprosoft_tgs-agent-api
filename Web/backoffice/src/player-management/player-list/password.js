@@ -47,10 +47,10 @@ export const Panel = ({
   ...props
 }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useEditPlayerPassword({
+  let { result, error, isLoading } = useEditPlayerPassword(
     playerCode,
-    data: submitData
-  })
+    submitData
+  )
   useEffect(() => {
     if (result) {
       onSubmitted && onSubmitted()

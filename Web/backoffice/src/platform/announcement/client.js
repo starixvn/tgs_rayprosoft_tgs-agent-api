@@ -35,3 +35,9 @@ export const useChangeAnnouncementOrders = (data) => {
   let url = `${API}/changeorders`
   return useUpdatePut(url, data)
 }
+
+export const useChangeAnnouncementStatus = (id, status) => {
+  let url = id && Number.isFinite(status) ? `${API}/${id}/status/${status}` : ""
+
+  return useUpdatePut(url, status)
+}

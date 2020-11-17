@@ -35,23 +35,35 @@ export const from = (value) => {
   return value
 }
 
+export const toString = (value) => {
+  switch (value) {
+    case Enabled:
+      return EnabledString
+    case Disabled:
+      return DisabledString
+    case InBlacklist:
+      return InBlacklistString
+    default:
+      return ""
+  }
+}
+
 export const Field = ({ name, required, ...props }) => {
   let enabledPair = useEnabledPair()
   let disabledPair = useDisabledPair()
   let blockedPair = useBlockedPair()
 
-  let options = required 
-  ? [enabledPair,
-    disabledPair,
-    blockedPair] 
-  : [{
-    label: "",
-    value: null
-  }, 
-  enabledPair,
-  disabledPair,
-  blockedPair
-  ]
+  let options = required
+    ? [enabledPair, disabledPair, blockedPair]
+    : [
+        {
+          label: "",
+          value: null
+        },
+        enabledPair,
+        disabledPair,
+        blockedPair
+      ]
 
   return (
     <_Field name={name} required={required}>

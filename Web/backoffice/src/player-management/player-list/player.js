@@ -26,7 +26,11 @@ import {
 import { FieldValues } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 import { Field as InputField } from "../../input/Field"
-import { Field as StatusField, from as toStatus } from "../status"
+import {
+  Field as StatusField,
+  from as toStatus,
+  toString as toStatusString
+} from "../status"
 import { Field as VipLevelField } from "../../vip-level/field"
 import { Field as _Field, FieldMinHeight } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
@@ -51,10 +55,10 @@ export const EditPanel = ({
   ...props
 }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useEditPlayerInfo({
+  let { result, error, mutate, isLoading } = useEditPlayerInfo(
     playerCode,
-    data: submitData
-  })
+    submitData
+  )
   useEffect(() => {
     if (result && !error) {
       onSubmitted && onSubmitted()
@@ -82,6 +86,7 @@ export const EditPanel = ({
     status,
     hasAgent
   } = player
+
   return (
     <TabPanel tabId={Key} {...props}>
       {error && <AlertDialog {...error} onClickClose={clearResult} />}
@@ -90,7 +95,7 @@ export const EditPanel = ({
           realName: realName ?? "",
           vipId,
           parentUsername: parentUsername ?? "",
-          status,
+          status: toStatusString(status),
           hasAgent: hasAgent.toString()
         }}
         onSubmit={submit}

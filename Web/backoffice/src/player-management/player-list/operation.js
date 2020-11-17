@@ -43,16 +43,13 @@ export const Panel = ({ playerCode, ...props }) => {
     to: dateRange.end
   })
   let { pageIndex, pageSize, sortby, orderby, from, to } = state
-  let { data = {}, isLoading, mutate } = useOperations({
-    playerCode: isActive && playerCode,
-    searchParams: {
-      page: pageIndex + 1,
-      rows: pageSize,
-      sortby,
-      orderby,
-      from: format(from),
-      to: format(to)
-    }
+  let { data = {}, isLoading, mutate } = useOperations(playerCode, {
+    page: pageIndex + 1,
+    rows: pageSize,
+    sortby,
+    orderby,
+    from: format(from),
+    to: format(to)
   })
   let columns = useColumns()
 

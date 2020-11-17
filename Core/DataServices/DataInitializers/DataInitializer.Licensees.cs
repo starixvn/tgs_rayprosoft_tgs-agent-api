@@ -13,6 +13,7 @@ namespace TGS.Core.DataServices.DataInitializers
             string TimeZoneId {  get; }
             string ClientId {  get; }
             string SecretKey {  get; }
+            string ApiKey { get; }
             ICurrency[] Currencies {  get; }
             ILanguage[] Languages {  get; }
             string[] GameProviders { get; }
@@ -30,7 +31,9 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string ILicensee.ClientId => "TGS";
 
-            string ILicensee.SecretKey => "EOxdpC9s0vmVjv59OiyENccWOmN8sbbKZvQUztTvpcb";
+            string ILicensee.SecretKey => "GcHmUWH0WVqWq5JcSPS5qkeoDcTmkBBE";
+
+            string ILicensee.ApiKey => "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV";
 
             ICurrency[] ILicensee.Currencies => new ICurrency[] 
             { 

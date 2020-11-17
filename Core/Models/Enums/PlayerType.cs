@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace TGS.Core.Models.Enums
 {
     [Flags]
-    public enum PlayerTypes : byte
+    public enum PlayerType : byte
     {
         None = 0,
         [Description("Real Player")]

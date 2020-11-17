@@ -1,5 +1,4 @@
 ﻿using System;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operations.Models.Services
 {
@@ -7,7 +6,7 @@ namespace TGS.Services.Operations.Models.Services
     {
         public string Username { get; init; }
         public string PlayerCode { get; init; }
-        public PlatformType PlatformType { get; init; }
+        public Guid LoginRecordId { get; init; }
         public DateTimeOffset UpdatedOn { get; init; }
     }
 }

@@ -135,8 +135,8 @@
   <data name="PasswordNeedNumber" xml:space="preserve">
     <value>Password need numbers.</value>
   </data>
-  <data name="PasswordNeedSpecialCharacter" xml:space="preserve">
-    <value>Password need special character.</value>
+  <data name="PasswordNeedCharacter" xml:space="preserve">
+    <value>Password need character.</value>
   </data>
   <data name="PasswordNeedUpperCaseLetter" xml:space="preserve">
     <value>Password need upper case letter.</value>

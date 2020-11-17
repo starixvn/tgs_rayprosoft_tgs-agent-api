@@ -26,7 +26,7 @@ import {
 } from "bumbag"
 import { Field as _Field } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
-import { useList } from "./client"
+import { useRoleList } from "./client"
 
 export const Field = ({ required, validate, ...props }) => {
   let { name } = props
@@ -38,7 +38,7 @@ export const Field = ({ required, validate, ...props }) => {
 }
 
 export const Select = ({ ...props }) => {
-  let { error, data = {}, isLoading } = useList()
+  let { error, data = {}, isLoading } = useRoleList({ showAll: true })
   let { items = [] } = data
   let options = items.map(({ id, name }) => ({
     label: name,

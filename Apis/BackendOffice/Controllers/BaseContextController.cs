@@ -10,24 +10,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     public class BaseContextController : ControllerBase
     {
-        protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
-        {
-            return new TResponse
-            {
-                Valid = true
-            };
-        }
-
-        protected static TResponse CreateInvalidResponse<TResponse>(string message) where TResponse : MessageResponse, new()
-        {
-            return new TResponse
-            {
-                Valid = false,
-                Message = message
-            };
-        }
-
         private readonly Dictionary<string, string> _userInfoMap;
+
         public BaseContextController(IHttpContextAccessor httpContextAccessor)
         {
             _userInfoMap = httpContextAccessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
@@ -37,8 +21,32 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         protected string RoleName => _userInfoMap[Consts.UserInfo.RolenameKey];
 
-        protected Guid? ResellerId => _userInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(_userInfoMap[Consts.UserInfo.ResellerKey]);
+        protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);
 
-        protected Guid? BrandId => _userInfoMap[Consts.UserInfo.ResellerKey].IsNullOrEmpty() ? Guid.Empty : new Guid(_userInfoMap[Consts.UserInfo.LicenseeKey]);
+        protected Guid? LicenseeKey => GetIdByKey(Consts.UserInfo.LicenseeKey);
+
+        protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
+        {
+            return new TResponse
+            {
+                Valid = true
+            };
+        }
+
+        protected static TResponse CreateInvalidResponse<TResponse>(string message)
+            where TResponse : MessageResponse, new()
+        {
+            return new TResponse
+            {
+                Valid = false,
+                Message = message
+            };
+        }
+
+        private Guid? GetIdByKey(string key) =>
+            !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
+            !Guid.TryParse(value, out var id)
+                ? (Guid?) null
+                : id;
     }
 }

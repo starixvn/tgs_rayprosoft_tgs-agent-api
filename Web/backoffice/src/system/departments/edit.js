@@ -32,9 +32,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
 const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useAddDepartment({
-    data: submitData
-  })
+  let { result, error, isLoading } = useAddDepartment(submitData)
 
   const clearResult = () => {
     setSubmit(null)
@@ -99,10 +97,7 @@ export const EditButton = ({ id = "", name = "", onSubmitted, ...props }) => {
 
 const EditDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, error, isLoading } = useEditDepartment({
-    id,
-    data: submitData
-  })
+  let { result, error, isLoading } = useEditDepartment(id, submitData)
 
   const clearResult = () => {
     setSubmit(null)

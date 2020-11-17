@@ -1,122 +1,54 @@
-import useSWR, { cache } from "swr"
-import client, { urlWith, get, put, post } from "../../client"
+import {
+  urlWith,
+  useGet,
+  useCreatePost,
+  useUpdatePut,
+  useDelete
+} from "../../client"
 
-export const useList = (searchParams) => {
-  let url = urlWith(searchParams, `/api/role`)
-  const { data, error, isValidating, mutate } = useSWR(url, get)
+const API = "/api/role"
+
+export const useRoleList = (searchParams) => {
+  let url = searchParams ? urlWith(searchParams, API) : ""
+  return useGet(url)
+}
+
+export const useRole = (id) => {
+  let url = id ? `${API}/${id}` : ""
+  let { data, ...rest } = useGet(url)
 
   return {
-    data,
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
+    role: data?.role,
+    ...rest
   }
 }
 
-export const useRole = ({ id, shouldFetch = true } = {}) => {
-  let fetchData = shouldFetch && !!id
-  let key = `/api/role/${id}`
-  const { data: role, error, isValidating, mutate } = useSWR(
-    fetchData ? key : null,
-    (url) => get(url).then(({ role, ...response }) => role)
-  )
-
-  return {
-    role,
-    isLoading: !error && !role && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate,
-    deleteCache: () => cache.delete(key)
-  }
+export const useAddRole = (data) => {
+  let url = data ? API : ""
+  return useCreatePost(url, data)
 }
 
-export const useAddRole = ({ data }) => {
-  let fetchData = !!data
-  let { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/role`, data] : null,
-    (url, data) => post(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditRole = (id, data) => {
+  let url = id ? `${API}/${id}` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useEditRole = ({ id, data }) => {
-  let fetchData = id && !!data
-  let keys = fetchData ? [`/api/role/${id}`, data] : null
-  let { data: result, error, isValidating, mutate } = useSWR(
-    keys,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useCopyRole = (id, data) => {
+  let url = id ? `${API}/${id}/copy` : ""
+  return useCreatePost(url, data)
 }
 
-export const useCopyRole = ({ id, data }) => {
-  let fetchData = id && data
-  let keys = fetchData && [`/api/role/${id}/copy`, data]
-  const { data: result, error, isValidating, mutate } = useSWR(
-    keys,
-    (url, data) => post(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useDeleteRole = (id) => {
+  let url = id ? `/api/role/${id}` : ""
+  return useDelete(url)
 }
 
-export const useDeleteRole = ({ id }) => {
-  let fetchData = id
-  let url = fetchData && `/api/role/${id}`
-  let { data: result, error, isValidating, mutate } = useSWR(url, client.delete)
-
+export const useMenus = (fetchData = true) => {
+  let url = fetchData ? `${API}/menus` : ""
+  let { result, ...rest } = useCreatePost(url, null)
   return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
-}
-
-export const useMenus = ({ shouldFetch = true } = {}) => {
-  let key = "/api/role/menus"
-  const { data: menus, error, isValidating, mutate } = useSWR(
-    shouldFetch ? key : null,
-    (url) =>
-      post(url).then(({ menus, ...response }) => resetDisplay(false, menus))
-  )
-
-  return {
-    menus,
-    isLoading: !error && !menus,
-    isValidating,
-    error,
-    isError: error,
-    mutate: () => cache.delete(key)
+    menus: resetDisplay(false, result?.menus),
+    ...rest
   }
 }
 

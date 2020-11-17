@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
@@ -21,13 +20,14 @@ namespace TGS.Services.Operations
 
         Task<decimal> GetPlayerBalanceAsync(Guid defaultWalletId, bool dirtyRead);
 
-        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform = null);
+        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
+            PlatformType? platform = null);
 
         Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
 
-        Task<Player> GetPlayerByUsernameAsync(Guid licenseeId, string username);
+        Task<Player> GetPlayerByCodeAsync(string playerCode);
 
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
@@ -35,24 +35,26 @@ namespace TGS.Services.Operations
 
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
 
-        Task PlayerLoginAsync(PlayerLoginData data);
+        Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data);
 
         Task PlayerLogoutAsync(PlayerLogoutData data);
 
         Task<Guid> GetLicenseeIdByPlayerCodeAsync(string playerCode);
 
-        Task<Guid> GetMainWalletIdByPlayerIdAsync(string playerCode);
+        Task<Guid> GetMainWalletIdByPlayerCodeAsync(string playerCode);
+
+        Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
     {
         private readonly IRedisCacheManager _cacheManager;
-        private readonly IJsonSerializationProvider _json;
-        private readonly Func<IWalletQueries> _walletQueriesFactory;
-        private readonly Func<IPlayerQueries> _playerQueriesFactory;
-        private readonly IPlayerCommands _playerCommands;
 
         private readonly IPlayerOperations _interface;
+        private readonly IJsonSerializationProvider _json;
+        private readonly IPlayerCommands _playerCommands;
+        private readonly Func<IPlayerQueries> _playerQueriesFactory;
+        private readonly Func<IWalletQueries> _walletQueriesFactory;
 
         public PlayerOperations(
             IRedisCacheManager cacheManager,
@@ -90,12 +92,11 @@ namespace TGS.Services.Operations
             return cachedPlayer;
         }
 
-        Task<decimal> IPlayerOperations.GetPlayerBalanceAsync(Guid walletId, bool dirtyRead)
-        {
-            return _walletQueriesFactory().GetBalanceAsync(walletId, dirtyRead);
-        }
+        Task<decimal> IPlayerOperations.GetPlayerBalanceAsync(Guid walletId, bool dirtyRead) =>
+            _walletQueriesFactory().GetBalanceAsync(walletId, dirtyRead);
 
-        async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestEnabledLoginRecordAsync(string playerCode, PlatformType? platform)
+        async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
+            PlatformType? platform)
         {
             var loginRecords = await _interface.GetPlayerEnabledLoginRecordsAsync(playerCode);
 
@@ -108,22 +109,21 @@ namespace TGS.Services.Operations
             var field = "enabled";
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, field);
 
-            return value.HasValue ?
-                   _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value) :
-                   await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
+            return value.HasValue
+                ? _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value)
+                : await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
         }
 
-        Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid licenseeId, string username)
-        {
-            return _cacheManager.SafeGetAndCacheAsync(RedisCacheType.UsernameToPlayerCode, username, TimeSpan.FromHours(2),
+        Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid licenseeId, string username) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.UsernameToPlayerCode, username, TimeSpan.FromHours(2),
                 () => _playerQueriesFactory().GetPlayerCodeByUsernameAsync(licenseeId, username));
-        }
 
         async Task<string> IPlayerOperations.CreatePlayerAsync(CreatePlayerData data)
-        {                  
+        {
             var playerCode = await _playerCommands.CreatePlayerAsync(data);
 
-            await _cacheManager.SafeCacheAsync(RedisCacheType.UsernameToPlayerCode, data.Username, TimeSpan.FromHours(2), playerCode);
+            await _cacheManager.SafeCacheAsync(RedisCacheType.UsernameToPlayerCode, data.Username,
+                TimeSpan.FromHours(2), playerCode);
 
             return playerCode;
         }
@@ -140,10 +140,12 @@ namespace TGS.Services.Operations
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
         }
 
-        async Task IPlayerOperations.PlayerLoginAsync(PlayerLoginData data)
+        async Task<PlayerLoginRecord> IPlayerOperations.PlayerLoginAsync(PlayerLoginData data)
         {
-            await _playerCommands.PlayerLoginAsync(data);
+            var record = await _playerCommands.PlayerLoginAsync(data);
             await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
+
+            return record;
         }
 
         async Task IPlayerOperations.PlayerLogoutAsync(PlayerLogoutData data)
@@ -152,34 +154,23 @@ namespace TGS.Services.Operations
             await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
         }
 
-        Task<Player> IPlayerOperations.GetPlayerByUsernameAsync(Guid licenseeId, string username)
-        {
-            return _playerQueriesFactory().GetPlayerByPlayerCodeAsync(licenseeId, username);
-        }
+        Task<Player> IPlayerOperations.GetPlayerByCodeAsync(string playerCode) =>
+            _playerQueriesFactory().GetPlayerByCodeAsync(playerCode);
 
-        async Task<Guid> IPlayerOperations.GetLicenseeIdByPlayerCodeAsync(string playerCode)
-        {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, CachedPlayerFields.LicenseeId);
-            if (value.HasValue)
-            {
-                return Guid.Parse(value);
-            }
+        Task<Guid> IPlayerOperations.GetLicenseeIdByPlayerCodeAsync(string playerCode) =>
+            GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.LicenseeId,
+                Guid.Parse,
+                cachedPlayer => cachedPlayer?.LicenseeId ?? Guid.Empty);
 
-            var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
-            return cachedPlayer?.LicenseeId ?? Guid.Empty;
-        }
+        Task<Guid> IPlayerOperations.GetMainWalletIdByPlayerCodeAsync(string playerCode) =>
+            GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.DefaultWalletId,
+                Guid.Parse,
+                cachedPlayer => cachedPlayer?.DefaultWalletId ?? Guid.Empty);
 
-        async Task<Guid> IPlayerOperations.GetMainWalletIdByPlayerIdAsync(string playerCode)
-        {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, CachedPlayerFields.DefaultWalletId);
-            if (value.HasValue)
-            {
-                return Guid.Parse(value);
-            }
-
-            var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
-            return cachedPlayer?.DefaultWalletId ?? Guid.Empty;
-        }
+        Task<string> IPlayerOperations.GetUsernameByPlayerCodeAsync(string playerCode) =>
+            GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.Username,
+                value => value,
+                cachedPlayer => cachedPlayer?.Username);
 
         #region Private Methods
 
@@ -205,12 +196,12 @@ namespace TGS.Services.Operations
                 {
                     PlayerCode = playerCode,
                     LicenseeId = Guid.Parse(values[0]),
-                    Status = (PlayerStatus)(int)values[1],
-                    Type = (PlayerTypes)(int)values[2],
+                    Status = (PlayerStatus) (int) values[1],
+                    Type = (PlayerType) (int) values[2],
                     Username = values[3],
                     DefaultWalletId = Guid.Parse(values[4]),
                     CultureCode = values[5],
-                    BetLimitGroupId = (int)values[6],
+                    BetLimitGroupId = (int) values[6],
                     LicenseeCode = values[7],
                     DefaultWalletCurrencyCode = values[8],
                     ExternalCurrencyCode = values[9]
@@ -224,24 +215,27 @@ namespace TGS.Services.Operations
         {
             var fields = new HashEntry[]
             {
-                new (CachedPlayerFields.LicenseeId, player.LicenseeId.ToString()),
-                new (CachedPlayerFields.LicenseeCode, player.LicenseeCode),
-                new (CachedPlayerFields.Type, (int) player.Type),
-                new (CachedPlayerFields.Username, player.Username),
-                new (CachedPlayerFields.Status, (int) player.Status),
-                new (CachedPlayerFields.DefaultWalletId, player.DefaultWalletId.ToString()),
-                new (CachedPlayerFields.DefaultWalletCurrencyCode, player.DefaultWalletCurrencyCode),
-                new (CachedPlayerFields.CultureCode, player.CultureCode),
-                new (CachedPlayerFields.BetLimitGroupId, player.BetLimitGroupId),
-                new (CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
+                new(CachedPlayerFields.LicenseeId, player.LicenseeId.ToString()),
+                new(CachedPlayerFields.LicenseeCode, player.LicenseeCode),
+                new(CachedPlayerFields.Type, (int) player.Type),
+                new(CachedPlayerFields.Username, player.Username),
+                new(CachedPlayerFields.Status, (int) player.Status),
+                new(CachedPlayerFields.DefaultWalletId, player.DefaultWalletId.ToString()),
+                new(CachedPlayerFields.DefaultWalletCurrencyCode, player.DefaultWalletCurrencyCode),
+                new(CachedPlayerFields.CultureCode, player.CultureCode),
+                new(CachedPlayerFields.BetLimitGroupId, player.BetLimitGroupId),
+                new(CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
             };
 
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2), true);
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2),
+                true);
         }
 
-        private async Task<CachedPlayerLoginRecord[]> GetAndCachedPlayerLoginsRecordsAsync(string playerCode, string field)
+        private async Task<CachedPlayerLoginRecord[]> GetAndCachedPlayerLoginsRecordsAsync(string playerCode,
+            string field)
         {
-            var results = await _playerQueriesFactory().GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled);
+            var results = await _playerQueriesFactory()
+                .GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled);
             if (results == null || results.Length == 0)
             {
                 return null;
@@ -254,11 +248,25 @@ namespace TGS.Services.Operations
             }).ToArray();
 
             var expiresIn = loginRecords.Max(r => r.ExpiredOn) - DateTimeOffset.UtcNow;
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, new HashEntry[] {
-                    new (field, _json.SerializeToString(loginRecords))
-                }, expiresIn);
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, new HashEntry[]
+            {
+                new(field, _json.SerializeToString(loginRecords))
+            }, expiresIn);
 
             return loginRecords;
+        }
+
+        private async Task<T> GetCachedPlayerValueAsync<T>(string playerCode, string field, Func<string, T> cached,
+            Func<CachedPlayer, T> noCached)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode, field);
+            if (value.HasValue)
+            {
+                return cached(value);
+            }
+
+            var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
+            return noCached(cachedPlayer);
         }
 
         private static class CachedPlayerFields

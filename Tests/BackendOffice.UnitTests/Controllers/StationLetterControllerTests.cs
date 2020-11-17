@@ -253,12 +253,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             }
         }
 
-        [Test]
-        public async Task Can_Export()
-        {
-            var response = await _controller.ExportAsync();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
+        //[Test]
+        //public async Task Can_Export()
+        //{
+        //    var response = await _controller.ExportAsync();
+        //    response.StatusCode.Should().Be(HttpStatusCode.OK);
+        //}
 
         private Fixture CreateStationLetterFixture()
         {

@@ -1,67 +1,23 @@
-import useSWR from "swr"
-import client, { urlWith, get, put, post } from "../../client"
+import { urlWith, useGet, useCreatePost, useUpdatePut } from "../../client"
 
-export const useList = (searchParams) => {
-  let url = urlWith(searchParams, `/api/users`)
-  const { data, error, isValidating, mutate } = useSWR(url, get)
+const API = "/api/users"
 
-  return {
-    data,
-    isLoading: !error && !data,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useAdminList = (searchParams) => {
+  let url = searchParams ? urlWith(searchParams, API) : ""
+  return useGet(url)
 }
 
-export const useAddAdmin = ({ data }) => {
-  let fetchData = !!data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/users/`, data] : null,
-    (url, data) => post(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useAddAdmin = (data) => {
+  let url = data ? API : ""
+  return useCreatePost(url, data)
 }
 
-export const useEditAdmin = ({ id, data }) => {
-  let fetchData = id && data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/users/${id}`, data] : null,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditAdmin = (id, data) => {
+  let url = id ? `${API}/${id}` : ""
+  return useUpdatePut(url, data)
 }
 
-export const useEditPassword = ({ id, data }) => {
-  let fetchData = id && data
-  const { data: result, error, isValidating, mutate } = useSWR(
-    fetchData ? [`/api/users/${id}/password`, data] : null,
-    (url, data) => put(url, { data })
-  )
-
-  return {
-    result,
-    isLoading: !error && !result && fetchData,
-    isValidating,
-    error,
-    isError: error,
-    mutate
-  }
+export const useEditPassword = (id, data) => {
+  let url = id ? `${API}/${id}/password` : ""
+  return useUpdatePut(url, data)
 }

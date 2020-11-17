@@ -18,6 +18,11 @@ const Cancel = {
   en: "Cancel"
 }
 
+const Close = {
+  zh: "关闭",
+  en: "Close"
+}
+
 export const SubmitText = () => Trans(Submit)
 
 export const useSubmitText = () => useTrans(Submit)
@@ -29,6 +34,8 @@ export const useCancelText = () => useTrans(Cancel)
 export const ConfirmText = () => Trans(Confirm)
 
 export const useConfirmText = () => useTrans(Confirm)
+
+export const CloseText = () => useTrans(Close)
 
 export const SubmitCancel = ({ cancelText, submitText, ...props }) => {
   return (

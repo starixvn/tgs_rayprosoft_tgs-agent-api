@@ -173,5 +173,74 @@ namespace TGS.Tests.Redis.IntegrationTests
             var amount = await _cacheManager.ClearCacheByPatternAsync(CacheType, "pattern:0:*");
             amount.Should().Be(1000);
         }
+
+        [Test]
+        public async Task ClearCacheByBatch_clear_all_keys()
+        {
+            var key11 = "1:11";
+            var key12 = "1:12";
+            var key21 = "1:21";
+            var key22 = "1:22";
+
+            await _cacheManager.CacheAsync(CacheType, key11, null, NewData);
+            await _cacheManager.CacheAsync(CacheType, key12, null, NewData);
+            await _cacheManager.CacheAsync(CacheType, key21, null, NewData);
+            await _cacheManager.CacheAsync(CacheType, key22, null, NewData);
+            
+            var cacheKeys = new CacheKey[]
+            {
+                new() {CacheType = CacheType, Key =key11},
+                new() {CacheType = CacheType, Key =key12},
+                new() {CacheType = CacheType, Key =key21},
+                new() {CacheType = CacheType, Key =key22}
+            };
+
+            var amount = await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
+
+            var key11Value = await _cacheManager.GetAsync<string>(CacheType, key11);
+            var key12Value = await _cacheManager.GetAsync<string>(CacheType, key12);
+            var key21Value = await _cacheManager.GetAsync<string>(CacheType, key21);
+            var key22Value = await _cacheManager.GetAsync<string>(CacheType, key22);
+
+            amount.Should().Be(4);
+            key11Value.Should().Be(default);
+            key12Value.Should().Be(default);
+            key21Value.Should().Be(default);
+            key22Value.Should().Be(default);
+        }
+
+        [Test]
+        public async Task ClearCacheByBatch_clear_some_keys()
+        {
+            var key11 = "1:11";
+            var key12 = "1:12";
+            var key21 = "1:21";
+            var key22 = "1:22";
+
+            await _cacheManager.CacheAsync(CacheType, key11, null, NewData);
+            await _cacheManager.CacheAsync(CacheType, key12, null, NewData);
+            await _cacheManager.CacheAsync(CacheType, key21, null, NewData);
+            await _cacheManager.CacheAsync(CacheType, key22, null, NewData);
+            
+            var cacheKeys = new CacheKey[]
+            {
+                new() {CacheType = CacheType, Key =key11},
+                new() {CacheType = CacheType, Key =key12}
+            };
+
+            var amount = await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
+
+            var key11Value = await _cacheManager.GetAsync<string>(CacheType, key11);
+            var key12Value = await _cacheManager.GetAsync<string>(CacheType, key12);
+            var key21Value = await _cacheManager.GetAsync<string>(CacheType, key21);
+            var key22Value = await _cacheManager.GetAsync<string>(CacheType, key22);
+
+            amount.Should().Be(2);
+            key11Value.Should().Be(default);
+            key12Value.Should().Be(default);
+            key21Value.Should().Be(NewData);
+            key22Value.Should().Be(NewData);
+
+        }
     }
 }

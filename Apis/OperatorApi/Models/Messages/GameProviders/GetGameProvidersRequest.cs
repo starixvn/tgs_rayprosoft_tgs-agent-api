@@ -11,14 +11,11 @@ namespace TGS.Apis.OperatorApi.Models.Messages.GameProviders
         public PlatformType PlatformType { get; init; }
 
         [Required]
-        [JsonPropertyName("lang")] 
+        [JsonPropertyName("language")] 
         public string Language { get; init; }
 
         [Required]
         [JsonPropertyName("currency")]
         public string CurrencyCode { get; init; }
-
-        [JsonPropertyName("playercode")]
-        public string PlayerCode { get; init; }
     }
 }

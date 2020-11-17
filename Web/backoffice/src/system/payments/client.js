@@ -1,111 +1,53 @@
 import useSWR, { cache } from "swr"
 import { urlWith, useGet, useCreatePost, useUpdatePut } from "../../client"
 
-const PaymentAPI = "/api/payment"
-
-const PaymentChannelAPI = "/api/paymentchannel"
-
-const PaymentMethodAPI = "/api/paymentmethod"
-
-const PaymentVendorAPI = "/api/paymentvendor"
+const API = "/api/payment"
 
 export const usePaymentList = (searchParams) => {
-  let url = searchParams ? urlWith(searchParams, PaymentAPI) : ""
+  let url = searchParams ? urlWith(searchParams, API) : ""
   return useGet(url)
 }
 
 export const usePayment = (id) => {
-  let url = id ? `${PaymentAPI}/${id}` : ""
+  let url = id ? `${API}/${id}` : ""
   return useGet(url)
 }
 
 export const useAddPayment = (data) => {
-  return useCreatePost(PaymentAPI, data)
+  return useCreatePost(API, data)
 }
 
 export const useUpdatePayment = (id, data) => {
-  let url = id ? `${PaymentAPI}/${id}` : ""
+  let url = id ? `${API}/${id}` : ""
   return useUpdatePut(url, data)
 }
 
 export const useEnablePayment = (id) => {
-  let url = id ? `${PaymentAPI}/${id}/enable` : ""
+  let url = id ? `${API}/${id}/enable` : ""
   return useUpdatePut(url, {})
 }
 
 export const useDisablePayment = (id) => {
-  let url = id ? `${PaymentAPI}/${id}/disable` : ""
+  let url = id ? `${API}/${id}/disable` : ""
   return useUpdatePut(url, {})
 }
 
 export const usePaymentHandingFee = (id) => {
-  let url = id ? `${PaymentAPI}/${id}/handingFee` : ""
+  let url = id ? `${API}/${id}/handingFee` : ""
   return useGet(url)
 }
 
 export const useUpdatePaymentHandingFee = (id, data) => {
-  let url = id ? `${PaymentAPI}/${id}/handingFee` : ""
+  let url = id ? `${API}/${id}/handingFee` : ""
   return useUpdatePut(url, data)
 }
 
 export const useChangePaymentOrders = (data) => {
-  let url = `${PaymentAPI}/ChangeOrders`
+  let url = `${API}/ChangeOrders`
   return useUpdatePut(url, data)
 }
 
-export const usePaymentChannelList = (searchParams) => {
-  let url = searchParams ? urlWith(searchParams, PaymentChannelAPI) : ""
-  return useGet(url)
-}
-
-export const usePaymentChannel = (id) => {
-  let url = id ? `${PaymentChannelAPI}/${id}` : ""
-  return useGet(url)
-}
-
-export const useAddPaymentChannel = (data) => {
-  return useCreatePost(PaymentChannelAPI, data)
-}
-
-export const useUpdatePaymentChannel = (id, data) => {
-  let url = id ? `${PaymentChannelAPI}/${id}` : ""
-  return useUpdatePut(url, data)
-}
-
-export const usePaymentMethodList = (searchParams) => {
-  let url = searchParams ? urlWith(searchParams, PaymentMethodAPI) : ""
-  return useGet(url)
-}
-
-export const usePaymentMethod = (id) => {
-  let url = id ? `${PaymentMethodAPI}/${id}` : ""
-  return useGet(url)
-}
-
-export const useAddPaymentMethod = (data) => {
-  return useCreatePost(PaymentMethodAPI, data)
-}
-
-export const useUpdatePaymentMethod = (id, data) => {
-  let url = id ? `${PaymentMethodAPI}/${id}` : ""
-  return useUpdatePut(url, data)
-}
-
-export const usePaymentVendorList = (searchParams) => {
-  let url = searchParams ? urlWith(searchParams, PaymentVendorAPI) : ""
-  return useGet(url)
-}
-
-export const usePaymentVendor = (id) => {
-  let url = id ? `${PaymentVendorAPI}/${id}` : ""
-  return useGet(url)
-}
-
-export const useAddPaymentVendor = (data) => {
-  return useCreatePost(PaymentVendorAPI, data)
-}
-
-export const useUpdatePaymentVendor = (id, data) => {
-  let url = id ? `${PaymentVendorAPI}/${id}` : ""
-  return useUpdatePut(url, data)
+export const useChangePaymentStatus = (id, status) => {
+  let url = id && status ? `${API}/${id}/${status}` : ""
+  return useUpdatePut(url, status)
 }

@@ -70,7 +70,7 @@ namespace TGS.Core.Infrastructures.Redis
 
             string value = await db.ListLeftPopAsync(key);
             return string.IsNullOrEmpty(value)
-                ? default(T)
+                ? default
                 : _jsonSerializationProvider.DeserializeFromString<T>(value);
         }
 
@@ -81,7 +81,7 @@ namespace TGS.Core.Infrastructures.Redis
 
             string value = await db.ListRightPopAsync(key);
             return string.IsNullOrEmpty(value)
-                 ? default(T)
+                 ? default
                  : _jsonSerializationProvider.DeserializeFromString<T>(value);
         }
 
@@ -114,7 +114,7 @@ namespace TGS.Core.Infrastructures.Redis
             var range = await db.ListRangeAsync(key, start, start + count - 1);
             if (range == null)
             {
-                return new T[0];
+                return Array.Empty<T>();
             }
 
             return range

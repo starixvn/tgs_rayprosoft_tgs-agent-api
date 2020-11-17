@@ -29,7 +29,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             {ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA")}
         };
 
-        private readonly IHashProvider _hashProvider;
+        private readonly IPasswordHandler _passwordHandler;
         private readonly IBackendOfficeRepository _repository;
 
         private readonly IRole[] _roles =
@@ -41,8 +41,8 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
         {
             _repository = repository;
 
-            var config = new TgsHashConfig();
-            _hashProvider = new HashProvider(config);
+            var hashProvider = (IHashProvider) new HashProvider();
+            _passwordHandler = new PasswordHandler(hashProvider);
         }
 
         async Task IDataInitializer.SetInitialDataAsync()

@@ -7,8 +7,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Players
     {
         [JsonPropertyName("isnew")]
         public bool IsNew { get; set; }
-
-        [JsonPropertyName("playercode")]
-        public string PlayerCode { get; set; }
     }
 }

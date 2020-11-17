@@ -15,7 +15,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public string GameName { get; init; }
         public GameType GameType { get; init; }
         public string PlayerCode { get; init; }
-        public PlayerTypes PlayerType { get; init; }
+        public PlayerType PlayerType { get; init; }
         public PlatformType PlatformType { get; init; }
         public Guid WalletId { get; init; }
         public string CurrencyCode { get; init; }

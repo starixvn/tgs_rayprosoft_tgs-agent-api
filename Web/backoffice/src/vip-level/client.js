@@ -1,18 +1,11 @@
 import useSWR from "swr"
-import { urlWith, get } from "../client"
+import { useGet } from "../client"
 
 export const useVipLevels = () => {
-    const { data, error, isValidating, mutate } = useSWR(
-        "/api/vipLevel",
-        (url) => get(url).then(({ items }) => items)
-    )
-
-    return {
-        items: data ?? [],
-        isLoading: !error && !data,
-        isValidating,
-        error,
-        isError: error,
-        mutate
-    }
+  let url = "/api/vipLevel"
+  let { data, ...rest } = useGet(url)
+  return {
+    items: data?.vipLevels,
+    ...rest
+  }
 }

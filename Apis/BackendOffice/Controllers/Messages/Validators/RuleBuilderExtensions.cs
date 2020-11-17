@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators
                 .NotEmpty().WithMessage(Resources.User.PasswordRequired)
                 .MinimumLength(minimumLength).WithMessage(Resources.User.PasswordLengthAtLeast)
                 .Matches("[0-9]").WithMessage(Resources.User.PasswordNeedNumber)
-                .Matches("[^a-zA-Z0-9]").WithMessage(Resources.User.PasswordNeedSpecialCharacter);
+                .Matches("[a-zA-Z]").WithMessage(Resources.User.PasswordNeedCharacter);
             return options;
         }
     }

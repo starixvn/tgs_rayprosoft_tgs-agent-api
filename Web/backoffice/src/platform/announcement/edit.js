@@ -60,7 +60,7 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let { result, error, mutate, isLoading } = useAddAnnouncement(data)
 
   const clearResult = () => {
-    setSubmit(null)
+    setSubmit(undefined)
   }
 
   let title = useTrans({

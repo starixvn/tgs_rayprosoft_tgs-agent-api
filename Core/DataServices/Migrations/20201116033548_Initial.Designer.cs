@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201110061314_Initial")]
+    [Migration("20201116033548_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -445,6 +445,10 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasColumnType("varchar(64)");
+
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasColumnType("varchar(128)");
@@ -472,7 +476,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(32)");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
