@@ -9,6 +9,7 @@ using System.Linq;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Services
@@ -27,7 +28,7 @@ namespace TGS.Apis.OperatorApi.Services
         private const string ContentType = "image/jpeg";
         private const string Secret = "TCAPTCHA";
 
-        private static readonly IList<string> FontNames = new string[]
+        private static readonly IList<string> FontNames = new[]
         {
             "Helvetica", "Arial", "Lucida Family", "Verdana", "Tahoma", "Trebuchet MS", "Georgia", "Times"
         };
@@ -35,9 +36,9 @@ namespace TGS.Apis.OperatorApi.Services
         // use thread safe dictionary to prevent the brute-force attack from bots
         private static readonly ConcurrentDictionary<string, DateTime> Dic = new ConcurrentDictionary<string, DateTime>();
 
-        private readonly IDESCryptoProvider _cryptoProvider;
+        private readonly ISymmetricCryptoProvider _cryptoProvider;
 
-        public CaptchaFactory(IDESCryptoProvider cryptoProvider)
+        public CaptchaFactory(ISymmetricCryptoProviderFactory cryptoProviderFactory)
         {
             _characters = new List<char>();
 
@@ -69,7 +70,7 @@ namespace TGS.Apis.OperatorApi.Services
                 _characters.Add(c);
             }
 
-            _cryptoProvider = cryptoProvider;
+            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.DES);
         }
 
         CaptchaInfo ICaptchaFactory.Create(int charCount, int width, int height)
@@ -122,7 +123,7 @@ namespace TGS.Apis.OperatorApi.Services
             {
                 Image = memoryStream.ToArray(),
                 Answer = answer,
-                ContentType = ContentType,
+                ContentType = ContentType
             };
         }
 
@@ -151,8 +152,8 @@ namespace TGS.Apis.OperatorApi.Services
                 }
             }
 
-            var captcha1 = _cryptoProvider.DecryptString(captcha, Secret, Secret);
-            var temp = captcha1.Split('|');
+            var value = _cryptoProvider.DecryptString(captcha, Secret, Secret);
+            var temp = value.Split('|');
             if (!DateTime.TryParse(temp[1], out var dateTime))
             {
                 throw new InvalidCaptchaException("Failed to decrypt the captcha");
@@ -165,8 +166,8 @@ namespace TGS.Apis.OperatorApi.Services
                 throw new InvalidCaptchaException("The captcha is out of date");
             }
 
-            var answe1 = temp[0];
-            if (answe1.IgnoreCaseNotEquals(answer))
+            var answerToVerify = temp[0];
+            if (answerToVerify.IgnoreCaseNotEquals(answer))
             {
                 throw new InvalidCaptchaException("The answer is incorrect");
             }
@@ -183,7 +184,7 @@ namespace TGS.Apis.OperatorApi.Services
         /// </summary>
         private static void DrawDisorderLinesAndPoints(Random random, Bitmap bitmap, Graphics graphics, int lineCount, int pointCount)
         {
-            var colors = new Color[]
+            var colors = new[]
             {
                 Color.AliceBlue,
                 Color.Azure,

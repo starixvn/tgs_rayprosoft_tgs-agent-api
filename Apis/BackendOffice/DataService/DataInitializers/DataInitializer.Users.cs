@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Text;
 using TGS.Apis.BackendOffice.DataService.Enums;
 using TGS.Apis.BackendOffice.DataService.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
 
 namespace TGS.Apis.BackendOffice.DataService.DataInitializers
 {
@@ -18,7 +16,7 @@ namespace TGS.Apis.BackendOffice.DataService.DataInitializers
             Guid? resellerId = null,
             RoleType roleType = RoleType.Admin)
         {
-            var (salt, passwordHash) = _hashProvider.GenerateCredential(UserPassword);
+            var (salt, passwordHash) = _passwordHandler.GenerateCredential(UserPassword);
             userId ??= GuidExtensions.NewSequentialGuid();
 
             return new User

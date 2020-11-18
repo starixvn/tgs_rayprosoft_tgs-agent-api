@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Redis;
 
 namespace TGS.Core.Infrastructures.Redis
 {

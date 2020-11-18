@@ -3,15 +3,19 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record CreatePlayerRequest : BaseRequest
+    public record CreatePlayerRequest
     {
         [Required]
-        [JsonPropertyName("answer")]
-        public string Answer { get; init; }
+        [JsonPropertyName("username")]
+        public string Username { get; init; }
+        
+        [Required]
+        [JsonPropertyName("currency")]
+        public string CurrencyCode { get; init;  }
 
         [Required]
-        [JsonPropertyName("captcha")]
-        public string Captcha { get; init; }
+        [JsonPropertyName("lang")]
+        public string Language { get; init; }
 
         [Required]
         [JsonPropertyName("pwd")]
@@ -21,15 +25,14 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Players
         [JsonPropertyName("confirmpwd")]
         public string ConfirmPassword { get; init; }
 
-        [JsonPropertyName("parentinvitationcode")]
+        [JsonPropertyName("invitationcode")]
         public string ParentInvitationCode { get; init; }
 
         [Required]
-        [JsonPropertyName("isagent")]
+        [JsonPropertyName("agent")]
         public bool HasAgent { get; init; }
 
-        [Required]
-        [JsonPropertyName("istestplayer")]
-        public bool IsTestPlayer { get; init; }
+        [JsonPropertyName("testplayer")]
+        public bool IsTestPlayer { get; init; } = false;
     }
 }

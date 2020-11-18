@@ -20,6 +20,8 @@ namespace TGS.Core.DataServices.Models
 
         public string SecretKey { get; set; }
 
+        public string ApiKey { get; set; }
+
         public virtual ICollection<Player> Players { get; set; }
 
         public virtual ICollection<LicenseeGame> Games { get; set; }

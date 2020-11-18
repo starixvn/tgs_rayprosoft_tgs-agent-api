@@ -4,7 +4,7 @@ namespace TGS.Core.Models
 {
     public interface IValidStatus<T> where T : struct
     {
-        T[] GetStatus(PlayerTypes playerType, GameActionType type = GameActionType.PlaceBet);
+        T[] GetStatus(PlayerType playerType, GameActionType type = GameActionType.PlaceBet);
     }
 
     public class ValidStatus : IValidStatus<Status>
@@ -12,7 +12,7 @@ namespace TGS.Core.Models
         public static Status[] Default => new[] { Status.Active };
         public static Status[] ClosingBet => new[] { Status.Active, Status.Maintenance };
 
-        Status[] IValidStatus<Status>.GetStatus(PlayerTypes playerType, GameActionType type)
+        Status[] IValidStatus<Status>.GetStatus(PlayerType playerType, GameActionType type)
         {
             if (type != GameActionType.PlaceBet)
             {
@@ -21,7 +21,7 @@ namespace TGS.Core.Models
 
             return playerType switch
             {
-                PlayerTypes.TgsTestPlayer => ClosingBet,
+                PlayerType.TgsTestPlayer => ClosingBet,
                 _ => Default
             };
         }
@@ -33,7 +33,7 @@ namespace TGS.Core.Models
         public static GameStatus[] ClosingBet => new[] { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
         public static GameStatus[] OperatorTesting => new[] { GameStatus.Active, GameStatus.Testing };
 
-        GameStatus[] IValidStatus<GameStatus>.GetStatus(PlayerTypes playerType, GameActionType type)
+        GameStatus[] IValidStatus<GameStatus>.GetStatus(PlayerType playerType, GameActionType type)
         {
             if (type != GameActionType.PlaceBet)
             {
@@ -42,8 +42,8 @@ namespace TGS.Core.Models
 
             return playerType switch
             {
-                PlayerTypes.TgsTestPlayer => ClosingBet,
-                PlayerTypes.OperatorTestPlayer => OperatorTesting,
+                PlayerType.TgsTestPlayer => ClosingBet,
+                PlayerType.OperatorTestPlayer => OperatorTesting,
                 _ => Default
             };
         }

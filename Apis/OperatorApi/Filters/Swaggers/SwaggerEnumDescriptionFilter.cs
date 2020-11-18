@@ -2,9 +2,8 @@
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using TGS.Core.Infrastructures.Extensions;
 
-namespace TGS.Apis.OperatorApi.Filters
+namespace TGS.Apis.OperatorApi.Filters.Swaggers
 {
     public class SwaggerEnumDescriptionFilter : ISchemaFilter
     {

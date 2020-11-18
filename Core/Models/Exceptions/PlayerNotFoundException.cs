@@ -7,7 +7,7 @@ namespace TGS.Core.Models.Exceptions
         public PlayerNotFoundException(string playerCode) 
             : base($"Player not found with code: {playerCode}") { }
 
-        public PlayerNotFoundException(string username, string message)
-            : base(string.Format(message, username)) { }
+        public PlayerNotFoundException(string userKey, string message)
+            : base(string.Format(message, userKey)) { }
     }
 }

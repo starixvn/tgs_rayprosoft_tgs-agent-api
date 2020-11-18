@@ -27,8 +27,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     public class AuthenticateControllerTests : BaseTests
     {
         private AuthenticateController _controller;
-        private readonly Mock<IHashProvider> _hashProviderMock = new Mock<IHashProvider>();
-        private readonly Mock<ITgsHashConfig> _tgsHashConfigMock = new Mock<ITgsHashConfig>();
+        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new Mock<IPasswordHandler>();
         private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
         private readonly Mock<IBackendOfficeQueries<User>> _userQueriesMock = new Mock<IBackendOfficeQueries<User>>();
         private readonly Mock<IBackendOfficeCommands<User>> _userCommandsMock = new Mock<IBackendOfficeCommands<User>>();
@@ -39,7 +38,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new AuthenticateController(
-                _hashProviderMock.Object,
+                _passwordHandlerMock.Object,
                 _antiForgeryMock.Object,
                 _userQueriesMock.Object,
                 _userCommandsMock.Object,
@@ -78,7 +77,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
-            _hashProviderMock.Setup(p => p.PasswordMatched(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
+            _passwordHandlerMock.Setup(p => p.Verify(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns(false);
 
             var response = await _controller.AuthenticateAsync(request);
@@ -100,7 +99,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
-            _hashProviderMock.Setup(p => p.PasswordMatched(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
+            _passwordHandlerMock.Setup(p => p.Verify(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns(true);
 
             _antiForgeryMock.Setup(p => p.GetAndStoreTokens(It.IsAny<HttpContext>()))
