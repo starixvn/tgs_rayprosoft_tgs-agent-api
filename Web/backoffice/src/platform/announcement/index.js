@@ -201,7 +201,12 @@ const AsyncTable = ({
   clearCache
 }) => {
   let { pageSize } = state
-  let columns = useColumns({ mutate, clearCache, statusName })
+  let columns = useColumns({
+    mutate,
+    clearCache,
+    statusName,
+    items: data?.items
+  })
 
   return (
     <Table
@@ -266,7 +271,7 @@ const EffectiveTable = ({
     clearCache,
     changeDisplayOrder,
     statusName,
-    items: data?.items ?? []
+    items: data?.items
   })
   return (
     <>

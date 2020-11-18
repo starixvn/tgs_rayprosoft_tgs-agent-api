@@ -2,8 +2,8 @@ import useSWR, { cache } from "swr"
 import {
   urlWith,
   useGet,
-  useCreatePost,
-  useUpdatePut,
+  usePostData,
+  usePutData,
   usePostFormData
 } from "../../client"
 
@@ -20,22 +20,22 @@ export const usePayment = (id) => {
 }
 
 export const useAddPayment = (data) => {
-  return useCreatePost(API, data)
+  return usePostData(API, data)
 }
 
 export const useUpdatePayment = (id, data) => {
   let url = id ? `${API}/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useEnablePayment = (id) => {
   let url = id ? `${API}/${id}/enable` : ""
-  return useUpdatePut(url, {})
+  return usePutData(url, {})
 }
 
 export const useDisablePayment = (id) => {
   let url = id ? `${API}/${id}/disable` : ""
-  return useUpdatePut(url, {})
+  return usePutData(url, {})
 }
 
 export const usePaymentHandingFee = (id) => {
@@ -45,7 +45,7 @@ export const usePaymentHandingFee = (id) => {
 
 export const useUpdatePaymentHandingFee = (id, data) => {
   let url = id ? `${API}/${id}/handingFee` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useUpload = (file) => {
@@ -55,10 +55,10 @@ export const useUpload = (file) => {
 
 export const useChangePaymentOrders = (data) => {
   let url = `${API}/ChangeOrders`
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useChangePaymentStatus = (id, status) => {
   let url = id && status ? `${API}/${id}/${status}` : ""
-  return useUpdatePut(url, status)
+  return usePutData(url, status)
 }

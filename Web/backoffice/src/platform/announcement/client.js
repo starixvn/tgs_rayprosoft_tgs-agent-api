@@ -5,8 +5,9 @@ import client, {
   put,
   post,
   useGet,
-  useCreatePost,
-  useUpdatePut,
+  usePut,
+  usePostData,
+  usePutData,
   usePostFormData
 } from "../../client"
 
@@ -19,25 +20,25 @@ export const useAnnouncementList = (searchParams) => {
 
 export const useVerifyAnnouncement = ({ id, type }, data) => {
   let url = !!id && !!type ? `${API}/${id}/${type}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useAddAnnouncement = (data) => {
-  return useCreatePost(API, data)
+  return usePostData(API, data)
 }
 
 export const useEditAnnouncement = (id, data) => {
   let url = id ? `${API}/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useChangeAnnouncementOrders = (data) => {
   let url = `${API}/changeorders`
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useChangeAnnouncementStatus = (id, status) => {
   let url = id && Number.isFinite(status) ? `${API}/${id}/status/${status}` : ""
 
-  return useUpdatePut(url, status)
+  return usePut(url)
 }
