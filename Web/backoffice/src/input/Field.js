@@ -137,6 +137,7 @@ export const Field = ({
   required,
   validate,
   children,
+  fieldWrapperProps,
   ...props
 }) => {
   let isChildrenFunction = typeof children === "function"
@@ -157,7 +158,11 @@ export const Field = ({
 
         //minHeight={`${FieldMinHeight}rem`}
         return (
-          <FieldWrapper state={state} validationText={validationText}>
+          <FieldWrapper
+            state={state}
+            validationText={validationText}
+            {...fieldWrapperProps}
+          >
             <>
               {!children && (
                 <Input inputRef={inputRef} id={name} {...field} {...props} />

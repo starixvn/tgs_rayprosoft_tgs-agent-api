@@ -1,5 +1,11 @@
 import useSWR, { cache } from "swr"
-import { urlWith, useGet, useCreatePost, useUpdatePut } from "../../client"
+import {
+  urlWith,
+  useGet,
+  useCreatePost,
+  useUpdatePut,
+  usePostFormData
+} from "../../client"
 
 const API = "/api/payment"
 
@@ -40,6 +46,11 @@ export const usePaymentHandingFee = (id) => {
 export const useUpdatePaymentHandingFee = (id, data) => {
   let url = id ? `${API}/${id}/handingFee` : ""
   return useUpdatePut(url, data)
+}
+
+export const useUpload = (file) => {
+  let url = file ? `${API}/upload` : ""
+  return usePostFormData(url, file)
 }
 
 export const useChangePaymentOrders = (data) => {

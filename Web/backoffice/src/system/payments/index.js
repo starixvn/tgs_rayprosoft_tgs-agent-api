@@ -45,6 +45,9 @@ import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
 import { CloseText } from "../../button/ActionButtons"
 import { Detail as ConditionDetail } from "./condition"
+import { EditButton } from "./edit"
+import { EditButton as FeeEditButton } from "./handingfee"
+import { ViewButton as LogsButton } from "./logs"
 
 export { Code }
 
@@ -158,6 +161,7 @@ const Body = () => {
 
 export const CodeContentPair = [Code, Content]
 
+//TODO: 1. remove paging & showAll? 2. survey status change issue
 const DataTable = ({
   state,
   data,
@@ -367,8 +371,8 @@ const useColumns = ({
         whiteSpace: "nowrap"
       },
       Cell: ({ value }) => {
-        let { allPlayer = true, designatedUsers = [] } = value
-        if (allPlayer) {
+        let { designatedUsers } = value
+        if (!designatedUsers) {
           return <Trans zh="无" en="None" />
         }
 
@@ -389,16 +393,7 @@ const useColumns = ({
         whiteSpace: "nowrap"
       },
       Cell: ({ value }) => {
-        //TODO: 0 - Unlimited?
-        //TODO: format num?
-        if (transferType === TransferType.Deposit) {
-          return (
-            <Text.Block whiteSpace="nowrap">
-              {value.depositedAmountFrom} - {value.depositedAmountTo}
-            </Text.Block>
-          )
-        }
-
+        //TODO: format number?
         return (
           <Text.Block whiteSpace="nowrap">
             {value.transferLimitFrom} - {value.transferLimitTo}
@@ -447,9 +442,11 @@ const useColumns = ({
       },
       Cell: ({ value }) => {
         return (
-          <Box alignX="center">
-            <Set>TODO: buttons</Set>
-          </Box>
+          <Set alignX="center">
+            <EditButton record={value} onSubmitted={mutate} />
+            <FeeEditButton record={value} onSubmitted={mutate} />
+            <LogsButton record={value} />
+          </Set>
         )
       }
     })

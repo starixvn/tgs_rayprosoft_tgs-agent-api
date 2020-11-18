@@ -65,8 +65,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     ChannelName = q.ChannelName,
                     PlayerListCondition = q.PlayerListCondition,
                     AllPlayer = q.AllPlayers,
-                    DepositedAmountFrom = q.DepositedAmountMin,
-                    DepositedAmountTo = q.DepositedAmountMax,
+                    DepositedAmountMin = q.DepositedAmountMin,
+                    DepositedAmountMax = q.DepositedAmountMax,
+                    DepositedAmountUnlimited = q.DepositedAmountUnlimited,
                     IdentityAuthentication = q.IdentityAuthentication,
                     PhoneAuthentication = q.PhoneAuthentication,
                     DesignatedUsers = q.PaymentPlayerList.Count > 0,
@@ -111,8 +112,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                 Payment = new PaymentModel
                 {
                     Id = payment.Id,
+                    PaymentVendorId = payment.PaymentVendor.Id,
                     PaymentVendorName = payment.PaymentVendor.Name,
+                    PaymentMethodId =  payment.PaymentVendor.Id,
                     PaymentMethodName = payment.PaymentMethod.Name,
+                    PaymentChannelId = payment.PaymentMethod.Id,
                     PaymentChannelName = payment.PaymentChannel.Name,
                     ChannelName = payment.ChannelName,
                     TransferLimitFrom = payment.TransferLimitFrom,
@@ -122,23 +126,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     IdentityAuthentication = payment.IdentityAuthentication,
                     PhoneAuthentication = payment.PhoneAuthentication,
                     DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-                    DepositedAmountFrom = payment.DepositedAmountMin,
-                    DepositedAmountTo = payment.DepositedAmountMax,
+                    DepositedAmountMin = payment.DepositedAmountMin,
+                    DepositedAmountMax = payment.DepositedAmountMax,
                     DesignatedUsers = payment.PaymentPlayerList.Count > 0,
                     PaymentStatus = payment.PaymentStatus,
                     Reason = payment.Reason,
-                    Whitelist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.White).Select(p =>
-                        new PaymentPlayerListModel
-                        {
-                            PlayerListType = p.ListType,
-                            Username = p.Player.Username
-                        }).ToArray(),
-                    Blacklist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.Black).Select(p =>
-                        new PaymentPlayerListModel
-                        {
-                            PlayerListType = p.ListType,
-                            Username = p.Player.Username
-                        }).ToArray(),
+                    Whitelist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.White).Select(p => p.Player.Username).ToArray(),
+                    Blacklist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.Black).Select(p => p.Player.Username).ToArray(),
                     VipLevelIds = payment.VipLevels.Select(p => p.VipLevelId).ToArray(),
                     CreatedByUsername = payment.CreatedByUsername,
                     UpdatedByUsername = payment.UpdatedByUsername,

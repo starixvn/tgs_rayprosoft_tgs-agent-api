@@ -58,24 +58,26 @@ const AsyncContentBody = ({}) => {
       ? EffectiveName
       : null
   })
-  let { pageIndex, pageSize, statusName, sortby, orderby } = state
-
+  let { statusName } = state
+  let isEffectiveTab = statusName === EffectiveName
   let {
     data = {},
     isLoading,
     isValidating,
     mutate,
     clearCache
-  } = useAnnouncementList({
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby: statusName === EffectiveName ? "displayOrder" : sortby,
-    orderby,
-    status:
-      statusName === EffectiveName
-        ? [statusFrom(EffectiveName), statusFrom(InvalidName)]
-        : statusFrom(statusName)
-  })
+  } = useAnnouncementList(
+    isEffectiveTab
+      ? {
+          showAll: true,
+          sortby: "displayOrder",
+          status: [statusFrom(EffectiveName), statusFrom(InvalidName)]
+        }
+      : toApiParams({
+          ...state,
+          status: statusFrom(statusName)
+        })
+  )
 
   let tab = useTabState({
     selectedId: statusName
@@ -134,6 +136,7 @@ const AsyncContentBody = ({}) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
                 mutate={mutate}
+                clearCache={clearCache}
               />
             )}
           </TabPanel>
@@ -162,6 +165,7 @@ const AsyncContentBody = ({}) => {
               setSortOrder={setSortOrder}
               isLoading={isLoading}
               mutate={mutate}
+              clearCache={clearCache}
             />
           )}
         </TabPanel>
@@ -175,6 +179,7 @@ const AsyncContentBody = ({}) => {
               setSortOrder={setSortOrder}
               isLoading={isLoading}
               mutate={mutate}
+              clearCache={clearCache}
             />
           )}
         </TabPanel>
@@ -198,10 +203,12 @@ const AsyncTable = ({
   setSortOrder,
   data,
   isLoading,
-  mutate
+  mutate,
+  clearCache,
+  isValidating
 }) => {
-  let { pageIndex, pageSize, sortby, orderby } = state
-  let columns = useColumns({ mutate, statusName })
+  let { pageSize } = state
+  let columns = useColumns({ mutate, clearCache, isValidating, statusName })
 
   return (
     <Table
@@ -263,6 +270,8 @@ const EffectiveTable = ({
 
   let columns = useColumns({
     mutate,
+    clearCache,
+    isValidating,
     changeDisplayOrder,
     statusName,
     items: data?.items ?? []
@@ -299,6 +308,7 @@ const EffectiveTable = ({
 
 const useColumns = ({
   mutate,
+  clearCache,
   statusName: tabStatusName,
   changeDisplayOrder,
   items = []
@@ -396,7 +406,10 @@ const useColumns = ({
           return (
             <StatusToggleButton
               record={value}
-              onSubmitted={mutate}
+              onSubmitted={() => {
+                //clearCache()
+                mutate(undefined)
+              }}
               disabled={!hasUpdateAuth}
             />
           )

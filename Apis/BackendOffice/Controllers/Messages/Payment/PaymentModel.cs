@@ -6,6 +6,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
     public class PaymentModel
     {
         public Guid Id { get; set; }
+        public Guid PaymentVendorId { get; set; }
+        public Guid PaymentMethodId { get; set; }
+        public Guid PaymentChannelId { get; set; }
         public int Number { get; set; }
         public string PaymentVendorName { get; set; }
         public string PaymentMethodName { get; set; }
@@ -20,13 +23,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public bool PhoneAuthentication { get; set; }
         public bool DesignatedUsers { get; set; }
         public bool DepositedAmountUnlimited { get; set; }
-        public decimal DepositedAmountFrom { get; set; }
-        public decimal DepositedAmountTo { get; set; }
+        public decimal DepositedAmountMin { get; set; }
+        public decimal DepositedAmountMax { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
         public string Reason { get; set; }
         public PaymentFeeModel PaymentFee { get; set; }
-        public PaymentPlayerListModel[] Whitelist { get; set; }
-        public PaymentPlayerListModel[] Blacklist { get; set; }
+        public string[] Whitelist { get; set; }
+        public string[] Blacklist { get; set; }
         public Guid[] VipLevelIds { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }

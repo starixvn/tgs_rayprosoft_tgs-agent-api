@@ -3,7 +3,13 @@ import { css, Global } from "@emotion/core"
 import { Formik, Form, Field } from "formik"
 import { Trans, useTrans } from "../../i18n"
 import { Type as TransferType } from "./transfer"
-import { Text } from "bumbag"
+import {
+  Text,
+  RadioGroup as _RadioGroup,
+  RadioGroupField as _RadioGroupField,
+  SwitchField,
+  CheckboxGroupField
+} from "bumbag"
 
 // const All = 0
 export const All = "All"
@@ -19,20 +25,43 @@ const SomeoneTrans = {
   en: "Satisfy one"
 }
 
-const AllPlayers = {
-  zh: "所有玩家",
+const AllPlayerTrans = {
+  zh: "全部玩家",
   en: "All Players"
+}
+
+const AccumulatedDepositTrans = {
+  zh: "累积存款",
+  en: "Accumulated Deposit"
+}
+
+const UnlimitedTrans = {
+  zh: "无上限",
+  en: "Unlimited"
+}
+
+const IdentityAuthenticationTrans = {
+  zh: "身份验证",
+  en: "Identity Authentication"
+}
+
+const PhoneAuthenticationTrans = {
+  zh: "手机验证",
+  en: "Phone Authentication"
+}
+
+const VipLevelsTrans = {
+  zh: "VIP群",
+  en: "VIP Levels"
 }
 
 export const Detail = ({ record }) => {
   let {
     playerListCondition,
     allPlayer,
-    transferType,
-    depositedAmountFrom,
-    depositedAmountTo,
-    transferLimitFrom,
-    transferLimitTo,
+    depositedAmountMin,
+    depositedAmountMax,
+    depositedAmountUnlimited,
     identityAuthentication,
     phoneAuthentication,
     vipLevelIds = []
@@ -44,16 +73,12 @@ export const Detail = ({ record }) => {
       : useTrans(AllTrans)
 
   let details = [
-    allPlayer ? useTrans(AllPlayers) : "",
-    transferType === TransferType.Deposit
-      ? `${depositedAmountFrom} - ${depositedAmountTo}`
-      : `${transferLimitFrom} - ${transferLimitTo}`,
-    identityAuthentication
-      ? useTrans({ zh: "身份验证", en: "Identity Authentication" })
-      : "",
-    phoneAuthentication
-      ? useTrans({ zh: "手机验证", en: "Phone Authentication" })
-      : "",
+    allPlayer ? useTrans(AllPlayerTrans) : "",
+    `${useTrans(AccumulatedDepositTrans)} ${depositedAmountMin} - ${
+      depositedAmountUnlimited ? useTrans(UnlimitedTrans) : depositedAmountMax
+    }`,
+    identityAuthentication ? useTrans(IdentityAuthenticationTrans) : "",
+    phoneAuthentication ? useTrans(PhoneAuthenticationTrans) : "",
     useVipLevelDetail(vipLevelIds)
   ].filter((string) => !!string)
 
@@ -65,23 +90,73 @@ export const Detail = ({ record }) => {
   )
 }
 
-export const Label = ({ value }) => {
+let getOptions = () => [
+  { label: useTrans(AllTrans), value: All },
+  { label: useTrans(SomeoneTrans), value: Someone }
+]
+
+export const RadioGroupField = ({ ...props }) => {
+  return (
+    <Field
+      orientation="horizontal"
+      component={_RadioGroupField.Formik}
+      options={getOptions()}
+      {...props}
+    />
+  )
+}
+
+export const AllPlayerText = () => <Trans {...AllPlayerTrans} />
+
+export const AllPlayerSwitchField = ({ name = "allPlayer", ...props }) => {
+  return <Field name={name} component={SwitchField.Formik} {...props} />
+}
+
+export const UnlimitedText = () => <Trans {...UnlimitedTrans} />
+
+export const AccumulatedDepositText = () => (
+  <Trans {...AccumulatedDepositTrans} />
+)
+
+export const IdentityAuthenticationText = () => (
+  <Trans {...IdentityAuthenticationTrans} />
+)
+
+export const IdentityAuthenticationSwitchField = ({
+  name = "identityAuthentication",
+  ...props
+}) => {
+  return <Field name={name} component={SwitchField.Formik} {...props} />
+}
+
+export const PhoneAuthenticationText = () => (
+  <Trans {...PhoneAuthenticationTrans} />
+)
+
+export const PhoneAuthenticationSwitchField = ({
+  name = "phoneAuthentication",
+  ...props
+}) => {
+  return <Field name={name} component={SwitchField.Formik} {...props} />
+}
+
+export const PlayerLabel = ({ value }) => {
   switch (value) {
     case All:
-      return <Trans zh="所有玩家" en="All Players" />
+      return <AllPlayerText />
     case Someone:
       return <Trans zh="特定玩家" en="Specific Players" />
   }
   return ""
 }
 
+//TODO: move to vip module?
+export const VipLevelsText = () => <Trans {...VipLevelsTrans} />
+
 export const useVipLevelDetail = (vipLevels = []) => {
   ///TODO: returns vip level detail?
   if (vipLevels.length > 0) {
-    return useTrans({
-      zh: "VIP群",
-      en: "VIP Levels"
-    })
+    return useTrans(VipLevelsTrans)
   }
   return ""
 }

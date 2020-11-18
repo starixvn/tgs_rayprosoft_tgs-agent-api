@@ -114,6 +114,11 @@ const AddDialog = ({ menus = [], dialog, onSubmitted }) => {
         placement="top"
         maxWidth="none"
         width="40vw"
+        css={css`
+          & .bb-DialogContent {
+            position: relative;
+          }
+        `}
       >
         <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
       </FormDialog>
@@ -123,7 +128,7 @@ const AddDialog = ({ menus = [], dialog, onSubmitted }) => {
 
 const DialogBody = ({ menus, setMenus, dialog }) => {
   return (
-    <FieldValues margin="major-1" height="100%">
+    <FieldValues margin="major-1">
       <Label name="name" required>
         <Trans zh="权限组名称" en="Name" />
       </Label>
