@@ -46,7 +46,7 @@ import { Modal, useModalState } from "../../dialog/Modal"
 import { CloseText } from "../../button/ActionButtons"
 import { Detail as ConditionDetail } from "./condition"
 import { EditButton } from "./edit"
-import { EditButton as FeeEditButton } from "./handingfee"
+import { EditButton as FeeEditButton } from "./handlingfee"
 import { ViewButton as LogsButton } from "./logs"
 
 export { Code }

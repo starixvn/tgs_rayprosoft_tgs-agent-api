@@ -24,7 +24,7 @@ import { Trans, useTrans } from "../../i18n"
 import { EditDisclosure } from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
 import { FieldValues } from "../../layout/Grid"
-import _Label from "../../form/Label"
+import { Normal as Label } from "../../form/Label"
 import InputField from "../../input/Field"
 import { ToggleButtonField } from "./status"
 import { Type as TransferType } from "./transfer"
@@ -310,12 +310,6 @@ const AccumulatedDepositGroup = () => {
     </Stack>
   )
 }
-
-const Label = ({ fontWeight = "normal", children, ...props }) => (
-  <_Label fontWeight={fontWeight} {...props}>
-    {children}
-  </_Label>
-)
 
 const ValueBlock = ({ children, ...props }) => (
   <Text.Block alignY="center" {...props}>
