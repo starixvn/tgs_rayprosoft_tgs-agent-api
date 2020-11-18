@@ -60,13 +60,7 @@ const AsyncContentBody = ({}) => {
   })
   let { statusName } = state
   let isEffectiveTab = statusName === EffectiveName
-  let {
-    data = {},
-    isLoading,
-    isValidating,
-    mutate,
-    clearCache
-  } = useAnnouncementList(
+  let { data = {}, isLoading, mutate, clearCache } = useAnnouncementList(
     isEffectiveTab
       ? {
           showAll: true,
@@ -204,11 +198,10 @@ const AsyncTable = ({
   data,
   isLoading,
   mutate,
-  clearCache,
-  isValidating
+  clearCache
 }) => {
   let { pageSize } = state
-  let columns = useColumns({ mutate, clearCache, isValidating, statusName })
+  let columns = useColumns({ mutate, clearCache, statusName })
 
   return (
     <Table
@@ -271,7 +264,6 @@ const EffectiveTable = ({
   let columns = useColumns({
     mutate,
     clearCache,
-    isValidating,
     changeDisplayOrder,
     statusName,
     items: data?.items ?? []
