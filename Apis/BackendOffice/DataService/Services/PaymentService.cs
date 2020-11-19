@@ -155,7 +155,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list)
         {
             var playerWhitelist = list != null
-                ? await _repository.Players.Where(x => list.Contains(x.PlayerCode))
+                ? await _repository.Players.Where(x => list.Contains(x.Username))
                     .ToArrayAsync()
                 : Array.Empty<Player>();
             return playerWhitelist.Select(player => new PaymentPlayerList

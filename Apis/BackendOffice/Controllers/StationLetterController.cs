@@ -79,13 +79,20 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {
             if (!_typeDictionary.ContainsKey(type))
+            {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidUrl);
+            }
 
             var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-            if (stationLetter == null) return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            if (stationLetter == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            }
 
             if (stationLetter.Status != StationLetterStatus.InVerify)
+            {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidStatus);
+            }
 
             var targetStatus = _typeDictionary
                 .FirstOrDefault(t => t.Key == type);
@@ -105,7 +112,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] StationLetterRequest request)
         {
             var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-            if (stationLetter == null) return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            if (stationLetter == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            }
 
             stationLetter.Subject = request.Subject;
             stationLetter.Content = request.Content;
@@ -138,7 +148,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ToArrayAsync();
 
             if (!request.AssignedAllPlayers)
+            {
                 allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
+            }
 
             var players = allPlayers.Select(p => new StationLetterPlayer
             {
@@ -156,8 +168,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Upload player file")]
         public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
         {
-            var uploadedResult = await _uploadService.GetUploadedExcelAsync(file);
-            var users = uploadedResult.Select(p => p.FirstOrDefault());
+            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
+            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
 
             var allPlayers = await _playerQueries.GetQueries()
                 .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))

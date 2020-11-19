@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
@@ -234,8 +232,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var playerUsernames = players.Select(p => new List<string> {p.Username}).ToList();
-            _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync(It.IsAny<IFormFile>()))
+            var playerUsernames = players.Select(p => new UploadPlayerModel {Username = p.Username}).ToList();
+            _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync<UploadPlayerModel>(It.IsAny<IFormFile>()))
                 .Returns(Task.FromResult(playerUsernames));
 
             _playerQueriesMock.Setup(p => p.GetQueries())
