@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace FileService.DataService
+namespace TGS.Apis.FileService.DataService
 {
     public interface IRepository<T>
     {
@@ -9,7 +8,7 @@ namespace FileService.DataService
         Task UpdateAsync(T obj);
         Task DeleteAsync(string id);
         Task<T> GetByIdAsync(string id);
-        Task<IEnumerable<T>> GetListAsync();
+        Task<T[]> GetListAsync();
         Task<bool> CanConnection();
     }
 }

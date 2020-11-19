@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace FileService.DataService.Model
+namespace TGS.Apis.FileService.DataService.Model
 {
     public abstract class BaseEntity
     {

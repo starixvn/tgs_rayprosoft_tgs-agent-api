@@ -1,4 +1,4 @@
-﻿namespace FileService.DataService.Model
+﻿namespace TGS.Apis.FileService.DataService.Model
 {
     public class File : BaseEntity
     {

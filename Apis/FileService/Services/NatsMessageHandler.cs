@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using FileService.DataService;
-using FileService.DataService.Model;
 using NATS.Client.Rx.Ops;
+using TGS.Apis.FileService.DataService;
+using TGS.Apis.FileService.DataService.Model;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Nats.Model;
 
-namespace FileService.Services
+namespace TGS.Apis.FileService.Services
 {
     public interface INatsMessageHandler
     {

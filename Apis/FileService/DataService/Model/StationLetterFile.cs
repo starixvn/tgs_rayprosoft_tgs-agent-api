@@ -2,7 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace FileService.DataService.Model
+namespace TGS.Apis.FileService.DataService.Model
 {
     public class StationLetterFile : BaseEntity
     {

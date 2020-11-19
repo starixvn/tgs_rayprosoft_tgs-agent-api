@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using FileService.Controllers.Messages;
-using FileService.DataService.Services;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.FileService.Controllers.Messages;
+using TGS.Apis.FileService.DataService.Services;
 
-namespace FileService.Controllers
+namespace TGS.Apis.FileService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

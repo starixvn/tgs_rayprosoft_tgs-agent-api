@@ -3,13 +3,13 @@ using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using FileService.DataService;
-using FileService.DataService.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.FileService.DataService;
+using TGS.Apis.FileService.DataService.Model;
 using TGS.Core.Models;
 
-namespace FileService.Controllers
+namespace TGS.Apis.FileService.Controllers
 {
     [AllowAnonymous]
     [Route("api/[controller]")]

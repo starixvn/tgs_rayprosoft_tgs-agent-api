@@ -5,6 +5,8 @@
     <UserSecretsId>30a457ed-c0fd-46c9-bd7e-2ef259ac9187</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <RootNamespace>TGS.Apis.FileService</RootNamespace>
+    <AssemblyName>TGS.Apis.FileService</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

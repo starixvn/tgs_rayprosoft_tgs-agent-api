@@ -1,4 +1,4 @@
-﻿namespace FileService.DataService
+﻿namespace TGS.Apis.FileService.DataService
 {
     public class DatabaseSettings : IDatabaseSettings
     {

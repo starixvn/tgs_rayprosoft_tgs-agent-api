@@ -3,7 +3,7 @@ using System.Linq;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
-namespace FileService.Controllers.Messages.Validators
+namespace TGS.Apis.FileService.Controllers.Messages.Validators
 {
     public static class RuleBuilderExtensions
     {

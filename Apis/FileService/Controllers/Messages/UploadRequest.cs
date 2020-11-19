@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace FileService.Controllers.Messages
+namespace TGS.Apis.FileService.Controllers.Messages
 {
     public class UploadRequest
     {

@@ -1,10 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using FileService.DataService;
-using FileService.DataService.Services;
-using FileService.Extensions;
-using FileService.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,10 +10,14 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using TGS.Apis.FileService.DataService;
+using TGS.Apis.FileService.DataService.Services;
+using TGS.Apis.FileService.Extensions;
+using TGS.Apis.FileService.Services;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 
-namespace FileService
+namespace TGS.Apis.FileService
 {
     public class Startup
     {
@@ -47,7 +47,7 @@ namespace FileService
                 c.GetService<IMongoClient>()?.StartSession());
 
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-            services.AddTransient<IUploadService, UploadService>();
+            services.AddScoped<IUploadService, UploadService>();
 
             services
                 .AddNats(_configuration)

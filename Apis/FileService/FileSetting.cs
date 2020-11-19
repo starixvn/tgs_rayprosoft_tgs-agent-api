@@ -1,4 +1,4 @@
-﻿namespace FileService
+﻿namespace TGS.Apis.FileService
 {
     public class FileSetting
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FileService.Resources {
+namespace TGS.Apis.FileService.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace FileService.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FileService.Resources.File", typeof(File).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TGS.Apis.FileService.Resources.File", typeof(File).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

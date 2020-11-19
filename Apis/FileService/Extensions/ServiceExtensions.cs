@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace FileService.Extensions
+namespace TGS.Apis.FileService.Extensions
 {
     public static class ServiceExtensions
     {

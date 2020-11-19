@@ -4,13 +4,13 @@ using System.Net;
 using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
-using FileService.DataService.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using TGS.Apis.FileService.DataService.Model;
 using TGS.Core.Infrastructures.Utility;
-using File = FileService.DataService.Model.File;
+using File = TGS.Apis.FileService.DataService.Model.File;
 
-namespace FileService.DataService.Services
+namespace TGS.Apis.FileService.DataService.Services
 {
     public interface IUploadService
     {
