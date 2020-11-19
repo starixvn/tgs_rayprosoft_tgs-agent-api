@@ -59,12 +59,6 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let [data, setSubmit] = useState()
   let { result, isLoading, error } = useAddStationLetter(data)
 
-  // let [formData, setFormData] = useState()
-  // let {
-  //   result: formDataResult,
-  //   error: formDataError
-  // } = useAddStationLetterWithFormData(formData)
-  console.warn("TODO: upload player list and download sample")
   const clearResult = () => {
     setSubmit(null)
   }
