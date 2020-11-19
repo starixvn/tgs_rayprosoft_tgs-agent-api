@@ -26,6 +26,6 @@ export const useAddStationLetter = (data) => {
   return usePostData(API, data)
 }
 
-export const useAddStationLetterWithFormData = (body) => {
+export const useStationLetterUpload = (body) => {
   return usePostFormData(API, body)
 }

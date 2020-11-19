@@ -115,9 +115,10 @@ const useTableColumns = ({ fetchTable }) => {
   let columns = [
     sequenceColumn(),
     {
-      Header: "权限组名称",
       id: "name",
       accessor: "name",
+      Header: "权限组名称",
+      disableSortBy: true,
       headCell: {
         textAlign: "center"
       },

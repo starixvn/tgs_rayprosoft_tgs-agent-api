@@ -28,7 +28,7 @@ import { Normal as Label } from "../../form/Label"
 import InputField from "../../input/Field"
 import { ToggleButtonField } from "./status"
 import { Type as TransferType } from "./transfer"
-import { usePayment, useUpdatePayment, useUpload } from "./client"
+import { usePayment, useUpdatePayment, usePaymentUpload } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
   RadioGroupField as ConditionRadioGroupField,
@@ -327,8 +327,18 @@ const List = applyTheme(_List, {
 
 const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
   let uploadFileInputRef = useRef()
-  let [file, setFile] = useState()
-  let { result, isLoading, error, clearCache } = useUpload(file)
+  let [formData, setFormData] = useState()
+  let { result, isLoading, error, clearCache, deleteCache } = usePaymentUpload(
+    formData
+  )
+
+  const resetFormData = () => {
+    if (uploadInputRef?.current) {
+      uploadInputRef.current.value = ""
+    }
+    deleteCache()
+    setFormData(undefined)
+  }
 
   list = result?.players ?? list
 
@@ -336,13 +346,11 @@ const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
     if (Array.isArray(result?.players) && !error) {
       onUploaded(result?.players)
     }
-  }, [file, result])
+  }, [formData, result])
 
   return (
     <Columns.Column display="flex" flexDirection="column">
-      {error && (
-        <AlertDialog {...error} onClickClose={() => setFile(undefined)} />
-      )}
+      {error && <AlertDialog {...error} onClickClose={resetFormData} />}
       <Stack orientation="horizontal" alignY="center" spacing="major-1">
         <Text.Block>{title}</Text.Block>
         <Button
@@ -369,10 +377,9 @@ const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
             if (file) {
               let formData = new FormData()
               formData.append("file", file, file.name)
-              setFile(formData)
+              setFormData(formData)
             } else {
-              clearCache()
-              setFile(undefined)
+              resetFormData()
             }
           }}
           css={css`
@@ -387,6 +394,7 @@ const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
           }}
           size="small"
           isLoading={isLoading}
+          disabled={isLoading}
         >
           <Trans zh="上传" en="Upload" />
         </Button>

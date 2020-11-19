@@ -3,6 +3,7 @@ import {
   urlWith,
   useGet,
   usePostData,
+  usePut,
   usePutData,
   usePostFormData
 } from "../../client"
@@ -48,7 +49,7 @@ export const useUpdatePaymentHandingFee = (id, data) => {
   return usePutData(url, data)
 }
 
-export const useUpload = (file) => {
+export const usePaymentUpload = (file) => {
   let url = file ? `${API}/upload` : ""
   return usePostFormData(url, file)
 }
@@ -60,5 +61,10 @@ export const useChangePaymentOrders = (data) => {
 
 export const useChangePaymentStatus = (id, status) => {
   let url = id && status ? `${API}/${id}/${status}` : ""
-  return usePutData(url, status)
+  return usePut(url)
+}
+
+export const usePaymentLogs = (id) => {
+  let url = id ? `${API}/${id}/auditLogs` : ""
+  return useGet(url)
 }

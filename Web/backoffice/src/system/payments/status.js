@@ -139,13 +139,22 @@ const statusPalette = (status) => {
 }
 
 // Enabled <-> Disabled toggle
-export const ToggleButton = ({ record, onSubmitted }) => {
+export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
   let { id, paymentStatus } = record
   let [newStatus, setSubmit] = useState()
-  let { result, isLoading, error } = useChangePaymentStatus(id, newStatus)
+  let { result, isLoading, error, clearCache } = useChangePaymentStatus(
+    id,
+    newStatus
+  )
+
+  const reset = () => {
+    clearCache()
+    setSubmit(undefined)
+  }
 
   useEffect(() => {
     if (result && !error) {
+      reset()
       onSubmitted && onSubmitted()
     }
   }, [result, error])
@@ -153,8 +162,10 @@ export const ToggleButton = ({ record, onSubmitted }) => {
   return (
     <Button
       isLoading={isLoading}
+      disabled={isLoading || disabled}
       palette={statusPalette(paymentStatus)}
       onClick={() => {
+        reset()
         setSubmit(toggleStatus(paymentStatus))
       }}
       css={css`

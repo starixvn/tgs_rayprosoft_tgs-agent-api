@@ -95,9 +95,8 @@ export const Label = ({ value }) => {
   }
 }
 
-//TODO: need to check is list validating?
 // Effective <-> Invalid toggle
-export const ToggleButton = ({ record, onSubmitted, disabled }) => {
+export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
   let { id, status } = record
   let [data, setSubmit] = useState()
   let { result, isLoading, error, clearCache } = useChangeAnnouncementStatus(
