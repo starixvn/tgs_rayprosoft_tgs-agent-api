@@ -15,9 +15,9 @@ namespace TGS.Core.Infrastructures.Redis
     {
         internal static readonly TimeSpan MaxTimeSpan = TimeSpan.FromDays(1);
         private readonly IRedisCacheManager _interface;
-        private readonly IServiceLog<RedisCacheManager> _serviceLog;
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
+        private readonly IServiceLog<RedisCacheManager> _serviceLog;
 
         public RedisCacheManager(
             IRedisRepository repository,
@@ -35,7 +35,7 @@ namespace TGS.Core.Infrastructures.Redis
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
             var existingKey = await db.KeyExistsAsync(cacheKey);
-            var serializedValues = data.Select(d => (RedisValue)_serializationProvider.SerializeToString(d)).ToArray();
+            var serializedValues = data.Select(d => (RedisValue) _serializationProvider.SerializeToString(d)).ToArray();
             await db.ListRightPushAsync(cacheKey, serializedValues);
 
             if (existingKey == false)
@@ -46,7 +46,7 @@ namespace TGS.Core.Infrastructures.Redis
 
         Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
         {
-            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
+            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> {data});
         }
 
         async Task<List<T>> IRedisCacheManager.GetListAsync<T>(object cacheType, object key,
@@ -67,6 +67,22 @@ namespace TGS.Core.Infrastructures.Redis
             var db = _repository.GetDb();
             var flags = GetCommandFlags(fireAndForget);
             return db.KeyDeleteAsync(cacheKey, flags);
+        }
+
+        async Task<int> IRedisCacheManager.ClearCacheByBatchAsync(CacheKey[] keys, bool fireAndForget)
+        {
+            if (keys == null || keys.Length == 0)
+            {
+                return 0;
+            }
+
+            var cacheKeys = keys.Select(k => (RedisKey) FormCacheKey(k)).ToArray();
+            var db = _repository.GetDb();
+            var flags = GetCommandFlags(fireAndForget);
+
+            await db.KeyDeleteAsync(cacheKeys, flags);
+
+            return keys.Length;
         }
 
         async Task<int> IRedisCacheManager.ClearCacheByPatternAsync(object cacheType, string pattern,
@@ -196,8 +212,9 @@ namespace TGS.Core.Infrastructures.Redis
             }
         }
 
-        async Task<RedisValue[]> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields,
-             bool fireAndForget)
+        async Task<RedisValue[]> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key,
+            RedisValue[] hashFields,
+            bool fireAndForget)
         {
             try
             {
@@ -215,7 +232,8 @@ namespace TGS.Core.Infrastructures.Redis
             return Array.Empty<RedisValue>();
         }
 
-        async Task<HashEntry[]> IRedisCacheManager.SafeGetAllHashSetAsync(object cacheType, object key, bool fireAndForget)
+        async Task<HashEntry[]> IRedisCacheManager.SafeGetAllHashSetAsync(object cacheType, object key,
+            bool fireAndForget)
         {
             try
             {
@@ -233,7 +251,8 @@ namespace TGS.Core.Infrastructures.Redis
             return Array.Empty<HashEntry>();
         }
 
-        async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField,
+        async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key,
+            RedisValue hashField,
             bool fireAndForget)
         {
             try
@@ -259,15 +278,14 @@ namespace TGS.Core.Infrastructures.Redis
 
         #region Internal Methods
 
-        internal static string FormCacheKey(object cacheType, object key)
-        {
-            return $"{cacheType}:{key}";
-        }
+        internal static string FormCacheKey(CacheKey cacheKey) =>
+            FormCacheKey(cacheKey.CacheType, cacheKey.Key);
 
-        internal static TimeSpan CapExpiry(TimeSpan? expiresIn)
-        {
-            return expiresIn == null || expiresIn.Value > MaxTimeSpan ? MaxTimeSpan : expiresIn.Value;
-        }
+        internal static string FormCacheKey(object cacheType, object key) =>
+            $"{cacheType}:{key}";
+
+        internal static TimeSpan CapExpiry(TimeSpan? expiresIn) =>
+            expiresIn == null || expiresIn.Value > MaxTimeSpan ? MaxTimeSpan : expiresIn.Value;
 
         internal async Task<T> GetAsync<T>(object cacheType, object key, Func<Task<T>> createFunc = null)
         {
@@ -276,7 +294,9 @@ namespace TGS.Core.Infrastructures.Redis
             var value = await db.StringGetAsync(cacheKey);
 
             if (value.IsNullOrEmpty)
+            {
                 return createFunc != null ? await createFunc() : default;
+            }
 
             return _serializationProvider.DeserializeFromString<T>(value);
         }
@@ -289,7 +309,9 @@ namespace TGS.Core.Infrastructures.Redis
             var value = await db.StringGetAsync(cacheKey);
 
             if (!value.IsNullOrEmpty)
+            {
                 return _serializationProvider.DeserializeFromString<T>(value);
+            }
 
             var createdValue = await createFunc();
             var serializedValue = _serializationProvider.SerializeToString(createdValue);

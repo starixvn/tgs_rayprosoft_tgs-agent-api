@@ -222,7 +222,7 @@ const useTableColumns = ({ fetchTable }) => {
       },
       Cell: ({ value }) => {
         return (
-          <Set>
+          <Set orientation="vertical" alignX="center">
             <EditButton user={value} onSubmitted={fetchTable} />
             <EditPasswordButton user={value} onSubmitted={fetchTable} />
           </Set>

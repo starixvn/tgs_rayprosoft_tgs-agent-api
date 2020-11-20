@@ -96,13 +96,22 @@ export const Label = ({ value }) => {
 }
 
 // Effective <-> Invalid toggle
-export const ToggleButton = ({ record, onSubmitted }) => {
+export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
   let { id, status } = record
   let [data, setSubmit] = useState()
-  let { result, isLoading, error } = useChangeAnnouncementStatus(id, data)
+  let { result, isLoading, error, clearCache } = useChangeAnnouncementStatus(
+    id,
+    data
+  )
+
+  const clearSubmit = () => {
+    clearCache()
+    setSubmit(undefined)
+  }
 
   useEffect(() => {
     if (result && !error) {
+      clearSubmit()
       onSubmitted && onSubmitted()
     }
   }, [result, error])
@@ -116,8 +125,11 @@ export const ToggleButton = ({ record, onSubmitted }) => {
   return (
     <Button
       isLoading={isLoading}
+      disabled={isLoading || disabled}
       palette={palette}
       onClick={() => {
+        clearSubmit()
+
         let newStatus = status === InvalidName ? Effective : Invalid
         setSubmit(newStatus)
       }}
@@ -130,7 +142,7 @@ export const ToggleButton = ({ record, onSubmitted }) => {
         <AlertDialog
           {...error}
           onClickClose={() => {
-            setSubmit(undefined)
+            clearSubmit()
           }}
         />
       )}

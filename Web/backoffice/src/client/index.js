@@ -74,10 +74,6 @@ export const useGet = (url) => {
   let key = fetchData ? url : null
   const { data, error, isValidating, mutate } = useSWR(key, get)
 
-  const clearCache = () => {
-    cache.clear(url)
-  }
-
   return {
     data,
     isLoading: !error && !data && fetchData,
@@ -85,19 +81,23 @@ export const useGet = (url) => {
     error,
     isError: error,
     mutate,
-    clearCache
+    deleteCache: () => cache.delete(key),
+    clearCache: () => cache.clear()
   }
 }
 
-export const useCreatePost = (url, data) => {
+const DefaultUpdateOptions = {
+  dedupingInterval: 100
+}
+
+export const usePostData = (url, data, options = DefaultUpdateOptions) => {
   let fetchData = !!url && data !== undefined
   let keys = fetchData ? [url, data] : null
   let { data: result, error, isValidating, mutate } = useSWR(
     keys,
-    (url, data) => post(url, { data })
+    (url, data) => post(url, { data }),
+    options
   )
-
-  const clearCache = () => cache.clear(url)
 
   return {
     result,
@@ -106,11 +106,16 @@ export const useCreatePost = (url, data) => {
     error,
     isError: error,
     mutate,
-    clearCache
+    deleteCache: () => cache.delete(keys),
+    clearCache: () => cache.clear()
   }
 }
 
-export const usePostFormData = (url, formData) => {
+export const usePostFormData = (
+  url,
+  formData,
+  options = DefaultUpdateOptions
+) => {
   let fetchData = !!url && !!formData
   let keys = fetchData ? [url, formData] : null
   let { data: result, error, isValidating, mutate } = useSWR(
@@ -118,10 +123,9 @@ export const usePostFormData = (url, formData) => {
     (url, formData) =>
       post(url, {
         body: formData
-      })
+      }),
+    options
   )
-
-  const clearCache = () => cache.clear(url)
 
   return {
     result,
@@ -130,19 +134,19 @@ export const usePostFormData = (url, formData) => {
     error,
     isError: error,
     mutate,
-    clearCache
+    deleteCache: () => cache.delete(keys),
+    clearCache: () => cache.clear()
   }
 }
 
-export const useUpdatePut = (url, data) => {
+export const usePutData = (url, data, options = DefaultUpdateOptions) => {
   let fetchData = !!url && !!data
   let keys = fetchData ? [url, data] : null
   let { data: result, error, isValidating, mutate } = useSWR(
     keys,
-    (url, data) => put(url, { data })
+    (url, data) => put(url, { data }),
+    options
   )
-
-  const clearCache = () => cache.clear(url)
 
   return {
     result,
@@ -151,20 +155,33 @@ export const useUpdatePut = (url, data) => {
     error,
     isError: error,
     mutate,
-    clearCache
+    deleteCache: () => cache.delete(keys),
+    clearCache: () => cache.clear()
   }
 }
 
-export const useDelete = (url, options) => {
+export const usePut = (url, settings, options = DefaultUpdateOptions) => {
+  let keys = url ? [url, settings] : null
+  let { data: result, error, isValidating, mutate } = useSWR(keys, put, options)
+
+  return {
+    result,
+    isLoading: keys && !error && !result,
+    isValidating,
+    error,
+    isError: error,
+    mutate,
+    deleteCache: () => cache.delete(keys),
+    clearCache: () => cache.clear()
+  }
+}
+
+export const useDelete = (url, settings) => {
   let fetchData = !!url
   let key = fetchData ? url : null
   const { data: result, error, isValidating, mutate } = useSWR(key, (url) =>
-    fetchApi("DELETE", url, options)
+    fetchApi("DELETE", url, settings)
   )
-
-  const clearCache = () => {
-    cache.clear(url)
-  }
 
   return {
     result,
@@ -173,7 +190,8 @@ export const useDelete = (url, options) => {
     error,
     isError: error,
     mutate,
-    clearCache
+    deleteCache: () => cache.delete(key),
+    clearCache: () => cache.clear()
   }
 }
 

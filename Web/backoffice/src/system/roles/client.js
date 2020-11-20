@@ -1,8 +1,8 @@
 import {
   urlWith,
   useGet,
-  useCreatePost,
-  useUpdatePut,
+  usePostData,
+  usePutData,
   useDelete
 } from "../../client"
 
@@ -25,17 +25,17 @@ export const useRole = (id) => {
 
 export const useAddRole = (data) => {
   let url = data ? API : ""
-  return useCreatePost(url, data)
+  return usePostData(url, data)
 }
 
 export const useEditRole = (id, data) => {
   let url = id ? `${API}/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useCopyRole = (id, data) => {
   let url = id ? `${API}/${id}/copy` : ""
-  return useCreatePost(url, data)
+  return usePostData(url, data)
 }
 
 export const useDeleteRole = (id) => {
@@ -45,7 +45,7 @@ export const useDeleteRole = (id) => {
 
 export const useMenus = (fetchData = true) => {
   let url = fetchData ? `${API}/menus` : ""
-  let { result, ...rest } = useCreatePost(url, null)
+  let { result, ...rest } = usePostData(url, null)
   return {
     menus: resetDisplay(false, result?.menus),
     ...rest
