@@ -282,7 +282,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         }
 
         [HttpGet("{id}/DesignatedUsers")]
-        [Description("Change Payment Order")]
+        [Description("Get Designated Users")]
         public async Task<GetDesignatedUsersResponse> GetDesignatedUsersAsync(Guid id)
         {
             var payment = await _queries.GetSingleAsync(x => x.Id == id,
@@ -295,20 +295,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 
             var vipLevelIds = payment.VipLevels.Select(x => x.VipLevelId).ToArray();
             var isAll = payment.PlayerListCondition == PlayerListCondition.All;
-            //&& payment.AllPlayers &&
-            //payment.DepositedAmountMin == 0 && payment.DepositedAmountUnlimited;
-
-            //var isSomeOne = payment.PlayerListCondition == PlayerListCondition.Someone;
 
             var players = await _playerQueries.GetQueries()
                 .Where(x => payment.PaymentPlayerList.Select(p => p.PlayerCode).Contains(x.PlayerCode))
                 .Where(x =>
                     x.AccumulatedDeposit > payment.DepositedAmountMin &&
                     (payment.DepositedAmountUnlimited || x.AccumulatedDeposit < payment.DepositedAmountMax))
-                //.Where(isSomeOne, x =>
-                //    (payment.IdentityAuthentication & x.IdentityAuthentication) |
-                //    (payment.IdentityAuthentication == false) ||
-                //    payment.PhoneAuthentication & x.PhoneAuthentication || vipLevelIds.Contains(x.VipId.Value))
                 .Where(isAll && payment.IdentityAuthentication,
                     x => x.IdentityAuthentication)
                 .Where(isAll && payment.PhoneAuthentication,
@@ -317,8 +309,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                     x => vipLevelIds.Contains(x.VipId.Value))
                 .Select(x => x.RealName)
                 .ToArrayAsync();
-
-            //await _commands.BatchInsertOrUpdateAsync(payments.ToArray());
 
             return new GetDesignatedUsersResponse
             {
