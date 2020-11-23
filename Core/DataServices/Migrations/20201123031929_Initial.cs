@@ -925,7 +925,7 @@ namespace TGS.Core.DataServices.Migrations
                     DepositedAmountUnlimited = table.Column<bool>("bit", nullable: false),
                     DepositedAmountMin = table.Column<decimal>("decimal(18,6)", nullable: false),
                     DepositedAmountMax = table.Column<decimal>("decimal(18,6)", nullable: false),
-                    Reason = table.Column<string>("nvarchar(4000)", nullable: false),
+                    Reason = table.Column<string>("nvarchar(4000)", nullable: true),
                     FeePercentage = table.Column<decimal>("decimal(18,6)", nullable: true),
                     LowestFee = table.Column<decimal>("decimal(18,6)", nullable: true),
                     HighestFee = table.Column<decimal>("decimal(18,6)", nullable: true),

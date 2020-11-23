@@ -707,7 +707,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<decimal>("TransferLimitFrom")
