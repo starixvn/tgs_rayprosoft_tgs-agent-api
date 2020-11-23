@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.DataServices;
 using TGS.Core.Models.Messages;
@@ -17,7 +18,13 @@ namespace TGS.Apis.BackendOffice.Controllers
             _repository = repository;
         }
 
-        public MessageResponse GetBrandGameProvidersAsync()
+        public async Task<MessageResponse> GetBrandGameProvidersAsync()
+        {
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut]
+        public async Task<MessageResponse> SetScheduledMaintenanceTimeAsync()
         {
             return CreateValidResponse<MessageResponse>();
         }
