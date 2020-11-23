@@ -1,7 +1,10 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using NATS.Client;
+using NATS.Client.Rx;
+using NATS.Client.Rx.Ops;
 using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Core.Infrastructures.Nats
@@ -16,16 +19,19 @@ namespace TGS.Core.Infrastructures.Nats
 
         IAsyncSubscription SubscribeAsync<T>(string topic, Action<NatsMessage<T>> action);
 
+        INATSObservable<Msg> SubscribeWithObserveAsync(string topic);
+
+        T Deserialize<T>(byte[] data);
         string GetConnectStatus();
     }
 
     public class NatsManager : INatsManager
     {
+        private readonly IMessagePackProvider _messagePackProvider;
+        private readonly IOptions<NatsSetting> _natsSetting;
         private readonly IServiceLog<NatsManager> _serviceLog;
         private Lazy<IConnection> _connectionFactory;
-        private readonly IMessagePackProvider _messagePackProvider;
         private ConnState _state;
-        private readonly IOptions<NatsSetting> _natsSetting;
 
         public NatsManager(
             IMessagePackProvider messagePackProvider,
@@ -38,14 +44,60 @@ namespace TGS.Core.Infrastructures.Nats
             CreateConnection();
         }
 
-        private void CreateConnection()
-        {
-            _connectionFactory = new Lazy<IConnection>(Connect);
-        }
-
         string INatsManager.GetConnectStatus()
         {
             return _connectionFactory.Value.State.ToString();
+        }
+
+        Task INatsManager.PublishAsync<T>(string topic, T content)
+        {
+            return PublishAsync(topic, content);
+        }
+
+        Task INatsManager.PublishAsync<T>(T content)
+        {
+            return PublishAsync(typeof(T).Name, content);
+        }
+
+        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, string queueName, Action<NatsMessage<T>> action)
+        {
+            return _connectionFactory.Value?.SubscribeAsync(
+                topic,
+                queueName,
+                EventHandlerFactory(action));
+        }
+
+        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, Action<NatsMessage<T>> action)
+        {
+            return _connectionFactory.Value?.SubscribeAsync(
+                topic,
+                EventHandlerFactory(action));
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (!_connectionFactory.IsValueCreated)
+            {
+                return;
+            }
+
+            _connectionFactory.Value?.Drain();
+            _connectionFactory.Value?.Dispose();
+        }
+
+        INATSObservable<Msg> INatsManager.SubscribeWithObserveAsync(string topic)
+        {
+            return _connectionFactory.Value?.Observe(topic).Where(m => m.Data?.Any() == true);
+        }
+
+        T INatsManager.Deserialize<T>(byte[] data)
+        {
+            return _messagePackProvider.Deserialize<T>(data);
+        }
+
+        private void CreateConnection()
+        {
+            _connectionFactory = new Lazy<IConnection>(Connect);
         }
 
         private IConnection Connect()
@@ -74,21 +126,20 @@ namespace TGS.Core.Infrastructures.Nats
                 _serviceLog.LogError($"Failed to connect to NATS. {ex}");
                 CreateConnection();
             }
+
             return conn;
         }
-
-        Task INatsManager.PublishAsync<T>(string topic, T content)
-            => PublishAsync(topic, content);
-
-        Task INatsManager.PublishAsync<T>(T content)
-            => PublishAsync(typeof(T).Name, content);
 
 
         private Task PublishAsync<T>(string topic, T content)
         {
             return Task.Run(() =>
             {
-                if (_connectionFactory.IsValueCreated && _state != ConnState.CONNECTED) return;
+                if (_connectionFactory.IsValueCreated && _state != ConnState.CONNECTED)
+                {
+                    return;
+                }
+
                 var data = _messagePackProvider.Serialize(content);
 
                 _connectionFactory.Value?.Publish(topic, data);
@@ -101,21 +152,6 @@ namespace TGS.Core.Infrastructures.Nats
                     _serviceLog.LogError($"Flush failed. Subject:{topic} Error:{ex}");
                 }
             });
-        }
-
-        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, string queueName, Action<NatsMessage<T>> action)
-        {
-            return _connectionFactory.Value?.SubscribeAsync(
-                topic,
-                queueName,
-                EventHandlerFactory(action));
-        }
-
-        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, Action<NatsMessage<T>> action)
-        {
-            return _connectionFactory.Value?.SubscribeAsync(
-                topic,
-                EventHandlerFactory(action));
         }
 
         private EventHandler<MsgHandlerEventArgs> EventHandlerFactory<T>(Action<NatsMessage<T>> action)
@@ -159,14 +195,6 @@ namespace TGS.Core.Infrastructures.Nats
         private void AsyncErrorEventHandler(object sender, ErrEventArgs e)
         {
             _serviceLog.LogError($"Error occurred. Subject:{e.Subscription.Subject} Error:{e.Error}");
-        }
-
-        void IDisposable.Dispose()
-        {
-            if (!_connectionFactory.IsValueCreated)
-                return;
-            _connectionFactory.Value?.Drain();
-            _connectionFactory.Value?.Dispose();
         }
     }
 }

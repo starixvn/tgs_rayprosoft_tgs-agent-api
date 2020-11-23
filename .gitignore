@@ -183,3 +183,6 @@ $RECYCLE.BIN/
 
 # Local Stack
 .localstack/**
+
+# Upload Images
+**/UploadImages/*.*
