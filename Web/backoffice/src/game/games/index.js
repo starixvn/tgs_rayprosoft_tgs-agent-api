@@ -12,7 +12,7 @@ import {
 import { Code } from "./menu"
 import { useTable, Table, pageCount } from "../../table"
 import { Trans, useTrans } from "../../i18n"
-import SearchButton from "../../button/Search"
+import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 
 export { Code }
@@ -23,10 +23,10 @@ export const Content = () => {
     return null
   }
 
-  return <AsyncContent />
+  return <Body />
 }
 
-const AsyncContent = () => {
+const Body = () => {
   return ""
 }
 

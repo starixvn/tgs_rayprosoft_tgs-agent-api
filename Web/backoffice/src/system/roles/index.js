@@ -15,7 +15,7 @@ import { Code } from "./menu"
 import { useRoleList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
-import SearchButton from "../../button/Search"
+import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 
 export { Code }

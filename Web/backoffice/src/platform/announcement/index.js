@@ -81,10 +81,11 @@ const AsyncContentBody = ({}) => {
     if (newStatusName === statusName) {
       mutate()
     }
-    //TODO: reset sortBy?
+
     setState({
       pageIndex: 0,
-      statusName: newStatusName
+      statusName: newStatusName,
+      sortBy: []
     })
   }
 
