@@ -1,0 +1,16 @@
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace TGS.Apis.FileService.Extensions
+{
+    public static class ServiceExtensions
+    {
+        public static IServiceCollection AddFile(this IServiceCollection services, IConfiguration configuration,
+            string configSectionName = "FileSetting")
+        {
+            services.Configure<FileSetting>(configuration.GetSection(configSectionName));
+
+            return services;
+        }
+    }
+}

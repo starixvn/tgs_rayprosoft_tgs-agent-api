@@ -11,8 +11,8 @@ namespace TGS.Apis.BackendOffice
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -46,7 +46,8 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapControllers();
             });
 
-            var requestLocalizationOptions = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+            var requestLocalizationOptions =
+                app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
         }
     }

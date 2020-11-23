@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
@@ -13,6 +11,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
+using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
@@ -34,6 +33,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _commandsMock.Object,
                 _playerCommandsMock.Object,
                 _uploadServiceMock.Object,
+                _stationLetterServiceMock.Object,
                 HttpContextAccessorMock.Object);
         }
 
@@ -47,6 +47,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             new Mock<ITgsCommands<StationLetterPlayer>>();
 
         private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
+        private readonly Mock<IStationLetterService> _stationLetterServiceMock = new Mock<IStationLetterService>();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -234,8 +235,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var playerUsernames = players.Select(p => new List<string> {p.Username}).ToList();
-            _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync(It.IsAny<IFormFile>()))
+            var playerUsernames = players.Select(p => new UploadPlayerModel {Username = p.Username}).ToList();
+            _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync<UploadPlayerModel>(It.IsAny<IFormFile>()))
                 .Returns(Task.FromResult(playerUsernames));
 
             _playerQueriesMock.Setup(p => p.GetQueries())

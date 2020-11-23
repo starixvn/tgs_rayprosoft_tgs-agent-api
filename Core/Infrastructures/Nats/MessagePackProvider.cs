@@ -13,8 +13,11 @@ namespace TGS.Core.Infrastructures.Nats
 
     public class MessagePackProvider : IMessagePackProvider
     {
+        private readonly MessagePackSerializerOptions _messagePackSerializerOptions =
+            MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+
         private readonly IServiceLog<MessagePackProvider> _serviceLog;
-        private readonly MessagePackSerializerOptions _messagePackSerializerOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+
         public MessagePackProvider(IServiceLog<MessagePackProvider> serviceLog)
         {
             _serviceLog = serviceLog;
