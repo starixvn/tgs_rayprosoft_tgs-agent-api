@@ -26,7 +26,7 @@ import { Trans, useTrans, useLocale, Locales } from "../../i18n"
 import { Field as InputField } from "../../input/Field"
 import {
   useAddStationLetter,
-  useAddStationLetterWithFormData,
+  useStationLetterUpload,
   useVerifyStationLetter
 } from "./client"
 import { CancelText } from "../../button/ActionButtons"
@@ -34,6 +34,7 @@ import TargetSelectField, {
   AllPlayers,
   DesignatedPlayers
 } from "./TargetSelectField"
+import Alert from "../../dialog/Alert"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -54,17 +55,10 @@ export const AddButton = ({ onSubmitted, ...props }) => {
   )
 }
 
-//TODO: upload player list and download sample
 const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let [data, setSubmit] = useState()
   let { result, isLoading, error } = useAddStationLetter(data)
 
-  // let [formData, setFormData] = useState()
-  // let {
-  //   result: formDataResult,
-  //   error: formDataError
-  // } = useAddStationLetterWithFormData(formData)
-  console.warn("TODO: upload player list and download sample")
   const clearResult = () => {
     setSubmit(null)
   }
@@ -81,25 +75,12 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
         subject: "",
         content: ""
       }}
-      onSubmit={({ target, playerUsernamesFile, subject, content }) => {
-        //TODO: use form data or json data
-        let data = { subject, content }
-
-        // let formData = new FormData()
-        // formData.append("subject", subject)
-        // formData.append("content", content)
-
+      onSubmit={({ target, ...data }) => {
         if (target === AllPlayers) {
           data.assignedAllPlayers = true
-          // formData.append("assignedAllPlayers", true)
-        } else {
-          //TODO: set playerUsernames fields or upload file to server?
-          console.warn("TODO: playerUsernames")
-          //formData.append("playerUsernames", playerUsernamesFile, playerUsernamesFile.name)
         }
 
         setSubmit(data)
-        // setFormData(formData)
       }}
       isLoading={isLoading}
       result={result}
@@ -145,6 +126,25 @@ const EditBody = ({ readonly = false, dialog }) => {
   let language = locale === Locales.zh ? "zh_CN" : ""
   let [editor, setEditor] = useState()
   let uploadInputRef = useRef()
+
+  let [formData, setFormData] = useState()
+  let { result, isLoading, error, deleteCache } = useStationLetterUpload(
+    formData
+  )
+
+  const resetFormData = () => {
+    if (uploadInputRef?.current) {
+      uploadInputRef.current.value = ""
+    }
+    deleteCache()
+    setFormData(undefined)
+  }
+
+  useEffect(() => {
+    if (Array.isArray(result?.players) && !error) {
+      setFieldValue("assignedAllPlayers", result?.players)
+    }
+  }, [formData, result])
 
   const setupEditor = () => {
     if (!contentEditorRef.current) {
@@ -210,7 +210,13 @@ const EditBody = ({ readonly = false, dialog }) => {
               type="file"
               onChange={(event) => {
                 let [file] = event.target.files
-                setFieldValue("playerUsernamesFile", file)
+                if (file) {
+                  let formData = new FormData()
+                  formData.append("file", file, file.name)
+                  setFormData(formData)
+                } else {
+                  resetFormData()
+                }
               }}
               css={css`
                 display: none;
@@ -218,12 +224,26 @@ const EditBody = ({ readonly = false, dialog }) => {
             />
             <Button
               type="button"
+              palette="primary"
+              size="small"
               onClick={(event) => {
                 uploadInputRef?.current.click()
               }}
+              isLoading={isLoading}
+              disabled={isLoading}
             >
               <Trans zh="上传文件" en="Upload file" />
             </Button>
+            <Button
+              use="a"
+              href="/download/payments/list.xlsx"
+              download="players.xlsx"
+              palette="primary"
+              size="small"
+            >
+              <Trans zh="下载文件格式" en="Download Format File" />
+            </Button>
+            {error && <Alert {...error} onClickClose={resetFormData} />}
           </>
         )}
       </Set>

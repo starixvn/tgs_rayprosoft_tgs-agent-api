@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, forwardRef } from "react"
-import { Dialog, Modal as _Modal } from "bumbag"
+import { Dialog, Modal as _Modal, Button } from "bumbag"
 import Backdrop from "./Backdrop"
+import { Trans } from "../i18n"
+import { CloseText } from "../button/ActionButtons"
 
 export const Modal = ({
   hideOnClickOutside = false,
@@ -23,5 +25,17 @@ export const Modal = ({
 )
 
 export const useModalState = _Modal.useState
+
+export const Footer = Dialog.Footer
+
+export const CloseButtonFooter = ({ onClick, ...props }) => {
+  return (
+    <Footer {...props}>
+      <Button type="button" onClick={onClick}>
+        <CloseText />
+      </Button>
+    </Footer>
+  )
+}
 
 export default Modal

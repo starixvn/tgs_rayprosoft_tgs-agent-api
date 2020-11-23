@@ -17,6 +17,7 @@ import {
   Checkbox,
   FieldStack,
   FieldWrapper,
+  InputField,
   SelectField,
   Dialog,
   Modal,
@@ -131,13 +132,13 @@ const InputPadding = 0.4
 const FieldValidationTextHeight = 0.875
 export const FieldMinHeight =
   InputMinHeight + InputPadding + FieldValidationTextHeight
+
 export const Field = ({
   name,
   inputRef,
   required,
   validate,
   children,
-  fieldWrapperProps,
   ...props
 }) => {
   let isChildrenFunction = typeof children === "function"
@@ -158,18 +159,19 @@ export const Field = ({
 
         //minHeight={`${FieldMinHeight}rem`}
         return (
-          <FieldWrapper
-            state={state}
-            validationText={validationText}
-            {...fieldWrapperProps}
-          >
-            <>
-              {!children && (
-                <Input inputRef={inputRef} id={name} {...field} {...props} />
-              )}
-              {isChildrenFunction && children({ field, form, meta, inputRef })}
-            </>
-          </FieldWrapper>
+          <>
+            {!children && (
+              <InputField.Formik
+                state={state}
+                validationText={validationText}
+                inputRef={inputRef}
+                id={name}
+                {...field}
+                {...props}
+              />
+            )}
+            {isChildrenFunction && children({ field, form, meta, inputRef })}
+          </>
         )
       }}
     </_Field>

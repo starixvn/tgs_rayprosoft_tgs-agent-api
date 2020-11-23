@@ -55,7 +55,7 @@ const VipLevelsTrans = {
   en: "VIP Levels"
 }
 
-export const Detail = ({ record }) => {
+export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
   let {
     playerListCondition,
     allPlayer,
@@ -82,11 +82,11 @@ export const Detail = ({ record }) => {
     useVipLevelDetail(vipLevelIds)
   ].filter((string) => !!string)
 
-  //TODO: one line?
   return (
-    <Text.Block whiteSpace="nowrap">{`${condition}: ${details.join(
-      ", "
-    )}`}</Text.Block>
+    <Text.Block
+      whiteSpace={whiteSpace}
+      {...props}
+    >{`${condition}: ${details.join(", ")}`}</Text.Block>
   )
 }
 

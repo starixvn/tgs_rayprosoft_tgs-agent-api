@@ -7,8 +7,8 @@ export const Disclosure = forwardRef(
     <Modal.Disclosure
       ref={ref}
       use={use}
+      flex="unset"
       css={css`
-        flex: unset;
         white-space: nowrap;
       `}
       {...props}

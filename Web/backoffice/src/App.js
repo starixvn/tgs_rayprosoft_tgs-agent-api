@@ -127,13 +127,13 @@ const Header = () => {
             </Button>
           </DropdownMenu>
         </TopNav.Item>
-        <LangItem />
+        <LangItem display="none" />
       </TopNav.Section>
     </TopNav>
   )
 }
 
-const LangItem = ({}) => {
+const LangItem = ({ ...props }) => {
   let locale = useLocale()
   let chinese = "中文"
   let english = "English"
@@ -141,7 +141,7 @@ const LangItem = ({}) => {
   let useEn = useEnglish()
   let useZh = useChinese()
   return (
-    <TopNav.Item>
+    <TopNav.Item {...props}>
       <DropdownMenu
         menu={
           <>

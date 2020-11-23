@@ -15,7 +15,7 @@ import { Code } from "./menu"
 import { useRoleList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
-import SearchButton from "../../button/Search"
+import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 
 export { Code }
@@ -115,9 +115,10 @@ const useTableColumns = ({ fetchTable }) => {
   let columns = [
     sequenceColumn(),
     {
-      Header: "权限组名称",
       id: "name",
       accessor: "name",
+      Header: "权限组名称",
+      disableSortBy: true,
       headCell: {
         textAlign: "center"
       },

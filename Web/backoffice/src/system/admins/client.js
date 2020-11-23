@@ -1,4 +1,4 @@
-import { urlWith, useGet, useCreatePost, useUpdatePut } from "../../client"
+import { urlWith, useGet, usePostData, usePutData } from "../../client"
 
 const API = "/api/users"
 
@@ -9,15 +9,15 @@ export const useAdminList = (searchParams) => {
 
 export const useAddAdmin = (data) => {
   let url = data ? API : ""
-  return useCreatePost(url, data)
+  return usePostData(url, data)
 }
 
 export const useEditAdmin = (id, data) => {
   let url = id ? `${API}/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useEditPassword = (id, data) => {
   let url = id ? `${API}/${id}/password` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }

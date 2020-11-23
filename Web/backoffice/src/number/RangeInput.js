@@ -63,9 +63,7 @@ export const FieldGroup = ({
               min={isMinList ? min[index] : min}
               max={isMaxList ? max[index] : max}
               size={size}
-              fieldWrapperProps={{
-                flex: "1"
-              }}
+              flex="1"
               {...inputFieldProps}
             />
             {hasNext && (

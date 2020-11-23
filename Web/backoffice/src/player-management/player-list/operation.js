@@ -21,7 +21,7 @@ import { Trans } from "../../i18n"
 import format from "../../date/format"
 import { pastWeek } from "../../date/range"
 import DateTimeRangeInput from "../../date/RangeInput"
-import SearchButton from "../../button/Search"
+import SearchButton from "../../button/SearchButton"
 import { Tab as _Tab, TabPanel } from "../../tab"
 
 export const Key = "operation"
