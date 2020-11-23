@@ -30,6 +30,9 @@ namespace TGS.Core.DataServices.Models
         public string QQ { get; set; }
         public string Wechat { get; set; }
         public bool HasAgent { get; set; }
+        public bool IdentityAuthentication { get; set; }
+        public bool PhoneAuthentication { get; set; }
+        public decimal AccumulatedDeposit { get; set; }
 
         public string ParentPlayerCode { get; set; }
         public string ParentInvitationCode { get; set; }

@@ -11,6 +11,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("Players", "dbo");
             builder.HasKey(bc => bc.PlayerCode);
+            builder.HasIndex(p => p.Username);
 
             builder.Property(c => c.PlayerCode)
                 .HasColumnType(ColumnTypes.Varchar(16))
@@ -103,6 +104,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.Wechat)
                 .HasColumnType(ColumnTypes.Nvarchar(64));
+
+            builder.Property(c => c.AccumulatedDeposit)
+                .HasColumnType(ColumnTypes.Decimal(18, 6));
         }
     }
 }
