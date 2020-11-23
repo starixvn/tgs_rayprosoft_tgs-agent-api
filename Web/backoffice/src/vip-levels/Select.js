@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/core"
-import { get } from "../client"
 import { Select as _Select } from "bumbag"
 import { Field as _Field } from "../select/Field"
 import AlertDialog from "../dialog/Alert"
@@ -23,7 +22,7 @@ export const Select = ({ required, ...props }) => {
   }
 
   if (error) {
-    return <AlertDialog {...error}/>
+    return <AlertDialog {...error} />
   }
 
   let optioniItems = items.map(({ id, name }) => ({
@@ -31,17 +30,11 @@ export const Select = ({ required, ...props }) => {
     value: id
   }))
 
-  let options = required 
-  ? optioniItems
-  : [
-    { label: "", value: "" },
-    ...optioniItems
-  ]
+  let options = required
+    ? optioniItems
+    : [{ label: "", value: "" }, ...optioniItems]
 
-  return (
-    <_Select
-      options={options}
-      {...props}
-    />
-  )
+  return <_Select options={options} {...props} />
 }
+
+export default Select

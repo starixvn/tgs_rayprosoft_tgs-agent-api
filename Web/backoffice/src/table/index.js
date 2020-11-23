@@ -8,8 +8,6 @@ import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 const DefaultState = {
   pageIndex: 0,
   pageSize: 10,
-  sortby: "",
-  orderby: "",
   sortBy: []
 }
 
@@ -31,9 +29,9 @@ export const useTable = (initialState = {}) => {
     set((prevState) => ({ ...prevState, ...state }))
   }
 
-  const setSortOrder = ({ sortby = "", orderby = "" }) => {
+  const setSortOrder = (sortBy) => {
     set((prevState) => {
-      return { ...prevState, sortby, orderby }
+      return { ...prevState, sortBy }
     })
   }
 
@@ -104,29 +102,14 @@ export const Table = ({
       useControlledState: (state) => {
         let pageIndex = controlledState?.pageIndex ?? state.pageIndex
         let pageSize = controlledState?.pageSize ?? state.pageSize
-        let sortBy = [...state.sortBy]
-        if (controlledState?.sortby) {
-          sortBy = [
-            {
-              id: controlledState?.sortby,
-              desc: equalsDescending(controlledState?.orderby)
-            }
-          ]
-        }
 
         return React.useMemo(
           () => ({
             ...state,
             pageIndex,
-            pageSize,
-            sortBy
+            pageSize
           }),
-          [
-            JSON.stringify(state),
-            pageIndex,
-            controlledState?.sortby,
-            controlledState?.orderby
-          ]
+          [JSON.stringify(state), pageIndex]
         )
       },
       manualSortBy,
@@ -143,20 +126,15 @@ export const Table = ({
   let { getTableProps, gotoPage, state: tableState } = table
   let { pageIndex } = tableState
 
-  let HeadIndex = 0
-  let sortby = tableState?.sortBy?.[HeadIndex]?.id ?? ""
-  let orderby =
-    sortby && fromIsDescending(tableState?.sortBy?.[HeadIndex]?.desc)
-
   useEffect(() => {
-    setSortOrder && setSortOrder({ sortby, orderby })
-  }, [sortby, orderby])
+    setSortOrder && setSortOrder(tableState?.sortBy)
+  }, [JSON.stringify(tableState?.sortBy)])
 
   const getPage = () => pageIndex + 1
   return (
     <>
       <Set orientation="vertical">
-        <_Table width="100%" overflowX="auto" {...getTableProps()} {...props}>
+        <_Table width="100%" overflow="auto" {...getTableProps()} {...props}>
           {head === true && <Head table={table} />}
           {body === true && <Body table={table} />}
           {children}

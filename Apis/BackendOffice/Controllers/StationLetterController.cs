@@ -171,8 +171,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Upload player file")]
         public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
         {
-            var uploadedResult = await _uploadService.GetUploadedExcelAsync(file);
-            var users = uploadedResult.Select(p => p.FirstOrDefault());
+            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
+            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
 
             var allPlayers = await _playerQueries.GetQueries()
                 .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))

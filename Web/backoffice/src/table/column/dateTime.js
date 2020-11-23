@@ -23,6 +23,7 @@ export default ({
       textAlign: "center"
     },
     Cell: ({ value = "" } = {}) => {
+      //TODO: use fn date instead
       let date = dayjs(value)
       if (!date.isValid()) {
         //empty

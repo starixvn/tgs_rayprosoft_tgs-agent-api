@@ -31,7 +31,7 @@ import {
   from as toStatus,
   toString as toStatusString
 } from "../status"
-import { Field as VipLevelField } from "../../vip-level/field"
+import { Field as VipLevelField } from "../../vip-levels/Select"
 import { Field as _Field, FieldMinHeight } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"

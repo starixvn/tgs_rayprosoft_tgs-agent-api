@@ -15,7 +15,7 @@ import { Code } from "./menu"
 import { useAdminList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
-import SearchButton from "../../button/Search"
+import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 
 export { Code }
@@ -222,7 +222,7 @@ const useTableColumns = ({ fetchTable }) => {
       },
       Cell: ({ value }) => {
         return (
-          <Set>
+          <Set orientation="vertical" alignX="center">
             <EditButton user={value} onSubmitted={fetchTable} />
             <EditPasswordButton user={value} onSubmitted={fetchTable} />
           </Set>

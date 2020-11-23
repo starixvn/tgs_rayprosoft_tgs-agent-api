@@ -4,7 +4,7 @@ cd Web\backoffice
 docker build -f Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:%1 .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:%1
 
-cd ..
+cd ../..
 docker build -f Apis\BackendOffice\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:%1 .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:%1
 

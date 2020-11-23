@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["Apis/OperatorApi/OperatorApi.csproj", "Apis/OperatorApi/"]
+COPY ["Services/Clients/Clients.csproj", "Services/Clients/"]
 COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
 COPY ["Core/DataServices/DataServices.csproj", "Core/DataServices/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]

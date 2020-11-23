@@ -22,10 +22,10 @@ import {
 } from "../../user/context"
 import { Code } from "./menu"
 import { Field as StatusField } from "../status"
-import { Field as VipLevelField } from "../../vip-level/field"
+import { Field as VipLevelField } from "../../vip-levels/Select"
 import { ViewButton, EditButton } from "./button"
 import { Trans, useTrans } from "../../i18n"
-import SearchButton from "../../button/Search"
+import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 
 export { Code }

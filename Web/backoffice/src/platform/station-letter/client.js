@@ -5,8 +5,8 @@ import client, {
   put,
   post,
   useGet,
-  useCreatePost,
-  useUpdatePut,
+  usePostData,
+  usePutData,
   usePostFormData
 } from "../../client"
 
@@ -19,13 +19,13 @@ export const useStationLetterList = (searchParams = {}) => {
 
 export const useVerifyStationLetter = ({ id, type, data } = {}) => {
   let url = `${API}/${id}/${type}`
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useAddStationLetter = (data) => {
-  return useCreatePost(API, data)
+  return usePostData(API, data)
 }
 
-export const useAddStationLetterWithFormData = (body) => {
+export const useStationLetterUpload = (body) => {
   return usePostFormData(API, body)
 }

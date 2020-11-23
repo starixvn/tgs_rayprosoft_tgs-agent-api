@@ -1,8 +1,8 @@
 import {
   urlWith,
   useGet,
-  useCreatePost,
-  useUpdatePut,
+  usePostData,
+  usePutData,
   useDelete
 } from "../../client"
 
@@ -24,22 +24,22 @@ export const usePlayer = (playerCode) => {
 
 export const useEditPlayerInfo = (playerCode, data) => {
   let url = playerCode ? `${API}/${playerCode}/info` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useEditPlayerContact = (playerCode, data) => {
   let url = playerCode ? `${API}/${playerCode}/contact` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useAddPlayerBank = (playerCode, data) => {
   let url = playerCode ? `${API}/${playerCode}/bank` : ""
-  return useCreatePost(url, data)
+  return usePostData(url, data)
 }
 
 export const useEditPlayerBank = ({ playerCode, id } = {}, data) => {
   let url = playerCode && id ? `${API}/${playerCode}/bank/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useDeletePlayerBank = (playerCode, id) => {
@@ -49,7 +49,7 @@ export const useDeletePlayerBank = (playerCode, id) => {
 
 export const useEditPlayerPassword = (playerCode, data) => {
   let url = playerCode ? `${API}/${playerCode}/password` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useOperations = (playerCode, searchParams) => {

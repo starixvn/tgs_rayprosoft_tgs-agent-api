@@ -1,8 +1,8 @@
 import {
   urlWith,
   useGet,
-  useCreatePost,
-  useUpdatePut,
+  usePostData,
+  usePutData,
   useDelete
 } from "../../client"
 
@@ -15,12 +15,12 @@ export const useDepartmentList = (searchParams) => {
 
 export const useAddDepartment = (data) => {
   let url = data ? API : ""
-  return useCreatePost(url, data)
+  return usePostData(url, data)
 }
 
 export const useEditDepartment = (id, data) => {
   let url = id ? `${API}/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }
 
 export const useDeleteDepartment = (id) => {

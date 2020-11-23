@@ -1,5 +1,5 @@
 import useSWR, { cache } from "swr"
-import { urlWith, useGet, useCreatePost, useUpdatePut } from "../../../client"
+import { urlWith, useGet, usePostData, usePutData } from "../../../client"
 
 const PaymentMethodAPI = "/api/paymentmethod"
 
@@ -14,10 +14,10 @@ export const usePaymentMethod = (id) => {
 }
 
 export const useAddPaymentMethod = (data) => {
-  return useCreatePost(PaymentMethodAPI, data)
+  return usePostData(PaymentMethodAPI, data)
 }
 
 export const useUpdatePaymentMethod = (id, data) => {
   let url = id ? `${PaymentMethodAPI}/${id}` : ""
-  return useUpdatePut(url, data)
+  return usePutData(url, data)
 }

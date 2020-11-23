@@ -48,7 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico", "/api/pluggable" };
+            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico", "/api/pluggable", "/.well-known" };
 
             app.UseWhen(context => bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r, StringComparison.OrdinalIgnoreCase)),
                 builder =>

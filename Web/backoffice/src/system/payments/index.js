@@ -25,7 +25,7 @@ import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
-import SearchButton from "../../button/Search"
+import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import {
   Field as StatusSelectField,
@@ -45,6 +45,9 @@ import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
 import { CloseText } from "../../button/ActionButtons"
 import { Detail as ConditionDetail } from "./condition"
+import { EditButton } from "./edit"
+import { EditButton as FeeEditButton } from "./handlingfee"
+import { ViewButton as LogsButton } from "./logs"
 
 export { Code }
 
@@ -54,19 +57,24 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
 const Body = () => {
-  let { state, setState, setPageIndex, setSortOrder } = useTable({
+  let [state, set] = useState({
     transferType: TransferType.Deposit,
     paymentStatus: null,
     keyword: ""
   })
 
+  const setState = (state) => set((prevState) => ({ ...prevState, ...state }))
+
   let { transferType } = state
-  let { data, isLoading, mutate } = usePaymentList(toApiParams(state))
+  let { data, isLoading, mutate } = usePaymentList({
+    ...state,
+    sortby: "number",
+    showAll: true
+  })
 
   let tab = useTabState({
     selectedId: transferType
@@ -77,7 +85,6 @@ const Body = () => {
       mutate()
     }
     setState({
-      pageIndex: 0,
       transferType: newTransferType,
       paymentStatus: null,
       keyword: ""
@@ -90,21 +97,24 @@ const Body = () => {
       actionBar={
         <>
           <SearchBar
-            search={(data) => {
-              let newState = {
-                ...data,
-                pageIndex: 0
+            search={(newState) => {
+              if (
+                equals(newState, {
+                  paymentStatus: state.paymentStatus,
+                  keyword: state.keyword
+                })
+              ) {
+                mutate()
               }
-              mutate()
               setState(newState)
             }}
             isLoading={isLoading}
           />
-          <Set alignX="right" alignY="center">
+          {/* <Set alignX="right" alignY="center">
             <AddVendorButton />
             <AddMethodButton />
             <AddChannelButton />
-          </Set>
+          </Set> */}
         </>
       }
     >
@@ -132,8 +142,6 @@ const Body = () => {
               data={data}
               transferType={transferType}
               mutate={mutate}
-              setPageIndex={setPageIndex}
-              setSortOrder={setSortOrder}
               isLoading={isLoading}
             />
           )}
@@ -145,8 +153,6 @@ const Body = () => {
               data={data}
               transferType={transferType}
               mutate={mutate}
-              setPageIndex={setPageIndex}
-              setSortOrder={setSortOrder}
               isLoading={isLoading}
             />
           )}
@@ -158,16 +164,7 @@ const Body = () => {
 
 export const CodeContentPair = [Code, Content]
 
-const DataTable = ({
-  state,
-  data,
-  transferType,
-  mutate,
-  setPageIndex,
-  setSortOrder,
-  isLoading
-}) => {
-  let { pageSize } = state
+const DataTable = ({ state, data, transferType, mutate, isLoading }) => {
   let [displayOrders, setDisplayOrder] = useState({})
   let [submitData, setSubmit] = useState()
   let {
@@ -178,7 +175,7 @@ const DataTable = ({
 
   const reset = () => {
     setDisplayOrder({})
-    setSubmit(null)
+    setSubmit(undefined)
   }
 
   useEffect(() => {
@@ -203,15 +200,26 @@ const DataTable = ({
     items: data?.items ?? []
   })
   return (
-    <Table
-      controlledState={state}
-      columns={columns}
-      data={data?.items}
-      pageCount={pageCount(pageSize, data?.totalCount)}
-      setPageIndex={setPageIndex}
-      setSortOrder={setSortOrder}
-      isLoading={isLoading}
-    />
+    <Stack spacing="minor-1">
+      <Table
+        columns={columns}
+        data={data?.items}
+        isLoading={isLoading}
+        usePagination={false}
+      />
+      <Button
+        isLoading={isChangingDisplayOrder}
+        onClick={() => {
+          let list = Object.entries(displayOrders).map(([key, value]) => ({
+            id: key,
+            displayOrder: value
+          }))
+          setSubmit({ orders: list })
+        }}
+      >
+        <Trans zh="确认排序" en="Confirm Order" />
+      </Button>
+    </Stack>
   )
 }
 
@@ -367,12 +375,12 @@ const useColumns = ({
         whiteSpace: "nowrap"
       },
       Cell: ({ value }) => {
-        let { allPlayer = true, designatedUsers = [] } = value
-        if (allPlayer) {
+        let { designatedUsers } = value
+        if (!designatedUsers) {
           return <Trans zh="无" en="None" />
         }
 
-        return <DesignatedUsersLink users={designatedUsers} />
+        return <DesignatedUsersLink />
       }
     },
     {
@@ -389,16 +397,7 @@ const useColumns = ({
         whiteSpace: "nowrap"
       },
       Cell: ({ value }) => {
-        //TODO: 0 - Unlimited?
-        //TODO: format num?
-        if (transferType === TransferType.Deposit) {
-          return (
-            <Text.Block whiteSpace="nowrap">
-              {value.depositedAmountFrom} - {value.depositedAmountTo}
-            </Text.Block>
-          )
-        }
-
+        //TODO: format number?
         return (
           <Text.Block whiteSpace="nowrap">
             {value.transferLimitFrom} - {value.transferLimitTo}
@@ -447,9 +446,11 @@ const useColumns = ({
       },
       Cell: ({ value }) => {
         return (
-          <Box alignX="center">
-            <Set>TODO: buttons</Set>
-          </Box>
+          <Set alignX="center">
+            <EditButton record={value} onSubmitted={mutate} />
+            <FeeEditButton record={value} onSubmitted={mutate} />
+            <LogsButton record={value} />
+          </Set>
         )
       }
     })
@@ -463,13 +464,15 @@ const searchInputPlaceHolder = () =>
     en: "Search..."
   })
 
-const DesignatedUsersLink = ({ users = [] }) => {
+const DesignatedUsersLink = ({}) => {
   let dialog = useModalState()
 
   let title = useTrans({
     zh: "特定用户",
     en: "Designated Users"
   })
+  //TODO: fetch users API
+  let users = []
   return (
     <>
       <Disclosure use={Link} {...dialog}>
