@@ -150,5 +150,16 @@ namespace TGS.Core.DataServices.Base.Extensions
 
             return source;
         }
+
+        public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, bool filter,
+            Func<TSource, bool> predicate)
+        {
+            if (filter)
+            {
+                source = source.Where(predicate);
+            }
+
+            return source;
+        }
     }
 }

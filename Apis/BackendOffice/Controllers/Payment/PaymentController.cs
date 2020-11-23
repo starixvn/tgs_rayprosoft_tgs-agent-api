@@ -49,42 +49,45 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] PaymentsRequest request)
         {
             return _queries.GetQueries()
+                .Include(p => p.PaymentPlayerList).ThenInclude(pp => pp.Player)
+                .Include(p => p.VipLevels)
                 .Where(request.TransferType, p => p.TransferType == request.TransferType)
                 .Where(request.PaymentStatus, p => p.PaymentStatus == request.PaymentStatus)
                 .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
                                              p.PaymentMethod.Name.Contains(request.Keyword) ||
                                              p.PaymentChannel.Name.Contains(request.Keyword))
-                .Select(q => new PaymentModel
+                .Select(p => new PaymentModel
                 {
-                    Id = q.Id,
-                    Number = q.DisplayOrder,
-                    PaymentVendorName = q.PaymentVendor.Name,
-                    PaymentMethodName = q.PaymentMethod.Name,
-                    PaymentChannelName = q.PaymentChannel.Name,
-                    TransferType = q.TransferType,
-                    ChannelName = q.ChannelName,
-                    PlayerListCondition = q.PlayerListCondition,
-                    AllPlayer = q.AllPlayers,
-                    DepositedAmountMin = q.DepositedAmountMin,
-                    DepositedAmountMax = q.DepositedAmountMax,
-                    DepositedAmountUnlimited = q.DepositedAmountUnlimited,
-                    IdentityAuthentication = q.IdentityAuthentication,
-                    PhoneAuthentication = q.PhoneAuthentication,
-                    DesignatedUsers = q.PaymentPlayerList.Count > 0,
-                    TransferLimitFrom = q.TransferLimitFrom,
-                    TransferLimitTo = q.TransferLimitTo,
-                    PaymentStatus = q.PaymentStatus,
+                    Id = p.Id,
+                    Number = p.DisplayOrder,
+                    PaymentVendorName = p.PaymentVendor.Name,
+                    PaymentMethodName = p.PaymentMethod.Name,
+                    PaymentChannelName = p.PaymentChannel.Name,
+                    TransferType = p.TransferType,
+                    ChannelName = p.ChannelName,
+                    PlayerListCondition = p.PlayerListCondition,
+                    AllPlayer = p.AllPlayers,
+                    DepositedAmountMin = p.DepositedAmountMin,
+                    DepositedAmountMax = p.DepositedAmountMax,
+                    DepositedAmountUnlimited = p.DepositedAmountUnlimited,
+                    IdentityAuthentication = p.IdentityAuthentication,
+                    PhoneAuthentication = p.PhoneAuthentication,
+                    TransferLimitFrom = p.TransferLimitFrom,
+                    TransferLimitTo = p.TransferLimitTo,
+                    PaymentStatus = p.PaymentStatus,
+                    DesignatedUsers = GetDesignatedUsersAsync(p).Any(),
                     PaymentFee = new PaymentFeeModel
                     {
-                        FeePercentage = q.FeePercentage,
-                        HighestFee = q.HighestFee,
-                        LowestFee = q.LowestFee
+                        FeePercentage = p.FeePercentage,
+                        HighestFee = p.HighestFee,
+                        LowestFee = p.LowestFee
                     },
-                    CreatedByUsername = q.CreatedByUsername,
-                    UpdatedByUsername = q.UpdatedByUsername,
-                    CreatedOn = q.CreatedOn,
-                    UpdatedOn = q.UpdatedOn
-                }).AsNoTracking().CreatePagedResponseAsync(request);
+                    CreatedByUsername = p.CreatedByUsername,
+                    UpdatedByUsername = p.UpdatedByUsername,
+                    CreatedOn = p.CreatedOn,
+                    UpdatedOn = p.UpdatedOn
+                })
+                .AsNoTracking().CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
@@ -245,7 +248,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         public async Task<MessageResponse> UploadPlayersAsync(IFormFile file)
         {
             var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
-            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
+            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username))
+                .Select(p => p.Username);
 
             var allPlayers = await _playerQueries.GetQueries()
                 .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))
@@ -286,35 +290,43 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         public async Task<GetDesignatedUsersResponse> GetDesignatedUsersAsync(Guid id)
         {
             var payment = await _queries.GetSingleAsync(x => x.Id == id,
-                x => x.Include(p => p.PaymentPlayerList).Include(p => p.VipLevels).AsNoTracking());
+                x => x.Include(p => p.PaymentPlayerList)
+                    .ThenInclude(p => p.Player)
+                    .Include(p => p.VipLevels).AsNoTracking());
 
             if (payment == null)
             {
                 return CreateInvalidResponse<GetDesignatedUsersResponse>(Resources.Payment.NotFound);
             }
 
-            var vipLevelIds = payment.VipLevels.Select(x => x.VipLevelId).ToArray();
-            var isAll = payment.PlayerListCondition == PlayerListCondition.All;
-
-            var players = await _playerQueries.GetQueries()
-                .Where(x => payment.PaymentPlayerList.Select(p => p.PlayerCode).Contains(x.PlayerCode))
-                .Where(x =>
-                    x.AccumulatedDeposit > payment.DepositedAmountMin &&
-                    (payment.DepositedAmountUnlimited || x.AccumulatedDeposit < payment.DepositedAmountMax))
-                .Where(isAll && payment.IdentityAuthentication,
-                    x => x.IdentityAuthentication)
-                .Where(isAll && payment.PhoneAuthentication,
-                    x => x.PhoneAuthentication)
-                .Where(isAll && payment.VipLevels.Count > 0,
-                    x => vipLevelIds.Contains(x.VipId.Value))
-                .Select(x => x.RealName)
-                .ToArrayAsync();
+            var players = GetDesignatedUsersAsync(payment);
 
             return new GetDesignatedUsersResponse
             {
                 Valid = true,
                 Players = players
             };
+        }
+
+        private static string[] GetDesignatedUsersAsync(Core.DataServices.Models.Payment payment)
+        {
+            var vipLevelIds = payment.VipLevels.Select(x => x.VipLevelId).ToArray();
+            var playerCodes = payment.PaymentPlayerList.Where(x => x.ListType == PlayerListType.White)
+                .Select(p => p.PlayerCode).ToArray();
+            var isAll = payment.PlayerListCondition == PlayerListCondition.All;
+
+            return payment.PaymentPlayerList
+                .Where(x => playerCodes.Contains(x.PlayerCode))
+                .Where(x =>
+                    x.Player.AccumulatedDeposit >= payment.DepositedAmountMin &&
+                    (payment.DepositedAmountUnlimited || x.Player.AccumulatedDeposit < payment.DepositedAmountMax))
+                .Where(isAll && payment.IdentityAuthentication,
+                    x => x.Player.IdentityAuthentication)
+                .Where(isAll && payment.PhoneAuthentication,
+                    x => x.Player.PhoneAuthentication)
+                .Where(isAll && payment.VipLevels.Any(),
+                    x => x.Player.VipId != null && vipLevelIds.Contains(x.Player.VipId.Value))
+                .Select(x => x.Player.RealName).ToArray();
         }
     }
 }
