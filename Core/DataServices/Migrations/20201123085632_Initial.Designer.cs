@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201123031929_Initial")]
+    [Migration("20201123085632_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -652,7 +652,7 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllPlayers")
+                    b.Property<bool>("AllPlayer")
                         .HasColumnType("bit");
 
                     b.Property<string>("ChannelName")
@@ -744,7 +744,7 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AfterAllPlayers")
+                    b.Property<bool>("AfterAllPlayer")
                         .HasColumnType("bit");
 
                     b.Property<string>("AfterChannelName")
@@ -778,7 +778,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<decimal>("AfterTransferLimitTo")
                         .HasColumnType("decimal(18,6)");
 
-                    b.Property<bool>("BeforeAllPlayers")
+                    b.Property<bool>("BeforeAllPlayer")
                         .HasColumnType("bit");
 
                     b.Property<string>("BeforeChannelName")
@@ -825,7 +825,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(4000)");
 
                     b.HasKey("Id");

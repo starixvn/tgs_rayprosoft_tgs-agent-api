@@ -23,8 +23,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public decimal AfterTransferLimitTo { get; set; }
         public PlayerListCondition BeforePlayerListCondition { get; set; }
         public PlayerListCondition AfterPlayerListCondition { get; set; }
-        public bool BeforeAllPlayers { get; set; }
-        public bool AfterAllPlayers { get; set; }
+        public bool BeforeAllPlayer { get; set; }
+        public bool AfterAllPlayer { get; set; }
         public bool BeforeIdentityAuthentication { get; set; }
         public bool AfterIdentityAuthentication { get; set; }
         public bool BeforePhoneAuthentication { get; set; }
