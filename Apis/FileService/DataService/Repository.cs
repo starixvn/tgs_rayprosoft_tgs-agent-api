@@ -36,13 +36,13 @@ namespace TGS.Apis.FileService.DataService
             return Collection.InsertOneAsync(_clientSessionHandle, obj);
         }
 
-        public async Task UpdateAsync(T obj)
+        public Task UpdateAsync(T obj)
         {
             Expression<Func<T, string>> func = f => f.Id;
             var value = (string) obj.GetType().GetProperty(func.Body.ToString().Split(".")[1])?.GetValue(obj, null);
             var filter = Builders<T>.Filter.Eq(func, value);
 
-            await Collection.ReplaceOneAsync(_clientSessionHandle, filter, obj);
+            return Collection.ReplaceOneAsync(_clientSessionHandle, filter, obj);
         }
 
         public Task DeleteAsync(string id)

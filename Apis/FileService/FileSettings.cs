@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.FileService
 {
-    public class FileSetting
+    public class FileSettings
     {
         public string Url { get; set; }
         public string Path { get; set; }
