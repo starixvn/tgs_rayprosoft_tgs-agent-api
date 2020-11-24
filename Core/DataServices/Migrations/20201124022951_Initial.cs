@@ -147,7 +147,7 @@ namespace TGS.Core.DataServices.Migrations
                     AfterDepositedAmountMin = table.Column<decimal>("decimal(18,6)", nullable: false),
                     BeforeDepositedAmountMax = table.Column<decimal>("decimal(18,6)", nullable: false),
                     AfterDepositedAmountMax = table.Column<decimal>("decimal(18,6)", nullable: false),
-                    Reason = table.Column<string>("nvarchar(4000)", nullable: false),
+                    Reason = table.Column<string>("nvarchar(4000)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
                     CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
                     Operation = table.Column<short>("smallint", nullable: false)
