@@ -3,7 +3,7 @@ import { css, Stack, Heading, Box, Button } from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "./menu"
-import { EditDisclosure } from "../../dialog/Disclosure"
+import { Disclosure } from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
@@ -19,7 +19,9 @@ export const EditPresetButton = ({ record, onSubmitted, ...props }) => {
 
   return (
     <>
-      <EditDisclosure />
+      <Disclosure>
+        <Trans zh="预设维护" en="Preset Maintenance" />
+      </Disclosure>
       {dialog.visible && (
         <EditDialog record={record} onSubmitted={onSubmitted} dialog={dialog} />
       )}

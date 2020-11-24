@@ -27,8 +27,6 @@ import {
 } from "bumbag"
 import InputField from "../input/Field"
 
-//TODO:
-// 1. inputRefs = []
 export const FieldGroup = ({
   names = [],
   type = "number",
@@ -40,7 +38,6 @@ export const FieldGroup = ({
   size = "small",
   inputFieldProps = {},
   separator: Separator = Button,
-  separatorProps = {},
   ...props
 }) => {
   return (
@@ -53,25 +50,25 @@ export const FieldGroup = ({
         let isMinList = Array.isArray(min)
         let isMaxList = Array.isArray(max)
         return (
-          <Fragment key={index}>
-            <InputField
-              key={name}
-              name={name}
-              type={type}
-              required={isRequiredList ? required[index] : required}
-              disabled={isDisabledList ? disabled[index] : disabled}
-              min={isMinList ? min[index] : min}
-              max={isMaxList ? max[index] : max}
-              size={size}
-              flex="1"
-              {...inputFieldProps}
-            />
-            {hasNext && (
-              <Separator isStatic size={size} {...separatorProps}>
-                -
-              </Separator>
-            )}
-          </Fragment>
+          <InputField
+            key={name}
+            name={name}
+            type={type}
+            required={isRequiredList ? required[index] : required}
+            disabled={isDisabledList ? disabled[index] : disabled}
+            min={isMinList ? min[index] : min}
+            max={isMaxList ? max[index] : max}
+            size={size}
+            flex={hasNext ? "1.1" : "1"}
+            addonAfter={
+              hasNext && (
+                <Separator isStatic size={size} borderRadius="0">
+                  -
+                </Separator>
+              )
+            }
+            {...inputFieldProps}
+          />
         )
       })}
     </Group>

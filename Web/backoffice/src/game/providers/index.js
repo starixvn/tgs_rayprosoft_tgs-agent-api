@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
 import { Formik, Form, Field } from "formik"
-import { Heading, Stack, Button, InputField, Set, Text } from "bumbag"
+import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -15,6 +15,12 @@ import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { useProviderList } from "./client"
+import { useFormattedTimeString } from "../../date/format"
+import { useFormattedDay } from "../../date/week"
+import formatISO from "date-fns/fp/formatISO"
+import { StatusMenu } from "./status"
+import { EditButton } from "./edit"
+import { EditPresetButton } from "./maintenance"
 
 export { Code }
 
@@ -36,6 +42,20 @@ const Body = () => {
   })
   let { pageIndex, pageSize, name } = state
   let { data, isLoading, mutate } = useProviderList(toApiParams(state))
+
+  //TODO: rm test data
+  data = {
+    totalCount: 1,
+    items: [
+      {
+        id: "xxx",
+        name: "PT",
+        day: 0,
+        start: formatISO(new Date()),
+        end: formatISO(new Date())
+      }
+    ]
+  }
 
   let columns = useColumns({ items: data?.items, mutate })
 
@@ -140,7 +160,16 @@ const useColumns = ({ items = [], mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        return <Stack>TODO</Stack>
+        //TODO: rm test data
+        let { day, start, end } = value
+
+        return (
+          <Text.Block whiteSpace="nowrap">
+            {`${useFormattedDay()} ${useFormattedTimeString(
+              start
+            )} - ${useFormattedTimeString(end)}`}
+          </Text.Block>
+        )
       }
     },
     {
@@ -154,7 +183,11 @@ const useColumns = ({ items = [], mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        return <Stack>TODO</Stack>
+        return (
+          <Box alignX="center">
+            <StatusMenu value={value} />
+          </Box>
+        )
       }
     }
   ]
@@ -178,7 +211,8 @@ const useColumns = ({ items = [], mutate }) => {
       Cell: ({ value }) => {
         return (
           <Set orientation="vertical" alignX="center">
-            TODO
+            <EditButton record={value} onSubmitted={mutate} />
+            <EditPresetButton />
           </Set>
         )
       }

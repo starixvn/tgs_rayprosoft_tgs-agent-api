@@ -74,11 +74,12 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
   let {
     data = {},
     isLoading: isLoadingPayment,
-    error: getPaymentDataError
+    error: getPaymentDataError,
+    deleteCache: deleteGetPaymentCache
   } = usePayment(record?.id)
 
   let [submitData, setSubmit] = useState()
-  let { result, isLoading, error, deleteCache } = useUpdatePayment(
+  let { result, isLoading, error, mutate } = useUpdatePayment(
     record.id,
     submitData
   )
@@ -108,11 +109,13 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
         isLoading={isLoading}
         error={error}
         onCloseErrorAlert={() => {
-          console.log("deleteCache")
-          deleteCache()
           setSubmit(undefined)
+          mutate(undefined, false)
         }}
-        onSubmitted={onSubmitted}
+        onSubmitted={() => {
+          deleteGetPaymentCache()
+          onSubmitted && onSubmitted()
+        }}
         footer={
           <ConfirmButtonFooter
             alignX="center"

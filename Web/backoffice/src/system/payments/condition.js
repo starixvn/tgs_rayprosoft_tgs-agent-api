@@ -58,7 +58,7 @@ const VipLevelsTrans = {
 export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
   let {
     playerListCondition,
-    allPlayer,
+    allPlayers,
     depositedAmountMin,
     depositedAmountMax,
     depositedAmountUnlimited,
@@ -73,7 +73,7 @@ export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
       : useTrans(AllTrans)
 
   let details = [
-    allPlayer ? useTrans(AllPlayerTrans) : "",
+    allPlayers ? useTrans(AllPlayerTrans) : "",
     `${useTrans(AccumulatedDepositTrans)} ${depositedAmountMin} - ${
       depositedAmountUnlimited ? useTrans(UnlimitedTrans) : depositedAmountMax
     }`,
@@ -108,7 +108,7 @@ export const RadioGroupField = ({ ...props }) => {
 
 export const AllPlayerText = () => <Trans {...AllPlayerTrans} />
 
-export const AllPlayerSwitchField = ({ name = "allPlayer", ...props }) => {
+export const AllPlayerSwitchField = ({ name = "allPlayers", ...props }) => {
   return <Field name={name} component={SwitchField.Formik} {...props} />
 }
 
