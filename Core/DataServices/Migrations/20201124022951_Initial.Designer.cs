@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201123085632_Initial")]
+    [Migration("20201124022951_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -652,7 +652,7 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllPlayer")
+                    b.Property<bool>("AllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("ChannelName")
@@ -744,7 +744,7 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AfterAllPlayer")
+                    b.Property<bool>("AfterAllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("AfterChannelName")
@@ -778,7 +778,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<decimal>("AfterTransferLimitTo")
                         .HasColumnType("decimal(18,6)");
 
-                    b.Property<bool>("BeforeAllPlayer")
+                    b.Property<bool>("BeforeAllPlayers")
                         .HasColumnType("bit");
 
                     b.Property<string>("BeforeChannelName")

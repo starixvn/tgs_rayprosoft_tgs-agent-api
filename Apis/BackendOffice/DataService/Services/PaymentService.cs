@@ -42,7 +42,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 TransferLimitFrom = request.TransferLimitFrom,
                 TransferLimitTo = request.TransferLimitTo,
                 PlayerListCondition = request.PlayerListCondition,
-                AllPlayer = request.AllPlayer,
+                AllPlayers = request.AllPlayers,
                 IdentityAuthentication = request.IdentityAuthentication,
                 PhoneAuthentication = request.PhoneAuthentication,
                 DepositedAmountUnlimited = request.DepositedAmountUnlimited,
@@ -87,7 +87,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 TransferLimitFrom = payment.TransferLimitFrom,
                 TransferLimitTo = payment.TransferLimitTo,
                 PlayerListCondition = payment.PlayerListCondition,
-                AllPlayer = payment.AllPlayer,
+                AllPlayers = payment.AllPlayers,
                 IdentityAuthentication = payment.IdentityAuthentication,
                 PhoneAuthentication = payment.PhoneAuthentication,
                 DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
@@ -99,7 +99,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.TransferLimitFrom = request.TransferLimitFrom;
             payment.TransferLimitTo = request.TransferLimitTo;
             payment.PlayerListCondition = request.PlayerListCondition;
-            payment.AllPlayer = request.AllPlayer;
+            payment.AllPlayers = request.AllPlayers;
             payment.IdentityAuthentication = request.IdentityAuthentication;
             payment.PhoneAuthentication = request.PhoneAuthentication;
             payment.DepositedAmountUnlimited = request.DepositedAmountUnlimited;
@@ -192,8 +192,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 AfterTransferLimitTo = payment.TransferLimitTo,
                 BeforePlayerListCondition = beforePayment.PlayerListCondition,
                 AfterPlayerListCondition = payment.PlayerListCondition,
-                BeforeAllPlayer = beforePayment.AllPlayer,
-                AfterAllPlayer = payment.AllPlayer,
+                BeforeAllPlayers = beforePayment.AllPlayers,
+                AfterAllPlayers = payment.AllPlayers,
                 BeforeIdentityAuthentication = beforePayment.IdentityAuthentication,
                 AfterIdentityAuthentication = payment.IdentityAuthentication,
                 BeforePhoneAuthentication = beforePayment.PhoneAuthentication,

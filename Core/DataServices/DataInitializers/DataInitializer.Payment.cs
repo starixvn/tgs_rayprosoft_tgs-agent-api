@@ -124,7 +124,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     TransferLimitFrom = 10,
                     TransferLimitTo = 100000,
                     PlayerListCondition = PlayerListCondition.All,
-                    AllPlayer = true,
+                    AllPlayers = true,
                     IdentityAuthentication = true,
                     PhoneAuthentication = true,
                     DepositedAmountUnlimited = true,

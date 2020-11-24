@@ -13,7 +13,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
         public PlayerListCondition PlayerListCondition { get; set; }
-        public bool AllPlayer { get; set; }
+        public bool AllPlayers { get; set; }
         public bool IdentityAuthentication { get; set; }
         public bool PhoneAuthentication { get; set; }
         public bool DepositedAmountUnlimited { get; set; }
