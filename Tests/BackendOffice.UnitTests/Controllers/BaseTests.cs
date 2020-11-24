@@ -3,7 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using TGS.Apis.BackendOffice;
-using TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Tests.TestsCommon;
 
@@ -14,6 +14,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     {
         protected readonly Mock<IHttpContextAccessor> HttpContextAccessorMock = new Mock<IHttpContextAccessor>();
         protected string Username = "admin.enabled";
+
         public virtual void Setup()
         {
             Login();
@@ -45,7 +46,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     new Claim(Consts.UserInfo.UsernameKey, username),
                     new Claim(Consts.UserInfo.RolenameKey, rolename),
                     new Claim(Consts.UserInfo.PortalKey, roleType.ToString())
-                }),
+                })
             });
         }
 

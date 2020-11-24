@@ -6,30 +6,29 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
-using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
+using TGS.Core.Models.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class RoleController : BaseContextController
     {
-        private readonly IBackendOfficeQueries<Role> _roleQueries;
-        private readonly IBackendOfficeQueries<Setting> _settingQueries;
-        private readonly IBackendOfficeCommands<Role> _roleCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ITgsCommands<Role> _roleCommands;
+        private readonly ITgsQueries<Role> _roleQueries;
+        private readonly ITgsQueries<Setting> _settingQueries;
 
         public RoleController(
-            IBackendOfficeQueries<Role> roleQueries,
-            IBackendOfficeQueries<Setting> settingQueries,
-            IBackendOfficeCommands<Role> roleCommands,
+            ITgsQueries<Role> roleQueries,
+            ITgsQueries<Setting> settingQueries,
+            ITgsCommands<Role> roleCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
@@ -39,7 +38,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        [HttpGet, Description("Get roles")]
+        [HttpGet]
+        [Description("Get roles")]
         public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
         {
             return _roleQueries.GetQueries()
@@ -54,12 +54,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                     UpdatedOn = role.UpdatedOn,
                     CreatedByUsername = role.CreatedByUsername,
                     UpdatedByUsername = role.UpdatedByUsername
-
                 })
                 .CreatePagedResponseAsync(request);
         }
 
-        [HttpGet("{roleId}"), Description("Get a role")]
+        [HttpGet("{roleId}")]
+        [Description("Get a role")]
         public async Task<GetRoleResponse> GetSingleAsync(Guid roleId)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
@@ -67,6 +67,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
             }
+
             var roleModel = new RoleModel
             {
                 Id = role.Id,
@@ -87,7 +88,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPut("{roleId}"), Description("Update role")]
+        [HttpPut("{roleId}")]
+        [Description("Update role")]
         public async Task<MessageResponse> UpdateAsync(Guid roleId,
             [FromBody] UpdateRoleRequest request)
         {
@@ -113,7 +115,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpDelete("{roleId}"), Description("Delete a role")]
+        [HttpDelete("{roleId}")]
+        [Description("Delete a role")]
         public async Task<MessageResponse> DeleteAsync(Guid roleId)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, s => s.Include(x => x.Users));
@@ -131,7 +134,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost("{roleId}/copy"), Description("Copy role")]
+        [HttpPost("{roleId}/copy")]
+        [Description("Copy role")]
         public async Task<MessageResponse> CopyAsync(Guid roleId, [FromBody] CopyRoleRequest request)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
@@ -155,7 +159,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost, Description("Create a role")]
+        [HttpPost]
+        [Description("Create a role")]
         public async Task<MessageResponse> CreateAsync([FromBody] CreateRoleRequest request)
         {
             if (await _roleQueries.ExistsAsync(p => p.Name == request.Name))
@@ -173,7 +178,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost("menus"), Description("Get menus")]
+        [HttpPost("menus")]
+        [Description("Get menus")]
         public async Task<GetMenuResponse> GetMenuAsync()
         {
             var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
@@ -221,10 +227,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     var roleMenuLevel2 = SetMenuDisplay(subMenu, roleMenuLevel1?.SubMenus);
 
-                    foreach (var permission in subMenu.SubMenus)
-                    {
-                        SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
-                    }
+                    foreach (var permission in subMenu.SubMenus) SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
                 }
             }
 

@@ -74,5 +74,8 @@ namespace TGS.Core.DataServices
         DbSet<PaymentPlayerList> PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> PaymentAuditLogs { get; set; }
+        DbSet<User> Users { get; set; }
+        DbSet<Role> Roles { get; set; }
+        DbSet<Department> Departments { get; set; }
     }
 }

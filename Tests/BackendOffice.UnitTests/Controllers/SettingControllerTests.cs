@@ -10,19 +10,16 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
-using TGS.Apis.BackendOffice.DataService.Repositories;
-using Resources = TGS.Apis.BackendOffice.Resources;
-using Setting = TGS.Apis.BackendOffice.DataService.Models.Setting;
+using TGS.Apis.BackendOffice.Resources;
+using TGS.Core.DataServices.Base.Interfaces;
+using Setting = TGS.Core.DataServices.Models.Setting;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     public class SettingControllerTests : BaseTests
     {
-        private SettingController _controller;
-        private readonly Mock<IBackendOfficeQueries<Setting>> _queriesMock = new Mock<IBackendOfficeQueries<Setting>>();
-        private readonly Mock<IBackendOfficeCommands<Setting>> _commandsMock = new Mock<IBackendOfficeCommands<Setting>>();
-
         [SetUp]
         public override void Setup()
         {
@@ -32,6 +29,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _commandsMock.Object,
                 HttpContextAccessorMock.Object);
         }
+
+        private SettingController _controller;
+        private readonly Mock<ITgsQueries<Setting>> _queriesMock = new Mock<ITgsQueries<Setting>>();
+        private readonly Mock<ITgsCommands<Setting>> _commandsMock = new Mock<ITgsCommands<Setting>>();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -54,9 +55,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
 
-            var expectedRoles = showAll ?
-                orderedRoles.ToArray() :
-                orderedRoles.Skip(skip).Take(take).ToArray();
+            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
@@ -85,7 +84,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var setting = new Fixture().Create<Setting>();
             setting.Key = key;
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
             var response = await _controller.GetSingleAsync(key);
@@ -107,12 +107,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var setting = new Fixture().Create<Setting>();
             setting.Key = key;
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult<Setting>(null));
 
             var response = await _controller.GetSingleAsync(key);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Common.NotFound);
+            response.Message.Should().Be(Common.NotFound);
         }
 
         [Test]
@@ -120,13 +121,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<CreateSettingRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult<Setting>(null));
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
             _commandsMock.Verify(p => p.CreateAsync(It.Is<Setting>(d =>
                 d.Key == request.Key &&
                 d.Value == request.Value &&
@@ -138,14 +141,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<CreateSettingRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(new Setting()));
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Setting.KeyExists);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Setting.KeyExists);
 
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
             _commandsMock.Verify(p => p.CreateAsync(It.Is<Setting>(d =>
                 d.Key == request.Key &&
                 d.Value == request.Value &&
@@ -159,13 +164,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<UpdateSettingRequest>();
             var setting = new Fixture().Create<Setting>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
             var response = await _controller.UpdateAsync(key, request);
             response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Setting>(d =>
                 d.Value == request.Value &&
                 d.Description == request.Description)));
@@ -178,13 +185,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<UpdateSettingRequest>();
             var setting = new Fixture().Create<Setting>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
             var response = await _controller.UpdateAsync(key, request);
             response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Setting>(d =>
                 d.Value == request.Value &&
                 d.Description == request.Description)));
@@ -197,13 +206,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var setting = new Fixture().Create<Setting>();
             setting.Key = key;
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                    It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult(setting));
 
             var response = await _controller.DeleteAsync(key);
             response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(), It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
+                It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()));
             _commandsMock.Verify(p => p.DeleteAsync(It.Is<Setting>(d =>
                 d.Key == key)));
         }
