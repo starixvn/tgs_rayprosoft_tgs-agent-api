@@ -155,6 +155,7 @@ export const Field = ({
 
         return validate && validate(value)
       }}
+      {...props}
     >
       {({ field, form, meta }) => {
         let state = meta.error && meta.touched && "danger"
@@ -173,7 +174,8 @@ export const Field = ({
                 {...props}
               />
             )}
-            {isChildrenFunction && children({ field, form, meta, inputRef })}
+            {isChildrenFunction &&
+              children({ field, form, meta, state, validationText, inputRef })}
           </>
         )
       }}

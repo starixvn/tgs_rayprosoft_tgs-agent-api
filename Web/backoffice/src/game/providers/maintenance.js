@@ -19,7 +19,7 @@ export const EditPresetButton = ({ record, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure>
+      <Disclosure {...dialog}>
         <Trans zh="预设维护" en="Preset Maintenance" />
       </Disclosure>
       {dialog.visible && (
@@ -29,12 +29,21 @@ export const EditPresetButton = ({ record, onSubmitted, ...props }) => {
   )
 }
 
-const EditDialog = ({ record, onSubmitted, dialog }) => {
+const EditDialog = ({ record, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, isLoading, error } = useUpdatePresetMaintenance(
-    record?.id,
-    submitData
-  )
+  let {
+    result,
+    isLoading,
+    error,
+    mutate,
+    deleteCache
+  } = useUpdatePresetMaintenance(record?.id, submitData)
+
+  const reset = () => {
+    deleteCache()
+    mutate(undefined, false)
+    setSubmit(undefined)
+  }
 
   let title = useTrans({
     zh: "预设维护",
@@ -47,16 +56,23 @@ const EditDialog = ({ record, onSubmitted, dialog }) => {
       result={result}
       isLoading={isLoading}
       error={error}
-      onCloseErrorAlert={() => setSubmit(undefined)}
-      onSubmitted={onSubmitted}
+      onCloseErrorAlert={reset}
+      onSubmitted={() => {
+        reset()
+        props?.onSubmitted()
+      }}
       title={title}
       showCloseButton
+      showActionButtons={false}
       dialog={dialog}
       footer={<ConfirmButtonFooter />}
+      maxWidth="unset"
     >
       <EditBody record={record} />
     </FormDialog>
   )
 }
 
-const EditBody = ({}) => {}
+const EditBody = ({ record }) => {
+  return <Box>TODO</Box>
+}

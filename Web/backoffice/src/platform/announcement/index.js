@@ -451,21 +451,17 @@ const useColumns = ({
       },
       Cell: ({ value }) => {
         return (
-          <Box alignX="center">
-            <Set>
-              {tabStatusName === InVerifyName && (
-                <VerifyButton record={value} onSubmitted={mutate} />
-              )}
-              {tabStatusName === EffectiveName && (
-                <EditButton record={value} onSubmitted={mutate} />
-              )}
-              {(tabStatusName === EffectiveName ||
-                tabStatusName === ExpiredName ||
-                tabStatusName === RejectedName) && (
-                <ViewButton record={value} />
-              )}
-            </Set>
-          </Box>
+          <Set alignX="center">
+            {tabStatusName === InVerifyName && (
+              <VerifyButton record={value} onSubmitted={mutate} />
+            )}
+            {tabStatusName === EffectiveName && (
+              <EditButton record={value} onSubmitted={mutate} />
+            )}
+            {(tabStatusName === EffectiveName ||
+              tabStatusName === ExpiredName ||
+              tabStatusName === RejectedName) && <ViewButton record={value} />}
+          </Set>
         )
       }
     })

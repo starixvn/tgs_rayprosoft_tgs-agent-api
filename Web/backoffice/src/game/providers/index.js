@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/core"
-import { Formik, Form, Field } from "formik"
+import { Formik, Form, Field, useFormikContext } from "formik"
 import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -51,8 +51,8 @@ const Body = () => {
         id: "xxx",
         name: "PT",
         day: 0,
-        start: formatISO(new Date()),
-        end: formatISO(new Date())
+        start: "12:00",
+        end: "15:00"
       }
     ]
   }
@@ -160,14 +160,10 @@ const useColumns = ({ items = [], mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        //TODO: rm test data
         let { day, start, end } = value
-
         return (
           <Text.Block whiteSpace="nowrap">
-            {`${useFormattedDay()} ${useFormattedTimeString(
-              start
-            )} - ${useFormattedTimeString(end)}`}
+            {`${useFormattedDay(day)} ${start} - ${end}`}
           </Text.Block>
         )
       }

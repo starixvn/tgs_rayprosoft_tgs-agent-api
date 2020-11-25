@@ -10,7 +10,9 @@ import {
   Textarea,
   TextareaField,
   Input,
-  Set
+  Set,
+  Popover,
+  List
 } from "bumbag"
 import {
   Create as CreateMenu,
@@ -142,7 +144,10 @@ const EditBody = ({ readonly = false, dialog }) => {
 
   useEffect(() => {
     if (Array.isArray(result?.players) && !error) {
-      setFieldValue("assignedAllPlayers", result?.players)
+      setFieldValue(
+        "playerUsernames",
+        result?.players.map((item) => item.username)
+      )
     }
   }, [formData, result])
 
@@ -246,6 +251,26 @@ const EditBody = ({ readonly = false, dialog }) => {
             {error && <Alert {...error} onClickClose={resetFormData} />}
           </>
         )}
+        {readonly &&
+          values.target === DesignatedPlayers &&
+          values.playerUsernames.length > 0 && (
+            <Popover.State>
+              <Popover.Disclosure
+                use={Button}
+                palette="primary"
+                background="primary"
+              >
+                <Trans zh="玩家列表" en="Players" />
+              </Popover.Disclosure>
+              <Popover hasArrow>
+                <List maxHeight="15em" overflow="auto">
+                  {values.playerUsernames.map((name, index) => (
+                    <List.Item key={index}>{name}</List.Item>
+                  ))}
+                </List>
+              </Popover>
+            </Popover.State>
+          )}
       </Set>
 
       <Label name="subject" required={required}>

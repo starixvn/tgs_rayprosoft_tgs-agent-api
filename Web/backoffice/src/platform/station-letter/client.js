@@ -27,5 +27,6 @@ export const useAddStationLetter = (data) => {
 }
 
 export const useStationLetterUpload = (body) => {
-  return usePostFormData(API, body)
+  let url = body ? `${API}/upload` : ""
+  return usePostFormData(url, body)
 }
