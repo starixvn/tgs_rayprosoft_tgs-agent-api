@@ -11,28 +11,28 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
-using TGS.Apis.BackendOffice.Services;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Models.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api")]
     public class AuthenticateController : BaseContextController
     {
-        private readonly IPasswordHandler _passwordHandler;
         private readonly IAntiforgery _antiForgery;
-        private readonly IBackendOfficeQueries<User> _userQueries;
-        private readonly IBackendOfficeCommands<User> _userCommands;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IPasswordHandler _passwordHandler;
+        private readonly ITgsCommands<User> _userCommands;
+        private readonly ITgsQueries<User> _userQueries;
 
         public AuthenticateController(
             IPasswordHandler passwordHandler,
             IAntiforgery antiForgery,
-            IBackendOfficeQueries<User> userQueries,
-            IBackendOfficeCommands<User> userCommands,
+            ITgsQueries<User> userQueries,
+            ITgsCommands<User> userCommands,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
@@ -43,11 +43,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        [AllowAnonymous, IgnoreAntiforgeryToken]
-        [HttpPost("auth"), Description("Authenticate user login")]
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpPost("auth")]
+        [Description("Authenticate user login")]
         public async Task<AuthenticateUserResponse> AuthenticateAsync([FromBody] AuthenticateUserRequest request)
         {
-            var user = await _userQueries.GetSingleAsync(p => p.Username == request.Username, u => u.Include(p => p.Role));
+            var user = await _userQueries.GetSingleAsync(p => p.Username == request.Username,
+                u => u.Include(p => p.Role));
 
             if (user == null)
             {
@@ -83,8 +86,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPost, Route("logout")]
-        public Task LogoutAsync() => HttpContext.SignOutAsync();
+        [HttpPost]
+        [Route("logout")]
+        public Task LogoutAsync()
+        {
+            return HttpContext.SignOutAsync();
+        }
 
         private void SetCsrfToken()
         {
@@ -112,13 +119,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 new Claim(Consts.UserInfo.RolenameKey, user.Role.Name),
                 new Claim(Consts.UserInfo.ResellerKey, user.ResellerId.ToString()),
                 new Claim(Consts.UserInfo.LicenseeKey, user.LicenseeId.ToString()),
-                new Claim(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString()),
+                new Claim(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString())
             };
 
             var authProperties = new AuthenticationProperties
             {
                 ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20),
-                IsPersistent = true,
+                IsPersistent = true
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

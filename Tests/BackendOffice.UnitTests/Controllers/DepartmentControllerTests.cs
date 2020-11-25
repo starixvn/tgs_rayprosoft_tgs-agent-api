@@ -10,21 +10,16 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
-using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
-using Department = TGS.Apis.BackendOffice.DataService.Models.Department;
-using Resources = TGS.Apis.BackendOffice.Resources;
-using User = TGS.Apis.BackendOffice.DataService.Models.User;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     public class DepartmentControllerTests : BaseTests
     {
-        private DepartmentController _controller;
-        private readonly Mock<IBackendOfficeQueries<Department>> _queriesMock = new Mock<IBackendOfficeQueries<Department>>();
-        private readonly Mock<IBackendOfficeCommands<Department>> _commandsMock = new Mock<IBackendOfficeCommands<Department>>();
-
         [SetUp]
         public override void Setup()
         {
@@ -34,6 +29,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _commandsMock.Object,
                 HttpContextAccessorMock.Object);
         }
+
+        private DepartmentController _controller;
+        private readonly Mock<ITgsQueries<Department>> _queriesMock = new Mock<ITgsQueries<Department>>();
+        private readonly Mock<ITgsCommands<Department>> _commandsMock = new Mock<ITgsCommands<Department>>();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -56,9 +55,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.Name);
 
-            var expectedRoles = showAll ?
-                orderedRoles.ToArray() :
-                orderedRoles.Skip(skip).Take(take).ToArray();
+            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
@@ -85,7 +82,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Department.NameExists);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Department.NameExists);
         }
 
         [Test]
@@ -109,7 +106,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var department = CreateDepartmentFixture().Create<Department>();
             var request = new Fixture().Create<DepartmentRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                    It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
@@ -118,7 +116,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(department.Id, request);
 
             response.Valid.Should().BeTrue();
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Department>(r =>
                 r.Name == department.Name)));
         }
@@ -129,7 +128,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var department = CreateDepartmentFixture().Create<Department>();
             var request = new Fixture().Create<DepartmentRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                    It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult<Department>(null));
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
@@ -138,8 +138,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(department.Id, request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Department.NotFound);
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Department.NotFound);
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Department>(r =>
                 r.Name == department.Name)), Times.Never);
         }
@@ -150,7 +151,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var department = CreateDepartmentFixture().Create<Department>();
             var request = new Fixture().Create<DepartmentRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                    It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
@@ -159,8 +161,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(department.Id, request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Department.NameExists);
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Department.NameExists);
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Department>(r =>
                 r.Name == department.Name)), Times.Never);
         }
@@ -171,13 +174,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var department = CreateDepartmentFixture().Create<Department>();
             var departmentId = Guid.NewGuid();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                    It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
             var response = await _controller.DeleteAsync(departmentId);
 
             response.Valid.Should().BeTrue();
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
             _commandsMock.Verify(p => p.DeleteAsync(It.Is<Department>(r =>
                 r.Name == department.Name)));
         }
@@ -189,14 +194,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var department = CreateDepartmentFixture().Create<Department>();
             var departmentId = Guid.NewGuid();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                    It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult<Department>(null));
 
             var response = await _controller.DeleteAsync(departmentId);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Department.NotFound);
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Department.NotFound);
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
             _commandsMock.Verify(p => p.DeleteAsync(It.Is<Department>(r =>
                 r.Name == department.Name)), Times.Never);
         }
@@ -206,16 +213,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var department = CreateDepartmentFixture().Create<Department>();
             var departmentId = Guid.NewGuid();
-            department.Users = new[] { new User() };
+            department.Users = new[] {new User()};
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                    It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
             var response = await _controller.DeleteAsync(departmentId);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.Department.CannotBeDeleted);
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(), It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Department.CannotBeDeleted);
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
+                It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()));
             _commandsMock.Verify(p => p.DeleteAsync(It.Is<Department>(r =>
                 r.Name == department.Name)), Times.Never);
         }
