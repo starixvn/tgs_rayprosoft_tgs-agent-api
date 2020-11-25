@@ -89,6 +89,7 @@ services:
       tgs:
     depends_on:
       - backoffice-api
+      - fileservice-api
 
   backoffice-api:
     build:
@@ -113,6 +114,32 @@ services:
       - sqlserver
       - log-api
       - tgs-api
+
+  fileservice-api:
+    build:
+      context: .
+      dockerfile: Apis/FileService/Dockerfile
+    image: fileservice-api
+    container_name: fileservice-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    networks:
+      tgs:
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.2.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "1qaz2wsx!@"
+    volumes:
+      - ./.docker/mongodb/db:/data/db
+      - ./.docker/mongodb/config:/etc/mongod.conf
+      - ./.docker/mongodb/log:/var/log/mongodb/
+    networks:
+      tgs:
 
   operator-api:
     build:
@@ -221,7 +248,7 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - HOST_TMP_FOLDER=${TMPDIR}
     volumes:
-      - ./.localstack/data:/tmp/localstack
+      - ./.docker/localstack/data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./bin:/docker-entrypoint-initaws.d
 networks:
