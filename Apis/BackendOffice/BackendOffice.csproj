@@ -184,9 +184,5 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DataService\Commands\" />
-  </ItemGroup>
-
 
 </Project>

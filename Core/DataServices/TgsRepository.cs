@@ -58,6 +58,9 @@ namespace TGS.Core.DataServices
         DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
+        DbSet<User> ITgsRepository.Users { get; set; }
+        DbSet<Role> ITgsRepository.Roles { get; set; }
+        DbSet<Department> ITgsRepository.Departments { get; set; }
 
         Task<bool> IBaseRepository.CanConnectionAsync()
         {
@@ -100,7 +103,10 @@ namespace TGS.Core.DataServices
             var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
                             Database.GetPendingMigrations().Any();
 
-            if (isMigrate) await Database.MigrateAsync();
+            if (isMigrate)
+            {
+                await Database.MigrateAsync();
+            }
 
             if (addSeeding)
             {
@@ -164,6 +170,10 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new PaymentPlayerListMap());
             modelBuilder.ApplyConfiguration(new PaymentVipLevelMap());
             modelBuilder.ApplyConfiguration(new PaymentAuditLogMap());
+
+            modelBuilder.ApplyConfiguration(new UserMap());
+            modelBuilder.ApplyConfiguration(new RoleMap());
+            modelBuilder.ApplyConfiguration(new DepartmentMap());
         }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -36,11 +39,16 @@ namespace TGS.Core.DataServices.DataInitializers
             new Dictionary<string, GameProvider>();
 
         private readonly IHashProvider _hashProvider;
-        private readonly IPasswordHandler _passwordHandler;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
         private readonly StringBuilder _logBuilder = new StringBuilder();
+        private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
+
+        private readonly IRole[] _roles =
+        {
+            new AdminRole(), new ResellerAdminRole()
+        };
 
         private readonly VipLevel[] _vipLevels =
         {
@@ -83,6 +91,10 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, _logBuilder);
             await LogSeedingTimeAsync(GeneratePaymentAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateDepartmentsAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateRolesAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateUsersAsync, _logBuilder);
+
 
             timer.Stop();
 
@@ -576,14 +588,14 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             return new LocalizedString[]
             {
-                new ()
+                new()
                 {
                     Context = "GameProvider.Name",
                     Key = gp.Id.ToString(),
                     CultureCode = cultureCode,
                     Translation = gp.Name
                 },
-                new ()
+                new()
                 {
                     Context = "GameProvider.Description",
                     Key = gp.Id.ToString(),
@@ -597,14 +609,14 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             return new LocalizedString[]
             {
-                new ()
+                new()
                 {
                     Context = "Game.Name",
                     Key = g.Id.ToString(),
                     CultureCode = cultureCode,
                     Translation = g.Name
                 },
-                new ()
+                new()
                 {
                     Context = "Game.Description",
                     Key = g.Id.ToString(),
@@ -624,6 +636,94 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 builder.AppendLine($"{getFunc.Method.Name} total spent {timer.ElapsedMilliseconds} ms");
             }
+        }
+
+        private Role[] CreateRoleWithMenus(IRole[] roles)
+        {
+            return roles.Select(role => new Role
+            {
+                Id = role.Id,
+                Name = role.Name,
+                DisplayName = role.Name,
+                Description = role.Description,
+                Status = RoleStatus.Enabled,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                MenuSetting = _jsonSerializationProvider.SerializeToString(GetMenuSettings()),
+                RoleType = role.RoleType
+            }).ToArray();
+        }
+
+        private async Task GenerateRolesAsync()
+        {
+            var roles = CreateRoleWithMenus(_roles);
+            var command = @"
+INSERT INTO [dbo].[Roles]
+    ([Id]
+    ,[RoleType]
+    ,[Name]
+    ,[MenuSetting]
+    ,[DisplayName]
+    ,[Description]
+    ,[Status]
+    ,[CreatedOn]
+    ,[UpdatedOn]
+    ,[CreatedByUsername]
+    ,[UpdatedByUsername])
+VALUES
+    (@id
+    ,@roleType
+    ,@name
+    ,@menuSetting
+    ,@displayName
+    ,@description
+    ,@status
+    ,SYSDATETIMEOFFSET()
+    ,SYSDATETIMEOFFSET()
+    ,@createdByUsername
+    ,@updatedByUsername)
+";
+            foreach (var role in roles)
+            {
+                var args = new[]
+                {
+                    new SqlParameter {ParameterName = "@id", Value = role.Id, DbType = DbType.Guid},
+                    new SqlParameter {ParameterName = "@roleType", Value = (int) role.RoleType, DbType = DbType.Int16},
+                    new SqlParameter {ParameterName = "@name", Value = role.Name, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@displayName", Value = role.Name, DbType = DbType.String},
+
+                    new SqlParameter {ParameterName = "@description", Value = role.DisplayName, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@status", Value = role.Status, DbType = DbType.String},
+                    new SqlParameter
+                        {ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String},
+                    new SqlParameter
+                        {ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String}
+                };
+
+                await _repository.ExecuteSqlCommandAsync(command, CommandType.Text, parameters: args);
+            }
+        }
+
+        private Task GenerateUsersAsync()
+        {
+            string[] usernames =
+            {
+                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng", "rico.lin"
+            };
+
+            var users = new List<User>
+            {
+                CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin, Departments[MarketDepartment]),
+                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment])
+            };
+
+            users.AddRange(usernames.Select(username =>
+                CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
+
+            return _repository.BulkInsertAsync(users);
         }
     }
 

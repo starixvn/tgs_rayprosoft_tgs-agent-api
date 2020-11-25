@@ -68,3 +68,8 @@ export const usePaymentLogs = (id) => {
   let url = id ? `${API}/${id}/auditLogs` : ""
   return useGet(url)
 }
+
+export const usePaymentDesignatedUsers = (id) => {
+  let url = id ? `${API}/${id}/designatedUsers` : ""
+  return useGet(url)
+}

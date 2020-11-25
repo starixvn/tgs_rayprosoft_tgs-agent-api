@@ -12,27 +12,17 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
-using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
-using Department = TGS.Apis.BackendOffice.DataService.Models.Department;
-using Resources = TGS.Apis.BackendOffice.Resources;
-using Role = TGS.Apis.BackendOffice.DataService.Models.Role;
-using User = TGS.Apis.BackendOffice.DataService.Models.User;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
-    [TestFixture, Parallelizable]
+    [TestFixture]
+    [Parallelizable]
     public class AuthenticateControllerTests : BaseTests
     {
-        private AuthenticateController _controller;
-        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new Mock<IPasswordHandler>();
-        private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
-        private readonly Mock<IBackendOfficeQueries<User>> _userQueriesMock = new Mock<IBackendOfficeQueries<User>>();
-        private readonly Mock<IBackendOfficeCommands<User>> _userCommandsMock = new Mock<IBackendOfficeCommands<User>>();
-        private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock = new Mock<IJsonSerializationProvider>();
-
         [SetUp]
         public override void Setup()
         {
@@ -46,6 +36,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 HttpContextAccessorMock.Object);
         }
 
+        private AuthenticateController _controller;
+        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new Mock<IPasswordHandler>();
+        private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
+        private readonly Mock<ITgsQueries<User>> _userQueriesMock = new Mock<ITgsQueries<User>>();
+        private readonly Mock<ITgsCommands<User>> _userCommandsMock = new Mock<ITgsCommands<User>>();
+
+        private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock =
+            new Mock<IJsonSerializationProvider>();
+
         [Test]
         public async Task Cannot_Authenticate_User_Not_Found()
         {
@@ -55,12 +54,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Password = Generator.RandomString(6)
             };
 
-            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
+            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
+                    It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult<User>(null));
 
             var response = await _controller.AuthenticateAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.User.NotFound);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.User.NotFound);
         }
 
         [Test]
@@ -74,7 +74,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var user = CreateUserFixture().Create<User>();
 
-            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
+            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
+                    It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
             _passwordHandlerMock.Setup(p => p.Verify(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
@@ -82,7 +83,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.AuthenticateAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Resources.User.InvalidPassword);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.User.InvalidPassword);
         }
 
         [Test]
@@ -96,7 +97,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var user = CreateUserFixture().Create<User>();
 
-            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
+            _userQueriesMock.Setup(u => u.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
+                    It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
                 .Returns(Task.FromResult(user));
 
             _passwordHandlerMock.Setup(p => p.Verify(It.IsAny<byte[]>(), It.IsAny<byte[]>(), It.IsAny<string>()))
@@ -120,7 +122,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             SetupHttpContext();
             await _controller.LogoutAsync();
-            _authServiceMock.Verify(p => p.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()));
+            _authServiceMock.Verify(p =>
+                p.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()));
         }
 
         private void SetupHttpContext()
@@ -151,11 +154,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             _authServiceMock = new Mock<IAuthenticationService>();
             _authServiceMock
-                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(),
+                    It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
             _authServiceMock
-                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
+                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
             var serviceProviderMock = new Mock<IServiceProvider>();
@@ -169,8 +174,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<User>(u => u
-                .With(s => s.Role, new Role { Name = Generator.RandomString(5) })
-                .With(p => p.Department, new Department { Name = Generator.RandomString(5) }));
+                .With(s => s.Role, new Role {Name = Generator.RandomString(5)})
+                .With(p => p.Department, new Department {Name = Generator.RandomString(5)}));
             return fixture;
         }
     }

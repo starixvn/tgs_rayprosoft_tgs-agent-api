@@ -140,6 +140,39 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("Currencies", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Department", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.Game", b =>
                 {
                     b.Property<Guid>("Id")
@@ -707,7 +740,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<decimal>("TransferLimitFrom")
@@ -824,7 +856,6 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(4000)");
 
                     b.HasKey("Id");
@@ -1264,6 +1295,51 @@ namespace TGS.Core.DataServices.Migrations
                     b.ToTable("ResellerLanguages", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MenuSetting")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<byte>("RoleType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.Setting", b =>
                 {
                     b.Property<string>("Key")
@@ -1358,6 +1434,78 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasIndex("PlayerCode");
 
                     b.ToTable("StationLetterPlayers", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LastLoginIp")
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset?>("LastLoginTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("LicenseeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
+
+                    b.Property<Guid?>("ResellerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("RoleType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("TimeZone")
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Users", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.VipLevel", b =>
@@ -1940,6 +2088,25 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("StationLetter");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.User", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.Department", "Department")
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Models.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.Wallet", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.Currency", "Currency")
@@ -1992,6 +2159,11 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("LicenseeCurrencies");
 
                     b.Navigation("ResellerCurrencies");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Department", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Game", b =>
@@ -2096,6 +2268,11 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("Languages");
 
                     b.Navigation("Licensees");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.StationLetter", b =>

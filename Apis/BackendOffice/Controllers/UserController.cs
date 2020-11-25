@@ -1,37 +1,35 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-
     [Route("api/users")]
     [ApiController]
     public class UserController : BaseContextController
     {
+        private readonly ITgsQueries<Department> _departmentQueries;
         private readonly IPasswordHandler _passwordHandler;
-        private readonly IBackendOfficeQueries<User> _userQueries;
-        private readonly IBackendOfficeQueries<Department> _departmentQueries;
-        private readonly IBackendOfficeQueries<Role> _roleQueries;
-        private readonly IBackendOfficeCommands<User> _userCommands;
+        private readonly ITgsQueries<Role> _roleQueries;
+        private readonly ITgsCommands<User> _userCommands;
+        private readonly ITgsQueries<User> _userQueries;
 
         public UserController(
             IPasswordHandler passwordHandler,
-            IBackendOfficeQueries<User> userQueries,
-            IBackendOfficeQueries<Department> departmentQueries,
-            IBackendOfficeQueries<Role> roleQueries,
-            IBackendOfficeCommands<User> userCommands,
+            ITgsQueries<User> userQueries,
+            ITgsQueries<Department> departmentQueries,
+            ITgsQueries<Role> roleQueries,
+            ITgsCommands<User> userCommands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _passwordHandler = passwordHandler;
@@ -42,7 +40,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("")]
-        [HttpGet, Description("Get users")]
+        [HttpGet]
+        [Description("Get users")]
         public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request)
         {
             return _userQueries.GetQueries()
@@ -60,13 +59,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                     LastLoginTime = user.LastLoginTime,
                     Status = user.Status.ToString(),
                     CreatedOn = user.CreatedOn
-
                 })
                 .CreatePagedResponseAsync(request);
         }
 
         [Route("")]
-        [HttpPost, Description("Create a user")]
+        [HttpPost]
+        [Description("Create a user")]
         public async Task<MessageResponse> CreateAsync([FromBody] CreateUserRequest request)
         {
             if (await _userQueries.ExistsAsync(p => p.Username == request.Username))
@@ -105,7 +104,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut("{userId}"), Description("Update a user")]
+        [HttpPut("{userId}")]
+        [Description("Update a user")]
         public async Task<MessageResponse> UpdateAsync(Guid userId, [FromBody] UpdateUserRequest request)
         {
             var user = await _userQueries.GetSingleAsync(p => p.Id == userId);
@@ -119,7 +119,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
-            
+
             if (await _departmentQueries.GetSingleAsync(p => p.Id == request.DepartmentId) == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
@@ -136,7 +136,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut("{userId}/password"), Description("Update user password")]
+        [HttpPut("{userId}/password")]
+        [Description("Update user password")]
         public async Task<MessageResponse> UpdatePasswordAsync(Guid userId, [FromBody] UpdatePasswordRequest request)
         {
             var user = await _userQueries.GetSingleAsync(p => p.Id == userId);

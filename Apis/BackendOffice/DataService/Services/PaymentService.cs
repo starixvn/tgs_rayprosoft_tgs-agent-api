@@ -55,9 +55,9 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            var whitelist = await GeneratePaymentPlayerList(paymentId, request.Whitelist);
+            var whitelist = await GeneratePaymentPlayerList(paymentId, request.Whitelist, PlayerListType.White);
 
-            var blacklist = await GeneratePaymentPlayerList(paymentId, request.Blacklist);
+            var blacklist = await GeneratePaymentPlayerList(paymentId, request.Blacklist, PlayerListType.Black);
 
             var playerList = whitelist.Union(blacklist);
 
@@ -80,12 +80,20 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username)
         {
-            var beforePayment =
-                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
-                {
-                    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                }));
+            var beforePayment = new Payment
+            {
+                ChannelName = payment.ChannelName,
+                PaymentStatus = payment.PaymentStatus,
+                TransferLimitFrom = payment.TransferLimitFrom,
+                TransferLimitTo = payment.TransferLimitTo,
+                PlayerListCondition = payment.PlayerListCondition,
+                AllPlayers = payment.AllPlayers,
+                IdentityAuthentication = payment.IdentityAuthentication,
+                PhoneAuthentication = payment.PhoneAuthentication,
+                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                DepositedAmountMin = payment.DepositedAmountMin,
+                DepositedAmountMax = payment.DepositedAmountMax
+            };
 
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
@@ -107,8 +115,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             await _repository.SaveChangesAsync();
 
-            var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist);
-            var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist);
+            var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist, PlayerListType.White);
+            var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist, PlayerListType.Black);
             var playerList = whitelist.Union(blacklist).ToArray();
 
             payment.PaymentPlayerList = new HashSet<PaymentPlayerList>(playerList);
@@ -152,7 +160,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await _repository.SaveChangesAsync();
         }
 
-        private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list)
+        private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
+            PlayerListType playerListType)
         {
             var playerWhitelist = list != null
                 ? await _repository.Players.Where(x => list.Contains(x.Username))
@@ -160,7 +169,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 : Array.Empty<Player>();
             return playerWhitelist.Select(player => new PaymentPlayerList
             {
-                ListType = PlayerListType.White,
+                ListType = playerListType,
                 PaymentId = paymentId,
                 PlayerCode = player.PlayerCode,
                 Player = player

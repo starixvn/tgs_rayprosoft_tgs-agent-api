@@ -146,7 +146,10 @@ export const Field = ({
     <_Field
       name={name}
       validate={(value) => {
-        if (required && !value) {
+        if (
+          required &&
+          (value === undefined || value === null || value === "")
+        ) {
           return requiredField()
         }
 

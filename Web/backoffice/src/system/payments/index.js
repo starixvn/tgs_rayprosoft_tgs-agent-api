@@ -12,7 +12,8 @@ import {
   Input,
   Link,
   Dialog,
-  Card
+  Card,
+  List
 } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -29,25 +30,25 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import {
   Field as StatusSelectField,
-  Label as StatusLabel,
-  from as toStatus,
   ToggleButton as StatusToggleButton
 } from "./status"
-import { Type as TransferType, from as transferTypeFrom } from "./transfer"
-import { useChangePaymentOrders, usePaymentList } from "./client"
-import { View as ViewMenu, Update as UpdateMenu } from "./menu"
+import { Type as TransferType } from "./transfer"
 import {
-  AddButton as AddVendorButton,
-  AddMethodButton,
-  AddChannelButton
-} from "./vendor/edit"
+  useChangePaymentOrders,
+  usePaymentList,
+  usePaymentDesignatedUsers
+} from "./client"
+import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import Disclosure from "../../dialog/Disclosure"
-import { Modal, useModalState } from "../../dialog/Modal"
+import { useModalState } from "../../dialog/Modal"
 import { CloseText } from "../../button/ActionButtons"
 import { Detail as ConditionDetail } from "./condition"
 import { EditButton } from "./edit"
 import { EditButton as FeeEditButton } from "./handlingfee"
 import { ViewButton as LogsButton } from "./logs"
+import LoadingBackdrop from "../../dialog/LoadingBackdrop"
+import Alert from "../../dialog/Alert"
+import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
 
 export { Code }
 
@@ -374,14 +375,7 @@ const useColumns = ({
         textAlign: "center",
         whiteSpace: "nowrap"
       },
-      Cell: ({ value }) => {
-        let { designatedUsers } = value
-        if (!designatedUsers) {
-          return <Trans zh="无" en="None" />
-        }
-
-        return <DesignatedUsersLink />
-      }
+      Cell: ({ value }) => <DesignatedPlayersLink record={value} />
     },
     {
       id: "limit",
@@ -463,42 +457,3 @@ const searchInputPlaceHolder = () =>
     zh: "关键字搜索",
     en: "Search..."
   })
-
-const DesignatedUsersLink = ({}) => {
-  let dialog = useModalState()
-
-  let title = useTrans({
-    zh: "特定用户",
-    en: "Designated Users"
-  })
-  //TODO: fetch users API
-  let users = []
-  return (
-    <>
-      <Disclosure use={Link} {...dialog}>
-        <Trans zh="有" en="Users" />
-      </Disclosure>
-      {dialog.visible && (
-        <Dialog.Modal
-          title={title}
-          footer={
-            <Box alignX="right" width="100%">
-              <Button onClick={dialog.hide}>
-                <CloseText />
-              </Button>
-            </Box>
-          }
-          {...dialog}
-        >
-          <Card variant="bordered">
-            <Set orientation="vertical" spacing="major-1">
-              {users.map((user) => (
-                <Text.Block>{user}</Text.Block>
-              ))}
-            </Set>
-          </Card>
-        </Dialog.Modal>
-      )}
-    </>
-  )
-}

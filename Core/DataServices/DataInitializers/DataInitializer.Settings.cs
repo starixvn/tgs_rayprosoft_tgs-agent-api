@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Models;
+using TGS.Core.Models.Services;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
@@ -11,12 +12,16 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var options = new JsonSerializerOptions
             {
-                WriteIndented = true,
+                WriteIndented = true
             };
 
-            var settings = new Setting[]
+            var settings = new[]
             {
-                CreateSetting(SettingConsts.GameProviderConfigurations.SBOBET, _jsonSerializationProvider.SerializeToString(SBOConfiguration, options), "JSON based configuration of SBOBET.")
+                CreateSetting(SettingConsts.GameProviderConfigurations.SBOBET,
+                    _jsonSerializationProvider.SerializeToString(SBOConfiguration, options),
+                    "JSON based configuration of SBOBET."),
+                CreateSetting(SettingConsts.Menus, _jsonSerializationProvider.SerializeToString(GetMenuSettings()),
+                    "For menus used")
             };
 
             return _repository.BulkInsertAsync(settings);
@@ -34,6 +39,213 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreatedOn = Now,
                 UpdatedOn = Now
             };
+        }
+
+        private MenuSetting[] GetMenuSettings()
+        {
+            var menus = new[]
+            {
+                new MenuSetting("Platform")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Announcement")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Verify")
+                            }
+                        },
+                        new MenuSetting("StationLetter")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Verify")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("PlayerManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("PlayerList")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("AdminMenagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Currency")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("Language")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("Whitelist")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("View")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Log")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("AdminLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("ServiceLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("ApiLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Report")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("OverReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("GameProviderReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Game")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("GameProviders")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Games")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Agent")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Resellers")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Brands")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("System")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Admins")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Roles")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
+                            }
+                        },
+                        new MenuSetting("Departments")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Delete")
+                            }
+                        },
+                        new MenuSetting("Payments")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                }
+            };
+
+            return menus;
         }
     }
 }
