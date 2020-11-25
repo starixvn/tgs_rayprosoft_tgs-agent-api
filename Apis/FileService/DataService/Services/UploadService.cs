@@ -57,7 +57,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
             await _files.InsertAsync(file);
 
-            return $"{_fileSetting.Value.Url}/{path}";
+            return $"/{path}";
         }
 
         async Task<string> IUploadService.UploadFileS3Async(IFormFile formFile)
