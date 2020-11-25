@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Models
 {
-    // NB: Roles seeding uses explicit sql script to insert roles
-    // because role Id uses Identity feature and EF prevents inserting it as a value
-    // so if properties changed seeding script should be changed accordingly
     public class Department
     {
         public Guid Id { get; set; }
