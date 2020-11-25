@@ -75,6 +75,24 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                "Departments",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    Name = table.Column<string>("nvarchar(50)", nullable: false),
+                    Description = table.Column<string>("nvarchar(128)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Departments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 "GameProviders",
                 schema: "dbo",
                 columns: table => new
@@ -212,6 +230,28 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_Resellers", x => x.Id)
                         .Annotation("SqlServer:Clustered", false);
+                });
+
+            migrationBuilder.CreateTable(
+                "Roles",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    RoleType = table.Column<byte>("tinyint", nullable: false),
+                    Name = table.Column<string>("nvarchar(50)", nullable: false),
+                    DisplayName = table.Column<string>("nvarchar(50)", nullable: true),
+                    MenuSetting = table.Column<string>("nvarchar(4000)", nullable: false),
+                    Description = table.Column<string>("nvarchar(128)", nullable: true),
+                    Status = table.Column<byte>("tinyint", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -568,6 +608,49 @@ namespace TGS.Core.DataServices.Migrations
                         x => x.ResellerId,
                         principalSchema: "dbo",
                         principalTable: "Resellers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                "Users",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    Status = table.Column<byte>("tinyint", nullable: false),
+                    RoleId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    RoleType = table.Column<byte>("tinyint", nullable: false),
+                    DepartmentId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    ResellerId = table.Column<Guid>("uniqueidentifier", nullable: true),
+                    LicenseeId = table.Column<Guid>("uniqueidentifier", nullable: true),
+                    Username = table.Column<string>("nvarchar(50)", nullable: false),
+                    LastLoginIp = table.Column<string>("nvarchar(128)", nullable: true),
+                    LastLoginTime = table.Column<DateTimeOffset>("datetimeoffset", nullable: true),
+                    Name = table.Column<string>("nvarchar(30)", nullable: false),
+                    TimeZone = table.Column<string>("nvarchar(256)", nullable: true),
+                    Password = table.Column<byte[]>("varbinary(128)", nullable: false),
+                    Salt = table.Column<byte[]>("varbinary(128)", nullable: false),
+                    CreatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>("nvarchar(32)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        "FK_Users_Departments_DepartmentId",
+                        x => x.DepartmentId,
+                        principalSchema: "dbo",
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        "FK_Users_Roles_RoleId",
+                        x => x.RoleId,
+                        principalSchema: "dbo",
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1368,6 +1451,18 @@ namespace TGS.Core.DataServices.Migrations
                 column: "PlayerCode");
 
             migrationBuilder.CreateIndex(
+                "IX_Users_DepartmentId",
+                schema: "dbo",
+                table: "Users",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                "IX_Users_RoleId",
+                schema: "dbo",
+                table: "Users",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
                 "IX_Wallets_CurrencyCode",
                 schema: "dbo",
                 table: "Wallets",
@@ -1481,6 +1576,10 @@ namespace TGS.Core.DataServices.Migrations
                 "dbo");
 
             migrationBuilder.DropTable(
+                "Users",
+                "dbo");
+
+            migrationBuilder.DropTable(
                 "Wallets",
                 "dbo");
 
@@ -1502,6 +1601,14 @@ namespace TGS.Core.DataServices.Migrations
 
             migrationBuilder.DropTable(
                 "StationLetters",
+                "dbo");
+
+            migrationBuilder.DropTable(
+                "Departments",
+                "dbo");
+
+            migrationBuilder.DropTable(
+                "Roles",
                 "dbo");
 
             migrationBuilder.DropTable(

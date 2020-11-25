@@ -1,5 +1,5 @@
 ﻿using System;
-using TGS.Apis.BackendOffice.Services;
+using TGS.Core.Models.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
 {

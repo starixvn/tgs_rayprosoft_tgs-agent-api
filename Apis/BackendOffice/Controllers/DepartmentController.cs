@@ -6,32 +6,32 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class DepartmentController : BaseContextController
     {
-        private readonly IBackendOfficeQueries<Department> _queries;
-        private readonly IBackendOfficeCommands<Department> _commands;
+        private readonly ITgsCommands<Department> _commands;
+        private readonly ITgsQueries<Department> _queries;
 
         public DepartmentController(
-            IBackendOfficeQueries<Department> queries,
-            IBackendOfficeCommands<Department> commands,
+            ITgsQueries<Department> queries,
+            ITgsCommands<Department> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
             _commands = commands;
         }
 
-        [HttpGet, Description("Get departments")]
+        [HttpGet]
+        [Description("Get departments")]
         public Task<PagedResponse<DepartmentModel>> GetListAsync([FromQuery] PageableRequest request)
         {
             return _queries.GetQueries()
@@ -43,7 +43,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .CreatePagedResponseAsync(request);
         }
 
-        [HttpPut("{id}"), Description("Update a department")]
+        [HttpPut("{id}")]
+        [Description("Update a department")]
         public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] DepartmentRequest request)
         {
             var department = await _queries.GetSingleAsync(p => p.Id == id);
@@ -65,7 +66,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpDelete("{id}"), Description("Delete a department")]
+        [HttpDelete("{id}")]
+        [Description("Delete a department")]
         public async Task<MessageResponse> DeleteAsync(Guid id)
         {
             var department = await _queries.GetSingleAsync(p => p.Id == id, d => d.Include(x => x.Users));
@@ -84,7 +86,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
 
-        [HttpPost, Description("Create a department")]
+        [HttpPost]
+        [Description("Create a department")]
         public async Task<MessageResponse> CreateAsync([FromBody] DepartmentRequest request)
         {
             if (await _queries.ExistsAsync(p => p.Name == request.Name))
