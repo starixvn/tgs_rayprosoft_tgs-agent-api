@@ -10,12 +10,12 @@ import {
 import { useMenuCodes } from "./user/context"
 import { SideNav } from "bumbag"
 import memoize from "fast-memoize"
-import { codeMenuContentPair as platformPair } from "./platform"
+import { codeMenuContentPair as platformPair } from "./platform-management"
 import {
   Code as PlatformCode,
   nameMessage as PlatformNameMessages,
   codeLabelPair as platformLabelPair
-} from "./platform/menu"
+} from "./platform-management/menu"
 import { codeMenuContentPair as playerManagementPair } from "./player-management"
 import {
   Code as PlayerManagementCode,

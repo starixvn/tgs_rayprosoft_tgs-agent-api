@@ -26,11 +26,7 @@ import {
 import { FieldValues } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 import { Field as InputField } from "../../input/Field"
-import {
-  Field as StatusField,
-  from as toStatus,
-  toString as toStatusString
-} from "../status"
+import { Field as StatusField, Label as StatusValueLabel } from "../status"
 import { Field as VipLevelField } from "../../vip-levels/Select"
 import { Field as _Field, FieldMinHeight } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
@@ -59,52 +55,50 @@ export const EditPanel = ({
     playerCode,
     submitData
   )
+
+  const reset = () => {
+    mutate(undefined, false)
+    setSubmit(undefined)
+  }
+
   useEffect(() => {
     if (result && !error) {
+      reset()
       onSubmitted && onSubmitted()
     }
   }, [result])
 
   const submit = (data = {}) => {
+    console.log("submit", data)
     let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
-    let status = toStatus(data.status)
     setSubmit({
       ...data,
-      hasAgent,
-      status
+      hasAgent
     })
-  }
-
-  const clearResult = () => {
-    setSubmit(null)
   }
 
   let {
     realName = "",
     vipId = "",
     parentUsername = "",
-    status,
+    status = "",
     hasAgent
   } = player
 
   return (
     <TabPanel tabId={Key} {...props}>
-      {error && <AlertDialog {...error} onClickClose={clearResult} />}
+      {error && <AlertDialog {...error} onClickClose={reset} />}
       <Formik
         initialValues={{
           realName: realName ?? "",
           vipId,
           parentUsername: parentUsername ?? "",
-          status: toStatusString(status),
+          status,
           hasAgent: hasAgent.toString()
         }}
         onSubmit={submit}
       >
-        <EditForm
-          player={player}
-          isLoading={isLoading}
-          onClickClose={onClickClose}
-        />
+        <EditForm player={player} isLoading={isLoading} onClickClose={reset} />
       </Formik>
     </TabPanel>
   )
@@ -169,10 +163,7 @@ const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
           </Box>
         </FieldValues>
         <Box alignX="right">
-          <SubmitCancel
-            onClickSubmit={submitForm}
-            onClickCancel={onClickClose}
-          />
+          <SubmitCancel onClickCancel={onClickClose} />
         </Box>
       </Stack>
     </Form>
@@ -226,7 +217,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
 
         <StatusLabel />
         <Box>
-          <StatusLabel value={status} />
+          <StatusValueLabel value={status} />
         </Box>
 
         <AgentLabel />

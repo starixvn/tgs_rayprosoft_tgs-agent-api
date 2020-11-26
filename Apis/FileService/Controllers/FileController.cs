@@ -23,7 +23,7 @@ namespace TGS.Apis.FileService.Controllers
             return new
             {
                 Valid = true,
-                Url = url
+                Location = url
             };
         }
 
@@ -31,10 +31,11 @@ namespace TGS.Apis.FileService.Controllers
         public async Task<dynamic> UploadFileS3Async([FromForm] UploadRequest request)
         {
             var url = await _uploadService.UploadFileS3Async(request.File);
+
             return new
             {
                 Valid = true,
-                Url = url
+                Location = url
             };
         }
     }

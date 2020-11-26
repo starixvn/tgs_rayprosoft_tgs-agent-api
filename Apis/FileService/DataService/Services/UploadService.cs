@@ -90,7 +90,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
             await _files.InsertAsync(file);
 
-            return $"{_awsSettings.Value.S3.ServiceUrl}/{_awsSettings.Value.S3.Bucket}/{randomFileName}";
+            return $"{_awsSettings.Value.ServiceUrl}/{_awsSettings.Value.S3.Bucket}/{randomFileName}";
         }
     }
 }
