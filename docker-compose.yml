@@ -142,7 +142,8 @@ services:
       - ./.docker/mongodb/log:/var/log/mongodb/
     networks:
       tgs:
-
+    ports:
+      - 27017:27017
   operator-api:
     build:
       context: .
@@ -222,6 +223,7 @@ services:
       - "4222"
     ports:
       - "8222:8222"
+      - 4222:4222
     networks:
       tgs:
 
