@@ -69,7 +69,6 @@ export const EditPanel = ({
   }, [result])
 
   const submit = (data = {}) => {
-    console.log("submit", data)
     let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
     setSubmit({
       ...data,

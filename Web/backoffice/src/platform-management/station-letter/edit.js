@@ -102,10 +102,10 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
 
 const DialogCss = css`
   min-width: 65vw;
-  min-height: 65vh;
+  min-height: 80vh;
 
   & .bb-DialogContent {
-    min-height: 65vh;
+    min-height: 80vh;
   }
 
   .tox-fullscreen & {
@@ -163,7 +163,7 @@ const EditBody = ({ readonly = false, dialog }) => {
       selector,
       readonly,
       base_url: "/tinymce",
-      height: readonly ? 200 : 300,
+      height: readonly ? 280 : 380,
       plugins:
         "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
       menubar: "file edit insert view format table upload",
