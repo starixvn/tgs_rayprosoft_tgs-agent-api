@@ -4,7 +4,7 @@ pipeline {
 	//  withDotNet 
     //}
 	tools {
-	   sdk "dotnetsdk"
+	   dotnetsdk
 	}
     stages {
         stage('Checkout SCM') {
