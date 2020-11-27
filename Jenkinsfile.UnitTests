@@ -15,25 +15,19 @@ pipeline {
         }
 		stage('Restore packages'){
 			steps{
-				 withDotNet('dotnetsdk') {
-				 	sh "dotnetRestore tgs.sln"
-				 }
+				sh "dotnet restore tgs.sln"
 				echo "restore tgs.sln"
 			  }
 		}
 		stage('Build') {
 			steps {
-				 withDotNet('dotnetsdk') {
-				 	sh "dotnetBuild tgs.sln"
-				 }
+				sh "dotnet build tgs.sln"
 				echo "build solution"
 			}
 		}
 		stage('Test') {
 			steps {
-				withDotNet('dotnetsdk') {
-					sh  "dotnetTest tgs.sln"  
-				}
+				sh  "dotnet test tgs.sln"  
 				echo "test tgs.sln"
 			}
 		}
