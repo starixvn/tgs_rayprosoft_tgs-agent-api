@@ -45,8 +45,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.HasMany(b => b.Players)
                 .WithOne(b => b.BetLimitGroup)
-                .HasForeignKey(b => b.BetLimitGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(b => b.BetLimitGroupId);
         }
     }
 }

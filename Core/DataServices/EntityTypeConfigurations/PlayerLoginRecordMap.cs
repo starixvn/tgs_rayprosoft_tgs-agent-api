@@ -17,7 +17,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varchar(16))
                 .IsRequired();
 
-            builder.Property(b => b.LicenseeId)
+            builder.Property(b => b.BrandId)
                 .IsRequired();
 
             builder.Property(b => b.Status)
@@ -25,7 +25,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(b => b.PlatformType)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(b => b.CreatedOn)
@@ -41,9 +41,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasForeignKey(b => b.PlayerCode)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(b => b.Licensee)
+            builder.HasOne(b => b.Brand)
                 .WithMany(b => b.PlayerLoginRecords)
-                .HasForeignKey(b => b.LicenseeId)
+                .HasForeignKey(b => b.BrandId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

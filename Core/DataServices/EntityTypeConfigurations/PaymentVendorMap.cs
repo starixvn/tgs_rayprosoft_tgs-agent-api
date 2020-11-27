@@ -23,12 +23,12 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasMany(p => p.PaymentChannels)
                 .WithOne(u => u.PaymentVendor)
                 .HasForeignKey(p => p.PaymentVendorId)
-                .IsRequired().OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(p => p.PaymentMethods)
                 .WithOne(p => p.PaymentVendor)
                 .HasForeignKey(p => p.PaymentVendorId)
-                .IsRequired().OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))

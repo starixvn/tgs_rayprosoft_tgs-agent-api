@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Storage;
-using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
-using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Models.Data;
@@ -30,18 +26,17 @@ namespace TGS.Services.GameOperations.Data
 
     internal sealed partial class GameActionProcessor : IGameActionProcessor
     {
-        private readonly ITransactionSettingsGenerator _transactionSettingsGenerator;
-        private readonly IAmountValidator _amountValidator;
+        private static readonly GameType[] BypassPreviousActionGameTypes = {GameType.Slot};
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
+        private readonly IAmountValidator _amountValidator;
         private readonly IBetValuesCalculator _betValuesCalculator;
+        private readonly IRoundStatusManager _roundStatusManager;
         private readonly IStatusValidator _statusValidator;
         private readonly ITimeZoneManager _timeZoneManager;
-        private readonly IRoundStatusManager _roundStatusManager;
-        private readonly IValidStatus<Status> _validStatus;
+        private readonly ITransactionSettingsGenerator _transactionSettingsGenerator;
         private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IValidStatus<Status> _validStatus;
 
-        private static readonly GameType[] BypassPreviousActionGameTypes = { GameType.Slot };
-        
         public GameActionProcessor(
             ITransactionSettingsGenerator transactionSettingsGenerator,
             IAmountValidator amountValidator,
@@ -77,7 +72,7 @@ namespace TGS.Services.GameOperations.Data
 
                 var result = await HandleGameActionAsync(new GameActionState(trx)
                 {
-                    Db = new (data.Repository, data.Transaction),
+                    Repository = data.Repository,
                     GameProvider = data.GameProvider,
                     GameProviderConfigurationId = betData.GameProviderConfigurationId,
                     BatchId = betData.BatchId,
@@ -104,7 +99,7 @@ namespace TGS.Services.GameOperations.Data
                 CurrencyCode = player.Wallet.CurrencyCode,
                 Transactions = transactionResults.ToArray(),
                 PlatformType = (int) betData.PlatformType,
-                Error = TgsApiError.None,
+                Error = TgsApiError.None
             };
         }
 
@@ -138,7 +133,7 @@ namespace TGS.Services.GameOperations.Data
                 {
                     ExternalTransactionId = s.ExternalTransactionId,
                     InternalTransactionId = ga.Id,
-                    IsDuplicate = false,
+                    IsDuplicate = false
                 },
                 GameAction = ga,
                 ReferencedGameAction = s.ReferencedGameAction,
@@ -150,7 +145,7 @@ namespace TGS.Services.GameOperations.Data
 
         private static async Task<GameActionState> FillRoundDataAsync(GameActionState s)
         {
-            var roundData = await GetRoundByExternalRoundIdAsync(s.Db, s.GameProviderConfigurationId,
+            var roundData = await GetRoundByExternalRoundIdAsync(s.Repository, s.GameProviderConfigurationId,
                 s.PlayerData.Wallet.Id, s.ExternalRoundId);
 
             if (s.MustHaveExistingRound && roundData == null)
@@ -197,18 +192,19 @@ namespace TGS.Services.GameOperations.Data
                 return (s, null);
             }
 
-            var db = s.Db;
+            var repository = s.Repository;
             var gameProviderConfigurationId = s.GameProviderConfigurationId;
             var walletId = s.PlayerData.Wallet.Id;
             var externalRoundId = s.ExternalRoundId;
 
             // get all transactions belonging to this round
             var actionsData =
-                await GetGameActionsInSameRoundAsync(db, gameProviderConfigurationId, walletId, externalRoundId);
+                await GetGameActionsInSameRoundAsync(repository, gameProviderConfigurationId, walletId,
+                    externalRoundId);
 
             if (actionsData.Length == 0 && s.HasExtRefTransactionId)
             {
-                await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(db, externalRoundId,
+                await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repository, externalRoundId,
                     s.ExternalTransactionReferenceId);
                 return (s, null);
             }
@@ -305,7 +301,7 @@ namespace TGS.Services.GameOperations.Data
             SameRoundActionData[] actionsData)
         {
             var amount = s.PrepareAmount(s.Amount);
-            
+
             if (actionsData.Length == 0)
             {
                 return (null, null, amount);
@@ -354,10 +350,11 @@ namespace TGS.Services.GameOperations.Data
             s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
             !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
-        private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId) =>
-            new ()
+        private static GameActionResult
+            GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId) =>
+            new()
             {
-                TransactionResult = new ()
+                TransactionResult = new()
                 {
                     ExternalTransactionId = externalTransactionId,
                     InternalTransactionId = gameActionId,
@@ -384,7 +381,7 @@ namespace TGS.Services.GameOperations.Data
 
         private GameActionState FillEmptyData(GameActionState s)
         {
-            s.NewRoundStatus = _roundStatusManager.GetStatus(new ()
+            s.NewRoundStatus = _roundStatusManager.GetStatus(new()
             {
                 AutoCloseRound = s.AutoCloseRound,
                 RequestToCloseRound = s.RoundClosed,
@@ -443,12 +440,12 @@ namespace TGS.Services.GameOperations.Data
 
         private static Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
         {
-            var db = s.Db;
+            var repository = s.Repository;
             var walletId = s.PlayerData.Wallet.Id;
 
             return s.HasWalletUpdate && s.Amount != 0
-                ? AtomicUpdateBalanceAsync(db, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
-                : GetBalanceAsync(db, walletId);
+                ? AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
+                : GetBalanceAsync(repository, walletId);
         }
 
         private static async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)
@@ -479,19 +476,22 @@ namespace TGS.Services.GameOperations.Data
                 PlatformType = s.PlatformType,
                 WalletId = s.PlayerData.Wallet.Id,
                 CurrencyCode = s.PlayerData.Wallet.CurrencyCode,
+                ResellerId = s.PlayerData.ResellerId,
+                ResellerCode = s.PlayerData.ResellerCode,
                 LicenseeId = s.PlayerData.LicenseeId,
                 LicenseeCode = s.PlayerData.LicenseeCode,
-                LicenseeName = s.PlayerData.LicenseeName,
+                BrandId = s.PlayerData.BrandId,
+                BrandCode = s.PlayerData.BrandCode,
                 CreatedOn = s.UtcNow,
                 UpdatedOn = s.UtcNow,
                 ClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.UtcNow : default(DateTimeOffset?),
                 Status = s.NewRoundStatus == RoundStatus.Closed ? RoundStatus.Closed : RoundStatus.Open,
                 RoundDetail = s.RoundDetail,
                 ExternalCreatedOn = s.Timestamp,
-                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),
+                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?)
             };
 
-            await InsertNewRoundAsync(s.Db, roundData);
+            await InsertNewRoundAsync(s.Repository, roundData);
 
             return roundData.Id;
         }
@@ -503,9 +503,10 @@ namespace TGS.Services.GameOperations.Data
                 Id = s.InternalRoundId.Value,
                 RoundDetail = s.RoundDetail,
                 Commission = s.Commission,
-                UpdatedOn = s.UtcNow,
+                UpdatedOn = s.UtcNow
             };
 
+            // @formatter:off
             if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
             {
                 roundData = roundData with
@@ -527,8 +528,9 @@ namespace TGS.Services.GameOperations.Data
                     IsClosed = true
                 };
             }
+            // @formatter:on
 
-            await UpdateRoundAsync(s.Db, roundData);
+            await UpdateRoundAsync(s.Repository, roundData);
         }
 
         private static async Task<GameActionData> CreateGameActionAsync(GameActionState s, BetActionData current)
@@ -555,16 +557,16 @@ namespace TGS.Services.GameOperations.Data
                 WinLoss = current.WinLoss,
                 UnsettledBets = current.UnsettledBets,
                 IsClosingRound = current.IsClosingRound,
-                ClosingRoundExplicitRequest = current.IsExplicitlyClosingRound ? true :
-                    current.IsExplicitlyNotClosingRound                        ? false : (bool?) null,
-                LicenseeId = player.LicenseeId,
+                ClosingRoundExplicitRequest =
+                    current.IsExplicitlyClosingRound    ? true :
+                    current.IsExplicitlyNotClosingRound ? false : (bool?) null,
                 Amount = s.Amount,
                 Balance = player.Wallet.Balance,
                 BetType = s.BetType,
-                Description = s.Description,
+                Description = s.Description
             };
 
-            await InsertGameActionAsync(s.Db, gameActionData);
+            await InsertGameActionAsync(s.Repository, gameActionData);
 
             return gameActionData;
         }

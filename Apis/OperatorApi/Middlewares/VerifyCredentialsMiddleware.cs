@@ -24,7 +24,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
         }
 
         public async Task InvokeAsync(HttpContext context,
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
             IStatusValidator statusValidator,
             IJwtTokenHandler handler)
         {
@@ -50,8 +50,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new InvalidCredentialsException("Licensee doesn't exist");
             }
 
-            await statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
-            var secretKey = await licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
+            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var secretKey = await brandOperations.GetBrandSecretKeyAsync(licenseeId);
             var signature = $"{licenseeId}:{currency}:{secretKey}";
 
             handler.ValidateToken(token, new TokenValidationParameters
@@ -67,7 +67,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 exception => throw new InvalidCredentialsException(exception.Message),
                 _ => throw new InvalidCredentialsException("token expired"));
 
-            context.Items.Add(Core.Models.Consts.ContextItems.LicenseeId, licenseeId);
+            context.Items.Add(Core.Models.Consts.ContextItems.BrandId, licenseeId);
 
             await _next(context);
         }

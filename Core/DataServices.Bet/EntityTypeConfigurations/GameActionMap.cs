@@ -16,11 +16,6 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.ExternalBetId)
                 .HasColumnType(ColumnTypes.Nvarchar(64));
 
-            builder.HasMany(p => p.FollowUpGameActions)
-                .WithOne(p => p.ReferencedGameAction)
-                .HasForeignKey(p => p.ReferencedGameActionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.Property(c => c.IsClosingRound)
                 .IsRequired();
 
@@ -29,7 +24,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.Type)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.RoundId)
@@ -39,9 +34,6 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.GameProviderConfigurationId)
-                .IsRequired();
-
-            builder.Property(c => c.LicenseeId)
                 .IsRequired();
 
             builder.Property(c => c.RecordedOn)
@@ -93,10 +85,18 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(128));
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
+                .HasColumnType(ColumnTypes.NvarcharMax);
 
             builder.Property(c => c.GameProviderConfigurationId)
                 .IsRequired();
+            
+            builder.HasOne(c => c.Round)
+                .WithMany(c => c.GameActions)
+                .HasForeignKey(c => c.RoundId);
+
+            builder.HasOne(c => c.ReferencedGameAction)
+                .WithMany(c => c.FollowUpGameActions)
+                .HasForeignKey(c => c.ReferencedGameActionId);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace TGS.Core.DataServices.DataInitializers
             ILicensee[] Licensees { get; }           
             ICurrency[] Currencies { get; }
             ILanguage[] Languages { get; }
+            string[] GameProviders { get; }
         }
 
         internal record TgsReseller : IReseller
@@ -42,6 +43,12 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 new CNLanguage(), new USLanguage(), new IDLanguage(),
                 new VNLanguage(), new THLanguage()
+            };
+
+            string[] IReseller.GameProviders => new[]
+            {
+                //Consts.GameProvider.RedTiger,
+                Consts.GameProvider.SBOBET
             };
         }
     }

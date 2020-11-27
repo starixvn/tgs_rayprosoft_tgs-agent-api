@@ -1,4 +1,7 @@
-﻿using System;
+﻿// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
+
+using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -50,6 +53,7 @@ namespace TGS.Core.DataServices.DataInitializers
             PlatformType PlatformType { get; init; }
             bool HasTurnoverOnTieBet { get; init; }
             bool SubGame { get; init; }
+            string AvailableCurrencies { get; init; }
         }
 
         internal interface ICodeMapper
@@ -75,31 +79,24 @@ namespace TGS.Core.DataServices.DataInitializers
 
         internal record Game : IGame
         {
-            private string _code;
-            private string _name;
+            private readonly string _code;
+            private readonly string _availableCurrencies;
 
             public Guid Id => Guid.NewGuid();
 
             [Name("Name")]
-            public string Name
-            {
-                get { return _name; }
-                init { _name = value; }
-            }
+            public string Name { get; init; }
 
             [Name("Code")]
             public string Code
             {
-                get { return _code; }
-                init
-                {
-                    _code = value.IsNotNullOrEmpty() ?
-                                value :
-                                _name.ReplaceApostropheByEmpty()
-                                     .Replace("&", "And")
-                                     .Replace("-", "_")
-                                     .Replace("+", "Plus");
-                }
+                get => _code;
+                init => _code = value.IsNotNullOrEmpty() ?
+                        value :
+                        Name.ReplaceApostropheByEmpty()
+                            .Replace("&", "And")
+                            .Replace("-", "_")
+                            .Replace("+", "Plus");
             }
 
             [Name("ExternalId")]
@@ -125,6 +122,13 @@ namespace TGS.Core.DataServices.DataInitializers
 
             [Name("SubGame")]
             public bool SubGame { get; init; }
+
+            [Name("AvailableCurrencies")]
+            public string AvailableCurrencies
+            {
+                get => _availableCurrencies;
+                init => _availableCurrencies = value.Replace(";", ",");
+            }
         }
 
         #endregion Interfaces and Base Models
@@ -133,13 +137,20 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private static IGame[] LoadGamesFromCsv(string gameProviderCode)
         {
-            const string Namespace = "TGS.Core.DataServices.DataInitializers";
+            const string @namespace = "TGS.Core.DataServices.DataInitializers";
 
             if (gameProviderCode.IsNullOrEmpty())
+            {
                 return null;
+            }
 
-            var csvName = $"{Namespace}.Games.{gameProviderCode}.csv";
+            var csvName = $"{@namespace}.Games.{gameProviderCode}.csv";
             using var stream = typeof(DataInitializer).Assembly.GetManifestResourceStream(csvName);
+            if (stream == null)
+            {
+                throw new FileNotFoundException($"Cannot find game setting file of '{gameProviderCode}'");
+            }
+
             using var reader = new StreamReader(stream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             return csv.GetRecords<Game>().ToList().Cast<IGame>().ToArray();

@@ -13,7 +13,7 @@ BEGIN
     as
     (
         SELECT 
-            p.LicenseeId,
+            p.BrandId,
 	        p.Type,
 	        p.Username,
 	        p.Status,
@@ -26,11 +26,11 @@ BEGIN
     )
     SELECT 
         p.*,
-	    l.Code as [LicenseeCode],
+	    b.Code as [BrandCode],
 	    w.CurrencyCode as [DefaultWalletCurrencyCode],
 	    w.ExternalCurrencyCode
     FROM player p
-	JOIN dbo.[Licensees] l on p.LicenseeId = l.Id 
+	JOIN dbo.[Brands] b on p.BrandId = b.Id 
 	JOIN dbo.[Wallets] w on p.DefaultWalletId = w.Id
 END
 GO
