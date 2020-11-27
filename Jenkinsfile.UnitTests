@@ -1,11 +1,5 @@
 pipeline {
     agent any
-	//environment {
-	//  withDotNet 
-    //}
-	tools {
-	   dotnetsdk 'v1.0.0'
-	}
     stages {
         stage('Checkout SCM') {
           steps {
@@ -21,19 +15,25 @@ pipeline {
         }
 		stage('Restore packages'){
 			steps{
-				sh "dotnetRestore tgs.sln"
+				 withDotNet('dotnetsdk') {
+				 	sh "dotnetRestore tgs.sln"
+				 }
 				echo "restore tgs.sln"
 			  }
 		}
 		stage('Build') {
 			steps {
-				sh "dotnetBuild tgs.sln"
+				 withDotNet('dotnetsdk') {
+				 	sh "dotnetBuild tgs.sln"
+				 }
 				echo "build solution"
 			}
 		}
 		stage('Test') {
 			steps {
-				sh  "dotnetTest tgs.sln"  
+				withDotNet('dotnetsdk') {
+					sh  "dotnetTest tgs.sln"  
+				}
 				echo "test tgs.sln"
 			}
 		}
