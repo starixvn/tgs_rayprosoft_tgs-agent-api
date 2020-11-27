@@ -32,11 +32,11 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class PlayerController : ControllerBase
     {
         private readonly ICaptchaFactory _captchaFactory;
-        private readonly ILicenseeCurrencyCodeMapper _currencyCodeMapper;
+        private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
         private readonly IHashProvider _hashProvider;
         private readonly IJwtTokenHandler _jwtTokenHandler;
-        private readonly ILicenseeLanguageCodeMapper _languageCodeMapper;
-        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IBrandLanguageCodeMapper _languageCodeMapper;
+        private readonly IBrandOperations _brandOperations;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
         private readonly IPlayerQueries _playerQueries;
@@ -47,9 +47,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         public PlayerController(
             IPlayerQueries playerQueries,
             IPlayerOperations playerOperations,
-            ILicenseeOperations licenseeOperations,
-            ILicenseeCurrencyCodeMapper currencyCodeMapper,
-            ILicenseeLanguageCodeMapper languageCodeMapper,
+            IBrandOperations brandOperations,
+            IBrandCurrencyCodeMapper currencyCodeMapper,
+            IBrandLanguageCodeMapper languageCodeMapper,
             ICaptchaFactory captchaFactory,
             IJwtTokenHandler jwtTokenHandler,
             ITokenProvider tokenProvider,
@@ -64,7 +64,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _statusValidator = statusValidator;
             _playerQueries = playerQueries;
             _playerOperations = playerOperations;
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
             _currencyCodeMapper = currencyCodeMapper;
             _languageCodeMapper = languageCodeMapper;
             _requestAnalyzer = requestAnalyzer;
@@ -77,10 +77,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet]
         [Route("captcha")]
-        public CaptchaInfo GetCaptcha()
-        {
-            return _captchaFactory.Create();
-        }
+        public CaptchaInfo GetCaptcha() => _captchaFactory.Create();
 
         /// <summary>
         /// Check username exists
@@ -89,8 +86,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Route("checkUsername")]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, request.Username);
+            var brandId = HttpContext.Items.GetBrandId();
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, request.Username);
 
             return new CheckPlayerResponse
             {
@@ -107,19 +104,19 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             // TODO: Verify captcha via middleware
 
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = HttpContext.Items.GetBrandId();
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var username = request.Username;
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, username);
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNotNullOrEmpty())
             {
                 return new CreatePlayerResponse {IsNew = false};
             }
 
             var externalCurrency = request.CurrencyCode;
-            var currency = await _currencyCodeMapper.ExternalToInternalAsync(externalCurrency, licenseeId);
-            var language = await _languageCodeMapper.ExternalToInternalAsync(request.Language, licenseeId);
+            var currency = await _currencyCodeMapper.ExternalToInternalAsync(externalCurrency, brandId);
+            var language = await _languageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
 
             var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
 
@@ -127,7 +124,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await _playerOperations.CreatePlayerAsync(new CreatePlayerData
             {
-                LicenseeId = licenseeId,
+                BrandId = brandId,
                 Username = username,
                 Salt = salt,
                 Password = password,
@@ -154,11 +151,11 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Route("login")]
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = HttpContext.Items.GetBrandId();
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var username = request.Username;
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(licenseeId, username);
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNullOrEmpty())
             {
                 throw new PlayerNotFoundException(username, Resources.Player.NotFound);
@@ -177,7 +174,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var record = await _playerOperations.PlayerLoginAsync(new PlayerLoginData
             {
-                LicenseeId = licenseeId,
+                BrandId = brandId,
                 Username = username,
                 PlayerCode = playerCode,
                 PlatformType = request.PlatformType,
@@ -194,7 +191,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ExpiredOn = record.ExpiredOn
             };
 
-            var token = await GeneratePlayerJwtToken(licenseeId, playerTokenData);
+            var token = await GeneratePlayerJwtToken(brandId, playerTokenData);
 
             return new LoginResponse
             {
@@ -211,8 +208,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<LogoutResponse> LogoutAsync()
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = HttpContext.Items.GetBrandId();
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
@@ -246,8 +243,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync()
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = HttpContext.Items.GetBrandId();
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
@@ -291,8 +288,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = HttpContext.Items.GetBrandId();
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
@@ -325,8 +322,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = HttpContext.Items.GetBrandId();
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
@@ -356,7 +353,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        private async Task<string> GeneratePlayerJwtToken(Guid licenseeId, PlayerTokenData playerTokenData)
+        private async Task<string> GeneratePlayerJwtToken(Guid brandId, PlayerTokenData playerTokenData)
         {
             var data = _tokenProvider.Encrypt(playerTokenData);
 
@@ -368,7 +365,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             });
 
             var payload = _hashProvider.Hash($"{data}:{jti}");
-            var secretKey = await _licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
+            var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
             var signature = Encoding.UTF8.GetBytes($"{payload}:{secretKey}");
 
             return _jwtTokenHandler.GenerateToken(identity, signature, Consts.Site,

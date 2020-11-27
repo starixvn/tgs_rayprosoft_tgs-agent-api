@@ -16,6 +16,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
+            builder.Property(c => c.Name)
+                .HasColumnType(ColumnTypes.Nvarchar(64))
+                .IsRequired();
+
             builder.Property(c => c.NativeName)
                 .HasColumnType(ColumnTypes.Nvarchar(64));
 

@@ -54,7 +54,7 @@ namespace TGS.Services.Operations.Commands
                 _repositoryFactory,
                 IsolationLevel.ReadCommitted,
                 username,
-                async (repo, trans) =>
+                async repo =>
                 {
                     var walletId = GuidExtensions.NewSequentialGuid();
                     var createdOn = DateTimeOffset.UtcNow;
@@ -73,7 +73,7 @@ namespace TGS.Services.Operations.Commands
                                 Password = data.Password,
                                 Salt = data.Salt,
                                 InvitationCode = StringGenerator.GenerateAlphanumericString(6),
-                                LicenseeId = data.LicenseeId,
+                                BrandId = data.BrandId,
                                 CultureCode = data.CultureCode,
                                 DefaultWalletId = walletId,
                                 DefaultWalletCurrencyCode = data.CurrencyCode,
@@ -141,7 +141,7 @@ namespace TGS.Services.Operations.Commands
                 _repositoryFactory,
                 IsolationLevel.ReadCommitted,
                 username,
-                async (repo, trans) =>
+                async repo =>
                 {
                     var player = new Player
                     {
@@ -178,7 +178,7 @@ namespace TGS.Services.Operations.Commands
                 _repositoryFactory,
                 IsolationLevel.ReadCommitted,
                 username,
-                async (repo, trans) =>
+                async repo =>
                 {
                     var player = new Player
                     {
@@ -209,15 +209,15 @@ namespace TGS.Services.Operations.Commands
                 _repositoryFactory,
                 IsolationLevel.ReadCommitted,
                 username,
-                async (repo, trans) =>
+                async repo =>
                 {
-                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType, trans.GetDbTransaction());
+                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType);
 
                     var record = new PlayerLoginRecord
                     {
                         Id = GuidExtensions.NewSequentialGuid(),
                         PlayerCode = data.PlayerCode,
-                        LicenseeId = data.LicenseeId,
+                        BrandId = data.BrandId,
                         Status = LoginStatus.Enabled,
                         PlatformType = data.PlatformType,
                         IpAddress = data.IpAddress,
@@ -245,9 +245,9 @@ namespace TGS.Services.Operations.Commands
                 _repositoryFactory,
                 IsolationLevel.ReadCommitted,
                 username,
-                async (repo, trans) =>
+                async repo =>
                 {
-                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.LoginRecordId, trans.GetDbTransaction());
+                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.LoginRecordId);
 
                     CreateAuditLog(repo, username, $"Player '{username}' logout.", data.UpdatedOn);
 
@@ -273,11 +273,10 @@ namespace TGS.Services.Operations.Commands
             });
         }
 
-        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode,
-            Guid loginRecordId, IDbTransaction transaction = null)
+        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, Guid loginRecordId)
         {
             const string sql = "usp_Player_DeauthorizeByLoginRecordId";
-            return repo.ExecuteSqlCommandAsync(sql, transaction: transaction, parameters: new SqlParameter[]
+            return repo.ExecuteSqlCommandAsync(sql, parameters: new SqlParameter[]
             {
                 new()
                 {
@@ -294,11 +293,10 @@ namespace TGS.Services.Operations.Commands
             });
         }
 
-        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode,
-            PlatformType? platformType, IDbTransaction transaction = null)
+        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, PlatformType? platformType)
         {
             const string sql = "usp_Player_DeauthorizeByPlatform";
-            return repo.ExecuteSqlCommandAsync(sql, transaction: transaction, parameters: new SqlParameter[]
+            return repo.ExecuteSqlCommandAsync(sql, parameters: new SqlParameter[]
             {
                 new()
                 {

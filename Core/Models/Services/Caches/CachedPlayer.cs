@@ -7,9 +7,8 @@ namespace TGS.Core.Models.Services.Caches
     public record CachedPlayer
     {
         public string PlayerCode { get; init; }
-        public Guid LicenseeId { get; init; }
-        public string LicenseeCode { get; init; }
-        public string LicenseeName { get; set; }
+        public Guid BrandId { get; init; }
+        public string BrandCode { get; init; }
         public PlayerStatus Status { get; init; }
         public string Username { get; init; }
         public string ExternalCurrencyCode { get; init; }

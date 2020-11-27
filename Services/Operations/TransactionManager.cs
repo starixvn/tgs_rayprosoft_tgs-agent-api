@@ -15,7 +15,7 @@ namespace TGS.Services.Operations
             Func<TContext> contextFactory,
             IsolationLevel level,
             string externalTransactionId,
-            Func<TContext, IDbContextTransaction, Task<TResult>> execute,
+            Func<TContext, Task<TResult>> execute,
             Func<TContext, TResult, Task> onPostCommit = null,
             Func<TContext, TResult, Exception, Task> onPostRollback = null)
             where TContext : IBaseRepository;
@@ -34,7 +34,7 @@ namespace TGS.Services.Operations
             Func<TContext> contextFactory,
             IsolationLevel level,
             string externalTransactionId,
-            Func<TContext, IDbContextTransaction, Task<TResult>> execute,
+            Func<TContext, Task<TResult>> execute,
             Func<TContext, TResult, Task> onPostCommit,
             Func<TContext, TResult, Exception, Task> onPostRollback)
         {
@@ -45,7 +45,7 @@ namespace TGS.Services.Operations
 
             try
             {
-                result = await execute(context, transaction);
+                result = await execute(context);
 
                 await transaction.CommitAsync();
 

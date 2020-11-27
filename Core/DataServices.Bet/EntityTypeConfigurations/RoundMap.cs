@@ -11,21 +11,13 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
         {
             builder.ToTable("Rounds", "dbo");
             builder.HasKey(bc => bc.Id).IsClustered(false);
-
-            builder.HasMany(p => p.GameActions)
-                .WithOne(p => p.Round)
-                .HasForeignKey(p => p.RoundId);
-
-            builder.HasOne(p => p.RoundDetail)
-                .WithOne(p => p.Round)
-                .HasForeignKey<RoundDetail>(p => p.RoundId);
-                        
+            
             builder.Property(c => c.ExternalRoundId)
                 .HasColumnType(ColumnTypes.Nvarchar(255))
                 .IsRequired();
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.GameId)
@@ -36,7 +28,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.GameType)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
             
             builder.Property(c => c.GameProviderId)               
@@ -55,7 +47,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.PlayerType)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.PlatformType)
@@ -72,6 +64,13 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
             builder.Property(c => c.WalletId)
                 .IsRequired();
 
+            builder.Property(c => c.ResellerId)
+                .IsRequired();
+
+            builder.Property(c => c.ResellerCode)
+                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .IsRequired();
+
             builder.Property(c => c.LicenseeId)
                 .IsRequired();
 
@@ -79,8 +78,11 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
-            builder.Property(c => c.LicenseeName)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+            builder.Property(c => c.BrandId)
+                .IsRequired();
+
+            builder.Property(c => c.BrandCode)
+                .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
@@ -111,6 +113,10 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
 
             builder.Property(c => c.Commission)
                 .HasColumnType(ColumnTypes.Decimal(18, 6));
+
+            builder.HasOne(p => p.RoundDetail)
+                .WithOne(p => p.Round)
+                .HasForeignKey<RoundDetail>(p => p.RoundId);
         }
     }
 }

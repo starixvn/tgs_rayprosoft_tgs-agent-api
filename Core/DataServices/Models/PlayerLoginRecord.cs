@@ -8,8 +8,8 @@ namespace TGS.Core.DataServices.Models
         public Guid Id { get; set; }
         public string PlayerCode { get; set; }
         public virtual Player Player { get; set; }
-        public Guid LicenseeId { get; set; }
-        public virtual Licensee Licensee { get; set; }
+        public Guid BrandId { get; set; }
+        public virtual Brand Brand { get; set; }
         public LoginStatus Status { get; set; }
         public PlatformType PlatformType { get; set; }
         public string IpAddress { get; set; }

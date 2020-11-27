@@ -12,14 +12,14 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(bc => new { bc.LicenseeId, bc.BetLimitGroupId });
 
             builder
-                .HasOne(bc => bc.Licensee)
-                .WithMany(c => c.BetLimitGroups)
-                .HasForeignKey(bc => bc.LicenseeId);
+                .HasOne(lbl => lbl.Licensee)
+                .WithMany(l => l.BetLimitGroups)
+                .HasForeignKey(lbl => lbl.LicenseeId);
 
             builder
-                .HasOne(bc => bc.BetLimitGroup)
-                .WithMany(c => c.Licensees)
-                .HasForeignKey(bc => bc.BetLimitGroupId);
+                .HasOne(lbl => lbl.BetLimitGroup)
+                .WithMany(blg => blg.Licensees)
+                .HasForeignKey(lbl => lbl.BetLimitGroupId);
         }
     }
 }

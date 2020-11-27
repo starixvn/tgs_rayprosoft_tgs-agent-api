@@ -17,8 +17,8 @@ namespace TGS.Core.DataServices.Models
         public virtual Language Language { get; set; }
         public Guid DefaultWalletId { get; set; }
         public string DefaultWalletCurrencyCode { get; set; }
-        public Guid LicenseeId { get; set; }
-        public virtual Licensee Licensee { get; set; }
+        public Guid BrandId { get; set; }
+        public virtual Brand Brand { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
         public DateTimeOffset LastActiveOn { get; set; }
         public PlayerStatus Status { get; set; }

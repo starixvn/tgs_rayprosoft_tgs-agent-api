@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
     public sealed class AuthorizeSBOBETMiddleware : IMiddleware
     {
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
@@ -27,12 +26,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
-            ILicenseeOperations licenseeOperations)
+            IBrandOperations brandOperations)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
             _gameProviderOperations = gameProviderOperations;
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -52,9 +51,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             var playerCode = request.PlayerCode;
             var externalGameId = request.ExternalGameId;
 
-            var licenseeId = await _playerOperations.GetLicenseeIdByPlayerCodeAsync(playerCode);
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProvider.SBOBET);
-            var lgpc = await _licenseeOperations.GetLicenseeGameProviderConfigurationAsync(licenseeId, gameProviderId);
+            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
             PlatformType platformType;
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId);
@@ -73,9 +72,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
                     .FirstOrDefault();
             }
 
-            context.Items.Add(ContextItems.LicenseeId, licenseeId);
+            context.Items.Add(ContextItems.BrandId, brandId);
             context.Items.Add(ContextItems.GameProviderId, gameProviderId);
-            context.Items.Add(ContextItems.GameProviderConfigurationId, lgpc.GameProviderConfigurationId);
+            context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
             context.Items.Add(ContextItems.PlatformType, platformType);
 
             await next(context);

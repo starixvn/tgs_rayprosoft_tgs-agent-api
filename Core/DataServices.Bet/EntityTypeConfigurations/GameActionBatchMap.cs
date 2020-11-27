@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
         void IEntityTypeConfiguration<GameActionBatch>.Configure(EntityTypeBuilder<GameActionBatch> builder)
         {
             builder.ToTable("GameActionBatches", "dbo");
-            builder.HasKey(bc => bc.Id).IsClustered(false); ;
+            builder.HasKey(bc => bc.Id).IsClustered(false);
 
             builder.Property(c => c.ErrorType)
                 .HasColumnType(ColumnTypes.SmallInt)
@@ -39,8 +39,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
 
             builder.HasMany(p => p.GameActions)
                 .WithOne(p => p.GameActionBatch)
-                .HasForeignKey(p => p.GameActionBatchId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(p => p.GameActionBatchId);
         }
     }
 }

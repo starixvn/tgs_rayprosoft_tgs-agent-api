@@ -23,6 +23,6 @@ namespace TGS.Core.DataServices.Models
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
 
-        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
+        public virtual ICollection<BrandGameProvider> BrandGameProviders { get; set; }
     }
 }

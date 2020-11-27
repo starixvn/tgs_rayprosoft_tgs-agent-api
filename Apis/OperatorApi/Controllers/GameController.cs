@@ -30,8 +30,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly IExpirationValidator _expirationValidator;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
-        private readonly ILicenseeLanguageCodeMapper _licenseeLanguageCodeMapper;
-        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
+        private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IPluggalbeGameProviderApiClient _pluggableApiClient;
         private readonly IPluggableOperations _pluggableOperations;
@@ -40,10 +40,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly IValidStatus<Status> _validStatus;
 
         public GameController(
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
-            ILicenseeLanguageCodeMapper licenseeLanguageCodeMapper,
+            IBrandLanguageCodeMapper brandLanguageCodeMapper,
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
             IValidStatus<Status> validStatus,
@@ -53,10 +53,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             IPluggalbeGameProviderApiClient pluggableApiClient,
             IPluggableOperations pluggableOperations)
         {
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
-            _licenseeLanguageCodeMapper = licenseeLanguageCodeMapper;
+            _brandLanguageCodeMapper = brandLanguageCodeMapper;
             _cacheManger = cacheManager;
             _json = json;
             _validStatus = validStatus;
@@ -72,8 +72,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async Task<GetGamesResponse> GetGamesAsync(GetGamesRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
-            var cultureCode = await _licenseeLanguageCodeMapper.ExternalToInternalAsync(request.Language, licenseeId);
+            var brandId = HttpContext.Items.GetBrandId();
+            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
 
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
@@ -84,13 +84,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ? await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode)
                 : null;
 
-            var cacheKey = $"{licenseeId}";
+            var cacheKey = $"{brandId}";
             var field = cachedPlayer == null
                 ? $"{platform}:{gameProviderId}:{cultureCode}:general"
                 : $"{platform}:{gameProviderId}:{cultureCode}:{cachedPlayer.DefaultWalletCurrencyCode}:{(int) cachedPlayer.Type}";
 
             var value =
-                await _cacheManger.SafeGetHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, cacheKey, field);
+                await _cacheManger.SafeGetHashSetAsync(RedisCacheType.BrandGamesByPlatform, cacheKey, field);
 
             if (value.HasValue)
             {
@@ -100,10 +100,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 };
             }
 
-            var licenseeGames = await _licenseeOperations.GetLicenseeGamesAsync(licenseeId, platform);
-            var gameModels = await GetGameModelsAsync(gameProviderId, licenseeGames, cachedPlayer);
+            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, platform);
+            var gameModels = await GetGameModelsAsync(gameProviderId, brandGames, cachedPlayer);
 
-            await _cacheManger.SafeCacheHashSetAsync(RedisCacheType.LicenseeGamesByPlatform, cacheKey, new HashEntry[]
+            await _cacheManger.SafeCacheHashSetAsync(RedisCacheType.BrandGamesByPlatform, cacheKey, new HashEntry[]
             {
                 new(field, _json.SerializeToString(gameModels))
             }, TimeSpan.FromHours(1));
@@ -134,9 +134,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameCode, platformType);
 
-            var statuses = _validStatus.GetStatus(cachedPlayer.Type);
-            var gameStatuses = _validGameStatus.GetStatus(cachedPlayer.Type);
-            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(gameProviderId, game.Id, gameCode,
+            var playerType = cachedPlayer.Type;
+            var statuses = _validStatus.GetStatus(playerType);
+            var gameStatuses = _validGameStatus.GetStatus(playerType);
+            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(cachedPlayer.BrandId, gameProviderId, game.Id, gameCode,
                 statuses, gameStatuses);
 
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(gameProviderCode);
@@ -158,7 +159,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         #region Private Methods
 
         private async Task<GetGamesResponse.GameModel[]> GetGameModelsAsync(Guid gameProviderId,
-            CachedLicenseeGame[] licenseeGames, CachedPlayer cachedPlayer)
+            CachedBrandGame[] licenseeGames, CachedPlayer cachedPlayer)
         {
             var statuses = ValidStatus.Default;
             var gameStatuses = ValidGameStatus.Default;

@@ -21,31 +21,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varchar(16))
                 .IsRequired(false);
 
-            builder.HasMany(p => p.Wallets)
-                .WithOne(p => p.Player)
-                .HasForeignKey(p => p.PlayerCode);
-
-            builder.HasMany(p => p.Banks)
-                .WithOne(p => p.Player)
-                .HasForeignKey(p => p.PlayerCode);
-
-            builder.HasOne(p => p.Vip)
-                .WithMany(p => p.Players)
-                .HasForeignKey(p => p.VipId);
-
-            builder.HasOne(p => p.ParentPlayer)
-                .WithMany(p => p.SubPlayers)
-                .HasForeignKey(p => p.ParentPlayerCode)
-                .IsRequired(false);
-
-            builder.HasMany(p => p.SubPlayers)
-                .WithOne(p => p.ParentPlayer)
-                .HasForeignKey(p => p.ParentPlayerCode);
-
-            builder.HasMany(p => p.Letters)
-                .WithOne(p => p.Player)
-                .HasForeignKey(p => p.PlayerCode);
-
             builder.Property(c => c.Username)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
@@ -106,7 +81,34 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(64));
 
             builder.Property(c => c.AccumulatedDeposit)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasDefaultValue(0)
+                .IsRequired();
+
+            builder.HasMany(p => p.Wallets)
+                .WithOne(p => p.Player)
+                .HasForeignKey(p => p.PlayerCode);
+
+            builder.HasMany(p => p.Banks)
+                .WithOne(p => p.Player)
+                .HasForeignKey(p => p.PlayerCode);
+
+            builder.HasOne(p => p.Vip)
+                .WithMany(p => p.Players)
+                .HasForeignKey(p => p.VipId);
+
+            builder.HasOne(p => p.ParentPlayer)
+                .WithMany(p => p.SubPlayers)
+                .HasForeignKey(p => p.ParentPlayerCode)
+                .IsRequired(false);
+
+            builder.HasMany(p => p.SubPlayers)
+                .WithOne(p => p.ParentPlayer)
+                .HasForeignKey(p => p.ParentPlayerCode);
+
+            builder.HasMany(p => p.Letters)
+                .WithOne(p => p.Player)
+                .HasForeignKey(p => p.PlayerCode);
         }
     }
 }

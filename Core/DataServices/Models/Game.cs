@@ -28,6 +28,12 @@ namespace TGS.Core.DataServices.Models
 
         public bool HasTurnoverOnTieBet { get; set; }
 
-        public virtual ICollection<LicenseeGame> Licensees { get; set; }
+        public virtual ICollection<BrandGame> Brands { get; set; }
+
+        /// <summary>
+        /// Currencies that the game supports, recorded by csv format
+        /// Empty for all currencies that game provider has.
+        /// </summary>
+        public string AvailableCurrencies { get; set; }
     }
 }

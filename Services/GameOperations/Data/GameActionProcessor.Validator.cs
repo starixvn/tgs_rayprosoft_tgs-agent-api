@@ -1,17 +1,17 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Services.GameOperations.Models.Data;
 using static TGS.Core.Models.Enums.GameActionType;
-using GameActionResult = TGS.Services.GameOperations.Models.Data.GameActionResult;
 
 namespace TGS.Services.GameOperations.Data
 {
     internal sealed partial class GameActionProcessor
-    {  
+    {
         private void ValidateAmounts(GameActionState s)
         {
             s.ValidateAmount(nameof(s.Amount), s.Amount);
@@ -33,7 +33,8 @@ namespace TGS.Services.GameOperations.Data
 
             if (s.MustHaveExistingRound && !s.HasExtRoundId)
             {
-                throw new InvalidGameActionException("Missing External Round Id", InvalidGameActionErrorCode.RoundNotFound);
+                throw new InvalidGameActionException("Missing External Round Id",
+                    InvalidGameActionErrorCode.RoundNotFound);
             }
 
             if (!s.HasExtGameId)
@@ -49,14 +50,16 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(Db db, string externalRoundId, string externalTransactionId)
+        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(ITgsRepository repository,
+            string externalRoundId, string externalTransactionId)
         {
-            var foundExternalRoundId = await GetExternalRoundIdAsync(db, externalTransactionId);
-            if (foundExternalRoundId.IsNotNullOrEmpty() && foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
+            var foundExternalRoundId = await GetExternalRoundIdAsync(repository, externalTransactionId);
+            if (foundExternalRoundId.IsNotNullOrEmpty() &&
+                foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
             {
                 throw new InvalidGameActionException(
-                       $"Expected the reference transaction '{externalTransactionId}' to belong to round '{externalRoundId}' but it belongs to '{foundExternalRoundId}'",
-                       InvalidGameActionErrorCode.TransactionNotFound);
+                    $"Expected the reference transaction '{externalTransactionId}' to belong to round '{externalRoundId}' but it belongs to '{foundExternalRoundId}'",
+                    InvalidGameActionErrorCode.TransactionNotFound);
             }
         }
 
@@ -73,7 +76,7 @@ namespace TGS.Services.GameOperations.Data
             {
                 throw new InvalidGameActionException(
                     $"External transaction ID: {s.ExternalTransactionId} was already used for another player.",
-                    InvalidGameActionErrorCode.Duplicate);
+                    InvalidGameActionErrorCode.ActionProhibited);
             }
 
             return GetDuplicateTransactionResult(action.Id, s.ExternalTransactionId);
@@ -106,6 +109,7 @@ namespace TGS.Services.GameOperations.Data
         private async Task ThrowIfStatusesIsInvalidAsync(GameActionState s)
         {
             var playerType = s.PlayerData.PlayerType;
+            var brandId = s.PlayerData.BrandId;
             var gameActionType = s.GameActionType;
             var gameProviderId = s.GameProvider.Id;
             var gameId = s.GameId;
@@ -113,8 +117,9 @@ namespace TGS.Services.GameOperations.Data
             var status = _validStatus.GetStatus(playerType, gameActionType);
             var gameStatus = _validGameStatus.GetStatus(playerType, gameActionType);
 
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(s.PlayerData.LicenseeId, status);
-            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(gameProviderId, gameId, s.ExternalGameId, status, gameStatus);
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
+            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(brandId, gameProviderId, gameId,
+                s.ExternalGameId, status, gameStatus);
         }
     }
 }

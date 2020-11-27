@@ -31,7 +31,6 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Tests.ApiClients.GameProviders;
 using TGS.Tests.ApiClients.Operators;
 using TGS.Tests.TestsCommon;
-using TGS.Tests.TestsCommon.Extensions;
 
 namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 {
@@ -75,23 +74,23 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _serviceProvider = services.BuildServiceProvider();
         }
 
-        [Given(@"player ""(.*)"" of licensee ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerLoginViaAsync(string username, string licenseeCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, licenseeCode);
+        [Given(@"player ""(.*)"" of brand ""(.*)"" login via ""(.*)""")]
+        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode, PlatformType platformType) =>
+            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode);
 
-        [Given(@"player ""(.*)"" of licensee ""(.*)"" without login")]
-        public async Task GivenPlayerOfLicenseeWithoutLoginAsync(string username, string licenseeCode)
+        [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
+        public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
         {
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var playerCode = await
                 (from p in db.Players
-                    join l in db.Licensees on p.LicenseeId equals l.Id
-                    where p.Username == username && l.Code == licenseeCode
+                    join b in db.Brands on p.BrandId equals b.Id
+                    where p.Username == username && b.Code == brandCode
                     select p.PlayerCode).AsNoTracking().FirstAsync();
 
             await DeauthorizePlayerAsync(_serviceProvider, playerCode);
 
-            Set(SR.LicenseeCode, licenseeCode);
+            Set(SR.BrandCode, brandCode);
             Set(SR.PlayerCode, playerCode);
             Set(SR.Username, username);
             Remove($"{SR.LoginTime}:{username}:{PlatformType.Desktop}");
@@ -129,9 +128,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return ChangeGameStatusAsync(_serviceProvider, GameProviderCode, externalGameId, gameStatus);
         }
 
-        [Given(@"licensee has status set to ""(.*)""")]
-        public Task GivenLicenseeHasStatusSetToAsync(Status status) => 
-            ChangeLicenseeStatusAsync(_serviceProvider, status);
+        [Given(@"brand has status set to ""(.*)""")]
+        public Task GivenBrandHasStatusSetToAsync(Status status) => 
+            ChangeBrandStatusAsync(_serviceProvider, status);
 
         [Given(@"balance now being \$(.*)")]
         public void GivenBalanceNowBeing(decimal balance) =>
@@ -538,9 +537,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId), GameStatus.Active);
         
         [After]
-        public Task AfterChangeLicenseeStatusScenarioAsync() => 
-            ChangeLicenseeStatusAsync(_serviceProvider, Status.Active);
-
+        public Task AfterChangeBrandStatusScenarioAsync() => 
+            ChangeBrandStatusAsync(_serviceProvider, Status.Active);
+        
         #endregion
 
         #region Private Methods

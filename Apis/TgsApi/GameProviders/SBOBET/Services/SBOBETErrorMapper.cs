@@ -28,7 +28,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 {typeof(InvalidGameActionException), GameApiError.InvalidGameAction},
                 {typeof(GameProviderUnderMaintenanceException), GameApiError.UnderMaintenance},
                 {typeof(GameUnderMaintenanceException), GameApiError.UnderMaintenance},
-                {typeof(LicenseeUnderMaintenanceException), GameApiError.UnderMaintenance},
+                {typeof(BrandUnderMaintenanceException), GameApiError.UnderMaintenance},
                 {typeof(InvalidCredentialsException), GameApiError.InvalidCredentials}
             };
 
@@ -43,15 +43,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     {RoundNotFound, GameApiError.BetNotExists}
                 };
 
-        int IErrorMapper.GetHttpStatusByException(Exception exception)
-        {
-            return StatusCodes.Status200OK;
-        }
+        int IErrorMapper.GetHttpStatusByException(Exception exception) =>
+            StatusCodes.Status200OK;
 
-        string IErrorMapper.GetMessageByException(Exception exception)
-        {
-            return exception.Message;
-        }
+        string IErrorMapper.GetMessageByException(Exception exception) =>
+            exception.Message;
 
         int IErrorMapper.GetApiErrorByException(Exception exception)
         {

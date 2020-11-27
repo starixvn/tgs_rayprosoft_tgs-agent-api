@@ -21,16 +21,16 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AuthController : ControllerBase
     {
-        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IBrandOperations _brandOperations;
         private readonly IStatusValidator _statusValidator;
         private readonly IJwtTokenHandler _handler;
 
         public AuthController(
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
             IStatusValidator statusValidator,
             IJwtTokenHandler handler)
         {
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
             _statusValidator = statusValidator;
             _handler = handler;
         }
@@ -40,20 +40,20 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Route("jwt")]
         public async Task<AuthResponse> GetJwtToken(AuthRequest request)
         {
-            var licenseeId = await _licenseeOperations.GetLicenseeIdByApiKeyAsync(request.ApiKey);
-            await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
+            var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(request.ApiKey);
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
             var currency = request.Currency;
             
             var identity = new ClaimsIdentity(new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, $"{licenseeId}"),
+                new Claim(JwtRegisteredClaimNames.Sub, $"{brandId}"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim( Consts.ClaimName.Currency, currency)
             });
 
-            var secretKey = await _licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
-            var signature = $"{licenseeId}:{currency}:{secretKey}";
+            var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
+            var signature = $"{brandId}:{currency}:{secretKey}";
             var expires = DateTime.Now.AddSeconds(TokenExpireSeconds.Jwt);
 
             var token = _handler.GenerateToken(identity, Encoding.UTF8.GetBytes(signature),
