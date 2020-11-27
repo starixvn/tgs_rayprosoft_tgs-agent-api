@@ -17,7 +17,6 @@
       "launchUrl": "api/status",
       "environmentVariables": {
         "GameProviderCode": "SBO",
-        "GameProviderName": "SBOBET",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:62330"
@@ -28,7 +27,6 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
       "environmentVariables": {
         "GameProviderCode": "SBO",
-        "GameProviderName": "SBOBET",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,

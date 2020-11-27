@@ -16,5 +16,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Players
         [Required]
         [JsonPropertyName("captcha")]
         public string Captcha { get; init; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("bypasscaptcha")]
+        public bool? BypassCaptcha { get; init; }
     }
 }

@@ -23,9 +23,9 @@ namespace TGS.Services.Operations
 
     public sealed class SettingOperations : ISettingOperations
     {
-        private readonly ISettingQueries _settingQueries;
         private readonly IRedisCacheManager _cacheManager;
         private readonly IJsonSerializationProvider _json;
+        private readonly ISettingQueries _settingQueries;
 
         public SettingOperations(
             ISettingQueries settingQueries,
@@ -55,10 +55,8 @@ namespace TGS.Services.Operations
             return int.TryParse(value, out var result) ? result : defaultValue;
         }
 
-        Task<string> ISettingOperations.GetValueByKeyAsync(string key)
-        {
-            return GetByKeyAsync(key);
-        }
+        Task<string> ISettingOperations.GetValueByKeyAsync(string key) =>
+            GetByKeyAsync(key);
 
         async Task<T> ISettingOperations.GetValueFromJsonByKeyAsync<T>(string key)
         {
@@ -70,18 +68,14 @@ namespace TGS.Services.Operations
             }
 
             var result = _json.DeserializeFromString<T>(value);
-            return result != null ? result :
-                throw new InvalidOperationException($"Setting value '{value}' for {key} can't be deserialized as {typeof(T).Name}");
+            return result != null
+                ? result
+                : throw new InvalidOperationException(
+                    $"Setting value '{value}' for {key} can't be deserialized as {typeof(T).Name}");
         }
 
-        private Task<string> GetByKeyAsync(string key)
-        {
-            return _cacheManager.SafeGetAndCacheAsync(
-                RedisCacheType.Setting,
-                key,
-                TimeSpan.FromDays(1),
-                () => _settingQueries.GetSettingValueByKeyAsync(key)
-            );
-        }
+        private Task<string> GetByKeyAsync(string key) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Setting, key, TimeSpan.FromDays(1),
+                () => _settingQueries.GetSettingValueByKeyAsync(key));
     }
 }

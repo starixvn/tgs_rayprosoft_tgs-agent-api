@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -9,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TechTalk.SpecFlow;
+using TGS.Apis.OperatorApi.Models.Messages.Authentications;
 using TGS.Apis.OperatorApi.Models.Messages.Players;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
@@ -34,7 +36,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         protected async Task PlayerLoginAsync(IServiceProvider serviceProvider, string username,
-            PlatformType platformType, string licenseeCode)
+            PlatformType platformType, string brandCode)
         {
             var loginTimeCacheKey = $"{SR.LoginTime}:{username}:{platformType}";
 
@@ -45,44 +47,56 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 return;
             }
 
-            var licenseeCacheKey = $"{SR.Licensee}:{licenseeCode}";
-            var licensee = Get<Licensee>(licenseeCacheKey);
+            var brandCacheKey = $"{SR.Brand}:{brandCode}";
+            var brand = Get<Brand>(brandCacheKey);
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            if (licensee == null)
+            if (brand == null)
             {
-                licensee = await db.Licensees.FirstAsync(l => l.Code == licenseeCode);
-                Set(licenseeCacheKey, licensee);
+                brand = await db.Brands.FirstAsync(b => b.Code == brandCode);
+                Set(brandCacheKey, brand);
             }
 
-            var timestamp = DateTimeOffset.Now.ToIso8601String();
-            var hashProvider = serviceProvider.GetRequiredService<IHashProvider>();
-            var authCode = hashProvider.Hash(
-                $"{licensee.ClientId}{licensee.SecretKey}{timestamp}",
-                HashAlgorithmKind.Sha512,
-                HashStringKind.Hex,
-                Encoding.UTF8);
+            var player = await db.Players.FirstAsync(p => p.Username == username && p.BrandId == brand.Id);
+            var apiClient = serviceProvider.GetRequiredService<IPlayerApiClient>();
+
+            var brandTokenCacheKey = $"{SR.BrandToken}:{brandCode}";
+            var brandToken = Get<string>(brandTokenCacheKey);
+
+            var brandTokenExpireTimeCacheKey = $"{SR.BrandTokenExpireTime}:{brandCode}";
+            var brandTokenExpireTime = Get<long>(brandTokenExpireTimeCacheKey);
+
+            if (brandToken.IsNullOrEmpty() || brandTokenExpireTime < DateTimeOffset.Now.ToUnixTimeMilliseconds())
+            {
+                var r = await apiClient.GetBrandTokenAsync(new AuthRequest
+                {
+                    ApiKey =  brand.ApiKey,
+                    Currency = player.DefaultWalletCurrencyCode
+                });
+
+                brandToken = r.Token;
+
+                Set(brandTokenCacheKey, brandToken);
+                Set(brandTokenExpireTimeCacheKey, r.ExpireTime);
+            }
 
             var headers = new Dictionary<string, string>
             {
-                {"clientid", licensee.ClientId},
-                {"timestamp", timestamp},
-                {"authcode", authCode}
+                {"Authorization", $"Bearer {brandToken}"}
             };
-
-            var apiClient = serviceProvider.GetRequiredService<IPlayerApiClient>();
 
             var res = await apiClient.PlayerLoginAsync(new LoginRequest
             {
                 Username = username,
                 Password = "TgsP@ssw0rd",
-                PlatformType = platformType
+                PlatformType = platformType,
+                Captcha = "111",
+                Answer = "111",
+                BypassCaptcha = true
             }, headers);
 
-            var playerCode = await db.Players.FirstAsync(p => p.Username == username);
-
-            Set(SR.LicenseeCode, licenseeCode);
-            Set(SR.PlayerCode, playerCode);
+            Set(SR.BrandCode, brandCode);
+            Set(SR.PlayerCode, player.PlayerCode);
             Set(SR.Username, username);
             Set(SR.PlatformType, platformType);
             Set(loginTimeCacheKey, res.LoginTime);
@@ -182,18 +196,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 return;
             }
 
-            var licenseeCode = Get<string>(SR.LicenseeCode);
+            var brandCode = Get<string>(SR.BrandCode);
 
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             var gameProviderConfiguration = await (
-                from lgpc in db.LicenseeGameProviderConfigurations
-                join licensee in from l in db.Licensees where l.Code == licenseeCode select l
-                    on lgpc.LicenseeId equals licensee.Id
+                from bgp in db.BrandGameProviders
+                join brand in from b in db.Brands where b.Code == brandCode select b
+                    on bgp.BrandId equals brand.Id
                 join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
-                    on lgpc.GameProviderId equals gameProvider.Id
+                    on bgp.GameProviderId equals gameProvider.Id
                 join gpc in db.GameProviderConfigurations
-                    on lgpc.GameProviderConfigurationId equals gpc.Id
+                    on bgp.GameProviderConfigurationId equals gpc.Id
                 select gpc).FirstAsync();
 
             gameProviderConfiguration.Status = status;
@@ -230,24 +244,24 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await cacheManager.ClearCacheAsync(RedisCacheType.Games, game.GameProviderId);
         }
 
-        protected async Task ChangeLicenseeStatusAsync(IServiceProvider serviceProvider, Status status)
+        protected async Task ChangeBrandStatusAsync(IServiceProvider serviceProvider, Status status)
         {
-            if (!HasTag("ChangeLicenseeStatus"))
+            if (!HasTag("ChangeBrandStatus"))
             {
                 return;
             }
 
-            var licenseeCode = Get<string>(SR.LicenseeCode);
+            var brandCode = Get<string>(SR.BrandCode);
 
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var licensee = await db.Licensees.FirstAsync(l => l.Code == licenseeCode);
-            licensee.Status = status;
+            var brand = await db.Brands.FirstAsync(b => b.Code == brandCode);
+            brand.Status = status;
 
             await db.SaveChangesAsync();
 
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-            await cacheManager.ClearCacheAsync(RedisCacheType.Licensee, licensee.Id);
+            await cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
         }
 
         #region Private Methods

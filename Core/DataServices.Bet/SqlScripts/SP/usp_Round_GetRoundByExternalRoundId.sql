@@ -4,10 +4,10 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE OR ALTER PROCEDURE [dbo].[usp_Round_GetRoundByExternalRoundId]
-      @gameProviderConfigurationId UNIQUEIDENTIFIER,
-      @walletId                    UNIQUEIDENTIFIER,
-	  @externalRoundId             NVARCHAR(255) 
-AS 
+      @gameProviderConfigurationId  UNIQUEIDENTIFIER,
+      @walletId                     UNIQUEIDENTIFIER,
+	  @externalRoundId              NVARCHAR(255) 
+AS
 BEGIN
     SET NOCOUNT ON
     

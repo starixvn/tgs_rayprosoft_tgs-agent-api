@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -17,20 +18,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     {
         Task<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
 
-        Task<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId);
+        Task<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId);
 
-        Task<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, GameActionType[] gameActionTypes);
-        
+        Task<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId, GameActionType[] gameActionTypes);
+
         Task<GameActionData> GetValidGameActionsAsync(Guid gameProviderId, string playerCode, string externalRoundId);
-        
+
         Task<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string externalRoundId);
     }
 
     public sealed class SBOBETServices : ISBOBETServices
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameActionQueries _gameActionQueries;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRoundQueries _roundQueries;
 
         public SBOBETServices(
@@ -47,11 +50,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         async Task<GameProviderConfigurationData> ISBOBETServices.GetGameProviderConfigurationDataAsync()
         {
-            var items = _httpContextAccessor.HttpContext.Items;
+            var items = _httpContextAccessor?.HttpContext?.Items;
+            if (items == null)
+            {
+                throw new InvalidOperationException("Can not get http context items");
+            }
 
-            var gameProviderId = (Guid)items[ContextItems.GameProviderId];
-            var gameProviderConfigurationId = (Guid)items[ContextItems.GameProviderConfigurationId];
-            var platformType = (PlatformType)items[ContextItems.PlatformType];
+            var gameProviderId = items.Get(ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(ContextItems.PlatformType, PlatformType.Desktop);
 
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
 
@@ -64,24 +71,20 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
-        Task<GameActionExternalIds[]> ISBOBETServices.GetValidGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId)
-        {
-            return _gameActionQueries.GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, false);
-        }
+        Task<GameActionExternalIds[]> ISBOBETServices.GetValidGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId) =>
+            _gameActionQueries.GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, false);
 
-        Task<GameActionExternalIds[]> ISBOBETServices.GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, GameActionType[] gameActionTypes)
-        {
-            return _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameActionTypes);
-        }
+        Task<GameActionExternalIds[]> ISBOBETServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, GameActionType[] gameActionTypes) =>
+            _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId,
+                gameActionTypes);
 
-        Task<GameActionData> ISBOBETServices.GetValidGameActionsAsync(Guid gameProviderId, string playerCode, string externalRoundId)
-        {
-            return _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId);
-        }
+        Task<GameActionData> ISBOBETServices.GetValidGameActionsAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId) =>
+            _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId);
 
-        Task<RoundStatus?> ISBOBETServices.GetRoundStatusAsync(Guid gameProviderId, string externalRoundId)
-        {
-            return _roundQueries.GetRoundStatusAsync(gameProviderId, externalRoundId);
-        }
+        Task<RoundStatus?> ISBOBETServices.GetRoundStatusAsync(Guid gameProviderId, string externalRoundId) =>
+            _roundQueries.GetRoundStatusAsync(gameProviderId, externalRoundId);
     }
 }

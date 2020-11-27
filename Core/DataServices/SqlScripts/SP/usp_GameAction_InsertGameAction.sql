@@ -24,7 +24,6 @@ CREATE OR ALTER PROCEDURE [dbo].[usp_GameAction_InsertGameAction]
           @sentOn                       datetimeoffset,
           @isClosingRound               bit,
           @closingRoundExplicitRequest  bit NULL,
-          @licenseeId                   uniqueidentifier,
           @playerCode                   varchar(16),
           @playerIp                     varchar(128),
           @description                  nvarchar(4000) NULL
@@ -53,7 +52,6 @@ BEGIN
           @sentOn,
           @isClosingRound,
           @closingRoundExplicitRequest,
-          @licenseeId,
           @playerCode,
           @playerIp,
           @description

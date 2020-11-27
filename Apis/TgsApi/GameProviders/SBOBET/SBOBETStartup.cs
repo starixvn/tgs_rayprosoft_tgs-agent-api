@@ -2,8 +2,6 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -18,24 +16,23 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 {
     public sealed class SBOBETStartup : BaseStartup
     {
-        protected override string LogPrefix => "sbo";
-
-        
         public SBOBETStartup(IConfiguration configuration, IWebHostEnvironment env) :
             base(configuration, env)
         {
         }
 
+        protected override string LogPrefix => "sbo";
+
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                addCustom: () => services.AddSingleton<SBOBETErrorMapper>(),
-                get: provider => key =>
+                () => services.AddSingleton<SBOBETErrorMapper>(),
+                provider => key =>
                 {
                     return key switch
                     {
                         Consts.GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
-                        _ => provider.GetRequiredService<TgsErrorMapper>()
+                        _                          => provider.GetRequiredService<TgsErrorMapper>()
                     };
                 });
 
@@ -43,14 +40,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
             services.AddScoped<HandleSBOBETExceptionMiddleware>();
 
             services.AddScoped<ISBOBETServices, SBOBETServices>();
-            services.AddSingleton<ISBOBETGameControllerMapper, SBOBETGameControllerMapper>();            
+            services.AddSingleton<ISBOBETGameControllerMapper, SBOBETGameControllerMapper>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            IList<string> bypassRouting = new[] { "/api/status", "/favicon.ico", "/api/pluggable", "/.well-known" };
+            const string Route = "/api/provider";
 
-            app.UseWhen(context => bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r, StringComparison.OrdinalIgnoreCase)),
+            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
                     builder.UseMiddleware<HandleSBOBETExceptionMiddleware>();

@@ -20,7 +20,7 @@ namespace TGS.Services.Operations
         /// </summary>
         Task<Dictionary<string, Dictionary<string, string>>> GetLocalizationByGameProviderIdAsync(
             Guid gameProviderId,
-            string cultureCode = Consts.DefualtCultureCode);
+            string cultureCode = Consts.DefaultCultureCode);
 
         string Parse(Dictionary<string, Dictionary<string, string>> store, string key, string context,
             string defaultValue);

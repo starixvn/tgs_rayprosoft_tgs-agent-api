@@ -63,10 +63,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.HasMany(c => c.LicenseeGameProviderConfigurations)
+            builder.HasMany(c => c.BrandGameProviders)
                 .WithOne(c => c.GameProviderConfiguration)
-                .HasForeignKey(c => c.GameProviderConfigurationId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(c => c.GameProviderConfigurationId);
         }
     }
 }
