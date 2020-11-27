@@ -2,15 +2,15 @@
 {
     public static class Consts
     {
-        public const string DefualtCultureCode = "en-US";
+        public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
 
         public static class CachePrefix
         {
             public const string GameProviderToTgsMap = "GameProviderToTgsMap";
             public const string TgsToGameProviderMap = "TgsToGameProviderMap";
-            public const string LicenseeToTgsMap = "LicenseeToTgsMap";
-            public const string TgsToLicenseeMap = "TgsToLicenseeMap";
+            public const string BrandToTgsMap = "BrandToTgsMap";
+            public const string TgsToBrandMap = "TgsToBrandMap";
         }
 
         public static class Nats
@@ -45,7 +45,7 @@
 
         public static class ContextItems
         {
-            public const string LicenseeId = "licenseeId";
+            public const string BrandId = "brandId";
             public const string GameProviderId = "gameProviderId";
             public const string GameProviderConfigurationId = "gameProviderConfigurationId";
             public const string PlatformType = "platformType";

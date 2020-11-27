@@ -18,7 +18,6 @@ namespace TGS.Core.DataServices.DataInitializers
         private const string WeChatPayScan = "WeChatPayScan";
         private const string BankTransfer = "BankTransfer";
 
-
         private static readonly Dictionary<string, Guid> PaymentVendors = new Dictionary<string, Guid>
         {
             {Help2Pay, new Guid("30CB4D17-2506-4D72-8470-65063B80F9C9")}
@@ -138,13 +137,13 @@ namespace TGS.Core.DataServices.DataInitializers
                     {
                         new PaymentPlayerList
                         {
-                            PlayerCode = players[0].PlayerCode,
+                            PlayerCode = _players[0].PlayerCode,
                             ListType = PlayerListType.White,
                             PaymentId = paymentId
                         },
                         new PaymentPlayerList
                         {
-                            PlayerCode = players[1].PlayerCode,
+                            PlayerCode = _players[1].PlayerCode,
                             ListType = PlayerListType.Black,
                             PaymentId = paymentId
                         }

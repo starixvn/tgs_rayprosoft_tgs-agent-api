@@ -11,16 +11,14 @@ namespace TGS.Apis.TgsApi.Commons.Middlewares
 {
     public abstract class BaseHandleGameProviderExceptionMiddleware : IMiddleware
     {
-        protected abstract string LoggerName { get; }
-
+        protected string LoggerName { get; }
         protected IErrorMapper ErrorMapper { get; }
         protected ITgsLog Log { get; }
 
-        public BaseHandleGameProviderExceptionMiddleware(
-            Func<string, IErrorMapper> mapper,
-            string mapperKey,
-            ITgsLog log)
+        protected BaseHandleGameProviderExceptionMiddleware(Func<string, IErrorMapper> mapper, string mapperKey, ITgsLog log, string loggerName)
         {
+            LoggerName = loggerName;
+
             ErrorMapper = mapper(mapperKey);
             Log = log.SetLogger(LoggerName);
         }

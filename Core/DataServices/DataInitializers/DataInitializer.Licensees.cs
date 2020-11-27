@@ -10,12 +10,10 @@ namespace TGS.Core.DataServices.DataInitializers
             Guid Id { get; }
             string Code { get; }
             string Name { get; }
-            string TimeZoneId {  get; }
-            string ClientId {  get; }
-            string SecretKey {  get; }
-            string ApiKey { get; }
+            string OperationalEmail { get; }
             ICurrency[] Currencies {  get; }
             ILanguage[] Languages {  get; }
+            IBrand[] Brands { get; }
             string[] GameProviders { get; }
         }
 
@@ -27,13 +25,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string ILicensee.Name => "Turnkey Game System";
 
-            string ILicensee.TimeZoneId => "Asia/Taipei";  // Linux ts timezone
-
-            string ILicensee.ClientId => "TGS";
-
-            string ILicensee.SecretKey => "GcHmUWH0WVqWq5JcSPS5qkeoDcTmkBBE";
-
-            string ILicensee.ApiKey => "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV";
+            string ILicensee.OperationalEmail => "tgs.services@gmail.com";
 
             ICurrency[] ILicensee.Currencies => new ICurrency[] 
             { 
@@ -48,9 +40,13 @@ namespace TGS.Core.DataServices.DataInitializers
                 new VNLanguage(), new THLanguage()
             };
 
+            IBrand[] ILicensee.Brands => new IBrand[]
+            {
+                new TgsBrand()
+            };
+
             string[] ILicensee.GameProviders => new[]
             {
-                Consts.GameProvider.RedTiger,
                 Consts.GameProvider.SBOBET
             };
         }

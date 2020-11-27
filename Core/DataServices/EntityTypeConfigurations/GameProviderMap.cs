@@ -24,7 +24,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(p => p.SettleBetTimeout)
                 .HasColumnType(ColumnTypes.SmallInt);
 
-            builder.HasMany(p => p.LicenseeGameProviderConfigurations)
+            builder.HasMany(p => p.Brands)
                 .WithOne(lgpc => lgpc.GameProvider)
                 .HasForeignKey(lgpc => lgpc.GameProviderId);
         }

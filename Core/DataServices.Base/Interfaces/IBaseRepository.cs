@@ -11,6 +11,8 @@ namespace TGS.Core.DataServices.Base.Interfaces
 {
     public interface IBaseRepository : IAsyncDisposable
     {
+        IDbContextTransaction CurrentTransaction { get; }
+
         Task<bool> CanConnectionAsync();
 
         void SetTimeoutToSeconds(int seconds);

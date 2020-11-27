@@ -16,9 +16,9 @@ namespace TGS.Core.DataServices.Bet.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "3.1.7")
+                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "5.0.0");
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
                 {
@@ -38,8 +38,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<bool?>("ClosingRoundExplicitRequest")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Remarks")
-                        .HasColumnType("nvarchar(4000)");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ExternalBetId")
                         .HasColumnType("nvarchar(64)");
@@ -60,9 +60,6 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<bool>("IsClosingRound")
                         .HasColumnType("bit");
-
-                    b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
@@ -92,8 +89,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     b.Property<decimal>("Turnover")
                         .HasColumnType("decimal(18,6)");
 
-                    b.Property<short>("Type")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("Type")
+                        .HasColumnType("tinyint");
 
                     b.Property<decimal>("UnsettledBets")
                         .HasColumnType("decimal(18,6)");
@@ -105,7 +102,7 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("decimal(18,6)");
 
                     b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                        .IsClustered(false);
 
                     b.HasIndex("GameActionBatchId");
 
@@ -113,7 +110,7 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.HasIndex("RoundId");
 
-                    b.ToTable("GameActions","dbo");
+                    b.ToTable("GameActions", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameActionBatch", b =>
@@ -145,9 +142,9 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                        .IsClustered(false);
 
-                    b.ToTable("GameActionBatches","dbo");
+                    b.ToTable("GameActionBatches", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.Round", b =>
@@ -158,6 +155,14 @@ namespace TGS.Core.DataServices.Bet.Migrations
 
                     b.Property<decimal?>("BetAmount")
                         .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("BrandCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<Guid?>("BrandId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("datetimeoffset");
@@ -203,20 +208,15 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<short>("GameType")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("GameType")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("LicenseeCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(16)");
 
-                    b.Property<Guid?>("LicenseeId")
-                        .IsRequired()
+                    b.Property<Guid>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LicenseeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlatformType")
                         .HasColumnType("smallint");
@@ -225,11 +225,18 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(16)");
 
-                    b.Property<short>("PlayerType")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("PlayerType")
+                        .HasColumnType("tinyint");
 
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                    b.Property<string>("ResellerCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<Guid>("ResellerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
 
                     b.Property<decimal?>("TieBetAdjustment")
                         .HasColumnType("decimal(18,6)");
@@ -244,9 +251,9 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("decimal(18,6)");
 
                     b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                        .IsClustered(false);
 
-                    b.ToTable("Rounds","dbo");
+                    b.ToTable("Rounds", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
@@ -259,28 +266,32 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoundId")
-                        .HasAnnotation("SqlServer:Clustered", true);
+                        .IsClustered();
 
-                    b.ToTable("RoundDetails","dbo");
+                    b.ToTable("RoundDetails", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Bet.Models.GameActionBatch", "GameActionBatch")
                         .WithMany("GameActions")
-                        .HasForeignKey("GameActionBatchId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("GameActionBatchId");
 
                     b.HasOne("TGS.Core.DataServices.Bet.Models.GameAction", "ReferencedGameAction")
                         .WithMany("FollowUpGameActions")
-                        .HasForeignKey("ReferencedGameActionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ReferencedGameActionId");
 
                     b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
                         .WithMany("GameActions")
                         .HasForeignKey("RoundId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("GameActionBatch");
+
+                    b.Navigation("ReferencedGameAction");
+
+                    b.Navigation("Round");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
@@ -290,6 +301,25 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .HasForeignKey("TGS.Core.DataServices.Bet.Models.RoundDetail", "RoundId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
+                {
+                    b.Navigation("FollowUpGameActions");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameActionBatch", b =>
+                {
+                    b.Navigation("GameActions");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.Round", b =>
+                {
+                    b.Navigation("GameActions");
+
+                    b.Navigation("RoundDetail");
                 });
 #pragma warning restore 612, 618
         }

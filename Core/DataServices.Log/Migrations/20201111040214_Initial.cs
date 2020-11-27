@@ -108,6 +108,8 @@ namespace TGS.Core.DataServices.Log.Migrations
                 {
                     table.PrimaryKey("PK_ServiceLogs", x => x.Id);
                 });
+
+            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

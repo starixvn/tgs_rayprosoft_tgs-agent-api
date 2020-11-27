@@ -41,33 +41,22 @@ namespace TGS.Services.GameOperations
             };
         }
 
-        async Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
-        {
-            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
-            await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId, data.PlatformType);
-            await ThrowIfGameIsNotTakenByLicenseeAsync(player, data);
-            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
-            var r = await _operations.PlaceBetAsync(data);
-            return await EnsureMappingsAsync(data.GameProviderId, r);
-        }
+        Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data) =>
+            ExecuteGamePlayActionAsync(data, _operations.PlaceBetAsync, async player =>
+            {
+                await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
+                    data.PlatformType);
 
-        async Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data)
-        {
-            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
-            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
-            var res = await _operations.SettleBetAsync(data);
-            return await EnsureMappingsAsync(data.GameProviderId, res);
-        }
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+            });
 
-        async Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
-        {
-            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
-            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
-            var res = await _operations.CancelTransactionAsync(data);
-            return await EnsureMappingsAsync(data.GameProviderId, res);
-        }
+        Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data) =>
+            ExecuteGamePlayActionAsync(data, _operations.SettleBetAsync);
 
-        private async Task ThrowIfGameIsNotTakenByLicenseeAsync(CachedPlayer player, BetData data,
+        Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data) =>
+            ExecuteGamePlayActionAsync(data, _operations.CancelTransactionAsync);
+
+        private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, BetData data,
             GameActionType type = GameActionType.PlaceBet)
         {
             if (type != GameActionType.PlaceBet)
@@ -88,10 +77,10 @@ namespace TGS.Services.GameOperations
             }
 
             var platformType = data.PlatformType;
-            var licenseeGames = await _licenseeOperations.GetLicenseeGamesAsync(player.LicenseeId, gameProviderId);
+            var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, platformType);
             var subGames = await _gameProviderOperations.GetSubGameIdsAsync(gameProviderId, platformType);
 
-            var games = licenseeGames.Where(g => g.PlatformType == platformType)
+            var games = brandGames
                 .Select(g => new IdMap {Id = g.GameId, ExternalId = g.ExternalGameId})
                 .Concat(subGames).Distinct()
                 .ToArray();
@@ -104,20 +93,20 @@ namespace TGS.Services.GameOperations
             if (gameIds.Length == 0)
             {
                 throw new InvalidOperationException(
-                    $"Licensee {player.LicenseeCode} doesn't have games '{placeBetExternalGameIds.JoinAsStringByComma()}'");
+                    $"Brand {player.BrandCode} doesn't have games '{placeBetExternalGameIds.JoinAsStringByComma()}'");
             }
 
-            var validGameStatus = _validGameStatus.GetStatus(player.Type, type);
+            var gameStatuses = _validGameStatus.GetStatus(player.Type, type);
             foreach (var id in gameIds)
             {
                 var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, id);
                 if (cachedGame == null)
                 {
                     throw new InvalidOperationException(
-                        $"Licensee {player.LicenseeCode} doesn't have game with id '{id}'");
+                        $"Brand {player.BrandCode} doesn't have game with id '{id}'");
                 }
 
-                if (validGameStatus.Any(s => s == cachedGame.Status))
+                if (gameStatuses.Any(s => s == cachedGame.Status))
                 {
                     continue;
                 }
@@ -128,7 +117,7 @@ namespace TGS.Services.GameOperations
                 }
 
                 throw new InvalidOperationException(
-                    $"Licensee {player.LicenseeCode} doesn't have game '{cachedGame.ExternalId}' with status '{validGameStatus.JoinAsStringByComma()}' but game status is '{cachedGame.Status}'");
+                    $"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{gameStatuses.JoinAsStringByComma()}' but game status is '{cachedGame.Status}'");
             }
         }
 
@@ -142,7 +131,9 @@ namespace TGS.Services.GameOperations
             foreach (var t in data.Transactions)
             {
                 if (t.GameActionType != GameActionType.PlaceBet)
+                {
                     continue;
+                }
 
                 var internalCurrency =
                     await _currencyMapper.ExternalToInternalAsync(t.CurrencyCode, data.GameProviderId);
@@ -160,6 +151,23 @@ namespace TGS.Services.GameOperations
         {
             var currencyCode = await _currencyMapper.InternalToExternalAsync(r.CurrencyCode, gameProviderId);
             return r with { CurrencyCode = currencyCode };
+        }
+
+        private async Task<BetResult> ExecuteGamePlayActionAsync(BetData data, Func<BetData, Task<BetResult>> execute,
+            Func<CachedPlayer, Task> preAction = null)
+        {
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+
+            if (preAction != null)
+            {
+                await preAction(player);
+            }
+
+            data = await EnsureMappingsAsync(data, player.DefaultWalletCurrencyCode);
+
+            var r = await execute(data);
+
+            return await EnsureMappingsAsync(data.GameProviderId, r);
         }
     }
 }

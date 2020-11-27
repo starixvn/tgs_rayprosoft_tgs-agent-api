@@ -12,11 +12,12 @@ namespace TGS.Core.DataServices.Models
         public int PlaceBetTimeout { get; set; }
         public int SettleBetTimeout { get; set; }
         public virtual ICollection<Game> Games { get; set; }
+        public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
         public virtual ICollection<LicenseeGameProvider> Licensees { get; set; }
+        public virtual ICollection<BrandGameProvider> Brands { get; set; }
         public virtual ICollection<GameProviderCurrency> Currencies { get; set; }
         public virtual ICollection<GameProviderLanguage> Languages { get; set; }
         public virtual ICollection<GameProviderConfiguration> GameProviderConfigurations { get; set; }
-        public virtual ICollection<LicenseeGameProviderConfiguration> LicenseeGameProviderConfigurations { get; set; }
         public virtual ICollection<GameProviderBetLimit> GameProviderBetLimits { get; set; }
     }
 }

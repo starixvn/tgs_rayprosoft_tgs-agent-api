@@ -22,14 +22,14 @@ namespace TGS.Services.Operations.Extensions
 
             services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
             services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
-            services.AddScoped<ILicenseeCurrencyCodeMapper, LicenseeCurrencyCodeMapper>();
-            services.AddScoped<ILicenseeLanguageCodeMapper, LicenseeLanguageCodeMapper>();
+            services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
+            services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
 
             #endregion
 
             #region Queries
                         
-            services.AddFactory<ILicenseeQueries, LicenseeQueries>();
+            services.AddFactory<IBrandQueries, BrandQueries>();
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
@@ -49,10 +49,10 @@ namespace TGS.Services.Operations.Extensions
 
             #region Operations
 
-            services.AddScoped<ILicenseeOperations, LicenseeOperations>();
+            services.AddScoped<IBrandOperations, BrandOperations>();
             services.AddScoped<IGameProviderOperations, GameProviderOperations>();
             services.AddScoped<IPlayerOperations, PlayerOperations>();
-            services.AddScoped<ILicenseeGameProviderOperations, LicenseeGameProviderOperations>();
+            services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
             services.AddScoped<ISettingOperations, SettingOperations>();
             services.AddScoped<ILocalizationOperations, LocalizationOperations>();
             services.AddScoped<IPluggableOperations, PluggableOperations>();

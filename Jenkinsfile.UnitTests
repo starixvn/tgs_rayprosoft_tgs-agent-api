@@ -5,10 +5,10 @@ pipeline {
           steps {
             checkout([
               $class: 'GitSCM',
-              branches: [[name: "*/${params.branch}" ]],
+			  branches: [[name: "*/develop" ]],
               userRemoteConfigs: [[
                 url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
-                credentialsId: 'gitlab_userpwd',
+                credentialsId: 'gitlab-user-pwd',
               ]]
              ])
            }

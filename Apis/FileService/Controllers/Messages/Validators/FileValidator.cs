@@ -6,7 +6,7 @@ namespace TGS.Apis.FileService.Controllers.Messages.Validators
 {
     public class FileValidator : AbstractValidator<UploadRequest>
     {
-        public FileValidator(IOptions<FileSetting> options)
+        public FileValidator(IOptions<FileSettings> options)
         {
             RuleFor(x => x.File.Length)
                 .ExclusiveBetween(0, options.Value.FileSizeLimit)

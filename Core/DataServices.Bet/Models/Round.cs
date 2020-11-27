@@ -25,9 +25,12 @@ namespace TGS.Core.DataServices.Bet.Models
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset? ClosedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
-        public Guid? LicenseeId { get; set; }
+        public Guid ResellerId { get; set; }
+        public string ResellerCode { get; set; }
+        public Guid LicenseeId { get; set; }
         public string LicenseeCode { get; set; }
-        public string LicenseeName { get; set; }
+        public Guid? BrandId { get; set; }
+        public string BrandCode { get; set; }
         public DateTimeOffset? ExternalCreatedOn { get; set; }
         public DateTimeOffset? ExternalClosedOn { get; set; }
         public decimal? BetAmount { get; set; }
