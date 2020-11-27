@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker { image "mcr.microsoft.com/dotnet/sdk:5.0"
-                  args '-u root:root -v $HOME/workspace'
-            
-        }
-    }
+    agent any
     stages {
         stage('Checkout SCM') {
           steps {
