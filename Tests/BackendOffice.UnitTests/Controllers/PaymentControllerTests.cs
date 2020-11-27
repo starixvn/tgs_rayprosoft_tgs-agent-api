@@ -55,7 +55,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [TestCase(false)]
         public async Task Can_Get_Payments(bool showAll)
         {
-            var request = new PaymentsRequest
+            var request = new GetPaymentsRequest
             {
                 PaymentStatus = PaymentStatus.Enabled,
                 Page = 1,

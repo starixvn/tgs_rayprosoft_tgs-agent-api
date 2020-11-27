@@ -12,6 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.5.0.36" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.101" />
     <PackageReference Include="AWSSDK.S3" Version="3.5.4" />
@@ -89,6 +91,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Player.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Reseller.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Reseller.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Role.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -140,6 +147,10 @@
     <EmbeddedResource Update="Resources\PaymentVendor.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>PaymentVendor.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Reseller.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Reseller.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\StationLetter.resx">
       <LastGenOutput>StationLetter.Designer.cs</LastGenOutput>

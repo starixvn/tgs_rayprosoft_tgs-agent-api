@@ -46,7 +46,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 
         [HttpGet]
         [Description("Get Payments")]
-        public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] PaymentsRequest request)
+        public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] GetPaymentsRequest request)
         {
             return _queries.GetQueries()
                 .Include(p => p.PaymentPlayerList).ThenInclude(pp => pp.Player)
