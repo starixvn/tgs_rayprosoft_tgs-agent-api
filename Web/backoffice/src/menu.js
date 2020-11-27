@@ -28,6 +28,12 @@ import {
   nameMessages as GameManagementNameMessages,
   codeLabelPair as gameManagementLabelPair
 } from "./game/menu"
+import { codeMenuContentPair as merchantPair } from "./merchant"
+import {
+  Code as MerchantCode,
+  nameMessages as MerchantName,
+  codeLabelPair as merchantLabelPair
+} from "./merchant/menu"
 import { codeMenuContentPair as systemPair } from "./system"
 import {
   Code as SystemCode,
@@ -79,6 +85,7 @@ export const allMenuContentPairs = () => [
   platformPair,
   playerManagementPair,
   gameManagementPair,
+  merchantPair,
   systemPair
 ]
 
@@ -96,6 +103,7 @@ export const useLabel = ({ codes = [] }) => {
     playerManagementLabelPair,
     systemLabelPair,
     gameManagementLabelPair,
+    merchantLabelPair,
     platformLabelPair
   ]
   return findlLabel({
@@ -128,6 +136,8 @@ const moduleLabel = ({ code = "", locale }) => {
       return getTrans(PlayerManagementNameMessages, locale)
     case GameManagementCode:
       return getTrans(GameManagementNameMessages, locale)
+    case MerchantCode:
+      return getTrans(MerchantName, locale)
     case SystemCode:
       return getTrans(SystemNameMessages, locale)
     default:

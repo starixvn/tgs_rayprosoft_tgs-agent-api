@@ -189,6 +189,26 @@ namespace TGS.Core.DataServices.DataInitializers
                         }
                     }
                 },
+                new MenuSetting("Merchant")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Companies")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Platforms")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
                 new MenuSetting("Agent")
                 {
                     SubMenus = new[]

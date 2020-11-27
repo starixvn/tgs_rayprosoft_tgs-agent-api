@@ -4,19 +4,19 @@ import { Menu as _Menu, findlLabel } from "../menu"
 import {
   Code as CompanyCode,
   codeLabelPair as companyPair
-} from "./company/menu"
+} from "./companies/menu"
 import {
   Code as PlatformCode,
   codeLabelPair as platformPair
 } from "./platforms/menu"
 import { getTrans, useTrans } from "../i18n"
 
-const nameMessage = {
+export const nameMessages = {
   zh: "商户管理",
   en: "Merchant Management"
 }
 
-export const Name = () => useTrans(nameMessage)
+export const Name = () => useTrans(nameMessages)
 
 export const Code = "merchant"
 
