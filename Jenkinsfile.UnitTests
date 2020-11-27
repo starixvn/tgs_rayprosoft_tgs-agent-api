@@ -1,8 +1,8 @@
 pipeline {
     agent any
-	#environment {
-	#   withDotNet 
-	#}
+	//environment {
+	//  withDotNet 
+    //}
 	tools {
 	   sdk "dotnetsdk"
 	}
