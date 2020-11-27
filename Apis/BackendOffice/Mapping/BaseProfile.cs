@@ -1,17 +1,16 @@
 ﻿using AutoMapper;
-using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
-using TGS.Core.DataServices.Models;
 
 namespace TGS.Apis.BackendOffice.Mapping
 {
-    public class MappingProfile : Profile
+    public class BaseProfile : Profile
     {
         public static MapperConfiguration Config = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<MappingProfile>();
+            cfg.AddProfile<BaseProfile>();
+            cfg.AddProfile<ResellerProfile>();
         });
 
-        public MappingProfile()
+        public BaseProfile()
         {
             CreateMap<string, string>().ConvertUsing<NullStringConverter>();
             // Domain to Resource
@@ -21,11 +20,6 @@ namespace TGS.Apis.BackendOffice.Mapping
             //// Resource to Domain
             //CreateMap<MusicResource, Music>();
             //CreateMap<SaveMusicResource, Music>();
-            CreateMap<CreateResellerRequest, Reseller>();
-            CreateMap<UpdateResellerRequest, Reseller>();
-            CreateMap<Reseller, ResellerModel>();
-            CreateMap<Currency, ResellerCurrencyModel>();
-            CreateMap<Language, ResellerLanguageModel>();
         }
 
         public class NullStringConverter : ITypeConverter<string, string>

@@ -8,10 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 using TGS.Apis.BackendOffice.DataService.Services;
+using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Messages;
-using Reseller = TGS.Apis.BackendOffice.Resources.Reseller;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -67,20 +66,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return new GetResellerResponse
             {
                 Valid = true,
-                Reseller = new ResellerModel
-                {
-                    Id = reseller.Id,
-                    Code = reseller.Code,
-                    Name = reseller.Name,
-                    ResellerCurrencies = reseller.Currencies
-                        .Select(x => _mapper.Map<Currency, ResellerCurrencyModel>(x.Currency)).ToArray(),
-                    ResellerLanguages = reseller.Languages
-                        .Select(x => _mapper.Map<Language, ResellerLanguageModel>(x.Language)).ToArray(),
-                    Description = reseller.Description,
-                    OperationalEmail = reseller.OperationalEmail,
-                    CreatedOn = reseller.CreatedOn,
-                    UpdatedOn = reseller.UpdatedOn
-                }
+                Reseller = _mapper.Map<Core.DataServices.Models.Reseller, ResellerModel>(reseller)
             };
         }
 

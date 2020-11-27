@@ -1,7 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +25,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
     {
         private readonly ITgsQueries<PaymentAuditLog> _auditLogQueries;
         private readonly ITgsCommands<Core.DataServices.Models.Payment> _commands;
+        private readonly IMapper _mapper;
         private readonly IPaymentService _paymentService;
         private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsQueries<Core.DataServices.Models.Payment> _queries;
@@ -34,6 +38,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
             ITgsQueries<Player> playerQueries,
             IUploadService uploadService,
             IPaymentService paymentService,
+            IMapper mapper,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
@@ -42,12 +47,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
             _playerQueries = playerQueries;
             _paymentService = paymentService;
             _auditLogQueries = auditLogQueries;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [Description("Get Payments")]
         public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] GetPaymentsRequest request)
         {
+            Expression<Func<Core.DataServices.Models.Payment, string[]>>
+                dtoExpression = r => GetDesignatedUsersAsync(r);
+            _mapper.Map<Expression<Func<Core.DataServices.Models.Payment, string[]>>>(dtoExpression);
+
             return _queries.GetQueries()
                 .Include(p => p.PaymentPlayerList).ThenInclude(pp => pp.Player)
                 .Include(p => p.VipLevels)
@@ -56,37 +66,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                 .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
                                              p.PaymentMethod.Name.Contains(request.Keyword) ||
                                              p.PaymentChannel.Name.Contains(request.Keyword))
-                .Select(p => new PaymentModel
-                {
-                    Id = p.Id,
-                    Number = p.DisplayOrder,
-                    PaymentVendorName = p.PaymentVendor.Name,
-                    PaymentMethodName = p.PaymentMethod.Name,
-                    PaymentChannelName = p.PaymentChannel.Name,
-                    TransferType = p.TransferType,
-                    ChannelName = p.ChannelName,
-                    PlayerListCondition = p.PlayerListCondition,
-                    AllPlayers = p.AllPlayers,
-                    DepositedAmountMin = p.DepositedAmountMin,
-                    DepositedAmountMax = p.DepositedAmountMax,
-                    DepositedAmountUnlimited = p.DepositedAmountUnlimited,
-                    IdentityAuthentication = p.IdentityAuthentication,
-                    PhoneAuthentication = p.PhoneAuthentication,
-                    TransferLimitFrom = p.TransferLimitFrom,
-                    TransferLimitTo = p.TransferLimitTo,
-                    PaymentStatus = p.PaymentStatus,
-                    DesignatedUsers = GetDesignatedUsersAsync(p).Any(),
-                    PaymentFee = new PaymentFeeModel
-                    {
-                        FeePercentage = p.FeePercentage,
-                        HighestFee = p.HighestFee,
-                        LowestFee = p.LowestFee
-                    },
-                    CreatedByUsername = p.CreatedByUsername,
-                    UpdatedByUsername = p.UpdatedByUsername,
-                    CreatedOn = p.CreatedOn,
-                    UpdatedOn = p.UpdatedOn
-                })
+                .ProjectTo<PaymentModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking().CreatePagedResponseAsync(request);
         }
 
