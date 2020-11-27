@@ -1,7 +1,10 @@
 pipeline {
     agent any
+	#environment {
+	#   withDotNet 
+	#}
 	tools {
-	   dotnetsdk
+	   sdk "dotnetsdk"
 	}
     stages {
         stage('Checkout SCM') {
