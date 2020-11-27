@@ -8,7 +8,7 @@ namespace TGS.Apis.FileService.Extensions
         public static IServiceCollection AddFile(this IServiceCollection services, IConfiguration configuration,
             string configSectionName = "FileSetting")
         {
-            services.Configure<FileSetting>(configuration.GetSection(configSectionName));
+            services.Configure<FileSettings>(configuration.GetSection(configSectionName));
 
             return services;
         }
