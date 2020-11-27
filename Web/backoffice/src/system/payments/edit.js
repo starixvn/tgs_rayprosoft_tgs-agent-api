@@ -4,6 +4,7 @@ import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Stack,
   Box,
+  Set,
   Button,
   Text,
   Modal,
@@ -73,11 +74,15 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
   let {
     data = {},
     isLoading: isLoadingPayment,
-    error: getPaymentDataError
+    error: getPaymentDataError,
+    deleteCache: deleteGetPaymentCache
   } = usePayment(record?.id)
 
   let [submitData, setSubmit] = useState()
-  let { result, isLoading, error } = useUpdatePayment(record.id, submitData)
+  let { result, isLoading, error, mutate } = useUpdatePayment(
+    record.id,
+    submitData
+  )
 
   if (isLoadingPayment) {
     return <LoadingBackdrop {...dialog} />
@@ -103,8 +108,14 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
         result={result}
         isLoading={isLoading}
         error={error}
-        onCloseErrorAlert={() => setSubmit(undefined)}
-        onSubmitted={onSubmitted}
+        onCloseErrorAlert={() => {
+          setSubmit(undefined)
+          mutate(undefined, false)
+        }}
+        onSubmitted={() => {
+          deleteGetPaymentCache()
+          onSubmitted && onSubmitted()
+        }}
         footer={
           <ConfirmButtonFooter
             alignX="center"
@@ -210,12 +221,20 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
                 title={<Trans zh="白名单列表" en="Whitelist" />}
                 list={record.whitelist}
                 onUploaded={(list) => setFieldValue("whitelist", list)}
+                clear={() => {
+                  record.whitelist = []
+                  setFieldValue("whitelist", [])
+                }}
                 fileName="whitelist.xlsx"
               />
               <UploadListColumn
                 title={<Trans zh="黑名单列表" en="Blacklist" />}
                 list={record.blacklist}
                 onUploaded={(list) => setFieldValue("blacklist", list)}
+                clear={() => {
+                  record.blacklist = []
+                  setFieldValue("blacklist", [])
+                }}
                 fileName="blacklist.xlsx"
               />
             </Columns>
@@ -325,7 +344,13 @@ const List = applyTheme(_List, {
   }
 })
 
-const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
+const UploadListColumn = ({
+  title,
+  list = [],
+  fileName = "",
+  onUploaded,
+  clear
+}) => {
   let uploadFileInputRef = useRef()
   let [formData, setFormData] = useState()
   let { result, isLoading, error, clearCache, deleteCache } = usePaymentUpload(
@@ -368,7 +393,7 @@ const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
           <List.Item key={item}>{item}</List.Item>
         ))}
       </List>
-      <Box alignX="center">
+      <Set alignX="center" orientation="horizontal">
         <input
           ref={uploadFileInputRef}
           type="file"
@@ -398,7 +423,10 @@ const UploadListColumn = ({ title, list = [], fileName = "", onUploaded }) => {
         >
           <Trans zh="上传" en="Upload" />
         </Button>
-      </Box>
+        <Button type="button" size="small" onClick={clear}>
+          <Trans zh="清除" en="Clear" />
+        </Button>
+      </Set>
     </Columns.Column>
   )
 }

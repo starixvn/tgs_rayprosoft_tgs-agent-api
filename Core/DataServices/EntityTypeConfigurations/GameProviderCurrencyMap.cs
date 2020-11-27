@@ -23,12 +23,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasForeignKey(gpc => gpc.CurrencyCode);
 
             builder.Property(gpc => gpc.CurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(16));
 
             builder.Property(gpc => gpc.GameProviderCurrencyCode)
                 .HasColumnType(ColumnTypes.Nvarchar(16))
-                .IsUnicode()
                 .IsRequired();
         }
     }

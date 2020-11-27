@@ -181,8 +181,8 @@ $RECYCLE.BIN/
 #NLog
 **/logs/
 
-# Local Stack
-.localstack/**
-
 # Upload Images
 **/UploadImages/*.*
+
+# docker
+.docker/**

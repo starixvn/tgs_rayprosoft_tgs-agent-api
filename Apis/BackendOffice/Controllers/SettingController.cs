@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
-using TGS.Apis.BackendOffice.DataService.Models;
-using TGS.Apis.BackendOffice.DataService.Repositories;
+using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Models.Messages;
+using Setting = TGS.Core.DataServices.Models.Setting;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -16,12 +17,12 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class SettingController : BaseContextController
     {
-        private readonly IBackendOfficeQueries<Setting> _queries;
-        private readonly IBackendOfficeCommands<Setting> _commands;
+        private readonly ITgsCommands<Setting> _commands;
+        private readonly ITgsQueries<Setting> _queries;
 
         public SettingController(
-            IBackendOfficeQueries<Setting> queries,
-            IBackendOfficeCommands<Setting> commands,
+            ITgsQueries<Setting> queries,
+            ITgsCommands<Setting> commands,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _queries = queries;
@@ -29,7 +30,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("")]
-        [HttpGet, Description("Get setting list")]
+        [HttpGet]
+        [Description("Get setting list")]
         public Task<PagedResponse<SettingModel>> GetListAsync([FromQuery] GetSettingsRequest request)
         {
             return _queries.GetQueries()
@@ -47,13 +49,14 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("{key}")]
-        [HttpGet, Description("Get setting by key")]
+        [HttpGet]
+        [Description("Get setting by key")]
         public async Task<GetSettingResponse> GetSingleAsync(string key)
         {
             var setting = await _queries.GetSingleAsync(p => p.Key == key);
             if (setting == null)
             {
-                return CreateInvalidResponse<GetSettingResponse>(Resources.Common.NotFound);
+                return CreateInvalidResponse<GetSettingResponse>(Common.NotFound);
             }
 
             return new GetSettingResponse
@@ -72,7 +75,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPost(""), Description("Create a setting")]
+        [HttpPost("")]
+        [Description("Create a setting")]
         public async Task<MessageResponse> CreateAsync([FromBody] CreateSettingRequest request)
         {
             var settingExisted = await _queries.GetSingleAsync(p => p.Key == request.Key);
@@ -94,13 +98,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut("{key}"), Description("Update setting by key")]
+        [HttpPut("{key}")]
+        [Description("Update setting by key")]
         public async Task<MessageResponse> UpdateAsync(string key, [FromBody] UpdateSettingRequest request)
         {
             var setting = await _queries.GetSingleAsync(p => p.Key == key);
             if (setting == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Common.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Common.NotFound);
             }
 
             setting.Value = request.Value;
@@ -113,13 +118,14 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [Route("{key}")]
-        [HttpDelete, Description("Delete setting by key")]
+        [HttpDelete]
+        [Description("Delete setting by key")]
         public async Task<MessageResponse> DeleteAsync(string key)
         {
             var setting = await _queries.GetSingleAsync(p => p.Key == key);
             if (setting == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Common.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Common.NotFound);
             }
 
             await _commands.DeleteAsync(setting);

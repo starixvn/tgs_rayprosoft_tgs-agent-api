@@ -1,50 +1,45 @@
-﻿using Amazon.CloudWatchLogs;
+﻿using System;
+using Amazon.CloudWatchLogs;
 using Amazon.S3;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace TGS.Apis.FileService.Extensions
 {
     public static class AwsServiceExtensions
     {
         public static IServiceCollection AddAwsService(this IServiceCollection services,
-            IConfiguration configuration, IWebHostEnvironment environment, string configSectionName = "aws")
+            IConfiguration configuration, string configSectionName = "aws")
         {
             services.Configure<AwsSettings>(configuration.GetSection(configSectionName));
             var awsSettings = configuration.GetSection(configSectionName).Get<AwsSettings>();
             configuration.Bind(awsSettings);
             services.AddSingleton(awsSettings);
 
-            if (environment.IsDevelopment())
+            services.AddSingleton<IAmazonS3>(provider =>
             {
-                services.AddSingleton<IAmazonS3>(provider =>
+                var settings = provider.GetService<AwsSettings>();
+                if (settings == null)
                 {
-                    var settings = provider.GetService<AwsSettings>();
-                    return new AmazonS3Client(new AmazonS3Config
-                    {
-                        UseHttp = true,
-                        ServiceURL = settings?.S3.ServiceUrl,
-                        ForcePathStyle = true
-                    });
-                });
-                services.AddSingleton<IAmazonCloudWatchLogs>(provider =>
+                    throw new Exception("can't get aws settings");
+                }
+
+                return new AmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey, new AmazonS3Config
                 {
-                    var settings = provider.GetService<AwsSettings>();
-                    return new AmazonCloudWatchLogsClient(new AmazonCloudWatchLogsConfig
-                    {
-                        UseHttp = true,
-                        ServiceURL = settings?.CloudWatch.ServiceUrl
-                    });
+                    UseHttp = true,
+                    ServiceURL = settings.S3.ServiceUrl,
+                    ForcePathStyle = true
                 });
-            }
-            else
+            });
+            services.AddSingleton<IAmazonCloudWatchLogs>(provider =>
             {
-                services.AddDefaultAWSOptions(configuration.GetAWSOptions());
-                services.AddAWSService<IAmazonS3>();
-                services.AddAWSService<IAmazonCloudWatchLogs>();
-            }
+                var settings = provider.GetService<AwsSettings>();
+                return new AmazonCloudWatchLogsClient(new AmazonCloudWatchLogsConfig
+                {
+                    UseHttp = true,
+                    ServiceURL = settings?.CloudWatch.ServiceUrl
+                });
+            });
 
             return services;
         }

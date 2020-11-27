@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Linq;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
@@ -8,6 +12,7 @@ namespace TGS.Core.DataServices.DataInitializers
 {
     partial class DataInitializer
     {
+
         internal record SBOGameProvider : IGameProvider
         {
             private static readonly string EndpointPath = "/{CULTURE}/home";

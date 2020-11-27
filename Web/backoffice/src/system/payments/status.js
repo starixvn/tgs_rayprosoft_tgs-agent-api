@@ -105,7 +105,7 @@ export const ToggleButtonField = ({ name = "paymentStatus" }) => {
     <Button
       type="button"
       size="small"
-      palette={statusPalette(paymentStatus)}
+      palette={toPalette(paymentStatus)}
       onClick={(event) => {
         let newStatus = toggleStatus(paymentStatus)
         setFieldValue(name, newStatus)
@@ -127,7 +127,7 @@ const toggleStatus = (status) => {
   }
 }
 
-const statusPalette = (status) => {
+const toPalette = (status) => {
   switch (status) {
     case DisabledName:
       return "danger"
@@ -142,13 +142,17 @@ const statusPalette = (status) => {
 export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
   let { id, paymentStatus } = record
   let [newStatus, setSubmit] = useState()
-  let { result, isLoading, error, clearCache } = useChangePaymentStatus(
-    id,
-    newStatus
-  )
+  let {
+    result,
+    isLoading,
+    error,
+    deleteCache,
+    mutate
+  } = useChangePaymentStatus(id, newStatus)
 
   const reset = () => {
-    clearCache()
+    deleteCache()
+    mutate(undefined, false)
     setSubmit(undefined)
   }
 
@@ -163,7 +167,7 @@ export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
     <Button
       isLoading={isLoading}
       disabled={isLoading || disabled}
-      palette={statusPalette(paymentStatus)}
+      palette={toPalette(paymentStatus)}
       onClick={() => {
         reset()
         setSubmit(toggleStatus(paymentStatus))
@@ -173,14 +177,7 @@ export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
       `}
     >
       <Label value={record.paymentStatus} />
-      {error && (
-        <AlertDialog
-          {...error}
-          onClickClose={() => {
-            setSubmit(undefined)
-          }}
-        />
-      )}
+      {error && <AlertDialog {...error} onClickClose={reset} />}
     </Button>
   )
 }

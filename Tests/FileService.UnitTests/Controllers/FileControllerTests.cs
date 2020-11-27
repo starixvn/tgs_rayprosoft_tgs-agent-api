@@ -39,7 +39,7 @@ namespace TGS.Tests.FileService.UnitTests.Controllers
             var response = await _controller.UploadFileAsync(request);
 
             Assert.IsTrue(response.Valid);
-            Assert.AreEqual(response.Url, url);
+            Assert.AreEqual(response.Location, url);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace TGS.Tests.FileService.UnitTests.Controllers
             var response = await _controller.UploadFileS3Async(request);
 
             Assert.IsTrue(response.Valid);
-            Assert.AreEqual(response.Url, url);
+            Assert.AreEqual(response.Location, url);
         }
     }
 }

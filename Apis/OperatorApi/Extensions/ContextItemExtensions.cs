@@ -7,8 +7,8 @@ namespace TGS.Apis.OperatorApi.Extensions
 {
     internal static class ContextItemExtensions
     {
-        public static Guid GetLicenseeId(this IDictionary<object, object> items) =>
-            items.TryGetValue(LicenseeId, out var v) && v != null ? (Guid) v : Guid.Empty;
+        public static Guid GetBrandId(this IDictionary<object, object> items) =>
+            items.TryGetValue(BrandId, out var v) && v != null ? (Guid) v : Guid.Empty;
 
         public static PlayerTokenData GetPlayerTokenData(this IDictionary<object, object> items) =>
             items.TryGetValue(PlayerToken, out var v) && v != null ? (PlayerTokenData) v : null;

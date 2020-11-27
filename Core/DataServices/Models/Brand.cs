@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using TGS.Core.Models.Enums;
+
+namespace TGS.Core.DataServices.Models
+{
+    public class Brand : BaseEntity
+    {
+        public Status Status { get; set; }
+
+        public string Description { get; set; }
+        
+        public string OperationalEmail { get; set; }
+        
+        public string TimeZoneId { get; set; }
+
+        public Guid LicenseeId { get; set; }
+
+        public virtual Licensee Licensee { get; set; }
+
+        public string ClientId { get; set; }
+
+        public string SecretKey { get; set; }
+
+        public string ApiKey { get; set; }
+
+        public virtual ICollection<Player> Players { get; set; }
+
+        public virtual ICollection<BrandGame> Games { get; set; }
+
+        public virtual ICollection<BrandCurrency> Currencies { get; set; }
+
+        public virtual ICollection<BrandLanguage> Languages { get; set; }
+
+        public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
+
+        public virtual ICollection<BrandBetLimit> BetLimitGroups { get; set; }
+
+        public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
+    }
+}

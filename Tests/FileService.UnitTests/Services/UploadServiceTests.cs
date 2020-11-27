@@ -52,7 +52,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
             _repositoryMock.Verify(
                 c => c.InsertAsync(It.IsAny<File>()), Times.Once);
 
-            Assert.IsTrue(url.IndexOf($"{settings.Url}", StringComparison.Ordinal) > -1);
+            Assert.IsTrue(url.IndexOf($"{settings.Path}", StringComparison.Ordinal) > -1);
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
             _repositoryMock.Verify(
                 c => c.InsertAsync(It.IsAny<File>()));
 
-            Assert.IsTrue(url.IndexOf($"{settings.S3.ServiceUrl}/{settings.S3.Bucket}", StringComparison.Ordinal) > -1);
+            Assert.IsTrue(url.IndexOf($"{settings.ServiceUrl}/{settings.S3.Bucket}", StringComparison.Ordinal) > -1);
         }
 
         private Fixture Customize<T>(Func<ICustomizationComposer<T>, ISpecimenBuilder> composerTransformation)

@@ -1,5 +1,7 @@
-import _format from "date-fns/fp/format"
-import isValid from "date-fns/fp/isValid"
+import format from "date-fns/format"
+import isValid from "date-fns/isValid"
+import { enUS, zhCN } from "date-fns/locale"
+import { useLocale, Locales } from "../i18n"
 
 export const Format = {
   Date: "yyyy/MM/dd",
@@ -8,6 +10,10 @@ export const Format = {
 
 export const DateTimeFormat = `${Format.Date} ${Format.Time}`
 
-const format = _format(`${Format.Date} ${Format.Time}`)
+export const useFormattedTimeString = (value) => {
+  let date = new Date(value)
+  return isValid(date) ? format(date, `HH:mm`) : ""
+}
 
-export default (date) => (isValid(date) ? format(date) : "")
+export default (date) =>
+  isValid(date) ? format(date, `${Format.Date} ${Format.Time}`) : ""

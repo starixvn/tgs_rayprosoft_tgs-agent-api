@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 COPY ["Apis/FileService/FileService.csproj", "Apis/FileService/"]
+COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
 COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
 COPY ["Core/DataServices/DataServices.csproj", "Core/DataServices/"]
@@ -22,4 +23,5 @@ RUN dotnet publish "FileService.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "FileService.dll"]
+RUN mkdir -p /app/UploadImages
+ENTRYPOINT ["dotnet", "TGS.Apis.FileService.dll"]

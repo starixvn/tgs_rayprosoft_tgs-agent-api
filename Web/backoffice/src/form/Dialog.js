@@ -98,9 +98,15 @@ export const Dialog = ({
 
 export const Footer = Dialog.Footer
 
-export const ConfirmButtonFooter = ({ isLoading, disabled, ...props }) => {
+export const ConfirmButtonFooter = ({
+  isLoading,
+  disabled,
+  width = "100%",
+  alignX = "center",
+  ...props
+}) => {
   return (
-    <Box {...props}>
+    <Box width={width} alignX={alignX} {...props}>
       <Button type="submit" isLoading={isLoading} disabled={disabled}>
         <SubmitText />
       </Button>

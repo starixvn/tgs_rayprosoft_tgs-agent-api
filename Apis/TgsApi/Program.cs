@@ -39,7 +39,6 @@ namespace TGS.Apis.TgsApi
                         }
 
                         config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", true);
-                        config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", true);
                     })
                     .ConfigureWebHostDefaults(webBuilder =>
                     {

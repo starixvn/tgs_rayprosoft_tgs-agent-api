@@ -23,8 +23,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.Reason)
-                .HasColumnType(ColumnTypes.Nvarchar(4000))
-                .IsRequired();
+                .HasColumnType(ColumnTypes.Nvarchar(4000));
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))

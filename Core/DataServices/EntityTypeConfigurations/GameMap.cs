@@ -17,7 +17,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.ExternalId)
@@ -34,11 +34,11 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(512));
 
             builder.Property(c => c.Type)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.PlatformType)
-                .HasColumnType(ColumnTypes.SmallInt)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.SubGame)
@@ -49,25 +49,32 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            builder.Property(c => c.AvailableCurrencies)
+                .HasColumnType(ColumnTypes.Nvarchar(1024))
+                .IsRequired()
+                .HasDefaultValue(string.Empty);
+
             builder.HasOne(p => p.GameProvider)
                 .WithMany(p => p.Games)
                 .HasForeignKey(p => p.GameProviderId);
 
-            builder.HasIndex(c => c.GameProviderId).IncludeProperties(c => new
-            {
-                c.Id,
-                c.Code,
-                c.Name,
-                c.ExternalId,
-                c.PlatformType,
-                c.Type,
-                c.Status,
-                c.Description,
-                c.EndpointPath,
-                c.SubGame,
-                c.HasTurnoverOnTieBet,
-                c.RuleUrl
-            });
+            builder.HasIndex(c => c.GameProviderId)
+                .IncludeProperties(c => new
+                {
+                    c.Id,
+                    c.Code,
+                    c.Name,
+                    c.ExternalId,
+                    c.PlatformType,
+                    c.Type,
+                    c.Status,
+                    c.AvailableCurrencies,
+                    c.EndpointPath,
+                    c.SubGame,
+                    c.HasTurnoverOnTieBet,
+                    c.RuleUrl,
+                    c.Description
+                });
         }
     }
 }

@@ -14,28 +14,23 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.IpAddress)
                 .HasColumnType(ColumnTypes.Nvarchar(64))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(256))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.InternalNote)
                 .HasColumnType(ColumnTypes.Nvarchar(256))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(c => c.CreatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
@@ -44,6 +39,19 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.HasOne(c => c.Reseller)
+                .WithMany()
+                .HasForeignKey(c => c.ResellerId);
+
+            builder.HasOne(c => c.Licensee)
+                .WithMany()
+                .HasForeignKey(c => c.LicenseeId);
+
+            
+            builder.HasOne(c => c.Brand)
+                .WithMany()
+                .HasForeignKey(c => c.BrandId);
         }
     }
 }

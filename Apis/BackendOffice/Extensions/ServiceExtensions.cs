@@ -38,8 +38,6 @@ namespace TGS.Apis.BackendOffice.Extensions
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddRepository<IBackendOfficeRepository, BackendOfficeRepository>(configuration, "BackendOffice");
-
             services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
             services.AddTgsRepository(configuration, "Tgs")
                 .AddBetRepository(configuration, "Bet");
@@ -48,8 +46,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddScoped<ExceptionMiddleware>();
 
             services.AddTransient<IStreamToString, StreamToString>();
-            services.AddTransient(typeof(IBackendOfficeCommands<>), typeof(BackendOfficeCommands<>));
-            services.AddTransient(typeof(IBackendOfficeQueries<>), typeof(BackendOfficeQueries<>));
             services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));

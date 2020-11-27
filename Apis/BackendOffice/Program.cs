@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.Infrastructures.Extensions;
@@ -51,11 +50,6 @@ namespace TGS.Apis.BackendOffice
             await using (var betRepo = sp.GetRequiredService<IBetRepository>())
             {
                 await betRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
-            }
-
-            await using (var backOfficeRepo = sp.GetRequiredService<IBackendOfficeRepository>())
-            {
-                await backOfficeRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
             }
         }
     }

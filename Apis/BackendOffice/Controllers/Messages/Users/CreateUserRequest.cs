@@ -1,5 +1,5 @@
 ﻿using System;
-using TGS.Apis.BackendOffice.DataService.Enums;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Users
 {

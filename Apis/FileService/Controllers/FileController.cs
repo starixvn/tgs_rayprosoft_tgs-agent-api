@@ -23,7 +23,7 @@ namespace TGS.Apis.FileService.Controllers
             return new UploadResponse
             {
                 Valid = true,
-                Url = url
+                Location = url
             };
         }
 
@@ -34,7 +34,7 @@ namespace TGS.Apis.FileService.Controllers
             return new UploadResponse
             {
                 Valid = true,
-                Url = url
+                Location = url
             };
         }
     }

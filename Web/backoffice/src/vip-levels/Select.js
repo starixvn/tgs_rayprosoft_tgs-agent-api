@@ -3,7 +3,7 @@ import { css, Global } from "@emotion/core"
 import { Select as _Select } from "bumbag"
 import { Field as _Field } from "../select/Field"
 import AlertDialog from "../dialog/Alert"
-import { useVipLevels } from "./client"
+import { useVipLevelList } from "./client"
 
 export const Field = ({ required, validate, ...props }) => {
   let { name } = props
@@ -15,7 +15,7 @@ export const Field = ({ required, validate, ...props }) => {
 }
 
 export const Select = ({ required, ...props }) => {
-  let { items, isLoading, error } = useVipLevels()
+  let { items, isLoading, error } = useVipLevelList()
 
   if (isLoading) {
     return <_Select isLoading options={[]} {...props} />

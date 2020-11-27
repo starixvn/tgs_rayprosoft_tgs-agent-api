@@ -30,7 +30,7 @@ BEGIN
       AND r.PlayerCode = @playerCode
       AND ga.GameProviderConfigurationId = r.GameProviderConfigurationId
       AND ga.WalletId = r.WalletId
-      AND ga.[Type] IN (SELECT [Value] FROM @gameActionTypes) 	
+      AND ga.[Type] IN (SELECT [Value] FROM @gameActionTypes)
 END
 
 GO
