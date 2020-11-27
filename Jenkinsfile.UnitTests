@@ -1,7 +1,7 @@
 pipeline {
     agent any
 	tools {
-	   dotnetsdk '5.0'
+	   dotnetsdk 'v1.0.0'
 	}
     stages {
         stage('Checkout SCM') {
