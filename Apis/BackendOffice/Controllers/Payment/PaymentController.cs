@@ -2,13 +2,10 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
@@ -24,33 +21,21 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
     public partial class PaymentController : BaseContextController
     {
         private readonly ITgsQueries<PaymentAuditLog> _auditLogQueries;
-        private readonly ITgsCommands<Core.DataServices.Models.Payment> _commands;
-        private readonly IMapper _mapper;
-        private readonly IPaymentMappingShared _paymentMappingShared;
         private readonly IPaymentService _paymentService;
         private readonly ITgsQueries<Player> _playerQueries;
-        private readonly ITgsQueries<Core.DataServices.Models.Payment> _queries;
         private readonly IUploadService _uploadService;
 
         public PaymentController(
-            ITgsQueries<Core.DataServices.Models.Payment> queries,
-            ITgsCommands<Core.DataServices.Models.Payment> commands,
-            ITgsQueries<PaymentAuditLog> auditLogQueries,
             ITgsQueries<Player> playerQueries,
             IUploadService uploadService,
             IPaymentService paymentService,
-            IMapper mapper,
-            IPaymentMappingShared paymentMappingShared,
+            ITgsQueries<PaymentAuditLog> auditLogQueries,
             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
-            _queries = queries;
-            _commands = commands;
             _uploadService = uploadService;
             _playerQueries = playerQueries;
             _paymentService = paymentService;
             _auditLogQueries = auditLogQueries;
-            _mapper = mapper;
-            _paymentMappingShared = paymentMappingShared;
         }
 
         [HttpGet]
@@ -65,7 +50,37 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                 .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
                                              p.PaymentMethod.Name.Contains(request.Keyword) ||
                                              p.PaymentChannel.Name.Contains(request.Keyword))
-                .ProjectTo<PaymentModel>(_mapper.ConfigurationProvider)
+                .Select(p => new PaymentModel
+                {
+                    Id = p.Id,
+                    Number = p.DisplayOrder,
+                    PaymentVendorName = p.PaymentVendor.Name,
+                    PaymentMethodName = p.PaymentMethod.Name,
+                    PaymentChannelName = p.PaymentChannel.Name,
+                    TransferType = p.TransferType,
+                    ChannelName = p.ChannelName,
+                    PlayerListCondition = p.PlayerListCondition,
+                    AllPlayers = p.AllPlayers,
+                    DepositedAmountMin = p.DepositedAmountMin,
+                    DepositedAmountMax = p.DepositedAmountMax,
+                    DepositedAmountUnlimited = p.DepositedAmountUnlimited,
+                    IdentityAuthentication = p.IdentityAuthentication,
+                    PhoneAuthentication = p.PhoneAuthentication,
+                    TransferLimitFrom = p.TransferLimitFrom,
+                    TransferLimitTo = p.TransferLimitTo,
+                    PaymentStatus = p.PaymentStatus,
+                    DesignatedUsers = GetDesignatedUsersAsync(p).Any(),
+                    PaymentFee = new PaymentFeeModel
+                    {
+                        FeePercentage = p.FeePercentage,
+                        HighestFee = p.HighestFee,
+                        LowestFee = p.LowestFee
+                    },
+                    CreatedByUsername = p.CreatedByUsername,
+                    UpdatedByUsername = p.UpdatedByUsername,
+                    CreatedOn = p.CreatedOn,
+                    UpdatedOn = p.UpdatedOn
+                })
                 .CreatePagedResponseAsync(request);
         }
 
@@ -91,7 +106,38 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
             return new GetPaymentResponse
             {
                 Valid = true,
-                Payment = _mapper.Map<Core.DataServices.Models.Payment, PaymentModel>(payment)
+                Payment = new PaymentModel
+                {
+                    Id = payment.Id,
+                    PaymentVendorId = payment.PaymentVendor.Id,
+                    PaymentVendorName = payment.PaymentVendor.Name,
+                    PaymentMethodId = payment.PaymentVendor.Id,
+                    PaymentMethodName = payment.PaymentMethod.Name,
+                    PaymentChannelId = payment.PaymentMethod.Id,
+                    PaymentChannelName = payment.PaymentChannel.Name,
+                    ChannelName = payment.ChannelName,
+                    TransferLimitFrom = payment.TransferLimitFrom,
+                    TransferLimitTo = payment.TransferLimitTo,
+                    PlayerListCondition = payment.PlayerListCondition,
+                    AllPlayers = payment.AllPlayers,
+                    IdentityAuthentication = payment.IdentityAuthentication,
+                    PhoneAuthentication = payment.PhoneAuthentication,
+                    DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                    DepositedAmountMin = payment.DepositedAmountMin,
+                    DepositedAmountMax = payment.DepositedAmountMax,
+                    DesignatedUsers = payment.PaymentPlayerList.Count > 0,
+                    PaymentStatus = payment.PaymentStatus,
+                    Reason = payment.Reason,
+                    Whitelist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.White)
+                        .Select(p => p.Player.Username).ToArray(),
+                    Blacklist = payment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.Black)
+                        .Select(p => p.Player.Username).ToArray(),
+                    VipLevelIds = payment.VipLevels.Select(p => p.VipLevelId).ToArray(),
+                    CreatedByUsername = payment.CreatedByUsername,
+                    UpdatedByUsername = payment.UpdatedByUsername,
+                    CreatedOn = payment.CreatedOn,
+                    UpdatedOn = payment.UpdatedOn
+                }
             };
         }
 
@@ -104,7 +150,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
             return new GetPaymentFeeResponse
             {
                 Valid = true,
-                PaymentFee = _mapper.Map<PaymentFeeModel>(payment)
+                PaymentFee = new PaymentFeeModel
+                {
+                    FeePercentage = payment.FeePercentage,
+                    HighestFee = payment.HighestFee,
+                    LowestFee = payment.LowestFee
+                }
             };
         }
 
@@ -126,7 +177,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                 }
             }
 
-            if (await _queries.ExistsAsync(p => p.ChannelName == request.ChannelName))
+            if (await _paymentService.ExistsAsync(p => p.ChannelName == request.ChannelName))
             {
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NameExists);
             }
@@ -154,14 +205,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                 }
             }
 
-            var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
+            var payment = await _paymentService.GetPaymentAsync(q => q.Id == paymentId, tracking: true);
 
             if (payment == null)
             {
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NotFound);
             }
 
-            if (await _queries.ExistsAsync(p => p.Id != paymentId && p.ChannelName == request.ChannelName))
+            if (await _paymentService.ExistsAsync(p => p.Id != paymentId && p.ChannelName == request.ChannelName))
             {
                 return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NameExists);
             }
@@ -177,11 +228,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         public async Task<MessageResponse> UpdatePaymentHandlingFeeAsync(Guid paymentId,
             UpdatePaymentFeeRequest request)
         {
-            var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
-            payment.FeePercentage = request.FeePercentage;
-            payment.LowestFee = request.LowestFee;
-            payment.HighestFee = request.HighestFee;
-            await _commands.UpdateAsync(payment);
+            var payment = await _paymentService.GetPaymentAsync(q => q.Id == paymentId, tracking: true);
+
+            if (payment == null)
+            {
+                return CreateInvalidResponse<CreateUpdatePaymentResponse>(Resources.Payment.NotFound);
+            }
+
+            await _paymentService.UpdatePaymentHandlingFeeAsync(payment, request, Username);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -217,13 +272,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 
         [HttpPut("ChangeOrders")]
         [Description("Change Payment Order")]
-        public async Task<MessageResponse> ChangeOrder(ChangeOrderRequest request)
+        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
-            var ids = request.Orders.Select(q => q.Id);
-            var payments = await _queries.GetQueries().Where(q => ids.Contains(q.Id)).ToListAsync();
-            payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
-
-            await _commands.BatchInsertOrUpdateAsync(payments.ToArray());
+            await _paymentService.ChangeOrderAsync(request);
 
             return CreateValidResponse<MessageResponse>();
         }
@@ -232,7 +283,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         [Description("Get Designated Users")]
         public async Task<GetDesignatedUsersResponse> GetDesignatedUsersAsync(Guid id)
         {
-            var payment = await _queries.GetSingleAsync(x => x.Id == id,
+            var payment = await _paymentService.GetPaymentAsync(x => x.Id == id,
                 x => x.Include(p => p.PaymentPlayerList)
                     .ThenInclude(p => p.Player)
                     .Include(p => p.VipLevels).AsNoTracking());
@@ -242,13 +293,34 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                 return CreateInvalidResponse<GetDesignatedUsersResponse>(Resources.Payment.NotFound);
             }
 
-            var players = _paymentMappingShared.GetDesignatedUsers(payment);
+            var players = GetDesignatedUsersAsync(payment);
 
             return new GetDesignatedUsersResponse
             {
                 Valid = true,
                 Players = players
             };
+        }
+
+        private static string[] GetDesignatedUsersAsync(Core.DataServices.Models.Payment payment)
+        {
+            var vipLevelIds = payment.VipLevels.Select(x => x.VipLevelId).ToArray();
+            var playerCodes = payment.PaymentPlayerList.Where(x => x.ListType == PlayerListType.White)
+                .Select(p => p.PlayerCode).ToArray();
+            var isAll = payment.PlayerListCondition == PlayerListCondition.All;
+
+            return payment.PaymentPlayerList
+                .Where(x => playerCodes.Contains(x.PlayerCode))
+                .Where(x =>
+                    x.Player.AccumulatedDeposit >= payment.DepositedAmountMin &&
+                    (payment.DepositedAmountUnlimited || x.Player.AccumulatedDeposit < payment.DepositedAmountMax))
+                .Where(isAll && payment.IdentityAuthentication,
+                    x => x.Player.IdentityAuthentication)
+                .Where(isAll && payment.PhoneAuthentication,
+                    x => x.Player.PhoneAuthentication)
+                .Where(isAll && payment.VipLevels.Any(),
+                    x => x.Player.VipId != null && vipLevelIds.Contains(x.Player.VipId.Value))
+                .Select(x => x.Player.RealName).ToArray();
         }
     }
 }

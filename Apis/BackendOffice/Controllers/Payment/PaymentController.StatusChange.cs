@@ -13,7 +13,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
         [Description("change a Payment's status")]
         public async Task<MessageResponse> UpdatePaymentStatusAsync(Guid paymentId, PaymentStatus status)
         {
-            var payment = await _queries.GetSingleAsync(q => q.Id == paymentId);
+            var payment = await _paymentService.GetPaymentAsync(q => q.Id == paymentId);
 
             if (payment == null)
             {

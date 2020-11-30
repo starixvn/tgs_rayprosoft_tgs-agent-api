@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 using TGS.Core.DataServices;
@@ -24,26 +23,32 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
     public class ResellerService : IResellerService
     {
-        private readonly IMapper _mapper;
         private readonly ITgsRepository _repository;
 
-        public ResellerService(ITgsRepository repository, IMapper mapper)
+        public ResellerService(ITgsRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         Task IResellerService.CreateResellerAsync(CreateResellerRequest request,
             string username)
         {
-            var reseller = _mapper.Map<CreateResellerRequest, Reseller>(request);
+            var reseller = new Reseller
+            {
+                Id = Guid.NewGuid(),
+                Code = request.Code,
+                Name = request.Name,
+                Description = request.Description,
+                OperationalEmail = request.OperationalEmail,
+                CreatedByUsername = username,
+                UpdatedByUsername = username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
 
-            reseller.CreatedByUsername = username;
-            reseller.UpdatedByUsername = username;
-            reseller.CreatedOn = DateTimeOffset.Now;
-            reseller.UpdatedOn = DateTimeOffset.Now;
             reseller.Languages = GenerateResellerLanguages(reseller, request);
             reseller.Currencies = GenerateResellerCurrencies(reseller, request);
+
 
             _repository.Resellers.AddAsync(reseller);
             return _repository.SaveChangesAsync();
@@ -60,10 +65,15 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         Task IResellerService.UpdatePaymentAsync(UpdateResellerRequest request, string username)
         {
-            var reseller = _mapper.Map<UpdateResellerRequest, Reseller>(request);
-
-            reseller.UpdatedByUsername = username;
-            reseller.UpdatedOn = DateTimeOffset.Now;
+            var reseller = new Reseller
+            {
+                Code = request.Code,
+                Name = request.Name,
+                Description = request.Description,
+                OperationalEmail = request.OperationalEmail,
+                UpdatedByUsername = username,
+                UpdatedOn = DateTimeOffset.Now
+            };
             reseller.Languages = GenerateResellerLanguages(reseller, request);
             reseller.Currencies = GenerateResellerCurrencies(reseller, request);
 

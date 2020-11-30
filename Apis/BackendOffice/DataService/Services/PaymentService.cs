@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
@@ -23,17 +22,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task CreatePaymentAsync(CreatePaymentRequest request, string username);
         Task UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username);
         Task ChangeStatusAsync(Payment payment, PaymentStatus status, string username);
+        Task<bool> ExistsAsync(Expression<Func<Payment, bool>> predicate);
+        Task UpdatePaymentHandlingFeeAsync(Payment payment, UpdatePaymentFeeRequest request, string username);
+        Task ChangeOrderAsync(ChangeOrderRequest request);
     }
 
     public class PaymentService : IPaymentService
     {
-        private readonly IMapper _mapper;
         private readonly ITgsRepository _repository;
 
-        public PaymentService(ITgsRepository repository, IMapper mapper)
+        public PaymentService(ITgsRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         async Task IPaymentService.CreatePaymentAsync(CreatePaymentRequest request, string username)
@@ -88,7 +88,20 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username)
         {
-            var beforePayment = _mapper.Map<Payment>(payment);
+            var beforePayment = new Payment
+            {
+                ChannelName = payment.ChannelName,
+                PaymentStatus = payment.PaymentStatus,
+                TransferLimitFrom = payment.TransferLimitFrom,
+                TransferLimitTo = payment.TransferLimitTo,
+                PlayerListCondition = payment.PlayerListCondition,
+                AllPlayers = payment.AllPlayers,
+                IdentityAuthentication = payment.IdentityAuthentication,
+                PhoneAuthentication = payment.PhoneAuthentication,
+                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                DepositedAmountMin = payment.DepositedAmountMin,
+                DepositedAmountMax = payment.DepositedAmountMax
+            };
 
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
@@ -137,7 +150,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await tran.CommitAsync();
         }
 
-        async Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
+        Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
         {
             var beforePayment =
                 JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
@@ -151,8 +164,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.UpdatedByUsername = username;
 
             _repository.Entry(payment).State = EntityState.Modified;
-            await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-            await _repository.SaveChangesAsync();
+            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            return _repository.SaveChangesAsync();
         }
 
         Task<Payment> IPaymentService.GetPaymentAsync(Expression<Func<Payment, bool>> predicate,
@@ -167,6 +180,30 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         IQueryable<Payment> IPaymentService.GetPaymentsAsync(bool tracking)
         {
             return tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
+        }
+
+        Task<bool> IPaymentService.ExistsAsync(Expression<Func<Payment, bool>> predicate)
+        {
+            return _repository.Payments.AnyAsync(predicate);
+        }
+
+        Task IPaymentService.UpdatePaymentHandlingFeeAsync(Payment payment, UpdatePaymentFeeRequest request,
+            string username)
+        {
+            payment.FeePercentage = request.FeePercentage;
+            payment.LowestFee = request.LowestFee;
+            payment.HighestFee = request.HighestFee;
+            _repository.Entry(payment).State = EntityState.Modified;
+            return _repository.SaveChangesAsync();
+        }
+
+        async Task IPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            var ids = request.Orders.Select(q => q.Id);
+            var payments = await _repository.Payments.Where(q => ids.Contains(q.Id)).ToListAsync();
+            payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
+
+            await _repository.BulkInsertOrUpdateAsync(payments.ToArray());
         }
 
         private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,

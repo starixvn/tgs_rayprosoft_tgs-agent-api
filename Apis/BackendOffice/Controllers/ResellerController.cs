@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,16 +17,13 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class ResellerController : BaseContextController
     {
-        private readonly IMapper _mapper;
         private readonly IResellerService _service;
 
         public ResellerController(IResellerService service,
-            IMapper mapper,
             IHttpContextAccessor httpContextAccessor) : base(
             httpContextAccessor)
         {
             _service = service;
-            _mapper = mapper;
         }
 
         [HttpGet]
@@ -66,7 +62,27 @@ namespace TGS.Apis.BackendOffice.Controllers
             return new GetResellerResponse
             {
                 Valid = true,
-                Reseller = _mapper.Map<Core.DataServices.Models.Reseller, ResellerModel>(reseller)
+                Reseller = new ResellerModel
+                {
+                    Id = reseller.Id,
+                    Code = reseller.Code,
+                    Name = reseller.Name,
+                    ResellerCurrencies = reseller.Currencies
+                        .Select(x => new ResellerCurrencyModel
+                        {
+                            Code = x.CurrencyCode,
+                            Name = x.Currency.Name
+                        }).ToArray(),
+                    ResellerLanguages = reseller.Languages
+                        .Select(x => new ResellerLanguageModel
+                        {
+                            CultureCode = x.CultureCode
+                        }).ToArray(),
+                    Description = reseller.Description,
+                    OperationalEmail = reseller.OperationalEmail,
+                    CreatedOn = reseller.CreatedOn,
+                    UpdatedOn = reseller.UpdatedOn
+                }
             };
         }
 
