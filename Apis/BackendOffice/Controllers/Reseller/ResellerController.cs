@@ -7,15 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 using TGS.Apis.BackendOffice.DataService.Services;
-using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers.Reseller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ResellerController : BaseContextController
+    public partial class ResellerController : BaseContextController
     {
         private readonly IResellerService _service;
 
@@ -38,6 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Id = x.Id,
                     Name = x.Name,
                     Code = x.Code,
+                    Status = x.Status,
                     Description = x.Description,
                     OperationalEmail = x.OperationalEmail,
                     CreatedOn = x.CreatedOn,
@@ -52,11 +52,12 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var reseller = await _service.GetResellerAsync(x => x.Id == id,
                 x => x.Include(i => i.Currencies)
-                    .Include(i => i.Languages), true);
+                    .Include(i => i.Languages)
+                    .Include(i => i.GameProviders), true);
 
             if (reseller == null)
             {
-                return CreateInvalidResponse<GetResellerResponse>(Reseller.ResellerNotFound);
+                return CreateInvalidResponse<GetResellerResponse>(Resources.Reseller.ResellerNotFound);
             }
 
             return new GetResellerResponse
@@ -67,6 +68,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Id = reseller.Id,
                     Code = reseller.Code,
                     Name = reseller.Name,
+                    Status = reseller.Status,
                     ResellerCurrencies = reseller.Currencies
                         .Select(x => new ResellerCurrencyModel
                         {
@@ -78,6 +80,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                         {
                             CultureCode = x.CultureCode
                         }).ToArray(),
+                    ResellerGameProviders = reseller.GameProviders
+                        .Select(x => new ResellerGameProviderModel
+                        {
+                            Id = x.GameProviderId,
+                            Name = x.GameProvider.Name
+                        }).ToArray(),
+
                     Description = reseller.Description,
                     OperationalEmail = reseller.OperationalEmail,
                     CreatedOn = reseller.CreatedOn,
@@ -97,7 +106,14 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPut("{id}")]
         public async Task<MessageResponse> UpdateResellerAsync(Guid id, UpdateResellerRequest request)
         {
-            await _service.UpdatePaymentAsync(request, Username);
+            var reseller = await _service.GetResellerAsync(q => q.Id == id, tracking: true);
+
+            if (reseller == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.ResellerNotFound);
+            }
+
+            await _service.UpdatePaymentAsync(reseller, request, Username);
 
             return CreateValidResponse<MessageResponse>();
         }

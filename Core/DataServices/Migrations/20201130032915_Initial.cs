@@ -1698,8 +1698,6 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

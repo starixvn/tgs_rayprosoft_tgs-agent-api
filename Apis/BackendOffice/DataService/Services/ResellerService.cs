@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 using TGS.Core.DataServices;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
 {
@@ -18,7 +18,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         IQueryable<Reseller> GetResellersAsync(bool tracking = false);
         Task CreateResellerAsync(CreateResellerRequest request, string username);
-        Task UpdatePaymentAsync(UpdateResellerRequest request, string username);
+        Task UpdatePaymentAsync(Reseller reseller, UpdateResellerRequest request, string username);
+        Task ChangeStatusAsync(Reseller reseller, Status status, string username);
     }
 
     public class ResellerService : IResellerService
@@ -38,6 +39,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 Id = Guid.NewGuid(),
                 Code = request.Code,
                 Name = request.Name,
+                Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
                 CreatedByUsername = username,
@@ -48,6 +50,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             reseller.Languages = GenerateResellerLanguages(reseller, request);
             reseller.Currencies = GenerateResellerCurrencies(reseller, request);
+            reseller.GameProviders = GenerateResellerGameProviders(reseller, request);
 
 
             _repository.Resellers.AddAsync(reseller);
@@ -63,19 +66,22 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(reseller).FirstOrDefaultAsync(predicate);
         }
 
-        Task IResellerService.UpdatePaymentAsync(UpdateResellerRequest request, string username)
+        Task IResellerService.UpdatePaymentAsync(Reseller reseller, UpdateResellerRequest request,
+            string username)
         {
-            var reseller = new Reseller
-            {
-                Code = request.Code,
-                Name = request.Name,
-                Description = request.Description,
-                OperationalEmail = request.OperationalEmail,
-                UpdatedByUsername = username,
-                UpdatedOn = DateTimeOffset.Now
-            };
+            _repository.ResellerLanguages.RemoveRange(reseller.Languages);
+            _repository.ResellerCurrencies.RemoveRange(reseller.Currencies);
+            _repository.ResellerGameProviders.RemoveRange(reseller.GameProviders);
+
+            reseller.Code = request.Code;
+            reseller.Name = request.Name;
+            reseller.Description = request.Description;
+            reseller.OperationalEmail = request.OperationalEmail;
+            reseller.UpdatedByUsername = username;
+            reseller.UpdatedOn = DateTimeOffset.Now;
             reseller.Languages = GenerateResellerLanguages(reseller, request);
             reseller.Currencies = GenerateResellerCurrencies(reseller, request);
+            reseller.GameProviders = GenerateResellerGameProviders(reseller, request);
 
             _repository.Entry(reseller).State = EntityState.Modified;
 
@@ -87,10 +93,21 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
         }
 
+        Task IResellerService.ChangeStatusAsync(Reseller reseller, Status status, string username)
+        {
+            reseller.Status = status;
+            reseller.UpdatedOn = DateTimeOffset.Now;
+            reseller.UpdatedByUsername = username;
+
+            _repository.Entry(reseller).State = EntityState.Modified;
+
+            return _repository.SaveChangesAsync();
+        }
+
         private HashSet<ResellerLanguage> GenerateResellerLanguages(Reseller reseller, ResellerRequest request)
         {
             var resellerLanguages = _repository.Languages
-                .Where(request.CultureCodes.Any(), x => request.CultureCodes.Contains(x.CultureCode)).Select(x =>
+                .Where(x => request.CultureCodes.Contains(x.CultureCode)).Select(x =>
                     new ResellerLanguage
                     {
                         ResellerId = reseller.Id,
@@ -104,7 +121,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         private HashSet<ResellerCurrency> GenerateResellerCurrencies(Reseller reseller, ResellerRequest request)
         {
             var resellerCurrencies = _repository.Currencies
-                .Where(request.CurrencyCodes.Any(), x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
+                .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
                     new ResellerCurrency
                     {
                         ResellerId = reseller.Id,
@@ -113,6 +130,20 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                         Currency = x
                     });
             return new HashSet<ResellerCurrency>(resellerCurrencies);
+        }
+
+        private HashSet<ResellerGameProvider> GenerateResellerGameProviders(Reseller reseller, ResellerRequest request)
+        {
+            var resellerGameProviders = _repository.GameProviders
+                .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
+                    new ResellerGameProvider
+                    {
+                        ResellerId = reseller.Id,
+                        GameProviderId = x.Id,
+                        Reseller = reseller,
+                        GameProvider = x
+                    });
+            return new HashSet<ResellerGameProvider>(resellerGameProviders);
         }
     }
 }
