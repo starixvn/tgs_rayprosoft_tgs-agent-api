@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
@@ -14,6 +16,10 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 {
     public interface IPaymentService
     {
+        Task<Payment> GetPaymentAsync(Expression<Func<Payment, bool>> predicate,
+            Func<IQueryable<Payment>, IQueryable<Payment>> preQuery = null, bool tracking = false);
+
+        IQueryable<Payment> GetPaymentsAsync(bool tracking = false);
         Task CreatePaymentAsync(CreatePaymentRequest request, string username);
         Task UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username);
         Task ChangeStatusAsync(Payment payment, PaymentStatus status, string username);
@@ -21,11 +27,13 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
     public class PaymentService : IPaymentService
     {
+        private readonly IMapper _mapper;
         private readonly ITgsRepository _repository;
 
-        public PaymentService(ITgsRepository repository)
+        public PaymentService(ITgsRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         async Task IPaymentService.CreatePaymentAsync(CreatePaymentRequest request, string username)
@@ -80,20 +88,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IPaymentService.UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username)
         {
-            var beforePayment = new Payment
-            {
-                ChannelName = payment.ChannelName,
-                PaymentStatus = payment.PaymentStatus,
-                TransferLimitFrom = payment.TransferLimitFrom,
-                TransferLimitTo = payment.TransferLimitTo,
-                PlayerListCondition = payment.PlayerListCondition,
-                AllPlayers = payment.AllPlayers,
-                IdentityAuthentication = payment.IdentityAuthentication,
-                PhoneAuthentication = payment.PhoneAuthentication,
-                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-                DepositedAmountMin = payment.DepositedAmountMin,
-                DepositedAmountMax = payment.DepositedAmountMax
-            };
+            var beforePayment = _mapper.Map<Payment>(payment);
 
             payment.ChannelName = request.ChannelName;
             payment.TransferLimitFrom = request.TransferLimitFrom;
@@ -158,6 +153,20 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository.Entry(payment).State = EntityState.Modified;
             await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
             await _repository.SaveChangesAsync();
+        }
+
+        Task<Payment> IPaymentService.GetPaymentAsync(Expression<Func<Payment, bool>> predicate,
+            Func<IQueryable<Payment>, IQueryable<Payment>> preQuery, bool tracking)
+        {
+            var payment = tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
+            preQuery ??= c => c;
+
+            return preQuery(payment).FirstOrDefaultAsync(predicate);
+        }
+
+        IQueryable<Payment> IPaymentService.GetPaymentsAsync(bool tracking)
+        {
+            return tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
         }
 
         private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,

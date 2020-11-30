@@ -4,11 +4,11 @@ namespace TGS.Apis.BackendOffice.Mapping
 {
     public class BaseProfile : Profile
     {
-        public static MapperConfiguration Config = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<BaseProfile>();
-            cfg.AddProfile<ResellerProfile>();
-        });
+        //public static MapperConfiguration Config = new MapperConfiguration(cfg =>
+        //{
+        //    cfg.AddProfile<BaseProfile>();
+        //    cfg.AddProfile<ResellerProfile>();
+        //});
 
         public BaseProfile()
         {

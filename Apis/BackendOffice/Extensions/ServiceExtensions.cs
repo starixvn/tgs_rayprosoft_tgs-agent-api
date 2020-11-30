@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +16,11 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TGS.Apis.BackendOffice.DataService;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
+using TGS.Apis.BackendOffice.Mapping;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
@@ -126,6 +129,15 @@ namespace TGS.Apis.BackendOffice.Extensions
                 options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context =>
                     await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
             });
+
+            services.AddSingleton<IPaymentMappingShared, PaymentMappingShared>();
+            services.AddSingleton(provider => new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<BaseProfile>();
+                cfg.AddProfile<ResellerProfile>();
+                cfg.AddProfile(
+                    new PaymentProfile(provider.GetService<IPaymentMappingShared>()));
+            }).CreateMapper());
 
             return services;
         }

@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +23,6 @@ namespace TGS.Apis.BackendOffice
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddBackendOfficeServices(_configuration);
-            services.AddAutoMapper(typeof(Startup));
         }
 
         public void Configure(IApplicationBuilder app)
