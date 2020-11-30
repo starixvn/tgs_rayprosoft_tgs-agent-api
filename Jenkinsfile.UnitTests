@@ -27,7 +27,7 @@ pipeline {
 		}
 		stage('Test') {
 			steps {
-				sh  "dotnet test tgs.sln"  
+				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
 				echo "test tgs.sln"
 			}
 		}
