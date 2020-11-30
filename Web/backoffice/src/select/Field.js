@@ -21,6 +21,7 @@ export const Field = ({ required, validate, children, ...props }) => {
 
         return validate && validate(value)
       }}
+      {...props}
     >
       {({ field, form, meta }) => {
         let state = meta.error && meta.touched && "danger"

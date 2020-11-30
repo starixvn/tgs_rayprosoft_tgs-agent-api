@@ -10,6 +10,7 @@ import {
   SwitchField,
   CheckboxGroupField
 } from "bumbag"
+import { useVipLevelList } from "../../vip-levels/client"
 
 // const All = 0
 export const All = "All"
@@ -150,13 +151,27 @@ export const PlayerLabel = ({ value }) => {
   return ""
 }
 
-//TODO: move to vip module?
 export const VipLevelsText = () => <Trans {...VipLevelsTrans} />
 
 export const useVipLevelDetail = (vipLevels = []) => {
-  ///TODO: returns vip level detail?
+  let vipLevel = useTrans(VipLevelsTrans)
+  let { items = [] } = useVipLevelList()
   if (vipLevels.length > 0) {
-    return useTrans(VipLevelsTrans)
+    return `${vipLevel}${toVipLevelNames(vipLevels, items)}`
   }
   return ""
+}
+
+const toVipLevelNames = (ids = [], list = []) => {
+  if (list.length === 0 || ids.length === 0) {
+    return ""
+  }
+
+  let names = ids.reduce((detail, id) => {
+    let item = list.find((item) => item.id === id)
+
+    return detail ? `${detail}/${item.name}` : item.name
+  }, "")
+
+  return names ? `(${names})` : ""
 }

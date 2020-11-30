@@ -17,24 +17,24 @@ namespace TGS.Apis.FileService.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<dynamic> UploadFileAsync([FromForm] UploadRequest request)
+        public async Task<UploadResponse> UploadFileAsync([FromForm] UploadRequest request)
         {
             var url = await _uploadService.UploadFileAsync(request.File);
-            return new
+            return new UploadResponse
             {
                 Valid = true,
-                Url = url
+                Location = url
             };
         }
 
         [HttpPost("uploadFileS3")]
-        public async Task<dynamic> UploadFileS3Async([FromForm] UploadRequest request)
+        public async Task<UploadResponse> UploadFileS3Async([FromForm] UploadRequest request)
         {
             var url = await _uploadService.UploadFileS3Async(request.File);
-            return new
+            return new UploadResponse
             {
                 Valid = true,
-                Url = url
+                Location = url
             };
         }
     }

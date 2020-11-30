@@ -2,7 +2,10 @@
 {
     public class AwsSettings
     {
+        public string AccessKeyId { get; set; }
+        public string SecretAccessKey { get; set; }
         public string Region { get; set; }
+        public string ServiceUrl { get; set; }
         public S3 S3 { get; set; }
         public CloudFront CloudFront { get; set; }
         public CloudWatch CloudWatch { get; set; }

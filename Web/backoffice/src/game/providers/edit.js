@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react"
-import { css, Stack, Heading, Box, Button, Text } from "bumbag"
+import { useFormikContext } from "formik"
+import {
+  css,
+  Stack,
+  Heading,
+  Box,
+  Button,
+  Text,
+  Group,
+  Set,
+  Flex
+} from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "./menu"
@@ -10,6 +21,8 @@ import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
 import { StatusMenuField } from "./status"
+import { DaySelectField } from "../../date/week"
+import { TimeSelectField } from "../../date/time"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -64,6 +77,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
       footer={
         <ConfirmButtonFooter isLoading={isLoading} disabled={isLoading} />
       }
+      maxWidth="unset"
     >
       <EditBody record={record} />
     </FormDialog>
@@ -72,8 +86,9 @@ const EditDialog = ({ record, dialog, ...props }) => {
 
 const EditBody = ({ record = {} }) => {
   let { name } = record
+  let { values } = useFormikContext()
   return (
-    <Stack orientation="vertical">
+    <Stack orientation="vertical" width="500px">
       <Heading use="h5">
         <Trans zh="基本资料" en="Basic Information" />
       </Heading>
@@ -98,12 +113,22 @@ const EditBody = ({ record = {} }) => {
         <Label>
           <Trans zh="每周" en="Weekly" />
         </Label>
-        <Box>TODO: input</Box>
+        <Box>
+          <DaySelectField name="day" />
+        </Box>
 
         <Label>
-          <Trans zh="时间" en="Time" />
+          <Trans zh="开始时间" en="Start Time" />
         </Label>
-        <Box>TODO: date range input with addon</Box>
+        <Flex alignY="top" justifyContent="space-between">
+          <TimeSelectField name="start" max={values?.end} />
+          <Set orientation="horizontal">
+            <Label marginRight="major-2">
+              <Trans zh="结束时间" en="End Time" />
+            </Label>
+            <TimeSelectField name="end" min={values?.start} />
+          </Set>
+        </Flex>
       </FieldValues>
     </Stack>
   )

@@ -5,7 +5,7 @@ namespace TGS.Services.Operations.Models.Services
 {
     public record CreatePlayerData
     {
-        public Guid LicenseeId { get; init; }
+        public Guid BrandId { get; init; }
         public string Username { get; init; }
         public byte[] Salt { get; init; }
         public byte[] Password { get; init; }

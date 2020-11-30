@@ -18,20 +18,20 @@ namespace Tgs.UnitTests.Operations
     public sealed class StatusValidatorTests : NUnitTestsBase
     {
         private IStatusValidator _statusValidator;
-        private Mock<ILicenseeOperations> _licenseeOperationsMock;
+        private Mock<IBrandOperations> _brandOperationsMock;
         private Mock<IGameProviderOperations> _gameProviderOperationsMock;
 
         protected override void InitializeBeforeEachTest()
         {
-            _licenseeOperationsMock = new Mock<ILicenseeOperations>();
+            _brandOperationsMock = new Mock<IBrandOperations>();
             _gameProviderOperationsMock = new Mock<IGameProviderOperations>();
-            _statusValidator = new StatusValidator(_licenseeOperationsMock.Object, _gameProviderOperationsMock.Object);
+            _statusValidator = new StatusValidator(_brandOperationsMock.Object, _gameProviderOperationsMock.Object);
         }
 
         [Test]
-        public void ThrowIfLicenseeStatusIsNotOneOfAsync_Ensures_Status()
+        public void ThrowIfBrandStatusIsNotOneOfAsync_Ensures_Status()
         {
-            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(Guid.NewGuid());
+            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid.NewGuid());
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
         }
 
@@ -40,10 +40,10 @@ namespace Tgs.UnitTests.Operations
         {
             var fixture = new Fixture();
             var licenseeId = fixture.Create<Guid>();
-            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
+            _brandOperationsMock.Setup(x => x.GetBrandStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?) null));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
                 licenseeId,
                 Status.Active);
 
@@ -56,10 +56,10 @@ namespace Tgs.UnitTests.Operations
         {
             var fixture = new Fixture();
             var licenseeId = fixture.Create<Guid>();
-            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
+            _brandOperationsMock.Setup(x => x.GetBrandStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?) Status.Inactive));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
                 licenseeId,
                 Status.Active);
 
@@ -71,14 +71,14 @@ namespace Tgs.UnitTests.Operations
         {
             var fixture = new Fixture();
             var licenseeId = fixture.Create<Guid>();
-            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
+            _brandOperationsMock.Setup(x => x.GetBrandStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?) Status.Maintenance));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
                 licenseeId,
                 Status.Active);
 
-            action.Should().Throw<LicenseeUnderMaintenanceException>();
+            action.Should().Throw<BrandUnderMaintenanceException>();
         }
 
         [Test]
@@ -86,10 +86,10 @@ namespace Tgs.UnitTests.Operations
         {
             var fixture = new Fixture();
             var licenseeId = fixture.Create<Guid>();
-            _licenseeOperationsMock.Setup(x => x.GetLicenseeStatusAsync(licenseeId))
+            _brandOperationsMock.Setup(x => x.GetBrandStatusAsync(licenseeId))
                 .Returns(Task.FromResult((Status?) Status.Active));
 
-            Func<Task> action = async () => await _statusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(
+            Func<Task> action = async () => await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(
                 licenseeId,
                 Status.Active);
 
@@ -186,6 +186,7 @@ namespace Tgs.UnitTests.Operations
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<Guid>(),
+                It.IsAny<Guid>(),
                 It.IsAny<string>(), Array.Empty<Status>(), gameStatus);
 
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
@@ -198,142 +199,285 @@ namespace Tgs.UnitTests.Operations
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<Guid>(),
+                It.IsAny<Guid>(),
                 It.IsAny<string>(), status, Array.Empty<GameStatus>());
 
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
         }
 
-        [TestCase(Status.Active, new[] {Status.Active}, GameStatus.Active, new[] {GameStatus.Active})]
-        [TestCase(Status.Maintenance, new[] {Status.Active, Status.Maintenance}, GameStatus.Maintenance,
-            new[] {GameStatus.Active, GameStatus.Maintenance})]
-        [TestCase(Status.Maintenance, new[] {Status.Active, Status.Maintenance}, GameStatus.Active,
-            new[] {GameStatus.Active, GameStatus.Maintenance})]
-        public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Not_Throws_When_Ok(Status? status,
-            Status[] expectedStatuses, GameStatus? gameStatus, GameStatus[] expectedGameStatuses)
+        // @formatter:off
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Maintenance, Status.Active,
+            GameStatus.Maintenance, GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Maintenance, Status.Active,
+            GameStatus.Active, GameStatus.Maintenance,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Maintenance, Status.Active,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Maintenance, Status.Active,
+            GameStatus.Active, GameStatus.Maintenance,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Maintenance, Status.Maintenance,
+            GameStatus.Maintenance, GameStatus.Maintenance,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Active, Status.Maintenance,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Active, Status.Maintenance,
+            GameStatus.Maintenance, GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Active, Status.Maintenance,
+            GameStatus.Active, GameStatus.Maintenance,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Active, Status.Maintenance,
+            GameStatus.Maintenance, GameStatus.Maintenance,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        // @formatter:on
+        public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Not_Throws_When_Ok(Status? gameProviderStatus,
+            Status? brandGameProviderStatus,
+            GameStatus? gameStatus,
+            GameStatus? brandGameStatus,
+            Status[] expectedStatuses, GameStatus[] expectedGameStatuses)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
             var gameId = fixture.Create<Guid>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
-                .Returns(Task.FromResult(status));
+                .Returns(Task.FromResult(gameProviderStatus));
             _gameProviderOperationsMock.Setup(x => x.GetGameStatusAsync(gpId, gameId))
                 .Returns(Task.FromResult(gameStatus));
 
+            _brandOperationsMock.Setup(x => x.GetBrandGameProviderStatusAsync(brandId, gpId))
+                .Returns(Task.FromResult(brandGameProviderStatus));
+            _brandOperationsMock.Setup(x => x.GetBrandGameStatusAsync(brandId, gpId, gameId))
+                .Returns(Task.FromResult(brandGameStatus));
+
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
+                brandId, gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
 
             action.Should().NotThrow();
         }
 
-        [TestCase(null, new[] {Status.Active}, GameStatus.Active, new[] {GameStatus.Active})]
-        [TestCase(Status.Active, new[] {Status.Active}, null, new[] {GameStatus.Active})]
-        public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_Exception_When_Status_Is_Null(Status? status,
-            Status[] expectedStatuses, GameStatus? gameStatus, GameStatus[] expectedGameStatuses)
+        // @formatter:off
+        [TestCase(null, Status.Active,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Active, Status.Active,
+            null, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Active, null,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+       
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Active, null,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        // @formatter:on
+        public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_Exception_When_Status_Is_Null(
+            Status? gameProviderStatus, Status? brandGameProviderStatus, GameStatus? gameStatus,
+            GameStatus? brandGameStatus,
+            Status[] expectedStatuses, GameStatus[] expectedGameStatuses)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
             var gameId = fixture.Create<Guid>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
-                .Returns(Task.FromResult(status));
+                .Returns(Task.FromResult(gameProviderStatus));
             _gameProviderOperationsMock.Setup(x => x.GetGameStatusAsync(gpId, gameId))
                 .Returns(Task.FromResult(gameStatus));
 
+            _brandOperationsMock.Setup(x => x.GetBrandGameProviderStatusAsync(brandId, gpId))
+                .Returns(Task.FromResult(brandGameProviderStatus));
+            _brandOperationsMock.Setup(x => x.GetBrandGameStatusAsync(brandId, gpId, gameId))
+                .Returns(Task.FromResult(brandGameStatus));
+
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
+                brandId, gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
 
             action.Should().Throw<InvalidStatusException>();
         }
 
-        [TestCase(Status.Maintenance, new[] {Status.Active}, GameStatus.Maintenance,
-            new[] {GameStatus.Active, GameStatus.Maintenance})]
-        [TestCase(Status.Maintenance, new[] {Status.Active}, GameStatus.Active, new[] {GameStatus.Active})]
+        // @formatter:off
+        [TestCase(Status.Maintenance, Status.Active,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Active, Status.Maintenance,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        // @formatter:on
         public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_GameProviderUnderMaintenanceException(
-            Status? status, Status[] expectedStatuses, GameStatus? gameStatus, GameStatus[] expectedGameStatuses)
+            Status? gameProviderStatus, Status? brandGameProviderStatus, GameStatus? gameStatus,
+            GameStatus? brandGameStatus, Status[] expectedStatuses, GameStatus[] expectedGameStatuses)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
             var gameId = fixture.Create<Guid>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
-                .Returns(Task.FromResult(status));
+                .Returns(Task.FromResult(gameProviderStatus));
             _gameProviderOperationsMock.Setup(x => x.GetGameStatusAsync(gpId, gameId))
                 .Returns(Task.FromResult(gameStatus));
 
+            _brandOperationsMock.Setup(x => x.GetBrandGameProviderStatusAsync(brandId, gpId))
+                .Returns(Task.FromResult(brandGameProviderStatus));
+            _brandOperationsMock.Setup(x => x.GetBrandGameStatusAsync(brandId, gpId, gameId))
+                .Returns(Task.FromResult(brandGameStatus));
+
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
+                brandId, gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
 
             action.Should().Throw<GameProviderUnderMaintenanceException>();
         }
 
-        [TestCase(Status.Inactive, new[] {Status.Active}, GameStatus.Active, new[] {GameStatus.Active})]
-        [TestCase(Status.Inactive, new[] {Status.Active, Status.Maintenance}, GameStatus.Active,
-            new[] {GameStatus.Active})]
+        // @formatter:off
+        [TestCase(Status.Inactive, Status.Active,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Active, Status.Inactive,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Inactive, Status.Active,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active})]
+        
+        [TestCase(Status.Active, Status.Inactive,
+            GameStatus.Active, GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active})]
+        // @formatter:on
         public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_Exception_When_Status_Is_Not_One_Of(
-            Status? status, Status[] expectedStatuses, GameStatus? gameStatus, GameStatus[] expectedGameStatuses)
+            Status? gameProviderStatus, Status? brandGameProviderStatus, GameStatus? gameStatus,
+            GameStatus? brandGameStatus, Status[] expectedStatuses,
+            GameStatus[] expectedGameStatuses)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
             var gameId = fixture.Create<Guid>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
-                .Returns(Task.FromResult(status));
+                .Returns(Task.FromResult(gameProviderStatus));
             _gameProviderOperationsMock.Setup(x => x.GetGameStatusAsync(gpId, gameId))
                 .Returns(Task.FromResult(gameStatus));
 
+            _brandOperationsMock.Setup(x => x.GetBrandGameProviderStatusAsync(brandId, gpId))
+                .Returns(Task.FromResult(brandGameProviderStatus));
+            _brandOperationsMock.Setup(x => x.GetBrandGameStatusAsync(brandId, gpId, gameId))
+                .Returns(Task.FromResult(brandGameStatus));
+
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
+                brandId, gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
 
             action.Should().Throw<InvalidStatusException>()
                 .WithMessage("GameProvider doesn't exist or is not active");
         }
 
-        [TestCase(Status.Active, new[] {Status.Active}, GameStatus.Maintenance, new[] {GameStatus.Active})]
-        [TestCase(Status.Active, new[] {Status.Active, Status.Maintenance}, GameStatus.Maintenance,
-            new[] {GameStatus.Active})]
-        public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_GameUnderMaintenanceException(Status? status,
-            Status[] expectedStatuses, GameStatus? gameStatus, GameStatus[] expectedGameStatuses)
+        // @formatter:off
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Maintenance,GameStatus.Active, 
+            new[] {Status.Active},  new[] {GameStatus.Active})]
+
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Active,GameStatus.Maintenance, 
+            new[] {Status.Active},  new[] {GameStatus.Active})]
+        // @formatter:on
+        public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_GameUnderMaintenanceException(
+            Status? gameProviderStatus, Status? brandGameProviderStatus, GameStatus? gameStatus,
+            GameStatus? brandGameStatus,
+            Status[] expectedStatuses, GameStatus[] expectedGameStatuses)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
             var gameId = fixture.Create<Guid>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
-                .Returns(Task.FromResult(status));
+                .Returns(Task.FromResult(gameProviderStatus));
             _gameProviderOperationsMock.Setup(x => x.GetGameStatusAsync(gpId, gameId))
                 .Returns(Task.FromResult(gameStatus));
 
+            _brandOperationsMock.Setup(x => x.GetBrandGameProviderStatusAsync(brandId, gpId))
+                .Returns(Task.FromResult(brandGameProviderStatus));
+            _brandOperationsMock.Setup(x => x.GetBrandGameStatusAsync(brandId, gpId, gameId))
+                .Returns(Task.FromResult(brandGameStatus));
+            
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
+                brandId, gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
 
             action.Should().Throw<GameUnderMaintenanceException>();
         }
 
-        [TestCase(Status.Active, new[] {Status.Active}, GameStatus.Inactive,
-            new[] {GameStatus.Active, GameStatus.Maintenance})]
-        [TestCase(Status.Active, new[] {Status.Active, Status.Maintenance}, GameStatus.Inactive,
-            new[] {GameStatus.Active, GameStatus.Maintenance})]
+        // @formatter:off
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Inactive,GameStatus.Active,
+            new[] {Status.Active}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Active,GameStatus.Inactive,
+            new[] {Status.Active}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Inactive,GameStatus.Active,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Active,GameStatus.Inactive,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+        
+        [TestCase(Status.Active, Status.Active,
+            GameStatus.Inactive,GameStatus.Inactive,
+            new[] {Status.Active, Status.Maintenance}, new[] {GameStatus.Active, GameStatus.Maintenance})]
+
+        // @formatter:on
         public void ThrowIfGameOrGameProviderStatusIsNotOneOfAsync_Throws_Exception_When_GameStatus_Is_Not_One_Of(
-            Status? status, Status[] expectedStatuses, GameStatus? gameStatus, GameStatus[] expectedGameStatuses)
+            Status? gameProviderStatus, Status? brandGameProviderStatus, GameStatus? gameStatus,
+            GameStatus? brandGameStatus, Status[] expectedStatuses, GameStatus[] expectedGameStatuses)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
             var gameId = fixture.Create<Guid>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
-                .Returns(Task.FromResult(status));
+                .Returns(Task.FromResult(gameProviderStatus));
             _gameProviderOperationsMock.Setup(x => x.GetGameStatusAsync(gpId, gameId))
                 .Returns(Task.FromResult(gameStatus));
+           
+            _brandOperationsMock.Setup(x => x.GetBrandGameProviderStatusAsync(brandId, gpId))
+                .Returns(Task.FromResult(brandGameProviderStatus));
+            _brandOperationsMock.Setup(x => x.GetBrandGameStatusAsync(brandId, gpId, gameId))
+                .Returns(Task.FromResult(brandGameStatus));
 
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
+                brandId, gpId, gameId, externalGameId, expectedStatuses, expectedGameStatuses);
 
             action.Should().Throw<InvalidStatusException>()
                 .WithMessage($"Game '{externalGameId}' doesn't exist or is not active");

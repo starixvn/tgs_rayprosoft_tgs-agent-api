@@ -11,7 +11,11 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("Resellers", "dbo");
             BaseConfigureProperties(builder);
-            
+
+            builder.Property(c => c.Status)
+                .HasColumnType(ColumnTypes.TinyInt)
+                .IsRequired();
+
             builder.HasMany(c => c.Licensees)
                 .WithOne(e => e.Reseller);
 

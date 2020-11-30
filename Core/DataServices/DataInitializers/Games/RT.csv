@@ -1,11 +1,11 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame
-Dragon's Luck,,,DragonsLuck,Slot,Desktop,FALSE,,Win special symbols and hidden coins to make your fortune in the realm of the Chinese dragons!,FALSE
-Wild Fight,,,WildFight,Slot,Desktop,FALSE,,"Fight your way to win locking wilds, free spins and other great action prizes from the WILD FIGHT!",FALSE
-Red Phoenix Rising,,,RedPhoenixRising,Slot,Desktop,FALSE,,Discover Golden Egg Instant Wins and endless Free Spins in the mystical lair of the Red Phoenix!,FALSE
-Puss'n Boots,Puss_N_Boots,,PussNBoots,Slot,Desktop,FALSE,/ugs/launcher/PussNBoots/?token={TOKEN}&lang={CULTURE},,FALSE
-Random Offer,,,RandomOffer,Slot,Desktop,FALSE,NONE,,TRUE
-Dragon's Luck,,,DragonsLuck,Slot,Mobile,FALSE,,Win special symbols and hidden coins to make your fortune in the realm of the Chinese dragons!,FALSE
-Wild Fight,,,WildFight,Slot,Mobile,FALSE,,"Fight your way to win locking wilds, free spins and other great action prizes from the WILD FIGHT!",FALSE
-Red Phoenix Rising,,,RedPhoenixRising,Slot,Mobile,FALSE,,Discover Golden Egg Instant Wins and endless Free Spins in the mystical lair of the Red Phoenix!,FALSE
-Puss'n Boots,Puss_N_Boots,,PussNBoots,Slot,Mobile,FALSE,/ugs/launcher/PussNBoots/?token={TOKEN}&lang={CULTURE},,FALSE
-Random Offer,,,RandomOffer,Slot,Mobile,FALSE,NONE,,TRUE
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableCurrencies
+Dragon's Luck,,,DragonsLuck,Slot,Desktop,FALSE,,Win special symbols and hidden coins to make your fortune in the realm of the Chinese dragons!,FALSE,
+Wild Fight,,,WildFight,Slot,Desktop,FALSE,,"Fight your way to win locking wilds, free spins and other great action prizes from the WILD FIGHT!",FALSE,
+Red Phoenix Rising,,,RedPhoenixRising,Slot,Desktop,FALSE,,Discover Golden Egg Instant Wins and endless Free Spins in the mystical lair of the Red Phoenix!,FALSE,
+Puss'n Boots,Puss_N_Boots,,PussNBoots,Slot,Desktop,FALSE,/ugs/launcher/PussNBoots/?token={TOKEN}&lang={CULTURE},,FALSE,
+Random Offer,,,RandomOffer,Slot,Desktop,FALSE,NONE,,TRUE,
+Dragon's Luck,,,DragonsLuck,Slot,Mobile,FALSE,,Win special symbols and hidden coins to make your fortune in the realm of the Chinese dragons!,FALSE,
+Wild Fight,,,WildFight,Slot,Mobile,FALSE,,"Fight your way to win locking wilds, free spins and other great action prizes from the WILD FIGHT!",FALSE,
+Red Phoenix Rising,,,RedPhoenixRising,Slot,Mobile,FALSE,,Discover Golden Egg Instant Wins and endless Free Spins in the mystical lair of the Red Phoenix!,FALSE,
+Puss'n Boots,Puss_N_Boots,,PussNBoots,Slot,Mobile,FALSE,/ugs/launcher/PussNBoots/?token={TOKEN}&lang={CULTURE},,FALSE,
+Random Offer,,,RandomOffer,Slot,Mobile,FALSE,NONE,,TRUE,

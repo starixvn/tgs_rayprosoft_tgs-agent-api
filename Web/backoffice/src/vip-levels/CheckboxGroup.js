@@ -3,10 +3,10 @@ import { css, Global } from "@emotion/core"
 import { Formik, Form, Field as _Field } from "formik"
 import { CheckboxGroupField } from "bumbag"
 import AlertDialog from "../dialog/Alert"
-import { useVipLevels } from "./client"
+import { useVipLevelList } from "./client"
 
 export const Field = ({ orientation = "horizontal", ...props }) => {
-  let { items = [], isLoading, error } = useVipLevels()
+  let { items = [], isLoading, error } = useVipLevelList()
 
   let options = items.map(({ id, name, ...item }) => ({
     label: name,

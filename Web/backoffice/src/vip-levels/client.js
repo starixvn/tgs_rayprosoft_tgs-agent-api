@@ -1,9 +1,10 @@
 import useSWR from "swr"
 import { useGet } from "../client"
 
-export const useVipLevels = () => {
-  let url = "/api/vipLevel"
-  let { data, ...rest } = useGet(url)
+const API = "/api/vipLevel"
+
+export const useVipLevelList = () => {
+  let { data, ...rest } = useGet(API)
   return {
     items: data?.vipLevels,
     ...rest

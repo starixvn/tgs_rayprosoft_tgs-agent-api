@@ -16,12 +16,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 {
     public sealed class HandleSBOBETExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
     {
-        protected override string LoggerName => "sbo";
-
         public HandleSBOBETExceptionMiddleware(
             Func<string, IErrorMapper> mapper,
             ITgsLog log)
-            : base(mapper, Consts.GameProvider.SBOBET, log)
+            : base(mapper, Consts.GameProvider.SBOBET, log, "sbo")
         {
            
         }

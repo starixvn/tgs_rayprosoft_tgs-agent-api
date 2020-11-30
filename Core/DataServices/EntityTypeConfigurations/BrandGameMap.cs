@@ -1,0 +1,29 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Models;
+
+namespace TGS.Core.DataServices.EntityTypeConfigurations
+{
+    internal class BrandGameMap : IEntityTypeConfiguration<BrandGame>
+    {
+        void IEntityTypeConfiguration<BrandGame>.Configure(EntityTypeBuilder<BrandGame> builder)
+        {
+            builder.ToTable("BrandGames", "dbo");
+            builder.HasKey(bg => new { bg.BrandId, bg.GameId });
+
+            builder.Property(bg => bg.Status)
+                .IsRequired();
+
+            builder
+                .HasOne(bg => bg.Brand)
+                .WithMany(b => b.Games)
+                .HasForeignKey(bg => bg.BrandId);
+
+            builder
+                .HasOne(bg => bg.Game)
+                .WithMany(g => g.Brands)
+                .HasForeignKey(bg => bg.GameId);
+
+        }
+    }
+}

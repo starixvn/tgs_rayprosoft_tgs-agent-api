@@ -14,7 +14,7 @@ import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { usePlayerList } from "./client"
-import { useTable, Table, pageCount } from "../../table"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Label as StatueLabel } from "../status"
 import {
   useIsDisplayMenuByRoute,
@@ -36,12 +36,12 @@ export const Content = () => {
     return null
   }
 
-  return <AsyncContent />
+  return <Body />
 }
 
 export const CodeContentPair = [Code, Content]
 
-const AsyncContent = () => {
+const Body = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable({
     status: null,
     vipId: null,
@@ -56,17 +56,11 @@ const AsyncContent = () => {
     vipId,
     username = ""
   } = state
-  let { data = {}, isLoading, isValidating, mutate } = usePlayerList({
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby,
-    orderby,
-    status,
-    vipId,
-    username
-  })
+  let { data = {}, isLoading, isValidating, mutate } = usePlayerList(
+    toApiParams(state)
+  )
 
-  let columns = useTableColumns({ fetchData: mutate })
+  let columns = useColumns({ mutate })
 
   return (
     <PageContent
@@ -141,7 +135,7 @@ const SearchForm = ({ search, isPending, ...props }) => {
 const useSearchInputPlaceHolder = () =>
   useTrans({ zh: "用户名输入框", en: "Input user name" })
 
-const useTableColumns = ({ fetchData } = {}) => {
+const useColumns = ({ mutate } = {}) => {
   let columns = [
     sequenceColumn(),
     {
@@ -200,7 +194,7 @@ const useTableColumns = ({ fetchData } = {}) => {
           <Box alignX="center">
             <Set>
               <ViewButton player={value} />
-              <EditButton player={value} onSubmitted={fetchData} />
+              <EditButton player={value} onSubmitted={mutate} />
             </Set>
           </Box>
         )

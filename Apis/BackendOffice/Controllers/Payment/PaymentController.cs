@@ -76,6 +76,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
                         HighestFee = p.HighestFee,
                         LowestFee = p.LowestFee
                     },
+                    VipLevelIds = p.VipLevels.Select(p => p.VipLevelId).ToArray(),
                     CreatedByUsername = p.CreatedByUsername,
                     UpdatedByUsername = p.UpdatedByUsername,
                     CreatedOn = p.CreatedOn,

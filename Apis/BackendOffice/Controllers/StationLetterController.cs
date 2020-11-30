@@ -70,6 +70,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Content = a.Content,
                     Remarks = a.Remarks,
                     AssignedAllPlayers = a.AssignedAllPlayers,
+                    PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
                     CreatedByUsername = a.CreatedByUsername,
                     VerifiedByUsername = a.VerifiedByUsername,
                     Status = a.Status.ToString(),

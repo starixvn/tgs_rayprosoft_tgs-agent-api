@@ -16,12 +16,10 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Docker"
       },
       "publishAllPorts": true,
-      "useSSL": true,
-      "httpPort": 32777,
-      "sslPort": 32776
+      "useSSL": true
     }
   }
 }

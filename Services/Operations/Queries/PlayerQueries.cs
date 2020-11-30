@@ -21,7 +21,7 @@ namespace TGS.Services.Operations.Queries
         Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(string playerCode,
             params LoginStatus[] statuses);
 
-        Task<string> GetPlayerCodeByUsernameAsync(Guid licenseeId, string username);
+        Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
 
         Task<Player> GetPlayerByCodeAsync(string playerCode);
 
@@ -78,9 +78,9 @@ namespace TGS.Services.Operations.Queries
             return results.ToArray();
         }
 
-        Task<string> IPlayerQueries.GetPlayerCodeByUsernameAsync(Guid licenseeId, string username) =>
+        Task<string> IPlayerQueries.GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
             _repository.Players
-                .Where(p => p.LicenseeId == licenseeId &&
+                .Where(p => p.BrandId == brandId &&
                     p.Username == username)
                 .Select(p => p.PlayerCode)
                 .FirstOrDefaultAsync();

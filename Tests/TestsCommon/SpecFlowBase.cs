@@ -27,6 +27,18 @@ namespace TGS.Tests.TestsCommon
 
         protected bool Remove(string key) =>
             _context.Remove(key);
+        
+        protected void RemoveAll(string keyPrefix)
+        {
+            var keys = _context.Keys.ToArray();
+            foreach (var key in keys)
+            {
+                if (key.StartsWith(keyPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    _context.Remove(key);
+                }
+            }
+        }
 
         protected bool HasTag(string tag) =>
             _context.ScenarioInfo.Tags.Contains(tag);

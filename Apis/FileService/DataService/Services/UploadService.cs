@@ -6,7 +6,6 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using TGS.Apis.FileService.DataService.Model;
 using TGS.Core.Infrastructures.Utility;
 using File = TGS.Apis.FileService.DataService.Model.File;
 
@@ -23,22 +22,20 @@ namespace TGS.Apis.FileService.DataService.Services
         private readonly IAmazonS3 _amazonS3;
         private readonly IOptions<AwsSettings> _awsSettings;
         private readonly IRepository<File> _files;
-        private readonly IOptions<FileSetting> _fileSetting;
-        private readonly IRepository<StationLetterFile> _stationLetters;
+        private readonly IOptions<FileSettings> _fileSetting;
 
         public UploadService(IAmazonS3 amazonS3, IOptions<AwsSettings> awsSettings,
-            IOptions<FileSetting> fileSetting, IRepository<StationLetterFile> stationLetters,
-            IRepository<File> files)
+            IOptions<FileSettings> fileSetting, IRepository<File> files)
         {
             _amazonS3 = amazonS3;
             _awsSettings = awsSettings;
             _fileSetting = fileSetting;
-            _stationLetters = stationLetters;
             _files = files;
         }
 
-        async Task<string> IUploadService.UploadFileAsync(IFormFile formFile)
+        public async Task<string> UploadFileAsync(IFormFile formFile)
         {
+            Directory.CreateDirectory(_fileSetting.Value.Path);
             var randomFileName =
                 $"{StringGenerator.GenerateAlphanumericString(32)}{Path.GetExtension(formFile.FileName)}";
             var path = Path.Join(_fileSetting.Value.Path, "/", randomFileName);
@@ -57,10 +54,10 @@ namespace TGS.Apis.FileService.DataService.Services
 
             await _files.InsertAsync(file);
 
-            return $"{_fileSetting.Value.Url}/{path}";
+            return $"/{path}";
         }
 
-        async Task<string> IUploadService.UploadFileS3Async(IFormFile formFile)
+        public async Task<string> UploadFileS3Async(IFormFile formFile)
         {
             var randomFileName =
                 $"{StringGenerator.GenerateAlphanumericString(32)}{Path.GetExtension(formFile.FileName)}";
@@ -90,7 +87,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
             await _files.InsertAsync(file);
 
-            return $"{_awsSettings.Value.S3.ServiceUrl}/{_awsSettings.Value.S3.Bucket}/{randomFileName}";
+            return $"{_awsSettings.Value.ServiceUrl}/{_awsSettings.Value.S3.Bucket}/{randomFileName}";
         }
     }
 }

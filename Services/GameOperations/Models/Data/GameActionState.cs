@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
@@ -37,11 +36,10 @@ namespace TGS.Services.GameOperations.Models.Data
             UtcNow = DateTimeOffset.UtcNow;
         }
 
-        public Db Db { get; init; }
+        public ITgsRepository Repository { get; init; }
         public GameActionType GameActionType { get; init; }
         public PlatformType PlatformType { get; init; }
         public Action<string, decimal> ValidateAmount { get; init; }
-        public string LicenseeCode { get; init; }
         public Func<decimal, decimal> PrepareAmount { get; init; }
         public bool HasWalletUpdate { get; init; }
         public bool MustHaveExistingRound { get; init; }
@@ -82,9 +80,8 @@ namespace TGS.Services.GameOperations.Models.Data
         public DateTimeOffset ExternalRoundCreatedOn =>
             PreviousActions?.FirstOrDefault()?.SentOn ?? UtcNow;
 
-        public DateTimeOffset? RoundClosedOn => NewRoundStatus == RoundStatus.Closed ?
-            UtcNow :
-            (DateTimeOffset?)null;
+        public DateTimeOffset? RoundClosedOn => 
+            NewRoundStatus == RoundStatus.Closed ? UtcNow : default(DateTimeOffset?);
 
         // set from TransactionData
         public DateTimeOffset Timestamp { get; init; }
@@ -110,6 +107,4 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool FreeBetAsSingleRound { get; init; }
         public bool AllowCancelCancelTransaction { get; init; }
     }
-
-    internal record Db(ITgsRepository Repository, IDbTransaction Transaction);
 }

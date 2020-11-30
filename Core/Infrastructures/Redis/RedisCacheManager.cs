@@ -252,8 +252,7 @@ namespace TGS.Core.Infrastructures.Redis
         }
 
         async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key,
-            RedisValue hashField,
-            bool fireAndForget)
+            RedisValue hashField, bool fireAndForget)
         {
             try
             {

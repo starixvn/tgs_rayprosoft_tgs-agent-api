@@ -29,7 +29,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             ITokenProvider tokenProvider,
             IHashProvider hashProvider,
             IPlayerOperations playerOperations,
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
             IExpirationValidator expirationValidator,
             IJwtTokenHandler handler)
         {
@@ -74,8 +74,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 return;
             }
 
-            var licenseeId = await playerOperations.GetLicenseeIdByPlayerCodeAsync(playerCode);
-            var secretKey = await licenseeOperations.GetLicenseeSecretKeyAsync(licenseeId);
+            var licenseeId = await playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+            var secretKey = await brandOperations.GetBrandSecretKeyAsync(licenseeId);
 
             var jti = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var payload = hashProvider.Hash($"{sub}:{jti}");

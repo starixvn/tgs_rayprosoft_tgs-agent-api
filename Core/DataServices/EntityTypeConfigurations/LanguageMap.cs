@@ -14,23 +14,23 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(l => l.CultureCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(l => l.LanguageCode)
                 .HasColumnType(ColumnTypes.Nvarchar(10))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(l => l.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(30))
-                .IsRequired()
-                .IsUnicode();
+                .HasColumnType(ColumnTypes.Nvarchar(64))
+                .IsRequired();
+
+            builder.Property(l => l.LocalizedName)
+                .HasColumnType(ColumnTypes.Nvarchar(64))
+                .IsRequired();
 
             builder.Property(l => l.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired()
-                .IsUnicode();
+                .IsRequired();
 
             builder.Property(l => l.UpdatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
@@ -56,9 +56,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithOne(gpl => gpl.Language)
                 .HasForeignKey(gpl => gpl.CultureCode);
 
-            builder.HasMany(l => l.LicenseeGameProviderConfigurations)
-                .WithOne(bgpc => bgpc.DefaultLanguage)
-                .HasForeignKey(bgpc => bgpc.DefaultLanguageCode);
+            builder.HasMany(l => l.BrandGameProviders)
+                .WithOne(bgp => bgp.DefaultLanguage)
+                .HasForeignKey(bgp => bgp.DefaultLanguageCode);
 
             builder.HasMany(l => l.LocalizedStrings)
                 .WithOne(ls => ls.Language)
