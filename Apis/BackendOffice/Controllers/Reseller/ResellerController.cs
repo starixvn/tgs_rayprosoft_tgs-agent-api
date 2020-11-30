@@ -57,7 +57,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
 
             if (reseller == null)
             {
-                return CreateInvalidResponse<GetResellerResponse>(Resources.Reseller.ResellerNotFound);
+                return CreateInvalidResponse<GetResellerResponse>(Resources.Reseller.NotFound);
             }
 
             return new GetResellerResponse
@@ -69,18 +69,18 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     Code = reseller.Code,
                     Name = reseller.Name,
                     Status = reseller.Status,
-                    ResellerCurrencies = reseller.Currencies
+                    Currencies = reseller.Currencies
                         .Select(x => new ResellerCurrencyModel
                         {
                             Code = x.CurrencyCode,
                             Name = x.Currency.Name
                         }).ToArray(),
-                    ResellerLanguages = reseller.Languages
+                    Languages = reseller.Languages
                         .Select(x => new ResellerLanguageModel
                         {
                             CultureCode = x.CultureCode
                         }).ToArray(),
-                    ResellerGameProviders = reseller.GameProviders
+                    GameProviders = reseller.GameProviders
                         .Select(x => new ResellerGameProviderModel
                         {
                             Id = x.GameProviderId,
@@ -96,6 +96,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         }
 
         [HttpPost]
+        [Description("Create a Reseller")]
         public async Task<MessageResponse> CreateResellerAsync(CreateResellerRequest request)
         {
             await _service.CreateResellerAsync(request, Username);
@@ -104,16 +105,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         }
 
         [HttpPut("{id}")]
+        [Description("Update a Reseller")]
         public async Task<MessageResponse> UpdateResellerAsync(Guid id, UpdateResellerRequest request)
         {
             var reseller = await _service.GetResellerAsync(q => q.Id == id, tracking: true);
 
             if (reseller == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.ResellerNotFound);
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NotFound);
             }
 
-            await _service.UpdatePaymentAsync(reseller, request, Username);
+            await _service.UpdateResellerAsync(reseller, request, Username);
 
             return CreateValidResponse<MessageResponse>();
         }

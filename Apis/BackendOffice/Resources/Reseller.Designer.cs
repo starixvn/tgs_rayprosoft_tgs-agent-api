@@ -63,9 +63,9 @@ namespace TGS.Apis.BackendOffice.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Reseller is not found..
         /// </summary>
-        public static string ResellerNotFound {
+        public static string NotFound {
             get {
-                return ResourceManager.GetString("ResellerNotFound", resourceCulture);
+                return ResourceManager.GetString("NotFound", resourceCulture);
             }
         }
     }

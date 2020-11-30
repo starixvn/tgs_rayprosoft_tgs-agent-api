@@ -11,13 +11,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
     {
         [HttpPut("{resellerId:guid}/{status}")]
         [Description("change a Reseller's status")]
-        public async Task<MessageResponse> UpdatePaymentStatusAsync(Guid resellerId, Status status)
+        public async Task<MessageResponse> UpdateResellerStatusAsync(Guid resellerId, Status status)
         {
             var reseller = await _service.GetResellerAsync(q => q.Id == resellerId);
 
             if (reseller == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.ResellerNotFound);
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NotFound);
             }
 
             await _service.ChangeStatusAsync(reseller, status, Username);

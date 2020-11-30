@@ -50,6 +50,8 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
             services.AddTransient<IResellerService, ResellerService>();
+            services.AddTransient<ILicenseeService, LicenseeService>();
+            services.AddTransient<IBrandService, BrandService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
 

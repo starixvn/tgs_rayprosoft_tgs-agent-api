@@ -18,7 +18,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         IQueryable<Reseller> GetResellersAsync(bool tracking = false);
         Task CreateResellerAsync(CreateResellerRequest request, string username);
-        Task UpdatePaymentAsync(Reseller reseller, UpdateResellerRequest request, string username);
+        Task UpdateResellerAsync(Reseller reseller, UpdateResellerRequest request, string username);
         Task ChangeStatusAsync(Reseller reseller, Status status, string username);
     }
 
@@ -66,7 +66,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(reseller).FirstOrDefaultAsync(predicate);
         }
 
-        Task IResellerService.UpdatePaymentAsync(Reseller reseller, UpdateResellerRequest request,
+        Task IResellerService.UpdateResellerAsync(Reseller reseller, UpdateResellerRequest request,
             string username)
         {
             _repository.ResellerLanguages.RemoveRange(reseller.Languages);
