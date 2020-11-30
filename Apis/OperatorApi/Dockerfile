@@ -6,6 +6,9 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+
+RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
+
 WORKDIR /src
 COPY ["Apis/OperatorApi/OperatorApi.csproj", "Apis/OperatorApi/"]
 COPY ["Services/Clients/Clients.csproj", "Services/Clients/"]
