@@ -17,5 +17,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Games
         [Required]
         [JsonPropertyName("language")]
         public string Language { get; init; }
+
+        [Required]
+        [JsonPropertyName("currency")]
+        public string CurrencyCode { get; init; }
     }
 }

@@ -1052,7 +1052,8 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     GameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Tag = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1598,12 +1599,6 @@ namespace TGS.Core.DataServices.Migrations
                 column: "BetLimitGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Players_BrandId",
-                schema: "dbo",
-                table: "Players",
-                column: "BrandId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Players_CultureCode",
                 schema: "dbo",
                 table: "Players",
@@ -1616,16 +1611,17 @@ namespace TGS.Core.DataServices.Migrations
                 column: "ParentPlayerCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Players_Username",
-                schema: "dbo",
-                table: "Players",
-                column: "Username");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Players_VipId",
                 schema: "dbo",
                 table: "Players",
                 column: "VipId");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Players_BrandId_Username",
+                schema: "dbo",
+                table: "Players",
+                columns: new[] { "BrandId", "Username" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ResellerBetLimits_BetLimitGroupId",

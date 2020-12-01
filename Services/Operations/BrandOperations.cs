@@ -39,8 +39,7 @@ namespace TGS.Services.Operations
 
         Task<string> GetBrandSecretKeyAsync(Guid brandId);
 
-        Task<CachedBrandGameProviderDetail[]> GetBrandGameProvidersAsync(Guid brandId, string currencyCode,
-            PlatformType platformType);
+        Task<CachedBrandGameProvider[]> GetBrandGameProvidersAsync(Guid brandId);
 
         Task<CachedBrandGameProvider> GetBrandGameProviderAsync(Guid brandId, Guid gameProviderId);
 
@@ -182,54 +181,15 @@ namespace TGS.Services.Operations
             GetCachedBrandValueAsync(brandId, CachedBrandFields.SecretKey, v => (string) v,
                 brand => brand?.SecretKey);
 
-        async Task<CachedBrandGameProviderDetail[]> IBrandOperations.GetBrandGameProvidersAsync(Guid brandId,
-            string currencyCode, PlatformType platformType)
-        {
-            var cacheType = RedisCacheType.BrandGameProviders;
-            var fieldName =
-                $"{brandId}:{currencyCode}:{platformType}";
-
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, null, fieldName);
-            if (value.HasValue)
-            {
-                return _json.DeserializeFromString<CachedBrandGameProviderDetail[]>(value);
-            }
-
-            var gameProviders = await
-                _brandQueries.GetBrandGameProvidersAsync(brandId, currencyCode, platformType);
-
-            var fields = new HashEntry[]
-            {
-                new(fieldName, _json.SerializeToString(gameProviders))
-            };
-
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, null, fields, TimeSpan.FromHours(2));
-
-            return gameProviders;
-        }
+        Task<CachedBrandGameProvider[]> IBrandOperations.GetBrandGameProvidersAsync(Guid brandId) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.BrandGameProviders, brandId.ToString(), TimeSpan.FromHours(2), 
+                () => _brandQueries.GetBrandGameProvidersAsync(brandId));
 
         async Task<CachedBrandGameProvider> IBrandOperations.GetBrandGameProviderAsync(Guid brandId,
             Guid gameProviderId)
         {
-            var cacheType = RedisCacheType.BrandGameProviders;
-            var fieldName = gameProviderId.ToString();
-
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, brandId, fieldName);
-            if (value.HasValue)
-            {
-                return _json.DeserializeFromString<CachedBrandGameProvider>(value);
-            }
-
-            var gameProvider = await _brandQueries.GetBrandGameProviderAsync(brandId, gameProviderId);
-
-            var fields = new HashEntry[]
-            {
-                new(fieldName, _json.SerializeToString(gameProvider))
-            };
-
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, brandId, fields, TimeSpan.FromHours(2));
-
-            return gameProvider;
+            var gameProviders = await _interface.GetBrandGameProvidersAsync(brandId);
+            return gameProviders.FirstOrDefault(bgp => bgp.GameProviderId == gameProviderId);
         }
 
         async Task<Status?> IBrandOperations.GetBrandGameProviderStatusAsync(Guid brandId, Guid gameProviderId)

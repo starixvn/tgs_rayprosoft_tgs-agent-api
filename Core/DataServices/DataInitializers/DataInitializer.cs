@@ -236,17 +236,17 @@ namespace TGS.Core.DataServices.DataInitializers
                 new
                 {
                     Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
                 },
                 new
                 {
                     Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
                 },
                 new
                 {
                     Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN",
-                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
                 },
                 new
                 {
@@ -630,13 +630,23 @@ namespace TGS.Core.DataServices.DataInitializers
                     DesktopQueryString = string.Empty,
                     MobileQueryString = string.Empty
                 }).ToHashSet(),
-                Games = gameProviders.SelectMany(gp => gp.Games).Select(g => new BrandGame
-                {
-                    BrandId = brand.Id,
-                    GameId = g.Id,
-                    Status = GameStatus.Active
-                }).ToHashSet()
+                Games = gameProviders.SelectMany(gp => gp.Games).Select((g, idx) => new BrandGame
+                    {
+                        BrandId = brand.Id,
+                        GameId = g.Id,
+                        Status = GameStatus.Active,
+                        Tag = GetGameTag(idx)
+                    }).ToHashSet()
             };
+
+            static GameTag GetGameTag(int index) =>
+                (index % 3) switch
+                {
+                    0 => GameTag.New,
+                    1 => GameTag.New | GameTag.Recommend,
+                    2 => GameTag.New | GameTag.Recommend | GameTag.Hot,
+                    _ => GameTag.None
+                };
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)

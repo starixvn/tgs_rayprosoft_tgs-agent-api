@@ -114,9 +114,26 @@ namespace TGS.Services.Operations
                 : await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
         }
 
-        Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
-            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.UsernameToPlayerCode, username, TimeSpan.FromHours(2),
-                () => _playerQueriesFactory().GetPlayerCodeByUsernameAsync(brandId, username));
+        async Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid brandId, string username)
+        {
+            var cacheType = RedisCacheType.UsernameToPlayerCode;
+            var cacheKey = brandId;
+            var field = username;
+
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, username);
+            if (value.HasValue)
+            {
+                return value;
+            }
+
+            var playerCode = await _playerQueriesFactory().GetPlayerCodeByUsernameAsync(brandId, username);
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
+            {
+                new(field, playerCode)
+            }, TimeSpan.FromHours(2));
+
+            return playerCode;
+        }
 
         async Task<string> IPlayerOperations.CreatePlayerAsync(CreatePlayerData data)
         {

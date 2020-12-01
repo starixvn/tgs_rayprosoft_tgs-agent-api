@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi
             services.AddTgsRepository(_configuration, "Tgs")
                 .AddBetRepository(_configuration, "Bet");
 
-            services.AddSingleton<ICaptchaFactory, CaptchaFactory>();
+            services.AddSingleton<ICaptchaService, CaptchaService>();
 
             services.AddNats(_configuration)
                 .AddWebApiServices()
