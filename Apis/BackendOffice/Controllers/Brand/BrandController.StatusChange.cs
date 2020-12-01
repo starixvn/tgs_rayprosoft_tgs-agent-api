@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOfficeApplication.Models.Brand;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
@@ -11,18 +12,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     {
         [HttpPut("{brandId:guid}/{status}")]
         [Description("change a Brand's status")]
-        public async Task<MessageResponse> UpdateBrandStatusAsync(Guid brandId, Status status)
+        public Task<MessageResponse> UpdateBrandStatusAsync(Guid brandId, Status status)
         {
-            var brand = await _service.GetBrandAsync(q => q.Id == brandId);
-
-            if (brand == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Brand.NotFound);
-            }
-
-            await _service.ChangeStatusAsync(brand, status, Username);
-
-            return CreateValidResponse<MessageResponse>();
+            return _mediator.Send(new UpdateBrandStatusRequest(brandId, status));
         }
     }
 }

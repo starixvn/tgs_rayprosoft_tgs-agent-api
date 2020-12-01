@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -30,6 +31,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.BackOfficeApplication.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -54,6 +56,8 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<IBrandService, BrandService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
+            services.AddBackOfficeApplicationServices();
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(UsernamePipe<,>));
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
