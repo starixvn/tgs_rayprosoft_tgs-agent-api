@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
@@ -12,6 +13,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasKey(bg => new { bg.BrandId, bg.GameId });
 
             builder.Property(bg => bg.Status)
+                .IsRequired();
+
+            builder.Property(bg => bg.Tag)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder

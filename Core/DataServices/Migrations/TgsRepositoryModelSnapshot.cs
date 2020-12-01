@@ -214,6 +214,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<short>("Tag")
+                        .HasColumnType("smallint");
+
                     b.HasKey("BrandId", "GameId");
 
                     b.HasIndex("GameId");
@@ -1225,15 +1228,15 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("BetLimitGroupId");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CultureCode");
 
                     b.HasIndex("ParentPlayerCode");
 
-                    b.HasIndex("Username");
-
                     b.HasIndex("VipId");
+
+                    b.HasIndex("BrandId", "Username")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Players_BrandId_Username");
 
                     b.ToTable("Players", "dbo");
                 });

@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Bet;
 namespace TGS.Core.DataServices.Bet.Migrations
 {
     [DbContext(typeof(BetRepository))]
-    [Migration("20201127023657_Initial")]
+    [Migration("20201127033021_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

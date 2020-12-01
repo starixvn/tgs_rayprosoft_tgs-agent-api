@@ -21,7 +21,8 @@ BEGIN
         [EndpointPath],
         [Type],
         [PlatformType],
-        [HasTurnoverOnTieBet]
+        [HasTurnoverOnTieBet],
+        [AvailableCurrencies]
     FROM dbo.[Games]
     WHERE [GameProviderId] = @gameProviderId
 END

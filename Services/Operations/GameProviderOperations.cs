@@ -37,6 +37,8 @@ namespace TGS.Services.Operations
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, string externalGameId);
 
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType);
+
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, Guid gameId);
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, string gameCode, PlatformType platformType);
@@ -49,17 +51,17 @@ namespace TGS.Services.Operations
     public sealed class GameProviderOperations : IGameProviderOperations
     {
         private readonly IRedisCacheManager _cacheManager;
-        private readonly Func<IGameProviderQueries> _gameProviderQueriesFactory;
+        private readonly IGameProviderQueries _gameProviderQueries;
         private readonly IGameProviderOperations _interface;
         private readonly IJsonSerializationProvider _json;
 
         public GameProviderOperations(
             IRedisCacheManager cacheManager,
-            Func<IGameProviderQueries> gameProviderQueriesFactory,
+            IGameProviderQueries gameProviderQueries,
             IJsonSerializationProvider json)
         {
             _cacheManager = cacheManager;
-            _gameProviderQueriesFactory = gameProviderQueriesFactory;
+            _gameProviderQueries = gameProviderQueries;
             _json = json;
             _interface = this;
         }
@@ -72,7 +74,7 @@ namespace TGS.Services.Operations
                 return cachedGameProvider;
             }
 
-            var r = await _gameProviderQueriesFactory().GetCachedGameProviderAsync(gameProviderId);
+            var r = await _gameProviderQueries.GetCachedGameProviderAsync(gameProviderId);
             cachedGameProvider = new()
             {
                 Id = gameProviderId,
@@ -100,7 +102,7 @@ namespace TGS.Services.Operations
                 return gpc;
             }
 
-            var r = await _gameProviderQueriesFactory()
+            var r = await _gameProviderQueries
                 .GetCachedGameProviderConfigurationAsync(gameProviderConfigurationId);
             if (r == null)
             {
@@ -140,7 +142,7 @@ namespace TGS.Services.Operations
         {
             return _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderIdByCode, gameProviderCode,
                 TimeSpan.FromHours(2),
-                () => _gameProviderQueriesFactory().GetGameProviderIdByCodeAsync(gameProviderCode));
+                () => _gameProviderQueries.GetGameProviderIdByCodeAsync(gameProviderCode));
         }
 
         async Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId)
@@ -175,7 +177,7 @@ namespace TGS.Services.Operations
                 gameProviderId, TimeSpan.FromHours(2),
                 async () =>
                 {
-                    var dict = await _gameProviderQueriesFactory()
+                    var dict = await _gameProviderQueries
                         .GetGameProviderLanguagesByInternalCodeAsync(gameProviderId);
                     return dict.Keys.ToArray();
                 });
@@ -189,7 +191,7 @@ namespace TGS.Services.Operations
                 gameProviderId, TimeSpan.FromHours(2),
                 async () =>
                 {
-                    var dict = await _gameProviderQueriesFactory()
+                    var dict = await _gameProviderQueries
                         .GetGameProviderCurrenciesByInternalCodeAsync(gameProviderId);
                     return dict.Keys.ToArray();
                 });
@@ -208,7 +210,7 @@ namespace TGS.Services.Operations
                 return value;
             }
 
-            var betLimitCode = await _gameProviderQueriesFactory()
+            var betLimitCode = await _gameProviderQueries
                 .GetGameProviderBetLimitCodeAsync(gameProviderId, currencyCode, betLimitGroupId);
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderBetLimitCode, gameProviderId,
@@ -244,6 +246,27 @@ namespace TGS.Services.Operations
             await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
             {
                 new(externalGameId, _json.SerializeToString(games))
+            }, TimeSpan.FromHours(2));
+
+            return games;
+        }
+
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType)
+        {
+            var cacheType = RedisCacheType.GamesByPlatform;
+            var field = $"{platformType}";
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, field);
+            if (value.HasValue)
+            {
+                return _json.DeserializeFromString<CachedGame[]>(value);
+            }
+
+            var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
+            var games = cachedGames.Where(g => g.PlatformType == platformType).ToArray();
+
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
+            {
+                new(field, _json.SerializeToString(games))
             }, TimeSpan.FromHours(2));
 
             return games;
@@ -367,7 +390,7 @@ namespace TGS.Services.Operations
 
         private async Task<CachedGame[]> GetAndCacheGamesAsync(Guid gameProviderId)
         {
-            var games = await _gameProviderQueriesFactory().GetCachedGamesAsync(gameProviderId);
+            var games = await _gameProviderQueries.GetCachedGamesAsync(gameProviderId);
 
             var fields = games.Select(g => new HashEntry(g.Id.ToString(), _json.SerializeToString(g)))
                 .ToArray();
@@ -379,7 +402,7 @@ namespace TGS.Services.Operations
 
         private async Task<IdMap[]> GetAndCachedSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType)
         {
-            var games = await _gameProviderQueriesFactory().GetSubGameIdMapsAsync(gameProviderId, platformType);
+            var games = await _gameProviderQueries.GetSubGameIdMapsAsync(gameProviderId, platformType);
 
             var fields = new HashEntry[]
             {

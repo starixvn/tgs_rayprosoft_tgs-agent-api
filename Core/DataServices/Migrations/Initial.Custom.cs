@@ -77,9 +77,7 @@ namespace TGS.Core.DataServices.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlFormat, "usp_Brand_GetCurrenciesByExternalCode"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlFormat, "usp_Brand_GetBrandGameProviderForCache"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlFormat, "usp_Brand_GetBrandGameProvidersForDetail"));
+                string.Format(Consts.StoreProcedureSqlFormat, "usp_Brand_GetBrandGameProvidersForCache"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlFormat, "usp_Localization_GetLocalizationByGameProviderId"));
 

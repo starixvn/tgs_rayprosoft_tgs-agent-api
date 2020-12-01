@@ -1,6 +1,5 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Extensions;
 
 namespace TGS.Core.Models.Services.Caches
 {
@@ -13,7 +12,7 @@ namespace TGS.Core.Models.Services.Caches
         public string Username { get; init; }
         public string ExternalCurrencyCode { get; init; }
         public PlayerType Type { get; init; }
-        public bool IsTestPlayer => Type.IsTestPlayer();
+        public bool IsTestPlayer => Type == PlayerType.TestPlayer;
         public Guid DefaultWalletId { get; init; }
         public string DefaultWalletCurrencyCode { get; init; }
         public string CultureCode { get; init; }
