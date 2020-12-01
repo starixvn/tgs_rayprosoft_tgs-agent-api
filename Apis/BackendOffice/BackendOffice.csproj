@@ -38,7 +38,7 @@
     <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
-    <ProjectReference Include="..\..\Services\BackOfficeApplication\BackOfficeApplication.csproj" />
+    <ProjectReference Include="..\..\Services\BackOffice.Application\BackOffice.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

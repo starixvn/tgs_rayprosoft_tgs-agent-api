@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using TGS.Services.BackOfficeApplication.Models;
+using TGS.Services.BackOffice.Application.Models;
 
 namespace TGS.Apis.BackendOffice.Middlewares
 {

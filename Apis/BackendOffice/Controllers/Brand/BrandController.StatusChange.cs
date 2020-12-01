@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOfficeApplication.Models.Brand;
+using TGS.Services.BackOffice.Application.Models.Brand;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {

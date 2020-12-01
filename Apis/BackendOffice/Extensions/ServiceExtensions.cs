@@ -31,7 +31,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Services.BackOfficeApplication.Extensions;
+using TGS.Services.BackOffice.Application.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -53,7 +53,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
             services.AddTransient<IResellerService, ResellerService>();
             services.AddTransient<ILicenseeService, LicenseeService>();
-            services.AddTransient<IBrandService, BrandService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
             services.AddBackOfficeApplicationServices();

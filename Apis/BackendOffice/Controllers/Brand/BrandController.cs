@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOfficeApplication.Models.Brand;
+using TGS.Services.BackOffice.Application.Models.Brand;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
@@ -15,13 +14,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     public partial class BrandController : BaseContextController
     {
         private readonly IMediator _mediator;
-        private readonly IBrandService _service;
 
-        public BrandController(IBrandService service, IMediator mediator,
+        public BrandController(IMediator mediator,
             IHttpContextAccessor httpContextAccessor) : base(
             httpContextAccessor)
         {
-            _service = service;
             _mediator = mediator;
         }
 
