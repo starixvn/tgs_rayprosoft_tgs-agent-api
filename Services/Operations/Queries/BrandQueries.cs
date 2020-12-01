@@ -35,10 +35,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<Dictionary<string, string>> GetBrandCurrenciesByInternalCodeAsync(Guid brandId);
 
-        Task<CachedBrandGameProviderDetail[]> GetBrandGameProvidersAsync(Guid brandId, string currencyCode,
-            PlatformType platformType);
-
-        Task<CachedBrandGameProvider> GetBrandGameProviderAsync(Guid brandId, Guid gameProviderId);
+        Task<CachedBrandGameProvider[]> GetBrandGameProvidersAsync(Guid brandId);
     }
 
     public sealed class BrandQueries : IBrandQueries
@@ -158,11 +155,10 @@ namespace TGS.Services.Operations.Queries
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
 
-        async Task<CachedBrandGameProviderDetail[]> IBrandQueries.GetBrandGameProvidersAsync(Guid brandId,
-            string currencyCode, PlatformType platformType)
+        async Task<CachedBrandGameProvider[]> IBrandQueries.GetBrandGameProvidersAsync(Guid brandId)
         {
-            const string spName = "usp_Brand_GetBrandGameProvidersForDetail";
-            var result = await _repository.SqlQueryMultipleAsync<GetBrandGameProviderResult>(spName,
+            const string spName = "usp_Brand_GetBrandGameProvidersForCache";
+            var r = await _repository.SqlQueryMultipleAsync<CachedBrandGameProvider>(spName,
                 parameters: new SqlParameter[]
                 {
                     new()
@@ -170,54 +166,10 @@ namespace TGS.Services.Operations.Queries
                         ParameterName = "@brandId",
                         Value = brandId,
                         DbType = DbType.Guid
-                    },
-                    new()
-                    {
-                        ParameterName = "@currencyCode",
-                        Value = currencyCode,
-                        DbType = DbType.String
-                    },
-                    new()
-                    {
-                        ParameterName = "@platformType",
-                        Value = platformType,
-                        DbType = DbType.Int16
                     }
                 });
 
-            return (from r in result
-                    group r.GameType by new {r.Id, r.Code, r.Name, r.Status, r.Description}
-                    into g
-                    select new CachedBrandGameProviderDetail
-                    {
-                        Id = g.Key.Id,
-                        Code = g.Key.Code,
-                        Name = g.Key.Name,
-                        Status = g.Key.Status,
-                        Description = g.Key.Description,
-                        GameTypes = g.ToArray()
-                    }).ToArray();
-        }
-
-        Task<CachedBrandGameProvider> IBrandQueries.GetBrandGameProviderAsync(Guid brandId, Guid gameProviderId)
-        {
-            const string spName = "usp_Brand_GetBrandGameProviderForCache";
-            return _repository.SqlQuerySingleAsync<CachedBrandGameProvider>(spName,
-                parameters: new SqlParameter[]
-                {
-                    new()
-                    {
-                        ParameterName = "@brandId",
-                        Value = brandId,
-                        DbType = DbType.Guid
-                    },
-                    new()
-                    {
-                        ParameterName = "@gameProviderId",
-                        Value = gameProviderId,
-                        DbType = DbType.Guid
-                    }
-                });
+            return r.ToArray();
         }
     }
 }

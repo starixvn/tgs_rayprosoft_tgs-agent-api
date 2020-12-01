@@ -3,12 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages.Players
 {
-    public record CreatePlayerRequest
+    public record CreatePlayerRequest : BaseUserRequest
     {
-        [Required]
-        [JsonPropertyName("username")]
-        public string Username { get; init; }
-        
         [Required]
         [JsonPropertyName("currency")]
         public string CurrencyCode { get; init;  }

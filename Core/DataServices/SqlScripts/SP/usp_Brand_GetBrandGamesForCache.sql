@@ -14,8 +14,8 @@ BEGIN
 		g.[Id] AS [GameId],
 		g.[ExternalId] AS [ExternalGameId],
 		g.[PlatformType],
-		g.[SubGame],
-		bg.[Status] AS [BrandGameStatus]
+		bg.[Status] AS [BrandGameStatus],
+		bg.[Tag]
 	FROM dbo.[BrandGames] bg
 	JOIN dbo.[Games] g ON bg.[GameId] = g.[Id]
 	WHERE bg.[BrandId] = @brandId    
