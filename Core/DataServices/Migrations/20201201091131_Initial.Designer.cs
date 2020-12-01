@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201130032915_Initial")]
+    [Migration("20201201091131_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -215,6 +215,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<short>("Tag")
+                        .HasColumnType("smallint");
 
                     b.HasKey("BrandId", "GameId");
 
@@ -1227,15 +1230,15 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("BetLimitGroupId");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CultureCode");
 
                     b.HasIndex("ParentPlayerCode");
 
-                    b.HasIndex("Username");
-
                     b.HasIndex("VipId");
+
+                    b.HasIndex("BrandId", "Username")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Players_BrandId_Username");
 
                     b.ToTable("Players", "dbo");
                 });
