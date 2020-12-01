@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Services.Games
+namespace TGS.Core.Models.Services.Data
 {
     public record GameActionResult
     {
@@ -19,7 +19,7 @@ namespace TGS.Core.Models.Services.Games
 
         public Guid? ReferencedGameActionId {  get; init; }
 
-        public DateTimeOffset RecordedOn { get; set; }
+        public DateTimeOffset RecordedOn { get; init; }
 
         public Guid RoundId { get; init; }
 

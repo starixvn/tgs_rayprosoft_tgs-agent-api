@@ -11,7 +11,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("Players", "dbo");
             builder.HasKey(bc => bc.PlayerCode);
-            builder.HasIndex(p => p.Username);
+
+            builder.HasIndex(p => new { p.BrandId, p.Username })
+                .HasDatabaseName("UX_Players_BrandId_Username")
+                .IsUnique();
 
             builder.Property(c => c.PlayerCode)
                 .HasColumnType(ColumnTypes.Varchar(16))

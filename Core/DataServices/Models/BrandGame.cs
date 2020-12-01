@@ -14,5 +14,7 @@ namespace TGS.Core.DataServices.Models
         public virtual Brand Brand { get; set; }
 
         public GameStatus Status { get; set; }
+
+        public GameTag Tag { get; set; }
     }
 }

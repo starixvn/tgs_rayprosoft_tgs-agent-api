@@ -17,6 +17,9 @@ namespace TGS.Apis.OperatorApi.Extensions
                     .UseMiddleware<VerifyCredentialsMiddleware>()
                     .UseMiddleware<VerifyPlayerTokenMiddleware>());
 
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/player"),
+                builder => builder.UseMiddleware<VerifyCaptchaMiddleware>());
+
             return app;
         }
     }

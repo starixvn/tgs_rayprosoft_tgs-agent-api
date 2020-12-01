@@ -12,6 +12,8 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Clients;
 using TGS.Services.Operations;
@@ -26,12 +28,14 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class GameController : ControllerBase
     {
+        private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
+        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
+        private readonly IBrandOperations _brandOperations;
         private readonly IRedisCacheManager _cacheManger;
         private readonly IExpirationValidator _expirationValidator;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
-        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
-        private readonly IBrandOperations _brandOperations;
+        private readonly ILocalizationOperations _localizationOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IPluggalbeGameProviderApiClient _pluggableApiClient;
         private readonly IPluggableOperations _pluggableOperations;
@@ -43,7 +47,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
+            ILocalizationOperations localizationOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
+            IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
             IValidStatus<Status> validStatus,
@@ -56,7 +62,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
+            _localizationOperations = localizationOperations;
             _brandLanguageCodeMapper = brandLanguageCodeMapper;
+            _brandCurrencyCodeMapper = brandCurrencyCodeMapper;
             _cacheManger = cacheManager;
             _json = json;
             _validStatus = validStatus;
@@ -73,24 +81,37 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<GetGamesResponse> GetGamesAsync(GetGamesRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
-
+            var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
-            var platform = request.PlatformType;
-
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var cachedPlayer = playerTokenData != null
-                ? await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode)
-                : null;
+            var platformType = request.PlatformType;
 
+            CachedPlayer cachedPlayer = null;
+
+            if (playerTokenData != null)
+            {
+                if (playerTokenData.PlatformType != platformType)
+                {
+                    throw new InvalidOperationException("request platform is not matched with player login platform.");
+                }
+
+                cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
+                if (cachedPlayer != null && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(currencyCode))
+                {
+                    throw new CurrencyNotMatchingException(cachedPlayer.DefaultWalletCurrencyCode, currencyCode);
+                }
+            }
+
+            var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
+            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
+
+            var cacheType = RedisCacheType.BrandGamesWithConditions;
             var cacheKey = $"{brandId}";
-            var field = cachedPlayer == null
-                ? $"{platform}:{gameProviderId}:{cultureCode}:general"
-                : $"{platform}:{gameProviderId}:{cultureCode}:{cachedPlayer.DefaultWalletCurrencyCode}:{(int) cachedPlayer.Type}";
+            var field = $"{gameProviderId}:{platformType}:{currencyCode}:{(int) playerType}:{cultureCode}";
 
             var value =
-                await _cacheManger.SafeGetHashSetAsync(RedisCacheType.BrandGamesByPlatform, cacheKey, field);
+                await _cacheManger.SafeGetHashSetAsync(cacheType, cacheKey, field);
 
             if (value.HasValue)
             {
@@ -100,10 +121,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 };
             }
 
-            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, platform);
-            var gameModels = await GetGameModelsAsync(gameProviderId, brandGames, cachedPlayer);
+            var gameModels = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, cultureCode,
+                playerType);
 
-            await _cacheManger.SafeCacheHashSetAsync(RedisCacheType.BrandGamesByPlatform, cacheKey, new HashEntry[]
+            await _cacheManger.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
             {
                 new(field, _json.SerializeToString(gameModels))
             }, TimeSpan.FromHours(1));
@@ -137,7 +158,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerType = cachedPlayer.Type;
             var statuses = _validStatus.GetStatus(playerType);
             var gameStatuses = _validGameStatus.GetStatus(playerType);
-            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(cachedPlayer.BrandId, gameProviderId, game.Id, gameCode,
+            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(cachedPlayer.BrandId, gameProviderId,
+                game.Id, gameCode,
                 statuses, gameStatuses);
 
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(gameProviderCode);
@@ -158,19 +180,11 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         #region Private Methods
 
-        private async Task<GetGamesResponse.GameModel[]> GetGameModelsAsync(Guid gameProviderId,
-            CachedBrandGame[] licenseeGames, CachedPlayer cachedPlayer)
+        private async Task<GetGamesResponse.GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
+            PlatformType platformType, string currencyCode, string culture, PlayerType playerType)
         {
-            var statuses = ValidStatus.Default;
-            var gameStatuses = ValidGameStatus.Default;
-            var currencyCode = string.Empty;
-
-            if (cachedPlayer != null)
-            {
-                statuses = _validStatus.GetStatus(cachedPlayer.Type);
-                gameStatuses = _validGameStatus.GetStatus(cachedPlayer.Type);
-                currencyCode = cachedPlayer.DefaultWalletCurrencyCode;
-            }
+            var statuses = _validStatus.GetStatus(playerType);
+            var gameStatuses = _validGameStatus.GetStatus(playerType);
 
             if (currencyCode.IsNotNullOrEmpty())
             {
@@ -183,22 +197,45 @@ namespace TGS.Apis.OperatorApi.Controllers
                 }
             }
 
+            var brandGameProviderStatus =
+                await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId) ?? Status.Active;
+            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, platformType);
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId);
 
-            return (from lg in licenseeGames.Where(g => g.GameProviderId == gameProviderId)
-                    join gg in cachedGames on lg.GameId equals gg.Id
+            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, culture);
+
+            return (from bg in brandGames.Where(g => g.GameProviderId == gameProviderId)
+                    join g in cachedGames on bg.GameId equals g.Id
+                    where g.AvailableCurrencies.Length == 0 ||
+                        g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase)
+                    let key = g.Id.ToString()
                     select new GetGamesResponse.GameModel
                     {
-                        Id = lg.GameId,
-                        Code = gg.Code,
-                        Name = gg.Name,
-                        Description = gg.Description,
+                        Id = bg.GameId,
+                        Code = g.Code,
+                        Name = _localizationOperations.Parse(store, key,
+                            Core.Models.Consts.LocalizationContext.GameName, g.Name),
+                        Description = _localizationOperations.Parse(store, key,
+                            Core.Models.Consts.LocalizationContext.GameDescription, g.Description),
                         GameProviderCode = cachedGameProvider.Code,
-                        Type = gg.Type,
-                        IsActive = statuses.Contains(cachedGameProvider.Status) && gameStatuses.Contains(gg.Status)
+                        Type = g.Type,
+                        IsActive = IsGameActive(statuses, cachedGameProvider.Status, brandGameProviderStatus,
+                            gameStatuses, g.Status, bg.BrandGameStatus),
+                        Tag = new GetGamesResponse.Tag
+                        {
+                            New = bg.Tag.IsNew(),
+                            Hot = bg.Tag.IsHot(),
+                            Recommend = bg.Tag.IsRecommend()
+                        }
                     }).ToArray();
         }
+
+        private static bool IsGameActive(Status[] statuses, Status gameProviderStatus, Status brandGameProviderStatus,
+            GameStatus[] gameStatuses, GameStatus gameStatus, GameStatus brandGameStatus) =>
+            statuses.Contains(gameProviderStatus) &&
+            gameStatuses.Contains(gameStatus) &&
+            statuses.Contains(brandGameProviderStatus) && gameStatuses.Contains(brandGameStatus);
 
         #endregion
     }
