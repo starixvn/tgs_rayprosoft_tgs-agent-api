@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -22,26 +23,21 @@ namespace TGS.Core.DataServices.DataInitializers
     public sealed partial class DataInitializer : IDataInitializer
     {
         private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
-        private static readonly object Locker = new object();
+        private static readonly object Locker = new();
         private static readonly string AdminUsername = "admin.enabled";
-
-        private static readonly IList<IGameProvider> GameProviders = new IGameProvider[]
-        {
-            new SBOGameProvider()
-            //new RedTigerGameProvider(),
-        };
 
         private static readonly IList<IReseller> Resellers = new IReseller[]
         {
             new TgsReseller()
         };
-
+        
+        private readonly IList<IGameProvider> _gameProviders;
         private readonly IDictionary<string, GameProvider> _gameProvidersCreated =
             new Dictionary<string, GameProvider>();
 
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
-        private readonly StringBuilder _logBuilder = new StringBuilder();
+        private readonly StringBuilder _logBuilder = new();
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
 
@@ -52,23 +48,28 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private readonly VipLevel[] _vipLevels =
         {
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
         };
 
         private Player[] _players;
 
-        public DataInitializer(ITgsRepository repository)
+        public DataInitializer(ITgsRepository repository, IWebHostEnvironment env)
         {
             _repository = repository;
 
             var hashProvider = (IHashProvider) new HashProvider();
             _passwordHandler = new PasswordHandler(hashProvider);
             _jsonSerializationProvider = new JsonSerializationProvider();
+
+            _gameProviders = new IGameProvider[]
+            {
+                new SBOGameProvider(env)
+            };
         }
 
         async Task IDataInitializer.SetInitialDataAsync()
@@ -94,7 +95,6 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateDepartmentsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateRolesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateUsersAsync, _logBuilder);
-
 
             timer.Stop();
 
@@ -366,7 +366,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private async Task GenerateGameProvidersAsync()
         {
-            foreach (var gp in GameProviders)
+            foreach (var gp in _gameProviders)
             {
                 var gameProvider = CreateGameProvider(gp);
                 _gameProvidersCreated.Add(gp.Code, gameProvider);

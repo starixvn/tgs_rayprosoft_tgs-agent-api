@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
+﻿using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Services;
 
@@ -15,21 +17,28 @@ namespace TGS.Core.DataServices.DataInitializers
                 WriteIndented = true
             };
 
-            var settings = new[]
+            var commonSettings = new[]
             {
-                CreateSetting(SettingConsts.GameProviderConfigurations.SBOBET,
-                    _jsonSerializationProvider.SerializeToString(SBOConfiguration, options),
-                    "JSON based configuration of SBOBET."),
                 CreateSetting(SettingConsts.Menus, _jsonSerializationProvider.SerializeToString(GetMenuSettings()),
                     "For menus used")
             };
+
+            var gameProviderSettings = _gameProviders.Select(gp =>
+            {
+                var configuration = gp.GetConfiguration();
+                return CreateSetting(SettingConsts.GameProviderConfigurations.Template.Args(gp.Code),
+                    _jsonSerializationProvider.SerializeToString(configuration, configuration.GetType()),
+                    $"JSON based configuration of {gp.Code}");
+            }).ToArray();
+
+            var settings = commonSettings.Concat(gameProviderSettings).ToArray();
 
             return _repository.BulkInsertAsync(settings);
         }
 
         private static Setting CreateSetting(string key, string value, string description)
         {
-            return new Setting
+            return new()
             {
                 Key = key,
                 Value = value,

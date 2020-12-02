@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -73,7 +74,7 @@ namespace TGS.Core.DataServices.Bet
         Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
             this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
 
-        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
                 (await Database.GetPendingMigrationsAsync()).Any();
