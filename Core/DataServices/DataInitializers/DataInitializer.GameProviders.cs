@@ -9,6 +9,7 @@ using CsvHelper;
 using CsvHelper.Configuration.Attributes;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
@@ -27,6 +28,7 @@ namespace TGS.Core.DataServices.DataInitializers
             IGame[] Games { get; }
             bool AutoClosedRound { get; }
             bool SupportTestPlayer { get; }
+            PluggableConfigurationBase GetConfiguration();
         }
 
         internal interface IGameProviderConfiguration

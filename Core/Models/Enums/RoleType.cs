@@ -4,6 +4,7 @@
     {
         Admin = 0,
         Reseller = 1,
-        Licensee = 2
+        Licensee = 2,
+        Brand = 3
     }
 }

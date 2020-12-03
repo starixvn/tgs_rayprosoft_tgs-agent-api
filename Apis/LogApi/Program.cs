@@ -37,11 +37,14 @@ namespace TGS.Apis.LogApi
                     }
                 });
 
-        private static async Task ExecuteMigrationAndSeedingAsync(IServiceProvider provider)
+        private static async Task ExecuteMigrationAndSeedingAsync(IServiceProvider serviceProvider)
         {
-            using var scope = provider.CreateScope();
-            await using var repo = scope.ServiceProvider.GetRequiredService<ILogRepository>();
-            await repo.ExecuteMigrationAndSeedingAsync();
+            using var scope = serviceProvider.CreateScope();
+            var sp = scope.ServiceProvider;
+            var env = sp.GetRequiredService<IWebHostEnvironment>();
+
+            await using var tgsRepo = sp.GetRequiredService<ILogRepository>();
+            await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
         }
     }
 }

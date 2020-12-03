@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -43,10 +44,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        private Guid? GetIdByKey(string key) =>
-            !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
-            !Guid.TryParse(value, out var id)
+        private Guid? GetIdByKey(string key)
+        {
+            return !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
+                   !Guid.TryParse(value, out var id)
                 ? (Guid?) null
                 : id;
+        }
     }
 }
