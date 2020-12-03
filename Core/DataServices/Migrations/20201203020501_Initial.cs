@@ -810,8 +810,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     LicenseeId = table.Column<Guid>("uniqueidentifier", nullable: false),
-                    CurrencyCode = table.Column<string>("nvarchar(16)", nullable: false),
-                    LicenseeCurrencyCode = table.Column<string>("nvarchar(16)", nullable: false)
+                    CurrencyCode = table.Column<string>("nvarchar(16)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -865,8 +864,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     LicenseeId = table.Column<Guid>("uniqueidentifier", nullable: false),
-                    CultureCode = table.Column<string>("nvarchar(6)", nullable: false),
-                    LicenseeCultureCode = table.Column<string>("nvarchar(6)", nullable: false)
+                    CultureCode = table.Column<string>("nvarchar(6)", nullable: false)
                 },
                 constraints: table =>
                 {

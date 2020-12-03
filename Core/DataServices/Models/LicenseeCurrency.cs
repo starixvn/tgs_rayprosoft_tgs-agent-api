@@ -11,7 +11,5 @@ namespace TGS.Core.DataServices.Models
         public string CurrencyCode { get; set; }
 
         public virtual Currency Currency { get; set; }
-
-        public string LicenseeCurrencyCode { get; set; }
     }
 }

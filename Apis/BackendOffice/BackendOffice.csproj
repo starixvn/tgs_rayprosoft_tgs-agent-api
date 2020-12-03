@@ -38,12 +38,20 @@
     <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+    <ProjectReference Include="..\..\Services\BackOffice.Application\BackOffice.Application.csproj" />
+    <ProjectReference Include="..\..\Services\BackOffice.Domain\BackOffice.Domain.csproj" />
+    <ProjectReference Include="..\..\Services\BackOffice.Validation\BackOffice.Validation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
 	<Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+	<Compile Update="Resources\Brand.Designer.cs">
+	  <DesignTime>True</DesignTime>
+	  <AutoGen>True</AutoGen>
+	  <DependentUpon>Brand.resx</DependentUpon>
+	</Compile>
     <Compile Update="Resources\Department.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -58,6 +66,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Common.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Licensee.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Licensee.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Paging.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -122,9 +135,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources\Brand.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Brand.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Department.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Department.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Licensee.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Licensee.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Paging.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

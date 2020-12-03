@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Apis\BackendOffice\BackendOffice.csproj" />
+    <ProjectReference Include="..\..\Services\BackOffice.Domain\BackOffice.Domain.csproj" />
     <ProjectReference Include="..\TestsCommon\TestsCommon.csproj" />
   </ItemGroup>
 

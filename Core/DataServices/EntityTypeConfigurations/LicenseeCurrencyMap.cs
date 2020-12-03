@@ -24,10 +24,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.CurrencyCode)
                 .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
-
-            builder.Property(c => c.LicenseeCurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
-                .IsRequired();
         }
     }
 }

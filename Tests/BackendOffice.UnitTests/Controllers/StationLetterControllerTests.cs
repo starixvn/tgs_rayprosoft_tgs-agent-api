@@ -116,13 +116,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
-            _commandsMock.Verify(p => p.CreateAsync(It.Is<StationLetter>(s =>
-                s.Subject == request.Subject &&
-                s.Content == request.Content &&
-                s.AssignedAllPlayers == request.AssignedAllPlayers)));
-
-            _playerCommandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<StationLetterPlayer[]>(s =>
-                s.Length == request.PlayerUsernames.Length)));
+            _stationLetterServiceMock.Verify(p => p.CreateStationLetterAsync(It.Is<StationLetter>(s =>
+                    s.Subject == request.Subject &&
+                    s.Content == request.Content &&
+                    s.AssignedAllPlayers == request.AssignedAllPlayers),
+                It.Is<StationLetterPlayer[]>(x => x.Length == request.PlayerUsernames.Length)));
         }
 
         [Test]
