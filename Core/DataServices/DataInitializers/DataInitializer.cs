@@ -47,7 +47,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private readonly IRole[] _roles =
         {
-            new AdminRole(), new ResellerAdminRole()
+            new AdminRole(), new ResellerAdminRole(), new LicenseeAdminRole(), new BrandRole()
         };
 
         private readonly VipLevel[] _vipLevels =
@@ -709,6 +709,9 @@ namespace TGS.Core.DataServices.DataInitializers
                 Id = role.Id,
                 Name = role.Name,
                 DisplayName = role.Name,
+                ResellerId = role.ResellerId,
+                LicenseeId = role.LicenseeId,
+                BrandId = role.BrandId,
                 Description = role.Description,
                 Status = RoleStatus.Enabled,
                 CreatedOn = DateTimeOffset.Now,
@@ -728,6 +731,9 @@ INSERT INTO [dbo].[Roles]
     ([Id]
     ,[RoleType]
     ,[Name]
+    ,[ResellerId]
+    ,[LicenseeId]
+    ,[BrandId]
     ,[MenuSetting]
     ,[DisplayName]
     ,[Description]
@@ -740,6 +746,9 @@ VALUES
     (@id
     ,@roleType
     ,@name
+    ,@resellerId
+    ,@licenseeId
+    ,@brandId
     ,@menuSetting
     ,@displayName
     ,@description
@@ -756,6 +765,9 @@ VALUES
                     new SqlParameter {ParameterName = "@id", Value = role.Id, DbType = DbType.Guid},
                     new SqlParameter {ParameterName = "@roleType", Value = (int) role.RoleType, DbType = DbType.Int16},
                     new SqlParameter {ParameterName = "@name", Value = role.Name, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@resellerId", Value = role.ResellerId, DbType = DbType.Guid},
+                    new SqlParameter {ParameterName = "@licenseeId", Value = role.LicenseeId, DbType = DbType.Guid},
+                    new SqlParameter {ParameterName = "@brandId", Value = role.BrandId, DbType = DbType.Guid},
                     new SqlParameter {ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String},
                     new SqlParameter {ParameterName = "@displayName", Value = role.Name, DbType = DbType.String},
 
@@ -781,7 +793,13 @@ VALUES
             var users = new List<User>
             {
                 CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin, Departments[MarketDepartment]),
-                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment])
+                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment]),
+                CreateUser("reseller.enabled", UserStatus.Enabled, Roles.Reseller, Departments[MarketDepartment]),
+                CreateUser("reseller.disabled", UserStatus.Disabled, Roles.Reseller, Departments[MarketDepartment]),
+                CreateUser("licensee.enabled", UserStatus.Enabled, Roles.Licensee, Departments[MarketDepartment]),
+                CreateUser("licensee.disabled", UserStatus.Disabled, Roles.Licensee, Departments[MarketDepartment]),
+                CreateUser("brand.enabled", UserStatus.Enabled, Roles.Brand, Departments[MarketDepartment]),
+                CreateUser("brand.disabled", UserStatus.Disabled, Roles.Brand, Departments[MarketDepartment])
             };
 
             users.AddRange(usernames.Select(username =>

@@ -24,7 +24,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         {
             return _service.GetBrandsAsync()
                 .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Id == LicenseeId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.Id == BrandId)
                 .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
                                              x.Description.Contains(request.Keyword) ||
                                              x.OperationalEmail.Contains(request.Keyword))

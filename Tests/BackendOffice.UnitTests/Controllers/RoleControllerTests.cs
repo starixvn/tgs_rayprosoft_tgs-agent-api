@@ -395,9 +395,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             role.Users = new List<User> {new User()};
 
+            var request = new GetMenuRequest
+            {
+                ResellerId = role.ResellerId,
+                LicenseeId = role.LicenseeId,
+                BrandId = role.BrandId
+            };
+
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult(new Setting()));
+                .Returns(Task.FromResult(new Setting {Value = "{}"}));
 
             var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
 
@@ -405,7 +412,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
                 .Returns(menuSettings);
 
-            var response = await _controller.GetMenuAsync();
+            var response = await _controller.GetMenuAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Menus.Length; i++)
@@ -428,13 +435,20 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
+            var request = new GetMenuRequest
+            {
+                ResellerId = role.ResellerId,
+                LicenseeId = role.LicenseeId,
+                BrandId = role.BrandId
+            };
+
             role.Users = new List<User> {new User()};
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult<Setting>(null));
+                .Returns(Task.FromResult(new Setting()));
 
-            var response = await _controller.GetMenuAsync();
+            var response = await _controller.GetMenuAsync(request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.Role.MenuNotFound);
         }
