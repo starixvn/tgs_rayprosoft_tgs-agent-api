@@ -1,1 +1,1 @@
-DockerImageBuild.bat dev
+DockerImageBuild.bat 0.1.0
