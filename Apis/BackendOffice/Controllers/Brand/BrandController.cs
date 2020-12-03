@@ -23,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         }
 
         [HttpGet]
-        [Description("Get brands: 營運商列表")]
+        [Description("Get brands: 品牌商列表")]
         public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
         {
             return _mediator.Send(request);
