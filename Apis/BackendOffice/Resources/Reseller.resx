@@ -97,7 +97,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ResellerNotFound" xml:space="preserve">
+  <data name="NotFound" xml:space="preserve">
     <value>Reseller is not found.</value>
+  </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>Code is required.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="GameProviderRequired" xml:space="preserve">
+    <value>Game provider is required.</value>
+  </data>
+  <data name="CurrencyRequired" xml:space="preserve">
+    <value>Currency is required.</value>
+  </data>
+  <data name="CultureRequired" xml:space="preserve">
+    <value>Language is Required.</value>
   </data>
 </root>

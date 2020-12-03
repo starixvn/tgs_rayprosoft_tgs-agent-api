@@ -11,7 +11,5 @@ namespace TGS.Core.DataServices.Models
         public string CultureCode { get; set; }
 
         public virtual Language Language { get; set; }
-
-        public string LicenseeCultureCode { get; set; }
     }
 }

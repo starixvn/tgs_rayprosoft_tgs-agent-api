@@ -13,13 +13,19 @@
     },
     "Docker": {
       "commandName": "Docker",
+      //"commandLineArgs": "-v $env:USERPROFILE\\.aspnet\\https:/https/ mcr.microsoft.com/dotnet/core/samples:aspnetapp",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
       "environmentVariables": {
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "/https/aspnetapp.pfx",
+        "ASPNETCORE_URLS": "https://+;http://+",
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "1234",
+        "ASPNETCORE_HTTPS_PORT": "8001",
         "ASPNETCORE_ENVIRONMENT": "Docker"
       },
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": true,
+      "sslPort": 8001
     }
   }
 }

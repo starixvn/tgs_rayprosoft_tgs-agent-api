@@ -117,7 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ResellerNotFound" xml:space="preserve">
+  <data name="NotFound" xml:space="preserve">
     <value>找不到公司</value>
+  </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>代码必填</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>名称必填</value>
+  </data>
+  <data name="GameProviderRequired" xml:space="preserve">
+    <value>请选择游戏商</value>
+  </data>
+  <data name="CurrencyRequired" xml:space="preserve">
+    <value>请选择币别</value>
+  </data>
+  <data name="CultureRequired" xml:space="preserve">
+    <value>请选择游语系</value>
   </data>
 </root>

@@ -95,7 +95,6 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateRolesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateUsersAsync, _logBuilder);
 
-
             timer.Stop();
 
             _logBuilder.AppendLine($"Total Time was {timer.ElapsedMilliseconds} ms");
@@ -564,14 +563,12 @@ namespace TGS.Core.DataServices.DataInitializers
                 Currencies = licensee.Currencies.Select(curr => new LicenseeCurrency
                 {
                     LicenseeId = licensee.Id,
-                    CurrencyCode = curr.Code,
-                    LicenseeCurrencyCode = curr.ExternalCode
+                    CurrencyCode = curr.Code
                 }).ToHashSet(),
                 Languages = licensee.Languages.Select(lang => new LicenseeLanguage
                 {
                     LicenseeId = licensee.Id,
-                    CultureCode = lang.Code,
-                    LicenseeCultureCode = lang.ExternalCode
+                    CultureCode = lang.Code
                 }).ToHashSet(),
                 GameProviders = gameProviders.Select(gp => new LicenseeGameProvider
                 {
@@ -631,22 +628,24 @@ namespace TGS.Core.DataServices.DataInitializers
                     MobileQueryString = string.Empty
                 }).ToHashSet(),
                 Games = gameProviders.SelectMany(gp => gp.Games).Select((g, idx) => new BrandGame
-                    {
-                        BrandId = brand.Id,
-                        GameId = g.Id,
-                        Status = GameStatus.Active,
-                        Tag = GetGameTag(idx)
-                    }).ToHashSet()
+                {
+                    BrandId = brand.Id,
+                    GameId = g.Id,
+                    Status = GameStatus.Active,
+                    Tag = GetGameTag(idx)
+                }).ToHashSet()
             };
 
-            static GameTag GetGameTag(int index) =>
-                (index % 3) switch
+            static GameTag GetGameTag(int index)
+            {
+                return (index % 3) switch
                 {
                     0 => GameTag.New,
                     1 => GameTag.New | GameTag.Recommend,
                     2 => GameTag.New | GameTag.Recommend | GameTag.Hot,
                     _ => GameTag.None
                 };
+            }
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)

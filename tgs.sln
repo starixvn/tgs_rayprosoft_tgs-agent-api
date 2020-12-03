@@ -85,7 +85,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Localstack", "Localstack", 
 		Readme\Localstack\docker-compose.yml = Readme\Localstack\docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileService.UnitTests", "Tests\FileService.UnitTests\FileService.UnitTests.csproj", "{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.UnitTests", "Tests\FileService.UnitTests\FileService.UnitTests.csproj", "{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackOffice.Application", "Services\BackOffice.Application\BackOffice.Application.csproj", "{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackOffice", "BackOffice", "{CA94E635-7AE6-46A4-A75E-04D43D28353B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackOffice.Validation", "Services\BackOffice.Validation\BackOffice.Validation.csproj", "{F3109AB1-25E5-423B-BAEF-E68B3033FAB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackOffice.Domain", "Services\BackOffice.Domain\BackOffice.Domain.csproj", "{D1429961-99C2-4949-A623-DEDECEBD89E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -185,6 +193,18 @@ Global
 		{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3109AB1-25E5-423B-BAEF-E68B3033FAB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3109AB1-25E5-423B-BAEF-E68B3033FAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3109AB1-25E5-423B-BAEF-E68B3033FAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3109AB1-25E5-423B-BAEF-E68B3033FAB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1429961-99C2-4949-A623-DEDECEBD89E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1429961-99C2-4949-A623-DEDECEBD89E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1429961-99C2-4949-A623-DEDECEBD89E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1429961-99C2-4949-A623-DEDECEBD89E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -217,6 +237,10 @@ Global
 		{C859BEF9-42E6-4C85-91F5-1BE4DAEBBF81} = {A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}
 		{75FBF9C7-4204-4BA1-855D-AAFFAB98B631} = {A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}
 		{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
+		{5BA1460D-C63B-4B1D-BB49-EC7640D2149F} = {CA94E635-7AE6-46A4-A75E-04D43D28353B}
+		{CA94E635-7AE6-46A4-A75E-04D43D28353B} = {2D13A664-6549-483A-9659-22362B2C1DE9}
+		{F3109AB1-25E5-423B-BAEF-E68B3033FAB8} = {CA94E635-7AE6-46A4-A75E-04D43D28353B}
+		{D1429961-99C2-4949-A623-DEDECEBD89E0} = {CA94E635-7AE6-46A4-A75E-04D43D28353B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

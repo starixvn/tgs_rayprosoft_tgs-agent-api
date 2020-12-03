@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201201091131_Initial")]
+    [Migration("20201203020501_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -723,10 +723,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("CurrencyCode")
                         .HasColumnType("nvarchar(16)");
 
-                    b.Property<string>("LicenseeCurrencyCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(16)");
-
                     b.HasKey("LicenseeId", "CurrencyCode");
 
                     b.HasIndex("CurrencyCode");
@@ -756,10 +752,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("CultureCode")
                         .IsUnicode(true)
-                        .HasColumnType("nvarchar(6)");
-
-                    b.Property<string>("LicenseeCultureCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(6)");
 
                     b.HasKey("LicenseeId", "CultureCode");
