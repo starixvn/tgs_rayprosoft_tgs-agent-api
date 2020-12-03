@@ -113,7 +113,7 @@ services:
     depends_on:
       - sqlserver
       - log-api
-      - tgs-api
+      - game-sbo
 
   fileservice:
     build:
@@ -144,6 +144,7 @@ services:
       tgs:
     ports:
       - 27017:27017
+      
   operator-api:
     build:
       context: .
@@ -160,17 +161,17 @@ services:
         aliases:
           - operator.api
     depends_on:
-      - tgs-api
+      - sqlserver
+      - game-sbo
 
-  tgs-api:
+  game-sbo:
     build:
       context: .
       dockerfile: Apis/TgsApi/Dockerfile
     image: tgs-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
-      GameProviderCode: "RT"
-      GameProviderName: "RedTiger"
+      GameProviderCode: "SBO"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
@@ -180,6 +181,7 @@ services:
         aliases:
           - tgs.api
     depends_on:
+      - sqlserver
       - nats
       - redis
       - log-api
@@ -201,6 +203,7 @@ services:
         aliases:
           - log.api
     depends_on:
+      - sqlserver
       - nats
       - redis
       - sqlserver

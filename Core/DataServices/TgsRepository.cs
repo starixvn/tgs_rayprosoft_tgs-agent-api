@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -12,6 +13,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.DataInitializers;
 using TGS.Core.DataServices.EntityTypeConfigurations;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.DataServices
 {
@@ -133,33 +135,22 @@ namespace TGS.Core.DataServices
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
-        {
-            return Database.BeginTransactionAsync(level);
-        }
+        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) => 
+            Database.BeginTransactionAsync(level);
 
-        IDbConnection IBaseRepository.GetDbConnection()
-        {
-            return Database.GetDbConnection();
-        }
+        IDbConnection IBaseRepository.GetDbConnection() => 
+            Database.GetDbConnection();
 
-        Task IBaseRepository.SaveChangesAsync()
-        {
-            return SaveChangesAsync();
-        }
+        Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
-        {
-            return this.BulkInsertAsync(entities, bulkConfig, progress);
-        }
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
+            this.BulkInsertAsync(entities, bulkConfig, progress);
 
         Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
-            Action<decimal> progress)
-        {
-            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
-        }
+            Action<decimal> progress) =>
+            this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
 
-        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
                             (await Database.GetPendingMigrationsAsync()).Any();
@@ -169,22 +160,18 @@ namespace TGS.Core.DataServices
                 await Database.MigrateAsync();
             }
 
-            if (addSeeding)
+            if (env.IsDevelopmentOrDocker())
             {
-                IDataInitializer data = new DataInitializer(this);
+                IDataInitializer data = new DataInitializer(this, env);
                 await data.SetInitialDataAsync();
             }
         }
 
-        DbSet<T> IBaseRepository.Set<T>()
-        {
-            return Set<T>();
-        }
+        DbSet<T> IBaseRepository.Set<T>() => 
+            Set<T>();
 
-        EntityEntry<T> IBaseRepository.Entry<T>(T entity)
-        {
-            return base.Entry(entity);
-        }
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => 
+            base.Entry(entity);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
