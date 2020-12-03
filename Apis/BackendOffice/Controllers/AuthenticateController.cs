@@ -118,7 +118,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 new Claim(Consts.UserInfo.UsernameKey, user.Username),
                 new Claim(Consts.UserInfo.RolenameKey, user.Role.Name),
-                new Claim(Consts.UserInfo.RoleTypeKey, user.Role.RoleType.ToString()),
                 new Claim(Consts.UserInfo.ResellerKey, user.Role.ResellerId.ToString()),
                 new Claim(Consts.UserInfo.LicenseeKey, user.Role.LicenseeId.ToString()),
                 new Claim(Consts.UserInfo.BrandKey, user.Role.BrandId.ToString()),

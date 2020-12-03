@@ -19,8 +19,6 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         protected string Username => _userInfoMap[Consts.UserInfo.UsernameKey];
-
-        protected string RoleType => _userInfoMap[Consts.UserInfo.RoleTypeKey];
         protected string RoleName => _userInfoMap[Consts.UserInfo.RolenameKey];
 
         protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);

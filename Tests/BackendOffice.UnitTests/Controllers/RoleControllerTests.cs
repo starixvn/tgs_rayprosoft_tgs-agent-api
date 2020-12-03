@@ -15,6 +15,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -397,9 +398,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new GetMenuRequest
             {
-                ResellerId = role.ResellerId,
-                LicenseeId = role.LicenseeId,
-                BrandId = role.BrandId
+                RoleType = RoleType.Admin
             };
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
@@ -437,9 +436,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new GetMenuRequest
             {
-                ResellerId = role.ResellerId,
-                LicenseeId = role.LicenseeId,
-                BrandId = role.BrandId
+                RoleType = RoleType.Admin
             };
 
             role.Users = new List<User> {new User()};
