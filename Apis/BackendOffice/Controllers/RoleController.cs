@@ -44,6 +44,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
         {
             return _roleQueries.GetQueries()
+                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId)
                 .Where(request.Name, p => p.Name.Contains(request.Name))
                 .Select(role => new RoleModel
                 {
@@ -63,7 +66,11 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get a role")]
         public async Task<GetRoleResponse> GetSingleAsync(Guid roleId)
         {
-            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, x => x
+                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId));
+
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
@@ -178,11 +185,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get menus")]
         public async Task<GetMenuResponse> GetMenuAsync(GetMenuRequest request)
         {
-            var setting = ResellerId == null
-                ? (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value
-                : (await _roleQueries.GetSingleAsync(x => x.ResellerId == request.ResellerId, x => x
-                    .Where(request.LicenseeId, r => r.LicenseeId == request.LicenseeId)
-                    .Where(request.BrandId, r => r.BrandId == request.BrandId))).MenuSetting;
+            var setting = request.RoleType == Core.Models.Enums.RoleType.Licensee ||
+                          request.RoleType == Core.Models.Enums.RoleType.Brand
+                ? (await _roleQueries.GetSingleAsync(x => x.Id == request.RoleId)).MenuSetting
+                : (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value;
 
             if (setting == null)
             {
