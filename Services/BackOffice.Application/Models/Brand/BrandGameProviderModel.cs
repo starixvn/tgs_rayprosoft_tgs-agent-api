@@ -12,7 +12,6 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
 
     public class Configuration
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string ClientId { get; set; }

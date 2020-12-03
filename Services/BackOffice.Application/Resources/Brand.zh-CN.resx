@@ -120,4 +120,46 @@
   <data name="NotFound" xml:space="preserve">
     <value>找不到包网商</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>代码必填</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>名称必填</value>
+  </data>
+  <data name="ApiKeyRequired" xml:space="preserve">
+    <value>ApiKey必填</value>
+  </data>
+  <data name="SecretKeyRequired" xml:space="preserve">
+    <value>SecretKey必填</value>
+  </data>
+  <data name="GameProviderRequired" xml:space="preserve">
+    <value>游戏商必填</value>
+  </data>
+  <data name="CurrencyRequired" xml:space="preserve">
+    <value>货币必填</value>
+  </data>
+  <data name="ClientIdRequired" xml:space="preserve">
+    <value>ClientId必填</value>
+  </data>
+  <data name="StatusRequired" xml:space="preserve">
+    <value>状态必填</value>
+  </data>
+  <data name="DesktopEndpointRequired" xml:space="preserve">
+    <value>桌面终端必填</value>
+  </data>
+  <data name="MobileEndpointRequired" xml:space="preserve">
+    <value>移动终端必填</value>
+  </data>
+  <data name="ConfigurationDataRequired" xml:space="preserve">
+    <value>配置数据必填</value>
+  </data>
+  <data name="IsDefaultRequired" xml:space="preserve">
+    <value>是否预设值必填</value>
+  </data>
+  <data name="ConfigurationRequired" xml:space="preserve">
+    <value>配置必填</value>
+  </data>
+  <data name="CultureRequired" xml:space="preserve">
+    <value>语系必填</value>
+  </data>
 </root>

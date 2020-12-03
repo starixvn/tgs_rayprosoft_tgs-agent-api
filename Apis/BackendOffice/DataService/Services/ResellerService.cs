@@ -111,9 +111,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                     new ResellerLanguage
                     {
                         ResellerId = reseller.Id,
-                        CultureCode = x.CultureCode,
-                        Reseller = reseller,
-                        Language = x
+                        CultureCode = x.CultureCode
                     });
             return new HashSet<ResellerLanguage>(resellerLanguages);
         }
@@ -125,9 +123,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                     new ResellerCurrency
                     {
                         ResellerId = reseller.Id,
-                        CurrencyCode = x.Code,
-                        Reseller = reseller,
-                        Currency = x
+                        CurrencyCode = x.Code
                     });
             return new HashSet<ResellerCurrency>(resellerCurrencies);
         }
@@ -139,9 +135,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                     new ResellerGameProvider
                     {
                         ResellerId = reseller.Id,
-                        GameProviderId = x.Id,
-                        Reseller = reseller,
-                        GameProvider = x
+                        GameProviderId = x.Id
                     });
             return new HashSet<ResellerGameProvider>(resellerGameProviders);
         }

@@ -100,4 +100,19 @@
   <data name="NotFound" xml:space="preserve">
     <value>Licensee is not found.</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>Code is required.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="GameProviderRequired" xml:space="preserve">
+    <value>Game provider is required.</value>
+  </data>
+  <data name="CurrencyRequired" xml:space="preserve">
+    <value>Currency is required.</value>
+  </data>
+  <data name="CultureRequired" xml:space="preserve">
+    <value>Language is Required.</value>
+  </data>
 </root>

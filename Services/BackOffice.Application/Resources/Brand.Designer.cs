@@ -9,6 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace TGS.Services.BackOffice.Application.Resources {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -58,11 +61,137 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ApiKey is required..
+        /// </summary>
+        public static string ApiKeyRequired {
+            get {
+                return ResourceManager.GetString("ApiKeyRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ClientId is required..
+        /// </summary>
+        public static string ClientIdRequired {
+            get {
+                return ResourceManager.GetString("ClientIdRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Code is required..
+        /// </summary>
+        public static string CodeRequired {
+            get {
+                return ResourceManager.GetString("CodeRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ConfigurationData is required..
+        /// </summary>
+        public static string ConfigurationDataRequired {
+            get {
+                return ResourceManager.GetString("ConfigurationDataRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configuration is required..
+        /// </summary>
+        public static string ConfigurationRequired {
+            get {
+                return ResourceManager.GetString("ConfigurationRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Culture is required..
+        /// </summary>
+        public static string CultureRequired {
+            get {
+                return ResourceManager.GetString("CultureRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currency is required..
+        /// </summary>
+        public static string CurrencyRequired {
+            get {
+                return ResourceManager.GetString("CurrencyRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DesktopEndpoint is required..
+        /// </summary>
+        public static string DesktopEndpointRequired {
+            get {
+                return ResourceManager.GetString("DesktopEndpointRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game provider is required..
+        /// </summary>
+        public static string GameProviderRequired {
+            get {
+                return ResourceManager.GetString("GameProviderRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IsDefault is required..
+        /// </summary>
+        public static string IsDefaultRequired {
+            get {
+                return ResourceManager.GetString("IsDefaultRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MobileEndpoint is required..
+        /// </summary>
+        public static string MobileEndpointRequired {
+            get {
+                return ResourceManager.GetString("MobileEndpointRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name is required..
+        /// </summary>
+        public static string NameRequired {
+            get {
+                return ResourceManager.GetString("NameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Brand is not found..
         /// </summary>
         public static string NotFound {
             get {
                 return ResourceManager.GetString("NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SecretKey is required..
+        /// </summary>
+        public static string SecretKeyRequired {
+            get {
+                return ResourceManager.GetString("SecretKeyRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status is required..
+        /// </summary>
+        public static string StatusRequired {
+            get {
+                return ResourceManager.GetString("StatusRequired", resourceCulture);
             }
         }
     }

@@ -47,6 +47,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             var licensee = new Licensee
             {
                 Id = Guid.NewGuid(),
+                ResellerId = request.ResellerId,
                 Code = request.Code,
                 Name = request.Name,
                 Status = Status.Active,
@@ -108,9 +109,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                     new LicenseeLanguage
                     {
                         LicenseeId = licensee.Id,
-                        CultureCode = x.CultureCode,
-                        Licensee = licensee,
-                        Language = x
+                        CultureCode = x.CultureCode
                     });
             return new HashSet<LicenseeLanguage>(licenseeLanguages);
         }
@@ -122,9 +121,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                     new LicenseeCurrency
                     {
                         LicenseeId = licensee.Id,
-                        CurrencyCode = x.Code,
-                        Licensee = licensee,
-                        Currency = x
+                        CurrencyCode = x.Code
                     });
             return new HashSet<LicenseeCurrency>(licenseeCurrencies);
         }
@@ -136,9 +133,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                     new LicenseeGameProvider
                     {
                         LicenseeId = licensee.Id,
-                        GameProviderId = x.Id,
-                        Licensee = licensee,
-                        GameProvider = x
+                        GameProviderId = x.Id
                     });
             return new HashSet<LicenseeGameProvider>(licenseeGameProviders);
         }

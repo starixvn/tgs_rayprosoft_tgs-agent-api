@@ -126,8 +126,6 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
                 {
                     BrandId = brand.Id,
                     CultureCode = x.CultureCode,
-                    Brand = brand,
-                    Language = x,
                     BrandCultureCode = request.BrandCultures.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
                         ?.BrandCultureCode
                 });
@@ -141,9 +139,7 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
                     new BrandCurrency
                     {
                         BrandId = brand.Id,
-                        CurrencyCode = x.Code,
-                        Brand = brand,
-                        Currency = x
+                        CurrencyCode = x.Code
                     });
             return new HashSet<BrandCurrency>(brandCurrencies);
         }
@@ -161,8 +157,6 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
                     {
                         BrandId = brand.Id,
                         GameProviderId = x.Id,
-                        Brand = brand,
-                        GameProvider = x,
                         DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode,
                         GameProviderConfiguration = gameProviderConfiguration
                     };

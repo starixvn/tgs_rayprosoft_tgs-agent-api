@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Services.BackOffice.Application.Models;
+using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Apis.BackendOffice.Middlewares
+namespace TGS.Services.BackOffice.Application.Middlewares
 {
     public class UsernamePipe<TIn, TOut> : IPipelineBehavior<TIn, TOut>
     {

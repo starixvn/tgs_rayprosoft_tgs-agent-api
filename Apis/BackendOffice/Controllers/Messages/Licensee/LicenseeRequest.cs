@@ -5,6 +5,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee
     public class LicenseeRequest
     {
         public Guid Id { get; set; }
+        public Guid ResellerId { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }

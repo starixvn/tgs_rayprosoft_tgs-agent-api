@@ -183,6 +183,7 @@ services:
       - nats
       - redis
       - log-api
+      - sqlserver
 
   log-api:
     build:
@@ -202,6 +203,7 @@ services:
     depends_on:
       - nats
       - redis
+      - sqlserver
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-CU5-ubuntu-18.04
