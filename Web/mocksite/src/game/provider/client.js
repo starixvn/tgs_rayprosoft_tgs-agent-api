@@ -4,25 +4,17 @@ import { toValue as toPlatformType } from "../../platform"
 
 export const useGameProviderList = (
   { brandCode, username, currency } = {},
-  { platform, language } = {},
-  initialData
+  { platform, language } = {}
 ) => {
-  let { token: brandToken } = useBrandToken(
-    { brandCode, currency },
-    initialData?.brandToken ? { token: initialData?.brandToken } : undefined
-  )
-  let { token: playerToken } = usePlayerToken(
-    { brandCode, username, currency },
-    undefined,
-    initialData?.playerToken ? { token: initialData?.playerToken } : undefined
-  )
+  let { token: brandToken } = useBrandToken({ brandCode, currency })
+  let { token: playerToken } = usePlayerToken({ brandCode, username, currency })
 
   let keys =
     brandToken && playerToken && platform && language && currency
       ? [
           `/api/gameProvider/list`,
-          brandToken,
-          playerToken,
+          brandCode,
+          username,
           platform,
           language,
           currency
@@ -31,8 +23,8 @@ export const useGameProviderList = (
 
   let { data = {}, ...rest } = useSWR(
     keys,
-    (url, brandToken, playerToken, platform, language, currency) =>
-      fetch(url, {
+    (url, brandCode, username, platform, language, currency) => {
+      return fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,6 +37,7 @@ export const useGameProviderList = (
           currency
         })
       }).then((response) => response.json())
+    }
   )
 
   return {

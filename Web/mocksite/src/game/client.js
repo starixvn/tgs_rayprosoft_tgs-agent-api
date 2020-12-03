@@ -61,45 +61,32 @@ export const useGameList = (
   }
 }
 
-//TODO: save to cache result?
-//TODO: need language?
-export const useGameUrl = (
-  { brandCode, username, currency },
-  { gameProviderCode, gameCode }
-) => {
+export const useGameUrl = ({ brandCode, username, currency }, data) => {
   let { token: brandToken } = useBrandToken({ brandCode, currency })
   let { token: playerToken } = usePlayerToken({ brandCode, username, currency })
 
-  let keys =
-    brandToken && playerToken && gameProviderCode && gameCode
-      ? [
-          `/api/game/geturl`,
-          brandToken,
-          playerToken,
-          gameProviderCode,
-          gameCode
-        ]
+  let url =
+    brandToken && playerToken && data?.gameProviderCode && data?.gameCode
+      ? [`/api/game/geturl`, data]
       : undefined
-  let { data = {}, ...rest } = useSWR(
-    keys,
-    (url, brandToken, playerToken, gameProviderCode, gameCode) => {
-      return fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${brandToken}`,
-          Token: playerToken
-        },
-        body: JSON.stringify({
-          gpcode: gameProviderCode,
-          gcode: gameCode
-        })
-      }).then((response) => response.json())
-    }
-  )
+
+  let { data: result, ...rest } = useSWR(url, (url, data) => {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brandToken}`,
+        Token: playerToken
+      },
+      body: JSON.stringify({
+        gpcode: data?.gameProviderCode,
+        gcode: data?.gameCode
+      })
+    }).then((response) => response.json())
+  })
 
   return {
-    url: data?.url,
+    url: result?.url,
     ...rest
   }
 }

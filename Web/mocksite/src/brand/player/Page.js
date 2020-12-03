@@ -13,7 +13,6 @@ import {
   Card
 } from "bumbag"
 import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom"
-import GameProviderSelect from "../../game/provider/Select"
 import {
   State,
   useCurrency,
@@ -38,9 +37,7 @@ export const PlayerPage = ({ brandToken, ...props }) => {
 }
 
 const Body = ({ brandToken }) => {
-  //TODO: how to cache player token?
-  let { brandCode, username, playerToken } = useParams()
-  console.log("playerToken", playerToken)
+  let { brandCode, username } = useParams()
   let currency = useCurrency()
   let platform = usePlatform()
   let language = useLang()
@@ -55,7 +52,6 @@ const Body = ({ brandToken }) => {
           currency={currency}
           brandToken={brandToken}
           username={username}
-          playerToken={playerToken}
           platform={platform}
           language={language}
           value={gameProviderCode}

@@ -61,15 +61,11 @@ const LoginDialog = ({
   let [password, setPassword] = useState(DefaultPassword)
 
   let { image, answer: captcha } = useCaptcha(
-    dialog.visible ? { brandCode, currency, brandToken } : undefined,
-    { brandToken }
+    dialog.visible ? { brandCode, currency, brandToken } : undefined
   )
   let { token, error } = usePlayerToken(
     dialog.visible ? { brandCode, currency, username } : undefined,
-    fromData,
-    {
-      brandToken
-    }
+    fromData
   )
 
   useEffect(() => {
@@ -83,23 +79,25 @@ const LoginDialog = ({
   return (
     <Modal {...dialog}>
       <Card>
-        <Box>{JSON.stringify(token)}</Box>
-        <Box>
-          {image ? <img src={`data:image/png;base64, ${image}`} /> : null}
-        </Box>
-        <Box>
+        <Group>
+          <Button isStatic>
+            {image ? <img src={`data:image/png;base64, ${image}`} /> : null}
+          </Button>
           <Input
             value={answer}
             onChange={(event) => {
               setCaptchaAnswer(event.target.value)
             }}
           />
-        </Box>
+        </Group>
         <Box>
-          <Input
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
+          <Group>
+            <Button isStatic>Password</Button>
+            <Input
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </Group>
         </Box>
         <Button
           onClick={(event) => {

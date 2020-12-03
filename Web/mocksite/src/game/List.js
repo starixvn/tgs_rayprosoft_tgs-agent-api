@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
 import { Table, Set, Button, Box, Stack, PageWithHeader, TopNav } from "bumbag"
 import {
@@ -23,32 +23,36 @@ export const GameList = ({
     { brandCode, username, currency },
     { gameProviderCode, platform, language }
   )
-  return (
-    <Set orientation="vertical">
-      <Table width="100%" overflow="auto" isHoverable>
-        <Table.Head>
-          <Table.Row>
-            <Table.HeadCell>Name</Table.HeadCell>
-            <Table.HeadCell>Status</Table.HeadCell>
-            <Table.HeadCell>Actions</Table.HeadCell>
-          </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {games.map((game, index) => (
-            <GameRow
-              key={index}
-              brandCode={brandCode}
-              currency={currency}
-              username={username}
-              gameProviderCode={gameProviderCode}
-              game={game}
-              platform={platform}
-              language={language}
-            />
-          ))}
-        </Table.Body>
-      </Table>
-    </Set>
+
+  return useMemo(
+    () => (
+      <Set orientation="vertical">
+        <Table width="100%" overflow="auto" isHoverable>
+          <Table.Head>
+            <Table.Row>
+              <Table.HeadCell>Name</Table.HeadCell>
+              <Table.HeadCell>Status</Table.HeadCell>
+              <Table.HeadCell>Actions</Table.HeadCell>
+            </Table.Row>
+          </Table.Head>
+          <Table.Body>
+            {games.map((game, index) => (
+              <GameRow
+                key={index}
+                brandCode={brandCode}
+                currency={currency}
+                username={username}
+                gameProviderCode={gameProviderCode}
+                game={game}
+                platform={platform}
+                language={language}
+              />
+            ))}
+          </Table.Body>
+        </Table>
+      </Set>
+    ),
+    [JSON.stringify(games)]
   )
 }
 
@@ -90,27 +94,30 @@ const LaunchGameButton = ({
   language
 }) => {
   let [gameWindow, setGameWin] = useState()
-  let [gameCode, setGameCode] = useState()
-  let { url, ...rest } = useGameUrl(
-    { brandCode, username, currency },
-    { gameProviderCode, gameCode }
-  )
+  let [formData, setSubmit] = useState()
+  let { url, mutate } = useGameUrl({ brandCode, username, currency }, formData)
 
   useEffect(() => {
     if (url && gameWindow) {
       gameWindow.location = url
       setGameWin(undefined)
+      setSubmit(undefined)
+      mutate(undefined, false)
     }
   }, [url])
   return (
     <Button
       onClick={(event) => {
-        setGameCode(game?.code)
+        setSubmit({
+          gameProviderCode: gameProviderCode,
+          gameCode: game?.code
+        })
+
         let win = window.open()
         setGameWin(win)
       }}
     >
-      {game.code}
+      Launch
     </Button>
   )
 }

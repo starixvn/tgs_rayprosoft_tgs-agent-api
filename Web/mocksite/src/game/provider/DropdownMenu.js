@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
 import { Table, Set, Button, Box, Stack, Select, DropdownMenu } from "bumbag"
 import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom"
@@ -21,21 +21,23 @@ export const GameProviderDropdownMenu = ({
   )
 
   let gameProvider = gameProviders.find(({ code }) => code === value)
+  let menu = useMemo(
+    () => (
+      <>
+        {gameProviders.map((gameProvider) => (
+          <DropdownMenu.Item
+            key={gameProvider.code}
+            onClick={(event) => props?.onChange?.(gameProvider.code)}
+          >
+            {gameProvider.name}
+          </DropdownMenu.Item>
+        ))}
+      </>
+    ),
+    [JSON.stringify(gameProviders)]
+  )
   return (
-    <DropdownMenu
-      menu={
-        <>
-          {gameProviders.map((gameProvider) => (
-            <DropdownMenu.Item
-              key={gameProvider.code}
-              onClick={(event) => props?.onChange?.(gameProvider.code)}
-            >
-              {gameProvider.name}
-            </DropdownMenu.Item>
-          ))}
-        </>
-      }
-    >
+    <DropdownMenu menu={menu}>
       <Button iconAfter="chevron-down">
         {gameProvider ? gameProvider.name : "Game Provider"}
       </Button>

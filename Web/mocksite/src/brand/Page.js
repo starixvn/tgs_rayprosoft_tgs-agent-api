@@ -5,6 +5,7 @@ import {
   Switch,
   Route,
   Link,
+  useLocation,
   useHistory,
   useParams,
   useRouteMatch
@@ -23,8 +24,6 @@ import { PlayerList } from "./player/List"
 
 export const BrandPage = ({}) => {
   let { brandCode } = useParams()
-  //TODO: how to check token expires
-  //TODO: 1. select currency or set default currency? -> list players
   return (
     <State>
       <Body brandCode={brandCode} />
@@ -33,14 +32,17 @@ export const BrandPage = ({}) => {
 }
 
 const Body = ({ brandCode }) => {
+  let location = useLocation()
   let { path, url } = useRouteMatch()
   let history = useHistory()
   let currency = useCurrency()
   let { token, expires } = useBrandToken({ brandCode, currency })
 
   useEffect(() => {
-    history.push(`${url}/${currency}`)
-  }, [currency])
+    if (url === location.pathname) {
+      history.push(`${url}/${currency}`)
+    }
+  }, [currency, url, location.pathname])
 
   return (
     <Switch>

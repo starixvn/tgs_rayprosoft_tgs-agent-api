@@ -2,36 +2,29 @@ import useSWR, { cache } from "swr"
 
 const TGS = "TGS"
 
-export const useBrandToken = ({ brandCode, currency }, initialData) => {
+export const useBrandToken = ({ brandCode, currency }) => {
   let apiKey = useApiKey(brandCode)
   let keys =
     brandCode && currency && apiKey
       ? ["/api/auth/jwt", brandCode, currency]
       : undefined
 
-  let { data, ...rest } = useSWR(
-    keys,
-    (url, brandCode, currency) =>
-      fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          client: apiKey,
-          currency
-        })
-      }).then((response) => response.json()),
-    {
-      initialData
-    }
+  let { data, ...rest } = useSWR(keys, (url, brandCode, currency) =>
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        client: apiKey,
+        currency
+      })
+    }).then((response) => response.json())
   )
 
   return {
     token: data?.token,
-    /*
     expires: data?.expires,
-    */
     ...rest
   }
 }
@@ -39,18 +32,15 @@ export const useBrandToken = ({ brandCode, currency }, initialData) => {
 const DefaultPassword = "TgsP@ssw0rd"
 export const usePlayerToken = (
   { brandCode, currency, username } = {},
-  data,
-  initialData
+  data
 ) => {
-  let { token: brandToken } = useBrandToken(
-    { brandCode, currency },
-    { token: initialData?.brandToken }
-  )
+  let { token: brandToken } = useBrandToken({ brandCode, currency })
+  //TODO: get form data from cache (saved on form data submit)
   let keys =
-    brandToken && username
+    brandCode && brandToken && username
       ? [
           `/api/player/login`,
-          brandToken,
+          brandCode,
           username,
           JSON.stringify(
             data ?? {
@@ -66,7 +56,7 @@ export const usePlayerToken = (
 
   let { data: result, ...rest } = useSWR(
     keys,
-    (url, brandToken, username, body) => {
+    (url, brandCode, username, body) => {
       return fetch(url, {
         method: "POST",
         headers: {
@@ -74,30 +64,21 @@ export const usePlayerToken = (
           Authorization: `Bearer ${brandToken}`
         },
         body
-      }).then((response) => {
-        let result = response.json()
-        return result
-      })
+      }).then((response) => response.json())
     }
   )
 
   return {
     token: result?.token,
-    /*
-    expires: result?.expires,
-    */
     ...rest
   }
 }
 
-export const useCaptcha = ({ brandCode, currency }, initialData) => {
-  let { token: brandToken } = useBrandToken(
-    { brandCode, currency },
-    { token: initialData?.brandToken }
-  )
-  let keys = brandToken ? [`/api/player/captcha`, brandToken] : undefined
+export const useCaptcha = ({ brandCode, currency }) => {
+  let { token: brandToken } = useBrandToken({ brandCode, currency })
+  let keys = brandToken ? [`/api/player/captcha`, brandCode] : undefined
 
-  let { data = {}, ...rest } = useSWR(keys, (url, brandToken) =>
+  let { data = {}, ...rest } = useSWR(keys, (url, brandCode) =>
     fetch(url, {
       headers: {
         "Content-Type": "application/json",
