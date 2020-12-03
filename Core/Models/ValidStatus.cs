@@ -2,7 +2,7 @@
 
 namespace TGS.Core.Models
 {
-    public interface IValidStatus<T> where T : struct
+    public interface IValidStatus<out T> where T : struct
     {
         T[] GetStatus(PlayerType playerType, GameActionType type = GameActionType.PlaceBet);
     }
@@ -21,7 +21,7 @@ namespace TGS.Core.Models
 
             return playerType switch
             {
-                PlayerType.TgsTestPlayer => ClosingBet,
+                PlayerType.TestPlayer => ClosingBet,
                 _ => Default
             };
         }
@@ -31,7 +31,6 @@ namespace TGS.Core.Models
     {
         public static GameStatus[] Default => new[] { GameStatus.Active };
         public static GameStatus[] ClosingBet => new[] { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
-        public static GameStatus[] OperatorTesting => new[] { GameStatus.Active, GameStatus.Testing };
 
         GameStatus[] IValidStatus<GameStatus>.GetStatus(PlayerType playerType, GameActionType type)
         {
@@ -42,8 +41,7 @@ namespace TGS.Core.Models
 
             return playerType switch
             {
-                PlayerType.TgsTestPlayer => ClosingBet,
-                PlayerType.OperatorTestPlayer => OperatorTesting,
+                PlayerType.TestPlayer => ClosingBet,
                 _ => Default
             };
         }

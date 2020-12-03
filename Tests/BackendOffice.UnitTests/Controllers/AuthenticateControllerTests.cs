@@ -34,6 +34,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _userCommandsMock.Object,
                 _jsonSerializationProviderMock.Object,
                 HttpContextAccessorMock.Object);
+
+            //ref:https://stackoverflow.com/questions/47198341/how-to-unit-test-httpcontext-signinasync
+            _serviceProviderMock
+                .Setup(_ => _.GetService(typeof(IAuthenticationService)))
+                .Returns(_authenticationServiceMock.Object);
+
+            _controller.ControllerContext.HttpContext = new DefaultHttpContext
+            {
+                RequestServices = _serviceProviderMock.Object
+            };
         }
 
         private AuthenticateController _controller;
@@ -41,6 +51,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
         private readonly Mock<ITgsQueries<User>> _userQueriesMock = new Mock<ITgsQueries<User>>();
         private readonly Mock<ITgsCommands<User>> _userCommandsMock = new Mock<ITgsCommands<User>>();
+        private readonly Mock<IServiceProvider> _serviceProviderMock = new Mock<IServiceProvider>();
+        private readonly Mock<IAuthenticationService> _authenticationServiceMock = new Mock<IAuthenticationService>();
 
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock =
             new Mock<IJsonSerializationProvider>();
@@ -115,14 +127,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _userCommandsMock.Verify(p => p.UpdateAsync(It.Is<User>(u => u.Username == user.Username)));
         }
 
-        private Mock<IAuthenticationService> _authServiceMock;
-
         [Test]
         public async Task Can_Logout()
         {
-            SetupHttpContext();
+            //SetupHttpContext();
             await _controller.LogoutAsync();
-            _authServiceMock.Verify(p =>
+            _authenticationServiceMock.Verify(p =>
                 p.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()));
         }
 
@@ -152,13 +162,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
         private Mock<IServiceProvider> SetupServiceProviderMock()
         {
-            _authServiceMock = new Mock<IAuthenticationService>();
-            _authServiceMock
+            _authenticationServiceMock
                 .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(),
                     It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
-            _authServiceMock
+            _authenticationServiceMock
                 .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
                     It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
@@ -166,7 +175,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock
                 .Setup(_ => _.GetService(typeof(IAuthenticationService)))
-                .Returns(_authServiceMock.Object);
+                .Returns(_authenticationServiceMock.Object);
             return serviceProviderMock;
         }
 

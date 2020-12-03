@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -12,6 +13,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.DataInitializers;
 using TGS.Core.DataServices.EntityTypeConfigurations;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.DataServices
 {
@@ -35,8 +37,10 @@ namespace TGS.Core.DataServices
         DbSet<GameProviderLanguage> GameProviderLanguages { get; set; }
         DbSet<ResellerCurrency> ResellerCurrencies { get; set; }
         DbSet<ResellerLanguage> ResellerLanguages { get; set; }
+        DbSet<ResellerGameProvider> ResellerGameProviders { get; set; }
         DbSet<LicenseeCurrency> LicenseeCurrencies { get; set; }
         DbSet<LicenseeLanguage> LicenseeLanguages { get; set; }
+        DbSet<LicenseeGameProvider> LicenseeGameProviders { get; set; }
         DbSet<BrandCurrency> BrandCurrencies { get; set; }
         DbSet<BrandLanguage> BrandLanguages { get; set; }
         DbSet<BrandGameProvider> BrandGameProviders { get; set; }
@@ -77,6 +81,7 @@ namespace TGS.Core.DataServices
         DbSet<BrandGameProvider> ITgsRepository.BrandGameProviders { get; set; }
         DbSet<ResellerCurrency> ITgsRepository.ResellerCurrencies { get; set; }
         DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
+        DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
         DbSet<Currency> ITgsRepository.Currencies { get; set; }
         DbSet<Language> ITgsRepository.Languages { get; set; }
         DbSet<BrandGame> ITgsRepository.BrandGames { get; set; }
@@ -89,6 +94,7 @@ namespace TGS.Core.DataServices
         DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
         DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
         DbSet<LicenseeLanguage> ITgsRepository.LicenseeLanguages { get; set; }
+        DbSet<LicenseeGameProvider> ITgsRepository.LicenseeGameProviders { get; set; }
         DbSet<Licensee> ITgsRepository.Licensees { get; set; }
         DbSet<BetLimitGroup> ITgsRepository.BetLimitGroups { get; set; }
         DbSet<LicenseeBetLimit> ITgsRepository.LicenseeBetLimits { get; set; }
@@ -116,53 +122,56 @@ namespace TGS.Core.DataServices
         DbSet<Role> ITgsRepository.Roles { get; set; }
         DbSet<Department> ITgsRepository.Departments { get; set; }
 
-        IDbContextTransaction IBaseRepository.CurrentTransaction => 
+        IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
 
-        Task<bool> IBaseRepository.CanConnectionAsync() =>
-            Database.CanConnectAsync();
+        Task<bool> IBaseRepository.CanConnectionAsync()
+        {
+            return Database.CanConnectAsync();
+        }
 
         void IBaseRepository.SetTimeoutToSeconds(int seconds)
         {
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) =>
+        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) => 
             Database.BeginTransactionAsync(level);
 
-        IDbConnection IBaseRepository.GetDbConnection() =>
+        IDbConnection IBaseRepository.GetDbConnection() => 
             Database.GetDbConnection();
 
-        Task IBaseRepository.SaveChangesAsync() =>
-            SaveChangesAsync();
+        Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) =>
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
             this.BulkInsertAsync(entities, bulkConfig, progress);
 
         Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
             Action<decimal> progress) =>
             this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
 
-        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
-                (await Database.GetPendingMigrationsAsync()).Any();
+                            (await Database.GetPendingMigrationsAsync()).Any();
 
             if (isMigrate)
             {
                 await Database.MigrateAsync();
             }
 
-            if (addSeeding)
+            if (env.IsDevelopmentOrDocker())
             {
-                IDataInitializer data = new DataInitializer(this);
+                IDataInitializer data = new DataInitializer(this, env);
                 await data.SetInitialDataAsync();
             }
         }
 
-        DbSet<T> IBaseRepository.Set<T>() => Set<T>();
+        DbSet<T> IBaseRepository.Set<T>() => 
+            Set<T>();
 
-        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => base.Entry(entity);
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => 
+            base.Entry(entity);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -26,10 +26,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(bl => bl.CultureCode)
                 .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsUnicode();
-
-            builder.Property(bl => bl.LicenseeCultureCode)
-                .HasColumnType(ColumnTypes.Nvarchar(6))
-                .IsRequired();
         }
     }
 }

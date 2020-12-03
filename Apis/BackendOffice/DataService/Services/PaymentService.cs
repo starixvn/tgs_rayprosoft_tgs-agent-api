@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -14,9 +15,16 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 {
     public interface IPaymentService
     {
+        Task<Payment> GetPaymentAsync(Expression<Func<Payment, bool>> predicate,
+            Func<IQueryable<Payment>, IQueryable<Payment>> preQuery = null, bool tracking = false);
+
+        IQueryable<Payment> GetPaymentsAsync(bool tracking = false);
         Task CreatePaymentAsync(CreatePaymentRequest request, string username);
         Task UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username);
         Task ChangeStatusAsync(Payment payment, PaymentStatus status, string username);
+        Task<bool> ExistsAsync(Expression<Func<Payment, bool>> predicate);
+        Task UpdatePaymentHandlingFeeAsync(Payment payment, UpdatePaymentFeeRequest request, string username);
+        Task ChangeOrderAsync(ChangeOrderRequest request);
     }
 
     public class PaymentService : IPaymentService
@@ -142,7 +150,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await tran.CommitAsync();
         }
 
-        async Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
+        Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
         {
             var beforePayment =
                 JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
@@ -156,8 +164,46 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.UpdatedByUsername = username;
 
             _repository.Entry(payment).State = EntityState.Modified;
-            await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-            await _repository.SaveChangesAsync();
+            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            return _repository.SaveChangesAsync();
+        }
+
+        Task<Payment> IPaymentService.GetPaymentAsync(Expression<Func<Payment, bool>> predicate,
+            Func<IQueryable<Payment>, IQueryable<Payment>> preQuery, bool tracking)
+        {
+            var payment = tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
+            preQuery ??= c => c;
+
+            return preQuery(payment).FirstOrDefaultAsync(predicate);
+        }
+
+        IQueryable<Payment> IPaymentService.GetPaymentsAsync(bool tracking)
+        {
+            return tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
+        }
+
+        Task<bool> IPaymentService.ExistsAsync(Expression<Func<Payment, bool>> predicate)
+        {
+            return _repository.Payments.AnyAsync(predicate);
+        }
+
+        Task IPaymentService.UpdatePaymentHandlingFeeAsync(Payment payment, UpdatePaymentFeeRequest request,
+            string username)
+        {
+            payment.FeePercentage = request.FeePercentage;
+            payment.LowestFee = request.LowestFee;
+            payment.HighestFee = request.HighestFee;
+            _repository.Entry(payment).State = EntityState.Modified;
+            return _repository.SaveChangesAsync();
+        }
+
+        async Task IPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            var ids = request.Orders.Select(q => q.Id);
+            var payments = await _repository.Payments.Where(q => ids.Contains(q.Id)).ToListAsync();
+            payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
+
+            await _repository.BulkInsertOrUpdateAsync(payments.ToArray());
         }
 
         private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,

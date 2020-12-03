@@ -81,7 +81,7 @@ namespace TGS.Services.GameOperations
             var subGames = await _gameProviderOperations.GetSubGameIdsAsync(gameProviderId, platformType);
 
             var games = brandGames
-                .Select(g => new IdMap {Id = g.GameId, ExternalId = g.ExternalGameId})
+                .Select(g => new IdMap { Id = g.GameId, ExternalId = g.ExternalGameId })
                 .Concat(subGames).Distinct()
                 .ToArray();
 

@@ -5,9 +5,10 @@ namespace TGS.Core.Infrastructures.Extensions
 {
     public static class WebHostEnvironmentExtensions
     {
-        public static bool IsDevelopmentOrDocker(this IWebHostEnvironment env)
-        { 
-            return env.IsDevelopment() || env.IsEnvironment("Docker") || env.EnvironmentName.StartsWith("Dev");
-        }
+        public static bool IsDevelopmentOrDocker(this IWebHostEnvironment env) => 
+            env.IsDevelopment() || env.IsDocker();
+
+        public static bool IsDocker(this IWebHostEnvironment env) =>
+            env.IsEnvironment("Docker");
     }
 }

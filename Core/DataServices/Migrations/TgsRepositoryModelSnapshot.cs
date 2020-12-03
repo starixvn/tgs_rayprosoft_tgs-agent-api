@@ -214,6 +214,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<short>("Tag")
+                        .HasColumnType("smallint");
+
                     b.HasKey("BrandId", "GameId");
 
                     b.HasIndex("GameId");
@@ -718,10 +721,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("CurrencyCode")
                         .HasColumnType("nvarchar(16)");
 
-                    b.Property<string>("LicenseeCurrencyCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(16)");
-
                     b.HasKey("LicenseeId", "CurrencyCode");
 
                     b.HasIndex("CurrencyCode");
@@ -751,10 +750,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("CultureCode")
                         .IsUnicode(true)
-                        .HasColumnType("nvarchar(6)");
-
-                    b.Property<string>("LicenseeCultureCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(6)");
 
                     b.HasKey("LicenseeId", "CultureCode");
@@ -1225,15 +1220,15 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("BetLimitGroupId");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CultureCode");
 
                     b.HasIndex("ParentPlayerCode");
 
-                    b.HasIndex("Username");
-
                     b.HasIndex("VipId");
+
+                    b.HasIndex("BrandId", "Username")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Players_BrandId_Username");
 
                     b.ToTable("Players", "dbo");
                 });

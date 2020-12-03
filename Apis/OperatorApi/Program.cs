@@ -30,16 +30,15 @@ namespace TGS.Apis.OperatorApi
             using var scope = services.CreateScope();
             var sp = scope.ServiceProvider;
             var env = sp.GetRequiredService<IWebHostEnvironment>();
-            var isDevelopmentOrDocker = env.IsDevelopmentOrDocker();
 
             await using (var tgsRepo = sp.GetRequiredService<ITgsRepository>())
             {
-                await tgsRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
+                await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
             }
 
             await using (var betRepo = sp.GetRequiredService<IBetRepository>())
             {
-                await betRepo.ExecuteMigrationAndSeedingAsync(isDevelopmentOrDocker);
+                await betRepo.ExecuteMigrationAndSeedingAsync(env);
             }
         }
     }

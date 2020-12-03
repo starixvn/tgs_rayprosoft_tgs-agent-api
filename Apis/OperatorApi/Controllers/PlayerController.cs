@@ -31,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class PlayerController : ControllerBase
     {
-        private readonly ICaptchaFactory _captchaFactory;
+        private readonly ICaptchaService _captchaService;
         private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
         private readonly IHashProvider _hashProvider;
         private readonly IJwtTokenHandler _jwtTokenHandler;
@@ -50,7 +50,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             IBrandOperations brandOperations,
             IBrandCurrencyCodeMapper currencyCodeMapper,
             IBrandLanguageCodeMapper languageCodeMapper,
-            ICaptchaFactory captchaFactory,
+            ICaptchaService captchaService,
             IJwtTokenHandler jwtTokenHandler,
             ITokenProvider tokenProvider,
             IHashProvider hashProvider,
@@ -68,7 +68,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _currencyCodeMapper = currencyCodeMapper;
             _languageCodeMapper = languageCodeMapper;
             _requestAnalyzer = requestAnalyzer;
-            _captchaFactory = captchaFactory;
+            _captchaService = captchaService;
             _jwtTokenHandler = jwtTokenHandler;
         }
 
@@ -77,13 +77,14 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet]
         [Route("captcha")]
-        public CaptchaInfo GetCaptcha() => _captchaFactory.Create();
+        public CaptchaInfo GetCaptcha() => _captchaService.Create();
 
         /// <summary>
         /// Check username exists
         /// </summary>
         [HttpPost]
         [Route("checkUsername")]
+        [VerifyCaptcha]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -100,10 +101,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpPost]
         [Route("create")]
+        [VerifyCaptcha]
         public async Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request)
         {
-            // TODO: Verify captcha via middleware
-
             var brandId = HttpContext.Items.GetBrandId();
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
@@ -134,7 +134,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ParentInvitationCode = request.ParentInvitationCode,
                 BetLimitGroup = 1,
                 ParentPlayerCode = "",
-                Type = request.IsTestPlayer ? PlayerType.OperatorTestPlayer : PlayerType.RealPlayer,
+                Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
                 HasAgent = request.HasAgent
             });
 
@@ -148,7 +148,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Player login
         /// </summary>
         [HttpPost]
-        [Route("login")]
+        [Route("login")] 
+        [VerifyCaptcha]
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
