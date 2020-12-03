@@ -19,6 +19,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         protected string Username => _userInfoMap[Consts.UserInfo.UsernameKey];
 
+        protected string RoleType => _userInfoMap[Consts.UserInfo.RoleTypeKey];
         protected string RoleName => _userInfoMap[Consts.UserInfo.RolenameKey];
 
         protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);
@@ -43,10 +44,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        private Guid? GetIdByKey(string key) =>
-            !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
-            !Guid.TryParse(value, out var id)
+        private Guid? GetIdByKey(string key)
+        {
+            return !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
+                   !Guid.TryParse(value, out var id)
                 ? (Guid?) null
                 : id;
+        }
     }
 }
