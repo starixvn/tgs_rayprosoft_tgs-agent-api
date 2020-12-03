@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.BackOffice.Application.DataService.Services;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Resources;
@@ -12,7 +14,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
     {
         private readonly IBrandService _service;
 
-        public GetAllCarsQueryHandler(IBrandService service)
+        public GetAllCarsQueryHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
         }
@@ -23,7 +25,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
             var brand = await _service.GetBrandAsync(x => x.Id == request.Id,
                 x => x.Include(i => i.Currencies)
                     .Include(i => i.Languages)
-                    .Include(i => i.GameProviders), true);
+                    .Include(i => i.GameProviders)
+                    .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, l => l.Id == LicenseeId), true);
 
             if (brand == null)
             {

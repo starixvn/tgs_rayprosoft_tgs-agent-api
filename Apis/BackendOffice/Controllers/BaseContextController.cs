@@ -25,7 +25,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);
 
-        protected Guid? LicenseeKey => GetIdByKey(Consts.UserInfo.LicenseeKey);
+        protected Guid? LicenseeId => GetIdByKey(Consts.UserInfo.LicenseeKey);
+        protected Guid? BrandId => GetIdByKey(Consts.UserInfo.BrandKey);
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
         {

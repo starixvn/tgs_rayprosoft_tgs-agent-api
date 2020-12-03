@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.DataService.Services;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -11,7 +12,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers
     {
         private readonly IBrandService _service;
 
-        public UpdateBrandStatusHandler(IBrandService service)
+        public UpdateBrandStatusHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
         }
