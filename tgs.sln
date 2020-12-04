@@ -87,7 +87,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Localstack", "Localstack", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.UnitTests", "Tests\FileService.UnitTests\FileService.UnitTests.csproj", "{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackOffice", "Services\BackOffice.Application\BackOffice.csproj", "{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackOffice", "Services\BackOffice\BackOffice.csproj", "{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
