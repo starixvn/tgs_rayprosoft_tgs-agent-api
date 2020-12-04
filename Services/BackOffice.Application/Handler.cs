@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application
 {
@@ -34,7 +33,7 @@ namespace TGS.Services.BackOffice.Application
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
         {
-            return new TResponse
+            return new()
             {
                 Valid = true
             };
@@ -43,7 +42,7 @@ namespace TGS.Services.BackOffice.Application
         protected static TResponse CreateInvalidResponse<TResponse>(string message)
             where TResponse : MessageResponse, new()
         {
-            return new TResponse
+            return new()
             {
                 Valid = false,
                 Message = message

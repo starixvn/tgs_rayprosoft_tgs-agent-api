@@ -16,7 +16,7 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Services;
-using TGS.Services.BackOffice.Domain;
+using TGS.Services.BackOffice.Application;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -116,12 +116,12 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(Consts.UserInfo.UsernameKey, user.Username),
-                new Claim(Consts.UserInfo.RolenameKey, user.Role.Name),
-                new Claim(Consts.UserInfo.ResellerKey, user.Role.ResellerId.ToString()),
-                new Claim(Consts.UserInfo.LicenseeKey, user.Role.LicenseeId.ToString()),
-                new Claim(Consts.UserInfo.BrandKey, user.Role.BrandId.ToString()),
-                new Claim(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString())
+                new(Consts.UserInfo.UsernameKey, user.Username),
+                new(Consts.UserInfo.RolenameKey, user.Role.Name),
+                new(Consts.UserInfo.ResellerKey, user.Role.ResellerId.ToString()),
+                new(Consts.UserInfo.LicenseeKey, user.Role.LicenseeId.ToString()),
+                new(Consts.UserInfo.BrandKey, user.Role.BrandId.ToString()),
+                new(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString())
             };
 
             var authProperties = new AuthenticationProperties

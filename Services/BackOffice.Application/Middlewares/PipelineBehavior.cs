@@ -4,15 +4,14 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Services.BackOffice.Application.Models;
-using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application.Middlewares
 {
-    public class UsernamePipe<TIn, TOut> : IPipelineBehavior<TIn, TOut>
+    public class PipelineBehavior<TIn, TOut> : IPipelineBehavior<TIn, TOut>
     {
         private readonly HttpContext _httpContext;
 
-        public UsernamePipe(IHttpContextAccessor accessor)
+        public PipelineBehavior(IHttpContextAccessor accessor)
         {
             _httpContext = accessor.HttpContext;
         }
