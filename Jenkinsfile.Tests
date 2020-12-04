@@ -1,0 +1,47 @@
+pipeline {
+    agent { docker { image 'maven:3.3.3'}}
+    stages {
+	    stage('log version info') {
+          steps {
+              sh 'mvn --verison'
+			  sh 'mvn clean install'
+           }
+        }
+        stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/develop" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
+        }
+		stage('Restore packages'){
+			steps{
+				sh "dotnet restore tgs.sln"
+				echo "restore tgs.sln"
+			  }
+		}
+		stage('Build') {
+			steps {
+				sh "dotnet build tgs.sln"
+				echo "build solution"
+			}
+		}
+		stage('Docker Build') {
+			steps {
+				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
+				echo "test tgs.sln"
+			}
+		}
+		stage('Coder') {
+			steps {
+				sh  "dotcover()"  
+				echo "dotcover tgs.sln"
+			}
+		}
+    }
+}
