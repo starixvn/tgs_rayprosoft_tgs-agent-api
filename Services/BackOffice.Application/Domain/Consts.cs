@@ -1,4 +1,4 @@
-﻿namespace TGS.Services.BackOffice.Application
+﻿namespace TGS.Services.BackOffice.Domain
 {
     public class Consts
     {

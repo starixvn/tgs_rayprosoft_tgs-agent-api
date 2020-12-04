@@ -30,8 +30,8 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Services.BackOffice.Application;
 using TGS.Services.BackOffice.Application.Extensions;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>TGS.Services.BackOffice.Application</AssemblyName>
+    <AssemblyName>TGS.Services.BackOffice</AssemblyName>
     <RootNamespace>TGS.Services.BackOffice.Application</RootNamespace>
   </PropertyGroup>
 
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\Brand.Designer.cs">
+    <Compile Update="Application\Resources\Brand.Designer.cs">
       <DependentUpon>Brand.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources\Brand.resx">
+    <EmbeddedResource Update="Application\Resources\Brand.resx">
       <LastGenOutput>Brand.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>

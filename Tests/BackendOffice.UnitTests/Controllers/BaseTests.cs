@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application;
+using TGS.Services.BackOffice.Domain;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers

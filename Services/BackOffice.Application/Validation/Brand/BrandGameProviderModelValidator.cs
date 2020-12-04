@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.Brand;
 
-namespace TGS.Services.BackOffice.Application.Validation.Brand
+namespace TGS.Services.BackOffice.Validation.Brand
 {
     internal class BrandGameProviderModelValidator : AbstractValidator<BrandGameProviderModel>
     {
@@ -9,31 +9,31 @@ namespace TGS.Services.BackOffice.Application.Validation.Brand
         {
             RuleFor(x => x.Configuration.ClientId)
                 .NotEmpty()
-                .WithMessage(Resources.Brand.ClientIdRequired);
+                .WithMessage(Application.Resources.Brand.ClientIdRequired);
 
             RuleFor(x => x.Configuration.SecretKey)
                 .NotEmpty()
-                .WithMessage(Resources.Brand.SecretKeyRequired);
+                .WithMessage(Application.Resources.Brand.SecretKeyRequired);
 
             RuleFor(x => x.Configuration.Status)
                 .IsInEnum()
-                .WithMessage(Resources.Brand.StatusRequired);
+                .WithMessage(Application.Resources.Brand.StatusRequired);
 
             RuleFor(x => x.Configuration.DesktopEndpoint)
                 .NotEmpty()
-                .WithMessage(Resources.Brand.DesktopEndpointRequired);
+                .WithMessage(Application.Resources.Brand.DesktopEndpointRequired);
 
             RuleFor(x => x.Configuration.MobileEndpoint)
                 .NotEmpty()
-                .WithMessage(Resources.Brand.MobileEndpointRequired);
+                .WithMessage(Application.Resources.Brand.MobileEndpointRequired);
 
             RuleFor(x => x.Configuration.ConfigurationData)
                 .NotEmpty()
-                .WithMessage(Resources.Brand.ConfigurationDataRequired);
+                .WithMessage(Application.Resources.Brand.ConfigurationDataRequired);
 
             RuleFor(x => x.Configuration.IsDefault)
                 .NotEmpty()
-                .WithMessage(Resources.Brand.IsDefaultRequired);
+                .WithMessage(Application.Resources.Brand.IsDefaultRequired);
         }
     }
 }

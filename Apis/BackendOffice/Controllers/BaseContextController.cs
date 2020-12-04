@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
