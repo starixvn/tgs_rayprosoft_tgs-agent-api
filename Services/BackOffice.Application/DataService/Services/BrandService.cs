@@ -21,6 +21,7 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
         Task CreateBrandAsync(CreateBrandRequest request);
         Task UpdateBrandAsync(Brand brand, UpdateBrandRequest request);
         Task ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request);
+        Task<bool> ExistsAsync(Expression<Func<Brand, bool>> predicate);
     }
 
     public class BrandService : IBrandService
@@ -83,6 +84,11 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
         IQueryable<Brand> IBrandService.GetBrandsAsync(bool tracking)
         {
             return tracking ? _repository.Brands : _repository.Brands.AsNoTracking();
+        }
+
+        Task<bool> IBrandService.ExistsAsync(Expression<Func<Brand, bool>> predicate)
+        {
+            return _repository.Brands.AnyAsync(predicate);
         }
 
         async Task IBrandService.UpdateBrandAsync(Brand brand, UpdateBrandRequest request)
@@ -168,7 +174,7 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
         private static GameProviderConfiguration GenerateGameProviderConfiguration(GameProvider gameProvider,
             Configuration request, string username)
         {
-            return new GameProviderConfiguration
+            return new()
             {
                 Name = request.Name,
                 Description = request.Description,
