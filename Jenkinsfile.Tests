@@ -1,5 +1,11 @@
 pipeline {
     agent { docker { image 'maven:3.3.3'}}
+	environment {
+        registry = "https://registry.gitlab.com"
+        registryCredential = 'gitlab-personal-access-token'
+        dockerImage = ''
+    }
+	
     stages {
 	    stage('log version info') {
           steps {
@@ -25,23 +31,23 @@ pipeline {
              ])
            }
         }
-		stage('Restore packages'){
-			steps{
-				sh "dotnet restore tgs.sln"
-				echo "restore tgs.sln"
-			  }
-		}
-		stage('Build') {
-			steps {
-				sh "dotnet build tgs.sln"
-				echo "build solution"
+		
+		stage ('Build docker image') {
+            steps {
+                script {
+                dockerImage = docker.build registry
+                }
+            }
+        }
+       
+		stage('Upload Image') {
+		 steps{   
+			 script {
+				docker.withRegistry( '', registryCredential ) {
+				dockerImage.push()
+				}
 			}
-		}
-		stage('Unit Tests') {
-			steps {
-				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
-				echo "test tgs.sln"
-			}
+		  }
 		}
     }
 }
