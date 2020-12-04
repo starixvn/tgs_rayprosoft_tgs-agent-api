@@ -31,15 +31,15 @@ pipeline {
 				echo "build solution"
 			}
 		}
-		stage('Docker Build') {
+		stage('Unit Tests') {
 			steps {
 				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
 				echo "test tgs.sln"
 			}
 		}
-		stage('Coder') {
+		stage('docker login') {
 			steps {
-				sh  "dotcover()"  
+				sh  "docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r"  
 				echo "dotcover tgs.sln"
 			}
 		}
