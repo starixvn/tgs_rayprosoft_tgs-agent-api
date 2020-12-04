@@ -12,7 +12,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     [Category(Named.Unit)]
     public class BaseTests
     {
-        protected readonly Mock<IHttpContextAccessor> HttpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        protected readonly Mock<IHttpContextAccessor> HttpContextAccessorMock = new();
         protected string Username = "admin.enabled";
 
         public virtual void Setup()
@@ -39,7 +39,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             string rolename = "Admin",
             RoleType roleType = RoleType.Admin)
         {
-            return new ClaimsPrincipal(new[]
+            return new(new[]
             {
                 new ClaimsIdentity(new[]
                 {

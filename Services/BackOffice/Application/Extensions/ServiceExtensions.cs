@@ -13,7 +13,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
         {
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(UsernamePipe<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));
             services.AddTransient<IBrandService, BrandService>();
 
             return services;

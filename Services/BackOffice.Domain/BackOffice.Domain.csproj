@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>TGS.Services.BackOffice.Domain</AssemblyName>
-    <RootNamespace>TGS.Services.BackOffice.Domain</RootNamespace>
-  </PropertyGroup>
-
-</Project>

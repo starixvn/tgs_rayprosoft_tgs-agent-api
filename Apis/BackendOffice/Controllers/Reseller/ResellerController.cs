@@ -29,9 +29,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         [Description("Get resellers: 公司列表")]
         public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
         {
-            return _service.GetResellersAsync().Where(request.Keyword,
-                    x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
-                         x.Description.Contains(request.Keyword) || x.OperationalEmail.Contains(request.Keyword))
+            return _service.GetResellersAsync()
+                .Where(ResellerId != null, x => x.Id == ResellerId)
+                .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
+                                             x.Description.Contains(request.Keyword) ||
+                                             x.OperationalEmail.Contains(request.Keyword))
                 .Select(x => new ResellerModel
                 {
                     Id = x.Id,
@@ -53,7 +55,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
             var reseller = await _service.GetResellerAsync(x => x.Id == id,
                 x => x.Include(i => i.Currencies)
                     .Include(i => i.Languages)
-                    .Include(i => i.GameProviders), true);
+                    .Include(i => i.GameProviders)
+                    .Where(ResellerId != null, r => r.Id == ResellerId), true);
 
             if (reseller == null)
             {

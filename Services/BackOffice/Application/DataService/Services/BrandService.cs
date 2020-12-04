@@ -168,7 +168,7 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
         private static GameProviderConfiguration GenerateGameProviderConfiguration(GameProvider gameProvider,
             Configuration request, string username)
         {
-            return new GameProviderConfiguration
+            return new()
             {
                 Name = request.Name,
                 Description = request.Description,

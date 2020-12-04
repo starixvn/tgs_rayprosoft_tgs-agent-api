@@ -24,16 +24,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .WithMany(p => p.Users)
                 .HasForeignKey(p => p.RoleId);
 
-            builder.Property(c => c.RoleType)
-                .HasColumnType(ColumnTypes.TinyInt)
-                .IsRequired();
-
-            builder.Property(c => c.ResellerId)
-                .IsRequired(false);
-
-            builder.Property(c => c.LicenseeId)
-                .IsRequired(false);
-
             builder.Property(c => c.Status)
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();

@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>TGS.Services.BackOffice.Application</AssemblyName>
-    <RootNamespace>TGS.Services.BackOffice.Application</RootNamespace>
+    <AssemblyName>TGS.Services.BackOffice</AssemblyName>
+    <RootNamespace>TGS.Services.BackOffice</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="9.3.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
@@ -15,11 +16,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
-    <ProjectReference Include="..\BackOffice.Domain\BackOffice.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\Brand.Designer.cs">
+    <Compile Update="Application\Resources\Brand.Designer.cs">
       <DependentUpon>Brand.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources\Brand.resx">
+    <EmbeddedResource Update="Application\Resources\Brand.resx">
       <LastGenOutput>Brand.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>

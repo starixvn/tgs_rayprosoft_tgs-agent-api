@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
@@ -13,7 +14,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
     {
         private readonly IBrandService _service;
 
-        public GetBrandsQueryHandler(IBrandService service)
+        public GetBrandsQueryHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
         }
@@ -21,9 +22,13 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         public override Task<PagedResponse<BrandModel>> Handle(GetBrandsRequest request,
             CancellationToken cancellationToken)
         {
-            return _service.GetBrandsAsync().Where(request.Keyword,
-                    x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
-                         x.Description.Contains(request.Keyword) || x.OperationalEmail.Contains(request.Keyword))
+            return _service.GetBrandsAsync()
+                .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.Id == BrandId)
+                .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
+                                             x.Description.Contains(request.Keyword) ||
+                                             x.OperationalEmail.Contains(request.Keyword))
                 .Select(x => new BrandModel
                 {
                     Id = x.Id,

@@ -19,16 +19,16 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         protected string Username => _userInfoMap[Consts.UserInfo.UsernameKey];
-
         protected string RoleName => _userInfoMap[Consts.UserInfo.RolenameKey];
 
         protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);
 
-        protected Guid? LicenseeKey => GetIdByKey(Consts.UserInfo.LicenseeKey);
+        protected Guid? LicenseeId => GetIdByKey(Consts.UserInfo.LicenseeKey);
+        protected Guid? BrandId => GetIdByKey(Consts.UserInfo.BrandKey);
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
         {
-            return new TResponse
+            return new()
             {
                 Valid = true
             };
@@ -37,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         protected static TResponse CreateInvalidResponse<TResponse>(string message)
             where TResponse : MessageResponse, new()
         {
-            return new TResponse
+            return new()
             {
                 Valid = false,
                 Message = message
