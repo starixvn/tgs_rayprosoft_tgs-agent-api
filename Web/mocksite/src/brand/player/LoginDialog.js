@@ -93,7 +93,7 @@ const LoginDialog = ({
   } = useCaptcha(
     dialog.visible ? { brandCode, currency, brandToken } : undefined
   )
-  let { token, error, isLoading } = usePlayerToken(
+  let { token, error, isLoading, mutate } = usePlayerToken(
     dialog.visible ? { brandCode, currency, username } : undefined,
     fromData
   )
@@ -104,9 +104,21 @@ const LoginDialog = ({
       history.push(url)
       dialog.hide()
     }
-    console.log("useEffect token", token)
   }, [token])
-  console.log("player token", token)
+
+  const CaptchaAnsError = 31
+  useEffect(() => {
+    if (error) {
+      setSubmit(undefined)
+      mutate(undefined, false)
+
+      if (error.err === CaptchaAnsError) {
+        setCaptchaAnswer("")
+      }
+    }
+    console.log("TODO: handle", error)
+  }, [error])
+
   return (
     <Dialog.Modal
       showActionButtons

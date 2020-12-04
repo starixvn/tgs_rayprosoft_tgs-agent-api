@@ -80,14 +80,6 @@ export const usePlayerToken = (
   const ResultCacheKey = playerTokenCacheKey({ brandCode, currency, username })
 
   let cached = cache.get(ResultCacheKey)
-  console.log(
-    "keys",
-    keys,
-    "cached",
-    cached,
-    "revalidateOnMount",
-    keys && cached?.token ? false : true
-  )
   let { data: result, mutate, ...rest } = useSWR(
     keys,
     (url, brandCode, username, body) => {
