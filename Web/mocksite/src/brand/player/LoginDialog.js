@@ -4,13 +4,18 @@ import {
   Table,
   Set,
   Button,
-  Dialog,
   Modal,
+  Dialog,
   Card,
   Box,
   Input,
-  Group
+  Group,
+  Icon,
+  Stack,
+  FieldStack,
+  InputField
 } from "bumbag"
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons"
 import { useCaptcha, usePlayerToken } from "../client"
 import useSWR from "swr"
 import { useRouteMatch, useHistory } from "react-router-dom"
@@ -23,11 +28,27 @@ export const LoginDialogButton = ({
   ...props
 }) => {
   const modal = Modal.useState()
+  let [auto, setAuto] = useState()
   return (
     <>
       <Group>
-        <Modal.Disclosure use={Button} {...modal}>
+        <Modal.Disclosure
+          use={Button}
+          onClick={(event) => {
+            setAuto(true)
+          }}
+          {...modal}
+        >
           Login
+        </Modal.Disclosure>
+        <Modal.Disclosure
+          use={Button}
+          onClick={(event) => {
+            setAuto(false)
+          }}
+          {...modal}
+        >
+          <Icon type="font-awesome" icon={faPencilAlt} />
         </Modal.Disclosure>
       </Group>
       {modal.visible && (
@@ -36,6 +57,7 @@ export const LoginDialogButton = ({
           currency={currency}
           brandToken={brandToken}
           username={username}
+          auto={auto}
           dialog={modal}
         />
       )}
@@ -49,6 +71,7 @@ const LoginDialog = ({
   currency,
   brandToken,
   username,
+  auto,
   dialog,
   ...props
 }) => {
@@ -56,65 +79,80 @@ const LoginDialog = ({
 
   let history = useHistory()
 
-  let [fromData, setSubmit] = useState()
+  let [fromData, setSubmit] = useState(
+    auto ? undefined : { bypassCaptcha: false }
+  )
   let [answer, setCaptchaAnswer] = useState("")
   let [password, setPassword] = useState(DefaultPassword)
 
-  let { image, answer: captcha } = useCaptcha(
+  let {
+    image,
+    answer: captcha,
+    isLoading: isLoadingCaptcha,
+    mutate: mutateCaptcha
+  } = useCaptcha(
     dialog.visible ? { brandCode, currency, brandToken } : undefined
   )
-  let { token, error } = usePlayerToken(
+  let { token, error, isLoading } = usePlayerToken(
     dialog.visible ? { brandCode, currency, username } : undefined,
     fromData
   )
 
   useEffect(() => {
-    if (dialog.visible && token) {
+    if (token) {
       let url = `${match.url}/${username}`
       history.push(url)
       dialog.hide()
     }
-  }, [dialog.visible, token])
-
+    console.log("useEffect token", token)
+  }, [token])
+  console.log("player token", token)
   return (
-    <Modal {...dialog}>
-      <Card>
-        <Group>
-          <Button isStatic>
-            {image ? <img src={`data:image/png;base64, ${image}`} /> : null}
-          </Button>
-          <Input
+    <Dialog.Modal
+      showActionButtons
+      title="Login"
+      showCloseButton
+      actionButtonsProps={{
+        isLoading,
+        onClickSubmit: () =>
+          setSubmit({
+            username,
+            password,
+            captcha,
+            answer
+          })
+      }}
+      {...dialog}
+    >
+      <Stack>
+        <FieldStack>
+          <InputField label="Username" value={username} readOnly={true} />
+          <InputField
+            label="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <InputField
+            label="Captcha"
+            addonBefore={
+              <Button
+                onClick={() => mutateCaptcha(undefined)}
+                isLoading={isLoadingCaptcha}
+              >
+                {image ? (
+                  <img src={`data:image/png;base64, ${image}`} />
+                ) : (
+                  "..."
+                )}
+              </Button>
+            }
             value={answer}
             onChange={(event) => {
               setCaptchaAnswer(event.target.value)
             }}
           />
-        </Group>
-        <Box>
-          <Group>
-            <Button isStatic>Password</Button>
-            <Input
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </Group>
-        </Box>
-        <Button
-          onClick={(event) => {
-            setSubmit({
-              username,
-              password,
-              captcha,
-              answer
-            })
-          }}
-        >
-          Submit
-        </Button>
-        <Modal.Disclosure use={Button} {...dialog}>
-          Close
-        </Modal.Disclosure>
-      </Card>
-    </Modal>
+        </FieldStack>
+      </Stack>
+    </Dialog.Modal>
   )
 }

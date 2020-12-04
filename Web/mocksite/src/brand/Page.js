@@ -36,7 +36,7 @@ const Body = ({ brandCode }) => {
   let { path, url } = useRouteMatch()
   let history = useHistory()
   let currency = useCurrency()
-  let { token, expires } = useBrandToken({ brandCode, currency })
+  let { token = "", expires } = useBrandToken({ brandCode, currency })
 
   useEffect(() => {
     if (url === location.pathname) {
