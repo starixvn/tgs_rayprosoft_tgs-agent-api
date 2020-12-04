@@ -11,6 +11,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Services;
 
@@ -43,6 +44,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
         {
             return _roleQueries.GetQueries()
+                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId)
                 .Where(request.Name, p => p.Name.Contains(request.Name))
                 .Select(role => new RoleModel
                 {
@@ -62,7 +66,11 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get a role")]
         public async Task<GetRoleResponse> GetSingleAsync(Guid roleId)
         {
-            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, x => x
+                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId));
+
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
@@ -149,11 +157,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
-            var newRole = CreateRole(
-                request.Name,
-                role.DisplayName,
-                role.Description,
-                role.MenuSetting);
+            var newRole = CreateRole(request.Name, role.DisplayName, role.Description, role.ResellerId,
+                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting);
 
             await _roleCommands.CreateAsync(newRole);
             return CreateValidResponse<MessageResponse>();
@@ -168,10 +173,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
-            var role = CreateRole(
-                request.Name,
-                request.DisplayName,
-                request.Description,
+            var role = CreateRole(request.Name, request.DisplayName, request.Description, request.ResellerId,
+                request.RoleType, request.LicenseeId, request.BrandId,
                 _jsonSerializationProvider.SerializeToString(request.Menus));
 
             await _roleCommands.CreateAsync(role);
@@ -180,15 +183,19 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPost("menus")]
         [Description("Get menus")]
-        public async Task<GetMenuResponse> GetMenuAsync()
+        public async Task<GetMenuResponse> GetMenuAsync(GetMenuRequest request)
         {
-            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
+            var setting = request.RoleType == RoleType.Licensee ||
+                          request.RoleType == RoleType.Brand
+                ? (await _roleQueries.GetSingleAsync(x => x.Id == request.RoleId))?.MenuSetting
+                : (await _settingQueries.GetSingleAsync(p => p.Key == "Menus"))?.Value;
+
             if (setting == null)
             {
                 return CreateInvalidResponse<GetMenuResponse>(Resources.Role.MenuNotFound);
             }
 
-            var menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting.Value);
+            var menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
 
             return new GetMenuResponse
             {
@@ -197,15 +204,20 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        private Role CreateRole(string name, string displayName, string description, string menuSetting)
+        private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
+            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting)
         {
-            return new Role
+            return new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 Name = name,
                 Description = description ?? string.Empty,
                 DisplayName = displayName ?? string.Empty,
                 MenuSetting = menuSetting,
+                RoleType = roleType,
+                ResellerId = resellerId,
+                LicenseeId = licenseeId,
+                BrandId = brandId,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
