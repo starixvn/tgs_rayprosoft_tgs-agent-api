@@ -2,6 +2,7 @@ import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App.jsx"
 import { BrowserRouter } from "react-router-dom"
+import { SWRConfig } from "swr"
 import { Provider as BumbagProvider } from "bumbag"
 import "./index.css"
 
@@ -16,9 +17,16 @@ const theme = {
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <BumbagProvider theme={theme}>
-        <App />
-      </BumbagProvider>
+      <SWRConfig
+        value={{
+          revalidateOnFocus: false,
+          shouldRetryOnError: false
+        }}
+      >
+        <BumbagProvider theme={theme}>
+          <App />
+        </BumbagProvider>
+      </SWRConfig>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root")

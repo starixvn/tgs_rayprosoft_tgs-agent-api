@@ -1,0 +1,53 @@
+pipeline {
+    agent { docker { image 'maven:3.3.3'}}
+	environment {
+        registry = "https://registry.gitlab.com"
+        registryCredential = 'gitlab-personal-access-token'
+        dockerImage = ''
+    }
+	
+    stages {
+	    stage('log version info') {
+          steps {
+              sh 'mvn --verison'
+			  sh 'mvn clean install'
+           }
+        }
+	    stage('docker login') {
+			steps {
+				sh  "docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r"  
+				echo "dotcover tgs.sln"
+			}
+		}
+        stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/develop" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
+        }
+		
+		stage ('Build docker image') {
+            steps {
+                script {
+                dockerImage = docker.build registry
+                }
+            }
+        }
+       
+		stage('Upload Image') {
+		 steps{   
+			 script {
+				docker.withRegistry( '', registryCredential ) {
+				dockerImage.push()
+				}
+			}
+		  }
+		}
+    }
+}

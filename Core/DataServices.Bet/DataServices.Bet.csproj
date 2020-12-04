@@ -44,8 +44,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\DataServices.Base\DataServices.Base.csproj" />
-    <ProjectReference Include="..\DataServices\DataServices.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 

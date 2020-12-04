@@ -1,15 +1,48 @@
 import React, { useState, useEffect } from "react"
 import { css } from "@emotion/react"
-import { Table, Set, Button } from "bumbag"
-import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom"
+import { Table, Set, Button, Box, Stack, PageWithHeader, TopNav } from "bumbag"
+import {
+  Switch,
+  Route,
+  Link,
+  useHistory,
+  useParams,
+  useRouteMatch
+} from "react-router-dom"
+import BrandHeader from "../Header"
+import PlayerPage from "./Page"
+import { LoginDialogButton } from "./LoginDialog"
 
-export const PlayerTable = () => {
+export const PlayerList = ({ brandToken }) => {
+  let { brandCode, currency } = useParams()
+  let { path, url } = useRouteMatch()
+
+  return (
+    <Switch>
+      <Route exact path={path}>
+        <PageWithHeader header={<BrandHeader />}>
+          <Stack padding="major-1">
+            <PlayerTable
+              brandCode={brandCode}
+              brandToken={brandToken}
+              currency={currency}
+            />
+          </Stack>
+        </PageWithHeader>
+      </Route>
+      <Route path={`${path}/:username`}>
+        <PlayerPage brandToken={brandToken} />
+      </Route>
+    </Switch>
+  )
+}
+
+const PlayerTable = ({ brandCode, currency, brandToken }) => {
   return (
     <Set orientation="vertical">
       <Table width="100%" overflow="auto" isHoverable>
         <Table.Head>
           <Table.Row>
-            <Table.HeadCell>Code</Table.HeadCell>
             <Table.HeadCell>Username</Table.HeadCell>
             <Table.HeadCell>VIP</Table.HeadCell>
             <Table.HeadCell>Status</Table.HeadCell>
@@ -18,8 +51,14 @@ export const PlayerTable = () => {
           </Table.Row>
         </Table.Head>
         <Table.Body>
-          {players.map((player) => (
-            <PlayerRow player={player} />
+          {players.map((player, index) => (
+            <PlayerRow
+              key={index}
+              brandCode={brandCode}
+              currency={currency}
+              brandToken={brandToken}
+              player={player}
+            />
           ))}
         </Table.Body>
       </Table>
@@ -27,23 +66,26 @@ export const PlayerTable = () => {
   )
 }
 
-const PlayerRow = ({ player }) => {
-  let { path, url } = useRouteMatch()
+const PlayerRow = ({ player, brandCode, currency, brandToken }) => {
   return (
     <Table.Row>
-      <Table.Cell>{player.playerCode}</Table.Cell>
       <Table.Cell>{player.username}</Table.Cell>
       <Table.Cell>{player.vipLevel}</Table.Cell>
       <Table.Cell>{player.status}</Table.Cell>
       <Table.Cell>{player.hasAgent?.toString()}</Table.Cell>
       <Table.Cell>
-        <Button use={Link} to={`/${player.playerCode}`}>
-          Actions
-        </Button>
+        <LoginDialogButton
+          brandCode={brandCode}
+          currency={currency}
+          brandToken={brandToken}
+          username={player.username}
+        />
       </Table.Cell>
     </Table.Row>
   )
 }
+
+export default PlayerTable
 
 const players = [
   {
