@@ -28,7 +28,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
         {
-            return new TResponse
+            return new()
             {
                 Valid = true
             };
@@ -37,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         protected static TResponse CreateInvalidResponse<TResponse>(string message)
             where TResponse : MessageResponse, new()
         {
-            return new TResponse
+            return new()
             {
                 Valid = false,
                 Message = message

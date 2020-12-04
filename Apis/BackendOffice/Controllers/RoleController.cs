@@ -185,10 +185,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get menus")]
         public async Task<GetMenuResponse> GetMenuAsync(GetMenuRequest request)
         {
-            var setting = request.RoleType == Core.Models.Enums.RoleType.Licensee ||
-                          request.RoleType == Core.Models.Enums.RoleType.Brand
-                ? (await _roleQueries.GetSingleAsync(x => x.Id == request.RoleId)).MenuSetting
-                : (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value;
+            var setting = request.RoleType == RoleType.Licensee ||
+                          request.RoleType == RoleType.Brand
+                ? (await _roleQueries.GetSingleAsync(x => x.Id == request.RoleId))?.MenuSetting
+                : (await _settingQueries.GetSingleAsync(p => p.Key == "Menus"))?.Value;
 
             if (setting == null)
             {
@@ -207,7 +207,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
             RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting)
         {
-            return new Role
+            return new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 Name = name,
