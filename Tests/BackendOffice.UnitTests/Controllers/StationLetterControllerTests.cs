@@ -116,13 +116,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
-            _commandsMock.Verify(p => p.CreateAsync(It.Is<StationLetter>(s =>
-                s.Subject == request.Subject &&
-                s.Content == request.Content &&
-                s.AssignedAllPlayers == request.AssignedAllPlayers)));
-
-            _playerCommandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<StationLetterPlayer[]>(s =>
-                s.Length == request.PlayerUsernames.Length)));
+            _stationLetterServiceMock.Verify(p => p.CreateStationLetterAsync(It.Is<StationLetter>(s =>
+                    s.Subject == request.Subject &&
+                    s.Content == request.Content &&
+                    s.AssignedAllPlayers == request.AssignedAllPlayers),
+                It.Is<StationLetterPlayer[]>(x => x.Length == request.PlayerUsernames.Length)));
         }
 
         [Test]
@@ -276,7 +274,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             fixture.Customize<Player>(u => u
                 .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Name = "Vip"})
                 .With(s => s.Language, new Language())
-                .With(s => s.Licensee, new Licensee())
+                .With(s => s.Brand, new Brand())
                 .With(s => s.ParentPlayer, new Player())
                 .With(s => s.BetLimitGroup, new BetLimitGroup())
                 .With(s => s.SubPlayers, new Player[] { })

@@ -89,6 +89,7 @@ services:
       tgs:
     depends_on:
       - backoffice-api
+      - fileservice
 
   backoffice-api:
     build:
@@ -112,7 +113,37 @@ services:
     depends_on:
       - sqlserver
       - log-api
-      - tgs-api
+      - game-sbo
+
+  fileservice:
+    build:
+      context: .
+      dockerfile: Apis/FileService/Dockerfile
+    image: fileservice
+    container_name: fileservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    ports:
+      - 32671:80
+    networks:
+      tgs:
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.2.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "1qaz2wsx!@"
+    volumes:
+      - ./.docker/mongodb/db:/data/db
+      - ./.docker/mongodb/config:/etc/mongod.conf
+      - ./.docker/mongodb/log:/var/log/mongodb/
+    networks:
+      tgs:
+    ports:
+      - 27017:27017
 
   operator-api:
     build:
@@ -130,17 +161,17 @@ services:
         aliases:
           - operator.api
     depends_on:
-      - tgs-api
+      - sqlserver
+      - game-sbo
 
-  tgs-api:
+  game-sbo:
     build:
       context: .
       dockerfile: Apis/TgsApi/Dockerfile
     image: tgs-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
-      GameProviderCode: "RT"
-      GameProviderName: "RedTiger"
+      GameProviderCode: "SBO"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
@@ -150,6 +181,7 @@ services:
         aliases:
           - tgs.api
     depends_on:
+      - sqlserver
       - nats
       - redis
       - log-api
@@ -170,6 +202,7 @@ services:
         aliases:
           - log.api
     depends_on:
+      - sqlserver
       - nats
       - redis
 
@@ -193,6 +226,7 @@ services:
       - "4222"
     ports:
       - "8222:8222"
+      - 4222:4222
     networks:
       tgs:
 
@@ -204,26 +238,22 @@ services:
       tgs:
 
   localstack:
-    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
-    image: localstack/localstack
-    network_mode: bridge
+    container_name: localstack
+    image: localstack/localstack-full
+    networks:
+      tgs:
     ports:
       - "4566:4566"
       - "4571:4571"
-      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+      - "8080:8080"
     environment:
-      - SERVICES=ec2,s3,dynamodb
-      - DEBUG=${DEBUG-1}
-      - DATA_DIR=${DATA_DIR-/tmp/localstack/data}
-      - PORT_WEB_UI=8080
-      - LAMBDA_EXECUTOR=docker-reuse
-      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - HOST_TMP_FOLDER=${TMPDIR}
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
     volumes:
-      - ./.localstack/data:/tmp/localstack
+      - ./.docker/localstack/data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - ./bin:/docker-entrypoint-initaws.d
+      - ./localstack/bin:/docker-entrypoint-initaws.d
 networks:
   tgs:
     driver: bridge

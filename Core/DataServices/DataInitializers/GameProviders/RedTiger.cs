@@ -1,6 +1,12 @@
-﻿using System;
+﻿// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.GameProviders.Settings;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.DataInitializers
@@ -13,8 +19,9 @@ namespace TGS.Core.DataServices.DataInitializers
             private static readonly string QueryString = "?ext_token={TOKEN}";
 
             private readonly IGame[] _games;
+            private readonly IWebHostEnvironment _env;
 
-            public RedTigerGameProvider()
+            public RedTigerGameProvider(IWebHostEnvironment env)
             {
                 _games = LoadGamesFromCsv(GameProviderConst.RedTiger)
                     .Select(g => 
@@ -25,6 +32,8 @@ namespace TGS.Core.DataServices.DataInitializers
                         return (Game)g with { EndpointPath = $"{EndpointPath}{QueryString}" };
                     })
                     .ToArray();
+
+                _env = env;
             }
 
             Guid IGameProvider.Id => new Guid("34136F73-5E12-4823-9CAC-3399E5E72948");
@@ -53,6 +62,11 @@ namespace TGS.Core.DataServices.DataInitializers
             bool IGameProvider.AutoClosedRound => true;
 
             bool IGameProvider.SupportTestPlayer => true;
+
+            PluggableConfigurationBase IGameProvider.GetConfiguration() => new RedTigerConfiguration
+            {
+                ServiceEndpointUrl = new("https://localhost:62331")
+            };
         }
 
         internal record RedTigerGameProviderConfiguration : IGameProviderConfiguration

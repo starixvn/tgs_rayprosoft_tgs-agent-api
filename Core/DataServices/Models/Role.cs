@@ -10,6 +10,10 @@ namespace TGS.Core.DataServices.Models
 
         public RoleType RoleType { get; set; }
 
+        public Guid? ResellerId { get; set; }
+        public Guid? LicenseeId { get; set; }
+        public Guid? BrandId { get; set; }
+
         public string Name { get; set; }
 
         public string DisplayName { get; set; }

@@ -2,19 +2,12 @@
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.TimeZone;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Games;
-using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Models.Data;
-using TGS.Services.GameOperations.Validators;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -24,28 +17,28 @@ namespace TGS.Services.GameOperations.Data
     public interface IGameActionDataOperations
     {
         Task<BetResult> PlaceBetAsync(BetData data);
-        
+
         Task<BetResult> SettleBetAsync(BetData data);
 
         Task<BetResult> CancelTransactionAsync(BetData data);
     }
 
-    internal sealed partial class GameActionDataOperations : IGameActionDataOperations
+    internal sealed class GameActionDataOperations : IGameActionDataOperations
     {
-        private readonly Func<ITgsRepository> _tgsRepoFactory;
-        private readonly ITransactionManager _transactionManager;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IGameActionProcessor _processor;
         private readonly IStatusValidator _statusValidator;
+        private readonly Func<ITgsRepository> _tgsRepoFactory;
+        private readonly ITransactionManager _transactionManager;
 
         public GameActionDataOperations(
             Func<ITgsRepository> tgsRepoFactory,
             ITransactionManager transactionManager,
             IStatusValidator statusValidator,
             IPlayerOperations playerOperations,
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IGameActionProcessor processor)
         {
@@ -53,25 +46,19 @@ namespace TGS.Services.GameOperations.Data
             _transactionManager = transactionManager;
             _statusValidator = statusValidator;
             _playerOperations = playerOperations;
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _processor = processor;
         }
 
-        Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
-        {
-            return ExecuteGameActionAsync(data);
-        }
+        Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data) =>
+            ExecuteGameActionAsync(data);
 
-        Task<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data)
-        {
-            return ExecuteGameActionAsync(data);
-        }
+        Task<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data) =>
+            ExecuteGameActionAsync(data);
 
-        Task<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data)
-        {
-            return ExecuteGameActionAsync(data);
-        }
+        Task<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data) =>
+            ExecuteGameActionAsync(data);
 
         private async Task<BetResult> ExecuteGameActionAsync(BetData data)
         {
@@ -80,48 +67,52 @@ namespace TGS.Services.GameOperations.Data
                 throw new InvalidOperationException("No transactions in the request");
             }
 
-            var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
-            ThrowIfPlayerDisableToPlaceBet(data.Transactions, cachedPlayer.Status);
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            ThrowIfPlayerDisableToPlaceBet(data.Transactions, player.Status);
 
             // TODO: validate if place bet cap amount is exceed
 
-            var cachedLicensee = await _licenseeOperations.GetCachedLicenseeAsync(cachedPlayer.LicenseeId);
+            var brand = await _brandOperations.GetCachedBrandAsync(player.BrandId);
 
             var playerRelatedData = new PlayerRelatedData
             {
                 Wallet = new WalletData
                 {
-                    Id = cachedPlayer.DefaultWalletId,
-                    CurrencyCode = cachedPlayer.DefaultWalletCurrencyCode,
-                    ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode
+                    Id = player.DefaultWalletId,
+                    CurrencyCode = player.DefaultWalletCurrencyCode,
+                    ExternalCurrencyCode = player.ExternalCurrencyCode
                 },
                 PlayerCode = data.PlayerCode,
-                LicenseeId = cachedPlayer.LicenseeId,
-                LicenseeCode = cachedLicensee.Code,
-                LicenseeName = cachedLicensee.Name,
-                Status = cachedPlayer.Status,
-                PlayerType = cachedPlayer.Type,
-                PlayerUsername = cachedPlayer.Username,
-                ExternalCurrencyCode = cachedPlayer.ExternalCurrencyCode,
-                LicenseeTimeZoneId = cachedLicensee.TimeZoneId,
+                ResellerId = brand.ResellerId,
+                ResellerCode = brand.ResellerCode,
+                LicenseeId = brand.LicenseeId,
+                LicenseeCode = brand.LicenseeCode,
+                BrandId = player.BrandId,
+                BrandCode = brand.Code,
+                BrandName = brand.Name,
+                Status = player.Status,
+                PlayerType = player.Type,
+                PlayerUsername = player.Username,
+                ExternalCurrencyCode = player.ExternalCurrencyCode,
+                BrandTimeZoneId = brand.TimeZoneId,
                 PlayerIp = string.Empty
             };
 
-            var cacheGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
+            var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
             var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId);
 
-            var externalTransactionIds = data.Transactions.Select(t => t.ExternalTransactionId).JoinAsStringBySemicolon();
+            var externalTransactionIds =
+                data.Transactions.Select(t => t.ExternalTransactionId).JoinAsStringBySemicolon();
             var transactionResult = await _transactionManager.ExecuteTransactionAsync(
                 _tgsRepoFactory,
                 IsolationLevel.RepeatableRead,
                 externalTransactionIds,
-                execute: async (r, trans) => await _processor.ExecuteAsync(new ProcessorData
+                async r => await _processor.ExecuteAsync(new ProcessorData
                 {
                     Repository = r,
-                    Transaction = trans.GetDbTransaction(),
                     BetData = data,
                     Player = playerRelatedData,
-                    GameProvider = cacheGameProvider,
+                    GameProvider = gameProvider,
                     Games = games
                 }));
 

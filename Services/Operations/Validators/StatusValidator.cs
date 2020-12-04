@@ -9,13 +9,13 @@ namespace TGS.Services.Operations.Validators
 {
     public interface IStatusValidator
     {
-        Task ThrowIfLicenseeStatusIsNotOneOfAsync(Guid licenseeId, params Status[] statuses);
+        Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses);
 
         Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, params Status[] statuses);
 
-        Task ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameId, string idToThrow,
-            Status[] statuses, GameStatus[] gameStatuses);
+        Task ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid brandId, Guid gameProviderId, Guid gameId,
+            string idToThrow, Status[] statuses, GameStatus[] gameStatuses);
 
         void ThrowIfPlayerDisabled(PlayerStatus playerStatus);
 
@@ -24,36 +24,36 @@ namespace TGS.Services.Operations.Validators
 
     public sealed class StatusValidator : IStatusValidator
     {
+        private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ILicenseeOperations _licenseeOperations;
 
         public StatusValidator(
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations)
         {
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
         }
 
-        async Task IStatusValidator.ThrowIfLicenseeStatusIsNotOneOfAsync(Guid licenseeId, params Status[] statuses)
+        async Task IStatusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses)
         {
             EnsureStatus(statuses);
 
-            var licenseeStatus = await _licenseeOperations.GetLicenseeStatusAsync(licenseeId);
+            var status = await _brandOperations.GetBrandStatusAsync(brandId);
 
-            if (licenseeStatus == null)
+            if (status == null)
             {
-                throw new InvalidStatusException("Licensee doesn't exist");
+                throw new InvalidStatusException("Brand doesn't exist");
             }
 
-            if (!statuses.Contains(Status.Maintenance) && licenseeStatus == Status.Maintenance)
+            if (!statuses.Contains(Status.Maintenance) && status == Status.Maintenance)
             {
-                throw new LicenseeUnderMaintenanceException();
+                throw new BrandUnderMaintenanceException();
             }
 
-            if (!statuses.Contains(licenseeStatus.Value))
+            if (!statuses.Contains(status.Value))
             {
-                throw new InvalidStatusException("Licensee doesn't exist or is not active");
+                throw new InvalidStatusException("Brand doesn't exist or is not active");
             }
         }
 
@@ -85,7 +85,8 @@ namespace TGS.Services.Operations.Validators
             }
         }
 
-        async Task IStatusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid gameProviderId, Guid gameId,
+        async Task IStatusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid brandId, Guid gameProviderId,
+            Guid gameId,
             string idToThrow, Status[] statuses, GameStatus[] gameStatuses)
         {
             EnsureStatus(statuses);
@@ -99,37 +100,28 @@ namespace TGS.Services.Operations.Validators
                 throw new InvalidStatusException("GameProvider or Game doesn't exist");
             }
 
-            if (!statuses.Contains(Status.Maintenance) && gameProviderStatus == Status.Maintenance)
+            ValidateGameProviderAndGameStatus(gameId, idToThrow, statuses, gameStatuses, gameProviderStatus.Value,
+                gameStatus.Value);
+
+            var brandGameProviderStatus =
+                await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId);
+            var brandGameStatus = await _brandOperations.GetBrandGameStatusAsync(brandId, gameProviderId, gameId);
+
+            if (brandGameProviderStatus == null || brandGameStatus == null)
             {
-                throw new GameProviderUnderMaintenanceException();
+                throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider or Game");
             }
 
-            if (!statuses.Contains(gameProviderStatus.Value))
-            {
-                throw new InvalidStatusException("GameProvider doesn't exist or is not active");
-            }
-
-            if (!gameStatuses.Contains(GameStatus.Maintenance) && gameStatus == GameStatus.Maintenance)
-            {
-                throw new GameUnderMaintenanceException();
-            }
-
-            if (!gameStatuses.Contains(gameStatus.Value))
-            {
-                var id = idToThrow.IsNullOrEmpty() ? gameId.ToString() : idToThrow;
-                throw new InvalidStatusException($"Game '{id}' doesn't exist or is not active");
-            }
+            ValidateGameProviderAndGameStatus(gameId, idToThrow, statuses, gameStatuses, brandGameProviderStatus.Value,
+                brandGameStatus.Value);
         }
 
-        void IStatusValidator.ThrowIfPlayerDisabled(PlayerStatus status)
-        {
+        void IStatusValidator.ThrowIfPlayerDisabled(PlayerStatus status) =>
             EnsurePlayerStatus(status, PlayerStatus.Disabled);
-        }
 
-        void IStatusValidator.ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status)
-        {
+
+        void IStatusValidator.ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status) =>
             EnsurePlayerStatus(status, PlayerStatus.InBlacklist);
-        }
 
         #region Private Methods
 
@@ -151,6 +143,31 @@ namespace TGS.Services.Operations.Validators
             if (playerStatus == statusToThrowException)
             {
                 throw new PlayerDisabledException(playerStatus);
+            }
+        }
+
+        private static void ValidateGameProviderAndGameStatus(Guid gameId, string idToThrow, Status[] statuses,
+            GameStatus[] gameStatuses, Status gameProviderStatus, GameStatus gameStatus)
+        {
+            if (!statuses.Contains(Status.Maintenance) && gameProviderStatus == Status.Maintenance)
+            {
+                throw new GameProviderUnderMaintenanceException();
+            }
+
+            if (!statuses.Contains(gameProviderStatus))
+            {
+                throw new InvalidStatusException("GameProvider doesn't exist or is not active");
+            }
+
+            if (!gameStatuses.Contains(GameStatus.Maintenance) && gameStatus == GameStatus.Maintenance)
+            {
+                throw new GameUnderMaintenanceException();
+            }
+
+            if (!gameStatuses.Contains(gameStatus))
+            {
+                var id = idToThrow.IsNullOrEmpty() ? gameId.ToString() : idToThrow;
+                throw new InvalidStatusException($"Game '{id}' doesn't exist or is not active");
             }
         }
 

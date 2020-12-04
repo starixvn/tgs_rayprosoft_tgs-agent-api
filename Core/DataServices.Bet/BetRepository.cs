@@ -4,7 +4,9 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -31,30 +33,27 @@ namespace TGS.Core.DataServices.Bet
         DbSet<GameAction> IBetRepository.GameActions { get; set; }
         DbSet<GameActionBatch> IBetRepository.GameActionBatches { get; set; }
 
+        IDbContextTransaction IBaseRepository.CurrentTransaction =>
+            Database.CurrentTransaction;
+
         public BetRepository(DbContextOptions<BetRepository> options) : base(options)
         {
 
         }
 
-        Task<bool> IBaseRepository.CanConnectionAsync()
-        {
-            return Database.CanConnectAsync();
-        }
+        Task<bool> IBaseRepository.CanConnectionAsync() => 
+            Database.CanConnectAsync();
 
         void IBaseRepository.SetTimeoutToSeconds(int seconds)
         {
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
-        {
-            return Database.BeginTransactionAsync(level);
-        }
+        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) => 
+            Database.BeginTransactionAsync(level);
 
-        IDbConnection IBaseRepository.GetDbConnection()
-        {
-            return Database.GetDbConnection();
-        }
+        IDbConnection IBaseRepository.GetDbConnection() => 
+            Database.GetDbConnection();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,32 +65,30 @@ namespace TGS.Core.DataServices.Bet
             modelBuilder.ApplyConfiguration(new GameActionBatchMap());
         }
 
-        Task IBaseRepository.SaveChangesAsync()
-        {
-            return SaveChangesAsync();
-        }
+        Task IBaseRepository.SaveChangesAsync() => 
+            SaveChangesAsync();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
-        {
-            return this.BulkInsertAsync(entities, bulkConfig, progress);
-        }
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
+            this.BulkInsertAsync(entities, bulkConfig, progress);
 
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
-        {
-            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
-        }
+        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
+            this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
 
-        Task IBaseRepository.ExecuteMigrationAndSeedingAsync(bool addSeeding)
+        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
-            var isMigrate = !Database.GetService<IRelationalDatabaseCreator>().Exists() ||
-                           Database.GetPendingMigrations().Any();
+            var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
+                (await Database.GetPendingMigrationsAsync()).Any();
 
             if (isMigrate)
             {
-                return Database.MigrateAsync();
+                await Database.MigrateAsync();
             }
-            
-            return Task.CompletedTask;
         }
+
+        DbSet<T> IBaseRepository.Set<T>() => 
+            Set<T>();
+
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => 
+            base.Entry(entity);
     }
 }

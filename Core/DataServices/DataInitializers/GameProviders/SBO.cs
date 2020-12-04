@@ -1,5 +1,10 @@
-﻿using System;
+﻿// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
@@ -14,8 +19,9 @@ namespace TGS.Core.DataServices.DataInitializers
             private static readonly string QueryString = "?ext_token={TOKEN}";
 
             private readonly IGame[] _games;
+            private readonly IWebHostEnvironment _env;
 
-            public SBOGameProvider()
+            public SBOGameProvider(IWebHostEnvironment env)
             {
                 _games = LoadGamesFromCsv(GameProviderConst.SBOBET)
                     .Select(g => 
@@ -26,9 +32,11 @@ namespace TGS.Core.DataServices.DataInitializers
                         return (Game)g with { EndpointPath = $"{EndpointPath}{QueryString}" };
                     })
                     .ToArray();
+
+                _env = env;
             }
 
-            Guid IGameProvider.Id => new Guid("8D53C1F2-A718-4204-803F-5B33865175C5");
+            Guid IGameProvider.Id => new ("8D53C1F2-A718-4204-803F-5B33865175C5");
 
             string IGameProvider.Code => GameProviderConst.SBOBET;
 
@@ -54,6 +62,13 @@ namespace TGS.Core.DataServices.DataInitializers
             bool IGameProvider.AutoClosedRound => true;
 
             bool IGameProvider.SupportTestPlayer => true;
+
+            PluggableConfigurationBase IGameProvider.GetConfiguration() =>
+                new SBOConfiguration
+                { 
+                    ServiceEndpointUrl = _env.IsDocker() ? new Uri("http://game-sbo") : new("https://localhost:62331"),
+                    CompanyKey = "difjwifjwejfdisdfkidsjfiojwiowej213kiorfj23o5sdfkj9"
+                };
         }
 
         internal record SBOGameProviderConfiguration : IGameProviderConfiguration
@@ -74,11 +89,5 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string IGameProviderConfiguration.ConfigurationData => string.Empty;
         }
-
-        private static readonly SBOConfiguration SBOConfiguration = new()
-        {
-            ServiceEndpointUrl = new Uri("https://localhost:62331"),
-            CompanyKey = "difjwifjwejfdisdfkidsjfiojwiowej213kiorfj23o5sdfkj9"
-        }; 
     }
 }

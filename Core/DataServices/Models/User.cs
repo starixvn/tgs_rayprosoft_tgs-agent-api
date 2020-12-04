@@ -9,14 +9,8 @@ namespace TGS.Core.DataServices.Models
         public UserStatus Status { get; set; }
         public Guid RoleId { get; set; }
         public virtual Role Role { get; set; }
-        public RoleType RoleType { get; set; }
-
         public Guid DepartmentId { get; set; }
         public virtual Department Department { get; set; }
-
-        public Guid? ResellerId { get; set; }
-        public Guid? LicenseeId { get; set; }
-
         public string Username { get; set; }
         public string LastLoginIp { get; set; }
         public DateTimeOffset? LastLoginTime { get; set; }
@@ -24,7 +18,6 @@ namespace TGS.Core.DataServices.Models
         public string TimeZone { get; set; }
         public byte[] Password { get; set; }
         public byte[] Salt { get; set; }
-
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
         public DateTimeOffset CreatedOn { get; set; }

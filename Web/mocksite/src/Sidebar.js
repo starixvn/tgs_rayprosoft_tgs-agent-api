@@ -1,0 +1,48 @@
+import React, { useState, useEffect } from "react"
+import { css } from "@emotion/react"
+import { SideNav } from "bumbag"
+import {
+  Switch,
+  Route,
+  Redirect,
+  Link,
+  useParams,
+  useRouteMatch,
+  useLocation
+} from "react-router-dom"
+
+const DefaultBrandCode = "TGS"
+
+const Sidebar = () => {
+  let brands = [
+    {
+      code: "TGS"
+    }
+  ]
+  let match = useRouteMatch({
+    path: "/:brandCode",
+    sensitive: false
+  })
+  if (!match) {
+    return <Redirect to={`/${DefaultBrandCode}`} push={false} />
+  }
+  let { params } = match
+  return (
+    <SideNav selectedId={params.brandCode}>
+      <SideNav.Level>
+        {brands.map((brand, index) => (
+          <BrandNav key={index} brand={brand} />
+        ))}
+      </SideNav.Level>
+    </SideNav>
+  )
+}
+
+const BrandNav = ({ brand }) =>
+  brand?.code ? (
+    <SideNav.Item use={Link} to={`/${brand?.code}`} navId={`${brand?.code}`}>
+      {brand?.code}
+    </SideNav.Item>
+  ) : undefined
+
+export default Sidebar

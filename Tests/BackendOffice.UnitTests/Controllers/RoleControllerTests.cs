@@ -15,6 +15,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -36,12 +37,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         private RoleController _controller;
-        private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new Mock<ITgsQueries<Role>>();
-        private readonly Mock<ITgsQueries<Setting>> _settingQueriesMock = new Mock<ITgsQueries<Setting>>();
-        private readonly Mock<ITgsCommands<Role>> _roleCommandsMock = new Mock<ITgsCommands<Role>>();
+        private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
+        private readonly Mock<ITgsQueries<Setting>> _settingQueriesMock = new();
+        private readonly Mock<ITgsCommands<Role>> _roleCommandsMock = new();
 
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock =
-            new Mock<IJsonSerializationProvider>();
+            new();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -369,7 +370,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            role.Users = new List<User> {new User()};
+            role.Users = new List<User> {new()};
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -393,11 +394,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            role.Users = new List<User> {new User()};
+            role.Users = new List<User> {new()};
+
+            var request = new GetMenuRequest
+            {
+                RoleType = RoleType.Admin
+            };
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult(new Setting()));
+                .Returns(Task.FromResult(new Setting {Value = "{}"}));
 
             var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
 
@@ -405,7 +411,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
                 .Returns(menuSettings);
 
-            var response = await _controller.GetMenuAsync();
+            var response = await _controller.GetMenuAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Menus.Length; i++)
@@ -428,13 +434,39 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            role.Users = new List<User> {new User()};
+            var request = new GetMenuRequest
+            {
+                RoleType = RoleType.Admin
+            };
+
+            role.Users = new List<User> {new()};
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
                 .Returns(Task.FromResult<Setting>(null));
 
-            var response = await _controller.GetMenuAsync();
+            var response = await _controller.GetMenuAsync(request);
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Role.MenuNotFound);
+        }
+
+        [Test]
+        public async Task Cannot_Get_Menus_When_Is_Licensee_Or_Brand_Role()
+        {
+            var role = CreateRoleFixture().Create<Role>();
+
+            var request = new GetMenuRequest
+            {
+                RoleType = RoleType.Licensee
+            };
+
+            role.Users = new List<User> {new()};
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult<Role>(null));
+
+            var response = await _controller.GetMenuAsync(request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.Role.MenuNotFound);
         }

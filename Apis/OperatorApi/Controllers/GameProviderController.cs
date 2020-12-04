@@ -29,29 +29,31 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         private readonly IRedisCacheManager _cacheManager;
         private readonly IJsonSerializationProvider _json;
-
-        private readonly ILicenseeCurrencyCodeMapper _licenseeCurrencyCodeMapper;
-        private readonly ILicenseeLanguageCodeMapper _licenseeLanguageCodeMapper;
-        private readonly ILicenseeOperations _licenseeOperations;
+        private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
+        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
+        private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ILocalizationOperations _localizationOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<Status> _validStatus;
 
         public GameProviderController(
-            ILicenseeOperations licenseeOperations,
+            IBrandOperations brandOperations,
+            IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             ILocalizationOperations localizationOperations,
-            ILicenseeLanguageCodeMapper licenseeLanguageCodeMapper,
-            ILicenseeCurrencyCodeMapper licenseeCurrencyCodeMapper,
+            IBrandLanguageCodeMapper brandLanguageCodeMapper,
+            IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
             IValidStatus<Status> validStatus,
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json)
         {
-            _licenseeOperations = licenseeOperations;
+            _brandOperations = brandOperations;
+            _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
             _localizationOperations = localizationOperations;
-            _licenseeLanguageCodeMapper = licenseeLanguageCodeMapper;
-            _licenseeCurrencyCodeMapper = licenseeCurrencyCodeMapper;
+            _brandLanguageCodeMapper = brandLanguageCodeMapper;
+            _brandCurrencyCodeMapper = brandCurrencyCodeMapper;
             _validStatus = validStatus;
             _cacheManager = cacheManager;
             _json = json;
@@ -65,9 +67,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async Task<GetGameProvidersResponse> GetGameProvidersAsync(GetGameProvidersRequest request)
         {
-            var licenseeId = HttpContext.Items.GetLicenseeId();
+            var brandId = HttpContext.Items.GetBrandId();
             var currencyCode =
-                await _licenseeCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, licenseeId);
+                await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
 
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var platformType = request.PlatformType;
@@ -89,12 +91,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var culture = await _licenseeLanguageCodeMapper.ExternalToInternalAsync(request.Language, licenseeId);
+            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
 
-            var cacheType = RedisCacheType.LicenseeGameProviders;
-            var field = $"{licenseeId}:{currencyCode}:{platformType}:{(int) playerType}:{culture}";
+            var cacheType = RedisCacheType.BrandGameProvidersWithConditions;
+            var cacheKey = $"{brandId}";
+            var field = $"{currencyCode}:{platformType}:{(int) playerType}:{culture}";
            
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, null, field);
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, field);
             if (value.HasValue)
             {
                 return new GetGameProvidersResponse
@@ -103,9 +106,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 };
             }
 
-            var providers = await GetGameProviderModels(licenseeId, currencyCode, platformType, playerType, culture);
+            var providers = await GetGameProviderModels(brandId, currencyCode, platformType, playerType, culture);
 
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, null, new HashEntry[]
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
             {
                 new (field, _json.SerializeToString(providers))
             }, TimeSpan.FromHours(12));
@@ -116,31 +119,46 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        private async Task<GetGameProvidersResponse.GameProviderModel[]> GetGameProviderModels(Guid licenseeId,
+        private async Task<GetGameProvidersResponse.GameProviderModel[]> GetGameProviderModels(Guid brandId,
             string currencyCode, PlatformType platformType,
             PlayerType playerType, string culture)
         {
-            var gameProviders = await _licenseeOperations.GetLicenseeGameProvidersAsync(licenseeId, currencyCode,
-                platformType);
-
+            var gameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId);
             var statuses = _validStatus.GetStatus(playerType);
 
             var items = new List<GetGameProvidersResponse.GameProviderModel>();
 
-            foreach (var gp in gameProviders
-                .Where(gp => statuses.Contains(gp.Status)))
+            foreach (var bgp in gameProviders
+                .Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus)))
             {
-                var key = gp.Id.ToString();
-                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gp.Id, culture);
+                var gameProviderId = bgp.GameProviderId;
+                var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(bgp.GameProviderId);
+                var currencySupported =
+                    await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
+
+                if (!currencySupported)
+                {
+                    continue;
+                }
+
+                var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, platformType);
+
+                if (games.Length == 0)
+                {
+                    continue;
+                }
+
+                var key = $"{gameProviderId}";
+                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, culture);
 
                 var model = new GetGameProvidersResponse.GameProviderModel
                 {
-                    Id = gp.Id,
-                    Code = gp.Code,
-                    Name = _localizationOperations.Parse(store, key, GameProviderName, gp.Name),
+                    Id = gameProviderId,
+                    Code = gameProvider.Code,
+                    Name = _localizationOperations.Parse(store, key, GameProviderName, gameProvider.Name),
                     Description =
-                                _localizationOperations.Parse(store, key, GameProviderDescription, gp.Description),
-                    Status = gp.Status
+                                _localizationOperations.Parse(store, key, GameProviderDescription, gameProvider.Description),
+                    Status = gameProvider.Status
                 };
 
                 items.Add(model);

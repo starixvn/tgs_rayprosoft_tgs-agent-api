@@ -6,6 +6,7 @@ const Label = ({
   name,
   fontWeight = "bold",
   marginTop = "major-1",
+  whiteSpace = "nowrap",
   required,
   label,
   children,
@@ -13,6 +14,7 @@ const Label = ({
 }) => (
   <_Label
     htmlFor={name}
+    whiteSpace={whiteSpace}
     fontWeight={fontWeight}
     marginTop={marginTop}
     css={css`

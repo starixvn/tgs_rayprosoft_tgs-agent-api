@@ -88,6 +88,42 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Brand.
+        /// </summary>
+        public static string Brand {
+            get {
+                return ResourceManager.GetString("Brand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BrandCode.
+        /// </summary>
+        public static string BrandCode {
+            get {
+                return ResourceManager.GetString("BrandCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BrandToken.
+        /// </summary>
+        public static string BrandToken {
+            get {
+                return ResourceManager.GetString("BrandToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BrandTokenExpireTime.
+        /// </summary>
+        public static string BrandTokenExpireTime {
+            get {
+                return ResourceManager.GetString("BrandTokenExpireTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ErrorResponse.
         /// </summary>
         public static string ErrorResponse {
@@ -129,24 +165,6 @@ namespace TGS.Tests.TestsCommon {
         public static string GameAction {
             get {
                 return ResourceManager.GetString("GameAction", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Licensee.
-        /// </summary>
-        public static string Licensee {
-            get {
-                return ResourceManager.GetString("Licensee", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LicenseeCode.
-        /// </summary>
-        public static string LicenseeCode {
-            get {
-                return ResourceManager.GetString("LicenseeCode", resourceCulture);
             }
         }
         

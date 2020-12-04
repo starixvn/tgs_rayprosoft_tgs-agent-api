@@ -126,6 +126,18 @@
   <data name="AutoCloseRound" xml:space="preserve">
     <value>AutoCloseRound</value>
   </data>
+  <data name="Brand" xml:space="preserve">
+    <value>Brand</value>
+  </data>
+  <data name="BrandCode" xml:space="preserve">
+    <value>BrandCode</value>
+  </data>
+  <data name="BrandToken" xml:space="preserve">
+    <value>BrandToken</value>
+  </data>
+  <data name="BrandTokenExpireTime" xml:space="preserve">
+    <value>BrandTokenExpireTime</value>
+  </data>
   <data name="ErrorResponse" xml:space="preserve">
     <value>ErrorResponse</value>
   </data>
@@ -140,12 +152,6 @@
   </data>
   <data name="GameAction" xml:space="preserve">
     <value>GameAction</value>
-  </data>
-  <data name="Licensee" xml:space="preserve">
-    <value>Licensee</value>
-  </data>
-  <data name="LicenseeCode" xml:space="preserve">
-    <value>LicenseeCode</value>
   </data>
   <data name="LoginTime" xml:space="preserve">
     <value>LoginTime</value>

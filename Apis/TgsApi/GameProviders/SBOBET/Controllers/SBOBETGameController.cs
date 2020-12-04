@@ -19,7 +19,7 @@ using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 {
-    [Route("api")]
+    [Route("api/provider")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]

@@ -10,16 +10,17 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("LicenseeGameProviders", "dbo");
 
-            builder.HasKey(bc => new { bc.LicenseeId, bc.GameProviderId });
-            builder
-                .HasOne(bc => bc.GameProvider)
-                .WithMany(c => c.Licensees)
-                .HasForeignKey(bc => bc.GameProviderId);
+            builder.HasKey(lgp => new { lgp.LicenseeId, lgp.GameProviderId });
 
             builder
-                .HasOne(bc => bc.Licensee)
-                .WithMany(c => c.GameProviders)
-                .HasForeignKey(bc => bc.LicenseeId);
+                .HasOne(lgp => lgp.GameProvider)
+                .WithMany(gp => gp.Licensees)
+                .HasForeignKey(bgp => bgp.GameProviderId);
+
+            builder
+                .HasOne(lgp => lgp.Licensee)
+                .WithMany(l => l.GameProviders)
+                .HasForeignKey(rgp => rgp.LicenseeId);
         }
     }
 }

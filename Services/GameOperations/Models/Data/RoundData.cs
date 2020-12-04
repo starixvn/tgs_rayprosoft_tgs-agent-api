@@ -19,9 +19,12 @@ namespace TGS.Services.GameOperations.Models.Data
         public PlatformType PlatformType { get; init; }
         public Guid WalletId { get; init; }
         public string CurrencyCode { get; init; }
+        public Guid ResellerId { get; init; }
+        public string ResellerCode { get; init; }
         public Guid LicenseeId { get; init; }
         public string LicenseeCode { get; init; }
-        public string LicenseeName { get; init; }
+        public Guid BrandId { get; init; }
+        public string BrandCode { get; init; }
         public DateTimeOffset CreatedOn { get; init; }
         public DateTimeOffset UpdatedOn { get; init; }
         public DateTimeOffset? ClosedOn { get; init; }

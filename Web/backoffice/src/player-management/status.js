@@ -4,24 +4,26 @@ import { Select as _Select, Text } from "bumbag"
 import { Field as _Field } from "../select/Field"
 import { useTrans, Trans } from "../i18n"
 
-const Enabled = 0
+const Enabled = "Enabled"
+const EnabledTrans = {
+  zh: "活跃",
+  en: "Enabled"
+}
 
-const EnabledString = "Enabled"
+const Disabled = "Disabled"
+const DisabledTrans = {
+  zh: "封锁",
+  en: "Disabled"
+}
 
-const EnabledLabel = "Enabled"
+const InBlacklist = "InBlacklist"
+const InBlacklistTrans = {
+  zh: "黑名单",
+  en: "In Blacklist"
+}
 
-const Disabled = 1
-
-const DisabledString = "Disabled"
-
-const DisabledLabel = "Disabled"
-
-const InBlacklist = 2
-
-const InBlacklistString = "InBlacklist"
-
-const InBlacklistLabel = "In Blacklist"
-
+//TODO: rm?
+/*
 export const from = (value) => {
   if (value === EnabledString || value === `${Enabled}`) {
     return Enabled
@@ -44,26 +46,30 @@ export const toString = (value) => {
     case InBlacklist:
       return InBlacklistString
     default:
-      return ""
+      return value
   }
 }
+*/
 
 export const Field = ({ name, required, ...props }) => {
-  let enabledPair = useEnabledPair()
-  let disabledPair = useDisabledPair()
-  let blockedPair = useBlockedPair()
+  let options = [
+    {
+      label: useTrans(EnabledTrans),
+      value: Enabled
+    },
+    {
+      label: useTrans(DisabledTrans),
+      value: Disabled
+    },
+    {
+      label: useTrans(InBlacklistTrans),
+      value: InBlacklist
+    }
+  ]
 
-  let options = required
-    ? [enabledPair, disabledPair, blockedPair]
-    : [
-        {
-          label: "",
-          value: null
-        },
-        enabledPair,
-        disabledPair,
-        blockedPair
-      ]
+  if (!required) {
+    options = [{ label: "", value: "" }, ...options]
+  }
 
   return (
     <_Field name={name} required={required}>
@@ -72,61 +78,25 @@ export const Field = ({ name, required, ...props }) => {
   )
 }
 
-const useEnabledPair = () => {
-  let label = useTrans({
-    zh: "活跃",
-    en: EnabledLabel
-  })
-
-  return {
-    label,
-    value: `${Enabled}`
-  }
-}
-
-const useDisabledPair = () => {
-  let label = useTrans({
-    zh: "封锁",
-    en: DisabledLabel
-  })
-
-  return {
-    label,
-    value: `${Disabled}`
-  }
-}
-
-const useBlockedPair = () => {
-  let label = useTrans({
-    zh: "黑名单",
-    en: InBlacklistLabel
-  })
-
-  return {
-    label,
-    value: `${InBlacklist}`
-  }
-}
-
 export const Label = ({ value }) => {
-  let code = from(value)
+  let code = value
   switch (code) {
     case Enabled:
       return (
         <Text>
-          <Trans zh="活跃" en={EnabledString} />
+          <Trans {...EnabledTrans} />
         </Text>
       )
     case Disabled:
       return (
         <Text>
-          <Trans zh="封锁" en={DisabledString} />
+          <Trans {...DisabledTrans} />
         </Text>
       )
     case InBlacklist:
       return (
         <Text>
-          <Trans zh="黑名单" en={InBlacklistLabel} />
+          <Trans {...InBlacklistTrans} />
         </Text>
       )
   }

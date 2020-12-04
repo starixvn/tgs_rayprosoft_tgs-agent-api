@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.Data
 {
-    public class GetCachedGameProviderResult
+    public record GetCachedGameProviderResult
     {
         public Guid Id { get; set; }
         public string Code { get; set; }

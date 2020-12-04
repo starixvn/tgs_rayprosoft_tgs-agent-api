@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -22,53 +23,53 @@ namespace TGS.Core.DataServices.DataInitializers
     public sealed partial class DataInitializer : IDataInitializer
     {
         private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
-        private static readonly object Locker = new object();
+        private static readonly object Locker = new();
         private static readonly string AdminUsername = "admin.enabled";
-
-        private static readonly IList<IGameProvider> GameProviders = new IGameProvider[]
-        {
-            new RedTigerGameProvider(), new SBOGameProvider()
-        };
 
         private static readonly IList<IReseller> Resellers = new IReseller[]
         {
             new TgsReseller()
         };
-
+        
+        private readonly IList<IGameProvider> _gameProviders;
         private readonly IDictionary<string, GameProvider> _gameProvidersCreated =
             new Dictionary<string, GameProvider>();
 
-        private readonly IHashProvider _hashProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
-        private readonly StringBuilder _logBuilder = new StringBuilder();
+        private readonly StringBuilder _logBuilder = new();
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
 
         private readonly IRole[] _roles =
         {
-            new AdminRole(), new ResellerAdminRole()
+            new AdminRole(), new ResellerAdminRole(), new LicenseeAdminRole(), new BrandRole()
         };
 
         private readonly VipLevel[] _vipLevels =
         {
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E"},
-            new VipLevel {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E"},
+            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
         };
 
-        private Player[] players;
+        private Player[] _players;
 
-        public DataInitializer(ITgsRepository repository)
+        public DataInitializer(ITgsRepository repository, IWebHostEnvironment env)
         {
             _repository = repository;
 
-            _hashProvider = new HashProvider();
-            _passwordHandler = new PasswordHandler(_hashProvider);
+            var hashProvider = (IHashProvider) new HashProvider();
+            _passwordHandler = new PasswordHandler(hashProvider);
             _jsonSerializationProvider = new JsonSerializationProvider();
+
+            _gameProviders = new IGameProvider[]
+            {
+                new SBOGameProvider(env)
+            };
         }
 
         async Task IDataInitializer.SetInitialDataAsync()
@@ -86,7 +87,7 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateBetLimitGroupsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateVipLevelAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateGameProvidersAsync, _logBuilder);
-            await LogSeedingTimeAsync(GenerateResellersAndLicenseesAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateResellersWithDescendantsAsync, _logBuilder);
             await LogSeedingTimeAsync(GeneratePlayersAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, _logBuilder);
@@ -94,7 +95,6 @@ namespace TGS.Core.DataServices.DataInitializers
             await LogSeedingTimeAsync(GenerateDepartmentsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateRolesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateUsersAsync, _logBuilder);
-
 
             timer.Stop();
 
@@ -236,17 +236,17 @@ namespace TGS.Core.DataServices.DataInitializers
                 new
                 {
                     Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
                 },
                 new
                 {
                     Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
                 },
                 new
                 {
                     Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN",
-                    CurrencyCode = "CNY", Type = PlayerType.TgsTestPlayer
+                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
                 },
                 new
                 {
@@ -260,7 +260,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 }
             };
 
-            players = tmpPlayer.Select(p =>
+            _players = tmpPlayer.Select(p =>
             {
                 var playerCode = PlayerCodeGenerator.NewId();
                 var vipId = _vipLevels[rnd.Next(0, 6)].Id;
@@ -292,15 +292,14 @@ namespace TGS.Core.DataServices.DataInitializers
                     var vipId = _vipLevels[rnd.Next(0, 6)].Id;
 
                     return CreatePlayer(playerCode, username, realName, salt, password, cultureCode, currencyCode,
-                        vipId,
-                        PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
+                        vipId, PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
                 }).ToArray();
 
-            players = players.Concat(randomPlayers).ToArray();
+            _players = _players.Concat(randomPlayers).ToArray();
 
-            await _repository.BulkInsertAsync(players);
-            await _repository.BulkInsertAsync(players.SelectMany(p => p.Wallets).ToArray());
-            await _repository.BulkInsertAsync(players.SelectMany(p => p.Banks).ToArray());
+            await _repository.BulkInsertAsync(_players);
+            await _repository.BulkInsertAsync(_players.SelectMany(p => p.Wallets).ToArray());
+            await _repository.BulkInsertAsync(_players.SelectMany(p => p.Banks).ToArray());
         }
 
         private static Player CreatePlayer(string playerCode, string username, string realName, byte[] salt,
@@ -337,7 +336,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 LastActiveOn = Now,
                 UpdatedOn = Now,
                 UpdatedByUsername = username,
-                LicenseeId = Resellers[0].Licensees[0].Id,
+                BrandId = Resellers[0].Licensees[0].Brands[0].Id,
                 Wallets = new[]
                 {
                     new Wallet
@@ -367,7 +366,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private async Task GenerateGameProvidersAsync()
         {
-            foreach (var gp in GameProviders)
+            foreach (var gp in _gameProviders)
             {
                 var gameProvider = CreateGameProvider(gp);
                 _gameProvidersCreated.Add(gp.Code, gameProvider);
@@ -381,14 +380,15 @@ namespace TGS.Core.DataServices.DataInitializers
             await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Games).ToArray());
         }
 
-        private async Task GenerateResellersAndLicenseesAsync()
+        private async Task GenerateResellersWithDescendantsAsync()
         {
-            var resellers = Resellers.Select(CreateResellerWithLicensee).ToArray();
-
             // resellers
+            var resellers = Resellers.Select(CreateResellerWithLicensees).ToArray();
+
             await _repository.BulkInsertAsync(resellers);
             await _repository.BulkInsertAsync(resellers.SelectMany(r => r.Currencies).ToArray());
             await _repository.BulkInsertAsync(resellers.SelectMany(r => r.Languages).ToArray());
+            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.GameProviders).ToArray());
 
             // licensees
             var licensees = resellers.SelectMany(r => r.Licensees).ToArray();
@@ -396,9 +396,16 @@ namespace TGS.Core.DataServices.DataInitializers
             await _repository.BulkInsertAsync(licensees);
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Currencies).ToArray());
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Languages).ToArray());
-            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviderConfigurations).ToArray());
             await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviders).ToArray());
-            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Games).ToArray());
+
+            // brands
+            var brands = licensees.SelectMany(l => l.Brands).ToArray();
+
+            await _repository.BulkInsertAsync(brands);
+            await _repository.BulkInsertAsync(brands.SelectMany(b => b.Currencies).ToArray());
+            await _repository.BulkInsertAsync(brands.SelectMany(b => b.Languages).ToArray());
+            await _repository.BulkInsertAsync(brands.SelectMany(b => b.GameProviders).ToArray());
+            await _repository.BulkInsertAsync(brands.SelectMany(b => b.Games).ToArray());
         }
 
         private Task GenerateLocalizedStringsAsync()
@@ -491,14 +498,19 @@ namespace TGS.Core.DataServices.DataInitializers
                 CreatedOn = Now,
                 UpdatedOn = Now,
                 CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername
+                UpdatedByUsername = AdminUsername,
+                AvailableCurrencies = g.AvailableCurrencies
             }).ToHashSet();
 
             return gp;
         }
 
-        private Reseller CreateResellerWithLicensee(IReseller reseller)
+        private Reseller CreateResellerWithLicensees(IReseller reseller)
         {
+            var gameProviders = reseller.GameProviders
+                .Select(code => _gameProvidersCreated[code])
+                .ToArray();
+
             return new Reseller
             {
                 Id = reseller.Id,
@@ -520,13 +532,19 @@ namespace TGS.Core.DataServices.DataInitializers
                     ResellerId = reseller.Id,
                     CultureCode = lang.Code
                 }).ToHashSet(),
-                Licensees = reseller.Licensees.Select(l => CreateLicensee(reseller, l)).ToHashSet()
+                Licensees = reseller.Licensees.Select(l => CreateLicenseeWithBrands(reseller, l)).ToHashSet(),
+                GameProviders = gameProviders.Select(gp => new ResellerGameProvider
+                {
+                    GameProviderId = gp.Id,
+                    ResellerId = reseller.Id
+                }).ToHashSet()
             };
         }
 
-        private Licensee CreateLicensee(IReseller reseller, ILicensee licensee)
+        private Licensee CreateLicenseeWithBrands(IReseller reseller, ILicensee licensee)
         {
-            var gameProviders = licensee.GameProviders
+            var gameProviderCodes = reseller.GameProviders.Intersect(licensee.GameProviders).ToArray();
+            var gameProviders = gameProviderCodes
                 .Select(code => _gameProvidersCreated[code])
                 .ToArray();
 
@@ -535,54 +553,101 @@ namespace TGS.Core.DataServices.DataInitializers
                 Id = licensee.Id,
                 Code = licensee.Code,
                 Name = licensee.Name,
+                OperationalEmail = licensee.OperationalEmail,
                 Status = Status.Active,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = Now,
                 UpdatedOn = Now,
                 ResellerId = reseller.Id,
-                TimeZoneId = licensee.TimeZoneId,
                 Description = string.Empty,
-                ClientId = licensee.ClientId,
-                SecretKey = licensee.SecretKey,
-                ApiKey = licensee.ApiKey,
                 Currencies = licensee.Currencies.Select(curr => new LicenseeCurrency
                 {
                     LicenseeId = licensee.Id,
-                    CurrencyCode = curr.Code,
-                    LicenseeCurrencyCode = curr.ExternalCode
+                    CurrencyCode = curr.Code
                 }).ToHashSet(),
                 Languages = licensee.Languages.Select(lang => new LicenseeLanguage
                 {
                     LicenseeId = licensee.Id,
-                    CultureCode = lang.Code,
-                    LicenseeCultureCode = lang.ExternalCode
+                    CultureCode = lang.Code
                 }).ToHashSet(),
                 GameProviders = gameProviders.Select(gp => new LicenseeGameProvider
                 {
                     GameProviderId = gp.Id,
                     LicenseeId = licensee.Id
                 }).ToHashSet(),
-                Games = gameProviders.SelectMany(gp => gp.Games).Select(g => new LicenseeGame
-                {
-                    LicenseeId = licensee.Id,
-                    GameId = g.Id
-                }).ToHashSet(),
-                GameProviderConfigurations = gameProviders.SelectMany(gp => gp.GameProviderConfigurations)
-                    .Where(gpc => gpc.IsDefault).Select(gpc => new LicenseeGameProviderConfiguration
-                    {
-                        Id = Guid.NewGuid(),
-                        LicenseeId = licensee.Id,
-                        GameProviderId = gpc.GameProviderId,
-                        GameProviderConfigurationId = gpc.Id,
-                        DefaultLanguageCode = "en-US",
-                        DesktopQueryString = string.Empty,
-                        MobileQueryString = string.Empty
-                    })
-                    .ToHashSet()
+                Brands = licensee.Brands.Select(b => CreateBrand(reseller, licensee, b)).ToHashSet()
             };
         }
 
+        private Brand CreateBrand(IReseller reseller, ILicensee licensee, IBrand brand)
+        {
+            var gameProviderCodes = reseller.GameProviders.Intersect(licensee.GameProviders)
+                .Intersect(brand.GameProviders).ToArray();
+
+            var gameProviders = gameProviderCodes
+                .Select(code => _gameProvidersCreated[code])
+                .ToArray();
+
+            return new Brand
+            {
+                Id = brand.Id,
+                Code = brand.Code,
+                Name = brand.Name,
+                OperationalEmail = brand.OperationalEmail,
+                Status = Status.Active,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                CreatedOn = Now,
+                UpdatedOn = Now,
+                LicenseeId = licensee.Id,
+                TimeZoneId = brand.TimeZoneId,
+                Description = string.Empty,
+                ClientId = brand.ClientId,
+                SecretKey = brand.SecretKey,
+                ApiKey = brand.ApiKey,
+                Currencies = brand.Currencies.Select(curr => new BrandCurrency
+                {
+                    BrandId = brand.Id,
+                    CurrencyCode = curr.Code,
+                    BrandCurrencyCode = curr.ExternalCode
+                }).ToHashSet(),
+                Languages = brand.Languages.Select(lang => new BrandLanguage
+                {
+                    BrandId = brand.Id,
+                    CultureCode = lang.Code,
+                    BrandCultureCode = lang.ExternalCode
+                }).ToHashSet(),
+                GameProviders = gameProviders.Select(gp => new BrandGameProvider
+                {
+                    GameProviderId = gp.Id,
+                    BrandId = brand.Id,
+                    GameProviderConfigurationId = gp.GameProviderConfigurations.Where(gpc => gpc.IsDefault)
+                        .Select(gpc => gpc.Id).FirstOrDefault(),
+                    DefaultLanguageCode = "en-US",
+                    DesktopQueryString = string.Empty,
+                    MobileQueryString = string.Empty
+                }).ToHashSet(),
+                Games = gameProviders.SelectMany(gp => gp.Games).Select((g, idx) => new BrandGame
+                {
+                    BrandId = brand.Id,
+                    GameId = g.Id,
+                    Status = GameStatus.Active,
+                    Tag = GetGameTag(idx)
+                }).ToHashSet()
+            };
+
+            static GameTag GetGameTag(int index)
+            {
+                return (index % 3) switch
+                {
+                    0 => GameTag.New,
+                    1 => GameTag.New | GameTag.Recommend,
+                    2 => GameTag.New | GameTag.Recommend | GameTag.Hot,
+                    _ => GameTag.None
+                };
+            }
+        }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
         {
@@ -645,6 +710,9 @@ namespace TGS.Core.DataServices.DataInitializers
                 Id = role.Id,
                 Name = role.Name,
                 DisplayName = role.Name,
+                ResellerId = role.ResellerId,
+                LicenseeId = role.LicenseeId,
+                BrandId = role.BrandId,
                 Description = role.Description,
                 Status = RoleStatus.Enabled,
                 CreatedOn = DateTimeOffset.Now,
@@ -664,6 +732,9 @@ INSERT INTO [dbo].[Roles]
     ([Id]
     ,[RoleType]
     ,[Name]
+    ,[ResellerId]
+    ,[LicenseeId]
+    ,[BrandId]
     ,[MenuSetting]
     ,[DisplayName]
     ,[Description]
@@ -676,6 +747,9 @@ VALUES
     (@id
     ,@roleType
     ,@name
+    ,@resellerId
+    ,@licenseeId
+    ,@brandId
     ,@menuSetting
     ,@displayName
     ,@description
@@ -692,6 +766,9 @@ VALUES
                     new SqlParameter {ParameterName = "@id", Value = role.Id, DbType = DbType.Guid},
                     new SqlParameter {ParameterName = "@roleType", Value = (int) role.RoleType, DbType = DbType.Int16},
                     new SqlParameter {ParameterName = "@name", Value = role.Name, DbType = DbType.String},
+                    new SqlParameter {ParameterName = "@resellerId", Value = role.ResellerId, DbType = DbType.Guid},
+                    new SqlParameter {ParameterName = "@licenseeId", Value = role.LicenseeId, DbType = DbType.Guid},
+                    new SqlParameter {ParameterName = "@brandId", Value = role.BrandId, DbType = DbType.Guid},
                     new SqlParameter {ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String},
                     new SqlParameter {ParameterName = "@displayName", Value = role.Name, DbType = DbType.String},
 
@@ -703,7 +780,7 @@ VALUES
                         {ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String}
                 };
 
-                await _repository.ExecuteSqlCommandAsync(command, CommandType.Text, parameters: args);
+                await _repository.ExecuteSqlCommandAsync(command, CommandType.Text, args);
             }
         }
 
@@ -717,7 +794,13 @@ VALUES
             var users = new List<User>
             {
                 CreateUser("admin.disabled", UserStatus.Disabled, Roles.Admin, Departments[MarketDepartment]),
-                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment])
+                CreateUser("admin.enabled", UserStatus.Enabled, Roles.Admin, Departments[MarketDepartment]),
+                CreateUser("reseller.enabled", UserStatus.Enabled, Roles.Reseller, Departments[MarketDepartment]),
+                CreateUser("reseller.disabled", UserStatus.Disabled, Roles.Reseller, Departments[MarketDepartment]),
+                CreateUser("licensee.enabled", UserStatus.Enabled, Roles.Licensee, Departments[MarketDepartment]),
+                CreateUser("licensee.disabled", UserStatus.Disabled, Roles.Licensee, Departments[MarketDepartment]),
+                CreateUser("brand.enabled", UserStatus.Enabled, Roles.Brand, Departments[MarketDepartment]),
+                CreateUser("brand.disabled", UserStatus.Disabled, Roles.Brand, Departments[MarketDepartment])
             };
 
             users.AddRange(usernames.Select(username =>
@@ -727,22 +810,22 @@ VALUES
         }
     }
 
-    public class Generator
+    internal class Generator
     {
-        private static readonly Random _random = new Random();
+        private static readonly Random Random = new Random();
 
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[_random.Next(s.Length)]).ToArray());
+                .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
 
         public static string RandomIntString(int length)
         {
             const string chars = "0123456789";
             return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[_random.Next(s.Length)]).ToArray());
+                .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
     }
 }
