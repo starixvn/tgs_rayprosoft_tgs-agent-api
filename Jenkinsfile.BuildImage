@@ -1,5 +1,5 @@
 pipeline {
-    agent { docker { image 'maven:3.3.3'}}
+    agent any
 	environment {
         registry = "https://registry.gitlab.com"
         registryCredential = 'gitlab-personal-access-token'
@@ -7,12 +7,6 @@ pipeline {
     }
 	
     stages {
-	    stage('log version info') {
-          steps {
-              sh 'mvn --verison'
-			  sh 'mvn clean install'
-           }
-        }
 	    stage('docker login') {
 			steps {
 				sh  "docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r"  
