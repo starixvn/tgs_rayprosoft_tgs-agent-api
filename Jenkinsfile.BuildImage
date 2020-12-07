@@ -26,6 +26,19 @@ pipeline {
            }
         }
 		
+		stage('Restore packages'){
+			steps{
+				sh "dotnet restore tgs.sln"
+				echo "restore tgs.sln"
+			  }
+		}
+		stage('Build') {
+			steps {
+				sh "dotnet build tgs.sln"
+				echo "build solution"
+			}
+		}
+		
 		stage ('Build docker image for backoffice.site') {
           steps {
                 script {
