@@ -44,8 +44,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     OperationalEmail = x.OperationalEmail,
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn
-                })
-                .AsNoTracking().CreatePagedResponseAsync(request);
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
@@ -56,7 +55,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                 x => x.Include(i => i.Currencies)
                     .Include(i => i.Languages)
                     .Include(i => i.GameProviders)
-                    .Where(ResellerId != null, r => r.Id == ResellerId), true);
+                    .Where(ResellerId != null, r => r.Id == ResellerId));
 
             if (reseller == null)
             {
@@ -102,6 +101,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         [Description("Create a Reseller")]
         public async Task<MessageResponse> CreateResellerAsync(CreateResellerRequest request)
         {
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
+            }
+
             await _service.CreateResellerAsync(request, Username);
 
             return CreateValidResponse<MessageResponse>();
@@ -116,6 +125,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
             if (reseller == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NotFound);
+            }
+
+            if (await _service.ExistsAsync(x => x.Id != id && x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Id != id && x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
             }
 
             await _service.UpdateResellerAsync(reseller, request, Username);

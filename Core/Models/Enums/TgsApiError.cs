@@ -29,5 +29,6 @@
         TestPlayerStakeAmountCapExceeded = 904,
         BrowserIncompatibility = 905,
         GameNotSupportTestPlayer = 906,
+        ProviderApiError = 907
     }
 }

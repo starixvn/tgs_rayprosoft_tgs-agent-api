@@ -5,7 +5,7 @@ namespace TGS.Core.Infrastructures.ApiClient
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of Infrastruces.ApiClient, need to add following dependencies beforehand:
+        /// Dependency Injection of Infrastructures.ApiClient, need to add following dependencies beforehand:
         /// 1. AddJson() in Infrastructures.Json ( if BaseApiClient is used )
         /// 2. AddTgsLog() in Infrastructures.Log
         /// </summary>

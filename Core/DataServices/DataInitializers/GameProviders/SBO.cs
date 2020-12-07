@@ -15,36 +15,33 @@ namespace TGS.Core.DataServices.DataInitializers
     {
         internal record SBOGameProvider : IGameProvider
         {
-            private static readonly string EndpointPath = "/{CULTURE}/home";
-            private static readonly string QueryString = "?ext_token={TOKEN}";
-
-            private readonly IGame[] _games;
             private readonly IWebHostEnvironment _env;
+            private readonly IGame[] _games;
 
             public SBOGameProvider(IWebHostEnvironment env)
             {
                 _games = LoadGamesFromCsv(GameProviderConst.SBOBET)
-                    .Select(g => 
+                    .Select(g =>
                     {
                         if (g.EndpointPath.IsNotNullOrEmpty())
                             return g;
 
-                        return (Game)g with { EndpointPath = $"{EndpointPath}{QueryString}" };
+                        return (Game) g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 
                 _env = env;
             }
 
-            Guid IGameProvider.Id => new ("8D53C1F2-A718-4204-803F-5B33865175C5");
+            Guid IGameProvider.Id => new("8D53C1F2-A718-4204-803F-5B33865175C5");
 
             string IGameProvider.Code => GameProviderConst.SBOBET;
 
             string IGameProvider.Name => "SBOBET";
 
-            IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new[] 
+            IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new[]
             {
-                new SBOGameProviderConfiguration() 
+                new SBOGameProviderConfiguration()
             };
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
@@ -59,21 +56,20 @@ namespace TGS.Core.DataServices.DataInitializers
 
             IGame[] IGameProvider.Games => _games;
 
-            bool IGameProvider.AutoClosedRound => true;
-
-            bool IGameProvider.SupportTestPlayer => true;
+            bool IGameProvider.AllowKickPlayer => true;
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
                 new SBOConfiguration
-                { 
+                {
                     ServiceEndpointUrl = _env.IsDocker() ? new Uri("http://game-sbo") : new("https://localhost:62331"),
-                    CompanyKey = "difjwifjwejfdisdfkidsjfiojwiowej213kiorfj23o5sdfkj9"
+                    CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
+                    ApiUrl = new("https://ex-api-demo-yy.568win.com")
                 };
         }
 
         internal record SBOGameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _endpoint = "https://gserver-ugs-dev.dopamine-gaming.com/ugs";
+            private static readonly string _endpoint = string.Empty;
 
             Guid IGameProviderConfiguration.Id => new Guid("CC8AA6E0-5A7F-44BC-B294-5097C3518C37");
 
@@ -86,8 +82,6 @@ namespace TGS.Core.DataServices.DataInitializers
             string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
 
             string IGameProviderConfiguration.MobileEndpoint => _endpoint;
-
-            string IGameProviderConfiguration.ConfigurationData => string.Empty;
         }
     }
 }

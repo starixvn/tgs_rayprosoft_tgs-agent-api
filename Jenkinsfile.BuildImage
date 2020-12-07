@@ -32,20 +32,22 @@ pipeline {
            }
         }
 		
-		stage ('Build docker image') {
-            steps {
+		stage ('Build docker image for backoffice.site') {
+          steps {
                 script {
-                dockerImage = docker.build registry
+					sh "cd Web\backoffice"
+					sh "docker build -f Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0 ."
+					sh "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0"
                 }
             }
         }
        
-		stage('Upload Image') {
-		 steps{   
+		stage ('Build docker image for backoffice.api'){
+		   steps{   
 			 script {
-				docker.withRegistry( '', registryCredential ) {
-				dockerImage.push()
-				}
+				sh "cd ../.."
+				sh "docker build -f Apis/BackendOffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:0.2.0 ."
+				sh "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:0.2.0"
 			}
 		  }
 		}

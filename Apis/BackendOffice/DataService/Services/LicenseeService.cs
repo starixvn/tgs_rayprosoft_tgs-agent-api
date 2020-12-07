@@ -20,6 +20,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task CreateLicenseeAsync(CreateLicenseeRequest request, string username);
         Task UpdateLicenseeAsync(Licensee licensee, UpdateLicenseeRequest request, string username);
         Task ChangeStatusAsync(Licensee licensee, Status status, string username);
+        Task<bool> ExistsAsync(Expression<Func<Licensee, bool>> predicate);
     }
 
     public class LicenseeService : ILicenseeService
@@ -79,6 +80,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         IQueryable<Licensee> ILicenseeService.GetLicenseesAsync(bool tracking)
         {
             return tracking ? _repository.Licensees : _repository.Licensees.AsNoTracking();
+        }
+
+        Task<bool> ILicenseeService.ExistsAsync(Expression<Func<Licensee, bool>> predicate)
+        {
+            return _repository.Licensees.AnyAsync(predicate);
         }
 
         Task ILicenseeService.UpdateLicenseeAsync(Licensee licensee, UpdateLicenseeRequest request, string username)
