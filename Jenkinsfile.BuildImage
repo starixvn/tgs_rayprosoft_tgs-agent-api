@@ -31,8 +31,8 @@ pipeline {
                 script {
 				    sh "pwd"
 					sh "ls -l"
-					sh "docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0 ."
-					sh "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0"
+					sh "sudo docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0 ."
+					sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0"
                 }
             }
         }
@@ -41,8 +41,8 @@ pipeline {
 		   steps{   
 			 script {
 				sh "cd ../.."
-				sh "docker build -f Apis/BackendOffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:0.2.0 ."
-				sh "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:0.2.0"
+				sh "sudo docker build -f Apis/BackendOffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:0.2.0 ."
+				sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:0.2.0"
 			}
 		  }
 		}
