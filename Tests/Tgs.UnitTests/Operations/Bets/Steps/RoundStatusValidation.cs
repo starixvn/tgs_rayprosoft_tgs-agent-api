@@ -9,7 +9,7 @@ using TGS.Services.GameOperations.Models.Data;
 using TGS.Tests.TestsCommon;
 using TGS.Tests.TestsCommon.Extensions;
 
-namespace Tgs.UnitTests.Operations.Bets.Steps
+namespace TGS.UnitTests.Operations.Bets.Steps
 {
     [Binding, Scope(Tag = "RoundStatusValidation")]
     public sealed class RoundStatusValidation : SpecFlowBase

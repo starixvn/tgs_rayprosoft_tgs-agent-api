@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201203052643_Initial")]
+    [Migration("20201204100131_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -438,6 +438,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AllowKickPlayer")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("AutoCloseRound")
                         .HasColumnType("bit");
 
@@ -460,10 +463,14 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlaceBetTimeout")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
 
                     b.Property<short>("SettleBetTimeout")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");

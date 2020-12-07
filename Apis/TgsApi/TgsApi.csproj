@@ -16,6 +16,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\GameLauncher\**" />
+    <Content Remove="Models\GameLauncher\**" />
+    <EmbeddedResource Remove="Models\GameLauncher\**" />
+    <None Remove="Models\GameLauncher\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

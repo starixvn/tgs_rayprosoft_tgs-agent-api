@@ -7,10 +7,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Models;
+using TGS.Core.Infrastructures.Extensions;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 {
@@ -26,13 +29,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                () => services.AddSingleton<SBOBETErrorMapper>(),
-                provider => key =>
+                new[] {typeof(SBOBETErrorMapper)},
+                (provider, key) =>
                 {
                     return key switch
                     {
-                        Consts.GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
-                        _                          => provider.GetRequiredService<TgsErrorMapper>()
+                        GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
+                        _                   => provider.GetRequiredService<TgsErrorMapper>()
                     };
                 });
 
@@ -41,6 +44,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 
             services.AddScoped<ISBOBETServices, SBOBETServices>();
             services.AddSingleton<ISBOBETGameControllerMapper, SBOBETGameControllerMapper>();
+
+            services.AddHttpClient<ISBOApiClient, SBOApiClient>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SBOBETGameInitializer)}, (provider, _) =>
+                provider.GetRequiredService<SBOBETGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(SBOBETGameHistory)}, (provider, _) =>
+                provider.GetRequiredService<SBOBETGameHistory>());
+
+            services.AddScopedWithResolver<IPlayerAction>(new[] {typeof(SBOBETPlayerAction)}, (provider, _) =>
+                provider.GetRequiredService<SBOBETPlayerAction>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

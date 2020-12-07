@@ -11,7 +11,7 @@ using TGS.Tests.TestsCommon.Extensions;
 
 using Calculators = TGS.Services.GameOperations.Calculators;
 
-namespace Tgs.UnitTests.Operations.Bets.Steps
+namespace TGS.UnitTests.Operations.Bets.Steps
 {
     [Binding, Scope(Tag = "BetValuesCalculator")]
     public sealed class BetValuesCalculator : SpecFlowBase
