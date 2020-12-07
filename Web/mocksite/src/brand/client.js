@@ -1,5 +1,22 @@
 import useSWR, { cache } from "swr"
 
+const toDataOrError = (response) => {
+  if (!response.ok) {
+    return response
+      .json()
+      .catch((error) => {
+        return Promise.reject({
+          title: response.statusText
+        })
+      })
+      .then((data) => {
+        return Promise.reject(data)
+      })
+  }
+
+  return response.json()
+}
+
 const TGS = "TGS"
 
 export const useBrandToken = ({ brandCode, currency }) => {
@@ -30,7 +47,7 @@ export const useBrandToken = ({ brandCode, currency }) => {
           return result
         }),
     {
-      revalidateOnMount: cached?.token ? false : true
+      initialData: keys && cached?.token ? cached : undefined
     }
   )
 
@@ -55,6 +72,9 @@ const playerTokenCacheKey = ({ brandCode, currency, username }) =>
 const deletePlayerTokenCache = ({ brandCode, currency, username }) =>
   cache.delete(playerTokenCacheKey({ brandCode, currency, username }))
 
+const playerTokenFormDataCacheKey = ({ brandCode, currency, username }) =>
+  `playerTokenFormData:${brandCode}:${currency}:${username}`
+
 export const usePlayerToken = (
   { brandCode, currency, username } = {},
   data
@@ -64,22 +84,30 @@ export const usePlayerToken = (
     currency
   })
 
-  data = data ?? {
-    username,
-    password: DefaultPassword,
-    bypassCaptcha: true,
-    captcha: "captcha",
-    answer: "answer"
-  }
+  let formDataCacheKey = playerTokenFormDataCacheKey({
+    brandCode,
+    currency,
+    username
+  })
+  data = data ??
+    cache.get(formDataCacheKey) ?? {
+      username,
+      password: DefaultPassword,
+      bypassCaptcha: true,
+      captcha: "captcha",
+      answer: "answer"
+    }
+
   let body =
     data && data?.username && data?.password ? JSON.stringify(data) : undefined
   let keys =
     brandCode && brandToken && username && body
       ? [`/api/player/login`, brandCode, username, body]
       : undefined
-  const ResultCacheKey = playerTokenCacheKey({ brandCode, currency, username })
 
+  const ResultCacheKey = playerTokenCacheKey({ brandCode, currency, username })
   let cached = cache.get(ResultCacheKey)
+
   let { data: result, mutate, ...rest } = useSWR(
     keys,
     (url, brandCode, username, body) => {
@@ -91,14 +119,23 @@ export const usePlayerToken = (
         },
         body
       })
-        .then((response) => response.json())
+        .then(toDataOrError)
         .then((result) => {
+          let autoLoginFormData = JSON.parse(body)
+          cache.set(formDataCacheKey, {
+            username: autoLoginFormData.username,
+            password: autoLoginFormData.password,
+            bypassCaptcha: true,
+            captcha: "captcha",
+            answer: "answer",
+            formDataFromCache: true
+          })
           cache.set(ResultCacheKey, result)
           return result
         })
     },
     {
-      revalidateOnMount: keys && cached?.token ? false : true
+      initialData: keys && cached?.token ? cached : undefined
     }
   )
 
