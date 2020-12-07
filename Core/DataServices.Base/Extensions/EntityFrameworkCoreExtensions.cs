@@ -20,7 +20,7 @@ namespace TGS.Core.DataServices.Base.Extensions
             }
 
             using var reader = new StreamReader(stream);
-            string sql = reader.ReadToEnd();
+            var sql = reader.ReadToEnd();
             migrationBuilder.Sql(sql);
         }
     }

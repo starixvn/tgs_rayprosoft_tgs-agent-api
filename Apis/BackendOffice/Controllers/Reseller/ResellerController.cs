@@ -29,9 +29,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         [Description("Get resellers: 公司列表")]
         public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
         {
-            return _service.GetResellersAsync().Where(request.Keyword,
-                    x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
-                         x.Description.Contains(request.Keyword) || x.OperationalEmail.Contains(request.Keyword))
+            return _service.GetResellersAsync()
+                .Where(ResellerId != null, x => x.Id == ResellerId)
+                .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
+                                             x.Description.Contains(request.Keyword) ||
+                                             x.OperationalEmail.Contains(request.Keyword))
                 .Select(x => new ResellerModel
                 {
                     Id = x.Id,
@@ -42,8 +44,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     OperationalEmail = x.OperationalEmail,
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn
-                })
-                .AsNoTracking().CreatePagedResponseAsync(request);
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
@@ -53,7 +54,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
             var reseller = await _service.GetResellerAsync(x => x.Id == id,
                 x => x.Include(i => i.Currencies)
                     .Include(i => i.Languages)
-                    .Include(i => i.GameProviders), true);
+                    .Include(i => i.GameProviders)
+                    .Where(ResellerId != null, r => r.Id == ResellerId));
 
             if (reseller == null)
             {
@@ -99,6 +101,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         [Description("Create a Reseller")]
         public async Task<MessageResponse> CreateResellerAsync(CreateResellerRequest request)
         {
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
+            }
+
             await _service.CreateResellerAsync(request, Username);
 
             return CreateValidResponse<MessageResponse>();
@@ -113,6 +125,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
             if (reseller == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NotFound);
+            }
+
+            if (await _service.ExistsAsync(x => x.Id != id && x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Id != id && x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
             }
 
             await _service.UpdateResellerAsync(reseller, request, Username);

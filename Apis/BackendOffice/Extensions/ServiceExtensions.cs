@@ -32,7 +32,6 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Application.Extensions;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Validation.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -57,7 +56,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
             services.AddBackOfficeApplicationServices();
-            services.AddBackOfficeApplicationValidatorServices();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();

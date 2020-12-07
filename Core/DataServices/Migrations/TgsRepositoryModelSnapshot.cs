@@ -436,6 +436,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AllowKickPlayer")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("AutoCloseRound")
                         .HasColumnType("bit");
 
@@ -458,10 +461,14 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlaceBetTimeout")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
 
                     b.Property<short>("SettleBetTimeout")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
@@ -1440,6 +1447,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -1453,6 +1463,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid?>("LicenseeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("MenuSetting")
                         .IsRequired()
                         .HasColumnType("nvarchar(4000)");
@@ -1460,6 +1473,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("ResellerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("RoleType")
                         .HasColumnType("tinyint");
@@ -1597,9 +1613,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<DateTimeOffset?>("LastLoginTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid?>("LicenseeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(30)");
@@ -1608,14 +1621,8 @@ namespace TGS.Core.DataServices.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(128)");
 
-                    b.Property<Guid?>("ResellerId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("RoleType")
-                        .HasColumnType("tinyint");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()

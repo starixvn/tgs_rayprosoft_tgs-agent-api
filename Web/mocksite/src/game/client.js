@@ -6,8 +6,14 @@ export const useGameList = (
   { brandCode, username, currency },
   { gameProviderCode, platform, language }
 ) => {
-  let { token: brandToken } = useBrandToken({ brandCode, currency })
-  let { token: playerToken } = usePlayerToken({ brandCode, username, currency })
+  let {
+    token: brandToken,
+    deleteCache: deleteBrandTokenCache
+  } = useBrandToken({ brandCode, currency })
+  let {
+    token: playerToken,
+    deleteCache: deletePlayerTokenCache
+  } = usePlayerToken({ brandCode, username, currency })
 
   let keys =
     brandToken &&
@@ -51,7 +57,32 @@ export const useGameList = (
           language,
           currency
         })
-      }).then((response) => response.json())
+      })
+        .then((response) => {
+          if (!response?.ok) {
+            //TODO
+            // if (response.statusText === "Unauthorized") {
+            // }
+
+            return response
+              .json()
+              .catch((error) => {
+                return Promise.reject({
+                  title: response.statusText,
+                  error
+                })
+              })
+              .then((data) => Promise.reject(data))
+          }
+
+          return response.json()
+        })
+        .catch((error) => {
+          deletePlayerTokenCache()
+          deleteBrandTokenCache()
+          console.error(error)
+          return error
+        })
     }
   )
 

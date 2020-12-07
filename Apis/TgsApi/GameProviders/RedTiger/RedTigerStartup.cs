@@ -7,34 +7,33 @@ using TGS.Apis.TgsApi.GameProviders.RedTiger.Filters;
 using TGS.Apis.TgsApi.GameProviders.RedTiger.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.RedTiger.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Models;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.RedTiger
 {
     public sealed class RedTigerStartup : BaseStartup
     {
-        protected override string LogPrefix => "redtiger";
-
         public RedTigerStartup(IConfiguration configuration, IWebHostEnvironment env) :
             base(configuration, env)
         {
-            
         }
 
+        protected override string LogPrefix => "redtiger";
+
         protected override void AddCustomDependencyServices(IServiceCollection services)
-        {            
+        {
             services.AddErrorMappers(
-                addCustom: () => services.AddSingleton<RedTigerErrorMapper>(), 
-                get: provider => key => 
+                new[] {typeof(RedTigerErrorMapper)},
+                (provider, key) =>
                 {
-                    return key switch    
+                    return key switch
                     {
-                        Consts.GameProvider.RedTiger => provider.GetRequiredService<RedTigerErrorMapper>(),
-                        _ => provider.GetRequiredService<TgsErrorMapper>()                            
-                    }; 
+                        GameProvider.RedTiger => provider.GetRequiredService<RedTigerErrorMapper>(),
+                        _                     => provider.GetRequiredService<TgsErrorMapper>()
+                    };
                 });
 
-            services.AddScoped<HandleRedTigerErrorFilter>();             
+            services.AddScoped<HandleRedTigerErrorFilter>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

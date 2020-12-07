@@ -10,7 +10,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
 using TGS.Tests.TestsCommon;
 
-namespace Tgs.UnitTests.Operations
+namespace TGS.UnitTests.Operations
 {
     [TestFixture]
     [Category(Named.Unit)]

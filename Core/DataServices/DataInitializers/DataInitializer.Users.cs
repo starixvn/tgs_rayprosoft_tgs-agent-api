@@ -26,13 +26,11 @@ namespace TGS.Core.DataServices.DataInitializers
             {
                 Id = userId.Value,
                 RoleId = roleId,
-                RoleType = roleType,
                 DepartmentId = departmentId,
                 Username = userName,
                 Password = passwordHash,
                 Salt = salt,
                 Name = userName,
-                ResellerId = resellerId,
                 Status = status,
                 TimeZone = DefaultTimeZone,
                 CreatedByUsername = AdminUsername,

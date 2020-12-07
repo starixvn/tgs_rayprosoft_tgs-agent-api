@@ -26,8 +26,9 @@ namespace TGS.Core.DataServices.DataInitializers
             ICurrency[] Currencies { get; }
             ILanguage[] Languages { get; }
             IGame[] Games { get; }
-            bool AutoClosedRound { get; }
-            bool SupportTestPlayer { get; }
+            bool AutoClosedRound => true;
+            bool SupportTestPlayer => true;
+            bool AllowKickPlayer => false;
             PluggableConfigurationBase GetConfiguration();
         }
 
@@ -39,7 +40,7 @@ namespace TGS.Core.DataServices.DataInitializers
             string SecretKey { get; }
             string DesktopEndpoint { get; }
             string MobileEndpoint { get; }
-            string ConfigurationData { get; }
+            string ConfigurationData => string.Empty;
         }
 
         internal interface IGame

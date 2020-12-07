@@ -18,7 +18,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
     {
         private readonly ILicenseeService _service;
 
-        public LicenseeController(ILicenseeService service, IHttpContextAccessor httpContextAccessor) : base(
+        public LicenseeController(ILicenseeService service,
+            IHttpContextAccessor httpContextAccessor) : base(
             httpContextAccessor)
         {
             _service = service;
@@ -28,9 +29,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
         [Description("Get licensees: 營運商列表")]
         public Task<PagedResponse<LicenseeModel>> GetLicenseesAsync([FromQuery] GetLicenseesRequest request)
         {
-            return _service.GetLicenseesAsync().Where(request.Keyword,
-                    x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
-                         x.Description.Contains(request.Keyword) || x.OperationalEmail.Contains(request.Keyword))
+            return _service.GetLicenseesAsync()
+                .Where(ResellerId != null, x => x.ResellerId == ResellerId)
+                .Where(LicenseeId != null, x => x.Id == LicenseeId)
+                .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
+                                             x.Description.Contains(request.Keyword) ||
+                                             x.OperationalEmail.Contains(request.Keyword))
                 .Select(x => new LicenseeModel
                 {
                     Id = x.Id,
@@ -41,8 +45,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                     OperationalEmail = x.OperationalEmail,
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn
-                })
-                .AsNoTracking().CreatePagedResponseAsync(request);
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
@@ -52,7 +55,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
             var licensee = await _service.GetLicenseeAsync(x => x.Id == id,
                 x => x.Include(i => i.Currencies)
                     .Include(i => i.Languages)
-                    .Include(i => i.GameProviders), true);
+                    .Include(i => i.GameProviders)
+                    .Where(ResellerId != null, x => x.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, x => x.Id == LicenseeId), true);
 
             if (licensee == null)
             {
@@ -98,6 +103,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
         [Description("Create a Licensee")]
         public async Task<MessageResponse> CreateLicenseeAsync(CreateLicenseeRequest request)
         {
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.CodeExists);
+            }
+
             await _service.CreateLicenseeAsync(request, Username);
 
             return CreateValidResponse<MessageResponse>();
@@ -112,6 +127,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
             if (licensee == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NotFound);
+            }
+
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.CodeExists);
             }
 
             await _service.UpdateLicenseeAsync(licensee, request, Username);
