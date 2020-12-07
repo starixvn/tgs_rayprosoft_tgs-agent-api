@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.ApiClient
@@ -17,6 +18,9 @@ namespace TGS.Core.Infrastructures.ApiClient
 
     public abstract class BaseApiClient : IApiClient
     {
+        private const char Slash = '/';
+        private static readonly char[] UrlTrimChars = {Slash, ' '};
+
         private readonly HttpClient _client;
 
         protected IApiClientLogger Logger;
@@ -32,12 +36,10 @@ namespace TGS.Core.Infrastructures.ApiClient
             _client = client;
         }
 
-        protected Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
-        {
-            return Logger == null ?
+        protected Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) =>
+            Logger == null ?
                 SendWithTimeoutAsync(request) :
                 SendAndLogAsync(request);
-        }
 
         protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(
             HttpMethod method, string path, TRequest request,
@@ -55,9 +57,13 @@ namespace TGS.Core.Infrastructures.ApiClient
             IReadOnlyDictionary<string, string> headers = null,
             IReadOnlyDictionary<string, string> contentHeaders = null)
         {
-            _client.BaseAddress = apiUrl;
+            var uriString = apiUrl.AbsoluteUri.Trim(UrlTrimChars);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                uriString += $"{Slash}{path.TrimStart(UrlTrimChars)}";
+            }
 
-            var requestMessage = CreateHttpRequestMessage(path, method);
+            var requestMessage = CreateHttpRequestMessage(uriString, method);
             var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
             var response = await SendAsync(httpRequestMessage);
             return await ReadJsonContentAsync<TResponse>(response.Content);
@@ -114,22 +120,24 @@ namespace TGS.Core.Infrastructures.ApiClient
                     Content = new StringContent($"Internal TGS exception{Environment.NewLine}{Environment.NewLine}{ex}"),
                     RequestMessage = request
                 };
+
                 await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, prefix);
 
                 throw;
             }
         }
 
-        private async Task<HttpResponseMessage> SendWithTimeoutAsync(HttpRequestMessage request)
+        private Task<HttpResponseMessage> SendWithTimeoutAsync(HttpRequestMessage request)
         {
             using var cts = new CancellationTokenSource(Timeout);
-            return await _client.SendAsync(request, cts.Token);
+            return _client.SendAsync(request, cts.Token);
         }
 
         private void PrepareJsonRequest(HttpRequestMessage request, object content)
         {
             request.Headers.Remove("Accept");
             request.Headers.Add("Accept", "application/json");
+
             var method = request.Method;
             if (HttpMethod.Post == method || HttpMethod.Put == method || HttpMethod.Delete == method)
             {
@@ -177,10 +185,8 @@ namespace TGS.Core.Infrastructures.ApiClient
             }
         }
 
-        private static HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method)
-        {
-            return new HttpRequestMessage(method, path);
-        }
+        private static HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method) => 
+            new(method, path);
 
         private async Task<T> ReadJsonContentAsync<T>(HttpContent content)
         {

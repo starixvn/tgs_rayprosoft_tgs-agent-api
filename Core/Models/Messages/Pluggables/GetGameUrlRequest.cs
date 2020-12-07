@@ -1,5 +1,8 @@
-﻿using System.Text.Json.Serialization;
+﻿// ReSharper disable IdentifierTypo
+
+using System.Text.Json.Serialization;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Tokens;
 
 namespace TGS.Core.Models.Messages.Pluggables
 {
@@ -13,5 +16,11 @@ namespace TGS.Core.Models.Messages.Pluggables
 
         [JsonPropertyName("player")]
         public CachedPlayer Player { get; init; }
+
+        [JsonPropertyName("token")]
+        public PlayerTokenData Token { get; init; }
+
+        [JsonPropertyName("language")]
+        public string LanguageCode { get; init; }
     }
 }

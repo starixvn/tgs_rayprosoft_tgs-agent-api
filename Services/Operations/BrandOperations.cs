@@ -24,6 +24,8 @@ namespace TGS.Services.Operations
 
         Task<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
 
+        Task<string> GetBrandGameProviderConfigurationDefaultLanguageAsync(Guid brandId, Guid gameProviderId);
+
         Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, PlatformType platformType);
 
         Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, Guid gameProviderId,
@@ -104,6 +106,13 @@ namespace TGS.Services.Operations
             return bgpc.GameProviderConfigurationId;
         }
 
+        async Task<string> IBrandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(Guid brandId,
+            Guid gameProviderId)
+        {
+            var bgpc = await _interface.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+            return bgpc.DefaultLanguageCode;
+        }
+
         async Task<CachedBrandGameProviderConfiguration> IBrandOperations.
             GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
         {
@@ -120,12 +129,12 @@ namespace TGS.Services.Operations
                     $"BrandGameProviderConfiguration doesn't exist with brandId: {brandId} and gameProviderId: {gameProviderId}");
             }
 
-            bgpc = new CachedBrandGameProviderConfiguration
+            bgpc = new()
             {
                 GameProviderId = gameProviderId,
                 GameProviderConfigurationId = r.GameProviderConfigurationId,
                 DefaultLanguageCode = r.DefaultLanguageCode,
-                QueryStrings = new QueryString
+                QueryStrings = new()
                 {
                     Desktop = r.DesktopQueryString,
                     Mobile = r.MobileQueryString

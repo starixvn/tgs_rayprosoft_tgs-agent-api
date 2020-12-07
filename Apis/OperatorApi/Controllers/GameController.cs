@@ -165,6 +165,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(gameProviderCode);
             var r = await _pluggableApiClient.GetGameUrlAsync(serviceUrl, new()
             {
+                Token = playerTokenData,
                 Player = cachedPlayer,
                 GameProvider = gameProvider,
                 Game = game

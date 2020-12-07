@@ -1,5 +1,4 @@
 ﻿using System;
-using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
@@ -12,9 +11,20 @@ namespace TGS.Core.DataServices.DataInitializers
             string Name { get; }
             string OperationalEmail { get; }
             ILicensee[] Licensees { get; }           
-            ICurrency[] Currencies { get; }
-            ILanguage[] Languages { get; }
-            string[] GameProviders { get; }
+            ICurrency[] Currencies => new ICurrency[]
+            {
+                new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
+                new INRCurrency(), new VNDCurrency(), new VND1000Currency(),
+                new THBCurrency()
+            };
+
+            ILanguage[] Languages => new ILanguage[]
+            {
+                new CNLanguage(), new USLanguage(), new IDLanguage(),
+                new VNLanguage(), new THLanguage()
+            };
+
+            string[] GameProviders => Array.Empty<string>();
         }
 
         internal record TgsReseller : IReseller
@@ -30,25 +40,6 @@ namespace TGS.Core.DataServices.DataInitializers
             ILicensee[] IReseller.Licensees => new ILicensee[]
             {
                 new TgsLicensee()
-            };
-
-            ICurrency[] IReseller.Currencies => new ICurrency[]
-            {
-                new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
-                new INRCurrency(), new VNDCurrency(), new VND1000Currency(),
-                new THBCurrency()
-            };
-
-            ILanguage[] IReseller.Languages => new ILanguage[]
-            {
-                new CNLanguage(), new USLanguage(), new IDLanguage(),
-                new VNLanguage(), new THLanguage()
-            };
-
-            string[] IReseller.GameProviders => new[]
-            {
-                //Consts.GameProvider.RedTiger,
-                Consts.GameProvider.SBOBET
             };
         }
     }

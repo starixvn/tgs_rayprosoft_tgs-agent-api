@@ -9,6 +9,7 @@ using Microsoft.FeatureManagement;
 using NLog;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
+using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -18,7 +19,6 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models;
 using TGS.Services.GameOperations.Extensions;
 using TGS.Services.Operations.Extensions;
 
@@ -53,6 +53,7 @@ namespace TGS.Apis.TgsApi.Commons
                     .AddSecurity()
                     .AddOperations()
                     .AddTimeZone()
+                    .AddApiClient()
                     .AddGameOperations();
 
             services.AddHttpContextAccessor();
@@ -62,12 +63,7 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddFeatureManagement();
 
-            var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
-
-            services.AddControllers(options =>
-            {
-                AddCustomFilters(options);
-            })
+            services.AddControllers(AddCustomFilters)
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>

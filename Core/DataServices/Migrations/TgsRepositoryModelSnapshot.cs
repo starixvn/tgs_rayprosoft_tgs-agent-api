@@ -436,6 +436,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AllowKickPlayer")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("AutoCloseRound")
                         .HasColumnType("bit");
 
@@ -458,10 +461,14 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<short>("PlaceBetTimeout")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
 
                     b.Property<short>("SettleBetTimeout")
-                        .HasColumnType("smallint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0);
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
