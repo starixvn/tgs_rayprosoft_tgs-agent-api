@@ -42,8 +42,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                     OperationalEmail = x.OperationalEmail,
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn
-                })
-                .AsNoTracking().CreatePagedResponseAsync(request);
+                }).CreatePagedResponseAsync(request);
         }
 
         [HttpGet("{id}")]
@@ -101,6 +100,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
         [Description("Create a Licensee")]
         public async Task<MessageResponse> CreateLicenseeAsync(CreateLicenseeRequest request)
         {
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.CodeExists);
+            }
+
             await _service.CreateLicenseeAsync(request, Username);
 
             return CreateValidResponse<MessageResponse>();
@@ -115,6 +124,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
             if (licensee == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NotFound);
+            }
+
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NameExists);
+            }
+
+            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Licensee.CodeExists);
             }
 
             await _service.UpdateLicenseeAsync(licensee, request, Username);

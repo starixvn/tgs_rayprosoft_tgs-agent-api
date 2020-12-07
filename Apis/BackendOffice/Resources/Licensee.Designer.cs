@@ -61,6 +61,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Code exists already..
+        /// </summary>
+        public static string CodeExists {
+            get {
+                return ResourceManager.GetString("CodeExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Code is required..
         /// </summary>
         public static string CodeRequired {
@@ -93,6 +102,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         public static string GameProviderRequired {
             get {
                 return ResourceManager.GetString("GameProviderRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name exists already..
+        /// </summary>
+        public static string NameExists {
+            get {
+                return ResourceManager.GetString("NameExists", resourceCulture);
             }
         }
         

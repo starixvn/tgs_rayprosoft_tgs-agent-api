@@ -10,11 +10,11 @@ using TGS.Services.BackOffice.Application.Resources;
 
 namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
 {
-    public class GetAllCarsQueryHandler : Handler<GetBrandRequest, GetBrandResponse>
+    public class GetBrandQueryHandler : Handler<GetBrandRequest, GetBrandResponse>
     {
         private readonly IBrandService _service;
 
-        public GetAllCarsQueryHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
+        public GetBrandQueryHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
         }

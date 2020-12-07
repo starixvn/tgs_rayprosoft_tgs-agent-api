@@ -20,6 +20,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task CreateResellerAsync(CreateResellerRequest request, string username);
         Task UpdateResellerAsync(Reseller reseller, UpdateResellerRequest request, string username);
         Task ChangeStatusAsync(Reseller reseller, Status status, string username);
+        Task<bool> ExistsAsync(Expression<Func<Reseller, bool>> predicate);
     }
 
     public class ResellerService : IResellerService
@@ -102,6 +103,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository.Entry(reseller).State = EntityState.Modified;
 
             return _repository.SaveChangesAsync();
+        }
+
+        Task<bool> IResellerService.ExistsAsync(Expression<Func<Reseller, bool>> predicate)
+        {
+            return _repository.Resellers.AnyAsync(predicate);
         }
 
         private HashSet<ResellerLanguage> GenerateResellerLanguages(Reseller reseller, ResellerRequest request)

@@ -12,7 +12,15 @@ import {
   Group,
   Card
 } from "bumbag"
-import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom"
+import {
+  Switch,
+  Route,
+  Link,
+  useParams,
+  useRouteMatch,
+  useLocation,
+  useHistory
+} from "react-router-dom"
 import {
   State,
   useCurrency,
@@ -27,6 +35,7 @@ import PlatformDropdownMenu from "../../platform/DropdownMenu"
 import LangDropdownMenu from "../../language/DropdownMenu"
 import { GameProviderDropdownMenu } from "../../game/provider/DropdownMenu"
 import { GameList } from "../../game/List"
+import { useLogout, usePlayerToken } from "../client"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
   return (
@@ -42,11 +51,36 @@ const Body = ({ brandToken }) => {
   let platform = usePlatform()
   let language = useLang()
 
+  let { token: playerToken } = usePlayerToken({ brandCode, currency, username })
   let [gameProviderCode, setGameProviderCode] = useState()
+
+  let [token, setLogoutToken] = useState()
+  let { result, error, isLoading, ...rest } = useLogout(
+    { brandCode, currency, username },
+    token
+  )
+  let history = useHistory()
+  useEffect(() => {
+    if (result) {
+      history.push(`/${brandCode}/${currency}`)
+    }
+  })
 
   return (
     <Stack padding="major-1" spacing="major-1">
-      <Box>
+      <Set>
+        <DropdownMenu
+          menu={
+            <PlayerMenu
+              logout={() => setLogoutToken(playerToken)}
+              isLoading={isLoading}
+            />
+          }
+        >
+          <Button iconAfter="chevron-down" isLoading={isLoading}>
+            {username}
+          </Button>
+        </DropdownMenu>
         <GameProviderDropdownMenu
           brandCode={brandCode}
           currency={currency}
@@ -57,7 +91,7 @@ const Body = ({ brandToken }) => {
           value={gameProviderCode}
           onChange={setGameProviderCode}
         />
-      </Box>
+      </Set>
       <Box>
         <GameList
           brandCode={brandCode}
@@ -69,6 +103,14 @@ const Body = ({ brandToken }) => {
         />
       </Box>
     </Stack>
+  )
+}
+
+const PlayerMenu = ({ logout }) => {
+  return (
+    <>
+      <DropdownMenu.Item onClick={logout}>Logout</DropdownMenu.Item>
+    </>
   )
 }
 
