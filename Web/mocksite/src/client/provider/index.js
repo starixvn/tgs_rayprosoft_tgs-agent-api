@@ -1,6 +1,52 @@
 import useSWR, { cache } from "swr"
-import { useBrandToken, usePlayerToken } from "../brand/client"
-import { toValue as toPlatformType } from "../platform"
+import { toDataOrError } from "../response"
+import { useBrandToken } from "../brand"
+import { usePlayerToken } from "../brand/player"
+import { toValue as toPlatformType } from "../../platform"
+
+export const useGameProviderList = (
+  { brandCode, username, currency } = {},
+  { platform, language } = {}
+) => {
+  let { token: brandToken } = useBrandToken({ brandCode, currency })
+  let { token: playerToken } = usePlayerToken({ brandCode, username, currency })
+
+  let keys =
+    brandToken && playerToken && platform && language && currency
+      ? [
+          `/api/gameProvider/list`,
+          brandCode,
+          username,
+          platform,
+          language,
+          currency
+        ]
+      : undefined
+
+  let { data = {}, ...rest } = useSWR(
+    keys,
+    (url, brandCode, username, platform, language, currency) => {
+      return fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${brandToken}`,
+          Token: playerToken
+        },
+        body: JSON.stringify({
+          platformtype: toPlatformType(platform),
+          language,
+          currency
+        })
+      }).then(toDataOrError)
+    }
+  )
+
+  return {
+    items: data?.gameproviders,
+    ...rest
+  }
+}
 
 export const useGameList = (
   { brandCode, username, currency },
@@ -58,29 +104,11 @@ export const useGameList = (
           currency
         })
       })
-        .then((response) => {
-          if (!response?.ok) {
-            //TODO
-            // if (response.statusText === "Unauthorized") {
-            // }
-
-            return response
-              .json()
-              .catch((error) => {
-                return Promise.reject({
-                  title: response.statusText,
-                  error
-                })
-              })
-              .then((data) => Promise.reject(data))
-          }
-
-          return response.json()
-        })
+        .then(toDataOrError)
         .catch((error) => {
           deletePlayerTokenCache()
           deleteBrandTokenCache()
-          console.error(error)
+          console.error("TODO: mutate token when 401 error")
           return error
         })
     }
@@ -88,36 +116,6 @@ export const useGameList = (
 
   return {
     items: data?.games ?? [],
-    ...rest
-  }
-}
-
-export const useGameUrl = ({ brandCode, username, currency }, data) => {
-  let { token: brandToken } = useBrandToken({ brandCode, currency })
-  let { token: playerToken } = usePlayerToken({ brandCode, username, currency })
-
-  let url =
-    brandToken && playerToken && data?.gameProviderCode && data?.gameCode
-      ? [`/api/game/geturl`, data]
-      : undefined
-
-  let { data: result, ...rest } = useSWR(url, (url, data) => {
-    return fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${brandToken}`,
-        Token: playerToken
-      },
-      body: JSON.stringify({
-        gpcode: data?.gameProviderCode,
-        gcode: data?.gameCode
-      })
-    }).then((response) => response.json())
-  })
-
-  return {
-    url: result?.url,
     ...rest
   }
 }

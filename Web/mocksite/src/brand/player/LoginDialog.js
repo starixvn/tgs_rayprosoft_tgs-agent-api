@@ -16,8 +16,7 @@ import {
   InputField
 } from "bumbag"
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons"
-import { useCaptcha, usePlayerToken } from "../client"
-import useSWR from "swr"
+import { useCaptcha, usePlayerToken } from "../../client/brand/player"
 import { useRouteMatch, useHistory } from "react-router-dom"
 import { useForm } from "react-hook-form"
 

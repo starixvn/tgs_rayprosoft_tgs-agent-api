@@ -168,7 +168,7 @@ services:
     build:
       context: .
       dockerfile: Apis/TgsApi/Dockerfile
-    image: tgs-api
+    image: game-sbo
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
       GameProviderCode: "SBO"
@@ -178,8 +178,6 @@ services:
       - 32669:80
     networks:
       tgs:
-        aliases:
-          - tgs.api
     depends_on:
       - sqlserver
       - nats

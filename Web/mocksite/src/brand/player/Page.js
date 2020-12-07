@@ -35,7 +35,7 @@ import PlatformDropdownMenu from "../../platform/DropdownMenu"
 import LangDropdownMenu from "../../language/DropdownMenu"
 import { GameProviderDropdownMenu } from "../../game/provider/DropdownMenu"
 import { GameList } from "../../game/List"
-import { useLogout, usePlayerToken } from "../client"
+import { useLogout, usePlayerToken } from "../../client/brand/player"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
   return (
@@ -61,10 +61,10 @@ const Body = ({ brandToken }) => {
   )
   let history = useHistory()
   useEffect(() => {
-    if (result) {
-      history.push(`/${brandCode}/${currency}`)
-    }
-  })
+    // if (result) {
+    //   history.push(`/${brandCode}/${currency}`)
+    // }
+  }, [result])
 
   return (
     <Stack padding="major-1" spacing="major-1">

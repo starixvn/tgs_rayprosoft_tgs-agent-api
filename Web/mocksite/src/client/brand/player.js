@@ -1,69 +1,6 @@
 import useSWR, { cache } from "swr"
-
-const toDataOrError = (response) => {
-  if (!response.ok) {
-    return response
-      .json()
-      .catch((error) => {
-        return Promise.reject({
-          title: response.statusText
-        })
-      })
-      .then((data) => {
-        return Promise.reject(data)
-      })
-  }
-
-  return response.json()
-}
-
-const TGS = "TGS"
-
-export const useBrandToken = ({ brandCode, currency }) => {
-  let apiKey = useApiKey(brandCode)
-  let keys =
-    brandCode && currency && apiKey
-      ? ["/api/auth/jwt", brandCode, currency]
-      : undefined
-
-  const ResultCacheKey = `${useBrandToken.name}:${brandCode}:${currency}`
-  let cached = cache.get(ResultCacheKey)
-  let { data, mutate, ...rest } = useSWR(
-    keys,
-    (url, brandCode, currency) =>
-      fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          client: apiKey,
-          currency
-        })
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          cache.set(ResultCacheKey, result)
-          return result
-        }),
-    {
-      initialData: keys && cached?.token ? cached : undefined
-    }
-  )
-
-  return {
-    token: data?.token,
-    expires: data?.expires,
-    mutate,
-    deleteCache: () => {
-      cache.delete(keys)
-      cache.delete(ResultCacheKey)
-      mutate(undefined)
-    },
-    clearCache: () => cache.clear(),
-    ...rest
-  }
-}
+import { toDataOrError } from "../response"
+import { useBrandToken } from "./index"
 
 const DefaultPassword = "TgsP@ssw0rd"
 const playerTokenCacheKey = ({ brandCode, currency, username }) =>
@@ -79,7 +16,7 @@ export const usePlayerToken = (
   { brandCode, currency, username } = {},
   data
 ) => {
-  let { token: brandToken, deleteCache: deleteBrandCache } = useBrandToken({
+  let { token: brandToken, mutate: mutateBrandToken } = useBrandToken({
     brandCode,
     currency
   })
@@ -133,6 +70,10 @@ export const usePlayerToken = (
           cache.set(ResultCacheKey, result)
           return result
         })
+        .catch((error) => {
+          console.warn("TODO", error)
+          return error
+        })
     },
     {
       initialData: keys && cached?.token ? cached : undefined
@@ -142,11 +83,15 @@ export const usePlayerToken = (
   return {
     token: result?.token,
     isLoading: keys && !result,
-    mutate,
+    mutate: mutateBrandToken,
+    mutate: (data, shouldRevalidate) => {
+      cache.delete(keys)
+      cache.delete(ResultCacheKey)
+      mutate(data, shouldRevalidate)
+    },
     deleteCache: () => {
       cache.delete(keys)
       cache.delete(ResultCacheKey)
-      mutate(undefined)
     },
     clearCache: () => cache.clear(),
     ...rest
@@ -210,12 +155,4 @@ export const useCaptcha = ({ brandCode, currency }) => {
     ...data,
     ...rest
   }
-}
-
-const useApiKey = (code = TGS) => {
-  const store = {
-    TGS: "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV"
-  }
-
-  return Reflect.get(store, code)
 }

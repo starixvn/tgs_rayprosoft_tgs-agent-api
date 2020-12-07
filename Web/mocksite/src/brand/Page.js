@@ -10,7 +10,7 @@ import {
   useParams,
   useRouteMatch
 } from "react-router-dom"
-import { useBrandToken } from "./client"
+import { useBrandToken } from "../client/brand"
 import {
   State,
   useCurrency,
