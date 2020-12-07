@@ -115,4 +115,10 @@
   <data name="CultureRequired" xml:space="preserve">
     <value>Language is Required.</value>
   </data>
+  <data name="NameExists" xml:space="preserve">
+    <value>Name exists already.</value>
+  </data>
+  <data name="CodeExists" xml:space="preserve">
+    <value>Code exists already.</value>
+  </data>
 </root>
