@@ -29,6 +29,8 @@ pipeline {
 		stage ('Build docker image for backoffice.site') {
           steps {
                 script {
+				    sh "pwd"
+					sh "ls -l"
 					sh "cd Web\backoffice"
 					sh "docker build -f Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0 ."
 					sh "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0"
