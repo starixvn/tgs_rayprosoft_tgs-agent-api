@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
@@ -23,8 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public DepartmentController(
             ITgsQueries<Department> queries,
-            ITgsCommands<Department> commands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<Department> commands)
         {
             _queries = queries;
             _commands = commands;

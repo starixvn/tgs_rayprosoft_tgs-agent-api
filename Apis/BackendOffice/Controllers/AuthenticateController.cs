@@ -34,8 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             IAntiforgery antiForgery,
             ITgsQueries<User> userQueries,
             ITgsCommands<User> userCommands,
-            IJsonSerializationProvider jsonSerializationProvider,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _passwordHandler = passwordHandler;
             _antiForgery = antiForgery;

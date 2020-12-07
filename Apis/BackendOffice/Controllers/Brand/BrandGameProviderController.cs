@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.DataServices;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -12,8 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         private ITgsRepository _repository;
 
-        public BrandGameProviderController(ITgsRepository repository, IHttpContextAccessor httpContextAccessor) : base(
-            httpContextAccessor)
+        public BrandGameProviderController(ITgsRepository repository)
         {
             _repository = repository;
         }

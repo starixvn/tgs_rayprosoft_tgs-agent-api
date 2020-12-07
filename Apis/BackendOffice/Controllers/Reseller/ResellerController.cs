@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
@@ -18,9 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
     {
         private readonly IResellerService _service;
 
-        public ResellerController(IResellerService service,
-            IHttpContextAccessor httpContextAccessor) : base(
-            httpContextAccessor)
+        public ResellerController(IResellerService service)
         {
             _service = service;
         }

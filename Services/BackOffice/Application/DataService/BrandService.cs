@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
 
-namespace TGS.Services.BackOffice.Application.DataService.Services
+namespace TGS.Services.BackOffice.Application.DataService
 {
     public interface IBrandService
     {

@@ -29,8 +29,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
             ITgsQueries<Player> playerQueries,
             IUploadService uploadService,
             IPaymentService paymentService,
-            ITgsQueries<PaymentAuditLog> auditLogQueries,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsQueries<PaymentAuditLog> auditLogQueries)
         {
             _uploadService = uploadService;
             _playerQueries = playerQueries;

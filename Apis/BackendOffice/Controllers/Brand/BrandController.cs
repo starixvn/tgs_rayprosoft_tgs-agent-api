@@ -16,8 +16,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         private readonly IMediator _mediator;
 
         public BrandController(IMediator mediator,
-            IHttpContextAccessor httpContextAccessor) : base(
-            httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor)
         {
             _mediator = mediator;
         }

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
@@ -18,8 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
     {
         private readonly ILicenseeService _service;
 
-        public LicenseeController(ILicenseeService service, IHttpContextAccessor httpContextAccessor) : base(
-            httpContextAccessor)
+        public LicenseeController(ILicenseeService service)
         {
             _service = service;
         }

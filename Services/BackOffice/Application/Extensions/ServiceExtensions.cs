@@ -2,7 +2,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Services.BackOffice.Application.DataService.Services;
+using TGS.Services.BackOffice.Application.DataService;
 using TGS.Services.BackOffice.Application.Middlewares;
 
 namespace TGS.Services.BackOffice.Application.Extensions

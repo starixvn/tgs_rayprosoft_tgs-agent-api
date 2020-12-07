@@ -1,8 +1,10 @@
 ﻿using System;
+using MediatR;
+using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandGameProvider
+namespace TGS.Services.BackOffice.Application.Models.BrandGameProvider
 {
-    public class SetScheduledMaintenanceTimeRequest
+    public class SetScheduledMaintenanceTimeRequest : IRequest<MessageResponse>
     {
         public MaintenanceTime[] MaintenanceTimes { get; set; }
     }

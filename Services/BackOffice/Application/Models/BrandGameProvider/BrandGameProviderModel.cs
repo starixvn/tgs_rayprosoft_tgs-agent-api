@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandGameProvider
+namespace TGS.Services.BackOffice.Application.Models.BrandGameProvider
 {
     public class BrandGameProviderModel
     {

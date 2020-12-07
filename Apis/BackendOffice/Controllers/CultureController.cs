@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Threading;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -13,16 +13,16 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class CultureController : BaseContextController
     {
         private readonly IStringLocalizer _localizer;
+
         public CultureController(
-            IStringLocalizer<CultureController> localizer,
-            IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            IStringLocalizer<CultureController> localizer)
         {
             _localizer = localizer;
         }
 
         [Route("")]
-        [HttpPost, Description("Change culture")]
+        [HttpPost]
+        [Description("Change culture")]
         public MessageResponse ChangeCultureAsync(string culture)
         {
             SetCulture(culture);
@@ -41,8 +41,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             Response.Cookies.Delete(CookieRequestCultureProvider.DefaultCookieName);
             Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, lang);
 
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(culture);
-            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(culture);
+            Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }
     }
 }
