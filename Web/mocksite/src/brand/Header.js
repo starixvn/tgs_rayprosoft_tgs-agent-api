@@ -41,29 +41,11 @@ export const BrandHeader = ({ navItems = [] }) => {
 
   let now = new Date().getTime()
   let isExpired = now > expires
-  console.log("TODO: update isExpired", isExpired)
+
   return (
     <TopNav padding="major-1">
       <TopNav.Section>
-        <TopNav.Item>
-          <Popover.State>
-            <Popover.Disclosure
-              use={Button}
-              palette={isExpired ? "danger" : "success"}
-              variant="outlined"
-            >
-              {brandCode}
-            </Popover.Disclosure>
-            <Popover hasArrow maxWidth="650px">
-              <Stack>
-                <Text.Block>
-                  {new Date(expires).toLocaleString()}{" "}
-                  {`Expired: ${isExpired.toLocaleString()}`}
-                </Text.Block>
-              </Stack>
-            </Popover>
-          </Popover.State>
-        </TopNav.Item>
+        <TopNav.Item>{brandCode}</TopNav.Item>
         <TopNav.Item>
           <CurrencyDropdownMenu value={currency} onChange={setCurrency} />
         </TopNav.Item>

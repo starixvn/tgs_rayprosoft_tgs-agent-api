@@ -20,6 +20,13 @@ export const GameProviderDropdownMenu = ({
     { brandToken }
   )
 
+  useEffect(() => {
+    let gameProvider = gameProviders?.[0]
+    if (gameProvider) {
+      props?.onChange?.(gameProvider.code)
+    }
+  }, [JSON.stringify(gameProviders)])
+
   let gameProvider = gameProviders.find(({ code }) => code === value)
   let menu = useMemo(
     () => (
