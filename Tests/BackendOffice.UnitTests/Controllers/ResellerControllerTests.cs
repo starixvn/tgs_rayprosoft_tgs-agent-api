@@ -25,12 +25,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new ResellerController(
-                _resellerServiceMock.Object,
-                HttpContextAccessorMock.Object);
+                _resellerServiceMock.Object);
         }
 
         private ResellerController _controller;
-        private readonly Mock<IResellerService> _resellerServiceMock = new Mock<IResellerService>();
+        private readonly Mock<IResellerService> _resellerServiceMock = new();
 
         [TestCase(true)]
         [TestCase(false)]

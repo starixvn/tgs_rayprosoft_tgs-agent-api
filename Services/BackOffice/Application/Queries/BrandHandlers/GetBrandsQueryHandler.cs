@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
     {
         private readonly IBrandService _service;
 
-        public GetBrandsQueryHandler(IBrandService service, IHttpContextAccessor accessor)
+        public GetBrandsQueryHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
         }

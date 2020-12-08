@@ -33,21 +33,20 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _commandsMock.Object,
                 _playerCommandsMock.Object,
                 _uploadServiceMock.Object,
-                _stationLetterServiceMock.Object,
-                HttpContextAccessorMock.Object);
+                _stationLetterServiceMock.Object);
         }
 
         private StationLetterController _controller;
 
-        private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new Mock<ITgsQueries<Player>>();
-        private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new Mock<ITgsQueries<StationLetter>>();
-        private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new Mock<ITgsCommands<StationLetter>>();
+        private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new();
+        private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new();
+        private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new();
 
         private readonly Mock<ITgsCommands<StationLetterPlayer>> _playerCommandsMock =
-            new Mock<ITgsCommands<StationLetterPlayer>>();
+            new();
 
-        private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
-        private readonly Mock<IStationLetterService> _stationLetterServiceMock = new Mock<IStationLetterService>();
+        private readonly Mock<IUploadService> _uploadServiceMock = new();
+        private readonly Mock<IStationLetterService> _stationLetterServiceMock = new();
 
         [TestCase(true)]
         [TestCase(false)]

@@ -31,25 +31,24 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _bankQueriesMock.Object,
                 _commandsMock.Object,
                 _bankCommandsMock.Object,
-                _auditLogCommandsMock.Object,
-                HttpContextAccessorMock.Object);
+                _auditLogCommandsMock.Object);
         }
 
         private PlayerController _controller;
 
-        private readonly Mock<ITgsQueries<Player>> _queriesMock = new Mock<ITgsQueries<Player>>();
+        private readonly Mock<ITgsQueries<Player>> _queriesMock = new();
 
         private readonly Mock<ITgsQueries<PlayerAuditLog>> _auditLogQueriesMock =
-            new Mock<ITgsQueries<PlayerAuditLog>>();
+            new();
 
-        private readonly Mock<ITgsQueries<PlayerBank>> _bankQueriesMock = new Mock<ITgsQueries<PlayerBank>>();
-        private readonly Mock<ITgsCommands<Player>> _commandsMock = new Mock<ITgsCommands<Player>>();
-        private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new Mock<ITgsCommands<PlayerBank>>();
+        private readonly Mock<ITgsQueries<PlayerBank>> _bankQueriesMock = new();
+        private readonly Mock<ITgsCommands<Player>> _commandsMock = new();
+        private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new();
 
         private readonly Mock<ITgsCommands<PlayerAuditLog>> _auditLogCommandsMock =
-            new Mock<ITgsCommands<PlayerAuditLog>>();
+            new();
 
-        private readonly Mock<IPasswordHandler> _passwordHandlerMonk = new Mock<IPasswordHandler>();
+        private readonly Mock<IPasswordHandler> _passwordHandlerMonk = new();
 
         [TestCase(true)]
         [TestCase(false)]

@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("BrandGameProviders", "dbo");
 
-            builder.HasKey(bgp => new { bgp.BrandId, bgp.GameProviderId });
+            builder.HasKey(bgp => new {bgp.BrandId, bgp.GameProviderId});
 
             builder.Property(bgp => bgp.Status)
                 .IsRequired();

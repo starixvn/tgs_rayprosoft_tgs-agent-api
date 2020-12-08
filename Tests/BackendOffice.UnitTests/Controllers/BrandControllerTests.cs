@@ -23,8 +23,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new BrandController(
-                _mediatorMock.Object,
-                HttpContextAccessorMock.Object);
+                _mediatorMock.Object);
         }
 
         private BrandController _controller;

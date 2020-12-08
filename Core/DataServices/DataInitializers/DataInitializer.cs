@@ -30,8 +30,9 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             new TgsReseller()
         };
-        
+
         private readonly IList<IGameProvider> _gameProviders;
+
         private readonly IDictionary<string, GameProvider> _gameProvidersCreated =
             new Dictionary<string, GameProvider>();
 
@@ -197,7 +198,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private static BetLimitGroup CreateBetLimitGroup(int id, string code, string name, string description)
         {
-            return new BetLimitGroup
+            return new()
             {
                 Id = id,
                 Code = code,
@@ -812,7 +813,7 @@ VALUES
 
     internal class Generator
     {
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new();
 
         public static string RandomString(int length)
         {

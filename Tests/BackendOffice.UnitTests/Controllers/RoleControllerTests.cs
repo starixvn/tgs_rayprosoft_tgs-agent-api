@@ -32,8 +32,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _roleQueriesMock.Object,
                 _settingQueriesMock.Object,
                 _roleCommandsMock.Object,
-                _jsonSerializationProviderMock.Object,
-                HttpContextAccessorMock.Object);
+                _jsonSerializationProviderMock.Object);
         }
 
         private RoleController _controller;

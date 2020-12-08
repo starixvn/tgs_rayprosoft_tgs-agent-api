@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
@@ -6,7 +7,7 @@ namespace TGS.Core.DataServices.Models
     public class BrandGameProvider
     {
         public Guid BrandId { get; set; }
-        
+
         public virtual Brand Brand { get; set; }
 
         public Guid GameProviderId { get; set; }
@@ -26,5 +27,7 @@ namespace TGS.Core.DataServices.Models
         public string DesktopQueryString { get; set; }
 
         public string MobileQueryString { get; set; }
+
+        public virtual ICollection<BrandGameProviderSchedule> Schedules { get; set; }
     }
 }

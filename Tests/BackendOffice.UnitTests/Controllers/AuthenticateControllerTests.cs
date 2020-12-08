@@ -32,8 +32,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _antiForgeryMock.Object,
                 _userQueriesMock.Object,
                 _userCommandsMock.Object,
-                _jsonSerializationProviderMock.Object,
-                HttpContextAccessorMock.Object);
+                _jsonSerializationProviderMock.Object);
 
             //ref:https://stackoverflow.com/questions/47198341/how-to-unit-test-httpcontext-signinasync
             _serviceProviderMock
@@ -47,15 +46,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         private AuthenticateController _controller;
-        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new Mock<IPasswordHandler>();
-        private readonly Mock<IAntiforgery> _antiForgeryMock = new Mock<IAntiforgery>();
-        private readonly Mock<ITgsQueries<User>> _userQueriesMock = new Mock<ITgsQueries<User>>();
-        private readonly Mock<ITgsCommands<User>> _userCommandsMock = new Mock<ITgsCommands<User>>();
-        private readonly Mock<IServiceProvider> _serviceProviderMock = new Mock<IServiceProvider>();
-        private readonly Mock<IAuthenticationService> _authenticationServiceMock = new Mock<IAuthenticationService>();
+        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new();
+        private readonly Mock<IAntiforgery> _antiForgeryMock = new();
+        private readonly Mock<ITgsQueries<User>> _userQueriesMock = new();
+        private readonly Mock<ITgsCommands<User>> _userCommandsMock = new();
+        private readonly Mock<IServiceProvider> _serviceProviderMock = new();
+        private readonly Mock<IAuthenticationService> _authenticationServiceMock = new();
 
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock =
-            new Mock<IJsonSerializationProvider>();
+            new();
 
         [Test]
         public async Task Cannot_Authenticate_User_Not_Found()

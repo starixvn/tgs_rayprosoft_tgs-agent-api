@@ -25,15 +25,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new PaymentChannelController(
                 _queriesMock.Object,
-                _commandsMock.Object,
-                HttpContextAccessorMock.Object);
+                _commandsMock.Object);
         }
 
         private PaymentChannelController _controller;
-        private readonly Mock<ITgsQueries<PaymentChannel>> _queriesMock = new Mock<ITgsQueries<PaymentChannel>>();
+        private readonly Mock<ITgsQueries<PaymentChannel>> _queriesMock = new();
 
         private readonly Mock<ITgsCommands<PaymentChannel>> _commandsMock =
-            new Mock<ITgsCommands<PaymentChannel>>();
+            new();
 
         [TestCase(true)]
         [TestCase(false)]

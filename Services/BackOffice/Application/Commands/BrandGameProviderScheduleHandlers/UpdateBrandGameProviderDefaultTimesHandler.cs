@@ -1,0 +1,34 @@
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.DataService;
+using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
+
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduledHandlers
+{
+    public class UpdateBrandGameProviderDefaultTimesHandler : Handler<UpdateDefaultTimesRequest, MessageResponse>
+    {
+        private readonly IBrandGameProviderScheduleService _service;
+
+        public UpdateBrandGameProviderDefaultTimesHandler(IBrandGameProviderScheduleService service,
+            IHttpContextAccessor accessor) : base(accessor)
+        {
+            _service = service;
+        }
+
+        public override async Task<MessageResponse> Handle(UpdateDefaultTimesRequest request,
+            CancellationToken cancellationToken)
+        {
+            var schedules = await _service.GetBrandGameProviderSchedulesAsync(true)
+                .Where(x => x.BrandGameProviderId == request.BrandGameProviderId && !x.IsDefault)
+                .ToArrayAsync(cancellationToken);
+
+            await _service.UpdateBrandGameProviderDefaultTimesAsync(schedules, request);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+    }
+}

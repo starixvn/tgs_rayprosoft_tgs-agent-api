@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -15,8 +14,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     {
         private readonly IMediator _mediator;
 
-        public BrandController(IMediator mediator,
-            IHttpContextAccessor httpContextAccessor)
+        public BrandController(IMediator mediator)
         {
             _mediator = mediator;
         }
