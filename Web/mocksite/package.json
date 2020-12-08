@@ -1,10 +1,19 @@
 {
+  "version": "0.0.1",
   "scripts": {
     "start": "snowpack dev --reload",
     "build": "snowpack build",
     "test": "web-test-runner \"src/**/*.test.jsx\"",
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
-    "lint": "prettier --check \"src/**/*.{js,jsx}\""
+    "lint": "prettier --check \"src/**/*.{js,jsx}\"",
+    "tag:docker:dev": "cross-env-shell GIT_COMMIT_HASH=$(git show --no-patch --format=%h) \"npm-run-all build:docker:dev push:docker:dev\"",
+    "build:docker:dev": "cross-var docker build . -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/mocksite:$npm_package_version-$GIT_COMMIT_HASH",
+    "push:docker:dev": "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/mocksite:$npm_package_version-$GIT_COMMIT_HASH"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm-run-all tag:docker:dev"
+    }
   },
   "dependencies": {
     "react": "^16.13.1",
@@ -24,6 +33,10 @@
     "@web/test-runner": "^0.9.7",
     "bumbag": "^1.6.2",
     "chai": "^4.2.0",
+    "cross-env": "^7.0.3",
+    "cross-var": "^1.1.0",
+    "husky": "^4.3.5",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.0.5",
     "react-hook-form": "^6.12.2",
     "react-router-dom": "^5.2.0",
