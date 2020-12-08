@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
 import { Table, Set, Button, Box, Stack, Select, DropdownMenu } from "bumbag"
 import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom"
-import { useGameProviderList } from "./client"
+import { useGameProviderList } from "../../client/provider"
 
 export const GameProviderDropdownMenu = ({
   brandCode,
@@ -19,6 +19,13 @@ export const GameProviderDropdownMenu = ({
     { platform, language },
     { brandToken }
   )
+
+  useEffect(() => {
+    let gameProvider = gameProviders?.[0]
+    if (gameProvider) {
+      props?.onChange?.(gameProvider.code)
+    }
+  }, [JSON.stringify(gameProviders)])
 
   let gameProvider = gameProviders.find(({ code }) => code === value)
   let menu = useMemo(

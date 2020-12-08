@@ -307,7 +307,8 @@ namespace TGS.Core.DataServices.DataInitializers
             byte[] password,
             string cultureCode, string currencyCode, Guid vipId, PlayerType playerType, string invitationCode,
             string parentPlayerCode = null,
-            string parentInvitationCode = null)
+            string parentInvitationCode = null,
+            Guid? brandId = null)
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
@@ -337,7 +338,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 LastActiveOn = Now,
                 UpdatedOn = Now,
                 UpdatedByUsername = username,
-                BrandId = Resellers[0].Licensees[0].Brands[0].Id,
+                BrandId = brandId ?? Resellers[0].Licensees[0].Brands[0].Id,
                 Wallets = new[]
                 {
                     new Wallet
@@ -440,6 +441,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 AutoCloseRound = gameProvider.AutoClosedRound,
                 Status = Status.Active,
                 SupportTestPlayer = gameProvider.SupportTestPlayer,
+                AllowKickPlayer = gameProvider.AllowKickPlayer,
                 CreatedOn = Now,
                 UpdatedOn = Now,
                 CreatedByUsername = AdminUsername,
@@ -508,11 +510,9 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private Reseller CreateResellerWithLicensees(IReseller reseller)
         {
-            var gameProviders = reseller.GameProviders
-                .Select(code => _gameProvidersCreated[code])
-                .ToArray();
+            var gameProviders = GetSelectedGameProviders(reseller.GameProviders);
 
-            return new Reseller
+            return new()
             {
                 Id = reseller.Id,
                 Code = reseller.Code,
@@ -544,12 +544,13 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private Licensee CreateLicenseeWithBrands(IReseller reseller, ILicensee licensee)
         {
-            var gameProviderCodes = reseller.GameProviders.Intersect(licensee.GameProviders).ToArray();
-            var gameProviders = gameProviderCodes
-                .Select(code => _gameProvidersCreated[code])
-                .ToArray();
+            var gameProviderCodes = reseller.GameProviders.Length == 0
+                ? licensee.GameProviders
+                : reseller.GameProviders.Intersect(licensee.GameProviders).ToArray();
 
-            return new Licensee
+            var gameProviders = GetSelectedGameProviders(gameProviderCodes);
+
+            return new()
             {
                 Id = licensee.Id,
                 Code = licensee.Code,
@@ -583,14 +584,11 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private Brand CreateBrand(IReseller reseller, ILicensee licensee, IBrand brand)
         {
-            var gameProviderCodes = reseller.GameProviders.Intersect(licensee.GameProviders)
-                .Intersect(brand.GameProviders).ToArray();
+            var gameProviderCodes = IntersectGameProviderCodes(reseller.GameProviders, licensee.GameProviders);
+            gameProviderCodes = IntersectGameProviderCodes(gameProviderCodes, brand.GameProviders);
+            var gameProviders = GetSelectedGameProviders(gameProviderCodes);
 
-            var gameProviders = gameProviderCodes
-                .Select(code => _gameProvidersCreated[code])
-                .ToArray();
-
-            return new Brand
+            return new()
             {
                 Id = brand.Id,
                 Code = brand.Code,
@@ -648,6 +646,9 @@ namespace TGS.Core.DataServices.DataInitializers
                     _ => GameTag.None
                 };
             }
+
+            string[] IntersectGameProviderCodes(string[] parents, string[] children) => 
+                parents.Length == 0 ? children : children.Length == 0 ? parents : parents.Intersect(children).ToArray();
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
@@ -725,64 +726,10 @@ namespace TGS.Core.DataServices.DataInitializers
             }).ToArray();
         }
 
-        private async Task GenerateRolesAsync()
+        private Task GenerateRolesAsync()
         {
             var roles = CreateRoleWithMenus(_roles);
-            var command = @"
-INSERT INTO [dbo].[Roles]
-    ([Id]
-    ,[RoleType]
-    ,[Name]
-    ,[ResellerId]
-    ,[LicenseeId]
-    ,[BrandId]
-    ,[MenuSetting]
-    ,[DisplayName]
-    ,[Description]
-    ,[Status]
-    ,[CreatedOn]
-    ,[UpdatedOn]
-    ,[CreatedByUsername]
-    ,[UpdatedByUsername])
-VALUES
-    (@id
-    ,@roleType
-    ,@name
-    ,@resellerId
-    ,@licenseeId
-    ,@brandId
-    ,@menuSetting
-    ,@displayName
-    ,@description
-    ,@status
-    ,SYSDATETIMEOFFSET()
-    ,SYSDATETIMEOFFSET()
-    ,@createdByUsername
-    ,@updatedByUsername)
-";
-            foreach (var role in roles)
-            {
-                var args = new[]
-                {
-                    new SqlParameter {ParameterName = "@id", Value = role.Id, DbType = DbType.Guid},
-                    new SqlParameter {ParameterName = "@roleType", Value = (int) role.RoleType, DbType = DbType.Int16},
-                    new SqlParameter {ParameterName = "@name", Value = role.Name, DbType = DbType.String},
-                    new SqlParameter {ParameterName = "@resellerId", Value = role.ResellerId, DbType = DbType.Guid},
-                    new SqlParameter {ParameterName = "@licenseeId", Value = role.LicenseeId, DbType = DbType.Guid},
-                    new SqlParameter {ParameterName = "@brandId", Value = role.BrandId, DbType = DbType.Guid},
-                    new SqlParameter {ParameterName = "@menuSetting", Value = role.MenuSetting, DbType = DbType.String},
-                    new SqlParameter {ParameterName = "@displayName", Value = role.Name, DbType = DbType.String},
-
-                    new SqlParameter {ParameterName = "@description", Value = role.DisplayName, DbType = DbType.String},
-                    new SqlParameter {ParameterName = "@status", Value = role.Status, DbType = DbType.String},
-                    new SqlParameter
-                        {ParameterName = "@createdByUsername", Value = role.CreatedByUsername, DbType = DbType.String},
-                    new SqlParameter
-                        {ParameterName = "@updatedByUsername", Value = role.UpdatedByUsername, DbType = DbType.String}
-                };
-
-                await _repository.ExecuteSqlCommandAsync(command, CommandType.Text, args);
-            }
+            return _repository.BulkInsertAsync(roles);
         }
 
         private Task GenerateUsersAsync()
@@ -809,6 +756,13 @@ VALUES
 
             return _repository.BulkInsertAsync(users);
         }
+
+        private GameProvider[] GetSelectedGameProviders(string[] gameProviderCodes) =>
+            gameProviderCodes.Length == 0
+                ? _gameProvidersCreated.Values.ToArray()
+                : gameProviderCodes
+                    .Select(code => _gameProvidersCreated[code])
+                    .ToArray();
     }
 
     internal class Generator

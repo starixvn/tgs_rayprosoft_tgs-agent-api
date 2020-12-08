@@ -6,8 +6,4 @@
     <RootNamespace>TGS.Apis.TgsApi.GameModels</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="SBOBET\Outgoing\" />
-  </ItemGroup>
-
 </Project>

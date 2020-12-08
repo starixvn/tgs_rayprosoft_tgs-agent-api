@@ -16,9 +16,9 @@ import {
   InputField
 } from "bumbag"
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons"
-import { useCaptcha, usePlayerToken } from "../client"
-import useSWR from "swr"
+import { useCaptcha, usePlayerToken } from "../../client/brand/player"
 import { useRouteMatch, useHistory } from "react-router-dom"
+import { useForm } from "react-hook-form"
 
 export const LoginDialogButton = ({
   brandCode,
@@ -79,11 +79,10 @@ const LoginDialog = ({
 
   let history = useHistory()
 
+  let { register, handleSubmit, watch, setError, errors } = useForm()
   let [fromData, setSubmit] = useState(
     auto ? undefined : { bypassCaptcha: false }
   )
-  let [answer, setCaptchaAnswer] = useState("")
-  let [password, setPassword] = useState(DefaultPassword)
 
   let {
     image,
@@ -97,6 +96,7 @@ const LoginDialog = ({
     dialog.visible ? { brandCode, currency, username } : undefined,
     fromData
   )
+  const onSubmit = handleSubmit(setSubmit)
 
   useEffect(() => {
     if (token) {
@@ -109,14 +109,16 @@ const LoginDialog = ({
   const CaptchaAnsError = 31
   useEffect(() => {
     if (error) {
-      setSubmit(undefined)
+      setSubmit(auto ? undefined : { bypassCaptcha: false })
       mutate(undefined, false)
 
       if (error.err === CaptchaAnsError) {
-        setCaptchaAnswer("")
+        setError("answer", {
+          type: "answer",
+          shouldFocus: true
+        })
       }
     }
-    console.log("TODO: handle", error)
   }, [error])
 
   return (
@@ -126,45 +128,58 @@ const LoginDialog = ({
       showCloseButton
       actionButtonsProps={{
         isLoading,
-        onClickSubmit: () =>
-          setSubmit({
-            username,
-            password,
-            captcha,
-            answer
-          })
+        onClickSubmit: onSubmit
       }}
       {...dialog}
     >
-      <Stack>
-        <FieldStack>
-          <InputField label="Username" value={username} readOnly={true} />
-          <InputField
-            label="Password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-          <InputField
-            label="Captcha"
-            addonBefore={
-              <Button
-                onClick={() => mutateCaptcha(undefined)}
-                isLoading={isLoadingCaptcha}
-              >
-                {image ? (
-                  <img src={`data:image/png;base64, ${image}`} />
-                ) : (
-                  "..."
-                )}
-              </Button>
-            }
-            value={answer}
-            onChange={(event) => {
-              setCaptchaAnswer(event.target.value)
-            }}
-          />
-        </FieldStack>
-      </Stack>
+      <form onSubmit={onSubmit}>
+        <Stack>
+          <FieldStack>
+            <InputField
+              name="username"
+              inputRef={register}
+              label="Username"
+              defaultValue={username}
+              readOnly={true}
+            />
+            <InputField
+              name="password"
+              inputRef={register({ required: true })}
+              label="Password"
+              defaultValue={DefaultPassword}
+            />
+            <InputField
+              name="answer"
+              inputRef={register({ required: true })}
+              state={errors.answer ? "danger" : ""}
+              label="Captcha"
+              addonBefore={
+                <Button
+                  onClick={() => mutateCaptcha(undefined)}
+                  isLoading={isLoadingCaptcha}
+                >
+                  {image ? (
+                    <>
+                      <img src={`data:image/png;base64, ${image}`} />
+                      <input
+                        name="captcha"
+                        ref={register}
+                        value={captcha}
+                        readOnly
+                        css={css`
+                          display: none;
+                        `}
+                      />
+                    </>
+                  ) : (
+                    "..."
+                  )}
+                </Button>
+              }
+            />
+          </FieldStack>
+        </Stack>
+      </form>
     </Dialog.Modal>
   )
 }

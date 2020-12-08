@@ -10,15 +10,12 @@ import {
   useRouteMatch,
   useLocation
 } from "react-router-dom"
+import { useBrands } from "./client/brand"
 
 const DefaultBrandCode = "TGS"
 
 const Sidebar = () => {
-  let brands = [
-    {
-      code: "TGS"
-    }
-  ]
+  let brands = useBrands()
   let match = useRouteMatch({
     path: "/:brandCode",
     sensitive: false

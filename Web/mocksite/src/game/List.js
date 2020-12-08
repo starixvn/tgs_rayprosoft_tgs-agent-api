@@ -9,7 +9,8 @@ import {
   useParams,
   useRouteMatch
 } from "react-router-dom"
-import { useGameList, useGameUrl } from "./client"
+import { useGameList } from "../client/provider"
+import { useGameUrl } from "../client/provider/game"
 
 export const GameList = ({
   brandCode,
@@ -95,16 +96,30 @@ const LaunchGameButton = ({
 }) => {
   let [gameWindow, setGameWin] = useState()
   let [formData, setSubmit] = useState()
-  let { url, mutate } = useGameUrl({ brandCode, username, currency }, formData)
+  let { url, error, mutate } = useGameUrl(
+    { brandCode, username, currency },
+    formData
+  )
+
+  const reset = () => {
+    setGameWin(undefined)
+    setSubmit(undefined)
+    mutate(undefined, false)
+  }
 
   useEffect(() => {
     if (url && gameWindow) {
       gameWindow.location = url
-      setGameWin(undefined)
-      setSubmit(undefined)
-      mutate(undefined, false)
+      reset()
     }
   }, [url])
+
+  useEffect(() => {
+    if (error && gameWindow) {
+      gameWindow.close()
+      reset()
+    }
+  }, [gameWindow, error])
   return (
     <Button
       onClick={(event) => {

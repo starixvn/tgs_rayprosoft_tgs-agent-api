@@ -16,13 +16,24 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(128));
 
             builder.Property(p => p.Status)
-                .HasColumnType(ColumnTypes.SmallInt);
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
 
             builder.Property(p => p.PlaceBetTimeout)
-                .HasColumnType(ColumnTypes.SmallInt);
+                .HasColumnType(ColumnTypes.SmallInt)
+                .HasDefaultValue(0)
+                .IsRequired();
 
             builder.Property(p => p.SettleBetTimeout)
-                .HasColumnType(ColumnTypes.SmallInt);
+                .HasColumnType(ColumnTypes.SmallInt)
+                .HasDefaultValue(0)
+                .IsRequired();
+
+            builder.Property(p => p.AutoCloseRound)
+                .IsRequired();
+
+            builder.Property(p => p.AllowKickPlayer)
+                .IsRequired();
 
             builder.HasMany(p => p.Brands)
                 .WithOne(lgpc => lgpc.GameProvider)

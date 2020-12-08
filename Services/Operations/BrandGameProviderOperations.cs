@@ -27,7 +27,8 @@ namespace TGS.Services.Operations
             _languageCodeMapper = languageCodeMapper;
         }
 
-        async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId, string cultureCode)
+        async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId,
+            string cultureCode)
         {
             var internalCode = cultureCode;
 
@@ -36,8 +37,9 @@ namespace TGS.Services.Operations
                 var supported = await _gameProviderOperations.LanguageSupportedAsync(gameProviderId, cultureCode);
                 if (!supported)
                 {
-                    var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-                    internalCode = bgpc?.DefaultLanguageCode;
+                    internalCode =
+                        await _brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId,
+                            gameProviderId);
                 }
             }
 
