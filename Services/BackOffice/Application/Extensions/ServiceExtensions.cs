@@ -15,6 +15,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));
             services.AddTransient<IBrandService, BrandService>();
+            services.AddTransient<IBrandGameProviderScheduleService, BrandGameProviderScheduleService>();
 
             return services;
         }

@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201204100131_Initial")]
+    [Migration("20201208090054_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -228,10 +228,11 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.BrandGameProvider", b =>
                 {
-                    b.Property<Guid>("BrandId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("GameProviderId")
+                    b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DefaultLanguageCode")
@@ -247,6 +248,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("GameProviderConfigurationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("MobileQueryString")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -256,7 +260,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.HasKey("BrandId", "GameProviderId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
 
                     b.HasIndex("DefaultLanguageCode");
 
@@ -265,6 +271,37 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasIndex("GameProviderId");
 
                     b.ToTable("BrandGameProviders", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.BrandGameProviderSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BrandGameProviderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandGameProviderId");
+
+                    b.ToTable("BrandGameProviderSchedules", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.BrandLanguage", b =>
@@ -1883,6 +1920,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("GameProviderConfiguration");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Models.BrandGameProviderSchedule", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.BrandGameProvider", "BrandGameProvider")
+                        .WithMany("Schedules")
+                        .HasForeignKey("BrandGameProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BrandGameProvider");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Models.BrandLanguage", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Models.Brand", "Brand")
@@ -2431,6 +2479,11 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("PlayerLoginRecords");
 
                     b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.BrandGameProvider", b =>
+                {
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Currency", b =>

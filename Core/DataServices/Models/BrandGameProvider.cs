@@ -6,6 +6,7 @@ namespace TGS.Core.DataServices.Models
 {
     public class BrandGameProvider
     {
+        public Guid Id { get; set; }
         public Guid BrandId { get; set; }
 
         public virtual Brand Brand { get; set; }

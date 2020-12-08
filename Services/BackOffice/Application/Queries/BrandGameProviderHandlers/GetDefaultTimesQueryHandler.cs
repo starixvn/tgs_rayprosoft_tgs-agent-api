@@ -30,11 +30,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                 .Where(x => !x.IsDefault)
                 .Select(x => new DefaultTimeModel
                 {
-                    Id = x.Id,
-                    BrandGameProviderId = x.BrandGameProviderId,
                     From = x.From,
                     To = x.To,
-                    IsExpired = DateTimeOffset.Compare(x.To, DateTimeOffset.UtcNow) > 0
+                    IsExpired = DateTimeOffset.Compare(x.To, DateTimeOffset.UtcNow) < 0
                 }).ToArrayAsync(cancellationToken);
 
             return new GetDefaultTimesResponse

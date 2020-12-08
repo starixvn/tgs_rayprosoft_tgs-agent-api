@@ -49,10 +49,10 @@ namespace TGS.Services.BackOffice.Application.DataService
             return _repository.SaveChangesAsync();
         }
 
-        protected Task CreateOrUpdateEntitysAsync<T>(T[] entities) where T : class
+        protected async Task CreateOrUpdateEntitiesAsync<T>(T[] entities) where T : class
         {
-            _repository.BulkInsertOrUpdateAsync(entities);
-            return _repository.SaveChangesAsync();
+            await _repository.BulkInsertOrUpdateAsync(entities);
+            await _repository.SaveChangesAsync();
         }
 
         protected Task UpdateEntityAsync<T>(T entity) where T : class

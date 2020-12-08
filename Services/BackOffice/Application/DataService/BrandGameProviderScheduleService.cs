@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
 namespace TGS.Services.BackOffice.Application.DataService
@@ -86,10 +87,12 @@ namespace TGS.Services.BackOffice.Application.DataService
                 Id = Guid.NewGuid(),
                 BrandGameProviderId = request.BrandGameProviderId,
                 From = x.From,
-                To = x.To
+                To = x.To,
+                Status = ScheduleStatus.Enabled,
+                IsDefault = false
             }).ToArray();
 
-            await CreateOrUpdateEntitysAsync(addSchedules);
+            await CreateOrUpdateEntitiesAsync(addSchedules);
             await tran.CommitAsync();
         }
     }

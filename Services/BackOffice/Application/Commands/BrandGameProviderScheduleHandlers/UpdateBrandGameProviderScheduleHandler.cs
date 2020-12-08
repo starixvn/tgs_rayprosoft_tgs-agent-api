@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.DataService;
-using TGS.Services.BackOffice.Application.Models.BrandGameProviderScheduled;
+using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 using TGS.Services.BackOffice.Application.Resources;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduledHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduleHandlers
 {
     public class UpdateBrandGameProviderScheduleHandler : Handler<UpdateScheduleRequest, MessageResponse>
     {

@@ -14,11 +14,13 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("BrandGameProviderSchedules", "dbo");
 
-            builder.Property(c => c.Status)
+            builder.HasKey(s => s.Id);
+
+            builder.Property(s => s.Status)
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
-            builder.HasOne(bgp => bgp.BrandGameProvider)
+            builder.HasOne(s => s.BrandGameProvider)
                 .WithMany(t => t.Schedules)
                 .HasForeignKey(t => t.BrandGameProviderId);
         }

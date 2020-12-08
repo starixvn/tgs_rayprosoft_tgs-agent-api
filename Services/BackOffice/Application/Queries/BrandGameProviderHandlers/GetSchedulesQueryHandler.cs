@@ -35,6 +35,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                 {
                     Id = x.Id,
                     BrandGameProviderId = x.BrandGameProviderId,
+                    GameProviderName = x.BrandGameProvider.GameProvider.Name,
                     From = x.From,
                     To = x.To,
                     DayOfWeek = x.DayOfWeek
