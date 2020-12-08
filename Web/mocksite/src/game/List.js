@@ -101,19 +101,23 @@ const LaunchGameButton = ({
     formData
   )
 
+  const reset = () => {
+    setGameWin(undefined)
+    setSubmit(undefined)
+    mutate(undefined, false)
+  }
+
   useEffect(() => {
     if (url && gameWindow) {
       gameWindow.location = url
-      setGameWin(undefined)
-      setSubmit(undefined)
-      mutate(undefined, false)
+      reset()
     }
   }, [url])
 
   useEffect(() => {
     if (error && gameWindow) {
       gameWindow.close()
-      setGameWin(undefined)
+      reset()
     }
   }, [gameWindow, error])
   return (

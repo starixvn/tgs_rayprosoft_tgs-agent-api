@@ -70,10 +70,6 @@ export const usePlayerToken = (
           cache.set(ResultCacheKey, result)
           return result
         })
-        .catch((error) => {
-          console.warn("TODO", error)
-          return error
-        })
     },
     {
       initialData: keys && cached?.token ? cached : undefined
@@ -120,7 +116,7 @@ export const useLogout = ({ brandCode, currency, username }, playerToken) => {
         Token: playerToken
       }
     })
-      .then((response) => response.json())
+      .then(toDataOrError)
       .then((result) => {
         deletePlayerTokenCache({ brandCode, currency, username })
         return result

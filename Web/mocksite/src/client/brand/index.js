@@ -50,10 +50,23 @@ export const useBrandToken = ({ brandCode, currency }) => {
   }
 }
 
-const useApiKey = (code = TGS) => {
-  const store = {
-    TGS: "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV"
+const brands = [
+  {
+    code: "TGS",
+    apiKey: "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV"
+  },
+  {
+    code: "GPI",
+    apiKey: "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ"
   }
-  console.warn("TODO: add gpi api key")
-  return Reflect.get(store, code)
+]
+
+const useApiKey = (code) => {
+  let brand = brands.find((brand) => brand.code === code)
+
+  return brand?.apiKey ?? ""
+}
+
+export const useBrands = () => {
+  return brands
 }

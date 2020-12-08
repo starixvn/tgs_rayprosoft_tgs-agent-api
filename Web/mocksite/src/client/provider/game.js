@@ -14,12 +14,12 @@ export const useGameUrl = ({ brandCode, username, currency }, data) => {
     currency
   })
 
-  let url =
+  let keys =
     brandToken && playerToken && data?.gameProviderCode && data?.gameCode
       ? [`/api/game/geturl`, data]
       : undefined
 
-  let { data: result, mutate, ...rest } = useSWR(url, (url, data) => {
+  let { data: result, ...rest } = useSWR(keys, (url, data) => {
     return fetch(url, {
       method: "POST",
       headers: {
@@ -43,9 +43,7 @@ export const useGameUrl = ({ brandCode, username, currency }, data) => {
         }
       })
       .catch((error) => {
-        mutate(undefined, false)
         let { err, errmsg } = error
-        console.warn("err", err, "errmsg", errmsg)
         console.log("TODO: use err code to know which token expired?")
         // mutatePlayerToken()
         return Promise.reject(error)
