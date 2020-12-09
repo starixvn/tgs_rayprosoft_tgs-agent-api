@@ -1,18 +1,49 @@
 pipeline {
     agent any
 	environment {
-        registry = "https://registry.gitlab.com"
+        registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system"
         registryCredential = 'gitlab-personal-access-token'
         dockerImage = ''
     }
-	
-    stages {
+
+	stages {
+	    stage('Build') {
+            steps {
+                sh 'mvn -B'
+            }
+        }
 	    stage('docker login') {
 			steps {
 				sh  "sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r"  
 				echo "dotcover tgs.sln"
 			}
 		}
+		
+		stage('Cloning Git') {
+		  steps {
+			git 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git'
+		  }
+		}
+		stage('Building image') {
+		  steps {
+			script {
+			  dockerImage = docker.build -f "Apis/BackendOffice/Dockerfile" -t registry + ":$BUILD_NUMBER"
+			}
+		  }
+		}
+	
+	    stage('Deploy Image') {
+		  steps{
+			script {
+			  docker.withRegistry( '', registryCredential ) {
+				dockerImage.push()
+			  }
+			}
+		  }
+		}
+		
+		
+		/*
         stage('Checkout SCM') {
           steps {
             checkout([
@@ -25,14 +56,18 @@ pipeline {
              ])
            }
         }
+		*/
 		
 		stage ('Build docker image for backoffice.site') {
           steps {
                 script {
 				    sh "pwd"
 					sh "ls -l"
-					sh "sudo docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0 ."
-					sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0"
+					
+					docker.withRegistry('https://registry.gitlab.com', 'gitlab-api-token') {
+					  def customImage = docker.build("rayprosoft/turnkey-gaming-system/log-api:0.2.0")
+						customImage.push()
+					}
                 }
             }
         }
