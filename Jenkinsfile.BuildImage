@@ -25,7 +25,7 @@ pipeline {
 		  }
 		}
 		stage('Building image') {
-		  steps{
+		  steps {
 			script {
 			  dockerImage = docker.build -f "Apis/BackendOffice/Dockerfile" -t registry + ":$BUILD_NUMBER"
 			}
