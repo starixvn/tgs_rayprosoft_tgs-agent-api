@@ -28,7 +28,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     .Include(i => i.GameProviders)
                     .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
                     .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                    .Where(BrandId != null, l => l.Id == BrandId), true);
+                    .Where(BrandId != null, l => l.Id == BrandId));
 
             if (brand == null)
             {

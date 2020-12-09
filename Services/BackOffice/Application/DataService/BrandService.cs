@@ -15,9 +15,11 @@ namespace TGS.Services.BackOffice.Application.DataService
     public interface IBrandService
     {
         Task<Brand> GetBrandAsync(Expression<Func<Brand, bool>> predicate,
-            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null, bool tracking = false);
+            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null);
 
-        IQueryable<Brand> GetBrandsAsync(bool tracking = false);
+        IQueryable<Brand> GetBrandsAsync(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null,
+            bool tracking = false);
+
         Task CreateBrandAsync(CreateBrandRequest request);
         Task UpdateBrandAsync(Brand brand, UpdateBrandRequest request);
         Task ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request);
@@ -70,14 +72,9 @@ namespace TGS.Services.BackOffice.Application.DataService
         }
 
         Task<Brand> IBrandService.GetBrandAsync(Expression<Func<Brand, bool>> predicate,
-            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery, bool tracking)
+            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery)
         {
-            return GetEntityFirstOrDefaultAsync(predicate, preQuery, tracking);
-        }
-
-        IQueryable<Brand> IBrandService.GetBrandsAsync(bool tracking)
-        {
-            return GetQueriesAsync<Brand>(tracking);
+            return GetEntityFirstOrDefaultAsync(predicate, preQuery);
         }
 
         Task<bool> IBrandService.ExistsAsync(Expression<Func<Brand, bool>> predicate)
@@ -110,6 +107,12 @@ namespace TGS.Services.BackOffice.Application.DataService
 
             await UpdateEntityAsync(brand);
             await tran.CommitAsync();
+        }
+
+        IQueryable<Brand> IBrandService.GetBrandsAsync(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
+            bool tracking)
+        {
+            return GetQueriesAsync(preQuery, tracking);
         }
 
         private async Task<HashSet<BrandLanguage>> GenerateBrandLanguages(Brand brand, BrandRequest request)

@@ -20,7 +20,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers
         public override async Task<MessageResponse> Handle(UpdateBrandRequest request,
             CancellationToken cancellationToken)
         {
-            var brand = await _service.GetBrandAsync(q => q.Id == request.Id, tracking: true);
+            var brand = await _service.GetBrandAsync(q => q.Id == request.Id);
 
             if (brand == null)
             {

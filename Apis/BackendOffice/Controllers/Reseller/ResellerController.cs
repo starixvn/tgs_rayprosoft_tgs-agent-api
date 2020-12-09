@@ -117,7 +117,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         [Description("Update a Reseller")]
         public async Task<MessageResponse> UpdateResellerAsync(Guid id, UpdateResellerRequest request)
         {
-            var reseller = await _service.GetResellerAsync(q => q.Id == id, tracking: true);
+            var reseller = await _service.GetResellerAsync(q => q.Id == id);
 
             if (reseller == null)
             {

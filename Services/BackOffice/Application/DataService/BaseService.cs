@@ -25,17 +25,18 @@ namespace TGS.Services.BackOffice.Application.DataService
         }
 
         protected Task<T> GetEntityFirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate,
-            Func<IQueryable<T>, IQueryable<T>> preQuery, bool tracking) where T : class
+            Func<IQueryable<T>, IQueryable<T>> preQuery) where T : class
         {
-            var entity = tracking ? _repository.Set<T>() : _repository.Set<T>().AsNoTracking();
             preQuery ??= c => c;
 
-            return preQuery(entity).FirstOrDefaultAsync(predicate);
+            return preQuery(_repository.Set<T>()).FirstOrDefaultAsync(predicate);
         }
 
-        protected IQueryable<T> GetQueriesAsync<T>(bool tracking) where T : class
+        protected IQueryable<T> GetQueriesAsync<T>(Func<IQueryable<T>, IQueryable<T>> preQuery, bool tracking)
+            where T : class
         {
-            return tracking ? _repository.Set<T>() : _repository.Set<T>().AsNoTracking();
+            preQuery ??= c => c;
+            return tracking ? preQuery(_repository.Set<T>()) : preQuery(_repository.Set<T>()).AsNoTracking();
         }
 
         protected Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class
