@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.DataService;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduledHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduleHandlers
 {
     public class UpdateBrandGameProviderDefaultTimesHandler : Handler<UpdateDefaultTimesRequest, MessageResponse>
     {

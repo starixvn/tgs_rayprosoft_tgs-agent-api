@@ -26,7 +26,6 @@ namespace TGS.Services.BackOffice.Application.DataService
             UpdateDefaultTimesRequest request);
 
         Task ChangeStatusAsync(BrandGameProviderSchedule schedule, UpdateScheduleStatusRequest request);
-        Task<bool> ExistsAsync(Expression<Func<BrandGameProviderSchedule, bool>> predicate);
     }
 
     public class BrandGameProviderScheduleService : BaseService, IBrandGameProviderScheduleService
@@ -49,12 +48,6 @@ namespace TGS.Services.BackOffice.Application.DataService
             bool tracking)
         {
             return GetQueriesAsync<BrandGameProviderSchedule>(tracking);
-        }
-
-        Task<bool> IBrandGameProviderScheduleService.ExistsAsync(
-            Expression<Func<BrandGameProviderSchedule, bool>> predicate)
-        {
-            return ExistsAsync(predicate);
         }
 
         Task IBrandGameProviderScheduleService.ChangeStatusAsync(BrandGameProviderSchedule brandGameProvider,
