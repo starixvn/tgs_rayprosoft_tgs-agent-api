@@ -8,8 +8,17 @@ export const useGameProviderList = (
   { brandCode, username, currency } = {},
   { platform, language } = {}
 ) => {
-  let { token: brandToken } = useBrandToken({ brandCode, currency })
-  let { token: playerToken } = usePlayerToken({ brandCode, username, currency })
+  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+    brandCode,
+    currency
+  })
+  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+    brandCode,
+    username,
+    currency
+  })
+
+  console.warn("TODO: mutate invalid cache")
 
   let keys =
     brandToken && playerToken && platform && language && currency
@@ -52,14 +61,15 @@ export const useGameList = (
   { brandCode, username, currency },
   { gameProviderCode, platform, language }
 ) => {
-  let {
-    token: brandToken,
-    deleteCache: deleteBrandTokenCache
-  } = useBrandToken({ brandCode, currency })
-  let {
-    token: playerToken,
-    deleteCache: deletePlayerTokenCache
-  } = usePlayerToken({ brandCode, username, currency })
+  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+    brandCode,
+    currency
+  })
+  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+    brandCode,
+    username,
+    currency
+  })
 
   let keys =
     brandToken &&
@@ -106,10 +116,10 @@ export const useGameList = (
       })
         .then(toDataOrError)
         .catch((error) => {
-          deletePlayerTokenCache()
-          deleteBrandTokenCache()
+          mutatePlayerTokenCache()
+          mutateBrandTokenCache()
           console.error("TODO: mutate token when 401 error")
-          return error
+          return Promise.reject(error)
         })
     }
   )
