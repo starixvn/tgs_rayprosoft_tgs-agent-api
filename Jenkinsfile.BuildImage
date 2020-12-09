@@ -18,7 +18,7 @@ pipeline {
 		 */
 		docker.withRegistry('https://registry.gitlab.com', 'gitlab-api-token') {
 
-			def customImage = docker.build("rayprosoft/turnkey-gaming-system/log-api:$0.2.0")
+			def customImage = docker.build("rayprosoft/turnkey-gaming-system/log-api:0.2.0")
 
 			/* Push the container to the custom Registry */
 			customImage.push()
