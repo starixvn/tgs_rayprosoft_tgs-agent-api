@@ -1,12 +1,35 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3-alpine'
+            args '-v $HOME/.m2:/root/.m2'
+        }
+    }
 	environment {
         registry = "https://registry.gitlab.com"
         registryCredential = 'gitlab-personal-access-token'
         dockerImage = ''
     }
-	
-    stages {
+	node {
+		checkout scm
+		/*
+		 * In order to communicate with the MySQL server, this Pipeline explicitly
+		 * maps the port (`3306`) to a known port on the host machine.
+		 */
+		docker.withRegistry('https://registry.gitlab.com', 'gitlab-api-token') {
+
+			def customImage = docker.build("rayprosoft/turnkey-gaming-system/log-api:$0.2.0")
+
+			/* Push the container to the custom Registry */
+			customImage.push()
+		}
+	}
+	stages {
+	    stage('Build') {
+            steps {
+                sh 'mvn -B'
+            }
+        }
 	    stage('docker login') {
 			steps {
 				sh  "sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r"  
