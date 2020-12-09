@@ -46,9 +46,6 @@ pipeline {
 					  def customImage = docker.build("rayprosoft/turnkey-gaming-system/log-api:0.2.0")
 						customImage.push()
 					}
-				
-					#sh "sudo docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0 ."
-					#sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:0.2.0"
                 }
             }
         }
