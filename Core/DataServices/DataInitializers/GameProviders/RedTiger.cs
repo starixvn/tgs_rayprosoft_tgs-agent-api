@@ -63,6 +63,8 @@ namespace TGS.Core.DataServices.DataInitializers
 
             bool IGameProvider.SupportTestPlayer => true;
 
+            short IGameProvider.UniqueId => 999;
+
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new RedTigerConfiguration
             {
                 ServiceEndpointUrl = new("https://localhost:62331")

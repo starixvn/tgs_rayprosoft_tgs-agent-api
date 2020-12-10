@@ -10,13 +10,16 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<Game>.Configure(EntityTypeBuilder<Game> builder)
         {
             builder.ToTable("Games", "dbo");
-            BaseConfigureProperties(builder);
+            BaseConfigureProperties<Game, int>(builder);
 
-            builder.Property(c => c.Code)
+            builder.Property(e => e.Id)
+                .ValueGeneratedNever();
+
+            builder.Property(e => e.Code)
                 .HasColumnType(ColumnTypes.Nvarchar(128))
                 .IsRequired();
 
-            builder.Property(c => c.Status)
+            builder.Property(e => e.Status)
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
@@ -24,56 +27,56 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
-            builder.Property(c => c.Description)
+            builder.Property(e => e.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(128));
 
-            builder.Property(c => c.EndpointPath)
+            builder.Property(e => e.EndpointPath)
                 .HasColumnType(ColumnTypes.Nvarchar(2048));
 
-            builder.Property(c => c.RuleUrl)
+            builder.Property(e => e.RuleUrl)
                 .HasColumnType(ColumnTypes.Nvarchar(512));
 
-            builder.Property(c => c.Type)
+            builder.Property(e => e.Type)
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
-            builder.Property(c => c.PlatformType)
+            builder.Property(e => e.PlatformType)
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
-            builder.Property(c => c.SubGame)
+            builder.Property(e => e.SubGame)
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            builder.Property(c => c.HasTurnoverOnTieBet)
+            builder.Property(e => e.HasTurnoverOnTieBet)
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            builder.Property(c => c.AvailableCurrencies)
+            builder.Property(e => e.AvailableCurrencies)
                 .HasColumnType(ColumnTypes.Nvarchar(1024))
                 .IsRequired()
                 .HasDefaultValue(string.Empty);
 
-            builder.HasOne(p => p.GameProvider)
-                .WithMany(p => p.Games)
-                .HasForeignKey(p => p.GameProviderId);
+            builder.HasOne(e => e.GameProvider)
+                .WithMany(e => e.Games)
+                .HasForeignKey(e => e.GameProviderId);
 
-            builder.HasIndex(c => c.GameProviderId)
-                .IncludeProperties(c => new
+            builder.HasIndex(e => e.GameProviderId)
+                .IncludeProperties(e => new
                 {
-                    c.Id,
-                    c.Code,
-                    c.Name,
-                    c.ExternalId,
-                    c.PlatformType,
-                    c.Type,
-                    c.Status,
-                    c.AvailableCurrencies,
-                    c.EndpointPath,
-                    c.SubGame,
-                    c.HasTurnoverOnTieBet,
-                    c.RuleUrl,
-                    c.Description
+                    e.Id,
+                    e.Code,
+                    e.Name,
+                    e.ExternalId,
+                    e.PlatformType,
+                    e.Type,
+                    e.Status,
+                    e.AvailableCurrencies,
+                    e.EndpointPath,
+                    e.SubGame,
+                    e.HasTurnoverOnTieBet,
+                    e.RuleUrl,
+                    e.Description
                 });
         }
     }

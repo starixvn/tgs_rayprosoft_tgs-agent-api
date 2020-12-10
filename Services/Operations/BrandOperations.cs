@@ -31,7 +31,7 @@ namespace TGS.Services.Operations
         Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, Guid gameProviderId,
             PlatformType? platformType = null);
 
-        Task<CachedBrandGame> GetBrandGameAsync(Guid brandId, Guid gameProviderId, Guid gameId);
+        Task<CachedBrandGame> GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId);
 
         Task<string> GetTimeZoneByBrandIdAsync(Guid brandId);
 
@@ -47,7 +47,7 @@ namespace TGS.Services.Operations
 
         Task<Status?> GetBrandGameProviderStatusAsync(Guid brandId, Guid gameProviderId);
 
-        Task<GameStatus?> GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, Guid gameId);
+        Task<GameStatus?> GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, int gameId);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -167,7 +167,7 @@ namespace TGS.Services.Operations
                 .ToArray();
         }
 
-        async Task<CachedBrandGame> IBrandOperations.GetBrandGameAsync(Guid brandId, Guid gameProviderId, Guid gameId)
+        async Task<CachedBrandGame> IBrandOperations.GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId)
         {
             var games = await GetAndCachedBrandGamesAsync(brandId);
 
@@ -207,7 +207,7 @@ namespace TGS.Services.Operations
             return gameProvider?.BrandGameProviderStatus;
         }
 
-        async Task<GameStatus?> IBrandOperations.GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, Guid gameId)
+        async Task<GameStatus?> IBrandOperations.GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, int gameId)
         {
             var game = await _interface.GetBrandGameAsync(brandId, gameProviderId, gameId);
             return game?.BrandGameStatus;

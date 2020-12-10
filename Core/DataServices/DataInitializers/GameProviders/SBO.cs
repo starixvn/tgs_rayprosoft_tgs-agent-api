@@ -17,6 +17,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
+            private const int UniqueId = 1;
 
             public SBOGameProvider(IWebHostEnvironment env)
             {
@@ -64,6 +65,8 @@ namespace TGS.Core.DataServices.DataInitializers
             IGame[] IGameProvider.Games => _games;
 
             bool IGameProvider.AllowKickPlayer => true;
+
+            short IGameProvider.UniqueId => UniqueId;
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
                 new SBOConfiguration

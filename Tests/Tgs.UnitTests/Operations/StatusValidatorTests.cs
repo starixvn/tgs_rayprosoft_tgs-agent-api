@@ -186,7 +186,7 @@ namespace TGS.UnitTests.Operations
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<Guid>(),
-                It.IsAny<Guid>(),
+                It.IsAny<int>(),
                 It.IsAny<string>(), Array.Empty<Status>(), gameStatus);
 
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
@@ -199,7 +199,7 @@ namespace TGS.UnitTests.Operations
             Func<Task> action = async () => await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<Guid>(),
-                It.IsAny<Guid>(),
+                It.IsAny<int>(),
                 It.IsAny<string>(), status, Array.Empty<GameStatus>());
 
             action.Should().Throw<ArgumentException>().WithMessage("No status provided");
@@ -255,7 +255,7 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
-            var gameId = fixture.Create<Guid>();
+            var gameId = fixture.Create<int>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
@@ -299,7 +299,7 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
-            var gameId = fixture.Create<Guid>();
+            var gameId = fixture.Create<int>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
@@ -334,7 +334,7 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
-            var gameId = fixture.Create<Guid>();
+            var gameId = fixture.Create<int>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
@@ -378,7 +378,7 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
-            var gameId = fixture.Create<Guid>();
+            var gameId = fixture.Create<int>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
@@ -415,7 +415,7 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
-            var gameId = fixture.Create<Guid>();
+            var gameId = fixture.Create<int>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))
@@ -463,7 +463,7 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var brandId = fixture.Create<Guid>();
             var gpId = fixture.Create<Guid>();
-            var gameId = fixture.Create<Guid>();
+            var gameId = fixture.Create<int>();
             var externalGameId = fixture.Create<string>();
 
             _gameProviderOperationsMock.Setup(x => x.GetGameProviderStatusAsync(gpId))

@@ -38,7 +38,7 @@ namespace TGS.Core.DataServices.Bet.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ExternalRoundId = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GameId = table.Column<int>(type: "int", nullable: false),
                     GameName = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     GameType = table.Column<byte>(type: "tinyint", nullable: false),
                     GameProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),

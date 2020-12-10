@@ -7,7 +7,7 @@ CREATE OR ALTER PROCEDURE [dbo].[usp_Round_InsertRound]
         @roundId                        uniqueidentifier,
         @externalRoundId                nvarchar(255),
         @walletId                       uniqueidentifier,
-        @gameId                         uniqueidentifier,
+        @gameId                         int,
         @gameName                       nvarchar(255),
         @gameType                       smallint,
         @gameProviderId                 uniqueidentifier,

@@ -8,14 +8,14 @@ CREATE OR ALTER PROCEDURE [dbo].[usp_Localization_GetLocalizationByGameProviderI
 AS 
 BEGIN
     SET NOCOUNT ON
-    
+   
     SELECT          
-	    Id As [Value]
+	    CONVERT(nvarchar(36), Id) As [Value]
 	INTO #temp
 	FROM dbo.[Games] g
 	WHERE g.GameProviderId = @gameProviderId
     UNION ALL
-    SELECT @gameProviderId
+    SELECT CONVERT(nvarchar(36), @gameProviderId)
 
 	SELECT DISTINCT
 		Context,

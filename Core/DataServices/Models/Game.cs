@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class Game : BaseEntity
+    public class Game : BaseEntity<int>
     {
         public GameStatus Status { get; set; }
 
@@ -28,12 +28,12 @@ namespace TGS.Core.DataServices.Models
 
         public bool HasTurnoverOnTieBet { get; set; }
 
-        public virtual ICollection<BrandGame> Brands { get; set; }
-
         /// <summary>
         /// Currencies that the game supports, recorded by csv format
         /// Empty for all currencies that game provider has.
         /// </summary>
         public string AvailableCurrencies { get; set; }
+        
+        public virtual ICollection<BrandGame> Brands { get; set; }
     }
 }

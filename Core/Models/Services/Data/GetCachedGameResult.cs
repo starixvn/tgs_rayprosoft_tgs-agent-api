@@ -5,7 +5,7 @@ namespace TGS.Core.Models.Services.Data
 {
     public record GetCachedGameResult
     {
-        public Guid Id { get; init; }
+        public int Id { get; init; }
         public string Code { get; init; }
         public string Name { get; init; }
         public string Description { get; init; }

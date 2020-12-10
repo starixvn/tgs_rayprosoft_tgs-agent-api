@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class Licensee : BaseEntity
+    public class Licensee : BaseEntity<Guid>
     {
         public Status Status { get; set; }
 
