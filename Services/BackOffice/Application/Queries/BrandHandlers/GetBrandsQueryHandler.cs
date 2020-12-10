@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.DataService.Services;
+using TGS.Services.BackOffice.Application.DataService;
 using TGS.Services.BackOffice.Application.Models.Brand;
 
 namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers

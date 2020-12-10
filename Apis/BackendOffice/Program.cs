@@ -1,12 +1,7 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Bet;
-using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -15,8 +10,6 @@ namespace TGS.Apis.BackendOffice
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-
-            await ExecuteMigrationsAndSeedingsAsync(host.Services);
 
             await host.RunAsync();
         }
@@ -33,23 +26,6 @@ namespace TGS.Apis.BackendOffice
                     builder.AddDebug();
                     builder.AddConsole();
                 });
-        }
-
-        private static async Task ExecuteMigrationsAndSeedingsAsync(IServiceProvider serviceProvider)
-        {
-            using var scope = serviceProvider.CreateScope();
-            var sp = scope.ServiceProvider;
-            var env = sp.GetRequiredService<IWebHostEnvironment>();
-
-            await using (var tgsRepo = sp.GetRequiredService<ITgsRepository>())
-            {
-                await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
-            }
-
-            await using (var betRepo = sp.GetRequiredService<IBetRepository>())
-            {
-                await betRepo.ExecuteMigrationAndSeedingAsync(env);
-            }
         }
     }
 }

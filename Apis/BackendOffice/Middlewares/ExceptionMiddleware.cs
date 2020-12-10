@@ -20,13 +20,14 @@ namespace TGS.Apis.BackendOffice.Middlewares
     public class ExceptionMiddleware : IMiddleware
     {
         private const int ResMessageSizeLimit = 1000012;
-        private readonly IRequestAnalyzer _requestAnalyzer;
-        private readonly ITgsLog _tgsLog;
         private readonly IJsonSerializationProvider _json;
-        private readonly IStreamToString _streamToString;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
+        private readonly IRequestAnalyzer _requestAnalyzer;
+        private readonly IStreamToString _streamToString;
+        private readonly ITgsLog _tgsLog;
 
-        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json, IStreamToString streamToString)
+        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json,
+            IStreamToString streamToString)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
@@ -76,14 +77,14 @@ namespace TGS.Apis.BackendOffice.Middlewares
             {
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
                 adminLogEvent.StackTrace = ex.StackTrace.NoLongerThan(4000);
-                adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
+                adminLogEvent.responsecode = (int) HttpStatusCode.InternalServerError;
 
-                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                httpContext.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
                 httpContext.Response.ContentType = "application/json";
 
                 var message = new ErrorDetails
                 {
-                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Message = "Internal Server Error."
                 };
 
@@ -106,7 +107,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 var sw = Stopwatch.StartNew();
                 await next(context);
                 sw.Stop();
-                var ms = (int)sw.ElapsedMilliseconds;
+                var ms = (int) sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 var message = await _streamToString.GetString(context.Response.Body);
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
@@ -116,9 +117,10 @@ namespace TGS.Apis.BackendOffice.Middlewares
             finally
             {
                 context.Response.Body = originalBodyStream;
-                responseStream.Dispose();
+                await responseStream.DisposeAsync();
             }
         }
+
         private async Task<string> GetRequestBodyAsync(HttpContext context)
         {
             context.Request.EnableBuffering();

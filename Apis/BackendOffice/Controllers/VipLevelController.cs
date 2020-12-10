@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.VipLevel;
@@ -22,8 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public VipLevelController(
             ITgsQueries<VipLevel> queries,
-            ITgsCommands<VipLevel> commands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<VipLevel> commands)
         {
             _queries = queries;
             _commands = commands;

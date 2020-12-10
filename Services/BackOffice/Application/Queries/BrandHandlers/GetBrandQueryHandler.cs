@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Services.BackOffice.Application.DataService.Services;
+using TGS.Services.BackOffice.Application.DataService;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Resources;
 
@@ -28,7 +28,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     .Include(i => i.GameProviders)
                     .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
                     .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                    .Where(BrandId != null, l => l.Id == BrandId), true);
+                    .Where(BrandId != null, l => l.Id == BrandId));
 
             if (brand == null)
             {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
@@ -24,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsCommands<Announcement> _commands;
         private readonly ITgsQueries<Announcement> _queries;
 
-        private readonly Dictionary<string, dynamic> _typeDictionary = new Dictionary<string, dynamic>
+        private readonly Dictionary<string, dynamic> _typeDictionary = new()
         {
             {
                 "pass", new
@@ -57,8 +56,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public AnnouncementController(
             ITgsQueries<Announcement> queries,
-            ITgsCommands<Announcement> commands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<Announcement> commands)
         {
             _queries = queries;
             _commands = commands;

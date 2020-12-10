@@ -25,12 +25,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new ResellerController(
-                _resellerServiceMock.Object,
-                HttpContextAccessorMock.Object);
+                _resellerServiceMock.Object);
         }
 
         private ResellerController _controller;
-        private readonly Mock<IResellerService> _resellerServiceMock = new Mock<IResellerService>();
+        private readonly Mock<IResellerService> _resellerServiceMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -135,7 +134,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<UpdateResellerRequest>();
 
             _resellerServiceMock.Setup(s => s.GetResellerAsync(It.IsAny<Expression<Func<Reseller, bool>>>(),
-                    It.IsAny<Func<IQueryable<Reseller>, IQueryable<Reseller>>>(), true))
+                    It.IsAny<Func<IQueryable<Reseller>, IQueryable<Reseller>>>()))
                 .Returns(Task.FromResult(reseller));
 
             _resellerServiceMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Reseller, bool>>>()))
@@ -145,7 +144,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             response.Valid.Should().BeTrue();
             _resellerServiceMock.Verify(s => s.GetResellerAsync(It.IsAny<Expression<Func<Reseller, bool>>>(),
-                It.IsAny<Func<IQueryable<Reseller>, IQueryable<Reseller>>>(), true));
+                It.IsAny<Func<IQueryable<Reseller>, IQueryable<Reseller>>>()));
             _resellerServiceMock.Verify(p => p.UpdateResellerAsync(It.Is<Reseller>(r =>
                     r.Name == reseller.Name),
                 It.IsAny<UpdateResellerRequest>(),
@@ -161,7 +160,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _resellerServiceMock.Setup(s => s.GetResellerAsync(
                     It.IsAny<Expression<Func<Reseller, bool>>>(),
                     It.IsAny<Func<IQueryable<Reseller>,
-                        IQueryable<Reseller>>>(), true))
+                        IQueryable<Reseller>>>()))
                 .Returns(Task.FromResult<Reseller>(null));
 
             _resellerServiceMock.Setup(s =>
@@ -175,7 +174,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _resellerServiceMock.Verify(s => s.GetResellerAsync(
                 It.IsAny<Expression<Func<Reseller, bool>>>(),
                 It.IsAny<Func<IQueryable<Reseller>,
-                    IQueryable<Reseller>>>(), true));
+                    IQueryable<Reseller>>>()));
             _resellerServiceMock.Verify(p => p.UpdateResellerAsync(It.Is<Reseller>(r =>
                     r.Name == reseller.Name),
                 It.IsAny<UpdateResellerRequest>(),
@@ -191,7 +190,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _resellerServiceMock.Setup(s => s.GetResellerAsync(
                     It.IsAny<Expression<Func<Reseller, bool>>>(),
                     It.IsAny<Func<IQueryable<Reseller>,
-                        IQueryable<Reseller>>>(), true))
+                        IQueryable<Reseller>>>()))
                 .Returns(Task.FromResult(reseller));
 
             _resellerServiceMock.Setup(s =>
@@ -205,7 +204,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _resellerServiceMock.Verify(s => s.GetResellerAsync(
                 It.IsAny<Expression<Func<Reseller, bool>>>(),
                 It.IsAny<Func<IQueryable<Reseller>,
-                    IQueryable<Reseller>>>(), true));
+                    IQueryable<Reseller>>>()));
             _resellerServiceMock.Verify(p => p.UpdateResellerAsync(It.Is<Reseller>(r =>
                     r.Name == reseller.Name),
                 It.IsAny<UpdateResellerRequest>(),

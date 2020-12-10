@@ -28,7 +28,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
             if (request.ShowAll || request.Rows == 0)
             {
-                var allResult = result.ToArray();
+                var allResult = await result.ToArrayAsync();
                 return new PagedResponse<TModel>
                 {
                     Valid = true,

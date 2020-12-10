@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Core.DataServices.Base.Extensions;
@@ -29,8 +28,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsQueries<User> userQueries,
             ITgsQueries<Department> departmentQueries,
             ITgsQueries<Role> roleQueries,
-            ITgsCommands<User> userCommands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<User> userCommands)
         {
             _passwordHandler = passwordHandler;
             _userQueries = userQueries;

@@ -135,20 +135,31 @@ namespace TGS.Core.DataServices
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) => 
-            Database.BeginTransactionAsync(level);
+        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
+        {
+            return Database.BeginTransactionAsync(level);
+        }
 
-        IDbConnection IBaseRepository.GetDbConnection() => 
-            Database.GetDbConnection();
+        IDbConnection IBaseRepository.GetDbConnection()
+        {
+            return Database.GetDbConnection();
+        }
 
-        Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
+        Task IBaseRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
+        }
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
-            this.BulkInsertAsync(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
+        {
+            return this.BulkInsertAsync(entities, bulkConfig, progress);
+        }
 
         Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
-            Action<decimal> progress) =>
-            this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+            Action<decimal> progress)
+        {
+            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        }
 
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
@@ -167,11 +178,15 @@ namespace TGS.Core.DataServices
             }
         }
 
-        DbSet<T> IBaseRepository.Set<T>() => 
-            Set<T>();
+        DbSet<T> IBaseRepository.Set<T>()
+        {
+            return Set<T>();
+        }
 
-        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => 
-            base.Entry(entity);
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity)
+        {
+            return base.Entry(entity);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -198,6 +213,7 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new BrandLanguageMap());
             modelBuilder.ApplyConfiguration(new BrandGameMap());
             modelBuilder.ApplyConfiguration(new BrandGameProviderMap());
+            modelBuilder.ApplyConfiguration(new BrandGameProviderScheduledMap());
 
             modelBuilder.ApplyConfiguration(new PlayerMap());
 

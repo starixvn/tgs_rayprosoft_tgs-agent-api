@@ -32,7 +32,7 @@ namespace TGS.Services.BackOffice.Validation.Brand
                 .WithMessage(Application.Resources.Brand.ConfigurationDataRequired);
 
             RuleFor(x => x.Configuration.IsDefault)
-                .NotEmpty()
+                .NotNull()
                 .WithMessage(Application.Resources.Brand.IsDefaultRequired);
         }
     }

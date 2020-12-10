@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentVendor;
@@ -22,8 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 
         public PaymentVendorController(
             ITgsQueries<PaymentVendor> queries,
-            ITgsCommands<PaymentVendor> commands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<PaymentVendor> commands)
         {
             _queries = queries;
             _commands = commands;

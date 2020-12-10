@@ -32,7 +32,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly IStationLetterService _stationLetterService;
 
         private readonly Dictionary<string, StationLetterStatus> _typeDictionary =
-            new Dictionary<string, StationLetterStatus>
+            new()
             {
                 {"pass", StationLetterStatus.Published},
                 {"reject", StationLetterStatus.Rejected}
@@ -46,8 +46,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsCommands<StationLetter> commands,
             ITgsCommands<StationLetterPlayer> playerCommands,
             IUploadService uploadService,
-            IStationLetterService stationLetterService,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            IStationLetterService stationLetterService)
         {
             _queries = queries;
             _playerQueries = playerQueries;
