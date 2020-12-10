@@ -260,13 +260,14 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("DefaultLanguageCode");
 
                     b.HasIndex("GameProviderConfigurationId");
 
                     b.HasIndex("GameProviderId");
+
+                    b.HasIndex("BrandId", "GameProviderId")
+                        .IsUnique();
 
                     b.ToTable("BrandGameProviders", "dbo");
                 });

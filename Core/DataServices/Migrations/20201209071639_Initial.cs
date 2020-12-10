@@ -1431,10 +1431,11 @@ namespace TGS.Core.DataServices.Migrations
                 column: "CurrencyCode");
 
             migrationBuilder.CreateIndex(
-                "IX_BrandGameProviders_BrandId",
+                "IX_BrandGameProviders_BrandId_GameProviderId",
                 schema: "dbo",
                 table: "BrandGameProviders",
-                column: "BrandId");
+                columns: new[] {"BrandId", "GameProviderId"},
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 "IX_BrandGameProviders_DefaultLanguageCode",

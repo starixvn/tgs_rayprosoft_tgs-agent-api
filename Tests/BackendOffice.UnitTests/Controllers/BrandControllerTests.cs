@@ -93,7 +93,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         [Test]
-        public async Task Can_Create_Licensee()
+        public async Task Can_Create_Brand()
         {
             var request = new Fixture().Create<CreateBrandRequest>();
 
@@ -108,7 +108,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         [Test]
-        public async Task Can_Update_Licensee()
+        public async Task Can_Update_Brand()
         {
             var licensee = CreateBrandModelFixture().Create<BrandModel>();
             var request = new Fixture().Create<UpdateBrandRequest>();

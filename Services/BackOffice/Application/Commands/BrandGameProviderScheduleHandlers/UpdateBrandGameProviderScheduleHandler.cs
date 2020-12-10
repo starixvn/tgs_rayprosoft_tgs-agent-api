@@ -21,7 +21,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderSchedule
         public override async Task<MessageResponse> Handle(UpdateScheduleRequest request,
             CancellationToken cancellationToken)
         {
-            var schedule = await _service.GetBrandGameProviderScheduleAsync(q => q.Id == request.Id, tracking: true);
+            var schedule = await _service.GetBrandGameProviderScheduleAsync(q => q.Id == request.Id);
 
             if (schedule == null)
             {

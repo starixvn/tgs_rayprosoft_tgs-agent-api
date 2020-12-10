@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201208090054_Initial")]
+    [Migration("20201209071639_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -262,13 +262,14 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("DefaultLanguageCode");
 
                     b.HasIndex("GameProviderConfigurationId");
 
                     b.HasIndex("GameProviderId");
+
+                    b.HasIndex("BrandId", "GameProviderId")
+                        .IsUnique();
 
                     b.ToTable("BrandGameProviders", "dbo");
                 });

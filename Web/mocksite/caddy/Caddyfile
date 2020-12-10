@@ -12,7 +12,13 @@
 # Set this path to your site's directory.
 root * /usr/share/caddy
 
-try_files {path} /index.html
+@try_files {
+    not path /api/* /healthcheck
+    file {
+        try_files {path} /index.html
+    }
+}
+rewrite @try_files {http.matchers.file.relative}
 
 # Enable the static file server.
 file_server

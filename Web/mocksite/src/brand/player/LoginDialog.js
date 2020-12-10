@@ -120,7 +120,7 @@ const LoginDialog = ({
       }
     }
   }, [error])
-
+  console.log("error", error)
   return (
     <Dialog.Modal
       showActionButtons

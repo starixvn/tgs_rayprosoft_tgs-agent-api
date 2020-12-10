@@ -14,7 +14,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
     public interface IResellerService
     {
         Task<Reseller> GetResellerAsync(Expression<Func<Reseller, bool>> predicate,
-            Func<IQueryable<Reseller>, IQueryable<Reseller>> preQuery = null, bool tracking = false);
+            Func<IQueryable<Reseller>, IQueryable<Reseller>> preQuery = null);
 
         IQueryable<Reseller> GetResellersAsync(bool tracking = false);
         Task CreateResellerAsync(CreateResellerRequest request, string username);
@@ -59,12 +59,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         }
 
         Task<Reseller> IResellerService.GetResellerAsync(Expression<Func<Reseller, bool>> predicate,
-            Func<IQueryable<Reseller>, IQueryable<Reseller>> preQuery, bool tracking)
+            Func<IQueryable<Reseller>, IQueryable<Reseller>> preQuery)
         {
-            var reseller = tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
             preQuery ??= c => c;
 
-            return preQuery(reseller).FirstOrDefaultAsync(predicate);
+            return preQuery(_repository.Resellers).FirstOrDefaultAsync(predicate);
         }
 
         Task IResellerService.UpdateResellerAsync(Reseller reseller, UpdateResellerRequest request,

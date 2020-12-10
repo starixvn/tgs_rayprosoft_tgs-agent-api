@@ -5,12 +5,18 @@ import {
   Set,
   Button,
   Stack,
+  FieldStack,
   Box,
   PageWithHeader,
   TopNav,
   DropdownMenu,
   Group,
-  Card
+  Card,
+  Dialog,
+  Modal,
+  Text,
+  FieldWrapper,
+  InputField
 } from "bumbag"
 import {
   Switch,
@@ -35,7 +41,14 @@ import PlatformDropdownMenu from "../../platform/DropdownMenu"
 import LangDropdownMenu from "../../language/DropdownMenu"
 import { GameProviderDropdownMenu } from "../../game/provider/DropdownMenu"
 import { GameList } from "../../game/List"
-import { useLogout, usePlayerToken } from "../../client/brand/player"
+import {
+  useChangePlayerPassword,
+  useLogout,
+  usePlayerInfo,
+  usePlayerToken,
+  useUpdatePlayerInfo
+} from "../../client/brand/player"
+import { useForm } from "react-hook-form"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
   return (
@@ -51,36 +64,16 @@ const Body = ({ brandToken }) => {
   let platform = usePlatform()
   let language = useLang()
 
-  let { token: playerToken } = usePlayerToken({ brandCode, currency, username })
   let [gameProviderCode, setGameProviderCode] = useState()
-
-  let [token, setLogoutToken] = useState()
-  let { result, error, isLoading, ...rest } = useLogout(
-    { brandCode, currency, username },
-    token
-  )
-  let history = useHistory()
-  useEffect(() => {
-    // if (result) {
-    //   history.push(`/${brandCode}/${currency}`)
-    // }
-  }, [result])
 
   return (
     <Stack padding="major-1" spacing="major-1">
       <Set>
-        <DropdownMenu
-          menu={
-            <PlayerMenu
-              logout={() => setLogoutToken(playerToken)}
-              isLoading={isLoading}
-            />
-          }
-        >
-          <Button iconAfter="chevron-down" isLoading={isLoading}>
-            {username}
-          </Button>
-        </DropdownMenu>
+        <PlayerDropdownMenu
+          brandCode={brandCode}
+          currency={currency}
+          username={username}
+        />
         <GameProviderDropdownMenu
           brandCode={brandCode}
           currency={currency}
@@ -106,10 +99,274 @@ const Body = ({ brandToken }) => {
   )
 }
 
-const PlayerMenu = ({ logout }) => {
+const PlayerDropdownMenu = ({ brandCode, currency, username }) => {
+  let { token: playerToken, error: playerTokenError } = usePlayerToken({
+    brandCode,
+    currency,
+    username
+  })
+
+  let [token, setLogoutToken] = useState()
+  let { result, error, isLoading, ...rest } = useLogout(
+    { brandCode, currency, username },
+    token
+  )
+  let history = useHistory()
+  useEffect(() => {
+    if (result) {
+      history.push(`/${brandCode}/${currency}`)
+    }
+  }, [result])
+
+  useEffect(() => {
+    if (playerTokenError) {
+      history.push(`/${brandCode}/${currency}`)
+    }
+  }, [playerTokenError])
+
+  const viewInfoDialog = Modal.useState()
+  const editInfoDialog = Modal.useState()
+  const changePasswordDialog = Modal.useState()
+
   return (
     <>
+      <DropdownMenu
+        menu={
+          <PlayerMenu
+            playerInfoDialog={viewInfoDialog}
+            editPlayerInfoDialog={editInfoDialog}
+            editPasswordDialog={changePasswordDialog}
+            logout={() => setLogoutToken(playerToken)}
+          />
+        }
+      >
+        <Button iconAfter="chevron-down" isLoading={isLoading}>
+          {username}
+        </Button>
+      </DropdownMenu>
+      {viewInfoDialog.visible && (
+        <ViewInfoDialog
+          brandCode={brandCode}
+          currency={currency}
+          username={username}
+          dialog={viewInfoDialog}
+        />
+      )}
+      {editInfoDialog.visible && (
+        <EditInfoDialog
+          brandCode={brandCode}
+          currency={currency}
+          username={username}
+          dialog={editInfoDialog}
+        />
+      )}
+      {changePasswordDialog.visible && (
+        <ChangePasswordDialog
+          brandCode={brandCode}
+          currency={currency}
+          username={username}
+          dialog={changePasswordDialog}
+        />
+      )}
+    </>
+  )
+}
+
+const PlayerMenu = ({
+  playerInfoDialog,
+  editPlayerInfoDialog,
+  editPasswordDialog,
+  logout
+}) => {
+  return (
+    <>
+      <DropdownMenu.Item onClick={playerInfoDialog.show}>
+        View Info
+      </DropdownMenu.Item>
+      <DropdownMenu.Item onClick={editPlayerInfoDialog.show}>
+        Edit Info
+      </DropdownMenu.Item>
+      <DropdownMenu.Item onClick={editPasswordDialog.show}>
+        Change Password
+      </DropdownMenu.Item>
       <DropdownMenu.Item onClick={logout}>Logout</DropdownMenu.Item>
+    </>
+  )
+}
+
+const ViewInfoDialog = ({ brandCode, currency, username, dialog }) => {
+  let { data = {} } = usePlayerInfo({ brandCode, currency, username })
+  return (
+    <Dialog.Modal title={username} showCloseButton {...dialog}>
+      <Stack>
+        <FieldStack orientation="horizontal">
+          <FieldWrapper label="Username">
+            <Text.Block>{data?.username}</Text.Block>
+          </FieldWrapper>
+          <FieldWrapper label="Realname">
+            <Text.Block>{data?.realname}</Text.Block>
+          </FieldWrapper>
+        </FieldStack>
+
+        <FieldWrapper label="Phone">
+          <Text.Block>{data?.phone}</Text.Block>
+        </FieldWrapper>
+        <FieldWrapper label="Email">
+          <Text.Block>{data?.email}</Text.Block>
+        </FieldWrapper>
+        <FieldWrapper label="qq">
+          <Text.Block>{data?.qq}</Text.Block>
+        </FieldWrapper>
+        <FieldWrapper label="wechat">
+          <Text.Block>{data?.wechat}</Text.Block>
+        </FieldWrapper>
+      </Stack>
+    </Dialog.Modal>
+  )
+}
+
+const EditInfoDialog = ({ brandCode, currency, username, dialog }) => {
+  let { data = {} } = usePlayerInfo({ brandCode, currency, username })
+  let { register, handleSubmit, watch, setError, errors } = useForm()
+  let [formData, setSubmit] = useState()
+  let { result, isLoading, ...rest } = useUpdatePlayerInfo(
+    { brandCode, currency, username },
+    formData
+  )
+
+  const onSubmit = handleSubmit(setSubmit)
+
+  const reset = () => {
+    setSubmit(undefined)
+  }
+
+  useEffect(() => {
+    if (result) {
+      reset()
+      dialog.hide()
+    }
+  }, [result])
+
+  return (
+    <Dialog.Modal
+      title={username}
+      showCloseButton
+      showActionButtons
+      actionButtonsProps={{
+        isLoading,
+        onClickSubmit: onSubmit
+      }}
+      {...dialog}
+    >
+      <form onSubmit={onSubmit}>
+        <FieldStack>
+          <FieldStack orientation="horizontal">
+            <InputField
+              name="username"
+              inputRef={register}
+              defaultValue={data?.username}
+              label="Username"
+            />
+            <InputField
+              name="realname"
+              inputRef={register}
+              defaultValue={data?.realname}
+              label="Realname"
+            />
+          </FieldStack>
+          <InputField
+            name="phone"
+            inputRef={register}
+            defaultValue={data?.phone}
+            label="Phone"
+          />
+          <InputField
+            name="email"
+            type="email"
+            inputRef={register}
+            defaultValue={data?.email}
+            label="Email"
+          />
+          <InputField
+            name="qq"
+            inputRef={register}
+            defaultValue={data?.qq}
+            label="QQ"
+          />
+          <InputField
+            name="Wechat"
+            inputRef={register}
+            defaultValue={data?.wechat}
+            label="Wechat"
+          />
+        </FieldStack>
+      </form>
+    </Dialog.Modal>
+  )
+}
+
+const ChangePasswordDialog = ({ brandCode, currency, username, dialog }) => {
+  let { register, handleSubmit, watch, setError, errors } = useForm()
+  let [formData, setSubmit] = useState()
+  let { result, error, isLoading, mutate, ...rest } = useChangePlayerPassword(
+    { brandCode, currency, username },
+    formData
+  )
+
+  const onSubmit = handleSubmit(setSubmit)
+
+  const reset = () => {
+    setSubmit(undefined)
+    mutate(undefined, false)
+  }
+
+  useEffect(() => {
+    if (result) {
+      reset()
+      dialog.hide()
+    }
+  }, [result])
+
+  return (
+    <>
+      <Dialog.Modal
+        title={username}
+        showCloseButton
+        showActionButtons
+        actionButtonsProps={{
+          isLoading,
+          onClickSubmit: onSubmit
+        }}
+        {...dialog}
+      >
+        <FieldStack>
+          <InputField name="oldpwd" inputRef={register} label="Old Password" />
+          <InputField
+            name="newpwd"
+            inputRef={register({ required: true })}
+            label="New Password"
+          />
+          <InputField
+            name="confirmpwd"
+            inputRef={register({ required: true })}
+            label="Confirm Password"
+          />
+        </FieldStack>
+      </Dialog.Modal>
+      {error && (
+        <Modal.State visible={!!error}>
+          <Modal.Dialog
+            title="Error"
+            showCloseButton
+            type="warning"
+            onClickClose={(event) => {
+              reset()
+            }}
+          >
+            <Text.Block>{JSON.stringify(error)}</Text.Block>
+          </Modal.Dialog>
+        </Modal.State>
+      )}
     </>
   )
 }

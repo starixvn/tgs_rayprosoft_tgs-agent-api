@@ -15,9 +15,11 @@ namespace TGS.Services.BackOffice.Application.DataService
         Task<BrandGameProviderSchedule> GetBrandGameProviderScheduleAsync(
             Expression<Func<BrandGameProviderSchedule, bool>> predicate,
             Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery =
-                null, bool tracking = false);
+                null);
 
-        IQueryable<BrandGameProviderSchedule> GetBrandGameProviderSchedulesAsync(bool tracking = false);
+        IQueryable<BrandGameProviderSchedule> GetBrandGameProviderSchedulesAsync(
+            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery = null,
+            bool tracking = false);
 
         Task UpdateBrandGameProviderScheduleAsync(BrandGameProviderSchedule schedule,
             UpdateScheduleRequest request);
@@ -39,15 +41,15 @@ namespace TGS.Services.BackOffice.Application.DataService
 
         Task<BrandGameProviderSchedule> IBrandGameProviderScheduleService.GetBrandGameProviderScheduleAsync(
             Expression<Func<BrandGameProviderSchedule, bool>> predicate,
-            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery, bool tracking)
+            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery)
         {
-            return GetEntityFirstOrDefaultAsync(predicate, preQuery, tracking);
+            return GetEntityFirstOrDefaultAsync(predicate, preQuery);
         }
 
         IQueryable<BrandGameProviderSchedule> IBrandGameProviderScheduleService.GetBrandGameProviderSchedulesAsync(
-            bool tracking)
+            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery, bool tracking)
         {
-            return GetQueriesAsync<BrandGameProviderSchedule>(tracking);
+            return GetQueriesAsync(preQuery, tracking);
         }
 
         Task IBrandGameProviderScheduleService.ChangeStatusAsync(BrandGameProviderSchedule brandGameProvider,

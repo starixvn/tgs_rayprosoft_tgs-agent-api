@@ -33,8 +33,8 @@ services:
     networks:
       tgs:
     depends_on:
-      - backoffice-api
       - backoffice-site
+      - mocksite
 
   # Monitoring
   prometheus:
@@ -73,6 +73,21 @@ services:
     networks:
       tgs:
 
+  mocksite:
+    build:
+      context: ./Web/mocksite
+      dockerfile: Dockerfile
+    image: mocksite
+    container_name: mocksite
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mocksite.rule=Host(`mocksite.localhost`)
+      - traefik.http.routers.mocksite.entrypoints=web
+    networks:
+      tgs:
+    depends_on:
+      - operator-api
+
   backoffice-site:
     build:
       context: ./Web/backoffice
@@ -83,8 +98,6 @@ services:
       - traefik.enable=true
       - traefik.http.routers.backoffice-site.rule=Host(`backoffice.localhost`)
       - traefik.http.routers.backoffice-site.entrypoints=web
-    # ports:
-    #   - 8080:80
     networks:
       tgs:
     depends_on:
@@ -150,6 +163,10 @@ services:
       context: .
       dockerfile: Apis/OperatorApi/Dockerfile
     image: operator-api
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.operator-api.rule=Host(`mocksite.localhost`) && PathPrefix(`/api`)
+      - traefik.http.routers.operator-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
     # For crash debug
@@ -158,8 +175,6 @@ services:
       - 32670:80
     networks:
       tgs:
-        aliases:
-          - operator.api
     depends_on:
       - sqlserver
       - game-sbo

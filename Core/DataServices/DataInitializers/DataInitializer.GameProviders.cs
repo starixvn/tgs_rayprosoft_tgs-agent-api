@@ -73,7 +73,7 @@ namespace TGS.Core.DataServices.DataInitializers
             public BaseCodeMapper(string code, string externalCode)
             {
                 _code = code;
-                _externalCode = externalCode ?? code;
+                _externalCode = externalCode.IsNullOrEmpty() ? code : externalCode;
             }
 
             string ICodeMapper.Code => _code;

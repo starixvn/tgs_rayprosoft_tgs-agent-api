@@ -137,7 +137,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 queryString = "&oddstyle=MY&theme=sbo&oddsmode=double";
             }
 
-            return $"https: //{url}?device={device}&lang={cultureCode}&{queryString}";
+            return $"{url}&device={device}&lang={cultureCode}&{queryString}";
         }
     }
 }

@@ -18,7 +18,8 @@ BEGIN
         [AutoCloseRound],
         [SupportTestPlayer],
         [PlaceBetTimeout],
-        [SettleBetTimeout]
+        [SettleBetTimeout],
+        [AllowKickPlayer]
     FROM [dbo].[GameProviders]  
     WHERE [Id] = @gameProviderId
 END

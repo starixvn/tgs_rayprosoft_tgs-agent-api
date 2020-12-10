@@ -2,6 +2,10 @@ import useSWR, { cache } from "swr"
 import { toDataOrError } from "../response"
 import { useBrandToken } from "./index"
 
+export const useBrandPlayerList = ({ brandCode, currency }) => {
+  //TODO:
+}
+
 const DefaultPassword = "TgsP@ssw0rd"
 const playerTokenCacheKey = ({ brandCode, currency, username }) =>
   `playerToken:${brandCode}:${currency}:${username}`
@@ -149,6 +153,120 @@ export const useCaptcha = ({ brandCode, currency }) => {
 
   return {
     ...data,
+    ...rest
+  }
+}
+
+export const usePlayerInfo = ({ brandCode, currency, username } = {}) => {
+  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+    brandCode,
+    currency
+  })
+  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+    brandCode,
+    username,
+    currency
+  })
+
+  let keys =
+    brandToken && playerToken
+      ? [`/api/player/info`, brandCode, currency, username]
+      : undefined
+
+  let { data, ...rest } = useSWR(keys, (url, brandCode, currency, username) => {
+    return fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brandToken}`,
+        Token: playerToken
+      }
+    }).then(toDataOrError)
+  })
+
+  return {
+    data: data?.data,
+    ...rest
+  }
+}
+
+export const useUpdatePlayerInfo = (
+  { brandCode, currency, username } = {},
+  formData
+) => {
+  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+    brandCode,
+    currency
+  })
+  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+    brandCode,
+    username,
+    currency
+  })
+
+  let keys =
+    brandToken && playerToken && formData
+      ? [`/api/player/update`, brandCode, currency, username, formData]
+      : undefined
+
+  let { data: result, ...rest } = useSWR(
+    keys,
+    (url, brandCode, currency, username, formData) => {
+      return fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${brandToken}`,
+          Token: playerToken
+        },
+        body: JSON.stringify(formData)
+      }).then(toDataOrError)
+    }
+  )
+
+  return {
+    result,
+    isLoading: keys && !result,
+    ...rest
+  }
+}
+
+export const useChangePlayerPassword = (
+  { brandCode, currency, username } = {},
+  formData
+) => {
+  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+    brandCode,
+    currency
+  })
+  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+    brandCode,
+    username,
+    currency
+  })
+
+  let keys =
+    brandToken && playerToken && formData
+      ? [`/api/player/changePassword`, brandCode, currency, username, formData]
+      : undefined
+
+  let { data: result, ...rest } = useSWR(
+    keys,
+    (url, brandCode, currency, username, formData) => {
+      return fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${brandToken}`,
+          Token: playerToken
+        },
+        body: JSON.stringify(formData)
+      }).then(toDataOrError)
+    }
+  )
+
+  return {
+    result,
+    isLoading: keys && !result,
     ...rest
   }
 }

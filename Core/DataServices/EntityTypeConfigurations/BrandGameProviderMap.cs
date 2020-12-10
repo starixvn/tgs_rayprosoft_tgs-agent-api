@@ -13,6 +13,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.HasKey(bgp => bgp.Id);
 
+            builder.HasIndex(p => new {p.BrandId, p.GameProviderId})
+                .IsUnique();
+
             builder.Property(bgp => bgp.Status)
                 .IsRequired();
 
