@@ -116,8 +116,10 @@ export const useGameList = (
       })
         .then(toDataOrError)
         .catch((error) => {
-          mutatePlayerTokenCache()
+          console.log("TODO: which token expired?")
           mutateBrandTokenCache()
+          mutatePlayerTokenCache()
+
           console.error("TODO: mutate token when 401 error")
           return Promise.reject(error)
         })

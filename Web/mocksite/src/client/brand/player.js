@@ -49,7 +49,7 @@ export const usePlayerToken = (
   const ResultCacheKey = playerTokenCacheKey({ brandCode, currency, username })
   let cached = cache.get(ResultCacheKey)
 
-  let { data: result, mutate, ...rest } = useSWR(
+  let { data: result, error, mutate, ...rest } = useSWR(
     keys,
     (url, brandCode, username, body) => {
       return fetch(url, {
@@ -82,7 +82,8 @@ export const usePlayerToken = (
 
   return {
     token: result?.token,
-    isLoading: keys && !result,
+    isLoading: keys && !result && !error,
+    error,
     mutate: mutateBrandToken,
     mutate: (data, shouldRevalidate) => {
       cache.delete(keys)
@@ -249,7 +250,7 @@ export const useChangePlayerPassword = (
       ? [`/api/player/changePassword`, brandCode, currency, username, formData]
       : undefined
 
-  let { data: result, ...rest } = useSWR(
+  let { data: result, error, ...rest } = useSWR(
     keys,
     (url, brandCode, currency, username, formData) => {
       return fetch(url, {
@@ -266,7 +267,8 @@ export const useChangePlayerPassword = (
 
   return {
     result,
-    isLoading: keys && !result,
+    error,
+    isLoading: keys && !result && !error,
     ...rest
   }
 }

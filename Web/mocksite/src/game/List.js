@@ -7,7 +7,8 @@ import {
   Link,
   useHistory,
   useParams,
-  useRouteMatch
+  useRouteMatch,
+  useLocation
 } from "react-router-dom"
 import { useGameList } from "../client/provider"
 import { useGameUrl } from "../client/provider/game"
@@ -109,6 +110,7 @@ const LaunchGameButton = ({
 
   useEffect(() => {
     if (url && gameWindow) {
+      console.log("Open Game URL", url)
       gameWindow.location = url
       reset()
     }

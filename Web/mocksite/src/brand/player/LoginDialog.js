@@ -13,7 +13,8 @@ import {
   Icon,
   Stack,
   FieldStack,
-  InputField
+  InputField,
+  Text
 } from "bumbag"
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons"
 import { useCaptcha, usePlayerToken } from "../../client/brand/player"
@@ -79,7 +80,8 @@ const LoginDialog = ({
 
   let history = useHistory()
 
-  let { register, handleSubmit, watch, setError, errors } = useForm()
+  let { register, handleSubmit, watch, setError, setValue, errors } = useForm()
+
   let [fromData, setSubmit] = useState(
     auto ? undefined : { bypassCaptcha: false }
   )
@@ -96,7 +98,10 @@ const LoginDialog = ({
     dialog.visible ? { brandCode, currency, username } : undefined,
     fromData
   )
-  const onSubmit = handleSubmit(setSubmit)
+  const onSubmit = handleSubmit((data) => {
+    mutate(undefined, false)
+    setSubmit(data)
+  })
 
   useEffect(() => {
     if (token) {
@@ -106,12 +111,25 @@ const LoginDialog = ({
     }
   }, [token])
 
+  const errorDialog = Modal.useState()
+  const PasswordError = 30
   const CaptchaAnsError = 31
   useEffect(() => {
-    if (error) {
-      setSubmit(auto ? undefined : { bypassCaptcha: false })
-      mutate(undefined, false)
+    if (error && !token) {
+      if (fromData?.username) {
+        //not auto login
+        errorDialog.show()
+      }
 
+      if (error.err === PasswordError) {
+        if (auto && !fromData?.username) {
+          setValue("password", "", { shouldValidate: true })
+        }
+        setError("password", {
+          type: "password",
+          shouldFocus: true
+        })
+      }
       if (error.err === CaptchaAnsError) {
         setError("answer", {
           type: "answer",
@@ -120,66 +138,82 @@ const LoginDialog = ({
       }
     }
   }, [error])
-  console.log("error", error)
+
   return (
-    <Dialog.Modal
-      showActionButtons
-      title="Login"
-      showCloseButton
-      actionButtonsProps={{
-        isLoading,
-        onClickSubmit: onSubmit
-      }}
-      {...dialog}
-    >
-      <form onSubmit={onSubmit}>
-        <Stack>
-          <FieldStack>
-            <InputField
-              name="username"
-              inputRef={register}
-              label="Username"
-              defaultValue={username}
-              readOnly={true}
-            />
-            <InputField
-              name="password"
-              inputRef={register({ required: true })}
-              label="Password"
-              defaultValue={DefaultPassword}
-            />
-            <InputField
-              name="answer"
-              inputRef={register({ required: true })}
-              state={errors.answer ? "danger" : ""}
-              label="Captcha"
-              addonBefore={
-                <Button
-                  onClick={() => mutateCaptcha(undefined)}
-                  isLoading={isLoadingCaptcha}
-                >
-                  {image ? (
-                    <>
-                      <img src={`data:image/png;base64, ${image}`} />
-                      <input
-                        name="captcha"
-                        ref={register}
-                        value={captcha}
-                        readOnly
-                        css={css`
-                          display: none;
-                        `}
-                      />
-                    </>
-                  ) : (
-                    "..."
-                  )}
-                </Button>
-              }
-            />
-          </FieldStack>
-        </Stack>
-      </form>
-    </Dialog.Modal>
+    <>
+      <Dialog.Modal
+        showActionButtons
+        title="Login"
+        showCloseButton
+        hideOnClickOutside={false}
+        actionButtonsProps={{
+          isLoading,
+          onClickSubmit: onSubmit
+        }}
+        {...dialog}
+      >
+        <form onSubmit={onSubmit}>
+          <Stack>
+            <FieldStack>
+              <InputField
+                name="username"
+                inputRef={register}
+                label="Username"
+                defaultValue={username}
+                readOnly={true}
+              />
+              <InputField
+                name="password"
+                inputRef={register({ required: true })}
+                label="Password"
+                defaultValue={DefaultPassword}
+              />
+              <InputField
+                name="answer"
+                inputRef={register({ required: true })}
+                state={errors.answer ? "danger" : ""}
+                label="Captcha"
+                addonBefore={
+                  <Button
+                    onClick={() => mutateCaptcha(undefined)}
+                    isLoading={isLoadingCaptcha}
+                  >
+                    {image ? (
+                      <>
+                        <img src={`data:image/png;base64, ${image}`} />
+                        <input
+                          name="captcha"
+                          ref={register}
+                          value={captcha}
+                          readOnly
+                          css={css`
+                            display: none;
+                          `}
+                        />
+                      </>
+                    ) : (
+                      "..."
+                    )}
+                  </Button>
+                }
+              />
+            </FieldStack>
+          </Stack>
+        </form>
+      </Dialog.Modal>
+      {error && (
+        <Modal.Backdrop zIndex="19900410" {...errorDialog}>
+          <Dialog.Modal
+            title="Error"
+            showCloseButton
+            type="warning"
+            hideBackdrop={true}
+            {...errorDialog}
+          >
+            <Text.Block>{JSON.stringify(error)}</Text.Block>
+          </Dialog.Modal>
+        </Modal.Backdrop>
+      )}
+    </>
   )
 }
