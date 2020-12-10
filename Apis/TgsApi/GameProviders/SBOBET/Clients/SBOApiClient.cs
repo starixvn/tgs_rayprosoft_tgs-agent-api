@@ -16,6 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Clients
         Task<LogoutResponse> LogoutAsync(Uri apiUrl, LogoutRequest request);
         Task<RegisterPlayerResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
         Task<GetRoundHistoryResponse> GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request);
+        Task<UpdatePlayerBetLimitsResponse> UpdatePlayerBetLimitsAsync(Uri apiUrl, UpdatePlayerBetLimitsRequest request);
     }
 
     public sealed class SBOApiClient : BaseApiClient, ISBOApiClient
@@ -40,5 +41,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Clients
         Task<GetRoundHistoryResponse> ISBOApiClient.GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request) =>
             ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(HttpMethod.Post, apiUrl,
                 "/web-root/restricted/report/get-bet-list-by-refnos.aspx", request);
+
+        Task<UpdatePlayerBetLimitsResponse> ISBOApiClient.UpdatePlayerBetLimitsAsync(Uri apiUrl,
+            UpdatePlayerBetLimitsRequest request) =>
+            ExecuteJsonRequestAsync<UpdatePlayerBetLimitsRequest, UpdatePlayerBetLimitsResponse>(HttpMethod.Post, apiUrl,
+                "/web-root/restricted/player/update-player-bet-setting-by-sportid-and-markettype.aspx", request);
     }
 }

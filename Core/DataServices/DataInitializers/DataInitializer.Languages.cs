@@ -68,5 +68,14 @@
                
             }
         }
+
+        internal record TWLanguage : BaseCodeMapper, ILanguage
+        {
+            public TWLanguage(string externalCode = null) :
+                base("zh-TW", externalCode)
+            {
+                
+            }
+        }
     }
 }

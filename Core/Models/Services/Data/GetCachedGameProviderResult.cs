@@ -14,5 +14,6 @@ namespace TGS.Core.Models.Services.Data
         public bool SupportTestPlayer { get; set; }
         public int PlaceBetTimeout { get; set; }
         public int SettleBetTimeout { get; set; }
+        public bool AllowKickPlayer { get; set; }
     }
 }

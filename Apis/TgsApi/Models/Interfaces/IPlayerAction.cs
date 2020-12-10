@@ -10,5 +10,10 @@ namespace TGS.Apis.TgsApi.Models.Interfaces
         {
             throw new NotSupportedException($"Game Provider '{request.GameProviderCode}' doesn't support to kick player");
         }
+
+        Task<PlayerUpdateSportBetLimitsResponse> UpdateSportBetLimitsAsync(PlayerUpdateSportBetLimitsRequest request)
+        {
+            throw new NotSupportedException($"Game Provider '{request.GameProviderCode}' doesn't support to update player sports bet limits");
+        }
     }
 }
