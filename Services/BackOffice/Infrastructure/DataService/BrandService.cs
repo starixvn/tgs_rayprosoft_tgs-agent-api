@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
 
-namespace TGS.Services.BackOffice.Application.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IBrandService
     {
@@ -41,7 +41,7 @@ namespace TGS.Services.BackOffice.Application.DataService
             brand.UpdatedOn = DateTimeOffset.Now;
             brand.UpdatedByUsername = request.Username;
 
-            return ChangeStatusAsync(brand);
+            return UpdateEntityAsync(brand);
         }
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices;
 
-namespace TGS.Services.BackOffice.Application.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public abstract class BaseService
     {
@@ -15,13 +15,6 @@ namespace TGS.Services.BackOffice.Application.DataService
         protected BaseService(ITgsRepository tgsRepository)
         {
             _repository = tgsRepository;
-        }
-
-        protected Task ChangeStatusAsync<T>(T entity) where T : class
-        {
-            _repository.Entry(entity).State = EntityState.Modified;
-
-            return _repository.SaveChangesAsync();
         }
 
         protected Task<T> GetEntityFirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate,
@@ -48,6 +41,12 @@ namespace TGS.Services.BackOffice.Application.DataService
         {
             _repository.Set<T>().AddAsync(entity);
             return _repository.SaveChangesAsync();
+        }
+
+        protected async Task UpdateEntitiesAsync<T>(IEnumerable<T> entities) where T : class
+        {
+            _repository.Set<T>().UpdateRange(entities);
+            await _repository.SaveChangesAsync();
         }
 
         protected async Task CreateOrUpdateEntitiesAsync<T>(T[] entities) where T : class

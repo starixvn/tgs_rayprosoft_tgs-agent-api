@@ -8,16 +8,18 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
-namespace TGS.Services.BackOffice.Application.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
-    public interface IBrandGameProviderGameService
+    public interface IBrandGameProviderScheduleService
     {
-        Task<BrandGameProviderSchedule> GetBrandGameProviderGameAsync(
+        Task<BrandGameProviderSchedule> GetBrandGameProviderScheduleAsync(
             Expression<Func<BrandGameProviderSchedule, bool>> predicate,
             Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery =
-                null, bool tracking = false);
+                null);
 
-        IQueryable<BrandGameProviderSchedule> GetBrandGameProviderSchedulesAsync(bool tracking = false);
+        IQueryable<BrandGameProviderSchedule> GetBrandGameProviderSchedulesAsync(
+            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery = null,
+            bool tracking = false);
 
         Task UpdateBrandGameProviderScheduleAsync(BrandGameProviderSchedule schedule,
             UpdateScheduleRequest request);
@@ -28,30 +30,37 @@ namespace TGS.Services.BackOffice.Application.DataService
         Task ChangeStatusAsync(BrandGameProviderSchedule schedule, UpdateScheduleStatusRequest request);
     }
 
-    public class BrandGameProviderGameService : BaseService, IBrandGameProviderGameService
+    public class BrandGameProviderScheduleService : BaseService, IBrandGameProviderScheduleService
     {
         private readonly ITgsRepository _repository;
 
-        public BrandGameProviderGameService(ITgsRepository tgsRepository) : base(tgsRepository)
+        public BrandGameProviderScheduleService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
             _repository = tgsRepository;
         }
 
-        IQueryable<BrandGameProviderSchedule> IBrandGameProviderGameService.GetBrandGameProviderSchedulesAsync(
-            bool tracking)
+        Task<BrandGameProviderSchedule> IBrandGameProviderScheduleService.GetBrandGameProviderScheduleAsync(
+            Expression<Func<BrandGameProviderSchedule, bool>> predicate,
+            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery)
         {
-            return GetQueriesAsync<BrandGameProviderSchedule>(tracking);
+            return GetEntityFirstOrDefaultAsync(predicate, preQuery);
         }
 
-        Task IBrandGameProviderGameService.ChangeStatusAsync(BrandGameProviderSchedule brandGameProvider,
+        IQueryable<BrandGameProviderSchedule> IBrandGameProviderScheduleService.GetBrandGameProviderSchedulesAsync(
+            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery, bool tracking)
+        {
+            return GetQueriesAsync(preQuery, tracking);
+        }
+
+        Task IBrandGameProviderScheduleService.ChangeStatusAsync(BrandGameProviderSchedule brandGameProvider,
             UpdateScheduleStatusRequest request)
         {
             brandGameProvider.Status = request.Status;
 
-            return ChangeStatusAsync(brandGameProvider);
+            return UpdateEntityAsync(brandGameProvider);
         }
 
-        Task IBrandGameProviderGameService.UpdateBrandGameProviderScheduleAsync(
+        Task IBrandGameProviderScheduleService.UpdateBrandGameProviderScheduleAsync(
             BrandGameProviderSchedule schedule,
             UpdateScheduleRequest request)
         {
@@ -62,7 +71,7 @@ namespace TGS.Services.BackOffice.Application.DataService
             return UpdateEntityAsync(schedule);
         }
 
-        async Task IBrandGameProviderGameService.UpdateBrandGameProviderDefaultTimesAsync(
+        async Task IBrandGameProviderScheduleService.UpdateBrandGameProviderDefaultTimesAsync(
             BrandGameProviderSchedule[] schedules, UpdateDefaultTimesRequest request)
         {
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
@@ -80,13 +89,6 @@ namespace TGS.Services.BackOffice.Application.DataService
 
             await CreateOrUpdateEntitiesAsync(addSchedules);
             await tran.CommitAsync();
-        }
-
-        Task<BrandGameProviderSchedule> IBrandGameProviderGameService.GetBrandGameProviderGameAsync(
-            Expression<Func<BrandGameProviderSchedule, bool>> predicate,
-            Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery, bool tracking)
-        {
-            return GetEntityFirstOrDefaultAsync(predicate, preQuery, tracking);
         }
     }
 }
