@@ -29,13 +29,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new AnnouncementController(
                 _queriesMock.Object,
-                _commandsMock.Object,
-                HttpContextAccessorMock.Object);
+                _commandsMock.Object);
         }
 
         private AnnouncementController _controller;
-        private readonly Mock<ITgsQueries<Announcement>> _queriesMock = new Mock<ITgsQueries<Announcement>>();
-        private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new Mock<ITgsCommands<Announcement>>();
+        private readonly Mock<ITgsQueries<Announcement>> _queriesMock = new();
+        private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new();
 
         [TestCase(true, new[] {AnnounceStatus.Effective, AnnounceStatus.Invalid})]
         [TestCase(false, new[] {AnnounceStatus.Expired})]

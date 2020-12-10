@@ -2,8 +2,8 @@
 {
     public enum RoleStatus
     {
-        Disabled = 0,
-        Enabled = 1,
+        Enabled = 0,
+        Disabled = 1,
         Archived = 2
     }
 }

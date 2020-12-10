@@ -26,13 +26,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new SettingController(
                 _queriesMock.Object,
-                _commandsMock.Object,
-                HttpContextAccessorMock.Object);
+                _commandsMock.Object);
         }
 
         private SettingController _controller;
-        private readonly Mock<ITgsQueries<Setting>> _queriesMock = new Mock<ITgsQueries<Setting>>();
-        private readonly Mock<ITgsCommands<Setting>> _commandsMock = new Mock<ITgsCommands<Setting>>();
+        private readonly Mock<ITgsQueries<Setting>> _queriesMock = new();
+        private readonly Mock<ITgsCommands<Setting>> _commandsMock = new();
 
         [TestCase(true)]
         [TestCase(false)]

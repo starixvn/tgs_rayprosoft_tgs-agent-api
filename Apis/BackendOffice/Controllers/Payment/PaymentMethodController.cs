@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
@@ -22,8 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
 
         public PaymentMethodController(
             ITgsQueries<PaymentMethod> queries,
-            ITgsCommands<PaymentMethod> commands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<PaymentMethod> commands)
         {
             _queries = queries;
             _commands = commands;

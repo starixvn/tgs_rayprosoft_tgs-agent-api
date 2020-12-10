@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
@@ -11,15 +10,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     public class BaseContextController : ControllerBase
     {
-        private readonly Dictionary<string, string> _userInfoMap;
-
-        public BaseContextController(IHttpContextAccessor httpContextAccessor)
-        {
-            _userInfoMap = httpContextAccessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-        }
-
-        protected string Username => _userInfoMap[Consts.UserInfo.UsernameKey];
-        protected string RoleName => _userInfoMap[Consts.UserInfo.RolenameKey];
+        protected string Username => GetUserMap()[Consts.UserInfo.UsernameKey];
+        protected string RoleName => GetUserMap()[Consts.UserInfo.RolenameKey];
 
         protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);
 
@@ -46,10 +38,15 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private Guid? GetIdByKey(string key)
         {
-            return !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
+            return !GetUserMap().TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
                    !Guid.TryParse(value, out var id)
                 ? (Guid?) null
                 : id;
+        }
+
+        private Dictionary<string, string> GetUserMap()
+        {
+            return HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
 using TGS.Apis.BackendOffice.Resources;
@@ -22,8 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public SettingController(
             ITgsQueries<Setting> queries,
-            ITgsCommands<Setting> commands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<Setting> commands)
         {
             _queries = queries;
             _commands = commands;

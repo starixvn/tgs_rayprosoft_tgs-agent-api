@@ -10,25 +10,27 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
 
-namespace TGS.Services.BackOffice.Application.DataService.Services
+namespace TGS.Services.BackOffice.Application.DataService
 {
     public interface IBrandService
     {
         Task<Brand> GetBrandAsync(Expression<Func<Brand, bool>> predicate,
-            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null, bool tracking = false);
+            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null);
 
-        IQueryable<Brand> GetBrandsAsync(bool tracking = false);
+        IQueryable<Brand> GetBrandsAsync(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null,
+            bool tracking = false);
+
         Task CreateBrandAsync(CreateBrandRequest request);
         Task UpdateBrandAsync(Brand brand, UpdateBrandRequest request);
         Task ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request);
         Task<bool> ExistsAsync(Expression<Func<Brand, bool>> predicate);
     }
 
-    public class BrandService : IBrandService
+    public class BrandService : BaseService, IBrandService
     {
         private readonly ITgsRepository _repository;
 
-        public BrandService(ITgsRepository tgsRepository)
+        public BrandService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
             _repository = tgsRepository;
         }
@@ -39,9 +41,7 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
             brand.UpdatedOn = DateTimeOffset.Now;
             brand.UpdatedByUsername = request.Username;
 
-            _repository.Entry(brand).State = EntityState.Modified;
-
-            return _repository.SaveChangesAsync();
+            return ChangeStatusAsync(brand);
         }
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)
@@ -68,40 +68,29 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
             brand.Currencies = GenerateBrandCurrencies(brand, request);
             brand.GameProviders = await GenerateBrandGameProviders(brand, request);
 
-            await _repository.Brands.AddAsync(brand);
-            await _repository.SaveChangesAsync();
+            await CreateEntityAsync(brand);
         }
 
         Task<Brand> IBrandService.GetBrandAsync(Expression<Func<Brand, bool>> predicate,
-            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery, bool tracking)
+            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery)
         {
-            var brand = tracking ? _repository.Brands : _repository.Brands.AsNoTracking();
-            preQuery ??= c => c;
-
-            return preQuery(brand).FirstOrDefaultAsync(predicate);
-        }
-
-        IQueryable<Brand> IBrandService.GetBrandsAsync(bool tracking)
-        {
-            return tracking ? _repository.Brands : _repository.Brands.AsNoTracking();
+            return GetEntityFirstOrDefaultAsync(predicate, preQuery);
         }
 
         Task<bool> IBrandService.ExistsAsync(Expression<Func<Brand, bool>> predicate)
         {
-            return _repository.Brands.AnyAsync(predicate);
+            return ExistsAsync(predicate);
         }
 
         async Task IBrandService.UpdateBrandAsync(Brand brand, UpdateBrandRequest request)
         {
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
-            _repository.BrandLanguages.RemoveRange(brand.Languages);
-            _repository.BrandCurrencies.RemoveRange(brand.Currencies);
-            _repository.BrandGameProviders.RemoveRange(brand.GameProviders);
-            _repository.GameProviderConfigurations.RemoveRange(brand.GameProviders.Select(x =>
+            await DeleteEntitiesAsync(brand.Languages);
+            await DeleteEntitiesAsync(brand.Currencies);
+            await DeleteEntitiesAsync(brand.GameProviders);
+            await DeleteEntitiesAsync(brand.GameProviders.Select(x =>
                 x.GameProviderConfiguration));
-
-            await _repository.SaveChangesAsync();
 
             brand.Code = request.Code;
             brand.Name = request.Name;
@@ -116,10 +105,14 @@ namespace TGS.Services.BackOffice.Application.DataService.Services
             brand.Currencies = GenerateBrandCurrencies(brand, request);
             brand.GameProviders = await GenerateBrandGameProviders(brand, request);
 
-            _repository.Entry(brand).State = EntityState.Modified;
-
-            await _repository.SaveChangesAsync();
+            await UpdateEntityAsync(brand);
             await tran.CommitAsync();
+        }
+
+        IQueryable<Brand> IBrandService.GetBrandsAsync(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
+            bool tracking)
+        {
+            return GetQueriesAsync(preQuery, tracking);
         }
 
         private async Task<HashSet<BrandLanguage>> GenerateBrandLanguages(Brand brand, BrandRequest request)

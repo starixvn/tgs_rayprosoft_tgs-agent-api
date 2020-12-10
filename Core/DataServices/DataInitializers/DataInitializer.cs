@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Data.SqlClient;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -408,6 +405,8 @@ namespace TGS.Core.DataServices.DataInitializers
             await _repository.BulkInsertAsync(brands.SelectMany(b => b.Languages).ToArray());
             await _repository.BulkInsertAsync(brands.SelectMany(b => b.GameProviders).ToArray());
             await _repository.BulkInsertAsync(brands.SelectMany(b => b.Games).ToArray());
+            await _repository.BulkInsertAsync(
+                brands.SelectMany(b => b.GameProviders.SelectMany(g => g.Schedules)).ToArray());
         }
 
         private Task GenerateLocalizedStringsAsync()
@@ -512,7 +511,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var gameProviders = GetSelectedGameProviders(reseller.GameProviders);
 
-            return new()
+            return new Reseller
             {
                 Id = reseller.Id,
                 Code = reseller.Code,
@@ -550,7 +549,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             var gameProviders = GetSelectedGameProviders(gameProviderCodes);
 
-            return new()
+            return new Licensee
             {
                 Id = licensee.Id,
                 Code = licensee.Code,
@@ -588,7 +587,35 @@ namespace TGS.Core.DataServices.DataInitializers
             gameProviderCodes = IntersectGameProviderCodes(gameProviderCodes, brand.GameProviders);
             var gameProviders = GetSelectedGameProviders(gameProviderCodes);
 
-            return new()
+            var brandGameProviders = gameProviders.Select(gp =>
+            {
+                var brandGameProviderId = Guid.NewGuid();
+                return new BrandGameProvider
+                {
+                    Id = brandGameProviderId,
+                    GameProviderId = gp.Id,
+                    BrandId = brand.Id,
+                    GameProviderConfigurationId = gp.GameProviderConfigurations.Where(gpc => gpc.IsDefault)
+                        .Select(gpc => gpc.Id).FirstOrDefault(),
+                    DefaultLanguageCode = "en-US",
+                    DesktopQueryString = string.Empty,
+                    MobileQueryString = string.Empty,
+                    Schedules = new[]
+                    {
+                        new BrandGameProviderSchedule
+                        {
+                            Id = Guid.NewGuid(),
+                            BrandGameProviderId = brandGameProviderId,
+                            From = DateTimeOffset.UtcNow,
+                            To = DateTimeOffset.UtcNow.AddDays(7),
+                            DayOfWeek = DayOfWeek.Monday,
+                            IsDefault = true
+                        }
+                    }.ToHashSet()
+                };
+            });
+
+            return new Brand
             {
                 Id = brand.Id,
                 Code = brand.Code,
@@ -617,16 +644,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     CultureCode = lang.Code,
                     BrandCultureCode = lang.ExternalCode
                 }).ToHashSet(),
-                GameProviders = gameProviders.Select(gp => new BrandGameProvider
-                {
-                    GameProviderId = gp.Id,
-                    BrandId = brand.Id,
-                    GameProviderConfigurationId = gp.GameProviderConfigurations.Where(gpc => gpc.IsDefault)
-                        .Select(gpc => gpc.Id).FirstOrDefault(),
-                    DefaultLanguageCode = "en-US",
-                    DesktopQueryString = string.Empty,
-                    MobileQueryString = string.Empty
-                }).ToHashSet(),
+                GameProviders = brandGameProviders.ToHashSet(),
                 Games = gameProviders.SelectMany(gp => gp.Games).Select((g, idx) => new BrandGame
                 {
                     BrandId = brand.Id,
@@ -647,8 +665,11 @@ namespace TGS.Core.DataServices.DataInitializers
                 };
             }
 
-            string[] IntersectGameProviderCodes(string[] parents, string[] children) => 
-                parents.Length == 0 ? children : children.Length == 0 ? parents : parents.Intersect(children).ToArray();
+            string[] IntersectGameProviderCodes(string[] parents, string[] children)
+            {
+                return parents.Length == 0 ? children :
+                    children.Length == 0 ? parents : parents.Intersect(children).ToArray();
+            }
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
@@ -757,17 +778,19 @@ namespace TGS.Core.DataServices.DataInitializers
             return _repository.BulkInsertAsync(users);
         }
 
-        private GameProvider[] GetSelectedGameProviders(string[] gameProviderCodes) =>
-            gameProviderCodes.Length == 0
+        private GameProvider[] GetSelectedGameProviders(string[] gameProviderCodes)
+        {
+            return gameProviderCodes.Length == 0
                 ? _gameProvidersCreated.Values.ToArray()
                 : gameProviderCodes
                     .Select(code => _gameProvidersCreated[code])
                     .ToArray();
+        }
     }
 
     internal class Generator
     {
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new();
 
         public static string RandomString(int length)
         {

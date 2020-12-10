@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
@@ -30,8 +29,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsQueries<Role> roleQueries,
             ITgsQueries<Setting> settingQueries,
             ITgsCommands<Role> roleCommands,
-            IJsonSerializationProvider jsonSerializationProvider,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _roleQueries = roleQueries;
             _roleCommands = roleCommands;

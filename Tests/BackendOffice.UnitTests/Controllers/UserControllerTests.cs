@@ -29,16 +29,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _userQueriesMock.Object,
                 _departmentQueriesMock.Object,
                 _roleQueriesMock.Object,
-                _userCommandsMock.Object,
-                HttpContextAccessorMock.Object);
+                _userCommandsMock.Object);
         }
 
         private UserController _controller;
-        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new Mock<IPasswordHandler>();
-        private readonly Mock<ITgsQueries<User>> _userQueriesMock = new Mock<ITgsQueries<User>>();
-        private readonly Mock<ITgsQueries<Department>> _departmentQueriesMock = new Mock<ITgsQueries<Department>>();
-        private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new Mock<ITgsQueries<Role>>();
-        private readonly Mock<ITgsCommands<User>> _userCommandsMock = new Mock<ITgsCommands<User>>();
+        private readonly Mock<IPasswordHandler> _passwordHandlerMock = new();
+        private readonly Mock<ITgsQueries<User>> _userQueriesMock = new();
+        private readonly Mock<ITgsQueries<Department>> _departmentQueriesMock = new();
+        private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
+        private readonly Mock<ITgsCommands<User>> _userCommandsMock = new();
 
         [TestCase(true)]
         [TestCase(false)]

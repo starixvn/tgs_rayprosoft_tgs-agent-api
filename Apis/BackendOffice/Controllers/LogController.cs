@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Apis.BackendOffice.DataService.Repositories;
@@ -16,8 +15,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ILogQueries _logQueries;
 
         public LogController(
-            ILogQueries logQueries,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ILogQueries logQueries)
         {
             _logQueries = logQueries;
         }

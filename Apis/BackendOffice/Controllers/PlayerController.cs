@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Players;
@@ -24,8 +23,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly ITgsCommands<PlayerBank> _bankCommands;
         private readonly ITgsQueries<PlayerBank> _bankQueries;
         private readonly ITgsCommands<Player> _commands;
-        private readonly ITgsQueries<Player> _queries;
         private readonly IPasswordHandler _passwordHandler;
+        private readonly ITgsQueries<Player> _queries;
 
         public PlayerController(
             IPasswordHandler passwordHandler,
@@ -34,8 +33,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsQueries<PlayerBank> bankQueries,
             ITgsCommands<Player> commands,
             ITgsCommands<PlayerBank> bankCommands,
-            ITgsCommands<PlayerAuditLog> auditLogCommands,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            ITgsCommands<PlayerAuditLog> auditLogCommands)
         {
             _passwordHandler = passwordHandler;
             _queries = queries;

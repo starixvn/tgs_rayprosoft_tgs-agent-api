@@ -30,20 +30,19 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _playerQueriesMock.Object,
                 _uploadServiceMock.Object,
                 _paymentServiceMock.Object,
-                _auditLogQueriesMock.Object,
-                HttpContextAccessorMock.Object);
+                _auditLogQueriesMock.Object);
         }
 
         private PaymentController _controller;
-        private readonly Mock<IPaymentService> _paymentServiceMock = new Mock<IPaymentService>();
+        private readonly Mock<IPaymentService> _paymentServiceMock = new();
 
         private readonly Mock<ITgsQueries<PaymentAuditLog>> _auditLogQueriesMock =
-            new Mock<ITgsQueries<PaymentAuditLog>>();
+            new();
 
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock =
-            new Mock<ITgsQueries<Player>>();
+            new();
 
-        private readonly Mock<IUploadService> _uploadServiceMock = new Mock<IUploadService>();
+        private readonly Mock<IUploadService> _uploadServiceMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
