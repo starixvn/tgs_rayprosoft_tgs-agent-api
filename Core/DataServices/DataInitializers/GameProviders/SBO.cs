@@ -39,19 +39,26 @@ namespace TGS.Core.DataServices.DataInitializers
 
             string IGameProvider.Name => "SBOBET";
 
-            IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new[]
+            IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new IGameProviderConfiguration[]
             {
                 new SBOGameProviderConfiguration()
             };
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency(), new VNDCurrency(), new VND1000Currency()
+                new CNYCurrency("CNY"), new USDCurrency("USD"),
+                new VND1000Currency("VND"), new IDR1000Currency("IDR"),
+                new JPYCurrency("JPY"), new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"), new THBCurrency("THB"),
+                new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage(), new CNLanguage()
+                new USLanguage("en"), new CNLanguage("zh-cn"),
+                new IDLanguage("id-id"), new JPLanguage("ja-jp"),
+                new KRLanguage("ko-kr"), new THLanguage("th-th"),
+                new VNLanguage("vi-vn"), new TWLanguage("zh-tw")
             };
 
             IGame[] IGameProvider.Games => _games;

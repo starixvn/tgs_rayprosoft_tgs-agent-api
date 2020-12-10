@@ -46,6 +46,8 @@ namespace TGS.Services.Operations
         Task<GameStatus?> GetGameStatusAsync(Guid gameProviderId, Guid gameId);
 
         Task<IdMap[]> GetSubGameIdsAsync(Guid gameProviderId, PlatformType platformType);
+
+        Task<bool> GetAllowKickPlayerAsync(Guid gameProviderId);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -85,7 +87,8 @@ namespace TGS.Services.Operations
                 AutoCloseRound = r.AutoCloseRound,
                 SupportTestPlayer = r.SupportTestPlayer,
                 PlaceBetTimeout = r.PlaceBetTimeout,
-                SettleBetTimeout = r.SettleBetTimeout
+                SettleBetTimeout = r.SettleBetTimeout,
+                AllowKickPlayer = r.AllowKickPlayer
             };
 
             await CacheGameProviderAsync(gameProviderId, cachedGameProvider);
@@ -310,6 +313,19 @@ namespace TGS.Services.Operations
 
             return await GetAndCachedSubGameIdMapsAsync(gameProviderId, platformType);
         }
+        
+        async Task<bool> IGameProviderOperations.GetAllowKickPlayerAsync(Guid gameProviderId)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
+                CachedGameProviderFields.AllowKickPlayer);
+            if (value.HasValue)
+            {
+                return (bool) value;
+            }
+
+            var cachedGameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
+            return cachedGameProvider?.AllowKickPlayer ?? false;
+        }
 
         #region Private Methods
 
@@ -326,12 +342,13 @@ namespace TGS.Services.Operations
                     CachedGameProviderFields.AutoCloseRound,
                     CachedGameProviderFields.SupportTestPlayer,
                     CachedGameProviderFields.PlaceBetTimeout,
-                    CachedGameProviderFields.SettleBetTimeout
+                    CachedGameProviderFields.SettleBetTimeout,
+                    CachedGameProviderFields.AllowKickPlayer
                 });
 
             if (values.All(a => !a.IsNull))
             {
-                return new CachedGameProvider
+                return new()
                 {
                     Id = Guid.Parse(values[0]),
                     Code = values[1],
@@ -341,7 +358,8 @@ namespace TGS.Services.Operations
                     AutoCloseRound = (bool) values[5],
                     SupportTestPlayer = (bool) values[6],
                     PlaceBetTimeout = (int) values[7],
-                    SettleBetTimeout = (int) values[8]
+                    SettleBetTimeout = (int) values[8],
+                    AllowKickPlayer = (bool) values[9]
                 };
             }
 
@@ -360,7 +378,8 @@ namespace TGS.Services.Operations
                 new(CachedGameProviderFields.AutoCloseRound, gameProvider.AutoCloseRound),
                 new(CachedGameProviderFields.SupportTestPlayer, gameProvider.SupportTestPlayer),
                 new(CachedGameProviderFields.PlaceBetTimeout, gameProvider.PlaceBetTimeout),
-                new(CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout)
+                new(CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout),
+                new(CachedGameProviderFields.AllowKickPlayer, gameProvider.AllowKickPlayer)
             };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProvider, gameProviderId, fields,
@@ -426,6 +445,7 @@ namespace TGS.Services.Operations
             public const string SupportTestPlayer = "supportTestPlayer";
             public const string PlaceBetTimeout = "placeBetTimeout";
             public const string SettleBetTimeout = "settleBetTimeout";
+            public const string AllowKickPlayer = "allowKickPlayer";
         }
 
         #endregion Private Methods

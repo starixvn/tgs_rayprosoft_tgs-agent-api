@@ -1,8 +1,10 @@
 ﻿// ReSharper disable IdentifierTypo
 // ReSharper disable InconsistentNaming
 
+using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
+using TGS.Apis.TgsApi.GameModels.SBOBET.Outgoing;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Models;
@@ -39,6 +41,37 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             return response.Error.Code != ServiceApiError.None
                 ? new PlayerKickResponse
+                {
+                    Error = (int) TgsApiError.ProviderApiError,
+                    ErrorMessage = response.Error.Message
+                }
+                : new();
+        }
+
+        async Task<PlayerUpdateSportBetLimitsResponse> IPlayerAction.UpdateSportBetLimitsAsync(
+            PlayerUpdateSportBetLimitsRequest request)
+        {
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
+                    .GameProviderConfigurations.SBOBET);
+
+            var response = await _client.UpdatePlayerBetLimitsAsync(configuration.ApiUrl,
+                new()
+                {
+                    CompanyKey = configuration.CompanyKey,
+                    PlayerCode = request.PlayerCode,
+                    BetLimits = request.BetLimits.Select(bl => new UpdatePlayerBetLimitsRequest.BetLimit
+                    {
+                        SportType = int.Parse(bl.SportType),
+                        MarketType = int.Parse(bl.MarketType),
+                        MinBet = bl.MinBet,
+                        MaxBet = bl.MaxBet,
+                        MaxBetPerMatch = bl.MaxBetPerMatch
+                    }).ToArray()
+                });
+
+            return response.Error.Code != ServiceApiError.None
+                ? new PlayerUpdateSportBetLimitsResponse
                 {
                     Error = (int) TgsApiError.ProviderApiError,
                     ErrorMessage = response.Error.Message

@@ -26,7 +26,8 @@ namespace TGS.Core.DataServices.DataInitializers
             ILanguage[] Languages => new ILanguage[]
             {
                 new CNLanguage(), new USLanguage(), new IDLanguage(),
-                new VNLanguage(), new THLanguage()
+                new VNLanguage(), new THLanguage(), new TWLanguage(),
+                new JPLanguage(), new KRLanguage()
             };
 
             string[] GameProviders => Array.Empty<string>();
