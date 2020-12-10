@@ -19,7 +19,7 @@ namespace TGS.UnitTests.Startups.TgsApi
         [Test]
         public void Can_Get_All_Registered_Types()
         {
-            ResolveAllRegistrationsWithControllers(new[] {typeof(SBOBETGameController)});
+            ResolveAllRegistrationsWithAdditionalTypes(new[] {typeof(SBOBETGameController)});
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class GameProvider : BaseEntity
+    public class GameProvider : BaseEntity<Guid>
     {
         public Status Status { get; set; }
         public string Description { get; set; }
@@ -12,6 +13,7 @@ namespace TGS.Core.DataServices.Models
         public bool AllowKickPlayer { get; set; }
         public int PlaceBetTimeout { get; set; }
         public int SettleBetTimeout { get; set; }
+        public short UniqueId { get; set; }
         public virtual ICollection<Game> Games { get; set; }
         public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
         public virtual ICollection<LicenseeGameProvider> Licensees { get; set; }

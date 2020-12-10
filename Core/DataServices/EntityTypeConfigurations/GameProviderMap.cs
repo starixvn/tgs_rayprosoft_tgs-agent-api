@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
@@ -10,7 +11,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<GameProvider>.Configure(EntityTypeBuilder<GameProvider> builder)
         {
             builder.ToTable("GameProviders", "dbo");
-            BaseConfigureProperties(builder, true);
+            BaseConfigureProperties<GameProvider, Guid>(builder, true);
 
             builder.Property(p => p.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(128));

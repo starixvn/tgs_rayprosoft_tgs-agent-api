@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -13,7 +12,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages.Games
         public record GameModel
         {
             [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-            public Guid Id { get; init; }
+            public int Id { get; init; }
 
             [JsonPropertyName("code")]
             public string Code { get; init; }

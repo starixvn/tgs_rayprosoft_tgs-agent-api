@@ -21,15 +21,15 @@ namespace TGS.UnitTests.Startups.TgsApi
             _gameProviderCode = gameProviderCode;
         }
 
-        protected void ResolveAllRegistrationsWithControllers(Type[] controllerTypes, Type[] ignoreTypes = null, string namespacePrefix = "TGS")
+        protected void ResolveAllRegistrationsWithAdditionalTypes(Type[] resolveTypes, Type[] ignoreTypes = null, string namespacePrefix = "TGS")
         {
             ignoreTypes ??= Array.Empty<Type>();
 
             var additionalControllerTypes = new[] {typeof(PluggableController)};
-            var types = controllerTypes.Concat(additionalControllerTypes)
+            var types = resolveTypes.Concat(additionalControllerTypes)
                 .Except(ignoreTypes);
 
-            ResolveAllRegistrations(types, namespacePrefix);
+            base.ResolveAllRegistrations(types, namespacePrefix);
         }
 
         public override void InitialStartupConfigureServices(IServiceCollection services, IConfiguration configuration,

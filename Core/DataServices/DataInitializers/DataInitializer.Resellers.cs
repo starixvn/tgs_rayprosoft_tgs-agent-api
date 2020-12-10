@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.DataInitializers
 {
@@ -10,6 +11,7 @@ namespace TGS.Core.DataServices.DataInitializers
             string Code { get; }
             string Name { get; }
             string OperationalEmail { get; }
+            BusinessType BusinessType { get; }
             ILicensee[] Licensees { get; }           
             ICurrency[] Currencies => new ICurrency[]
             {
@@ -36,6 +38,8 @@ namespace TGS.Core.DataServices.DataInitializers
             string IReseller.Name => "Turnkey Game System";
 
             string IReseller.OperationalEmail => "tgs.services@gmail.com";
+
+            BusinessType IReseller.BusinessType => BusinessType.B2C;
 
             ILicensee[] IReseller.Licensees => new ILicensee[]
             {

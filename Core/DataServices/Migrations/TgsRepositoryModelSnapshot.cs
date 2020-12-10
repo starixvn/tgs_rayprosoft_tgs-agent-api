@@ -208,8 +208,8 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -392,9 +392,8 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Game", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.Property<string>("AvailableCurrencies")
                         .IsRequired()
@@ -513,6 +512,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<bool>("SupportTestPlayer")
                         .HasColumnType("bit");
+
+                    b.Property<short>("UniqueId")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -1381,6 +1383,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("BusinessType")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("Code")
                         .IsRequired()

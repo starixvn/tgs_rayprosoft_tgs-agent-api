@@ -9,7 +9,7 @@ namespace TGS.Core.DataServices.Bet.Models
         public Guid Id { get; set; }
         public string ExternalRoundId { get; set; }
         public Guid WalletId { get; set; }
-        public Guid GameId { get; set; }
+        public int GameId { get; set; }
         public string GameName { get; set; }
         public GameType GameType { get; set; }
         public Guid GameProviderId { get; set; }

@@ -12,7 +12,7 @@ namespace TGS.UnitTests.Startups
 {
     public abstract class StartupTestsBase
     {
-        protected void ResolveAllRegistrations(IEnumerable<Type> additionalTypes, string namespacePrefix = "TGS")
+        protected void ResolveAllRegistrations(IEnumerable<Type> resolveTypes, string namespacePrefix = "TGS")
         {
             var configuration = MockConfiguration();
             var envMock = new Mock<IWebHostEnvironment>();
@@ -21,7 +21,7 @@ namespace TGS.UnitTests.Startups
             services.AddSingleton(configuration);
             services.AddSingleton(envMock.Object);
 
-            additionalTypes.ToList().ForEach(t => services.AddTransient(t));
+            resolveTypes.ToList().ForEach(t => services.AddTransient(t));
 
             InitialStartupConfigureServices(services, configuration, envMock.Object);
 

@@ -15,7 +15,7 @@ namespace TGS.Services.GameOperations.Models.Data
         internal bool? ClosingRoundExplicitRequest { get; init; }
         internal GameActionType Type { get; init; }
         internal Guid RoundId { get; init; }
-        internal Guid GameId { get; init; }
+        internal int GameId { get; init; }
         internal RoundStatus RoundStatus { get; init; }
         internal string ExternalRoundId { get; init; }
         internal decimal Amount { get; init; }
