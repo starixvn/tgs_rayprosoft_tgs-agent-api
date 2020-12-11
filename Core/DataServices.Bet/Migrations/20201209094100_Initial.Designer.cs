@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Bet;
 namespace TGS.Core.DataServices.Bet.Migrations
 {
     [DbContext(typeof(BetRepository))]
-    [Migration("20201127033021_Initial")]
+    [Migration("20201209094100_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -189,8 +189,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
 
                     b.Property<string>("GameName")
                         .IsRequired()

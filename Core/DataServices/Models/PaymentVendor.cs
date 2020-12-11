@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class PaymentVendor : BaseEntity
+    public class PaymentVendor : BaseEntity<Guid>
     {
         public string Description { get; set; }
         public virtual ICollection<PaymentMethod> PaymentMethods { get; set; }

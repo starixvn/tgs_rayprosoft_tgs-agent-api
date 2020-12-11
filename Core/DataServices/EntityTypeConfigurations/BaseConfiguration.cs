@@ -7,7 +7,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
     internal class BaseConfiguration
     {
-        protected static void BaseConfigureProperties<T>(EntityTypeBuilder<T> builder, bool primaryKeyClustered = false) where T : BaseEntity
+        protected static void BaseConfigureProperties<TEntity, TId>(EntityTypeBuilder<TEntity> builder, bool primaryKeyClustered = false) 
+            where TId : struct
+            where TEntity : BaseEntity<TId>
         {
             builder.HasKey(p => p.Id).IsClustered(primaryKeyClustered);
 

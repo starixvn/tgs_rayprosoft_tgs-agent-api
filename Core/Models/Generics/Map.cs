@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TGS.Core.Models.Generics
+﻿namespace TGS.Core.Models.Generics
 {
     public class Map<TKey, TValue>
     {

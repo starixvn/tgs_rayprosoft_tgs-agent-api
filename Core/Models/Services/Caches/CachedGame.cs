@@ -1,11 +1,10 @@
-﻿using System;
-using TGS.Core.Models.Enums;
+﻿using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.Caches
 {
     public record CachedGame
     {
-        public Guid Id { get; init; }
+        public int Id { get; init; }
         public string Code { get; init; }
         public string Name { get; init; }
         public string Description { get; init; }

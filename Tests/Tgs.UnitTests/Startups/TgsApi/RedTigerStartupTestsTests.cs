@@ -17,7 +17,7 @@ namespace TGS.UnitTests.Startups.TgsApi
         [Ignore("not implementation")]
         public void Can_Get_All_Registered_Types()
         {
-            ResolveAllRegistrationsWithControllers(new[] {typeof(RedTigerGameController)});
+            ResolveAllRegistrations(new[] {typeof(RedTigerGameController)});
         }
     }
 }

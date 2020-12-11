@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class Brand : BaseEntity
+    public class Brand : BaseEntity<Guid>
     {
         public Status Status { get; set; }
 

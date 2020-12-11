@@ -187,8 +187,8 @@ namespace TGS.Core.DataServices.Bet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
 
                     b.Property<string>("GameName")
                         .IsRequired()

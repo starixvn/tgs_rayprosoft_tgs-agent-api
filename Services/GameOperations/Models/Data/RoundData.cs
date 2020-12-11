@@ -11,7 +11,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public Guid GameProviderId { get; init; }
         public string GameProviderCode { get; init; }
         public string GameProviderName { get; init; }
-        public Guid GameId { get; init; }
+        public int GameId { get; init; }
         public string GameName { get; init; }
         public GameType GameType { get; init; }
         public string PlayerCode { get; init; }

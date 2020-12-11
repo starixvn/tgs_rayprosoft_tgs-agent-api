@@ -29,6 +29,7 @@ namespace TGS.Core.DataServices.DataInitializers
             bool AutoClosedRound => true;
             bool SupportTestPlayer => true;
             bool AllowKickPlayer => false;
+            short UniqueId { get; }
             PluggableConfigurationBase GetConfiguration();
         }
 
@@ -45,7 +46,6 @@ namespace TGS.Core.DataServices.DataInitializers
 
         internal interface IGame
         {
-            Guid Id { get; }
             string Name { get; init; }
             string Code { get; init; }
             string ExternalId { get; init; }
@@ -84,8 +84,6 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             private readonly string _code;
             private readonly string _availableCurrencies;
-
-            public Guid Id => Guid.NewGuid();
 
             [Name("Name")]
             public string Name { get; init; }
