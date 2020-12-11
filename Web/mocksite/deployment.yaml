@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mocksite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mocksite
+  template:
+    metadata:
+      labels:
+        name: mocksite
+    spec:
+      containers:
+        - name: mocksite
+          image: registry.gitlab.com/rayprosoft/turnkey-gaming-system/mocksite:0.0.1-65912e7
+          resources:
+            requests:
+              cpu: 25m
+              memory: 263M
+            limits:
+              cpu: 296m
+              memory: 263M
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mocksite
+spec:
+  type: NodePort
+  selector:
+    name: mocksite
+  ports:
+    - port: 80
+      targetPort: 80
