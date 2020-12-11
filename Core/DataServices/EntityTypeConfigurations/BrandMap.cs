@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Models;
@@ -10,7 +11,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<Brand>.Configure(EntityTypeBuilder<Brand> builder)
         {
             builder.ToTable("Brands", "dbo");
-            BaseConfigureProperties(builder);
+            BaseConfigureProperties<Brand, Guid>(builder);
 
             builder.Property(c => c.Status)
                 .HasColumnType(ColumnTypes.TinyInt)

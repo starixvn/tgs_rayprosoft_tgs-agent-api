@@ -229,43 +229,16 @@ namespace TGS.Core.DataServices.DataInitializers
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
 
-            var tmpPlayer = new[]
-            {
-                new
-                {
-                    Username = "TP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
-                },
-                new
-                {
-                    Username = "TP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
-                },
-                new
-                {
-                    Username = "TP01_cny_zh-cn", RealName = "TP01_cny_zh-cn", CultureCode = "zh-CN",
-                    CurrencyCode = "CNY", Type = PlayerType.TestPlayer
-                },
-                new
-                {
-                    Username = "RP01_cny_en-us", RealName = "TP01_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.RealPlayer
-                },
-                new
-                {
-                    Username = "RP02_cny_en-us", RealName = "TP02_cny_en-us", CultureCode = "en-US",
-                    CurrencyCode = "CNY", Type = PlayerType.RealPlayer
-                }
-            };
+            var tgsPlayer = GenerateTgsPlayers();
 
-            _players = tmpPlayer.Select(p =>
+            _players = tgsPlayer.Select(p =>
             {
                 var playerCode = PlayerCodeGenerator.NewId();
                 var vipId = _vipLevels[rnd.Next(0, 6)].Id;
                 var invitationCode = Generator.RandomString(6);
 
                 return CreatePlayer(playerCode, p.Username, p.RealName, salt, password, p.CultureCode, p.CurrencyCode,
-                    vipId, p.Type, invitationCode);
+                    vipId, p.Type, invitationCode, brandId: p.BrandId);
             }).ToArray();
 
             var randomPlayers = Enumerable.Range(1, 100)
@@ -309,7 +282,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
-            return new Player
+            return new()
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -436,6 +409,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 Id = gameProvider.Id,
                 Name = gameProvider.Name,
                 Code = gameProvider.Code,
+                UniqueId = gameProvider.UniqueId,
                 Description = gameProvider.Name,
                 AutoCloseRound = gameProvider.AutoClosedRound,
                 Status = Status.Active,
@@ -481,28 +455,29 @@ namespace TGS.Core.DataServices.DataInitializers
                     IsDefault = idx == 0
                 }).ToHashSet();
 
-            gp.Games = gameProvider.Games.Select(g => new Models.Game
-            {
-                Id = g.Id,
-                Name = g.Name,
-                ExternalId = g.ExternalId,
-                Code = g.Code,
-                EndpointPath = g.EndpointPath,
-                RuleUrl = g.GameRuleUrl,
-                Type = g.GameTypeCode,
-                Description = g.Description,
-                Status = GameStatus.Active,
-                GameProvider = gp,
-                GameProviderId = gp.Id,
-                PlatformType = g.PlatformType,
-                HasTurnoverOnTieBet = g.HasTurnoverOnTieBet,
-                SubGame = g.SubGame,
-                CreatedOn = Now,
-                UpdatedOn = Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                AvailableCurrencies = g.AvailableCurrencies
-            }).ToHashSet();
+            gp.Games = gameProvider.Games.OrderBy(g => g.Code).ThenBy(g => g.PlatformType)
+                .Select((g, idx) => new Models.Game
+                {
+                    Id = int.Parse($"{gp.UniqueId}{idx+1:0000}"),
+                    Name = g.Name,
+                    ExternalId = g.ExternalId,
+                    Code = g.Code,
+                    EndpointPath = g.EndpointPath,
+                    RuleUrl = g.GameRuleUrl,
+                    Type = g.GameTypeCode,
+                    Description = g.Description,
+                    Status = GameStatus.Active,
+                    GameProvider = gp,
+                    GameProviderId = gp.Id,
+                    PlatformType = g.PlatformType,
+                    HasTurnoverOnTieBet = g.HasTurnoverOnTieBet,
+                    SubGame = g.SubGame,
+                    CreatedOn = Now,
+                    UpdatedOn = Now,
+                    CreatedByUsername = AdminUsername,
+                    UpdatedByUsername = AdminUsername,
+                    AvailableCurrencies = g.AvailableCurrencies
+                }).ToHashSet();
 
             return gp;
         }
@@ -518,6 +493,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 Name = reseller.Name,
                 OperationalEmail = reseller.OperationalEmail,
                 Description = string.Empty,
+                BusinessType = reseller.BusinessType,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = Now,
@@ -665,11 +641,8 @@ namespace TGS.Core.DataServices.DataInitializers
                 };
             }
 
-            string[] IntersectGameProviderCodes(string[] parents, string[] children)
-            {
-                return parents.Length == 0 ? children :
-                    children.Length == 0 ? parents : parents.Intersect(children).ToArray();
-            }
+            static string[] IntersectGameProviderCodes(string[] parents, string[] children) =>
+                parents.Length == 0 ? children : children.Length == 0 ? parents : parents.Intersect(children).ToArray();
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
@@ -795,14 +768,14 @@ namespace TGS.Core.DataServices.DataInitializers
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz0123456789";
-            return new string(Enumerable.Repeat(chars, length)
+            return new(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
 
         public static string RandomIntString(int length)
         {
             const string chars = "0123456789";
-            return new string(Enumerable.Repeat(chars, length)
+            return new(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
     }

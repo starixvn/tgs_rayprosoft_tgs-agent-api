@@ -2,9 +2,9 @@
 
 namespace TGS.Core.DataServices.Models
 {
-    public abstract class BaseEntity
+    public abstract class BaseEntity<T> where T : struct
     {
-        public Guid Id { get; set; }
+        public T Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
         public DateTimeOffset CreatedOn { get; set; }

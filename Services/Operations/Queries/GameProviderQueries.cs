@@ -35,7 +35,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
-        Task<IdMap[]> GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType);
+        Task<IdMap<int>[]> GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -196,10 +196,10 @@ namespace TGS.Services.Operations.Queries
             }).ToArray();
         }
 
-        async Task<IdMap[]> IGameProviderQueries.GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType)
+        async Task<IdMap<int>[]> IGameProviderQueries.GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType)
         {
             const string spName = "usp_GameProvider_GetSubGameIdMaps";
-            var r = await _repository.SqlQueryMultipleAsync<IdMap>(spName, parameters: new SqlParameter[]
+            var r = await _repository.SqlQueryMultipleAsync<IdMap<int>>(spName, parameters: new SqlParameter[]
             {
                 new()
                 {

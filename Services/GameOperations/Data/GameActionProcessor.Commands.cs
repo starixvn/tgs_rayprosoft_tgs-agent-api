@@ -70,7 +70,7 @@ namespace TGS.Services.GameOperations.Data
                 {
                     ParameterName = "@gameId",
                     Value = roundData.GameId,
-                    DbType = DbType.Guid
+                    DbType = DbType.Int32
                 },
                 new()
                 {

@@ -68,7 +68,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public Guid? ReferencedGameActionInternalId { get; set; }
         public BetActionData ReferencedGameAction { get; set; }
         public BetValuesResult BetValueResult { get; set; }
-        public Guid GameId { get; set; }
+        public int GameId { get; set; }
         public CachedGame Game { get; set; }
         public Guid? InternalRoundId { get; set; }
         public RoundStatus OldRoundStatus { get; set; }

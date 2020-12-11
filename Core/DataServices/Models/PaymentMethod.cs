@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Models
 {
-    public class PaymentMethod : BaseEntity
+    public class PaymentMethod : BaseEntity<Guid>
     {
         public string Description { get; set; }
         public Guid PaymentVendorId { get; set; }

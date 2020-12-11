@@ -49,6 +49,7 @@ import {
   useUpdatePlayerInfo
 } from "../../client/brand/player"
 import { useForm } from "react-hook-form"
+import { ChangePasswordDialog } from "./ChangePasswordDialog"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
   return (
@@ -302,72 +303,6 @@ const EditInfoDialog = ({ brandCode, currency, username, dialog }) => {
         </FieldStack>
       </form>
     </Dialog.Modal>
-  )
-}
-
-const ChangePasswordDialog = ({ brandCode, currency, username, dialog }) => {
-  let { register, handleSubmit, watch, setError, errors } = useForm()
-  let [formData, setSubmit] = useState()
-  let { result, error, isLoading, mutate, ...rest } = useChangePlayerPassword(
-    { brandCode, currency, username },
-    formData
-  )
-
-  const onSubmit = handleSubmit(setSubmit)
-
-  const reset = () => {
-    setSubmit(undefined)
-    mutate(undefined, false)
-  }
-
-  useEffect(() => {
-    if (result) {
-      reset()
-      dialog.hide()
-    }
-  }, [result])
-
-  return (
-    <>
-      <Dialog.Modal
-        title={username}
-        showCloseButton
-        showActionButtons
-        actionButtonsProps={{
-          isLoading,
-          onClickSubmit: onSubmit
-        }}
-        {...dialog}
-      >
-        <FieldStack>
-          <InputField name="oldpwd" inputRef={register} label="Old Password" />
-          <InputField
-            name="newpwd"
-            inputRef={register({ required: true })}
-            label="New Password"
-          />
-          <InputField
-            name="confirmpwd"
-            inputRef={register({ required: true })}
-            label="Confirm Password"
-          />
-        </FieldStack>
-      </Dialog.Modal>
-      {error && (
-        <Modal.State visible={!!error}>
-          <Modal.Dialog
-            title="Error"
-            showCloseButton
-            type="warning"
-            onClickClose={(event) => {
-              reset()
-            }}
-          >
-            <Text.Block>{JSON.stringify(error)}</Text.Block>
-          </Modal.Dialog>
-        </Modal.State>
-      )}
-    </>
   )
 }
 
