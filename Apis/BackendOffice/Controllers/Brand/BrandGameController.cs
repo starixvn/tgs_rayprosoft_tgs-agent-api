@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BrandGameController : BaseContextController
+    public partial class BrandGameController : BaseContextController
     {
         private readonly IMediator _mediator;
 
@@ -22,17 +22,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
 
         [HttpGet]
         [Description("Get brands: 平台商遊戲列表")]
-        public Task<PagedResponse<BrandGameModel>> GetBrandGamesAsync([FromQuery] GetBrandGamesRequest request)
-        {
-            return _mediator.Send(request);
-        }
+        public Task<PagedResponse<BrandGameModel>> GetBrandGamesAsync([FromQuery] GetBrandGamesRequest request) =>
+            _mediator.Send(request);
 
         [HttpGet("{id}")]
         [Description("Get a brand game")]
-        public Task<GetBrandGameResponse> GetBrandAsync(Guid id)
-        {
-            return _mediator.Send(new GetBrandGameRequest(id));
-        }
+        public Task<GetBrandGameResponse> GetBrandAsync(Guid id) => _mediator.Send(new GetBrandGameRequest(id));
 
         [HttpPut("{id}")]
         [Description("Update a brand game")]
@@ -42,11 +37,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             return _mediator.Send(request);
         }
 
-        [HttpPut("{id}/{tag}/{enable:bool}")]
+        [HttpPut("{id}/{tag}/{enabled:bool}")]
         [Description("Change a brand game tag")]
-        public Task<MessageResponse> UpdateBrandTagAsync(Guid id, GameTag tag, bool enable)
-        {
-            return _mediator.Send(new UpdateBrandGameTagRequest(id, tag, enable));
-        }
+        public Task<MessageResponse> UpdateBrandTagAsync(Guid id, GameTag tag, bool enabled) =>
+            _mediator.Send(new UpdateBrandGameTagRequest(id, tag, enabled));
     }
 }

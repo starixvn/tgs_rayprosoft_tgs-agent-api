@@ -21,7 +21,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         IQueryable<Payment> GetPaymentsAsync(bool tracking = false);
         Task CreatePaymentAsync(CreatePaymentRequest request, string username);
         Task UpdatePaymentAsync(Payment payment, UpdatePaymentRequest request, string username);
-        Task ChangeStatusAsync(Payment payment, PaymentStatus status, string username);
+        Task ChangeStatusAsync(Payment payment, SwitchStatus status, string username);
         Task<bool> ExistsAsync(Expression<Func<Payment, bool>> predicate);
         Task UpdatePaymentHandlingFeeAsync(Payment payment, UpdatePaymentFeeRequest request, string username);
         Task ChangeOrderAsync(ChangeOrderRequest request);
@@ -150,24 +150,6 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await tran.CommitAsync();
         }
 
-        Task IPaymentService.ChangeStatusAsync(Payment payment, PaymentStatus status, string username)
-        {
-            var beforePayment =
-                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
-                {
-                    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                }));
-
-            payment.PaymentStatus = status;
-            payment.UpdatedOn = DateTimeOffset.Now;
-            payment.UpdatedByUsername = username;
-
-            _repository.Entry(payment).State = EntityState.Modified;
-            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-            return _repository.SaveChangesAsync();
-        }
-
         Task<Payment> IPaymentService.GetPaymentAsync(Expression<Func<Payment, bool>> predicate,
             Func<IQueryable<Payment>, IQueryable<Payment>> preQuery, bool tracking)
         {
@@ -177,15 +159,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(payment).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<Payment> IPaymentService.GetPaymentsAsync(bool tracking)
-        {
-            return tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
-        }
+        IQueryable<Payment> IPaymentService.GetPaymentsAsync(bool tracking) =>
+            tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
 
-        Task<bool> IPaymentService.ExistsAsync(Expression<Func<Payment, bool>> predicate)
-        {
-            return _repository.Payments.AnyAsync(predicate);
-        }
+        Task<bool> IPaymentService.ExistsAsync(Expression<Func<Payment, bool>> predicate) =>
+            _repository.Payments.AnyAsync(predicate);
 
         Task IPaymentService.UpdatePaymentHandlingFeeAsync(Payment payment, UpdatePaymentFeeRequest request,
             string username)
@@ -206,6 +184,24 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await _repository.BulkInsertOrUpdateAsync(payments.ToArray());
         }
 
+        Task IPaymentService.ChangeStatusAsync(Payment payment, SwitchStatus status, string username)
+        {
+            var beforePayment =
+                JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(payment, new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                }));
+
+            payment.PaymentStatus = status;
+            payment.UpdatedOn = DateTimeOffset.Now;
+            payment.UpdatedByUsername = username;
+
+            _repository.Entry(payment).State = EntityState.Modified;
+            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            return _repository.SaveChangesAsync();
+        }
+
         private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
             PlayerListType playerListType)
         {
@@ -222,9 +218,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             }).ToArray();
         }
 
-        private PaymentAuditLog GeneratePaymentAuditLog(Payment payment, Payment beforePayment)
-        {
-            return new PaymentAuditLog
+        private PaymentAuditLog GeneratePaymentAuditLog(Payment payment, Payment beforePayment) =>
+            new()
             {
                 Id = Guid.NewGuid(),
                 PaymentId = payment.Id,
@@ -255,6 +250,5 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 CreatedByUsername = payment.UpdatedByUsername,
                 Operation = AuditLogOperation.Update
             };
-        }
     }
 }

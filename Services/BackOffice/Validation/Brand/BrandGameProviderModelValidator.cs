@@ -3,7 +3,7 @@ using TGS.Services.BackOffice.Application.Models.Brand;
 
 namespace TGS.Services.BackOffice.Validation.Brand
 {
-    internal class BrandGameProviderModelValidator : AbstractValidator<BrandGameProviderModel>
+    public class BrandGameProviderModelValidator : AbstractValidator<BrandGameProviderModel>
     {
         public BrandGameProviderModelValidator()
         {
@@ -30,10 +30,6 @@ namespace TGS.Services.BackOffice.Validation.Brand
             RuleFor(x => x.Configuration.ConfigurationData)
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.ConfigurationDataRequired);
-
-            RuleFor(x => x.Configuration.IsDefault)
-                .NotNull()
-                .WithMessage(Application.Resources.Brand.IsDefaultRequired);
         }
     }
 }

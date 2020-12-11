@@ -9,6 +9,7 @@ namespace TGS.Services.BackOffice.Application.Models.BrandGame
         public int GameId { get; set; }
         public string GameProviderName { get; set; }
         public string GameName { get; set; }
+        public GameStatus Status { get; set; }
         public GameType GameType { get; set; }
         public PlatformType Platform { get; set; }
         public bool SupportHtml5 { get; set; }

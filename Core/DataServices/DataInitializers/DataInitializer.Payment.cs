@@ -18,19 +18,19 @@ namespace TGS.Core.DataServices.DataInitializers
         private const string WeChatPayScan = "WeChatPayScan";
         private const string BankTransfer = "BankTransfer";
 
-        private static readonly Dictionary<string, Guid> PaymentVendors = new Dictionary<string, Guid>
+        private static readonly Dictionary<string, Guid> PaymentVendors = new()
         {
             {Help2Pay, new Guid("30CB4D17-2506-4D72-8470-65063B80F9C9")}
         };
 
-        private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new Dictionary<string, (Guid, Guid)>
+        private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new()
         {
             {AlipayPayment, (new Guid("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), PaymentVendors[Help2Pay])},
             {WeChatPayPayment, (new Guid("083D8754-1FE3-478A-9417-80DA796C3450"), PaymentVendors[Help2Pay])}
         };
 
         private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
-            new Dictionary<string, (Guid, (Guid, Guid))>
+            new()
             {
                 {
                     AlipayScan,
@@ -119,7 +119,7 @@ namespace TGS.Core.DataServices.DataInitializers
                     PaymentChannelId = PaymentChannels[BankTransfer].Item1,
                     TransferType = PaymentTransferType.Deposit,
                     ChannelName = "阿里pay",
-                    PaymentStatus = PaymentStatus.Enabled,
+                    PaymentStatus = SwitchStatus.Enabled,
                     TransferLimitFrom = 10,
                     TransferLimitTo = 100000,
                     PlayerListCondition = PlayerListCondition.All,

@@ -27,7 +27,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
                 return CreateInvalidResponse<MessageResponse>(BrandGame.NotFound);
             }
 
-            brandGame.EffectiveBettingProportion = request.EffectiveBettingProportion;
+            brandGame.EffectiveBettingPercentage = request.EffectiveBettingPercentage;
             brandGame.Rebate = request.Rebate;
 
             await _service.UpdateBrandGameAsync(brandGame);

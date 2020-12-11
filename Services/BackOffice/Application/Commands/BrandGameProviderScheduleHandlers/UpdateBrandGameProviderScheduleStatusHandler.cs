@@ -28,7 +28,9 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderSchedule
                 return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
             }
 
-            await _service.ChangeStatusAsync(schedule, request);
+            schedule.Status = request.Status;
+
+            await _service.UpdateBrandGameProviderScheduleAsync(schedule);
 
             return CreateValidResponse<MessageResponse>();
         }

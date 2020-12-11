@@ -282,7 +282,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
-            return new()
+            return new Player()
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -458,7 +458,7 @@ namespace TGS.Core.DataServices.DataInitializers
             gp.Games = gameProvider.Games.OrderBy(g => g.Code).ThenBy(g => g.PlatformType)
                 .Select((g, idx) => new Models.Game
                 {
-                    Id = int.Parse($"{gp.UniqueId}{idx+1:0000}"),
+                    Id = int.Parse($"{gp.UniqueId}{idx + 1:0000}"),
                     Name = g.Name,
                     ExternalId = g.ExternalId,
                     Code = g.Code,
@@ -623,6 +623,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 GameProviders = brandGameProviders.ToHashSet(),
                 Games = gameProviders.SelectMany(gp => gp.Games).Select((g, idx) => new BrandGame
                 {
+                    Id = Guid.NewGuid(),
                     BrandId = brand.Id,
                     GameId = g.Id,
                     Status = GameStatus.Active,
@@ -641,8 +642,11 @@ namespace TGS.Core.DataServices.DataInitializers
                 };
             }
 
-            static string[] IntersectGameProviderCodes(string[] parents, string[] children) =>
-                parents.Length == 0 ? children : children.Length == 0 ? parents : parents.Intersect(children).ToArray();
+            static string[] IntersectGameProviderCodes(string[] parents, string[] children)
+            {
+                return parents.Length == 0 ? children :
+                    children.Length == 0 ? parents : parents.Intersect(children).ToArray();
+            }
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
@@ -768,14 +772,14 @@ namespace TGS.Core.DataServices.DataInitializers
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz0123456789";
-            return new(Enumerable.Repeat(chars, length)
+            return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
 
         public static string RandomIntString(int length)
         {
             const string chars = "0123456789";
-            return new(Enumerable.Repeat(chars, length)
+            return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
     }

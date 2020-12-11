@@ -61,6 +61,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Game Tag is not found..
+        /// </summary>
+        public static string GameTagNotFound {
+            get {
+                return ResourceManager.GetString("GameTagNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Brand Game is not found..
         /// </summary>
         public static string NotFound {

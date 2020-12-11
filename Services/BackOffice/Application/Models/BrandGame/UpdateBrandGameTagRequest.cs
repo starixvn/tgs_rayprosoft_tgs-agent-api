@@ -7,15 +7,15 @@ namespace TGS.Services.BackOffice.Application.Models.BrandGame
 {
     public class UpdateBrandGameTagRequest : IRequest<MessageResponse>
     {
-        public UpdateBrandGameTagRequest(Guid id, GameTag tag, bool enable)
+        public UpdateBrandGameTagRequest(Guid id, GameTag tag, bool enabled)
         {
             Id = id;
             GameTag = tag;
-            Enable = enable;
+            Enabled = enabled;
         }
 
         public Guid Id { get; set; }
         public GameTag GameTag { get; set; }
-        public bool Enable { get; set; }
+        public bool Enabled { get; set; }
     }
 }

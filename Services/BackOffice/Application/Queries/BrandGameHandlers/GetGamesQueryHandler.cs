@@ -4,10 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Enums;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGame;
-using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
@@ -39,12 +38,13 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     Id = x.Id,
                     GameId = x.GameId,
                     GameProviderName = x.Game.GameProvider.Name,
+                    Status = x.Status,
                     GameName = x.Game.Name,
                     GameType = x.Game.Type,
                     Platform = x.Game.PlatformType,
-                    IsHot = GameTag.Hot.HasFlag(),
-                    IsNew = GameTag.New.HasFlag(),
-                    IsRecommend = GameTag.Recommend.HasFlag()
+                    IsHot = x.Tag.IsHot(),
+                    IsNew = x.Tag.IsNew(),
+                    IsRecommend = x.Tag.IsRecommend()
                 }).CreatePagedResponseAsync(request);
         }
     }

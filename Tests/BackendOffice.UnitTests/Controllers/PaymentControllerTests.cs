@@ -50,7 +50,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new GetPaymentsRequest
             {
-                PaymentStatus = PaymentStatus.Enabled,
+                PaymentStatus = SwitchStatus.Enabled,
                 Page = 1,
                 Rows = 10,
                 SortBy = "updatedOn",
@@ -64,7 +64,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .BuildMock().Object;
 
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.Where(x => x.PaymentStatus == PaymentStatus.Enabled)
+            var orderedRoles = list.Where(x => x.PaymentStatus == SwitchStatus.Enabled)
                 .OrderByDescending(p => p.UpdatedOn);
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();

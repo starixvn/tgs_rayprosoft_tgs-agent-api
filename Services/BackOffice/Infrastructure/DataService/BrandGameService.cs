@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
-using TGS.Services.BackOffice.Application.Models.BrandGame;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -23,7 +22,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task UpdateBrandGameAsync(BrandGame game);
 
         Task UpdateBrandGamesAsync(IEnumerable<BrandGame> brandGames);
-        Task UpdateBrandGameTagAsync(UpdateBrandGameTagRequest request);
     }
 
     public class BrandGameService : BaseService, IBrandGameService
@@ -38,25 +36,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         Task<BrandGame> IBrandGameService.GetBrandGameAsync(Expression<Func<BrandGame, bool>> predicate,
-            Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery)
-        {
-            return GetEntityFirstOrDefaultAsync(predicate, preQuery);
-        }
+            Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery) =>
+            GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         IQueryable<BrandGame> IBrandGameService.GetBrandGamesAsync(
-            Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery, bool tracking)
-        {
-            return GetQueriesAsync(preQuery, tracking);
-        }
+            Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery, bool tracking) =>
+            GetQueriesAsync(preQuery, tracking);
 
-        Task IBrandGameService.UpdateBrandGameAsync(BrandGame game)
-        {
-            return UpdateEntityAsync(game);
-        }
-
-        Task IBrandGameService.UpdateBrandGameTagAsync(UpdateBrandGameTagRequest request)
-        {
-            throw new NotImplementedException();
-        }
+        Task IBrandGameService.UpdateBrandGameAsync(BrandGame game) => UpdateEntityAsync(game);
     }
 }

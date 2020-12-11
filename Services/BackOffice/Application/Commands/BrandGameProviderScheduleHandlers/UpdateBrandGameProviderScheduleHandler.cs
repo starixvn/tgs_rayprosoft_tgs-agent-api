@@ -25,10 +25,14 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderSchedule
 
             if (schedule == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
+                return CreateInvalidResponse<MessageResponse>(BrandGameProviderSchedule.NotFound);
             }
 
-            await _service.UpdateBrandGameProviderScheduleAsync(schedule, request);
+            schedule.From = request.From;
+            schedule.To = request.To;
+            schedule.DayOfWeek = request.DayOfWeek;
+
+            await _service.UpdateBrandGameProviderScheduleAsync(schedule);
 
             return CreateValidResponse<MessageResponse>();
         }

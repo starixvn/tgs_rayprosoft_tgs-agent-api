@@ -25,7 +25,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public bool DepositedAmountUnlimited { get; set; }
         public decimal DepositedAmountMin { get; set; }
         public decimal DepositedAmountMax { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
+        public SwitchStatus PaymentStatus { get; set; }
         public string Reason { get; set; }
         public PaymentFeeModel PaymentFee { get; set; }
         public string[] Whitelist { get; set; }

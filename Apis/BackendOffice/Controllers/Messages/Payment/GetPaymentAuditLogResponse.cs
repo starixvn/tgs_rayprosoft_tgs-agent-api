@@ -15,8 +15,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
         public Guid PaymentId { get; set; }
         public string BeforeChannelName { get; set; }
         public string AfterChannelName { get; set; }
-        public PaymentStatus BeforePaymentStatus { get; set; }
-        public PaymentStatus AfterPaymentStatus { get; set; }
+        public SwitchStatus BeforePaymentStatus { get; set; }
+        public SwitchStatus AfterPaymentStatus { get; set; }
         public decimal BeforeTransferLimitFrom { get; set; }
         public decimal AfterTransferLimitFrom { get; set; }
         public decimal BeforeTransferLimitTo { get; set; }

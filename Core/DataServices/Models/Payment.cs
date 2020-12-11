@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Models
         public virtual PaymentChannel PaymentChannel { get; set; }
         public PaymentTransferType TransferType { get; set; }
         public string ChannelName { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
+        public SwitchStatus PaymentStatus { get; set; }
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
         public PlayerListCondition PlayerListCondition { get; set; }

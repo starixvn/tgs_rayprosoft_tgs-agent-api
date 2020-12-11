@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Payment
     {
         [HttpPut("{paymentId:guid}/{status}")]
         [Description("change a Payment's status")]
-        public async Task<MessageResponse> UpdatePaymentStatusAsync(Guid paymentId, PaymentStatus status)
+        public async Task<MessageResponse> UpdatePaymentStatusAsync(Guid paymentId, SwitchStatus status)
         {
             var payment = await _paymentService.GetPaymentAsync(q => q.Id == paymentId);
 

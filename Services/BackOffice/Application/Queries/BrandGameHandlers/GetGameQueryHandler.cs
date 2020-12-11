@@ -36,12 +36,13 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     Id = brandGame.Id,
                     GameId = brandGame.GameId,
                     GameName = brandGame.Game.Name,
+                    Status = brandGame.Status,
                     GameType = brandGame.Game.Type,
                     GameProviderName = brandGame.Game.GameProvider.Name,
                     Platform = brandGame.Game.PlatformType,
                     //TODO: Get from game model property
                     SupportHtml5 = true,
-                    EffectiveBettingProportion = brandGame.EffectiveBettingProportion,
+                    EffectiveBettingProportion = brandGame.EffectiveBettingPercentage,
                     Rebate = brandGame.Rebate
                 }
             };

@@ -19,6 +19,6 @@ namespace TGS.Core.DataServices.Models
         public GameTag Tag { get; set; }
         public int DisplayOrder { get; set; }
         public bool Rebate { get; set; }
-        public decimal EffectiveBettingProportion { get; set; }
+        public decimal EffectiveBettingPercentage { get; set; }
     }
 }

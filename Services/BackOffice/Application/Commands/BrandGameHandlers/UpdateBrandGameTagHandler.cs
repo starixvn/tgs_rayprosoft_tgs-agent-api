@@ -1,10 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGame;
 using TGS.Services.BackOffice.Application.Resources;
-using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
@@ -28,9 +28,9 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
                 return CreateInvalidResponse<MessageResponse>(BrandGame.NotFound);
             }
 
-            brandGame.Tag = request.Enable
-                ? brandGame.Tag.AddFlag(request.GameTag)
-                : brandGame.Tag.RemoveFlag(request.GameTag);
+            brandGame.Tag = request.Enabled
+                ? brandGame.Tag.AddTag(request.GameTag)
+                : brandGame.Tag.RemoveTag(request.GameTag);
 
             await _service.UpdateBrandGameAsync(brandGame);
 

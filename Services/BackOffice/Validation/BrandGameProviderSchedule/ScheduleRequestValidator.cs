@@ -1,0 +1,20 @@
+﻿using System;
+using FluentValidation;
+using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
+
+namespace TGS.Services.BackOffice.Validation.BrandGameProviderSchedule
+{
+    public class ScheduleRequestValidator : AbstractValidator<ScheduleRequest>
+    {
+        public ScheduleRequestValidator()
+        {
+            RuleFor(x => x.From)
+                .LessThan(x => x.To)
+                .WithMessage(Application.Resources.BrandGameProviderSchedule.ToDateGreaterThanFrom);
+            RuleFor(x => x.DayOfWeek)
+                .IsInEnum();
+        }
+
+        public static bool BeAValidDate(DateTimeOffset date) => date != default;
+    }
+}
