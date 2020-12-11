@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\Brand\BrandGameController.StatusChange.cs" />
     <Compile Remove="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
@@ -45,6 +46,7 @@
 	<Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+	<None Include="Controllers\Brand\BrandGameController.StatusChange.cs" />
 	<Compile Update="Resources\Brand.Designer.cs">
 	  <DesignTime>True</DesignTime>
 	  <AutoGen>True</AutoGen>
