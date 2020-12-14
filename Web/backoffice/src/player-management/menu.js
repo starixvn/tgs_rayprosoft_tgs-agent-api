@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react"
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { Menu as _Menu, findlLabel } from "../menu"
 import {
   Code as PlayerListCode,

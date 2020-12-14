@@ -1,16 +1,4 @@
 {
-  "extends": "@snowpack/app-scripts-react/babel.config.json",
-  "presets": [
-    ["@emotion/babel-preset-css-prop"],
-    [
-      "@babel/preset-env",
-      {
-        "targets": {
-          "esmodules": true
-        },
-        "modules": false
-      }
-    ]
-  ],
+  "presets": ["@babel/preset-react", "@emotion/babel-preset-css-prop"],
   "plugins": []
 }

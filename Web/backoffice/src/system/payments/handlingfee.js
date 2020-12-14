@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import { Stack, Box, Button, Text, Modal, Dialog, Heading } from "bumbag"
 import { useModalState } from "../../dialog/Modal"

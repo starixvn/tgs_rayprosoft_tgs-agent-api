@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react"
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { CodeContentPair as PlayerListPair } from "./player-list"
 import { Switch } from "../content"
 import { Code, DefaultCodePath, Menu } from "./menu"

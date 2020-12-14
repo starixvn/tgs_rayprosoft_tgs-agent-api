@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Formik, Form } from "formik"
 import { Dialog as _Dialog, Button, Box } from "bumbag"
 import { CancelText, SubmitText } from "../button/ActionButtons"

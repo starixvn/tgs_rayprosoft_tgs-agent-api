@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Select as _Select } from "bumbag"
 import { Field as _Field } from "../select/Field"
 import AlertDialog from "../dialog/Alert"

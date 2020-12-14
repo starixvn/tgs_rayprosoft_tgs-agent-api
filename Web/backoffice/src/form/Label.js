@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Label as _Label, Text } from "bumbag"
 
 const Label = ({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Button } from "bumbag"
 import { Locales, Trans, useTrans } from "../../i18n"
 import AlertDialog from "../../dialog/Alert"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Icon, Table as _Table, Pagination, Set } from "bumbag"
 import ReactTable, { useTable as _useTable } from "react-table"
 import { fromIsDescending, equalsDescending } from "./order"
