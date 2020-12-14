@@ -26,6 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new LicenseeController(
                 _licenseeServiceMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private LicenseeController _controller;

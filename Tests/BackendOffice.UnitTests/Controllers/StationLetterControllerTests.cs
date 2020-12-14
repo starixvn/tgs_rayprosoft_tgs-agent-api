@@ -34,6 +34,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _playerCommandsMock.Object,
                 _uploadServiceMock.Object,
                 _stationLetterServiceMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private StationLetterController _controller;

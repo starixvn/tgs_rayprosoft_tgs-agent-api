@@ -31,6 +31,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _uploadServiceMock.Object,
                 _paymentServiceMock.Object,
                 _auditLogQueriesMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private PaymentController _controller;

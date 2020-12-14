@@ -26,6 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new ResellerController(
                 _resellerServiceMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private ResellerController _controller;

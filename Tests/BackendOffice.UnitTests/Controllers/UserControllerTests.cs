@@ -30,6 +30,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _departmentQueriesMock.Object,
                 _roleQueriesMock.Object,
                 _userCommandsMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private UserController _controller;

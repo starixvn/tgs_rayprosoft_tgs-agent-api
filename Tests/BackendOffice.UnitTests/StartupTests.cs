@@ -50,8 +50,6 @@ namespace TGS.Tests.BackendOffice.UnitTests
             startup.ConfigureServices(services);
             SetupHttpContext();
 
-            services.AddSingleton(HttpContextAccessorMock.Object);
-
             var controllers = typeof(BaseContextController).Assembly.ExportedTypes
                 .Where(x => !x.IsAbstract && typeof(ControllerBase).IsAssignableFrom(x)).ToList();
 
@@ -82,9 +80,6 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             mockHttpContext.Setup(p => p.Response)
                 .Returns(httpResponse.Object);
-
-            HttpContextAccessorMock.Setup(p => p.HttpContext)
-                .Returns(mockHttpContext.Object);
         }
 
         private Mock<IAuthenticationService> _authServiceMock;
