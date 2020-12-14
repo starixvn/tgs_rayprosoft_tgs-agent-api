@@ -91,9 +91,7 @@ const LoginDialog = ({
     answer: captcha,
     isLoading: isLoadingCaptcha,
     mutate: mutateCaptcha
-  } = useCaptcha(
-    dialog.visible ? { brandCode, currency, brandToken } : undefined
-  )
+  } = useCaptcha(dialog.visible ? { brandCode, currency } : undefined)
   let { token, error, isLoading, mutate } = usePlayerToken(
     dialog.visible ? { brandCode, currency, username } : undefined,
     fromData

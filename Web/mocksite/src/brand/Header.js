@@ -13,7 +13,10 @@ import {
   InputField,
   FieldStack,
   Text,
-  FieldWrapper
+  FieldWrapper,
+  DropdownMenu,
+  Modal,
+  Dialog
 } from "bumbag"
 import {
   Switch,
@@ -32,6 +35,7 @@ import {
   useSetPlatform
 } from "./State"
 import CurrencyDropdownMenu from "../currency/DropdownMenu"
+import { CreatePlayerDialog } from "./CreatePlayerDialog"
 
 export const BrandHeader = ({ navItems = [] }) => {
   let currency = useCurrency()
@@ -45,13 +49,41 @@ export const BrandHeader = ({ navItems = [] }) => {
   return (
     <TopNav padding="major-1">
       <TopNav.Section>
-        <TopNav.Item>{brandCode}</TopNav.Item>
+        <TopNav.Item>
+          <BrandDropdownMenu brandCode={brandCode} currency={currency} />
+        </TopNav.Item>
         <TopNav.Item>
           <CurrencyDropdownMenu value={currency} onChange={setCurrency} />
         </TopNav.Item>
         {navItems}
       </TopNav.Section>
     </TopNav>
+  )
+}
+
+const BrandDropdownMenu = ({ brandCode, currency }) => {
+  let createPlayerDialog = Modal.useState()
+  return (
+    <>
+      <DropdownMenu
+        menu={
+          <>
+            <DropdownMenu.Item onClick={createPlayerDialog.show}>
+              Create Player
+            </DropdownMenu.Item>
+          </>
+        }
+      >
+        <Button iconAfter="chevron-down">{brandCode}</Button>
+      </DropdownMenu>
+      {createPlayerDialog.visible && (
+        <CreatePlayerDialog
+          brandCode={brandCode}
+          currency={currency}
+          dialog={createPlayerDialog}
+        />
+      )}
+    </>
   )
 }
 
