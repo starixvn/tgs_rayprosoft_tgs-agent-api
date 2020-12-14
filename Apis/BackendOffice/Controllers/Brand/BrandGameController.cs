@@ -27,7 +27,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
 
         [HttpGet("{id}")]
         [Description("Get a brand game")]
-        public Task<GetBrandGameResponse> GetBrandAsync(Guid id) => _mediator.Send(new GetBrandGameRequest(id));
+        public Task<GetBrandGameResponse> GetBrandGameAsync(Guid id) => _mediator.Send(new GetBrandGameRequest(id));
 
         [HttpPut("{id}")]
         [Description("Update a brand game")]
