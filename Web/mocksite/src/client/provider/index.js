@@ -18,8 +18,6 @@ export const useGameProviderList = (
     currency
   })
 
-  console.warn("TODO: mutate invalid cache")
-
   let keys =
     brandToken && playerToken && platform && language && currency
       ? [
@@ -47,7 +45,14 @@ export const useGameProviderList = (
           language,
           currency
         })
-      }).then(toDataOrError)
+      })
+        .then(toDataOrError)
+        .catch((error) => {
+          console.log("TODO: auto retry after get new brand token?")
+          mutatePlayerTokenCache()
+          mutateBrandTokenCache()
+          return Promise.reject(error)
+        })
     }
   )
 

@@ -42,6 +42,41 @@ export const useCreatePlayer = ({ brandCode, currency }, formData) => {
   }
 }
 
+export const useCheckPlayerUsername = ({ brandCode, currency }, formData) => {
+  let { token: brandToken, mutate: mutateBrandToken } = useBrandToken({
+    brandCode,
+    currency
+  })
+
+  let keys =
+    brandToken && formData
+      ? [`/api/Player/checkUsername`, formData, brandCode, currency]
+      : undefined
+
+  let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brandToken}`
+      },
+      body: JSON.stringify(formData)
+    })
+      .then(toDataOrError)
+      .catch((error) => {
+        console.log("TODO: auto retry after get new brand token?")
+        mutateBrandToken()
+        return Promise.reject(error)
+      })
+  })
+
+  return {
+    result,
+    error,
+    ...rest
+  }
+}
+
 const DefaultPassword = "TgsP@ssw0rd"
 const playerTokenCacheKey = ({ brandCode, currency, username }) =>
   `playerToken:${brandCode}:${currency}:${username}`

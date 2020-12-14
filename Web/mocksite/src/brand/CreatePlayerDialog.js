@@ -29,7 +29,11 @@ import {
   useRouteMatch
 } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { useCaptcha, useCreatePlayer } from "../client/brand/player"
+import {
+  useCaptcha,
+  useCheckPlayerUsername,
+  useCreatePlayer
+} from "../client/brand/player"
 
 export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
   let {
@@ -39,7 +43,14 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
     mutate: mutateCaptcha
   } = useCaptcha({ brandCode, currency })
 
-  let { register, handleSubmit, watch, setError, errors } = useForm()
+  let {
+    register,
+    handleSubmit,
+    watch,
+    setError,
+    errors,
+    clearErrors
+  } = useForm()
   let [formData, setSubmit] = useState()
   let { result, error, isLoading } = useCreatePlayer(
     { brandCode, currency },
@@ -63,6 +74,24 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
       errorDialog.show()
     }
   }, [error])
+
+  let [checkUsernameFormData, setCheckUsernameFormData] = useState()
+  let { result: usernameResult, mutate } = useCheckPlayerUsername(
+    { brandCode, currency },
+    checkUsernameFormData
+  )
+
+  useEffect(() => {
+    if (usernameResult?.isexist) {
+      setError("username", {
+        type: "exist",
+        message: "Username exists"
+      })
+    } else if (!usernameResult?.isexist) {
+      clearErrors("username")
+    }
+  }, [usernameResult])
+
   return (
     <Dialog.Modal
       title={brandCode}
@@ -78,6 +107,22 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
       <FieldStack>
         <InputField
           name="username"
+          onChange={(event) => {
+            let username = event.target.value
+            if (username) {
+              setCheckUsernameFormData({
+                username,
+                bypasscaptcha: true,
+                answer: "answer",
+                captcha: "captcha"
+              })
+            } else {
+              mutate(undefined, false)
+              clearErrors("")
+            }
+          }}
+          state={errors.username ? "danger" : ""}
+          validationText={errors?.username?.message}
           inputRef={register}
           label="Username"
           addonBefore={
