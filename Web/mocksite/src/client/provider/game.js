@@ -45,9 +45,9 @@ export const useGameUrl = ({ brandCode, username, currency }, data) => {
       })
       .catch((error) => {
         let { err, errmsg } = error
-        console.log("TODO: which token expired?")
-        mutateBrandToken()
-        mutatePlayerToken()
+        console.log("TODO: token expired err code")
+        // mutateBrandToken()
+        // mutatePlayerToken()
 
         return Promise.reject(error)
       })

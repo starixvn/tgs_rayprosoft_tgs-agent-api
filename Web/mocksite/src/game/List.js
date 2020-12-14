@@ -9,7 +9,8 @@ import {
   PageWithHeader,
   TopNav,
   Modal,
-  Dialog
+  Dialog,
+  Text
 } from "bumbag"
 import {
   Switch,
@@ -111,7 +112,7 @@ const LaunchGameButton = ({
     { brandCode, username, currency },
     formData
   )
-  let errorMessage = ""
+  let [errorMessage, setErrorMessage] = useState()
   const errorDialog = Modal.useState()
 
   const reset = () => {
@@ -129,7 +130,7 @@ const LaunchGameButton = ({
 
   useEffect(() => {
     if (error) {
-      errorMessage = JSON.stringify(error)
+      setErrorMessage(JSON.stringify(error))
       errorDialog.show()
     }
     if (error && gameWindow) {
@@ -157,11 +158,11 @@ const LaunchGameButton = ({
         showCloseButton
         type="warning"
         onClickClose={() => {
-          errorMessage = ""
+          setErrorMessage("")
         }}
         {...errorDialog}
       >
-        {errorMessage}
+        <Text.Block>{errorMessage}</Text.Block>
       </Dialog.Modal>
     </>
   )
