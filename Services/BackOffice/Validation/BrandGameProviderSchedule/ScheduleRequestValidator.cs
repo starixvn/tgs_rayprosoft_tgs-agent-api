@@ -1,5 +1,4 @@
-﻿using System;
-using FluentValidation;
+﻿using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
 namespace TGS.Services.BackOffice.Validation.BrandGameProviderSchedule
@@ -12,9 +11,8 @@ namespace TGS.Services.BackOffice.Validation.BrandGameProviderSchedule
                 .LessThan(x => x.To)
                 .WithMessage(Application.Resources.BrandGameProviderSchedule.ToDateGreaterThanFrom);
             RuleFor(x => x.DayOfWeek)
-                .IsInEnum();
+                .IsInEnum()
+                .WithMessage(Application.Resources.BrandGameProviderSchedule.DayOfWeekIncorrect);
         }
-
-        public static bool BeAValidDate(DateTimeOffset date) => date != default;
     }
 }
