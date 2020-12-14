@@ -13,12 +13,22 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.ChannelName)
+            builder.Property(c => c.Code)
                 .HasColumnType(ColumnTypes.Nvarchar(50))
                 .IsRequired();
 
-            builder.Property(c => c.Reason)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
+            builder.Property(c => c.Description)
+                .HasColumnType(ColumnTypes.Nvarchar(128));
+
+            builder.HasMany(p => p.PaymentChannels)
+                .WithOne(u => u.PaymentVendor)
+                .HasForeignKey(p => p.PaymentVendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(p => p.PaymentMethods)
+                .WithOne(p => p.PaymentVendor)
+                .HasForeignKey(p => p.PaymentVendorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(c => c.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
@@ -35,31 +45,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
-
-            builder.Property(c => c.TransferLimitFrom)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
-
-            builder.Property(c => c.TransferLimitTo)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
-
-            builder.Property(c => c.DepositedAmountMin)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
-
-            builder.Property(c => c.DepositedAmountMax)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
-                .IsRequired();
-
-            builder.Property(c => c.FeePercentage)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
-
-            builder.Property(c => c.LowestFee)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
-
-            builder.Property(c => c.HighestFee)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
         }
     }
 }

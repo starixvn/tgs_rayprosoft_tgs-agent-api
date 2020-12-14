@@ -6,7 +6,7 @@ namespace TGS.Core.DataServices.Models
     {
         public string Description { get; set; }
         public Guid PaymentVendorId { get; set; }
-        public virtual PaymentVendor PaymentVendor { get; set; }
+        public virtual Payment PaymentVendor { get; set; }
         public Guid PaymentMethodId { get; set; }
         public virtual PaymentMethod PaymentMethod { get; set; }
     }

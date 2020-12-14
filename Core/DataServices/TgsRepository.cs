@@ -56,10 +56,10 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> Announcements { get; set; }
         DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
         DbSet<StationLetter> StationLetters { get; set; }
-        DbSet<PaymentVendor> PaymentVendors { get; set; }
+        DbSet<Payment> PaymentVendors { get; set; }
         DbSet<PaymentMethod> PaymentMethods { get; set; }
         DbSet<PaymentChannel> PaymentChannels { get; set; }
-        DbSet<Payment> Payments { get; set; }
+        DbSet<BrandPayment> Payments { get; set; }
         DbSet<PaymentPlayerList> PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> PaymentAuditLogs { get; set; }
@@ -106,10 +106,10 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
-        DbSet<PaymentVendor> ITgsRepository.PaymentVendors { get; set; }
+        DbSet<Payment> ITgsRepository.PaymentVendors { get; set; }
         DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
         DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
-        DbSet<Payment> ITgsRepository.Payments { get; set; }
+        DbSet<BrandPayment> ITgsRepository.Payments { get; set; }
         DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
@@ -125,41 +125,26 @@ namespace TGS.Core.DataServices
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
 
-        Task<bool> IBaseRepository.CanConnectionAsync()
-        {
-            return Database.CanConnectAsync();
-        }
+        Task<bool> IBaseRepository.CanConnectionAsync() => Database.CanConnectAsync();
 
         void IBaseRepository.SetTimeoutToSeconds(int seconds)
         {
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level)
-        {
-            return Database.BeginTransactionAsync(level);
-        }
+        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) =>
+            Database.BeginTransactionAsync(level);
 
-        IDbConnection IBaseRepository.GetDbConnection()
-        {
-            return Database.GetDbConnection();
-        }
+        IDbConnection IBaseRepository.GetDbConnection() => Database.GetDbConnection();
 
-        Task IBaseRepository.SaveChangesAsync()
-        {
-            return SaveChangesAsync();
-        }
+        Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress)
-        {
-            return this.BulkInsertAsync(entities, bulkConfig, progress);
-        }
+        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) =>
+            this.BulkInsertAsync(entities, bulkConfig, progress);
 
         Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
-            Action<decimal> progress)
-        {
-            return this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
-        }
+            Action<decimal> progress) =>
+            this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
 
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
@@ -178,15 +163,9 @@ namespace TGS.Core.DataServices
             }
         }
 
-        DbSet<T> IBaseRepository.Set<T>()
-        {
-            return Set<T>();
-        }
+        DbSet<T> IBaseRepository.Set<T>() => Set<T>();
 
-        EntityEntry<T> IBaseRepository.Entry<T>(T entity)
-        {
-            return base.Entry(entity);
-        }
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => base.Entry(entity);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -240,8 +219,8 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new StationLetterPlayerMap());
             modelBuilder.ApplyConfiguration(new StationLetterMap());
 
+            modelBuilder.ApplyConfiguration(new BrandPaymentMap());
             modelBuilder.ApplyConfiguration(new PaymentMap());
-            modelBuilder.ApplyConfiguration(new PaymentVendorMap());
             modelBuilder.ApplyConfiguration(new PaymentMethodMap());
             modelBuilder.ApplyConfiguration(new PaymentChannelMap());
             modelBuilder.ApplyConfiguration(new PaymentPlayerListMap());

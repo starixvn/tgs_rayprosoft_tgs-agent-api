@@ -8,8 +8,8 @@ using FluentAssertions;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
+using TGS.Apis.BackendOffice.Controllers.BrandPayment;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
-using TGS.Apis.BackendOffice.Controllers.Payment;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 

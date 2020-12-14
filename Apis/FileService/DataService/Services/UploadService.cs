@@ -13,7 +13,6 @@ namespace TGS.Apis.FileService.DataService.Services
 {
     public interface IUploadService
     {
-        Task<string> UploadFileAsync(IFormFile formFile);
         Task<string> UploadFileS3Async(IFormFile formFile);
     }
 
@@ -22,39 +21,12 @@ namespace TGS.Apis.FileService.DataService.Services
         private readonly IAmazonS3 _amazonS3;
         private readonly IOptions<AwsSettings> _awsSettings;
         private readonly IRepository<File> _files;
-        private readonly IOptions<FileSettings> _fileSetting;
 
-        public UploadService(IAmazonS3 amazonS3, IOptions<AwsSettings> awsSettings,
-            IOptions<FileSettings> fileSetting, IRepository<File> files)
+        public UploadService(IAmazonS3 amazonS3, IOptions<AwsSettings> awsSettings, IRepository<File> files)
         {
             _amazonS3 = amazonS3;
             _awsSettings = awsSettings;
-            _fileSetting = fileSetting;
             _files = files;
-        }
-
-        public async Task<string> UploadFileAsync(IFormFile formFile)
-        {
-            Directory.CreateDirectory(_fileSetting.Value.Path);
-            var randomFileName =
-                $"{StringGenerator.GenerateAlphanumericString(32)}{Path.GetExtension(formFile.FileName)}";
-            var path = Path.Join(_fileSetting.Value.Path, "/", randomFileName);
-
-            var file = new File
-            {
-                Id = Guid.NewGuid().ToString(),
-                FileName = randomFileName,
-                ContentType = formFile.ContentType,
-                FileLength = formFile.Length
-            };
-
-            await using var stream = System.IO.File.Create(path);
-
-            await formFile.CopyToAsync(stream);
-
-            await _files.InsertAsync(file);
-
-            return $"/{path}";
         }
 
         public async Task<string> UploadFileS3Async(IFormFile formFile)

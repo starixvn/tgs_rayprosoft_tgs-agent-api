@@ -75,10 +75,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Paging.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\Payment.Designer.cs">
+    <Compile Update="Resources\BrandPayment.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Payment.resx</DependentUpon>
+      <DependentUpon>BrandPayment.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\PaymentChannel.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -90,10 +90,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>PaymentMethod.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\PaymentVendor.Designer.cs">
+    <Compile Update="Resources\Payment.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>PaymentVendor.resx</DependentUpon>
+      <DependentUpon>Payment.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Player.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -149,9 +149,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Paging.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Payment.resx">
+    <EmbeddedResource Update="Resources\BrandPayment.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Payment.Designer.cs</LastGenOutput>
+      <LastGenOutput>BrandPayment.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\PaymentChannel.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
@@ -161,9 +161,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>PaymentMethod.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\PaymentVendor.resx">
+    <EmbeddedResource Update="Resources\Payment.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>PaymentVendor.Designer.cs</LastGenOutput>
+      <LastGenOutput>Payment.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Reseller.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
