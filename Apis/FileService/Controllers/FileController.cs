@@ -6,7 +6,7 @@ using TGS.Apis.FileService.DataService.Services;
 namespace TGS.Apis.FileService.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("fs/[controller]")]
     public class FileController : ControllerBase
     {
         private readonly IUploadService _uploadService;
