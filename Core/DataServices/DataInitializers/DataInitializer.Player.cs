@@ -17,12 +17,10 @@ namespace TGS.Core.DataServices.DataInitializers
                     let prefix = type == PlayerType.RealPlayer ? "RP" : "TP"
                     from b in brands
                     from curr in b.Currencies
-                    let currency = curr.Code.ToLower()
                     from lang in b.Languages
-                    let language = lang.Code.ToLower()
                     from idx in Enumerable.Range(0, playerCountForPlayerType)
-                    let name = $"{prefix}{idx + 1:00}_{currency}_{language}"
-                    select new TgsPlayer(b.Id, name, name, language, currency, type)
+                    let name = $"{prefix}{idx + 1:00}_{curr.Code.ToLower()}_{lang.Code.ToLower()}"
+                    select new TgsPlayer(b.Id, name, name, lang.Code, curr.Code, type)
                 ).ToArray();
         }
 

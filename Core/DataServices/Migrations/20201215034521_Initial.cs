@@ -35,27 +35,6 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BetLimitGroups",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Code = table.Column<string>(type: "nvarchar(20)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BetLimitGroups", x => x.Id)
-                        .Annotation("SqlServer:Clustered", false);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Currencies",
                 schema: "dbo",
                 columns: table => new
@@ -320,27 +299,52 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BetLimits",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
+                    MinBet = table.Column<int>(type: "int", nullable: false),
+                    MaxBet = table.Column<int>(type: "int", nullable: false),
+                    MaxBetPerMatch = table.Column<int>(type: "int", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BetLimits", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
+                    table.ForeignKey(
+                        name: "FK_BetLimits_Currencies_CurrencyCode",
+                        column: x => x.CurrencyCode,
+                        principalSchema: "dbo",
+                        principalTable: "Currencies",
+                        principalColumn: "Code",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "GameProviderBetLimits",
                 schema: "dbo",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     GameProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BetLimitGroupId = table.Column<int>(type: "int", nullable: false),
-                    CurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: true)
+                    CurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: true),
+                    MinBet = table.Column<int>(type: "int", nullable: false),
+                    MaxBet = table.Column<int>(type: "int", nullable: false),
+                    MaxBetPerMatch = table.Column<int>(type: "int", nullable: true),
+                    ExternalSetting = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GameProviderBetLimits", x => x.Id)
                         .Annotation("SqlServer:Clustered", false);
-                    table.ForeignKey(
-                        name: "FK_GameProviderBetLimits_BetLimitGroups_BetLimitGroupId",
-                        column: x => x.BetLimitGroupId,
-                        principalSchema: "dbo",
-                        principalTable: "BetLimitGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_GameProviderBetLimits_Currencies_CurrencyCode",
                         column: x => x.CurrencyCode,
@@ -367,7 +371,7 @@ namespace TGS.Core.DataServices.Migrations
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     ClientId = table.Column<string>(type: "varchar(128)", nullable: false),
                     SecretKey = table.Column<string>(type: "varchar(64)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
                     GameProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DesktopEndpoint = table.Column<string>(type: "nvarchar(1024)", nullable: false),
                     MobileEndpoint = table.Column<string>(type: "nvarchar(1024)", nullable: false),
@@ -435,6 +439,7 @@ namespace TGS.Core.DataServices.Migrations
                     PlatformType = table.Column<byte>(type: "tinyint", nullable: false),
                     SubGame = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     HasTurnoverOnTieBet = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    Html5 = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     AvailableCurrencies = table.Column<string>(type: "nvarchar(1024)", nullable: false, defaultValue: ""),
                     Code = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
@@ -450,6 +455,52 @@ namespace TGS.Core.DataServices.Migrations
                     table.ForeignKey(
                         name: "FK_Games_GameProviders_GameProviderId",
                         column: x => x.GameProviderId,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MarketTypes",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GameProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    ExternalId = table.Column<string>(type: "nvarchar(16)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketTypes", x => x.Id);
+                    table.UniqueConstraint("AK_MarketTypes_GameProviderId_Code", x => new { x.GameProviderId, x.Code });
+                    table.ForeignKey(
+                        name: "FK_MarketTypes_GameProviders_Id",
+                        column: x => x.Id,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SportTypes",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GameProviderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    ExternalId = table.Column<string>(type: "nvarchar(16)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SportTypes", x => x.Id);
+                    table.UniqueConstraint("AK_SportTypes_GameProviderId_Code", x => new { x.GameProviderId, x.Code });
+                    table.ForeignKey(
+                        name: "FK_SportTypes_GameProviders_Id",
+                        column: x => x.Id,
                         principalSchema: "dbo",
                         principalTable: "GameProviders",
                         principalColumn: "Id",
@@ -556,33 +607,6 @@ namespace TGS.Core.DataServices.Migrations
                         .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
                         name: "FK_Licensees_Resellers_ResellerId",
-                        column: x => x.ResellerId,
-                        principalSchema: "dbo",
-                        principalTable: "Resellers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ResellerBetLimits",
-                schema: "dbo",
-                columns: table => new
-                {
-                    BetLimitGroupId = table.Column<int>(type: "int", nullable: false),
-                    ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ResellerBetLimits", x => new { x.ResellerId, x.BetLimitGroupId });
-                    table.ForeignKey(
-                        name: "FK_ResellerBetLimits_BetLimitGroups_BetLimitGroupId",
-                        column: x => x.BetLimitGroupId,
-                        principalSchema: "dbo",
-                        principalTable: "BetLimitGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ResellerBetLimits_Resellers_ResellerId",
                         column: x => x.ResellerId,
                         principalSchema: "dbo",
                         principalTable: "Resellers",
@@ -712,6 +736,62 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ResellerBetLimits",
+                schema: "dbo",
+                columns: table => new
+                {
+                    BetLimitId = table.Column<int>(type: "int", nullable: false),
+                    ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResellerBetLimits", x => new { x.ResellerId, x.BetLimitId });
+                    table.ForeignKey(
+                        name: "FK_ResellerBetLimits_BetLimits_BetLimitId",
+                        column: x => x.BetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "BetLimits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ResellerBetLimits_Resellers_ResellerId",
+                        column: x => x.ResellerId,
+                        principalSchema: "dbo",
+                        principalTable: "Resellers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SportMarketTypes",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SportTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MarketTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SportMarketTypes", x => x.Id);
+                    table.UniqueConstraint("AK_SportMarketTypes_SportTypeId_MarketTypeId", x => new { x.SportTypeId, x.MarketTypeId });
+                    table.ForeignKey(
+                        name: "FK_SportMarketTypes_MarketTypes_MarketTypeId",
+                        column: x => x.MarketTypeId,
+                        principalSchema: "dbo",
+                        principalTable: "MarketTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SportMarketTypes_SportTypes_SportTypeId",
+                        column: x => x.SportTypeId,
+                        principalSchema: "dbo",
+                        principalTable: "SportTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PaymentChannels",
                 schema: "dbo",
                 columns: table => new
@@ -785,17 +865,17 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
-                    BetLimitGroupId = table.Column<int>(type: "int", nullable: false),
+                    BetLimitId = table.Column<int>(type: "int", nullable: false),
                     LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LicenseeBetLimits", x => new { x.LicenseeId, x.BetLimitGroupId });
+                    table.PrimaryKey("PK_LicenseeBetLimits", x => new { x.LicenseeId, x.BetLimitId });
                     table.ForeignKey(
-                        name: "FK_LicenseeBetLimits_BetLimitGroups_BetLimitGroupId",
-                        column: x => x.BetLimitGroupId,
+                        name: "FK_LicenseeBetLimits_BetLimits_BetLimitId",
+                        column: x => x.BetLimitId,
                         principalSchema: "dbo",
-                        principalTable: "BetLimitGroups",
+                        principalTable: "BetLimits",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -950,17 +1030,19 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
-                    BetLimitGroupId = table.Column<int>(type: "int", nullable: false),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BetLimitId = table.Column<int>(type: "int", nullable: false),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandBetLimits", x => new { x.BrandId, x.BetLimitGroupId });
+                    table.PrimaryKey("PK_BrandBetLimits", x => new { x.BrandId, x.BetLimitId })
+                        .Annotation("SqlServer:Clustered", true);
                     table.ForeignKey(
-                        name: "FK_BrandBetLimits_BetLimitGroups_BetLimitGroupId",
-                        column: x => x.BetLimitGroupId,
+                        name: "FK_BrandBetLimits_BetLimits_BetLimitId",
+                        column: x => x.BetLimitId,
                         principalSchema: "dbo",
-                        principalTable: "BetLimitGroups",
+                        principalTable: "BetLimits",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -1052,6 +1134,7 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     GameId = table.Column<int>(type: "int", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
@@ -1059,7 +1142,8 @@ namespace TGS.Core.DataServices.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandGames", x => new { x.BrandId, x.GameId });
+                    table.PrimaryKey("PK_BrandGames", x => x.Id);
+                    table.UniqueConstraint("AK_BrandGames_BrandId_GameId", x => new { x.BrandId, x.GameId });
                     table.ForeignKey(
                         name: "FK_BrandGames_Brands_BrandId",
                         column: x => x.BrandId,
@@ -1072,6 +1156,34 @@ namespace TGS.Core.DataServices.Migrations
                         column: x => x.GameId,
                         principalSchema: "dbo",
                         principalTable: "Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BrandGroups",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandGroups", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
+                    table.ForeignKey(
+                        name: "FK_BrandGroups_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalSchema: "dbo",
+                        principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1122,7 +1234,7 @@ namespace TGS.Core.DataServices.Migrations
                     RegisteredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastActiveOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    BetLimitGroupId = table.Column<int>(type: "int", nullable: false),
+                    BetLimitId = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<byte>(type: "tinyint", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(64)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(32)", nullable: true),
@@ -1141,13 +1253,14 @@ namespace TGS.Core.DataServices.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Players", x => x.PlayerCode);
+                    table.UniqueConstraint("AK_Players_BrandId_Username", x => new { x.BrandId, x.Username });
                     table.ForeignKey(
-                        name: "FK_Players_BetLimitGroups_BetLimitGroupId",
-                        column: x => x.BetLimitGroupId,
+                        name: "FK_Players_BetLimits_BetLimitId",
+                        column: x => x.BetLimitId,
                         principalSchema: "dbo",
-                        principalTable: "BetLimitGroups",
+                        principalTable: "BetLimits",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Players_Brands_BrandId",
                         column: x => x.BrandId,
@@ -1275,6 +1388,64 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BrandGroupBetLimits",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BetLimitId = table.Column<int>(type: "int", nullable: false),
+                    BrandGroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandGroupBetLimits", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
+                    table.UniqueConstraint("AK_BrandGroupBetLimits_BrandGroupId_BetLimitId", x => new { x.BrandGroupId, x.BetLimitId })
+                        .Annotation("SqlServer:Clustered", true);
+                    table.ForeignKey(
+                        name: "FK_BrandGroupBetLimits_BetLimits_BetLimitId",
+                        column: x => x.BetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "BetLimits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BrandGroupBetLimits_BrandGroups_BrandGroupId",
+                        column: x => x.BrandGroupId,
+                        principalSchema: "dbo",
+                        principalTable: "BrandGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BrandGroupGames",
+                schema: "dbo",
+                columns: table => new
+                {
+                    BrandGroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandGameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandGroupGames", x => new { x.BrandGroupId, x.BrandGameId });
+                    table.ForeignKey(
+                        name: "FK_BrandGroupGames_BrandGames_BrandGameId",
+                        column: x => x.BrandGameId,
+                        principalSchema: "dbo",
+                        principalTable: "BrandGames",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BrandGroupGames_BrandGroups_BrandGroupId",
+                        column: x => x.BrandGroupId,
+                        principalSchema: "dbo",
+                        principalTable: "BrandGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PaymentPlayerList",
                 schema: "dbo",
                 columns: table => new
@@ -1360,6 +1531,37 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlayerSportsBetLimits",
+                schema: "dbo",
+                columns: table => new
+                {
+                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
+                    SportMarketTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MinBet = table.Column<int>(type: "int", nullable: false),
+                    MaxBet = table.Column<int>(type: "int", nullable: false),
+                    MaxBetPerMatch = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerSportsBetLimits", x => new { x.PlayerCode, x.SportMarketTypeId })
+                        .Annotation("SqlServer:Clustered", true);
+                    table.ForeignKey(
+                        name: "FK_PlayerSportsBetLimits_Players_PlayerCode",
+                        column: x => x.PlayerCode,
+                        principalSchema: "dbo",
+                        principalTable: "Players",
+                        principalColumn: "PlayerCode",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PlayerSportsBetLimits_SportMarketTypes_SportMarketTypeId",
+                        column: x => x.SportMarketTypeId,
+                        principalSchema: "dbo",
+                        principalTable: "SportMarketTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StationLetterPlayers",
                 schema: "dbo",
                 columns: table => new
@@ -1417,14 +1619,48 @@ namespace TGS.Core.DataServices.Migrations
                         principalSchema: "dbo",
                         principalTable: "Players",
                         principalColumn: "PlayerCode",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BrandGroupGameProviderBetLimits",
+                schema: "dbo",
+                columns: table => new
+                {
+                    BrandGroupBetLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GameProviderBetLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandGroupGameProviderBetLimits", x => new { x.BrandGroupBetLimitId, x.GameProviderBetLimitId });
+                    table.ForeignKey(
+                        name: "FK_BrandGroupGameProviderBetLimits_BrandGroupBetLimits_BrandGroupBetLimitId",
+                        column: x => x.BrandGroupBetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "BrandGroupBetLimits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BrandGroupGameProviderBetLimits_GameProviderBetLimits_GameProviderBetLimitId",
+                        column: x => x.GameProviderBetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviderBetLimits",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BrandBetLimits_BetLimitGroupId",
+                name: "IX_BetLimits_CurrencyCode_Id",
+                schema: "dbo",
+                table: "BetLimits",
+                columns: new[] { "CurrencyCode", "Id" })
+                .Annotation("SqlServer:Clustered", true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BrandBetLimits_BetLimitId",
                 schema: "dbo",
                 table: "BrandBetLimits",
-                column: "BetLimitGroupId");
+                column: "BetLimitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BrandCurrencies_CurrencyCode",
@@ -1470,6 +1706,30 @@ namespace TGS.Core.DataServices.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BrandGroupBetLimits_BetLimitId",
+                schema: "dbo",
+                table: "BrandGroupBetLimits",
+                column: "BetLimitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BrandGroupGameProviderBetLimits_GameProviderBetLimitId",
+                schema: "dbo",
+                table: "BrandGroupGameProviderBetLimits",
+                column: "GameProviderBetLimitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BrandGroupGames_BrandGameId",
+                schema: "dbo",
+                table: "BrandGroupGames",
+                column: "BrandGameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BrandGroups_BrandId",
+                schema: "dbo",
+                table: "BrandGroups",
+                column: "BrandId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BrandLanguages_CultureCode",
                 schema: "dbo",
                 table: "BrandLanguages",
@@ -1480,12 +1740,6 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Brands",
                 column: "LicenseeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameProviderBetLimits_BetLimitGroupId",
-                schema: "dbo",
-                table: "GameProviderBetLimits",
-                column: "BetLimitGroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GameProviderBetLimits_CurrencyCode",
@@ -1525,10 +1779,10 @@ namespace TGS.Core.DataServices.Migrations
                 .Annotation("SqlServer:Include", new[] { "Id", "Code", "Name", "ExternalId", "PlatformType", "Type", "Status", "AvailableCurrencies", "EndpointPath", "SubGame", "HasTurnoverOnTieBet", "RuleUrl", "Description" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LicenseeBetLimits_BetLimitGroupId",
+                name: "IX_LicenseeBetLimits_BetLimitId",
                 schema: "dbo",
                 table: "LicenseeBetLimits",
-                column: "BetLimitGroupId");
+                column: "BetLimitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LicenseeCurrencies_CurrencyCode",
@@ -1633,10 +1887,10 @@ namespace TGS.Core.DataServices.Migrations
                 column: "PlayerCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Players_BetLimitGroupId",
+                name: "IX_Players_BetLimitId",
                 schema: "dbo",
                 table: "Players",
-                column: "BetLimitGroupId");
+                column: "BetLimitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Players_CultureCode",
@@ -1657,17 +1911,16 @@ namespace TGS.Core.DataServices.Migrations
                 column: "VipId");
 
             migrationBuilder.CreateIndex(
-                name: "UX_Players_BrandId_Username",
+                name: "IX_PlayerSportsBetLimits_SportMarketTypeId",
                 schema: "dbo",
-                table: "Players",
-                columns: new[] { "BrandId", "Username" },
-                unique: true);
+                table: "PlayerSportsBetLimits",
+                column: "SportMarketTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ResellerBetLimits_BetLimitGroupId",
+                name: "IX_ResellerBetLimits_BetLimitId",
                 schema: "dbo",
                 table: "ResellerBetLimits",
-                column: "BetLimitGroupId");
+                column: "BetLimitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ResellerCurrencies_CurrencyCode",
@@ -1686,6 +1939,12 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "ResellerLanguages",
                 column: "CultureCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SportMarketTypes_MarketTypeId",
+                schema: "dbo",
+                table: "SportMarketTypes",
+                column: "MarketTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StationLetterPlayers_PlayerCode",
@@ -1757,15 +2016,15 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "BrandGames",
+                name: "BrandGroupGameProviderBetLimits",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "BrandGroupGames",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "BrandLanguages",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "GameProviderBetLimits",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -1821,6 +2080,10 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "PlayerSportsBetLimits",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "ResellerBetLimits",
                 schema: "dbo");
 
@@ -1861,11 +2124,23 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Games",
+                name: "BrandGroupBetLimits",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "GameProviderBetLimits",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "BrandGames",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "Payments",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "SportMarketTypes",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -1881,10 +2156,6 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Currencies",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
                 name: "Players",
                 schema: "dbo");
 
@@ -1893,15 +2164,27 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "BrandGroups",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Games",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "PaymentChannels",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "BetLimitGroups",
+                name: "MarketTypes",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Brands",
+                name: "SportTypes",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "BetLimits",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -1913,11 +2196,19 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "GameProviders",
+                name: "Brands",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "PaymentMethods",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "GameProviders",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Currencies",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

@@ -17,10 +17,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.Property(p => p.Name)
                 .HasColumnType(ColumnTypes.Nvarchar(255));
 
-            builder.HasOne(p => p.GameProvider)
-                .WithMany(p => p.GameProviderConfigurations)
-                .HasForeignKey(p => p.GameProviderId);
-
             builder.Property(c => c.Description)
                 .HasColumnType(ColumnTypes.Nvarchar(256));
 
@@ -30,6 +26,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(c => c.SecretKey)
                 .HasColumnType(ColumnTypes.Varchar(64))
+                .IsRequired();
+
+            builder.Property(c => c.Status)
+                .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
 
             builder.Property(c => c.DesktopEndpoint)
@@ -63,9 +63,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.HasMany(c => c.BrandGameProviders)
-                .WithOne(c => c.GameProviderConfiguration)
-                .HasForeignKey(c => c.GameProviderConfigurationId);
+            builder.HasOne(p => p.GameProvider)
+                .WithMany(p => p.GameProviderConfigurations)
+                .HasForeignKey(p => p.GameProviderId);
+
         }
     }
 }
