@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201214091819_Initial")]
+    [Migration("20201215033850_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -384,14 +384,14 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("PaymentChannelId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("PaymentMethodId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("PaymentVendorId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("PhoneAuthentication")
                         .HasColumnType("bit");
@@ -422,9 +422,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasIndex("PaymentChannelId");
 
-                    b.HasIndex("PaymentMethodId");
+                    b.HasIndex("PaymentId");
 
-                    b.HasIndex("PaymentVendorId");
+                    b.HasIndex("PaymentMethodId");
 
                     b.ToTable("BrandPayments", "dbo");
                 });
@@ -1088,10 +1088,10 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PaymentMethodId")
+                    b.Property<Guid>("PaymentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("PaymentVendorId")
+                    b.Property<Guid>("PaymentMethodId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UpdatedByUsername")
@@ -1103,9 +1103,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentMethodId");
+                    b.HasIndex("PaymentId");
 
-                    b.HasIndex("PaymentVendorId");
+                    b.HasIndex("PaymentMethodId");
 
                     b.ToTable("PaymentChannels", "dbo");
                 });
@@ -1133,7 +1133,7 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PaymentVendorId")
+                    b.Property<Guid>("PaymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UpdatedByUsername")
@@ -1145,7 +1145,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentVendorId");
+                    b.HasIndex("PaymentId");
 
                     b.ToTable("PaymentMethods", "dbo");
                 });
@@ -1976,23 +1976,23 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TGS.Core.DataServices.Models.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TGS.Core.DataServices.Models.PaymentMethod", "PaymentMethod")
                         .WithMany()
                         .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Payment", "PaymentVendor")
-                        .WithMany()
-                        .HasForeignKey("PaymentVendorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Payment");
 
                     b.Navigation("PaymentChannel");
 
                     b.Navigation("PaymentMethod");
-
-                    b.Navigation("PaymentVendor");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Game", b =>
@@ -2180,32 +2180,32 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentChannel", b =>
                 {
+                    b.HasOne("TGS.Core.DataServices.Models.Payment", "Payment")
+                        .WithMany("PaymentChannels")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TGS.Core.DataServices.Models.PaymentMethod", "PaymentMethod")
                         .WithMany("PaymentChannels")
                         .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Payment", "PaymentVendor")
-                        .WithMany("PaymentChannels")
-                        .HasForeignKey("PaymentVendorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Payment");
 
                     b.Navigation("PaymentMethod");
-
-                    b.Navigation("PaymentVendor");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentMethod", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Models.Payment", "PaymentVendor")
+                    b.HasOne("TGS.Core.DataServices.Models.Payment", "Payment")
                         .WithMany("PaymentMethods")
-                        .HasForeignKey("PaymentVendorId")
+                        .HasForeignKey("PaymentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("PaymentVendor");
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.PaymentPlayerList", b =>

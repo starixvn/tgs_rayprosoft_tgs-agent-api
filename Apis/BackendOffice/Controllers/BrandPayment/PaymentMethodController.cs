@@ -32,7 +32,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         public Task<PagedResponse<PaymentMethodModel>> GetPaymentMethodsAsync([FromQuery] PaymentMethodsRequest request)
         {
             return _queries.GetQueries()
-                .Include(p => p.PaymentVendor)
+                .Include(p => p.Payment)
                 .Where(request.Code, q => q.Code == request.Code)
                 .Select(q => new PaymentMethodModel
                 {
@@ -40,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     Name = q.Name,
                     Code = q.Code,
                     Description = q.Description,
-                    PaymentVendorName = q.PaymentVendor.Name,
+                    PaymentName = q.Payment.Name,
                     CreatedByUsername = q.CreatedByUsername,
                     UpdatedByUsername = q.UpdatedByUsername,
                     CreatedOn = q.CreatedOn,
@@ -54,7 +54,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         {
             var method = await _queries.GetSingleAsync(q => q.Id == id,
                 p => p
-                    .Include(pm => pm.PaymentVendor)
+                    .Include(pm => pm.Payment)
                     .AsNoTracking());
 
             return new GetPaymentMethodResponse
@@ -66,7 +66,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     Name = method.Name,
                     Code = method.Code,
                     Description = method.Description,
-                    PaymentVendorName = method.PaymentVendor.Name,
+                    PaymentName = method.Payment.Name,
                     CreatedOn = method.CreatedOn,
                     UpdatedOn = method.UpdatedOn,
                     CreatedByUsername = method.CreatedByUsername,
@@ -89,7 +89,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 Code = request.Code,
-                PaymentVendorId = request.PaymentVendorId,
+                PaymentId = request.PaymentId,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
@@ -116,7 +116,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             }
 
             method.Name = request.Name;
-            method.PaymentVendorId = request.PaymentVendorId;
+            method.PaymentId = request.PaymentId;
             method.Description = request.Description;
             method.UpdatedByUsername = Username;
             method.UpdatedOn = DateTimeOffset.Now;

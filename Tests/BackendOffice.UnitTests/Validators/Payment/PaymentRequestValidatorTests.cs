@@ -38,18 +38,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
         [Test]
         public void Should_have_error_when_payment_vendor_id_is_null()
         {
-            var model = new BrandPaymentRequest {PaymentVendorId = Guid.Empty};
+            var model = new BrandPaymentRequest {PaymentId = Guid.Empty};
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.PaymentVendorId)
-                .WithErrorMessage(BrandPayment.PaymentVendorRequired);
+            result.ShouldHaveValidationErrorFor(request => request.PaymentId)
+                .WithErrorMessage(BrandPayment.PaymentRequired);
         }
 
         [Test]
         public void Should_not_have_error_when_payment_vendor_id_is_specified()
         {
-            var model = new BrandPaymentRequest {PaymentVendorId = Guid.NewGuid()};
+            var model = new BrandPaymentRequest {PaymentId = Guid.NewGuid()};
             var result = _validator.TestValidate(model);
-            result.ShouldNotHaveValidationErrorFor(request => request.PaymentVendorId);
+            result.ShouldNotHaveValidationErrorFor(request => request.PaymentId);
         }
 
         [Test]

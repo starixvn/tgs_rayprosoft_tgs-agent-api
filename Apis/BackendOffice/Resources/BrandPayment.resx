@@ -127,8 +127,8 @@
   <data name="PaymentMethodRequired" xml:space="preserve">
     <value>Payment method is required.</value>
   </data>
-  <data name="PaymentVendorRequired" xml:space="preserve">
-    <value>Payment vendor is required.</value>
+  <data name="PaymentRequired" xml:space="preserve">
+    <value>Payment is required.</value>
   </data>
   <data name="HighestFeeGreaterLowestFee" xml:space="preserve">
     <value>Highest fee must be greater than lowest fee.</value>

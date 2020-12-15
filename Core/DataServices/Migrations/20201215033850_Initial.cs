@@ -513,7 +513,7 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>("uniqueidentifier", nullable: false),
                     Description = table.Column<string>("nvarchar(128)", nullable: true),
-                    PaymentVendorId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    PaymentId = table.Column<Guid>("uniqueidentifier", nullable: false),
                     Code = table.Column<string>("nvarchar(50)", nullable: false),
                     Name = table.Column<string>("nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>("datetimeoffset", nullable: false),
@@ -525,8 +525,8 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     table.PrimaryKey("PK_PaymentMethods", x => x.Id);
                     table.ForeignKey(
-                        "FK_PaymentMethods_Payments_PaymentVendorId",
-                        x => x.PaymentVendorId,
+                        "FK_PaymentMethods_Payments_PaymentId",
+                        x => x.PaymentId,
                         principalSchema: "dbo",
                         principalTable: "Payments",
                         principalColumn: "Id",
@@ -718,7 +718,7 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>("uniqueidentifier", nullable: false),
                     Description = table.Column<string>("nvarchar(128)", nullable: true),
-                    PaymentVendorId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    PaymentId = table.Column<Guid>("uniqueidentifier", nullable: false),
                     PaymentMethodId = table.Column<Guid>("uniqueidentifier", nullable: false),
                     Code = table.Column<string>("nvarchar(50)", nullable: false),
                     Name = table.Column<string>("nvarchar(max)", nullable: true),
@@ -738,8 +738,8 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        "FK_PaymentChannels_Payments_PaymentVendorId",
-                        x => x.PaymentVendorId,
+                        "FK_PaymentChannels_Payments_PaymentId",
+                        x => x.PaymentId,
                         principalSchema: "dbo",
                         principalTable: "Payments",
                         principalColumn: "Id",
@@ -895,7 +895,7 @@ namespace TGS.Core.DataServices.Migrations
                 {
                     Id = table.Column<Guid>("uniqueidentifier", nullable: false),
                     DisplayOrder = table.Column<int>("int", nullable: false),
-                    PaymentVendorId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                    PaymentId = table.Column<Guid>("uniqueidentifier", nullable: false),
                     PaymentMethodId = table.Column<Guid>("uniqueidentifier", nullable: false),
                     PaymentChannelId = table.Column<Guid>("uniqueidentifier", nullable: false),
                     TransferType = table.Column<int>("int", nullable: false),
@@ -937,8 +937,8 @@ namespace TGS.Core.DataServices.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        "FK_BrandPayments_Payments_PaymentVendorId",
-                        x => x.PaymentVendorId,
+                        "FK_BrandPayments_Payments_PaymentId",
+                        x => x.PaymentId,
                         principalSchema: "dbo",
                         principalTable: "Payments",
                         principalColumn: "Id",
@@ -1486,16 +1486,16 @@ namespace TGS.Core.DataServices.Migrations
                 column: "PaymentChannelId");
 
             migrationBuilder.CreateIndex(
+                "IX_BrandPayments_PaymentId",
+                schema: "dbo",
+                table: "BrandPayments",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
                 "IX_BrandPayments_PaymentMethodId",
                 schema: "dbo",
                 table: "BrandPayments",
                 column: "PaymentMethodId");
-
-            migrationBuilder.CreateIndex(
-                "IX_BrandPayments_PaymentVendorId",
-                schema: "dbo",
-                table: "BrandPayments",
-                column: "PaymentVendorId");
 
             migrationBuilder.CreateIndex(
                 "IX_Brands_LicenseeId",
@@ -1594,22 +1594,22 @@ namespace TGS.Core.DataServices.Migrations
                 column: "PaymentId");
 
             migrationBuilder.CreateIndex(
+                "IX_PaymentChannels_PaymentId",
+                schema: "dbo",
+                table: "PaymentChannels",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
                 "IX_PaymentChannels_PaymentMethodId",
                 schema: "dbo",
                 table: "PaymentChannels",
                 column: "PaymentMethodId");
 
             migrationBuilder.CreateIndex(
-                "IX_PaymentChannels_PaymentVendorId",
-                schema: "dbo",
-                table: "PaymentChannels",
-                column: "PaymentVendorId");
-
-            migrationBuilder.CreateIndex(
-                "IX_PaymentMethods_PaymentVendorId",
+                "IX_PaymentMethods_PaymentId",
                 schema: "dbo",
                 table: "PaymentMethods",
-                column: "PaymentVendorId");
+                column: "PaymentId");
 
             migrationBuilder.CreateIndex(
                 "IX_PaymentPlayerList_PlayerCode",

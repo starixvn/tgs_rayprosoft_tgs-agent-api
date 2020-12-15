@@ -47,14 +47,14 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 .Include(p => p.VipLevels)
                 .Where(request.TransferType, p => p.TransferType == request.TransferType)
                 .Where(request.PaymentStatus, p => p.PaymentStatus == request.PaymentStatus)
-                .Where(request.Keyword, p => p.PaymentVendor.Name.Contains(request.Keyword) ||
+                .Where(request.Keyword, p => p.Payment.Name.Contains(request.Keyword) ||
                                              p.PaymentMethod.Name.Contains(request.Keyword) ||
                                              p.PaymentChannel.Name.Contains(request.Keyword))
                 .Select(p => new BrandPaymentModel
                 {
                     Id = p.Id,
                     Number = p.DisplayOrder,
-                    PaymentVendorName = p.PaymentVendor.Name,
+                    PaymentName = p.Payment.Name,
                     PaymentMethodName = p.PaymentMethod.Name,
                     PaymentChannelName = p.PaymentChannel.Name,
                     TransferType = p.TransferType,
@@ -91,7 +91,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         {
             var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id,
                 p => p
-                    .Include(pm => pm.PaymentVendor)
+                    .Include(pm => pm.Payment)
                     .Include(pm => pm.PaymentMethod)
                     .Include(pm => pm.PaymentChannel)
                     .Include(pm => pm.PaymentPlayerList)
@@ -110,9 +110,9 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 Payment = new BrandPaymentModel
                 {
                     Id = brandPayment.Id,
-                    PaymentVendorId = brandPayment.PaymentVendor.Id,
-                    PaymentVendorName = brandPayment.PaymentVendor.Name,
-                    PaymentMethodId = brandPayment.PaymentVendor.Id,
+                    PaymentId = brandPayment.Payment.Id,
+                    PaymentName = brandPayment.Payment.Name,
+                    PaymentMethodId = brandPayment.Payment.Id,
                     PaymentMethodName = brandPayment.PaymentMethod.Name,
                     PaymentChannelId = brandPayment.PaymentMethod.Id,
                     PaymentChannelName = brandPayment.PaymentChannel.Name,

@@ -44,7 +44,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             {
                 Id = paymentId,
                 DisplayOrder = 99,
-                PaymentVendorId = request.PaymentVendorId,
+                PaymentId = request.PaymentId,
                 PaymentMethodId = request.PaymentMethodId,
                 PaymentChannelId = request.PaymentChannelId,
                 ChannelName = request.ChannelName,
@@ -83,7 +83,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             payment.VipLevels = new HashSet<PaymentVipLevel>(vipLevels);
 
-            await _repository.Payments.AddAsync(payment);
+            await _repository.BrandPayments.AddAsync(payment);
             await _repository.SaveChangesAsync();
         }
 
@@ -155,17 +155,17 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task<BrandPayment> IBrandPaymentService.GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
             Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
         {
-            var payment = tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
+            var payment = tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
             preQuery ??= c => c;
 
             return preQuery(payment).FirstOrDefaultAsync(predicate);
         }
 
         IQueryable<BrandPayment> IBrandPaymentService.GetPaymentsAsync(bool tracking) =>
-            tracking ? _repository.Payments : _repository.Payments.AsNoTracking();
+            tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
 
         Task<bool> IBrandPaymentService.ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
-            _repository.Payments.AnyAsync(predicate);
+            _repository.BrandPayments.AnyAsync(predicate);
 
         Task IBrandPaymentService.UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
             string username)
@@ -180,7 +180,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         async Task IBrandPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);
-            var payments = await _repository.Payments.Where(q => ids.Contains(q.Id)).ToListAsync();
+            var payments = await _repository.BrandPayments.Where(q => ids.Contains(q.Id)).ToListAsync();
             payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
             await _repository.BulkInsertOrUpdateAsync(payments.ToArray());

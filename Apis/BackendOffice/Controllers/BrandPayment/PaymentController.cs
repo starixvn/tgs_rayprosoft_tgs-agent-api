@@ -56,7 +56,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             return new GetPaymentResponse
             {
                 Valid = true,
-                PaymentVendor = new PaymentModel
+                Payment = new PaymentModel
                 {
                     Id = vendor.Id,
                     Name = vendor.Name,

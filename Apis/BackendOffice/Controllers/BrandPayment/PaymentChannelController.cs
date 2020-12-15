@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             [FromQuery] PaymentChannelsRequest request)
         {
             return _queries.GetQueries()
-                .Include(pc => pc.PaymentVendor)
+                .Include(pc => pc.Payment)
                 .Include(pc => pc.PaymentMethod)
                 .Where(request.Code, q => q.Code == request.Code)
                 .Select(q => new PaymentChannelModel
@@ -42,7 +42,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     Id = q.Id,
                     Code = q.Code,
                     Name = q.Name,
-                    PaymentVendorName = q.PaymentVendor.Name,
+                    PaymentName = q.Payment.Name,
                     PaymentMethodName = q.PaymentMethod.Name,
                     Description = q.Description,
                     CreatedByUsername = q.CreatedByUsername,
@@ -58,7 +58,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         {
             var channel = await _queries.GetSingleAsync(q => q.Id == id,
                 p => p
-                    .Include(pc => pc.PaymentVendor)
+                    .Include(pc => pc.Payment)
                     .Include(pc => pc.PaymentMethod)
                     .AsNoTracking());
 
@@ -70,7 +70,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     Id = channel.Id,
                     Code = channel.Code,
                     Name = channel.Name,
-                    PaymentVendorName = channel.PaymentVendor.Name,
+                    PaymentName = channel.Payment.Name,
                     PaymentMethodName = channel.PaymentMethod.Name,
                     Description = channel.Description,
                     CreatedOn = channel.CreatedOn,
@@ -95,7 +95,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 Code = request.Code,
-                PaymentVendorId = request.PaymentVendorId,
+                PaymentId = request.PaymentId,
                 PaymentMethodId = request.PaymentMethodId,
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
@@ -122,7 +122,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<MessageResponse>(Resources.PaymentMethod.CodeExists);
             }
 
-            channel.PaymentVendorId = request.PaymentVendorId;
+            channel.PaymentId = request.PaymentId;
             channel.PaymentMethodId = request.PaymentMethodId;
             channel.Description = request.Description;
             channel.UpdatedByUsername = Username;

@@ -147,7 +147,7 @@
   <data name="PaymentMethodRequired" xml:space="preserve">
     <value>支付方式必填</value>
   </data>
-  <data name="PaymentVendorRequired" xml:space="preserve">
+  <data name="PaymentRequired" xml:space="preserve">
     <value>支付厂商必填</value>
   </data>
   <data name="HighestFeeGreaterLowestFee" xml:space="preserve">

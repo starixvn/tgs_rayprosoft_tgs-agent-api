@@ -11,9 +11,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.BrandPayment
                 .NotEmpty()
                 .WithMessage(Resources.BrandPayment.ChannelNameRequired);
 
-            RuleFor(x => x.PaymentVendorId)
+            RuleFor(x => x.PaymentId)
                 .NotEmpty()
-                .WithMessage(Resources.BrandPayment.PaymentVendorRequired);
+                .WithMessage(Resources.BrandPayment.PaymentRequired);
 
             RuleFor(x => x.PaymentMethodId)
                 .NotEmpty()

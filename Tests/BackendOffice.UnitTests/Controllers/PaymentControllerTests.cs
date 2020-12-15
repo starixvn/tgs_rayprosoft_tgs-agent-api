@@ -74,7 +74,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         [Test]
-        public async Task Cannot_Create_PaymentVendor_With_Code_Exists()
+        public async Task Cannot_Create_Payment_With_Code_Exists()
         {
             var request = new Fixture().Create<CreatePaymentRequest>();
 
@@ -87,7 +87,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         [Test]
-        public async Task Can_Create_PaymentVendor()
+        public async Task Can_Create_Payment()
         {
             var request = new Fixture().Create<CreatePaymentRequest>();
 

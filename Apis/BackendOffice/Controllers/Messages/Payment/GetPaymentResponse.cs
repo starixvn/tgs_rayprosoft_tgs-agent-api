@@ -4,6 +4,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
 {
     public class GetPaymentResponse : MessageResponse
     {
-        public PaymentModel PaymentVendor { get; set; }
+        public PaymentModel Payment { get; set; }
     }
 }

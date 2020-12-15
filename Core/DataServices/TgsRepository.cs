@@ -56,10 +56,10 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> Announcements { get; set; }
         DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
         DbSet<StationLetter> StationLetters { get; set; }
-        DbSet<Payment> PaymentVendors { get; set; }
+        DbSet<Payment> Payments { get; set; }
         DbSet<PaymentMethod> PaymentMethods { get; set; }
         DbSet<PaymentChannel> PaymentChannels { get; set; }
-        DbSet<BrandPayment> Payments { get; set; }
+        DbSet<BrandPayment> BrandPayments { get; set; }
         DbSet<PaymentPlayerList> PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> PaymentAuditLogs { get; set; }
@@ -106,10 +106,10 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
-        DbSet<Payment> ITgsRepository.PaymentVendors { get; set; }
+        DbSet<Payment> ITgsRepository.Payments { get; set; }
         DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
         DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
-        DbSet<BrandPayment> ITgsRepository.Payments { get; set; }
+        DbSet<BrandPayment> ITgsRepository.BrandPayments { get; set; }
         DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }

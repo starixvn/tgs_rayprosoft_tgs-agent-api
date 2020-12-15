@@ -151,11 +151,11 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Payment vendor is required..
+        ///   Looks up a localized string similar to Payment is required..
         /// </summary>
-        public static string PaymentVendorRequired {
+        public static string PaymentRequired {
             get {
-                return ResourceManager.GetString("PaymentVendorRequired", resourceCulture);
+                return ResourceManager.GetString("PaymentRequired", resourceCulture);
             }
         }
         

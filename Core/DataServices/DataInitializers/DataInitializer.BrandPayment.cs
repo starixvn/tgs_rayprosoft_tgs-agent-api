@@ -18,15 +18,15 @@ namespace TGS.Core.DataServices.DataInitializers
         private const string WeChatPayScan = "WeChatPayScan";
         private const string BankTransfer = "BankTransfer";
 
-        private static readonly Dictionary<string, Guid> PaymentVendors = new()
+        private static readonly Dictionary<string, Guid> Payments = new()
         {
             {Help2Pay, new Guid("30CB4D17-2506-4D72-8470-65063B80F9C9")}
         };
 
         private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new()
         {
-            {AlipayPayment, (new Guid("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), PaymentVendors[Help2Pay])},
-            {WeChatPayPayment, (new Guid("083D8754-1FE3-478A-9417-80DA796C3450"), PaymentVendors[Help2Pay])}
+            {AlipayPayment, (new Guid("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay])},
+            {WeChatPayPayment, (new Guid("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay])}
         };
 
         private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
@@ -48,15 +48,15 @@ namespace TGS.Core.DataServices.DataInitializers
 
         private async Task GeneratePaymentAsync()
         {
-            await GeneratePaymentVendorsAsync();
+            await GeneratePaymentsAsync();
             await GeneratePaymentMethodsAsync();
             await GeneratePaymentChannelsAsync();
-            await GeneratePaymentsAsync();
+            await GenerateBrandPaymentsAsync();
         }
 
-        private Task GeneratePaymentVendorsAsync()
+        private Task GeneratePaymentsAsync()
         {
-            var paymentVendors = PaymentVendors.Select(p => new Payment
+            var payments = Payments.Select(p => new Payment
             {
                 Id = p.Value,
                 Code = p.Key,
@@ -67,7 +67,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 UpdatedByUsername = AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             }).ToArray();
-            return _repository.BulkInsertAsync(paymentVendors);
+            return _repository.BulkInsertAsync(payments);
         }
 
         private Task GeneratePaymentMethodsAsync()
@@ -77,7 +77,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 Id = p.Value.Item1,
                 Code = p.Key,
                 Name = p.Key,
-                PaymentVendorId = p.Value.Item2,
+                PaymentId = p.Value.Item2,
                 Description = "online payment method",
                 CreatedByUsername = AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
@@ -95,7 +95,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 Code = p.Key,
                 Name = p.Key,
                 Description = "online payment channel",
-                PaymentVendorId = p.Value.Item2.Item2,
+                PaymentId = p.Value.Item2.Item2,
                 PaymentMethodId = p.Value.Item2.Item1,
                 CreatedByUsername = AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
@@ -105,16 +105,16 @@ namespace TGS.Core.DataServices.DataInitializers
             return _repository.BulkInsertAsync(paymentVendors);
         }
 
-        private async Task GeneratePaymentsAsync()
+        private async Task GenerateBrandPaymentsAsync()
         {
             var paymentId = new Guid("013345DE-F145-483A-B982-9FF962AE055C");
-            var payment = new[]
+            var brandPayments = new[]
             {
                 new BrandPayment
                 {
                     Id = paymentId,
                     DisplayOrder = 1,
-                    PaymentVendorId = PaymentVendors[Help2Pay],
+                    PaymentId = Payments[Help2Pay],
                     PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
                     PaymentChannelId = PaymentChannels[BankTransfer].Item1,
                     TransferType = PaymentTransferType.Deposit,
@@ -167,9 +167,9 @@ namespace TGS.Core.DataServices.DataInitializers
                     UpdatedOn = DateTimeOffset.Now
                 }
             };
-            await _repository.BulkInsertAsync(payment);
-            await _repository.BulkInsertAsync(payment.SelectMany(p => p.VipLevels).ToArray());
-            await _repository.BulkInsertAsync(payment.SelectMany(p => p.PaymentPlayerList).ToArray());
+            await _repository.BulkInsertAsync(brandPayments);
+            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.VipLevels).ToArray());
+            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.PaymentPlayerList).ToArray());
         }
     }
 }
