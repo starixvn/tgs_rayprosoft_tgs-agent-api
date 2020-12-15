@@ -1,14 +1,15 @@
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, Children, isValidElement } from "react"
 import { css } from "@emotion/react"
 import { Menu as _Menu, findlLabel } from "../menu"
 import {
-  Code as CompanyCode,
-  codeLabelPair as companyPair
-} from "./companies/menu"
+  Code as ResellerCode,
+  codeLabelPair as resellerPair
+} from "./resellers/menu"
 import {
-  Code as PlatformCode,
-  codeLabelPair as platformPair
-} from "./platforms/menu"
+  Code as LicenseeCode,
+  codeLabelPair as licenseePair
+} from "./licensees/menu"
+import { Code as BrandCode, codeLabelPair as brandPair } from "./brands/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const nameMessages = {
@@ -39,21 +40,30 @@ export const Menu = ({
     itemLabel={label}
   />
 )
+
 const label = ({ locale, code }) => {
   switch (code) {
-    case CompanyCode:
+    case ResellerCode:
       return getTrans(
         {
-          zh: "公司列表",
-          en: "companies"
+          zh: "总公司列表",
+          en: "Resellers"
         },
         locale
       )
-    case PlatformCode:
+    case LicenseeCode:
       return getTrans(
         {
-          zh: "平台列表",
-          en: "platforms"
+          zh: "公司列表",
+          en: "Licensees"
+        },
+        locale
+      )
+    case BrandCode:
+      return getTrans(
+        {
+          zh: "品牌列表",
+          en: "Brands"
         },
         locale
       )
@@ -69,6 +79,6 @@ export const codeLabelPair = [
       locale,
       codes,
       label: label,
-      subLabelPairs: [companyPair, platformPair]
+      subLabelPairs: [resellerPair, licenseePair, brandPair]
     })
 ]

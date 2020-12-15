@@ -202,14 +202,21 @@ namespace TGS.Core.DataServices.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Companies")
+                        new MenuSetting("Resellers")
                         {
                             SubMenus = new[]
                             {
                                 new MenuSetting("Update")
                             }
                         },
-                        new MenuSetting("Platforms")
+                        new MenuSetting("Licensees")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Brands")
                         {
                             SubMenus = new[]
                             {

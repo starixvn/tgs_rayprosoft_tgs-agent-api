@@ -2,14 +2,14 @@ import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/react"
 import { Code, Menu, DefaultPaths } from "./menu"
 import { Switch } from "../content"
-import { Code as CompanyCode, Content as CompanyContent } from "./companies"
-import { Code as PlatformCode, Content as PlatformContent } from "./platforms"
+import { Code as LicenseeCode, Content as LicenseeContent } from "./licensees"
+import { Code as BrandCode, Content as BrandContent } from "./brands"
 
 export { Code }
 
 const pairs = () => [
-  [CompanyCode, CompanyContent],
-  [PlatformCode, PlatformContent]
+  [LicenseeCode, LicenseeContent],
+  [BrandCode, BrandContent]
 ]
 
 export const Content = ({ codes, path = DefaultPaths, ...props }) => (

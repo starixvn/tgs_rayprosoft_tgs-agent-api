@@ -43,9 +43,9 @@ export const useDeleteRole = (id) => {
   return useDelete(url)
 }
 
-export const useMenus = (fetchData = true) => {
-  let url = fetchData ? `${API}/menus` : ""
-  let { result, ...rest } = usePostData(url, null)
+export const useMenus = (formData) => {
+  let url = formData ? `${API}/menus` : ""
+  let { result, ...rest } = usePostData(url, formData)
   return {
     menus: resetDisplay(false, result?.menus),
     ...rest

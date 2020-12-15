@@ -175,7 +175,7 @@ const EditBody = ({ readonly = false, dialog }) => {
         "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
       ],
       toolbar_mode: "sliding",
-      images_upload_url: "/api/file/uploadFileS3",
+      images_upload_url: "/fs/file/uploadFileS3",
       setup: (editor) => {
         editor.on("Change", (event) => {
           let content = event.target.getContent()

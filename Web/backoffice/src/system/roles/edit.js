@@ -16,6 +16,8 @@ import {
   FieldWrapper,
   SelectField,
   Table,
+  Select,
+  Group,
   useClassName
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -32,22 +34,10 @@ import InputField from "../../input/Field"
 import { Modal, useModalState } from "../../dialog/Modal"
 import FormDialog from "../../form/Dialog"
 import cloneDeep from "clone-deep"
+import { useResellerList } from "../../merchant/resellers/client"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
-  let {
-    menus,
-    isLoading: isLoadingMenus,
-    error: fetchMenusError,
-    mutate
-  } = useMenus(dialog.visible)
-
-  useEffect(() => {
-    if (!dialog.visible) {
-      mutate()
-    }
-  }, [dialog.visible])
-
   let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
     return null
@@ -59,22 +49,27 @@ export const AddButton = ({ onSubmitted, ...props }) => {
         <Trans zh="新增" en="Add" />
       </Disclosure>
       {dialog.visible && (
-        <AddDialog
-          menus={menus}
-          onSubmitted={onSubmitted}
-          dialog={dialog}
-          visible={dialog.visible && !isLoadingMenus}
-        />
+        <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
       )}
-      {dialog.visible && isLoadingMenus && <LoadingBackdrop visible={true} />}
+      {/* {dialog.visible && isLoadingMenus && <LoadingBackdrop visible={true} />}
       {dialog.visible && fetchMenusError && (
         <AlertDialog {...fetchMenusError} onClickClose={dialog.hide} />
-      )}
+      )} */}
     </>
   )
 }
 
-const AddDialog = ({ menus = [], dialog, onSubmitted }) => {
+const AddDialog = ({ dialog, onSubmitted }) => {
+  let [formData, fetchMenus] = useState({
+    roleType: "Reseller"
+  })
+  let {
+    menus,
+    isLoading: isLoadingMenus,
+    error: fetchMenusError,
+    mutate
+  } = useMenus(formData)
+
   let [menusState, setMenus] = useState()
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useAddRole(submitData)
@@ -127,6 +122,14 @@ const AddDialog = ({ menus = [], dialog, onSubmitted }) => {
 }
 
 const DialogBody = ({ menus, setMenus, dialog }) => {
+  let { data: resellerData = {} } = useResellerList({ showAll: true })
+  let options = resellerData?.items?.map((reseller) => {
+    return {
+      id: reseller.id,
+      label: reseller.code
+    }
+  })
+  console.log("TODO: role select")
   return (
     <FieldValues margin="major-1">
       <Label name="name" required>

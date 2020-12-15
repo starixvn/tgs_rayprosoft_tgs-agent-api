@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, Children, isValidElement } from "react"
 import { css } from "@emotion/react"
 import {
   Switch,
@@ -43,39 +43,48 @@ import {
 import { useLocale, getTrans } from "./i18n"
 
 export const Menu = ({ title, url, codes, codePaths, itemLabel }) => {
+  let locale = useLocale()
   let authCodes = useMenuCodes(codePaths)
   codes = codes ?? authCodes
+  let items = codes
+    .map((code) => {
+      let label = itemLabel({ code, locale })
 
-  return (
+      return label ? (
+        <MenuItem
+          key={code}
+          code={code}
+          path={`${url}/${code}`}
+          label={label}
+        />
+      ) : undefined
+    })
+    .filter((item) => !!item)
+
+  return items && items.length ? (
     <SideNav.Level title={title}>
-      <SideNav.Level>
-        {codes.map((code) => (
-          <MenuItem
-            key={code}
-            code={code}
-            path={`${url}/${code}`}
-            itemLabel={itemLabel}
-          />
-        ))}
-      </SideNav.Level>
+      <SideNav.Level>{items}</SideNav.Level>
     </SideNav.Level>
-  )
+  ) : null
 }
 
-const MenuItem = ({ code, path, itemLabel, ...props }) => {
+const MenuItem = ({ code, path, label, ...props }) => {
   let ref = useRef()
-  let locale = useLocale()
   let { pathname } = useLocation()
   let isActive = path == pathname
 
   useEffect(() => {
-    isActive ? ref?.current.focus() : ref?.current.blur()
+    isActive ? ref?.current?.focus() : ref?.current?.blur()
   }, [path, isActive])
+
+  if (!label) {
+    return null
+  }
 
   return (
     <SideNav.Item navId={path} isActive={isActive}>
       <Link ref={ref} to={path}>
-        {itemLabel({ code, locale })}
+        {label}
       </Link>
     </SideNav.Item>
   )
@@ -93,7 +102,9 @@ export const AllMenus = ({ codes }) => {
   let authCodes = useMenuCodes()
   codes = codes ?? authCodes
   let list = allMenuContentPairs()
-  return codes.map((code) => <MenuByCode key={code} code={code} pairs={list} />)
+  return codes
+    .map((code) => <MenuByCode key={code} code={code} pairs={list} />)
+    .filter((item) => !!item)
 }
 
 export const useLabel = ({ codes = [] }) => {

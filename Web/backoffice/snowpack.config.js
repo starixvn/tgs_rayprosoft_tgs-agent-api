@@ -23,7 +23,7 @@ module.exports = {
     metaDir: "snowpack"
   },
   proxy: {
-    "/api/file/uploadFileS3": "http://localhost:32671/api/file/uploadFileS3",
+    "/fs/file/uploadFileS3": "http://localhost:32671/api/file/uploadFileS3",
     "/api": "http://localhost:32667/api"
   },
   alias: {
