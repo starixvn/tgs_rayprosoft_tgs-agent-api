@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Payment
+namespace TGS.Apis.BackendOffice.Controllers.Messages
 {
     public class ChangeOrderRequest
     {

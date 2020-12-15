@@ -8,8 +8,8 @@ using FluentAssertions;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
+using TGS.Apis.BackendOffice.Controllers.BrandPayment;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
-using TGS.Apis.BackendOffice.Controllers.Payment;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
 
@@ -26,6 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller = new PaymentChannelController(
                 _queriesMock.Object,
                 _commandsMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private PaymentChannelController _controller;

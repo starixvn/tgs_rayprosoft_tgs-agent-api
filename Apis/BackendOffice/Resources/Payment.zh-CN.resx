@@ -117,49 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PlayersNotFound" xml:space="preserve">
-    <value>找不到玩家</value>
-  </data>
-  <data name="WhiteSameAsBlack" xml:space="preserve">
-    <value>白名单玩家和黑名单相同</value>
-  </data>
-  <data name="PlayerNotFound" xml:space="preserve">
-    <value>找不到玩家</value>
-  </data>
-  <data name="NameExists" xml:space="preserve">
-    <value>通道名称已存在</value>
-  </data>
   <data name="NotFound" xml:space="preserve">
-    <value>找不到金流</value>
+    <value>找不到支付厂商</value>
   </data>
-  <data name="ChannelNameRequired" xml:space="preserve">
-    <value>通道名称必填</value>
+  <data name="ChannelsNotFound" xml:space="preserve">
+    <value>找不到支付通道</value>
   </data>
-  <data name="TransferLimitGreaterZero" xml:space="preserve">
-    <value>限额必须大于0</value>
-  </data>
-  <data name="DepositedGreaterZero" xml:space="preserve">
-    <value>累积存款必须大于0</value>
-  </data>
-  <data name="PaymentChannelRequired" xml:space="preserve">
-    <value>支付通道必填</value>
-  </data>
-  <data name="PaymentMethodRequired" xml:space="preserve">
-    <value>支付方式必填</value>
-  </data>
-  <data name="PaymentVendorRequired" xml:space="preserve">
-    <value>支付厂商必填</value>
-  </data>
-  <data name="HighestFeeGreaterLowestFee" xml:space="preserve">
-    <value>最高手续费必须大于最低手续费</value>
-  </data>
-  <data name="FeePercentageGreaterEqualZero" xml:space="preserve">
-    <value>手续费百分比必须大于或等于0</value>
-  </data>
-  <data name="LowestFeeGreaterEqualZero" xml:space="preserve">
-    <value>最低手续费必须大于或等于0</value>
-  </data>
-  <data name="PaymentNotFound" xml:space="preserve">
-    <value>找不到金流</value>
+  <data name="CodeExists" xml:space="preserve">
+    <value>代码已经存在</value>
   </data>
 </root>

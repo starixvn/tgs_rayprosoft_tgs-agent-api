@@ -10,8 +10,8 @@ using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
-using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
@@ -30,6 +30,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller = new AnnouncementController(
                 _queriesMock.Object,
                 _commandsMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private AnnouncementController _controller;

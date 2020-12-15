@@ -110,14 +110,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Update_Brand()
         {
-            var licensee = CreateBrandModelFixture().Create<BrandModel>();
+            var brand = CreateBrandModelFixture().Create<BrandModel>();
             var request = new Fixture().Create<UpdateBrandRequest>();
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateBrandRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MessageResponse {Valid = true});
 
-            var response = await _controller.UpdateBrandAsync(licensee.Id, request);
+            var response = await _controller.UpdateBrandAsync(brand.Id, request);
 
             response.Valid.Should().BeTrue();
             _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateBrandRequest>(), It.IsAny<CancellationToken>()));

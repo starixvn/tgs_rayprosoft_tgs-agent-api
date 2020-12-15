@@ -60,10 +60,10 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> Announcements { get; set; }
         DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
         DbSet<StationLetter> StationLetters { get; set; }
-        DbSet<PaymentVendor> PaymentVendors { get; set; }
+        DbSet<Payment> Payments { get; set; }
         DbSet<PaymentMethod> PaymentMethods { get; set; }
         DbSet<PaymentChannel> PaymentChannels { get; set; }
-        DbSet<Payment> Payments { get; set; }
+        DbSet<BrandPayment> BrandPayments { get; set; }
         DbSet<PaymentPlayerList> PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> PaymentAuditLogs { get; set; }
@@ -120,10 +120,10 @@ namespace TGS.Core.DataServices
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
-        DbSet<PaymentVendor> ITgsRepository.PaymentVendors { get; set; }
+        DbSet<Payment> ITgsRepository.Payments { get; set; }
         DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
         DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
-        DbSet<Payment> ITgsRepository.Payments { get; set; }
+        DbSet<BrandPayment> ITgsRepository.BrandPayments { get; set; }
         DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
         DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
         DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
@@ -242,8 +242,8 @@ namespace TGS.Core.DataServices
             modelBuilder.ApplyConfiguration(new StationLetterPlayerMap());
             modelBuilder.ApplyConfiguration(new StationLetterMap());
 
+            modelBuilder.ApplyConfiguration(new BrandPaymentMap());
             modelBuilder.ApplyConfiguration(new PaymentMap());
-            modelBuilder.ApplyConfiguration(new PaymentVendorMap());
             modelBuilder.ApplyConfiguration(new PaymentMethodMap());
             modelBuilder.ApplyConfiguration(new PaymentChannelMap());
             modelBuilder.ApplyConfiguration(new PaymentPlayerListMap());

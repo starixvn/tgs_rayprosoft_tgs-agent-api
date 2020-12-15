@@ -32,6 +32,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _commandsMock.Object,
                 _bankCommandsMock.Object,
                 _auditLogCommandsMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private PlayerController _controller;

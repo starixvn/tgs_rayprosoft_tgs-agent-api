@@ -299,7 +299,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
-            return new()
+            return new Player
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -392,10 +392,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             // brands
             var brands = licensees.SelectMany(l => l.Brands).ToArray();
-            foreach (var b in brands)
-            {
-                _brandCreated.Add(b.Code, b);
-            }
+            foreach (var b in brands) _brandCreated.Add(b.Code, b);
 
             await _repository.BulkInsertAsync(brands);
             await _repository.BulkInsertAsync(brands.SelectMany(b => b.Currencies).ToArray());
@@ -458,13 +455,13 @@ namespace TGS.Core.DataServices.DataInitializers
                 })).ToArray();
 
             var relation = (from s in sports
-                            let m = markets.First(m => m.GameProviderId == s.GameProviderId)
-                            select new SportMarketType
-                            {
-                                Id = Guid.NewGuid(),
-                                SportTypeId = s.Id,
-                                MarketTypeId = m.Id
-                            }).ToArray();
+                let m = markets.First(m => m.GameProviderId == s.GameProviderId)
+                select new SportMarketType
+                {
+                    Id = Guid.NewGuid(),
+                    SportTypeId = s.Id,
+                    MarketTypeId = m.Id
+                }).ToArray();
 
             await _repository.BulkInsertAsync(sports);
             await _repository.BulkInsertAsync(markets);
@@ -476,20 +473,20 @@ namespace TGS.Core.DataServices.DataInitializers
             var relation = _repository.SportMarketTypes.ToArray();
 
             var players = from p in _players.Where(p => p.Type == PlayerType.TestPlayer)
-                          group p by new {p.DefaultWalletCurrencyCode, p.CultureCode}
-                          into g
-                          select g.First();
+                group p by new {p.DefaultWalletCurrencyCode, p.CultureCode}
+                into g
+                select g.First();
 
             var limits = (from p in players
-                          from r in relation
-                          select new PlayerSportsBetLimit
-                          {
-                              PlayerCode = p.PlayerCode,
-                              SportMarketTypeId = r.Id,
-                              MinBet = 1,
-                              MaxBet = 2000,
-                              MaxBetPerMatch = 5000
-                          }).ToArray();
+                from r in relation
+                select new PlayerSportsBetLimit
+                {
+                    PlayerCode = p.PlayerCode,
+                    SportMarketTypeId = r.Id,
+                    MinBet = 1,
+                    MaxBet = 2000,
+                    MaxBetPerMatch = 5000
+                }).ToArray();
 
             return _repository.BulkInsertAsync(limits);
         }
@@ -591,7 +588,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var gameProviders = GetGameProviders(reseller.GameProviders);
 
-            return new()
+            return new Reseller()
             {
                 Id = reseller.Id,
                 Code = reseller.Code,
@@ -635,7 +632,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             var gameProviders = GetGameProviders(gameProviderCodes);
 
-            return new()
+            return new Licensee()
             {
                 Id = licensee.Id,
                 Code = licensee.Code,
@@ -725,7 +722,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
-            return new()
+            return new Brand()
             {
                 Id = brand.Id,
                 Code = brand.Code,
@@ -807,8 +804,11 @@ namespace TGS.Core.DataServices.DataInitializers
                 };
             }
 
-            static string[] IntersectGameProviderCodes(string[] parents, string[] children) =>
-                parents.Length == 0 ? children : children.Length == 0 ? parents : parents.Intersect(children).ToArray();
+            static string[] IntersectGameProviderCodes(string[] parents, string[] children)
+            {
+                return parents.Length == 0 ? children :
+                    children.Length == 0 ? parents : parents.Intersect(children).ToArray();
+            }
         }
 
         private static IEnumerable<LocalizedString> GetGameProviderLocalizedStrings(GameProvider gp, string cultureCode)
@@ -934,14 +934,14 @@ namespace TGS.Core.DataServices.DataInitializers
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz0123456789";
-            return new(Enumerable.Repeat(chars, length)
+            return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
 
         public static string RandomIntString(int length)
         {
             const string chars = "0123456789";
-            return new(Enumerable.Repeat(chars, length)
+            return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
     }

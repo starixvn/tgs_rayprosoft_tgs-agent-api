@@ -8,13 +8,10 @@ using FluentAssertions;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
+using TGS.Apis.BackendOffice.Controllers.BrandPayment;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.Controllers.Payment;
-using TGS.Apis.BackendOffice.DataService.Services;
-using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Models;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -27,30 +24,23 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new PaymentController(
-                _playerQueriesMock.Object,
-                _uploadServiceMock.Object,
-                _paymentServiceMock.Object,
-                _auditLogQueriesMock.Object);
+                _queriesMock.Object,
+                _commandsMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private PaymentController _controller;
-        private readonly Mock<IPaymentService> _paymentServiceMock = new();
+        private readonly Mock<ITgsQueries<Payment>> _queriesMock = new();
 
-        private readonly Mock<ITgsQueries<PaymentAuditLog>> _auditLogQueriesMock =
+        private readonly Mock<ITgsCommands<Payment>> _commandsMock =
             new();
-
-        private readonly Mock<ITgsQueries<Player>> _playerQueriesMock =
-            new();
-
-        private readonly Mock<IUploadService> _uploadServiceMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
         public async Task Can_Get_Payments(bool showAll)
         {
-            var request = new GetPaymentsRequest
+            var request = new PaymentsRequest
             {
-                PaymentStatus = PaymentStatus.Enabled,
                 Page = 1,
                 Rows = 10,
                 SortBy = "updatedOn",
@@ -64,12 +54,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .BuildMock().Object;
 
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.Where(x => x.PaymentStatus == PaymentStatus.Enabled)
-                .OrderByDescending(p => p.UpdatedOn);
+            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _paymentServiceMock.Setup(x => x.GetPaymentsAsync(false))
+            _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
 
             var response = await _controller.GetPaymentsAsync(request);
@@ -78,34 +67,23 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             for (var i = 0; i < response.Items.Length; i++)
             {
                 response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].ChannelName.Should().Be(expectedRoles[i].ChannelName);
+                response.Items[i].Name.Should().Be(expectedRoles[i].Name);
             }
 
-            _paymentServiceMock.Verify(p => p.GetPaymentsAsync(false));
+            _queriesMock.Verify(p => p.GetQueries());
         }
 
         [Test]
-        public async Task Cannot_Create_Payment_With_Name_Exists()
+        public async Task Cannot_Create_Payment_With_Code_Exists()
         {
             var request = new Fixture().Create<CreatePaymentRequest>();
 
-            _paymentServiceMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
+            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.CreatePaymentAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.NameExists);
-        }
-
-        [Test]
-        public async Task Cannot_Create_Payment_With_Whitelist_Same_As_Blacklist()
-        {
-            var request = new Fixture().Create<CreatePaymentRequest>();
-            request.Whitelist[0] = request.Blacklist[0];
-            var response = await _controller.CreatePaymentAsync(request);
-            response.Valid.Should().BeFalse();
-            response.DuplicatePlayers[0].Should().Be(request.Whitelist[0]);
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.WhiteSameAsBlack);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.CodeExists);
         }
 
         [Test]
@@ -113,16 +91,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<CreatePaymentRequest>();
 
-            _paymentServiceMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
+            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreatePaymentAsync(request);
+            var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
 
-            _paymentServiceMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()));
-            _paymentServiceMock.Verify(p => p.CreatePaymentAsync(It.Is<CreatePaymentRequest>(r =>
-                    r.ChannelName == request.ChannelName),
-                It.Is<string>(r => r == Username)));
+            _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()));
+            _commandsMock.Verify(p => p.CreateAsync(It.Is<Payment>(r =>
+                r.Code == request.Code)));
         }
 
         [Test]
@@ -131,90 +108,84 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var payment = CreatePaymentFixture().Create<Payment>();
             var request = new Fixture().Create<UpdatePaymentRequest>();
 
-            _paymentServiceMock.Setup(s => s.GetPaymentAsync(It.IsAny<Expression<Func<Payment, bool>>>(),
-                    It.IsAny<Func<IQueryable<Payment>, IQueryable<Payment>>>(), true))
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Payment, bool>>>(),
+                    It.IsAny<Func<IQueryable<Payment>, IQueryable<Payment>>>()))
                 .Returns(Task.FromResult(payment));
 
-            _paymentServiceMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
+            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdatePaymentAsync(payment.Id, request);
+            var response = await _controller.UpdateAsync(payment.Id, request);
 
             response.Valid.Should().BeTrue();
-            _paymentServiceMock.Verify(s => s.GetPaymentAsync(It.IsAny<Expression<Func<Payment, bool>>>(),
-                It.IsAny<Func<IQueryable<Payment>, IQueryable<Payment>>>(), true));
-            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<Payment>(r =>
-                    r.ChannelName == payment.ChannelName),
-                It.IsAny<UpdatePaymentRequest>(),
-                It.Is<string>(r => r == Username)));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Payment, bool>>>(),
+                It.IsAny<Func<IQueryable<Payment>, IQueryable<Payment>>>()));
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
+                r.Code == payment.Code)));
         }
 
         [Test]
-        public async Task Cannot_Update_Payment_When_Not_Found()
+        public async Task Can_Update_Payment_Not_Found()
         {
             var payment = CreatePaymentFixture().Create<Payment>();
             var request = new Fixture().Create<UpdatePaymentRequest>();
 
-            _paymentServiceMock.Setup(s => s.GetPaymentAsync(
+            _queriesMock.Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<Payment, bool>>>(),
                     It.IsAny<Func<IQueryable<Payment>,
-                        IQueryable<Payment>>>(), true))
+                        IQueryable<Payment>>>()))
                 .Returns(Task.FromResult<Payment>(null));
 
-            _paymentServiceMock.Setup(s =>
+            _queriesMock.Setup(s =>
                     s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdatePaymentAsync(payment.Id, request);
+            var response = await _controller.UpdateAsync(payment.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.NotFound);
-            _paymentServiceMock.Verify(s => s.GetPaymentAsync(
+            _queriesMock.Verify(s => s.GetSingleAsync(
                 It.IsAny<Expression<Func<Payment, bool>>>(),
                 It.IsAny<Func<IQueryable<Payment>,
-                    IQueryable<Payment>>>(), true));
-            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<Payment>(r =>
-                    r.ChannelName == payment.ChannelName),
-                It.IsAny<UpdatePaymentRequest>(),
-                It.Is<string>(r => r == Username)), Times.Never);
+                    IQueryable<Payment>>>()));
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
+                r.Code == payment.Code)), Times.Never);
         }
 
         [Test]
-        public async Task Cannot_Update_Payment_With_Name_Exists()
+        public async Task Cannot_Update_Payment_With_Code_Exists()
         {
             var payment = CreatePaymentFixture().Create<Payment>();
             var request = new Fixture().Create<UpdatePaymentRequest>();
-            request.ChannelName = payment.ChannelName;
-            _paymentServiceMock.Setup(s => s.GetPaymentAsync(
+            request.Code = payment.Code;
+            _queriesMock.Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<Payment, bool>>>(),
                     It.IsAny<Func<IQueryable<Payment>,
-                        IQueryable<Payment>>>(), true))
+                        IQueryable<Payment>>>()))
                 .Returns(Task.FromResult(payment));
 
-            _paymentServiceMock.Setup(s =>
+            _queriesMock.Setup(s =>
                     s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.UpdatePaymentAsync(payment.Id, request);
+            var response = await _controller.UpdateAsync(payment.Id, request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.NameExists);
-            _paymentServiceMock.Verify(s => s.GetPaymentAsync(
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.CodeExists);
+            _queriesMock.Verify(s => s.GetSingleAsync(
                 It.IsAny<Expression<Func<Payment, bool>>>(),
                 It.IsAny<Func<IQueryable<Payment>,
-                    IQueryable<Payment>>>(), true));
-            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<Payment>(r =>
-                    r.ChannelName == payment.ChannelName),
-                It.IsAny<UpdatePaymentRequest>(),
-                It.Is<string>(r => r == Username)), Times.Never);
+                    IQueryable<Payment>>>()));
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
+                r.Code == payment.Code)), Times.Never);
         }
 
         private Fixture CreatePaymentFixture()
         {
             var fixture = new Fixture();
             fixture.Customize<Payment>(u => u
-                .With(s => s.PaymentPlayerList, new PaymentPlayerList[] { })
-                .With(s => s.VipLevels, new PaymentVipLevel[] { }));
+                .With(s => s.PaymentMethods, new PaymentMethod[] { })
+                .With(s => s.PaymentChannels, new PaymentChannel[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

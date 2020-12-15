@@ -16,17 +16,6 @@ namespace TGS.Apis.FileService.Controllers
             _uploadService = uploadService;
         }
 
-        [HttpPost("upload")]
-        public async Task<UploadResponse> UploadFileAsync([FromForm] UploadRequest request)
-        {
-            var url = await _uploadService.UploadFileAsync(request.File);
-            return new UploadResponse
-            {
-                Valid = true,
-                Location = url
-            };
-        }
-
         [HttpPost("uploadFileS3")]
         public async Task<UploadResponse> UploadFileS3Async([FromForm] UploadRequest request)
         {

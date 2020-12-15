@@ -267,6 +267,21 @@ services:
       - ./.docker/localstack/data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./localstack/bin:/docker-entrypoint-initaws.d
+  mongo-express:
+    links:
+      - mongodb:mongo
+    image: mongo-express
+    container_name: "tgs-mongo-express"
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "1qaz2wsx!@"
+      ME_CONFIG_BASICAUTH_USERNAME: "root"
+      ME_CONFIG_BASICAUTH_PASSWORD: "1qaz2wsx!@"
+    ports:
+    - "8081:8081"
+    networks:
+      tgs:
 networks:
   tgs:
     driver: bridge

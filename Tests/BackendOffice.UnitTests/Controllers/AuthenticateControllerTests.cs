@@ -154,9 +154,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             mockHttpContext.Setup(p => p.Response)
                 .Returns(httpResponse.Object);
-
-            HttpContextAccessorMock.Setup(p => p.HttpContext)
-                .Returns(mockHttpContext.Object);
         }
 
         private Mock<IServiceProvider> SetupServiceProviderMock()
