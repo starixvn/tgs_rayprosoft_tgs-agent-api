@@ -14,7 +14,7 @@ using TGS.Core.Models;
 namespace TGS.Apis.FileService.Controllers
 {
     [AllowAnonymous]
-    [Route("api/[controller]")]
+    [Route("fs/[controller]")]
     [ApiController]
     public class StatusController : ControllerBase
     {
