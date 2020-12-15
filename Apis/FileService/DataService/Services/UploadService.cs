@@ -13,6 +13,7 @@ namespace TGS.Apis.FileService.DataService.Services
 {
     public interface IUploadService
     {
+        Task<bool> BucketExistsAsync();
         Task<string> UploadFileS3Async(IFormFile formFile);
     }
 
@@ -61,5 +62,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
             return $"{_awsSettings.Value.ServiceUrl}/{_awsSettings.Value.S3.Bucket}/{randomFileName}";
         }
+
+        Task<bool> IUploadService.BucketExistsAsync() => _amazonS3.DoesS3BucketExistAsync(_awsSettings.Value.S3.Bucket);
     }
 }
