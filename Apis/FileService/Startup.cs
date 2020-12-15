@@ -68,8 +68,6 @@ namespace TGS.Apis.FileService
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
 
             app.UseAuthorization();
