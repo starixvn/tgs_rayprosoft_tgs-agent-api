@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.DataService;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 using TGS.Services.BackOffice.Application.Resources;
+using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduleHandlers
 {
@@ -25,10 +25,14 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderSchedule
 
             if (schedule == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
+                return CreateInvalidResponse<MessageResponse>(BrandGameProviderSchedule.NotFound);
             }
 
-            await _service.UpdateBrandGameProviderScheduleAsync(schedule, request);
+            schedule.From = request.From;
+            schedule.To = request.To;
+            schedule.DayOfWeek = request.DayOfWeek;
+
+            await _service.UpdateBrandGameProviderScheduleAsync(schedule);
 
             return CreateValidResponse<MessageResponse>();
         }

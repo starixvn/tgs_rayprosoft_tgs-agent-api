@@ -4,12 +4,14 @@ namespace TGS.Core.DataServices.Models
 {
     public class BrandBetLimit
     {
-        public int BetLimitGroupId { get; set; }
-
-        public virtual BetLimitGroup BetLimitGroup { get; set; }
-
         public Guid BrandId { get; set; }
 
         public virtual Brand Brand { get; set; }
+
+        public int BetLimitId { get; set; }
+
+        public virtual BetLimit BetLimit { get; set; }
+
+        public bool IsDefault { get; set; }
     }
 }

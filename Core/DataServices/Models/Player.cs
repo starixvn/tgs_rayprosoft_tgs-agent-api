@@ -22,8 +22,8 @@ namespace TGS.Core.DataServices.Models
         public DateTimeOffset RegisteredOn { get; set; }
         public DateTimeOffset LastActiveOn { get; set; }
         public PlayerStatus Status { get; set; }
-        public int BetLimitGroupId { get; set; }
-        public virtual BetLimitGroup BetLimitGroup { get; set; }
+        public int BetLimitId { get; set; }
+        public virtual BetLimit BetLimit { get; set; }
         public PlayerType Type { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
@@ -50,5 +50,6 @@ namespace TGS.Core.DataServices.Models
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
         public virtual ICollection<StationLetterPlayer> Letters { get; set; }
         public virtual ICollection<PaymentPlayerList> PaymentPlayerList { get; set; }
+        public virtual ICollection<PlayerSportsBetLimit> SportsBetLimits { get; set;}
     }
 }

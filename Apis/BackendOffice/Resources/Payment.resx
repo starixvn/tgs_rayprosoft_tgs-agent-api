@@ -97,49 +97,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PlayersNotFound" xml:space="preserve">
-    <value>Players is not found.</value>
-  </data>
-  <data name="WhiteSameAsBlack" xml:space="preserve">
-    <value>Whitelist players same as blacklist.</value>
-  </data>
-  <data name="PlayerNotFound" xml:space="preserve">
-    <value>Player is not found.</value>
-  </data>
-  <data name="NameExists" xml:space="preserve">
-    <value>Channel name exists already.</value>
-  </data>
   <data name="NotFound" xml:space="preserve">
-    <value>Payment not found.</value>
+    <value>Payment Vendor not found.</value>
   </data>
-  <data name="ChannelNameRequired" xml:space="preserve">
-    <value>Channel name is required.</value>
+  <data name="ChannelsNotFound" xml:space="preserve">
+    <value>Payment Channels not found.</value>
   </data>
-  <data name="TransferLimitGreaterZero" xml:space="preserve">
-    <value>Transfer Limit must be greater than 0.</value>
-  </data>
-  <data name="DepositedGreaterZero" xml:space="preserve">
-    <value>Deposited must be greater than 0.</value>
-  </data>
-  <data name="PaymentChannelRequired" xml:space="preserve">
-    <value>Payment channel is required.</value>
-  </data>
-  <data name="PaymentMethodRequired" xml:space="preserve">
-    <value>Payment method is required.</value>
-  </data>
-  <data name="PaymentVendorRequired" xml:space="preserve">
-    <value>Payment vendor is required.</value>
-  </data>
-  <data name="HighestFeeGreaterLowestFee" xml:space="preserve">
-    <value>Highest fee must be greater than lowest fee.</value>
-  </data>
-  <data name="FeePercentageGreaterEqualZero" xml:space="preserve">
-    <value>Fee percentage must be greater than or equal to  0.</value>
-  </data>
-  <data name="LowestFeeGreaterEqualZero" xml:space="preserve">
-    <value>Lowest fee must be greater than or equal to  0.</value>
-  </data>
-  <data name="PaymentNotFound" xml:space="preserve">
-    <value>Payment is not found.</value>
+  <data name="CodeExists" xml:space="preserve">
+    <value>Code exists already.</value>
   </data>
 </root>

@@ -82,7 +82,7 @@ namespace TGS.Services.Operations.Commands
                                 LastActiveOn = createdOn,
                                 Status = PlayerStatus.Enabled,
                                 Type = data.Type,
-                                BetLimitGroupId = data.BetLimitGroup,
+                                BetLimitId = data.BetLimitGroup,
                                 HasAgent = data.HasAgent,
                                 UpdatedByUsername = username,
                                 UpdatedOn = createdOn,

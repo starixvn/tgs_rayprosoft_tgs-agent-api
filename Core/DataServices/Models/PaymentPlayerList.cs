@@ -9,6 +9,6 @@ namespace TGS.Core.DataServices.Models
         public string PlayerCode { get; set; }
         public virtual Player Player { get; set; }
         public Guid PaymentId { get; set; }
-        public virtual Payment Payment { get; set; }
+        public virtual BrandPayment Payment { get; set; }
     }
 }

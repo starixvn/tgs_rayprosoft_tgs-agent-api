@@ -34,6 +34,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _playerCommandsMock.Object,
                 _uploadServiceMock.Object,
                 _stationLetterServiceMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private StationLetterController _controller;
@@ -275,7 +276,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Language, new Language())
                 .With(s => s.Brand, new Brand())
                 .With(s => s.ParentPlayer, new Player())
-                .With(s => s.BetLimitGroup, new BetLimitGroup())
+                .With(s => s.BetLimit, new BetLimit())
                 .With(s => s.SubPlayers, new Player[] { })
                 .With(s => s.Banks, new[]
                 {

@@ -27,6 +27,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller = new SettingController(
                 _queriesMock.Object,
                 _commandsMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private SettingController _controller;

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
+using TGS.Apis.FileService.DataService.Services;
 using TGS.Core.Models;
 
 namespace TGS.Apis.FileService.Controllers
@@ -20,12 +21,15 @@ namespace TGS.Apis.FileService.Controllers
         private readonly IOptions<AwsSettings> _awsSettings;
         private readonly IRepository<File> _file;
         private readonly IDatabaseSettings _settings;
+        private readonly IUploadService _uploadService;
 
-        public StatusController(IDatabaseSettings settings, IRepository<File> file, IOptions<AwsSettings> awsSettings)
+        public StatusController(IDatabaseSettings settings, IRepository<File> file, IOptions<AwsSettings> awsSettings,
+            IUploadService uploadService)
         {
             _settings = settings;
             _file = file;
             _awsSettings = awsSettings;
+            _uploadService = uploadService;
         }
 
         [HttpGet]
@@ -44,6 +48,7 @@ namespace TGS.Apis.FileService.Controllers
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectDb = await _file.CanConnection(),
+                BucketExists = _uploadService.BucketExistsAsync(),
                 AwsConnectionString = _awsSettings,
                 FileConnectionString = _settings.ConnectionString
             };

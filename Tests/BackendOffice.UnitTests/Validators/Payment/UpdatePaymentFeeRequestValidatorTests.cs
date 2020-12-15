@@ -1,7 +1,7 @@
 ﻿using FluentValidation.TestHelper;
 using NUnit.Framework;
-using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Apis.BackendOffice.Controllers.Messages.Validators.Payment;
+using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
+using TGS.Apis.BackendOffice.Controllers.Messages.Validators.BrandPayment;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
 {
@@ -22,7 +22,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
             var model = new UpdatePaymentFeeRequest {FeePercentage = -1};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.FeePercentage)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Payment.FeePercentageGreaterEqualZero);
+                .WithErrorMessage(Apis.BackendOffice.Resources.BrandPayment.FeePercentageGreaterEqualZero);
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
             var model = new UpdatePaymentFeeRequest {LowestFee = -1};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.LowestFee)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Payment.LowestFeeGreaterEqualZero);
+                .WithErrorMessage(Apis.BackendOffice.Resources.BrandPayment.LowestFeeGreaterEqualZero);
         }
 
         [Test]
@@ -56,7 +56,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
             var model = new UpdatePaymentFeeRequest {LowestFee = 5, HighestFee = 1};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Payment.HighestFeeGreaterLowestFee);
+                .WithErrorMessage(Apis.BackendOffice.Resources.BrandPayment.HighestFeeGreaterLowestFee);
         }
 
         [Test]

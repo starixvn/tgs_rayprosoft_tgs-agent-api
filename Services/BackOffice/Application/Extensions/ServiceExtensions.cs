@@ -2,8 +2,8 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Services.BackOffice.Application.DataService;
 using TGS.Services.BackOffice.Application.Middlewares;
+using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Extensions
 {
@@ -15,6 +15,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));
             services.AddTransient<IBrandService, BrandService>();
+            services.AddTransient<IBrandGameService, BrandGameService>();
             services.AddTransient<IBrandGameProviderScheduleService, BrandGameProviderScheduleService>();
 
             return services;

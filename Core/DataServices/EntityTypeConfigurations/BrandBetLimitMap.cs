@@ -9,17 +9,21 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<BrandBetLimit>.Configure(EntityTypeBuilder<BrandBetLimit> builder)
         {
             builder.ToTable("BrandBetLimits", "dbo");
-            builder.HasKey(bc => new { bc.BrandId, bc.BetLimitGroupId });
+            builder.HasKey(e => new {e.BrandId, e.BetLimitId})
+                .IsClustered();
+
+            builder.Property(e => e.IsDefault)
+                .IsRequired();
 
             builder
-                .HasOne(bbl => bbl.Brand)
-                .WithMany(b => b.BetLimitGroups)
-                .HasForeignKey(bbl => bbl.BrandId);
+                .HasOne(e => e.Brand)
+                .WithMany(e => e.BetLimits)
+                .HasForeignKey(e => e.BrandId);
 
             builder
-                .HasOne(bbl => bbl.BetLimitGroup)
-                .WithMany(blg => blg.Brands)
-                .HasForeignKey(bbl => bbl.BetLimitGroupId);
+                .HasOne(e => e.BetLimit)
+                .WithMany(e => e.BrandBetLimits)
+                .HasForeignKey(e => e.BetLimitId);
         }
     }
 }

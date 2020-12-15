@@ -26,6 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new LicenseeController(
                 _licenseeServiceMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private LicenseeController _controller;
@@ -220,7 +221,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.GameProviders, new LicenseeGameProvider[] { })
                 .With(s => s.Languages, new LicenseeLanguage[] { })
                 .With(s => s.Currencies, new LicenseeCurrency[] { })
-                .With(s => s.BetLimitGroups, new LicenseeBetLimit[] { }));
+                .With(s => s.BetLimits, new LicenseeBetLimit[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

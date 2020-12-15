@@ -34,7 +34,9 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
-        public virtual ICollection<BrandBetLimit> BetLimitGroups { get; set; }
+        public virtual ICollection<BrandBetLimit> BetLimits { get; set; }
+
+        public virtual ICollection<BrandGroup> BrandGroups { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
     }

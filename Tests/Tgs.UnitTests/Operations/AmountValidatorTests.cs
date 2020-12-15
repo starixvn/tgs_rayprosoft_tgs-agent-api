@@ -5,9 +5,11 @@ using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations.Validators;
 using TGS.Tests.TestsCommon;
 
-namespace Tgs.UnitTests.Operations
+namespace TGS.UnitTests.Operations
 {
-    [TestFixture, Category(Named.Unit), Parallelizable]
+    [TestFixture]
+    [Category(Named.Unit)]
+    [Parallelizable]
     public sealed class AmountValidatorTests : NUnitTestsBase
     {
         private IAmountValidator _validator;
@@ -23,7 +25,7 @@ namespace Tgs.UnitTests.Operations
         [TestCase(10)]
         [TestCase(100)]
         public void ThrowIfAmountIsNotPositive_No_Throws_When_Amount_Is_Positive(decimal amount)
-        {           
+        {
             Action action = () => _validator.ThrowIfAmountIsNotPositive(Name, amount);
             action.Should().NotThrow();
         }
@@ -34,7 +36,7 @@ namespace Tgs.UnitTests.Operations
         [TestCase(-10)]
         [TestCase(-100)]
         public void ThrowIfAmountIsNotPositive_Throws_InvalidAmountException_When_Amount_Is_Not_Positive(decimal amount)
-        {           
+        {
             Action action = () => _validator.ThrowIfAmountIsNotPositive(Name, amount);
             action.Should().Throw<InvalidAmountException>()
                 .WithMessage($"Invalid Amount: The {Name} must be positive but is {amount}");
@@ -46,7 +48,7 @@ namespace Tgs.UnitTests.Operations
         [TestCase(10)]
         [TestCase(100)]
         public void ThrowIfAmountIsNegative_No_Throws_When_Amount_Is_Not_Negative(decimal amount)
-        {           
+        {
             Action action = () => _validator.ThrowIfAmountIsNegative(Name, amount);
             action.Should().NotThrow();
         }
@@ -56,7 +58,7 @@ namespace Tgs.UnitTests.Operations
         [TestCase(-10)]
         [TestCase(-100)]
         public void ThrowIfAmountIsNegative_Throws_InvalidAmountException_When_Amount_Is_Not_Negative(decimal amount)
-        {           
+        {
             Action action = () => _validator.ThrowIfAmountIsNegative(Name, amount);
             action.Should().Throw<InvalidAmountException>()
                 .WithMessage($"Invalid Amount: The {Name} must be zero or positive but is {amount}");
@@ -69,7 +71,7 @@ namespace Tgs.UnitTests.Operations
         [TestCase(-1)]
         [TestCase(-10)]
         public void IgnoreAmount_No_Throws(decimal amount)
-        {           
+        {
             Action action = () => _validator.IgnoreAmount(Name, amount);
             action.Should().NotThrow();
         }

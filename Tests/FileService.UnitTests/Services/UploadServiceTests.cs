@@ -20,10 +20,9 @@ namespace TGS.Tests.FileService.UnitTests.Services
 {
     public class UploadServiceTests : BaseTests
     {
-        private readonly Mock<IAmazonS3> _amazonS3Mock = new Mock<IAmazonS3>();
-        private readonly Mock<IOptions<AwsSettings>> _awsSettingsMock = new Mock<IOptions<AwsSettings>>();
-        private readonly Mock<IOptions<FileSettings>> _fileSettingsMock = new Mock<IOptions<FileSettings>>();
-        private readonly Mock<IRepository<File>> _repositoryMock = new Mock<IRepository<File>>();
+        private readonly Mock<IAmazonS3> _amazonS3Mock = new();
+        private readonly Mock<IOptions<AwsSettings>> _awsSettingsMock = new();
+        private readonly Mock<IRepository<File>> _repositoryMock = new();
 
         private UploadService _service;
 
@@ -31,28 +30,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
         public void Setup()
         {
             _service = new UploadService(
-                _amazonS3Mock.Object, _awsSettingsMock.Object, _fileSettingsMock.Object, _repositoryMock.Object);
-        }
-
-        [Test]
-        public async Task Can_Upload()
-        {
-            CreateFile();
-            var file = fileMock.Object;
-            var response = new PutObjectResponse
-            {
-                HttpStatusCode = HttpStatusCode.OK
-            };
-            var settings = Customize<FileSettings>(x => x).Create<FileSettings>();
-
-            _fileSettingsMock.Setup(x => x.Value).Returns(settings);
-
-            var url = await _service.UploadFileAsync(file);
-
-            _repositoryMock.Verify(
-                c => c.InsertAsync(It.IsAny<File>()), Times.Once);
-
-            Assert.IsTrue(url.IndexOf($"{settings.Path}", StringComparison.Ordinal) > -1);
+                _amazonS3Mock.Object, _awsSettingsMock.Object, _repositoryMock.Object);
         }
 
         [Test]
