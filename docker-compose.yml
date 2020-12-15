@@ -269,7 +269,7 @@ services:
       - ./localstack/bin:/docker-entrypoint-initaws.d
   mongo-express:
     links:
-      - mongodb
+      - mongodb:mongo
     image: mongo-express
     container_name: "tgs-mongo-express"
     restart: always
