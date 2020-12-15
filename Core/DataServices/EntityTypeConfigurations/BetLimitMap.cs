@@ -5,27 +5,35 @@ using TGS.Core.DataServices.Models;
 
 namespace TGS.Core.DataServices.EntityTypeConfigurations
 {
-    internal class BetLimitGroupMap : IEntityTypeConfiguration<BetLimitGroup>
+    internal class BetLimitMap : IEntityTypeConfiguration<BetLimit>
     {
-        void IEntityTypeConfiguration<BetLimitGroup>.Configure(EntityTypeBuilder<BetLimitGroup> builder)
+        void IEntityTypeConfiguration<BetLimit>.Configure(EntityTypeBuilder<BetLimit> builder)
         {
-            builder.ToTable("BetLimitGroups", "dbo");
+            builder.ToTable("BetLimits", "dbo");
             builder.HasKey(b => b.Id)
                 .IsClustered(false);
+
+            builder.HasIndex(e => new {e.CurrencyCode, e.Id})
+                .IsClustered();
 
             builder.Property(b => b.Id)
                 .ValueGeneratedOnAdd();
 
-            builder.Property(b => b.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(20))
+            builder.Property(b => b.CurrencyCode)
+                .HasColumnType(ColumnTypes.Nvarchar(16))
                 .IsRequired();
 
-            builder.Property(b => b.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+            builder.Property(b => b.MinBet)
+                .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
 
-            builder.Property(b => b.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
+            builder.Property(b => b.MaxBet)
+                .HasColumnType(ColumnTypes.Int)
+                .IsRequired();
+
+            builder.Property(b => b.MaxBetPerMatch)
+                .HasColumnType(ColumnTypes.Int)
+                .IsRequired();
 
             builder.Property(b => b.CreatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
@@ -35,7 +43,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-             builder.Property(b => b.CreatedByUsername)
+            builder.Property(b => b.CreatedByUsername)
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
@@ -43,9 +51,9 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(32))
                 .IsRequired();
 
-            builder.HasMany(b => b.Players)
-                .WithOne(b => b.BetLimitGroup)
-                .HasForeignKey(b => b.BetLimitGroupId);
+            builder.HasOne(e => e.Currency)
+                .WithMany(e => e.BetLimits)
+                .HasForeignKey(e => e.CurrencyCode);
         }
     }
 }

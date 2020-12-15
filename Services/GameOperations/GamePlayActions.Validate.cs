@@ -67,20 +67,18 @@ namespace TGS.Services.GameOperations
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
             var lang = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, player.CultureCode);
-            var gameProviderBetLimitCode = await _gameProviderOperations.GetGameProviderBetLimitCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode, player.BetLimitGroupId);
-
+            
             var brand = await _brandOperations.GetCachedBrandAsync(brandId);
 
-            return new PlayerValidationResult
+            return new()
             {
                 Balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false),
-                VipLevelId = gameProviderBetLimitCode,
                 GameProviderCurrency = cur,
                 Language = lang,
                 Username = player.Username,
                 IsTestPlayer = player.IsTestPlayer,
-                BrandId = brandId,
-                LicenseeCode = brand.Code,
+                BrandCode = brand.Code,
+                LicenseeCode = brand.LicenseeCode,
                 ResellerCode = brand.ResellerCode
             };
         }

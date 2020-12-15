@@ -44,8 +44,8 @@ namespace TGS.Core.DataServices.Migrations
                 string.Format(Consts.StoreProcedureSqlFormat, "usp_GameProvider_GetLanguagesByInternalCode"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlFormat, "usp_GameProvider_GetLanguagesByExternalCode"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlFormat, "usp_GameProvider_GetGameProviderBetLimitCode"));
+            //migrationBuilder.SqlResource(assembly,
+            //    string.Format(Consts.StoreProcedureSqlFormat, "usp_GameProvider_GetGameProviderBetLimitCode"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlFormat, "usp_Player_GetPlayerLoginRecords"));
             migrationBuilder.SqlResource(assembly,

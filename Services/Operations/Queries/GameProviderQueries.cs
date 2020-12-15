@@ -31,7 +31,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<Dictionary<string, string>> GetGameProviderLanguagesByInternalCodeAsync(Guid gameProviderId);
 
-        Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
+        //Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
@@ -138,33 +138,33 @@ namespace TGS.Services.Operations.Queries
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
 
-        Task<string> IGameProviderQueries.GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode,
-            int betLimitGroupId)
-        {
-            const string spName = "usp_GameProvider_GetGameProviderBetLimitCode";
-            return _repository.SqlQuerySingleAsync<string>(spName, parameters:
-                new SqlParameter[]
-                {
-                    new()
-                    {
-                        ParameterName = "@gameProviderId",
-                        Value = gameProviderId,
-                        DbType = DbType.Guid
-                    },
-                    new()
-                    {
-                        ParameterName = "@currencyCode",
-                        Value = currencyCode,
-                        DbType = DbType.String
-                    },
-                    new()
-                    {
-                        ParameterName = "@betLimitGroupId",
-                        Value = betLimitGroupId,
-                        DbType = DbType.Int32
-                    }
-                });
-        }
+        //Task<string> IGameProviderQueries.GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode,
+        //    int betLimitGroupId)
+        //{
+        //    const string spName = "usp_GameProvider_GetGameProviderBetLimitCode";
+        //    return _repository.SqlQuerySingleAsync<string>(spName, parameters:
+        //        new SqlParameter[]
+        //        {
+        //            new()
+        //            {
+        //                ParameterName = "@gameProviderId",
+        //                Value = gameProviderId,
+        //                DbType = DbType.Guid
+        //            },
+        //            new()
+        //            {
+        //                ParameterName = "@currencyCode",
+        //                Value = currencyCode,
+        //                DbType = DbType.String
+        //            },
+        //            new()
+        //            {
+        //                ParameterName = "@betLimitGroupId",
+        //                Value = betLimitGroupId,
+        //                DbType = DbType.Int32
+        //            }
+        //        });
+        //}
 
         async Task<CachedGame[]> IGameProviderQueries.GetCachedGamesAsync(Guid gameProviderId)
         {

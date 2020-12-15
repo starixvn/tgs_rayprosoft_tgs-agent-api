@@ -65,6 +65,25 @@ namespace TGS.Core.DataServices.DataInitializers
 
             short IGameProvider.UniqueId => 999;
 
+            GameProviderBetLimit[] IGameProvider.BetLimits => new GameProviderBetLimit[]
+            {
+                new(GuidExtensions.NewSequentialGuid(), "CNY", 1, 200, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(), "CNY", 1, 1000, 1000, "2", false),
+                new(GuidExtensions.NewSequentialGuid(),"EUR", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"GBP", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"IDR", 1000, 200000, 1000000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"IDR_1000", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"INR", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"JPY", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"KRW", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"MYR", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"SGD", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"THB", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"USD", 1, 1000, 1000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"VND", 1000, 200000, 1000000, "1"),
+                new(GuidExtensions.NewSequentialGuid(),"VND_1000", 1, 1000, 1000, "1")
+            };
+
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new RedTigerConfiguration
             {
                 ServiceEndpointUrl = new("https://localhost:62331")

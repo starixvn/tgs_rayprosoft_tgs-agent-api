@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Models
 {
@@ -6,18 +7,24 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid Id { get; set; }
 
-        public string Code { get; set; }
-
         public Guid GameProviderId { get; set; }
 
         public virtual GameProvider GameProvider { get; set; }
 
-        public int BetLimitGroupId { get; set; }
-
-        public virtual BetLimitGroup BetLimitGroup { get; set; }
-
         public string CurrencyCode { get; set; }
 
         public virtual Currency Currency { get; set; }
+
+        public int MinBet { get; set; }
+
+        public int MaxBet { get; set; }
+
+        public int? MaxBetPerMatch { get; set; }
+
+        public string ExternalSetting { get; set; }
+
+        public bool IsDefault { get; set; }
+
+        public virtual ICollection<BrandGroupGameProviderBetLimit> BrandGroupBetLimits { get; set; }
     }
 }

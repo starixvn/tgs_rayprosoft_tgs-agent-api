@@ -16,7 +16,8 @@ namespace TGS.Core.DataServices.DataInitializers
             { 
                 new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
                 new INRCurrency(), new VNDCurrency(), new VND1000Currency(),
-                new THBCurrency()
+                new THBCurrency(), new EURCurrency(), new GBPCurrency(),
+                new KRWCurrency(), new JPYCurrency()
             };
 
             ILanguage[] Languages => new ILanguage[]

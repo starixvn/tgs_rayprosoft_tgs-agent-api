@@ -19,7 +19,7 @@ BEGIN
 	        p.Status,
 	        p.DefaultWalletId,
 	        p.CultureCode,
-	        p.BetLimitGroupId,
+	        p.BetLimitId,
 	        p.PlayerCode
         FROM dbo.[Players] p
         WHERE p.PlayerCode = @playerCode
