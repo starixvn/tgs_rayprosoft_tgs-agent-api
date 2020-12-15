@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Models
@@ -6,6 +7,7 @@ namespace TGS.Core.DataServices.Models
     public class BrandGame
     {
         public Guid Id { get; set; }
+
         public int GameId { get; set; }
 
         public virtual Game Game { get; set; }
@@ -20,5 +22,7 @@ namespace TGS.Core.DataServices.Models
         public int DisplayOrder { get; set; }
         public bool Rebate { get; set; }
         public decimal EffectiveBettingPercentage { get; set; }
+
+        public virtual ICollection<BrandGroupGame> BrandGroups {get;set;}
     }
 }

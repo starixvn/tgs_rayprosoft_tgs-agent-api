@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Table, Set, Button, Box, Stack, PageWithHeader, TopNav } from "bumbag"
+import {
+  Table,
+  Set,
+  Button,
+  Box,
+  Stack,
+  PageWithHeader,
+  TopNav,
+  Modal,
+  Dialog,
+  Text
+} from "bumbag"
 import {
   Switch,
   Route,
@@ -101,6 +112,8 @@ const LaunchGameButton = ({
     { brandCode, username, currency },
     formData
   )
+  let [errorMessage, setErrorMessage] = useState()
+  const errorDialog = Modal.useState()
 
   const reset = () => {
     setGameWin(undefined)
@@ -110,31 +123,47 @@ const LaunchGameButton = ({
 
   useEffect(() => {
     if (url && gameWindow) {
-      console.log("Open Game URL", url)
       gameWindow.location = url
       reset()
     }
   }, [url])
 
   useEffect(() => {
+    if (error) {
+      setErrorMessage(JSON.stringify(error))
+      errorDialog.show()
+    }
     if (error && gameWindow) {
       gameWindow.close()
       reset()
     }
   }, [gameWindow, error])
   return (
-    <Button
-      onClick={(event) => {
-        setSubmit({
-          gameProviderCode: gameProviderCode,
-          gameCode: game?.code
-        })
+    <>
+      <Button
+        onClick={(event) => {
+          setSubmit({
+            gameProviderCode: gameProviderCode,
+            gameCode: game?.code
+          })
 
-        let win = window.open()
-        setGameWin(win)
-      }}
-    >
-      Launch
-    </Button>
+          let win = window.open()
+          setGameWin(win)
+        }}
+      >
+        Launch
+      </Button>
+      <Dialog.Modal
+        title="Error"
+        showCloseButton
+        type="warning"
+        onClickClose={() => {
+          setErrorMessage("")
+        }}
+        {...errorDialog}
+      >
+        <Text.Block>{errorMessage}</Text.Block>
+      </Dialog.Modal>
+    </>
   )
 }

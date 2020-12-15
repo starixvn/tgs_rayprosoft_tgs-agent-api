@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Alert, Button, Modal } from "bumbag"
 import { Delete as DeleteMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"

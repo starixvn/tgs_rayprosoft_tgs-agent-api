@@ -52,6 +52,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            builder.Property(e => e.Html5)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.Property(e => e.AvailableCurrencies)
                 .HasColumnType(ColumnTypes.Nvarchar(1024))
                 .IsRequired()

@@ -186,3 +186,6 @@ $RECYCLE.BIN/
 
 # docker
 .docker/**
+
+# python
+**/__pycache__

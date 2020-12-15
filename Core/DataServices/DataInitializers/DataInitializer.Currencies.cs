@@ -1,4 +1,6 @@
-﻿namespace TGS.Core.DataServices.DataInitializers
+﻿// ReSharper disable InconsistentNaming
+
+namespace TGS.Core.DataServices.DataInitializers
 {
     partial class DataInitializer
     {

@@ -11,10 +11,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         {
             builder.ToTable("Players", "dbo");
             builder.HasKey(bc => bc.PlayerCode);
-
-            builder.HasIndex(p => new { p.BrandId, p.Username })
-                .HasDatabaseName("UX_Players_BrandId_Username")
-                .IsUnique();
+            builder.HasAlternateKey(p => new { p.BrandId, p.Username });
 
             builder.Property(c => c.PlayerCode)
                 .HasColumnType(ColumnTypes.Varchar(16))
@@ -52,7 +49,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
-            builder.Property(c => c.BetLimitGroupId)
+            builder.Property(c => c.BetLimitId)
                 .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
 
@@ -88,10 +85,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasDefaultValue(0)
                 .IsRequired();
 
-            builder.HasMany(p => p.Wallets)
-                .WithOne(p => p.Player)
-                .HasForeignKey(p => p.PlayerCode);
-
             builder.HasMany(p => p.Banks)
                 .WithOne(p => p.Player)
                 .HasForeignKey(p => p.PlayerCode);
@@ -112,6 +105,11 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasMany(p => p.Letters)
                 .WithOne(p => p.Player)
                 .HasForeignKey(p => p.PlayerCode);
+
+            builder.HasOne(e => e.BetLimit)
+                .WithMany(e => e.Players)
+                .HasForeignKey(e => e.BetLimitId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -276,7 +276,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Language, new Language())
                 .With(s => s.Brand, new Brand())
                 .With(s => s.ParentPlayer, new Player())
-                .With(s => s.BetLimitGroup, new BetLimitGroup())
+                .With(s => s.BetLimit, new BetLimit())
                 .With(s => s.SubPlayers, new Player[] { })
                 .With(s => s.Banks, new[]
                 {

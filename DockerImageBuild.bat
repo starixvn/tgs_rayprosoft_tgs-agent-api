@@ -20,3 +20,6 @@ docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%1
 
 docker build -f Apis\TgsApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/tgs-api:%1 .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/tgs-api:%1
+
+docker build -f Apis\FileService\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/file-service:%1 .
+docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/file-service:%1

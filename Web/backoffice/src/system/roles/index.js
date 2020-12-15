@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { Formik, Field } from "formik"
 import { Box, Button, InputField, Set } from "bumbag"
 import PageContent from "../../page/Content"

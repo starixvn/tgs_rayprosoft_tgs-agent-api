@@ -201,7 +201,7 @@ namespace TGS.Services.Operations
                 CachedPlayerFields.Username,
                 CachedPlayerFields.DefaultWalletId,
                 CachedPlayerFields.CultureCode,
-                CachedPlayerFields.BetLimitGroupId,
+                CachedPlayerFields.BetLimitId,
                 CachedPlayerFields.BrandCode,
                 CachedPlayerFields.DefaultWalletCurrencyCode,
                 CachedPlayerFields.ExternalCurrencyCode
@@ -218,7 +218,7 @@ namespace TGS.Services.Operations
                     Username = values[3],
                     DefaultWalletId = Guid.Parse(values[4]),
                     CultureCode = values[5],
-                    BetLimitGroupId = (int) values[6],
+                    BetLimitId = (int) values[6],
                     BrandCode = values[7],
                     DefaultWalletCurrencyCode = values[8],
                     ExternalCurrencyCode = values[9]
@@ -240,7 +240,7 @@ namespace TGS.Services.Operations
                 new(CachedPlayerFields.DefaultWalletId, player.DefaultWalletId.ToString()),
                 new(CachedPlayerFields.DefaultWalletCurrencyCode, player.DefaultWalletCurrencyCode),
                 new(CachedPlayerFields.CultureCode, player.CultureCode),
-                new(CachedPlayerFields.BetLimitGroupId, player.BetLimitGroupId),
+                new(CachedPlayerFields.BetLimitId, player.BetLimitId),
                 new(CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
             };
 
@@ -296,7 +296,7 @@ namespace TGS.Services.Operations
             public const string DefaultWalletId = "defaultWalletId";
             public const string DefaultWalletCurrencyCode = "defaultWalletCurrencyCode";
             public const string CultureCode = "cultureCode";
-            public const string BetLimitGroupId = "betLimitGroupId";
+            public const string BetLimitId = "betLimitGroupId";
             public const string ExternalCurrencyCode = "externalCurrencyCode";
         }
 

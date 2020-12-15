@@ -16,6 +16,6 @@ namespace TGS.Core.Models.Services.Caches
         public Guid DefaultWalletId { get; init; }
         public string DefaultWalletCurrencyCode { get; init; }
         public string CultureCode { get; init; }
-        public int BetLimitGroupId { get; init; }
+        public int BetLimitId { get; init; }
     }
 }

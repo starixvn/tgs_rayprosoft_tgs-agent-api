@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import { Spinner, Stack, Text, Box, Button, Set, Tabs as _Tabs } from "bumbag"
 import { Trans, FormattedNumber } from "../../i18n"

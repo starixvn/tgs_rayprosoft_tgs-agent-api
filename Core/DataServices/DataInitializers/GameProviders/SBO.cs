@@ -3,6 +3,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
@@ -68,6 +69,24 @@ namespace TGS.Core.DataServices.DataInitializers
 
             short IGameProvider.UniqueId => UniqueId;
 
+            GameProviderBetLimit[] IGameProvider.BetLimits => new GameProviderBetLimit[]
+            {
+                new(GuidExtensions.NewSequentialGuid(), "CNY", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"EUR", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"GBP", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"IDR", 1000, 200000, 1000000),
+                new(GuidExtensions.NewSequentialGuid(),"IDR_1000", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"INR", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"JPY", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"KRW", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"MYR", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"SGD", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"THB", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"USD", 1, 1000, 1000),
+                new(GuidExtensions.NewSequentialGuid(),"VND", 1000, 200000, 1000000),
+                new(GuidExtensions.NewSequentialGuid(),"VND_1000", 1, 1000, 1000)
+            };
+
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
                 new SBOConfiguration
                 {
@@ -75,23 +94,40 @@ namespace TGS.Core.DataServices.DataInitializers
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
                     ApiUrl = new("https://ex-api-demo-yy.568win.com")
                 };
+
+            Dictionary<string, string> IGameProvider.SportTypes => new()
+            {
+                { "Soccer", "1"},
+                { "Basketball", "2"},
+                { "Football", "3"},
+                { "Ice Hockey", "4"},
+                { "Badminton", "5"}
+            };
+
+            Dictionary<string, string> IGameProvider.MarketTypes => new()
+            {
+                { "ALL", "0"},
+                { "Handicap", "1"},
+                { "Odd_Even", "2"},
+                { "Over_Under", "3"},
+            };
         }
 
         internal record SBOGameProviderConfiguration : IGameProviderConfiguration
         {
             private static readonly string _endpoint = string.Empty;
 
-            Guid IGameProviderConfiguration.Id => new Guid("CC8AA6E0-5A7F-44BC-B294-5097C3518C37");
+            Guid DataInitializer.IGameProviderConfiguration.Id => new Guid("CC8AA6E0-5A7F-44BC-B294-5097C3518C37");
 
-            string IGameProviderConfiguration.Name => "Configuration SBO";
+            string DataInitializer.IGameProviderConfiguration.Name => "Configuration SBO";
 
-            string IGameProviderConfiguration.ClientId => "SBO-WG";
+            string DataInitializer.IGameProviderConfiguration.ClientId => "SBO-WG";
 
-            string IGameProviderConfiguration.SecretKey => "JFYif2fxc6jtOo3fA3JuaItNQ6SAlZAtNYGhgVmZGzm";
+            string DataInitializer.IGameProviderConfiguration.SecretKey => "JFYif2fxc6jtOo3fA3JuaItNQ6SAlZAtNYGhgVmZGzm";
 
-            string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
+            string DataInitializer.IGameProviderConfiguration.DesktopEndpoint => _endpoint;
 
-            string IGameProviderConfiguration.MobileEndpoint => _endpoint;
+            string DataInitializer.IGameProviderConfiguration.MobileEndpoint => _endpoint;
         }
     }
 }

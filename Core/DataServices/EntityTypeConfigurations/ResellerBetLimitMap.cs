@@ -9,17 +9,17 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
         void IEntityTypeConfiguration<ResellerBetLimit>.Configure(EntityTypeBuilder<ResellerBetLimit> builder)
         {
             builder.ToTable("ResellerBetLimits", "dbo");
-            builder.HasKey(rbl => new { rbl.ResellerId, rbl.BetLimitGroupId });
+            builder.HasKey(e => new {e.ResellerId, BetLimitRangeId = e.BetLimitId});
 
             builder
-                .HasOne(rbl => rbl.Reseller)
-                .WithMany(r => r.BetLimitGroups)
-                .HasForeignKey(rbl => rbl.ResellerId);
+                .HasOne(e => e.Reseller)
+                .WithMany(e => e.BetLimits)
+                .HasForeignKey(e => e.ResellerId);
 
             builder
-                .HasOne(rbl => rbl.BetLimitGroup)
-                .WithMany(blg => blg.Resellers)
-                .HasForeignKey(rbl => rbl.BetLimitGroupId);
+                .HasOne(e => e.BetLimit)
+                .WithMany(e => e.ResellerBetLimits)
+                .HasForeignKey(e => e.BetLimitId);
         }
     }
 }

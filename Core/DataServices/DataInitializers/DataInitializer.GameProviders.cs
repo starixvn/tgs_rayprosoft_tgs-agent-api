@@ -2,6 +2,7 @@
 // ReSharper disable IdentifierTypo
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -31,6 +32,9 @@ namespace TGS.Core.DataServices.DataInitializers
             bool AllowKickPlayer => false;
             short UniqueId { get; }
             PluggableConfigurationBase GetConfiguration();
+            GameProviderBetLimit[] BetLimits { get; }
+            Dictionary<string, string> SportTypes => new();
+            Dictionary<string, string> MarketTypes => new();
         }
 
         internal interface IGameProviderConfiguration
@@ -56,6 +60,7 @@ namespace TGS.Core.DataServices.DataInitializers
             PlatformType PlatformType { get; init; }
             bool HasTurnoverOnTieBet { get; init; }
             bool SubGame { get; init; }
+            bool Html5 { get; init; }
             string AvailableCurrencies { get; init; }
         }
 
@@ -123,6 +128,9 @@ namespace TGS.Core.DataServices.DataInitializers
 
             [Name("SubGame")]
             public bool SubGame { get; init; }
+
+            [Name("Html5")]
+            public bool Html5 { get; init; }
 
             [Name("AvailableCurrencies")]
             public string AvailableCurrencies

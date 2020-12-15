@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react"
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { Code, Menu, DefaultPaths } from "./menu"
 import { Switch } from "../content"
 import {

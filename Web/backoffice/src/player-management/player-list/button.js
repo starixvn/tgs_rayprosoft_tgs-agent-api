@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { css, Global } from "@emotion/core"
+import { css, Global } from "@emotion/react"
 import { useLocation, useRouteMatch } from "react-router-dom"
 import { Formik, Field, Form, useFormikContext } from "formik"
 import { Box } from "bumbag"
