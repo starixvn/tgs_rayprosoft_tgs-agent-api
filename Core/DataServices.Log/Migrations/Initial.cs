@@ -29,8 +29,6 @@ namespace TGS.Core.DataServices.Log.Migrations
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_AdminLogs_GetLog"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.StoreProcedureSqlForamt, "usp_ApiLogs_GetLog"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.StoreProcedureSqlForamt, "usp_ServiceLogs_InsertServiceLog"));
         }
     }
 }

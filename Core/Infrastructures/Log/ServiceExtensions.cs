@@ -21,7 +21,6 @@ namespace TGS.Core.Infrastructures.Log
             services.AddScoped(c => CreateLoggerPublisher(c.GetRequiredService<INatsManager>()));    
     
             services.AddTransient<ITgsLog, TgsLog>();    
-            services.AddTransient(typeof(IServiceLog<>), typeof(ServiceLog<>));
 
             services.AddLogging();
 

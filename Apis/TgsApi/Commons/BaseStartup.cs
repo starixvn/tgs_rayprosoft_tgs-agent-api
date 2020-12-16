@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
-using NLog;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -34,8 +33,6 @@ namespace TGS.Apis.TgsApi.Commons
         {
             Environment = env;
             Configuration = configuration;
-
-            LogManager.Configuration.Variables["connectionString"] = Configuration.GetConnectionString("Log");
         }
 
         public void ConfigureServices(IServiceCollection services)

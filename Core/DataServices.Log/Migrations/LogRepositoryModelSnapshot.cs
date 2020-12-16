@@ -16,9 +16,9 @@ namespace TGS.Core.DataServices.Log.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "3.1.7")
+                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "5.0.0");
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.AdminLog", b =>
                 {
@@ -27,12 +27,12 @@ namespace TGS.Core.DataServices.Log.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Exception")
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<int>("ExecutionTimeMs")
                         .HasColumnType("int");
@@ -42,56 +42,59 @@ namespace TGS.Core.DataServices.Log.Migrations
 
                     b.Property<string>("Ip")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Method")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Path")
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("RequestContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("RequestHeaders")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<short>("ResponseCode")
                         .HasColumnType("smallint");
 
                     b.Property<string>("ResponseContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ResponseHeaders")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(128)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("StackTrace")
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Test")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("TrackingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RecordedOn");
 
-                    b.ToTable("AdminLogs","dbo");
+                    b.ToTable("AdminLogs", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.ApiLog", b =>
@@ -107,58 +110,58 @@ namespace TGS.Core.DataServices.Log.Migrations
 
                     b.Property<string>("Ip")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Method")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Prefix")
                         .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("RequestContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("RequestHeaders")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<short>("ResponseCode")
                         .HasColumnType("smallint");
 
                     b.Property<string>("ResponseContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ResponseHeaders")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(128)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid>("TrackingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RecordedOn");
 
-                    b.ToTable("ApiLogs","dbo");
+                    b.ToTable("ApiLogs", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.LogRecord", b =>
@@ -168,92 +171,35 @@ namespace TGS.Core.DataServices.Log.Migrations
 
                     b.Property<string>("Exception")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("int");
 
                     b.Property<string>("Logger")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(512)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("ServerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(128)")
-                        .IsUnicode(true);
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid>("TrackingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RecordedOn");
 
-                    b.ToTable("LogRecords","dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Log.Models.ServiceLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Callsite")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Exception")
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Https")
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Level")
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Logger")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("MachineName")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Port")
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Properties")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("RemoteAddress")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("ServerAddress")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("ServerName")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("StackTrace")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(512)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceLogs","dbo");
+                    b.ToTable("LogRecords", "dbo");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,9 +11,13 @@
 
   <ItemGroup>
     <Compile Remove="DataService\EntityTypeConfigurations\**" />
+    <Compile Remove="UploadImages\**" />
     <Content Remove="DataService\EntityTypeConfigurations\**" />
+    <Content Remove="UploadImages\**" />
     <EmbeddedResource Remove="DataService\EntityTypeConfigurations\**" />
+    <EmbeddedResource Remove="UploadImages\**" />
     <None Remove="DataService\EntityTypeConfigurations\**" />
+    <None Remove="UploadImages\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,10 +37,6 @@
     <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UploadImages\" />
   </ItemGroup>
 
   <ItemGroup>

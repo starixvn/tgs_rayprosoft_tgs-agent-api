@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TGS.Core.DataServices.Log.Migrations
+﻿namespace TGS.Core.DataServices.Log.Migrations
 {
     internal static class Consts
     {
