@@ -78,6 +78,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UserInfo = new UserInfo
                 {
                     Role = user.Role.Name,
+                    RoleId = user.Role.Id,
+                    RoleType = user.Role.RoleType,
                     Username = user.Username,
                     UserId = user.Id,
                     TimeZone = user.TimeZone,

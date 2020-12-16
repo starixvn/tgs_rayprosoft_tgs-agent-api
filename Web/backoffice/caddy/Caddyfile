@@ -13,7 +13,7 @@
 root * /usr/share/caddy
 
 @try_files {
-    not path /api/* /healthcheck
+    not path /api/* /fs/* /healthcheck
     file {
         try_files {path} /index.html
     }
