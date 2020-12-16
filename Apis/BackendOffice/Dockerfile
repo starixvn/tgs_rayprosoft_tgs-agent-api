@@ -8,11 +8,12 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 COPY ["Apis/BackendOffice/BackendOffice.csproj", "Apis/BackendOffice/"]
-COPY ["Core/DataServices.Log/DataServices.Log.csproj", "Core/DataServices.Log/"]
-COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
-COPY ["Core/Models/Models.csproj", "Core/Models/"]
-COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
+COPY ["Services/BackOffice/BackOffice.csproj", "Services/BackOffice/"]
 COPY ["Core/DataServices/DataServices.csproj", "Core/DataServices/"]
+COPY ["Core/Models/Models.csproj", "Core/Models/"]
+COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
+COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
+COPY ["Core/DataServices.Log/DataServices.Log.csproj", "Core/DataServices.Log/"]
 COPY ["Core/DataServices.Bet/DataServices.Bet.csproj", "Core/DataServices.Bet/"]
 RUN dotnet restore "Apis/BackendOffice/BackendOffice.csproj"
 COPY . .

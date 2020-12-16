@@ -48,7 +48,7 @@ namespace TGS.Apis.FileService.Controllers
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectDb = await _file.CanConnection(),
-                BucketExists = _uploadService.BucketExistsAsync(),
+                BucketList = _uploadService.ListBucketsAsync(),
                 AwsConnectionString = _awsSettings,
                 FileConnectionString = _settings.ConnectionString
             };
