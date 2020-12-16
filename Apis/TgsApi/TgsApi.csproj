@@ -34,11 +34,6 @@
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
-    <PackageReference Include="NLog" Version="4.7.4" />
-    <PackageReference Include="NLog.Config" Version="4.7.4" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.5" />
-    <PackageReference Include="NLog.Schema" Version="4.7.4" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,9 +49,6 @@
     <Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Content Update="nlog.Development.config">
-      <DependentUpon>nlog.Development.config</DependentUpon>
-    </Content>
   </ItemGroup>
 
 

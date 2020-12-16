@@ -8,17 +8,13 @@ namespace TGS.Core.Infrastructures.Redis
     {
         private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
 
-        private readonly IServiceLog<BaseRedisConnection> _serviceLog;
-
-        protected BaseRedisConnection(string connectionString, IServiceLog<BaseRedisConnection> serviceLog)
+        protected BaseRedisConnection(string connectionString)
         {
-            _serviceLog = serviceLog;
-
             _lazyConnection = new Lazy<ConnectionMultiplexer>(
                 () =>
                 {
                     var connection = ConnectionMultiplexer.Connect(connectionString);
-                    _serviceLog.LogInformation($"{nameof(ConnectionMultiplexer)} connection opened.");
+                    Console.WriteLine($"{nameof(ConnectionMultiplexer)} connection opened.");
 
                     connection.ConnectionFailed += OnConnectionFailed;
                     connection.ConnectionRestored += ConnectionRestored;
@@ -39,13 +35,13 @@ namespace TGS.Core.Infrastructures.Redis
             if (_lazyConnection.IsValueCreated)
             {
                 _lazyConnection.Value.Dispose();
-                _serviceLog.LogInformation($"{nameof(ConnectionMultiplexer)} connection closed.");
+                Console.WriteLine($"{nameof(ConnectionMultiplexer)} connection closed.");
             }
         }
 
         private void OnConnectionFailed(object sender, ConnectionFailedEventArgs e)
         {
-            _serviceLog.LogWarning($@"{nameof(ConnectionMultiplexer)} connection failed.
+            Console.WriteLine($@"{nameof(ConnectionMultiplexer)} connection failed.
 FailureType is {e.FailureType}.
 ConnectionType is {e.ConnectionType}.
 Endpoint is {e.EndPoint}.
@@ -54,7 +50,7 @@ Exception is {e.Exception?.ToString() ?? "null"}");
 
         private void ConnectionRestored(object sender, ConnectionFailedEventArgs e)
         {
-            _serviceLog.LogInformation($@"{nameof(ConnectionMultiplexer)} connection restored.
+            Console.WriteLine($@"{nameof(ConnectionMultiplexer)} connection restored.
 FailureType is {e.FailureType}.
 ConnectionType is {e.ConnectionType}.
 Endpoint is {e.EndPoint}.
@@ -63,13 +59,13 @@ Exception is {e.Exception?.ToString() ?? "null"}");
 
         private void ErrorMessage(object sender, RedisErrorEventArgs e)
         {
-            _serviceLog.LogError($@"{nameof(ConnectionMultiplexer)} got an error message: {e.Message}.
+            Console.WriteLine($@"{nameof(ConnectionMultiplexer)} got an error message: {e.Message}.
 Endpoint is {e.EndPoint}.");
         }
 
         private void InternalError(object sender, InternalErrorEventArgs e)
         {
-            _serviceLog.LogError($@"{nameof(ConnectionMultiplexer)} internal error.
+            Console.WriteLine($@"{nameof(ConnectionMultiplexer)} internal error.
 ConnectionType is {e.ConnectionType}.
 Endpoint is {e.EndPoint}.
 Origin is {e.Origin}.

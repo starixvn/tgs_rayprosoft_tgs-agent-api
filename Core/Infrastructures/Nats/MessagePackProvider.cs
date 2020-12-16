@@ -16,11 +16,9 @@ namespace TGS.Core.Infrastructures.Nats
         private readonly MessagePackSerializerOptions _messagePackSerializerOptions =
             MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
 
-        private readonly IServiceLog<MessagePackProvider> _serviceLog;
-
-        public MessagePackProvider(IServiceLog<MessagePackProvider> serviceLog)
+        public MessagePackProvider()
         {
-            _serviceLog = serviceLog;
+
         }
 
         T IMessagePackProvider.Deserialize<T>(byte[] arrayToDeserialize)
@@ -31,7 +29,7 @@ namespace TGS.Core.Infrastructures.Nats
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"Failed to deserialize. {ex}");
+                Console.WriteLine($"Failed to deserialize. {ex}");
                 throw;
             }
         }
@@ -44,7 +42,7 @@ namespace TGS.Core.Infrastructures.Nats
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"Failed to serialize. {ex}");
+                Console.WriteLine($"Failed to serialize. {ex}");
                 throw;
             }
         }

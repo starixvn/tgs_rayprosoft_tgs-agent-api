@@ -29,16 +29,13 @@ namespace TGS.Core.Infrastructures.Nats
     {
         private readonly IMessagePackProvider _messagePackProvider;
         private readonly IOptions<NatsSetting> _natsSetting;
-        private readonly IServiceLog<NatsManager> _serviceLog;
         private Lazy<IConnection> _connectionFactory;
         private ConnState _state;
 
         public NatsManager(
             IMessagePackProvider messagePackProvider,
-            IServiceLog<NatsManager> serviceLog,
             IOptions<NatsSetting> natsSetting)
         {
-            _serviceLog = serviceLog;
             _messagePackProvider = messagePackProvider;
             _natsSetting = natsSetting;
             CreateConnection();
@@ -119,11 +116,11 @@ namespace TGS.Core.Infrastructures.Nats
                 var connectionFactory = new ConnectionFactory();
                 conn = connectionFactory.CreateConnection(opts);
                 _state = ConnState.CONNECTED;
-                _serviceLog.LogInformation($"Succeeded to create a NATS connection to {opts.Url}.");
+                Console.WriteLine($"Succeeded to create a NATS connection to {opts.Url}.");
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"Failed to connect to NATS. {ex}");
+                Console.WriteLine($"Failed to connect to NATS. {ex}");
                 CreateConnection();
             }
 
@@ -149,7 +146,7 @@ namespace TGS.Core.Infrastructures.Nats
                 }
                 catch (Exception ex)
                 {
-                    _serviceLog.LogError($"Flush failed. Subject:{topic} Error:{ex}");
+                    Console.WriteLine($"Flush failed. Subject:{topic} Error:{ex}");
                 }
             });
         }
@@ -177,24 +174,24 @@ namespace TGS.Core.Infrastructures.Nats
         private void ReconnectedEventHandler(object sender, ConnEventArgs e)
         {
             _state = ConnState.CONNECTED;
-            _serviceLog.LogWarning($"Reconnected to NATS. {e.Conn.Opts.Url}");
+            Console.WriteLine($"Reconnected to NATS. {e.Conn.Opts.Url}");
         }
 
         private void DisconnectedEventHandler(object sender, ConnEventArgs e)
         {
             _state = ConnState.DISCONNECTED;
-            _serviceLog.LogError($"Disconnected to NATS. {e.Conn.Opts.Url}");
+            Console.WriteLine($"Disconnected to NATS. {e.Conn.Opts.Url}");
         }
 
         private void ClosedEventHandler(object sender, ConnEventArgs e)
         {
             _state = ConnState.DISCONNECTED;
-            _serviceLog.LogWarning($"NATS connection closed. {e.Conn.Opts.Url}");
+            Console.WriteLine($"NATS connection closed. {e.Conn.Opts.Url}");
         }
 
         private void AsyncErrorEventHandler(object sender, ErrEventArgs e)
         {
-            _serviceLog.LogError($"Error occurred. Subject:{e.Subscription.Subject} Error:{e.Error}");
+            Console.WriteLine($"Error occurred. Subject:{e.Subscription.Subject} Error:{e.Error}");
         }
     }
 }

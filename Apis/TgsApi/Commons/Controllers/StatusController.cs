@@ -24,8 +24,6 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
         private readonly ITgsRepository _tgpRepository;
         private readonly IBetRepository _betRepository;
         private readonly IRedisRepository _redisRepository;
-        private readonly ITgsLog _tgsLog;
-        private readonly ILogger<StatusController> _logger;
         private readonly IFeatureManager _featureManagement;
         private readonly IConfiguration _configuration;
 
@@ -33,16 +31,12 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
             ITgsRepository tgpRepository,
             IBetRepository betRepository,
             IRedisRepository redisRepository,
-            ITgsLog tgsLog,
-            ILogger<StatusController> logger,
             IFeatureManager  featureManagement,
             IConfiguration configuration)
         {
             _tgpRepository = tgpRepository;
             _betRepository = betRepository;
             _redisRepository = redisRepository;
-            _tgsLog = tgsLog;
-            _logger = logger;
             _featureManagement = featureManagement;
             _configuration = configuration;
         }
@@ -70,30 +64,6 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
                 GameProviderCode = gpCode,
                 FeatureEnabled = isFeatureEnabled
             };
-        }
-
-        [HttpGet("error")]
-        public string ThrowErrorAsync()
-        {
-            throw new Exception("Test Tgs Error");
-        }
-
-        [HttpGet("log")]
-        public string WriteLogAsync()
-        {
-            var message = DateTime.Now.ToString();
-            _tgsLog.LogWarning(message);
-            return message;
-
-        }
-
-        [HttpGet("nlog")]
-        public string WriteNLogAsync()
-        {
-            var message = DateTime.Now.ToString();
-            _logger.LogWarning(message);
-            return message;
-
         }
     }
 }

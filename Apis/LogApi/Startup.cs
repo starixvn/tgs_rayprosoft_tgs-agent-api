@@ -108,8 +108,6 @@ namespace TGS.Apis.LogApi
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseHttpsRedirection();
-
             app.UseRouting();
 
             app.UseAuthorization();

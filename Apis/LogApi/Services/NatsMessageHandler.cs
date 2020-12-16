@@ -32,7 +32,6 @@ namespace TGS.Apis.LogApi.Services
     public class NatsMessageHandler : IMessageHandler
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IServiceLog<NatsMessageHandler> _serviceLog;
         private readonly INatsManager _natsManager;
         private IAsyncSubscription _apiLogSubscription;
         private IAsyncSubscription _adminLogSubscription;
@@ -48,12 +47,10 @@ namespace TGS.Apis.LogApi.Services
 
         public NatsMessageHandler(
             IServiceProvider serviceProvider,
-            IServiceLog<NatsMessageHandler> serviceLog,
             IOptions<LoggerServiceConfig> loggerServiceConfig,
             INatsManager natsManager)
         {
             _serviceProvider = serviceProvider;
-            _serviceLog = serviceLog;
             _natsManager = natsManager;
             _loggerServiceConfig = loggerServiceConfig.Value;
         }
@@ -101,7 +98,7 @@ namespace TGS.Apis.LogApi.Services
                     CountReceivedLogs(now, nameof(ApiLogEvent), logs.Count);
                     await WriteLogsAsync(nameof(ApiLogEvent), logs);
                 },
-                ex => _serviceLog.LogError($"error occurred when RX executed: {ex}"));
+                ex => Console.WriteLine($"error occurred when RX executed: {ex}"));
         }
 
         private void SubscribeAdminLogReceived()
@@ -133,7 +130,7 @@ namespace TGS.Apis.LogApi.Services
                         CountReceivedLogs(now, nameof(AdminLogEvent), logs.Count);
                         await WriteLogsAsync(nameof(AdminLogEvent), logs);
                     },
-                    ex => _serviceLog.LogError("error occurred when RX executed:" + ex));
+                    ex => Console.WriteLine("error occurred when RX executed:" + ex));
         }
 
 
@@ -166,7 +163,7 @@ namespace TGS.Apis.LogApi.Services
                         CountReceivedLogs(now, nameof(LogRecordEvent), logs.Cast<LogRecordEvent>().Count(log => log.level >= _loggerServiceConfig.LogLevel || _loggerServiceConfig.UnrestrictedLoggers.Contains(log.logger)));
                         await WriteLogsAsync(nameof(LogRecordEvent), logs);
                     },
-                    ex => _serviceLog.LogError("error occurred when RX executed:" + ex));
+                    ex => Console.WriteLine("error occurred when RX executed:" + ex));
         }
 
         void IMessageHandler.StopReceiveMessages()
@@ -207,7 +204,7 @@ namespace TGS.Apis.LogApi.Services
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError("error occurred when batch insert logs:" + ex);
+                Console.WriteLine("error occurred when batch insert logs:" + ex);
                 _lastError = ex.ToString();
             }
         }

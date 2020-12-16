@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
 
@@ -17,16 +16,13 @@ namespace TGS.Core.Infrastructures.Redis
         private readonly IRedisCacheManager _interface;
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
-        private readonly IServiceLog<RedisCacheManager> _serviceLog;
 
         public RedisCacheManager(
             IRedisRepository repository,
-            IJsonSerializationProvider serializationProvider,
-            IServiceLog<RedisCacheManager> serviceLog)
+            IJsonSerializationProvider serializationProvider)
         {
             _repository = repository;
             _serializationProvider = serializationProvider;
-            _serviceLog = serviceLog;
             _interface = this;
         }
 
@@ -116,7 +112,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -132,7 +128,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -149,7 +145,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
             }
         }
 
@@ -176,7 +172,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
                 return await getData();
             }
         }
@@ -189,7 +185,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
             }
         }
 
@@ -208,7 +204,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
             }
         }
 
@@ -226,7 +222,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
             }
 
             return Array.Empty<RedisValue>();
@@ -245,7 +241,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
             }
 
             return Array.Empty<HashEntry>();
@@ -264,7 +260,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                _serviceLog.LogError($"redis error :{ex}");
+                Console.WriteLine($"redis error :{ex}");
             }
 
             return RedisValue.Null;
