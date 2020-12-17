@@ -30,7 +30,7 @@ pipeline {
 		stage('Building image') {
 		  steps {
 			script {
-			   sh 'docker build -f Apis\BackendOffice\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev .'
+			   sh 'docker build -f Apis\\BackendOffice\\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev .'
 			   sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev'
 			}
 		  }
