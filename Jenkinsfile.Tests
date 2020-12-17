@@ -1,12 +1,40 @@
 pipeline {
-    agent {
-        docker { image 'node:7-alpine' }
-    }
+    agent { dockerfile true }
+
+    environment {
+		registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api"
+		registryCredential = 'gitlab-user-pwd'
+	}
+    agent any
+	
     stages {
-        stage('Test') {
+	    stage('Test') {
             steps {
                 sh 'node --version'
+                sh 'svn --version'
             }
         }
-    }
+		stage('Checkout SCM') {
+			steps {
+				checkout([
+					$class: 'GitSCM',
+					branches: [[name: "*/develop" ]],
+					userRemoteConfigs: [[
+						url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+						credentialsId: 'gitlab-user-pwd',
+					]]
+				])
+			}
+        }
+		stage('Building image') {
+			steps{
+				script {
+					docker.withRegistry('https://registry.gitlab.com', registryCredential) {
+						def customImage = docker.build(registry + ":dev", "-f Apis/BackendOffice/Dockerfile")
+						customImage.push()
+					}
+				}
+			}
+		}
+	}			
 }
