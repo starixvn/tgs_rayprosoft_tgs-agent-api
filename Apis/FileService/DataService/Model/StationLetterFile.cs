@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TGS.Apis.FileService.DataService.Model
 {
     public class StationLetterFile : BaseEntity
     {
-        [BsonRepresentation(BsonType.ObjectId)]
+        public string StationLetterId { get; set; }
         public ICollection<string> Files { get; set; }
 
-        [BsonIgnore] public ICollection<File> FileList { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
     }
 }

@@ -23,6 +23,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
         private readonly Mock<IAmazonS3> _amazonS3Mock = new();
         private readonly Mock<IOptions<AwsSettings>> _awsSettingsMock = new();
         private readonly Mock<IRepository<File>> _repositoryMock = new();
+        private readonly Mock<IRepository<StationLetterFile>> _stationLetterRepositoryMock = new();
 
         private UploadService _service;
 
@@ -30,7 +31,8 @@ namespace TGS.Tests.FileService.UnitTests.Services
         public void Setup()
         {
             _service = new UploadService(
-                _amazonS3Mock.Object, _awsSettingsMock.Object, _repositoryMock.Object);
+                _amazonS3Mock.Object, _awsSettingsMock.Object, _repositoryMock.Object,
+                _stationLetterRepositoryMock.Object);
         }
 
         [Test]

@@ -42,15 +42,15 @@ namespace TGS.Apis.FileService
             services.AddTransient(c =>
                 c.GetService<IMongoClient>()?.StartSession());
 
-            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-            services.AddScoped<IUploadService, UploadService>();
-
             services
                 .AddNats(_configuration)
                 .AddTgsLog()
                 .AddFile(_configuration)
                 .AddAwsService(_configuration);
 
+
+            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+            services.AddTransient<IUploadService, UploadService>();
             services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
 
             services.AddControllers()
