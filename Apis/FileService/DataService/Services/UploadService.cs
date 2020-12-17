@@ -102,7 +102,7 @@ namespace TGS.Apis.FileService.DataService.Services
                 await _stationLetterRepository.InsertAsync(stationLetterFile);
             }
 
-            await CleanFiles(model);
+            await CleanFiles();
         }
 
         async Task<string[]> IUploadService.GetObjectsAsync(string bucket, string prefix,
@@ -111,40 +111,48 @@ namespace TGS.Apis.FileService.DataService.Services
 
         Task<ListBucketsResponse> IUploadService.ListBucketsAsync() => _amazonS3.ListBucketsAsync();
 
-        private async Task CleanFiles(ObjectFileEventModel model)
+        private async Task CleanFiles()
         {
-            var stationLetterFileNames =
-                _stationLetterRepository.GetQueries()
-                    .SelectMany(l => l.Files)
-                    .Select(f => f);
-
-            var files = _fileRepository.GetQueries().Where(x => x.CreatedOn < DateTimeOffset.Now.AddHours(-24))
-                .ToArray();
-            var fileNames = files.Select(f => f.FileName);
-
-            var expectedList = fileNames.Except(stationLetterFileNames);
-
-            var enumerable = expectedList as string[] ?? expectedList.ToArray();
-            if (!enumerable.Any())
+            try
             {
-                return;
+                var stationLetterFileNames =
+                    _stationLetterRepository.GetQueries()
+                        .SelectMany(l => l.Files)
+                        .Select(f => f);
+
+                var files = _fileRepository.GetQueries().Where(x => x.CreatedOn < DateTimeOffset.Now.AddHours(-24))
+                    .ToArray();
+                var fileNames = files.Select(f => f.FileName);
+
+                var expectedList = fileNames.Except(stationLetterFileNames);
+
+                var enumerable = expectedList as string[] ?? expectedList.ToArray();
+                if (!enumerable.Any())
+                {
+                    return;
+                }
+
+                var keysAndVersions = enumerable.Select(key => new KeyVersion
+                {
+                    Key = key
+                }).ToList();
+
+                var request = new DeleteObjectsRequest
+                {
+                    BucketName = _awsSettings.Value.S3.Bucket,
+                    Objects = keysAndVersions
+                };
+
+                await _amazonS3.DeleteObjectsAsync(request);
+                await _fileRepository.DeleteManyAsync(files.Where(x => enumerable.Contains(x.FileName))
+                    .Select(x => x.Id)
+                    .ToArray());
             }
-
-            var keysAndVersions = enumerable.Select(key => new KeyVersion
+            catch (Exception e)
             {
-                Key = key
-            }).ToList();
-
-            var request = new DeleteObjectsRequest
-            {
-                BucketName = _awsSettings.Value.S3.Bucket,
-                Objects = keysAndVersions
-            };
-
-            await _amazonS3.DeleteObjectsAsync(request);
-            await _fileRepository.DeleteManyAsync(files.Where(x => enumerable.Contains(x.FileName))
-                .Select(x => x.Id)
-                .ToArray());
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }
