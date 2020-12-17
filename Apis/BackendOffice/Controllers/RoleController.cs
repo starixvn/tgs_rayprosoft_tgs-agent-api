@@ -183,8 +183,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get menus")]
         public async Task<GetMenuResponse> GetMenuAsync(GetMenuRequest request)
         {
-            var setting = request.RoleType == RoleType.Licensee ||
-                          request.RoleType == RoleType.Brand
+            var setting = request.RoleType != RoleType.Admin
                 ? (await _roleQueries.GetSingleAsync(x => x.Id == request.RoleId))?.MenuSetting
                 : (await _settingQueries.GetSingleAsync(p => p.Key == "Menus"))?.Value;
 
@@ -203,9 +202,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
-            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting)
-        {
-            return new()
+            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting) =>
+            new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 Name = name,
@@ -221,7 +219,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
-        }
 
         private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting)
         {
@@ -244,10 +241,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             return menuSettingTemplate;
         }
 
-        private MenuSetting[] GetMenuSettingByString(string setting)
-        {
-            return _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
-        }
+        private MenuSetting[] GetMenuSettingByString(string setting) =>
+            _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
 
         private MenuSetting SetMenuDisplay(MenuSetting menuTemplate, MenuSetting[] roleMenus)
         {
