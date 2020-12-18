@@ -80,7 +80,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Name = role.Name,
                 DisplayName = role.DisplayName,
                 Description = role.Description,
-                Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(role.MenuSetting),
+                Menus = await GetMenuSettingAsync(role.MenuSetting, role.RoleType),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
@@ -219,5 +219,21 @@ namespace TGS.Apis.BackendOffice.Controllers
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
+
+        private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting, RoleType type)
+        {
+            if (type != RoleType.Admin)
+            {
+                return GetMenuSettingByString(menuSetting);
+            }
+
+            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
+            var menuSettingTemplate = GetMenuSettingByString(setting.Value);
+
+            return menuSettingTemplate;
+        }
+
+        private MenuSetting[] GetMenuSettingByString(string setting) =>
+            _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
     }
 }
