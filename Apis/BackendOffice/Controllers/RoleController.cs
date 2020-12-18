@@ -49,6 +49,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Select(role => new RoleModel
                 {
                     Id = role.Id,
+                    RoleType = role.RoleType,
                     Name = role.Name,
                     DisplayName = role.DisplayName,
                     Description = role.Description,
@@ -77,6 +78,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var roleModel = new RoleModel
             {
                 Id = role.Id,
+                RoleType = role.RoleType,
                 Name = role.Name,
                 DisplayName = role.DisplayName,
                 Description = role.Description,
