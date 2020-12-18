@@ -79,6 +79,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     Role = user.Role.Name,
                     RoleId = user.Role.Id,
+                    ResellerId = user.Role.ResellerId,
+                    LicenseeId = user.Role.LicenseeId,
+                    BrandId = user.Role.BrandId,
                     RoleType = user.Role.RoleType,
                     Username = user.Username,
                     UserId = user.Id,
@@ -90,10 +93,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPost]
         [Route("logout")]
-        public Task LogoutAsync()
-        {
-            return HttpContext.SignOutAsync();
-        }
+        public Task LogoutAsync() => HttpContext.SignOutAsync();
 
         private void SetCsrfToken()
         {
