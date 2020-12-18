@@ -7,8 +7,18 @@ import {
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code, Update as UpdateMenu } from "./menu"
+import { useTrans } from "../../i18n"
 
 export { Code }
+
+export const Reseller = "Reseller"
+
+export const ResellerTrans = {
+  zh: "总公司",
+  en: "Reseller"
+}
+
+export const useResellerLabel = () => useTrans(ResellerTrans)
 
 export const Content = () => {
   return ""

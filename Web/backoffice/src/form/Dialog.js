@@ -67,9 +67,7 @@ export const Dialog = ({
               showActionButtons={showActionButtons}
               actionButtonsProps={{
                 isLoading: isLoading,
-                onClickSubmit: clickSubmit
-                  ? clickSubmit(formProps)
-                  : submitForm,
+                onClickSubmit: clickSubmit?.(formProps),
                 onClickCancel: reset,
                 cancelText,
                 submitText,

@@ -7,7 +7,6 @@ import {
   Flex,
   Box,
   Card,
-  Set,
   Button,
   Text,
   Input,
@@ -18,14 +17,29 @@ import {
   Table,
   Select,
   Group,
-  useClassName
+  Set,
+  useClassName,
+  InputField as _InputField
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
-import { useIsDisplayMenuByRoute } from "../../user/context"
+import {
+  useIsDisplayMenuByRoute,
+  useUserRoleType,
+  useUserRoleId,
+  useUserResellerId,
+  useUserLicenseeId,
+  useUserBrandId
+} from "../../user/context"
 import { useLabel as useMenuLabel, find as findMenu } from "../../menu"
-import { useMenus, useAddRole, useEditRole, useRole } from "./client"
+import {
+  useMenus,
+  useAddRole,
+  useEditRole,
+  useRole,
+  useRoleList
+} from "./client"
 import Disclosure from "../../dialog/Disclosure"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
@@ -35,6 +49,18 @@ import { Modal, useModalState } from "../../dialog/Modal"
 import FormDialog from "../../form/Dialog"
 import cloneDeep from "clone-deep"
 import { useResellerList } from "../../merchant/resellers/client"
+import { useLicenseeList } from "../../merchant/licensees/client"
+import {
+  RoleTypeSelect,
+  RoleTypes,
+  useRoleTypeOptions,
+  RoleTypeLabel,
+  adminOrNextRoleType
+} from "./type"
+import { useBrandList } from "../../merchant/brands/client"
+import { Reseller } from "../../merchant/resellers"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { HookFormDialog } from "../../form/HookFormDialog"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -51,25 +77,64 @@ export const AddButton = ({ onSubmitted, ...props }) => {
       {dialog.visible && (
         <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
       )}
-      {/* {dialog.visible && isLoadingMenus && <LoadingBackdrop visible={true} />}
-      {dialog.visible && fetchMenusError && (
-        <AlertDialog {...fetchMenusError} onClickClose={dialog.hide} />
-      )} */}
     </>
   )
 }
 
+export const HookFormInputField = ({ name, errors, ...props }) => {
+  let error = errors[name]
+  let state = error && "danger"
+  let validationText = error?.message ?? ""
+  if (error.type?.required && !validationText) {
+  }
+  return (
+    <_InputField
+      name={name}
+      state={state}
+      validationText={validationText}
+      {...props}
+    ></_InputField>
+  )
+}
+
 const AddDialog = ({ dialog, onSubmitted }) => {
-  let [formData, fetchMenus] = useState({
-    roleType: "Reseller"
+  let userRoleType = useUserRoleType()
+  let [roleType, setRoleType] = useState(userRoleType)
+
+  let userRoleId = useUserRoleId()
+  let [roleId, setRoleId] = useState(userRoleId)
+
+  let [formData, setMenusData] = useState({
+    roleType: userRoleType,
+    roleId: userRoleId
   })
+
+  useEffect(() => {
+    if (roleType && roleId) {
+      setMenusData({
+        roleType,
+        roleId
+      })
+    }
+  }, [roleType, roleId])
+
   let {
     menus,
     isLoading: isLoadingMenus,
-    error: fetchMenusError,
+    error: roleMenusError,
     mutate
   } = useMenus(formData)
 
+  let userResellerId = useUserResellerId()
+  let [resellerId, setResellerId] = useState(userResellerId)
+
+  let userLicenseeId = useUserLicenseeId()
+  let [licenseeId, setLicenseeId] = useState(userLicenseeId)
+
+  let userBrandId = useUserBrandId()
+  let [brandId, setBrandId] = useState(userBrandId)
+
+  let roleTypeOptions = useRoleTypeOptions()
   let [menusState, setMenus] = useState()
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useAddRole(submitData)
@@ -87,6 +152,47 @@ const AddDialog = ({ dialog, onSubmitted }) => {
     setSubmit(null)
   }
 
+  let showRoleSelect =
+    userRoleType != RoleTypes.Admin &&
+    ((roleType === RoleTypes.Licensee && resellerId) ||
+      (roleType === RoleTypes.Brand && licenseeId))
+
+  /*
+  return (
+    <HookFormDialog
+      title={title}
+      {...dialog}
+      placement="top"
+      maxWidth="none"
+      width="40vw"
+      css={css`
+        & .bb-DialogContent {
+          position: relative;
+        }
+      `}
+    >
+      <>
+        <FieldValues margin="major-1">
+          <Label name="name" required>
+            <Trans zh="权限组名称" en="Name" />
+          </Label>
+          <Box>
+            <HookFormInputField
+              name="name"
+              required
+              inputRef={register({ required: true })}
+            />
+          </Box>
+
+          <Label>
+            <Trans zh="权限管理" en="Role Settings" />
+          </Label>
+          <MenusBody menus={menus} setMenus={setMenus} />
+        </FieldValues>
+      </>
+    </HookFormDialog>
+  )
+  */
   return (
     <>
       <FormDialog
@@ -95,7 +201,11 @@ const AddDialog = ({ dialog, onSubmitted }) => {
         }}
         onSubmit={(data) => {
           setSubmit({
-            menus: menusState,
+            roleType,
+            resellerId,
+            licenseeId,
+            brandId,
+            menus: pickDisplayMenus(menusState),
             ...data
           })
         }}
@@ -115,21 +225,131 @@ const AddDialog = ({ dialog, onSubmitted }) => {
           }
         `}
       >
-        <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
+        <>
+          {roleTypeOptions.length > 1 && (
+            <FieldValues margin="major-1">
+              <Label name="roleType">
+                <Trans zh="权限组类型" en="Role Type" />
+              </Label>
+              <Box>
+                <Set orientation="horizontal">
+                  <RoleTypeSelect
+                    name="roleType"
+                    onChange={(event) => {
+                      let roleType = event.target.value
+                      setRoleType(roleType)
+
+                      if (
+                        roleType === RoleTypes.Admin ||
+                        roleType === RoleTypes.Reseller
+                      ) {
+                        setResellerId(undefined)
+                        setLicenseeId(undefined)
+                        setBrandId(undefined)
+                      }
+                      if (roleType === RoleTypes.Licensee) {
+                        setLicenseeId(undefined)
+                        setBrandId(undefined)
+                      }
+                      if (roleType === RoleTypes.Brand) {
+                        setBrandId(undefined)
+                      }
+                    }}
+                  />
+                  {roleType != RoleTypes.Admin && (
+                    <MerchantIdSelect
+                      start={adminOrNextRoleType(userRoleType)}
+                      end={roleType}
+                      resellerId={resellerId}
+                      licenseeId={licenseeId}
+                      brandId={brandId}
+                      onChange={({ resellerId, licenseeId, brandId }) => {
+                        setResellerId(resellerId)
+                        setLicenseeId(licenseeId)
+                        setBrandId(brandId)
+                      }}
+                    />
+                  )}
+                </Set>
+              </Box>
+
+              {showRoleSelect && (
+                <>
+                  <Label name="roleType">
+                    <Trans zh="权限组" en="Role" />
+                  </Label>
+                  <Box>
+                    <RoleSelect
+                      roleType={roleType}
+                      resellerId={resellerId}
+                      licenseeId={licenseeId}
+                      onChange={(roleId) => {
+                        setRoleId(roleId ?? userRoleId)
+                      }}
+                    />
+                  </Box>
+                </>
+              )}
+            </FieldValues>
+          )}
+          <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
+        </>
       </FormDialog>
     </>
   )
 }
 
-const DialogBody = ({ menus, setMenus, dialog }) => {
-  let { data: resellerData = {} } = useResellerList({ showAll: true })
-  let options = resellerData?.items?.map((reseller) => {
-    return {
-      id: reseller.id,
-      label: reseller.code
-    }
+const pickDisplayMenus = (menus = []) => {
+  return menus
+    .filter((menu) => menu.isDisplay)
+    .map((menu) => {
+      menu.subMenus = pickDisplayMenus(menu.subMenus)
+      return menu
+    })
+}
+
+const RoleSelect = ({
+  roleType,
+  resellerId,
+  licenseeId,
+  onChange,
+  ...props
+}) => {
+  let { data: roleData } = useRoleList(
+    roleType === RoleTypes.Licensee && resellerId
+      ? { showAll: true, resellerId }
+      : roleType === RoleTypes.Brand && licenseeId
+      ? { showAll: true, licenseeId }
+      : undefined
+  )
+
+  let placeholder = useTrans({
+    zh: "预设",
+    en: "Default"
   })
-  console.log("TODO: role select")
+  if (!roleData?.items) {
+    return null
+  }
+
+  return (
+    <Select
+      placeholder={placeholder}
+      options={roleData.items.map((role) => ({
+        label: role.name,
+        value: role.id
+      }))}
+      onChange={(event) => {
+        let roleId = event.target.value
+        if (!roleId) {
+          roleId = undefined
+        }
+        onChange(roleId)
+      }}
+    />
+  )
+}
+
+const DialogBody = ({ menus, setMenus, dialog }) => {
   return (
     <FieldValues margin="major-1">
       <Label name="name" required>
@@ -140,7 +360,7 @@ const DialogBody = ({ menus, setMenus, dialog }) => {
       </Box>
 
       <Label>
-        <Trans zh="权限管理" en="Role" />
+        <Trans zh="权限管理" en="Role Settings" />
       </Label>
       <MenusBody menus={menus} setMenus={setMenus} />
     </FieldValues>
@@ -192,7 +412,7 @@ const syncMenuDisplay = (path = [], menus) => {
     },
     {
       isSameDisplay: true,
-      isDisplay
+      isDisplay: false
     }
   )
 
@@ -233,13 +453,13 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
-        <AsyncRoleDialog id={id} onSubmitted={onSubmitted} dialog={dialog} />
+        <EditRoleDialog id={id} onSubmitted={onSubmitted} dialog={dialog} />
       )}
     </>
   )
 }
 
-const AsyncRoleDialog = ({ id, dialog, onSubmitted }) => {
+const EditRoleDialog = ({ id, dialog, onSubmitted }) => {
   let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole(
     id
   )
@@ -255,21 +475,26 @@ const AsyncRoleDialog = ({ id, dialog, onSubmitted }) => {
   return (
     <EditDialog
       id={id}
-      name={role.name}
-      menus={role.menus}
+      role={role}
+      name={role?.name}
+      menus={role?.menus}
       dialog={dialog}
       onSubmitted={(data) => {
-        mutate({
-          ...role,
-          ...data
-        })
+        mutate(false, undefined)
         onSubmitted && onSubmitted()
       }}
     />
   )
 }
 
-const EditDialog = ({ id, name, menus, dialog, onSubmitted }) => {
+const EditDialog = ({
+  id,
+  role,
+  name = "",
+  menus = [],
+  dialog,
+  onSubmitted
+}) => {
   let [menusState, setMenus] = useState(cloneDeep(menus))
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useEditRole(id, submitData)
@@ -286,6 +511,8 @@ const EditDialog = ({ id, name, menus, dialog, onSubmitted }) => {
   const clearResult = () => {
     setSubmit(null)
   }
+
+  let roleTypeOptions = useRoleTypeOptions()
 
   return (
     <FormDialog
@@ -321,7 +548,23 @@ const EditDialog = ({ id, name, menus, dialog, onSubmitted }) => {
         }, [name])
 
         return (
-          <DialogBody menus={menusState} setMenus={setMenus} dialog={dialog} />
+          <>
+            {roleTypeOptions.length > 1 && (
+              <FieldValues margin="major-1">
+                <Label name="roleType">
+                  <Trans zh="权限组类型" en="Role Type" />
+                </Label>
+                <Label fontWeight="normal">
+                  <RoleTypeLabel value={role.roleType} />
+                </Label>
+              </FieldValues>
+            )}
+            <DialogBody
+              menus={menusState}
+              setMenus={setMenus}
+              dialog={dialog}
+            />
+          </>
         )
       }}
     </FormDialog>

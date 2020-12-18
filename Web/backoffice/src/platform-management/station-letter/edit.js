@@ -181,7 +181,8 @@ const EditBody = ({ readonly = false, dialog }) => {
           let content = event.target.getContent()
           setFieldValue("content", content)
         })
-      }
+      },
+      resize: false
     }
     if (language) {
       options.language = language
@@ -476,6 +477,11 @@ const VerifyBody = ({ readonly = false, dialog }) => {
           name="remarks"
           component={TextareaField.Formik}
           disabled={readonly}
+          css={css`
+            & textarea {
+              resize: none;
+            }
+          `}
         />
       </FieldValues>
     </Stack>
