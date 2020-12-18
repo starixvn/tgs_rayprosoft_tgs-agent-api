@@ -5,12 +5,12 @@ import { Delete as DeleteMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
 import FormDialog from "../../form/Dialog"
+import { HookFormDialog } from "../../form/HookFormDialog"
 import { Trans, useTrans } from "../../i18n"
 import { useDeleteRole } from "./client"
 
 export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
-  let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([DeleteMenu])
   if (!isDisplay) {
@@ -28,27 +28,20 @@ export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
           name={name}
           onSubmitted={onSubmitted}
           dialog={dialog}
-          finalFocusRef={disclosureRef}
         />
       )}
     </>
   )
 }
 
-const DeleteDialog = ({
-  id,
-  name = "",
-  dialog,
-  onSubmitted,
-  finalFocusRef,
-  ...props
-}) => {
+const DeleteDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
   let [deleteId, setDelete] = useState()
-  let { result, error, isLoading } = useDeleteRole(deleteId)
+  let { result, error, isLoading, mutate } = useDeleteRole(deleteId)
 
   const submit = () => setDelete(id)
 
   const clearResult = () => {
+    mutate(undefined, false)
     setDelete(null)
   }
 
@@ -57,16 +50,18 @@ const DeleteDialog = ({
     en: "Delete Role"
   })
   return (
-    <FormDialog
+    <HookFormDialog
       onSubmit={submit}
       isLoading={isLoading}
       result={result}
       error={error}
       onCloseErrorAlert={clearResult}
-      onSubmitted={onSubmitted}
+      onSubmitted={() => {
+        mutate(undefined, false)
+        onSubmitted?.()
+      }}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
     >
       <Alert
         title={
@@ -85,6 +80,6 @@ const DeleteDialog = ({
           />
         </Text>
       </Alert>
-    </FormDialog>
+    </HookFormDialog>
   )
 }
