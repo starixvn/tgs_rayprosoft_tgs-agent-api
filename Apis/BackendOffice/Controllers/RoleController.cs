@@ -80,7 +80,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Name = role.Name,
                 DisplayName = role.DisplayName,
                 Description = role.Description,
-                Menus = await GetMenuSettingAsync(role.MenuSetting),
+                Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(role.MenuSetting),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
@@ -219,36 +219,5 @@ namespace TGS.Apis.BackendOffice.Controllers
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
-
-        private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting)
-        {
-            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
-            var menuSettingTemplate = GetMenuSettingByString(setting.Value);
-            var roleMenus = GetMenuSettingByString(menuSetting);
-
-            foreach (var menu in menuSettingTemplate)
-            {
-                var roleMenuLevel1 = SetMenuDisplay(menu, roleMenus);
-
-                foreach (var subMenu in menu.SubMenus)
-                {
-                    var roleMenuLevel2 = SetMenuDisplay(subMenu, roleMenuLevel1?.SubMenus);
-
-                    foreach (var permission in subMenu.SubMenus) SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
-                }
-            }
-
-            return menuSettingTemplate;
-        }
-
-        private MenuSetting[] GetMenuSettingByString(string setting) =>
-            _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
-
-        private MenuSetting SetMenuDisplay(MenuSetting menuTemplate, MenuSetting[] roleMenus)
-        {
-            var roleMenuLevel1 = roleMenus?.FirstOrDefault(p => p.Code == menuTemplate.Code);
-            menuTemplate.IsDisplay = roleMenuLevel1?.IsDisplay ?? false;
-            return roleMenuLevel1;
-        }
     }
 }
