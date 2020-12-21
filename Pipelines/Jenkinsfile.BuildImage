@@ -32,11 +32,14 @@ pipeline {
 				print 'Env:' + params.Env
 				script  {
 					def arr = params['Components'].split(",") 
-					for (i in arr) {
-						println "now got ${i}"
-						def data = i.split("::")
-						sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':' + params.Env+ ' .'
-						sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':' + params.Env
+					
+					if (arr.size()) > 0 {
+						for (i in arr) {
+							println "now got ${i}"
+							def data = i.split("::")
+							sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':' + params.Env+ ' .'
+							sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':' + params.Env
+						}
 					}
 				}
 			}
