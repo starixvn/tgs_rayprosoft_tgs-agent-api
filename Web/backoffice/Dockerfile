@@ -3,13 +3,13 @@ FROM node:14.15.1-stretch-slim AS build
 WORKDIR /src
 
 # Copy package.json and package-lock.json
-COPY ./package* ./
+COPY ./Web/backoffice/package* ./
 
 # Install packages
 RUN npm install
 
 # Copy source code
-COPY . .
+COPY ./Web/backoffice/ .
 
 # TODO: RUN npm run test
 RUN npm run build
