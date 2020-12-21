@@ -42,20 +42,18 @@ pipeline {
 				}
 			}
 		}
-		/*
-			#stage('Deployment') {
-			#steps {
-			#	print 'Apis:' + params['Apis']
-			#	script  {
-			#		sh 'cd /code/environment/' + params.Env
-			#		def arr = params['Apis'].split(",")
-			#		for (api in arr) {
-			#			sh 'kubectl apply -f ' + api + '.yml --record'
-			#		}
-			#	}
-			#}
-		#}
 		
-		*/
+		stage('Deployment') {
+			steps {
+				print 'Apis:' + params['Apis']
+				script  {
+					sh 'cd /code/environment/' + params.Env
+					def arr = params['Apis'].split(",")
+					for (api in arr) {
+						sh 'kubectl apply -f ' + api + '.yml --record'
+					}
+				}
+			}
+		}
     }
 }
