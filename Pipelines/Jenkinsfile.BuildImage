@@ -1,16 +1,22 @@
 pipeline {
-    agent { label 'master' }
+    agent any
 	environment {
         registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system"
         registryCredential = 'gitlab-personal-access-token'
         dockerImage = ''
     }
-
+	
 	stages {
 	    stage('docker login') {
 			steps {
 				sh  "sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r"  
 				echo "dotcover tgs.sln"
+			}
+		}
+		
+		stage('Hello') {
+			 steps {
+				print params['Components']
 			}
 		}
 		
