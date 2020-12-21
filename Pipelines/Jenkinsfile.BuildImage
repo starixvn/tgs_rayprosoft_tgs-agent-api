@@ -32,30 +32,30 @@ pipeline {
 				print 'Env:' + params.Env
 				script  {
 					def arr = params['Components'].split(",")
+					if 
 					for (i in arr) {
 						println "now got ${i}"
 						def data = i.split("::")
 						sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':' + params.Env+ ' .'
 						sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':' + params.Env
+					}
+				}
+			}
+		}
+		/*
+		stage('Deployment') {
+			 steps {
+				print 'Apis:' + params['Apis']
+				script  {
+					sh 'cd /code/environment/' + params.Env
+					def arr = params['Apis'].split(",")
+					for (api in arr) {
+						sh 'kubectl apply -f ' + api + '.yml --record'
 					}
 				}
 			}
 		}
 		
-		stage('Deployment') {
-			 steps {
-				print 'Apis:' + params['Apis']
-				script  {
-					sh 'cd /code/environment'
-					def arr = params['Apis'].split(",")
-					for (i in arr) {
-						println "now got ${i}"
-						def data = i.split("::")
-						sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':' + params.Env+ ' .'
-						sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':' + params.Env
-					}
-				}
-			}
-		}
+		*/
     }
 }
