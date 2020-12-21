@@ -9,7 +9,9 @@ import { CopyButton } from "./copy"
 import { DeleteButton } from "./delete"
 import {
   useIsDisplayMenuByRoute,
-  useHasSubMenuByRoute
+  useHasSubMenuByRoute,
+  useUserRoleType,
+  useUserRoleId
 } from "../../user/context"
 import { Code } from "./menu"
 import { useRoleList } from "./client"
@@ -37,7 +39,8 @@ const AsyncContent = () => {
   })
   let { pageIndex, pageSize, name } = state
   let { data, isLoading, mutate } = useRoleList(toApiParams(state))
-
+  let userRoleId = useUserRoleId()
+  let items = data?.items.filter(({ id }) => id != userRoleId)
   const fetchTable = mutate
   let columns = useTableColumns({ fetchTable })
   return (
@@ -65,7 +68,7 @@ const AsyncContent = () => {
       <Table
         controlledState={state}
         columns={columns}
-        data={data?.items}
+        data={items}
         pageCount={pageCount(pageSize, data?.totalCount)}
         setPageIndex={setPageIndex}
         setSortOrder={setSortOrder}

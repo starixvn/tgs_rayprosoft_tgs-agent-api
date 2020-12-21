@@ -266,6 +266,9 @@ const EditBody = ({ readonly = false }) => {
           & .bb-Textarea {
             height: ${textareaHeight};
           }
+          & textarea {
+            resize: none;
+          }
         `}
       />
     </FieldValues>
@@ -387,6 +390,11 @@ const VerifyBody = ({ readonly = false }) => {
           name="remarks"
           component={TextareaField.Formik}
           disabled={readonly}
+          css={css`
+            & textarea {
+              resize: none;
+            }
+          `}
         />
       </FieldValues>
     </Stack>

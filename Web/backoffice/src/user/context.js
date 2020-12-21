@@ -78,6 +78,31 @@ export const useUsername = () => {
   return state?.userInfo?.username ?? ""
 }
 
+export const useUserRoleType = () => {
+  let { state = {} } = useContext(Store)
+  return state?.userInfo?.roleType ?? ""
+}
+
+export const useUserRoleId = () => {
+  let { state = {} } = useContext(Store)
+  return state?.userInfo?.roleId ?? ""
+}
+
+export const useUserResellerId = () => {
+  let { state = {} } = useContext(Store)
+  return state?.userInfo?.resellerId ?? ""
+}
+
+export const useUserLicenseeId = () => {
+  let { state = {} } = useContext(Store)
+  return state?.userInfo?.licenseeId ?? ""
+}
+
+export const useUserBrandId = () => {
+  let { state = {} } = useContext(Store)
+  return state?.userInfo?.brandId ?? ""
+}
+
 export const useMenuByRoute = (extCodes = []) => {
   let { path = "" } = useRouteMatch()
   let [_, ...codes] = path.split("/")
