@@ -33,7 +33,7 @@ pipeline {
 				script  {
 					def arr = params['Components'].split(",") 
 					
-					if (arr.size()) > 0 {
+					if (arr.size() > 0) {
 						for (i in arr) {
 							println "now got ${i}"
 							def data = i.split("::")
