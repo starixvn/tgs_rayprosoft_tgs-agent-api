@@ -33,13 +33,11 @@ pipeline {
 				script  {
 					def arr = params['Components'].split(",") 
 					
-					if (arr.size() > 0) {
-						for (i in arr) {
-							println "now got ${i}"
-							def data = i.split("::")
-							sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':' + params.Env+ ' .'
-							sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':' + params.Env
-						}
+					for (i = 0;i < arr.length; i++) {
+						println "now got ${i}"
+						def data = arr[i].split("::")
+						sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':' + params.Env+ ' .'
+						sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':' + params.Env
 					}
 				}
 			}
