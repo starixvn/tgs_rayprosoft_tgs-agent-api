@@ -18,7 +18,7 @@ pipeline {
 			 steps {
 				print params['Components']
 				script  {
-					def arr = params['Components'].split("::")
+					def arr = params['Components'].split(",")
 					for (i in arr) {
 					  println "now got ${i}"
 					}
