@@ -14,19 +14,7 @@ pipeline {
 			}
 		}
 		
-		stage('Hello') {
-			 steps {
-				print params['Components']
-				script  {
-					def arr = params['Components'].split(",")
-					for (i in arr) {
-					  println "now got ${i}"
-					}
-				}
-			}
-		}
-		
-        stage('Checkout SCM') {
+		stage('Checkout SCM') {
           steps {
             checkout([
               $class: 'GitSCM',
@@ -38,14 +26,19 @@ pipeline {
              ])
            }
         }
-		
 		stage('Building image') {
-		  steps {
-			script {
-			   sh 'sudo docker build -f Apis/BackendOffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev .'
-			   sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:dev'
+			 steps {
+				print params['Components']
+				script  {
+					def arr = params['Components'].split(",")
+					for (i in arr) {
+						println "now got ${i}"
+						def data = ${i}.split("::")
+						sh 'sudo docker build -f ' + data[0] + ' -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1]+ ':dev .'
+						sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/' + data[1] + ':dev'
+					}
+				}
 			}
-		  }
 		}
     }
 }
