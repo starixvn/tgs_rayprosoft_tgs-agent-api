@@ -32,7 +32,7 @@ pipeline {
 				print 'Env:' + params.Env
 				script  {
 					def arr = params['Components'].split(",") 
-					
+					print 'arr.length : ' + arr.length
 					for (i = 0;i < arr.length; i++) {
 						println "now got ${i}"
 						def data = arr[i].split("::")
