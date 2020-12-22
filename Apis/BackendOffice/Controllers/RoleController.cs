@@ -42,6 +42,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
         {
             return _roleQueries.GetQueries()
+                .Where(request.IsAdmin, x => x.IsAdmin == request.IsAdmin)
                 .Where(ResellerId != null, r => r.ResellerId == ResellerId)
                 .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
                 .Where(BrandId != null, l => l.BrandId == BrandId)

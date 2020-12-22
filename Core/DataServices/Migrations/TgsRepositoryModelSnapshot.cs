@@ -1683,6 +1683,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
 

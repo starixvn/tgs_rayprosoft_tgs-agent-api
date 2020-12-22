@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201215060148_Initial")]
+    [Migration("20201222060348_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1684,6 +1684,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("DisplayName")
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
 
                     b.Property<Guid?>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
