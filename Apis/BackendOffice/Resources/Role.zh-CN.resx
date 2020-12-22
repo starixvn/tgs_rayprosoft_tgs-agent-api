@@ -123,4 +123,19 @@
   <data name="NotFound" xml:space="preserve">
     <value>找不到該權限</value>
   </data>
+  <data name="BrandRootExisted" xml:space="preserve">
+    <value>品牌管理员角色已存在</value>
+  </data>
+  <data name="LicenseeRootExisted" xml:space="preserve">
+    <value>营运商管理员角色已存在</value>
+  </data>
+  <data name="ResellerRootExisted" xml:space="preserve">
+    <value>总公司管理员角色已存在</value>
+  </data>
+  <data name="RootExixted" xml:space="preserve">
+    <value>管理员角色已存在</value>
+  </data>
+  <data name="CannotCopyRootRole" xml:space="preserve">
+    <value>无法复制根角色</value>
+  </data>
 </root>

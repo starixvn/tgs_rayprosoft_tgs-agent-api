@@ -5,7 +5,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
     public class UpdateRoleRequest
     {
         public string Name { get; set; }
-        public bool IsAdmin { get; set; }
         public MenuSetting[] Menus { get; set; }
     }
 }

@@ -61,11 +61,38 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Brand root role is existed..
+        /// </summary>
+        public static string BrandRootExisted {
+            get {
+                return ResourceManager.GetString("BrandRootExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not copy root role..
+        /// </summary>
+        public static string CannotCopyRootRole {
+            get {
+                return ResourceManager.GetString("CannotCopyRootRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The role cannot be deleted owing to user used already..
         /// </summary>
         public static string CannotDeleteRole {
             get {
                 return ResourceManager.GetString("CannotDeleteRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Licensee root role is existed..
+        /// </summary>
+        public static string LicenseeRootExisted {
+            get {
+                return ResourceManager.GetString("LicenseeRootExisted", resourceCulture);
             }
         }
         
@@ -111,6 +138,24 @@ namespace TGS.Apis.BackendOffice.Resources {
         public static string NotFound {
             get {
                 return ResourceManager.GetString("NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reseller root role is existed..
+        /// </summary>
+        public static string ResellerRootExisted {
+            get {
+                return ResourceManager.GetString("ResellerRootExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admin root role is existed..
+        /// </summary>
+        public static string RootExixted {
+            get {
+                return ResourceManager.GetString("RootExixted", resourceCulture);
             }
         }
     }

@@ -10,5 +10,6 @@ namespace TGS.Core.DataServices.Base.Interfaces
         IQueryable<T> GetQueries();
         Task<T> GetSingleAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>> preQuery = null);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+        Task<int> GetCountAsync(Expression<Func<T, bool>> predicate);
     }
 }
