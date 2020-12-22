@@ -13,7 +13,9 @@ import { CancelText, SubmitText } from "../button/ActionButtons"
 import AlertDialog from "../dialog/Alert"
 
 export const HookFormDialog = ({
+  defaultValues,
   onSubmit,
+  onClickSubmit,
   isLoading,
   result,
   error,
@@ -25,11 +27,12 @@ export const HookFormDialog = ({
   showActionButtons = true,
   cancelText = <CancelText />,
   submitText = <SubmitText />,
+  addonButtons,
   actionButtonsProps = {},
   formMethods,
   ...props
 }) => {
-  let methods = useForm()
+  let methods = useForm({ defaultValues })
   formMethods = formMethods ?? methods
 
   useEffect(() => {
@@ -53,9 +56,14 @@ export const HookFormDialog = ({
         showActionButtons={showActionButtons}
         actionButtonsProps={{
           isLoading: isLoading,
+          onClickSubmit,
           onClickCancel: formMethods.reset,
           cancelText,
           submitText,
+          addonButtons:
+            typeof addonButtons === "function"
+              ? addonButtons(formMethods)
+              : addonButtons,
           ...actionButtonsProps
         }}
         hideOnClickOutside={hideOnClickOutside}

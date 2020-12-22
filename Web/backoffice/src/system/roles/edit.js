@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Spinner,
   Stack,
@@ -44,12 +43,8 @@ import Disclosure from "../../dialog/Disclosure"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
-import InputField from "../../input/Field"
 import { Modal, useModalState } from "../../dialog/Modal"
-import FormDialog from "../../form/Dialog"
 import cloneDeep from "clone-deep"
-import { useResellerList } from "../../merchant/resellers/client"
-import { useLicenseeList } from "../../merchant/licensees/client"
 import {
   RoleTypeSelect,
   RoleTypes,
@@ -63,6 +58,7 @@ import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { HookFormDialog } from "../../form/HookFormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
+import { HookFormInputField } from "../../input/InputField"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -80,65 +76,6 @@ export const AddButton = ({ onSubmitted, ...props }) => {
         <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
       )}
     </>
-  )
-}
-
-const useRequiredMessage = () =>
-  useTrans({
-    zh: "必填栏",
-    en: "Required field"
-  })
-
-export const HookFormInputField = ({
-  name,
-  register,
-  inputRef,
-  validationText,
-  errors,
-  ...props
-}) => {
-  let formContext = useFormContext()
-  register = register ?? formContext.register
-
-  let requiredErrorMsg = useRequiredMessage()
-  if (!inputRef) {
-    const validate = (value) => {
-      if (
-        props.required &&
-        (value === undefined || value === null || value === "")
-      ) {
-        return requiredErrorMsg
-      }
-
-      return props?.validate?.(value)
-    }
-
-    inputRef = register({
-      /*
-      required: props.required,
-      min: props.min,
-      max: props.max,
-      minLength: props.minLength,
-      maxLength: props.maxLength,
-      validate: props.validate
-      */
-      validate
-    })
-  }
-
-  errors = errors ?? formContext.errors
-  let error = errors[name]
-  let state = error && "danger"
-  let errorMessage =
-    typeof validationText === "string" ? validationText : error?.message
-  return (
-    <_InputField
-      name={name}
-      inputRef={inputRef}
-      state={state}
-      validationText={errorMessage}
-      {...props}
-    />
   )
 }
 
