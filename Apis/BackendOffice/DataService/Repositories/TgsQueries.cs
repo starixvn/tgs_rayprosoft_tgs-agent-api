@@ -17,10 +17,8 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             _repository = repository;
         }
 
-        Task<bool> ITgsQueries<T>.ExistsAsync(Expression<Func<T, bool>> predicate)
-        {
-            return _repository.Set<T>().AnyAsync(predicate);
-        }
+        Task<bool> ITgsQueries<T>.ExistsAsync(Expression<Func<T, bool>> predicate) =>
+            _repository.Set<T>().AnyAsync(predicate);
 
         Task<T> ITgsQueries<T>.GetSingleAsync(Expression<Func<T, bool>> predicate,
             Func<IQueryable<T>, IQueryable<T>> preQuery)
@@ -29,9 +27,9 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             return preQuery(_repository.Set<T>()).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<T> ITgsQueries<T>.GetQueries()
-        {
-            return _repository.Set<T>();
-        }
+        IQueryable<T> ITgsQueries<T>.GetQueries() => _repository.Set<T>();
+
+        Task<int> ITgsQueries<T>.GetCountAsync(Expression<Func<T, bool>> predicate) =>
+            _repository.Set<T>().CountAsync(predicate);
     }
 }

@@ -11,6 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
         public string Name { get; set; }
         public string DisplayName { get; set; }
         public string Description { get; set; }
+        public bool IsRoot { get; set; }
         public MenuSetting[] Menus { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }

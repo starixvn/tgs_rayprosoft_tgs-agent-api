@@ -135,4 +135,19 @@
   <data name="NotFound" xml:space="preserve">
     <value>Role not found.</value>
   </data>
+  <data name="BrandRootExisted" xml:space="preserve">
+    <value>Brand root role is existed.</value>
+  </data>
+  <data name="LicenseeRootExisted" xml:space="preserve">
+    <value>Licensee root role is existed.</value>
+  </data>
+  <data name="ResellerRootExisted" xml:space="preserve">
+    <value>Reseller root role is existed.</value>
+  </data>
+  <data name="RootExixted" xml:space="preserve">
+    <value>Admin root role is existed.</value>
+  </data>
+  <data name="CannotCopyRootRole" xml:space="preserve">
+    <value>Can not copy root role.</value>
+  </data>
 </root>
