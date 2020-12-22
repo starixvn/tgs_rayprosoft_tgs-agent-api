@@ -47,7 +47,7 @@ export const HookFormDateInput = ({
           />
         )
       }}
-    ></Controller>
+    />
   )
 }
 

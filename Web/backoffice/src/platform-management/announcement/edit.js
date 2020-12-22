@@ -20,6 +20,7 @@ import {
 } from "./menu"
 import {
   useIsDisplayMenuByRoute,
+  useUserBrandId,
   useUserLicenseeId,
   useUserResellerId
 } from "../../user/context"
@@ -62,6 +63,8 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   let resellerId = useUserResellerId()
   let licenseeId = useUserLicenseeId()
+  let brandId = useUserBrandId()
+  console.warn("TODO: select brand if brandId is nil")
 
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useAddAnnouncement(data)
