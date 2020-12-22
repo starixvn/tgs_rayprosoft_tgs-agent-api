@@ -1,5 +1,6 @@
 pipeline {
-    agent { label 'kubepod'}
+    //agent { label 'kubepod'}
+	agent any
 	environment {
         registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system"
         registryCredential = 'gitlab-personal-access-token'
