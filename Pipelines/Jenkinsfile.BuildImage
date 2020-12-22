@@ -37,8 +37,8 @@ pipeline {
 					for (i = 0;i < arr.length; i++) {
 						println "now got ${i}"
 						def data = arr[i].split("::")
-						sh 'sudo docker build -f ${data[0]} -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env} .'
-						sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env}'
+						sh "sudo docker build -f ${data[0]} -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env} ."
+						sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env}"
 					}
 				}
 			}
@@ -53,7 +53,7 @@ pipeline {
 					for (api in arr) {
 					
 						withKubeConfig([credentialsId: 'k8s-kube-config2', serverUrl: 'https://127.0.0.1:35647']) {
-							sh 'kubectl apply -f ${api}.yml --record'
+							sh "kubectl apply -f ${api}.yml --record"
 						}
 	
 						//kubernetesDeploy(configs: "${api}.yml", kubeconfigId:"k8s-kube-config2")
