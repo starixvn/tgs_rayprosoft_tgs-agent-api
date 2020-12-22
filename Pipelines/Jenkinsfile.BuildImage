@@ -27,22 +27,6 @@ pipeline {
 				])
 			}
         }
-		//stage('Building image') {
-		//	steps {
-		//		print 'Components:' + params['Components']
-		//		print 'Env:' + params.Env
-		//		script  {
-		//			def arr = params['Components'].split(",") 
-		//			print 'arr.length : ' + arr.length
-		//			for (i = 0;i < arr.length; i++) {
-		//				println "now got ${i}"
-		//				def data = arr[i].split("::")
-		//				sh "sudo docker build -f ${data[0]} -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env} ."
-		//				sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env}"
-		//			}
-		//		}
-		//	}
-		//}
 		
 		stage('Deployment') {
 			steps {
