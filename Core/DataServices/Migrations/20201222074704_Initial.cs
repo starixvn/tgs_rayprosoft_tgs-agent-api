@@ -225,7 +225,7 @@ namespace TGS.Core.DataServices.Migrations
                     ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsAdmin = table.Column<bool>(type: "bit", nullable: false),
+                    IsRoot = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(50)", nullable: true),
                     MenuSetting = table.Column<string>(type: "nvarchar(4000)", nullable: false),
