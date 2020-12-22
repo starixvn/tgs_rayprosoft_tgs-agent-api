@@ -15,11 +15,6 @@
     "build:docker:dev": "cross-var docker build . -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH",
     "push:docker:dev": "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:$npm_package_version-$GIT_COMMIT_HASH"
   },
-  "husky": {
-    "hooks": {
-      "pre-push": "npm-run-all tag:docker:dev"
-    }
-  },
   "dependencies": {
     "react": "^16.14.0",
     "react-dom": "^16.14.0"

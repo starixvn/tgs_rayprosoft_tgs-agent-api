@@ -26,15 +26,17 @@ export const HookFormDialog = ({
   cancelText = <CancelText />,
   submitText = <SubmitText />,
   actionButtonsProps = {},
+  formMethods,
   ...props
 }) => {
-  const methods = useForm()
+  let methods = useForm()
+  formMethods = formMethods ?? methods
 
   useEffect(() => {
     if (result && !error) {
       onSubmitted?.()
       dialog.hide()
-      methods.reset()
+      formMethods.reset()
     }
   }, [result])
 
@@ -42,14 +44,16 @@ export const HookFormDialog = ({
     <>
       <Dialog.Modal
         wrap={(children) => (
-          <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)}>{children}</form>
+          <FormProvider {...formMethods}>
+            <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+              {children}
+            </form>
           </FormProvider>
         )}
         showActionButtons={showActionButtons}
         actionButtonsProps={{
           isLoading: isLoading,
-          onClickCancel: methods.reset,
+          onClickCancel: formMethods.reset,
           cancelText,
           submitText,
           ...actionButtonsProps

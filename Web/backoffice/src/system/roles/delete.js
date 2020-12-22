@@ -38,11 +38,13 @@ const DeleteDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
   let [deleteId, setDelete] = useState()
   let { result, error, isLoading, mutate } = useDeleteRole(deleteId)
 
-  const submit = () => setDelete(id)
+  const submit = () => {
+    setDelete(id)
+  }
 
   const clearResult = () => {
     mutate(undefined, false)
-    setDelete(null)
+    setDelete(undefined)
   }
 
   let title = useTrans({

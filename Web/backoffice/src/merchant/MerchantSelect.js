@@ -12,9 +12,10 @@ import {
   Checkbox,
   FieldStack,
   FieldWrapper,
+  Select,
   SelectField,
   Table,
-  Select,
+  SwitchField,
   Group,
   Set
 } from "bumbag"
@@ -25,6 +26,7 @@ import { useResellerList } from "./resellers/client"
 import { useLicenseeList } from "./licensees/client"
 import { useBrandList } from "./brands/client"
 import { useTrans } from "../i18n"
+import { useFormContext } from "react-hook-form"
 
 const isActive = (merchant, start, end) => {
   const order = [Reseller, Licensee, Brand]
@@ -59,22 +61,26 @@ const useBrandPlaceholder = () =>
     en: "Select Brand"
   })
 
-//TODO: required validation?
 export const MerchantIdSelect = ({
   start = Reseller,
   end = Brand,
-  resellerIdName = "resellerId",
+
   resellerId: initialResellerId = "",
-  licenseeIdName = "licenseeId",
+  resellerIdName = "resellerId",
+
   licenseeId: initialLicenseeId = "",
-  brandIdName = "brandId",
+  licenseeIdName = "licenseeId",
+
   brandId: initialBrandId = "",
-  range = [],
-  onChange,
+  brandIdName = "brandId",
+
   ...props
 }) => {
+  let { register, setValue, getValues, errors, watch } = useFormContext()
+
   let isResellerActive = isActive(Reseller, start, end)
-  let [resellerId, setResellerId] = useState(initialResellerId)
+  let resellerId = watch(resellerIdName)
+  let resellerError = errors[resellerIdName]
   let {
     data: resellerData,
     isLoading: isResellerDataLoading
@@ -86,7 +92,8 @@ export const MerchantIdSelect = ({
     })) ?? []
 
   let isLicenseeActive = isActive(Licensee, start, end)
-  let [licenseeId, setLicenseeId] = useState(initialLicenseeId)
+  let licenseeId = watch(licenseeIdName)
+  let licenseeError = errors[licenseeIdName]
   let {
     data: licenseeData,
     isLoading: isLicenseeDataLoading
@@ -98,7 +105,8 @@ export const MerchantIdSelect = ({
     })) ?? []
 
   let isBrandActive = isActive(Brand, start, end)
-  let [brandId, setBrandId] = useState(initialBrandId)
+  let brandId = watch(brandIdName)
+  let brandError = errors[brandIdName]
   let { data: brandData, isLoading: isBrandDataLoading } = useBrandList(
     isBrandActive ? { showAll: true } : undefined
   )
@@ -108,14 +116,6 @@ export const MerchantIdSelect = ({
       value: brand.id
     })) ?? []
 
-  useEffect(() => {
-    onChange?.({
-      resellerId,
-      licenseeId,
-      brandId
-    })
-  }, [resellerId, licenseeId, brandId])
-
   let resellerPlaceholder = useResellerPlaceholder()
   let licenseePlaceholder = useLicenseePlaceholder()
   let brandPlaceHolder = useBrandPlaceholder()
@@ -124,46 +124,43 @@ export const MerchantIdSelect = ({
       {isResellerActive && (
         <Select
           name={resellerIdName}
+          required
+          selectRef={register({ required: true })}
+          state={resellerError && "danger"}
           isLoading={isResellerDataLoading}
-          value={resellerId}
           options={resellerOptions}
-          onChange={(event) => {
-            let value = normalize(event.target.value)
-            setResellerId(value)
-
-            //reset
-            setLicenseeId(undefined)
-            setBrandId(undefined)
-          }}
+          defaultValue={resellerId}
           placeholder={resellerPlaceholder}
+          onChange={(event) => {
+            setValue(licenseeIdName, undefined)
+            setValue(brandIdName, undefined)
+          }}
         />
       )}
       {isLicenseeActive && (
         <Select
           name={licenseeIdName}
+          required
+          selectRef={register({ required: true })}
+          state={licenseeError && "danger"}
           isLoading={isLicenseeDataLoading}
-          value={licenseeId}
           options={licenseeOptions}
-          onChange={(event) => {
-            let value = normalize(event.target.value)
-            setLicenseeId(value)
-
-            //reset
-            setBrandId(undefined)
-          }}
+          defaultValue={licenseeId}
           placeholder={licenseePlaceholder}
+          onChange={(event) => {
+            setValue(brandIdName, undefined)
+          }}
         />
       )}
       {isBrandActive && (
         <Select
           name={brandIdName}
+          required
+          selectRef={register({ required: true })}
+          state={brandError && "danger"}
           isLoading={isBrandDataLoading}
-          value={brandId}
           options={brandOptions}
-          onChange={(event) => {
-            let value = normalize(event.target.value)
-            setBrandId(value)
-          }}
+          defaultValue={brandId}
           placeholder={brandPlaceHolder}
         />
       )}
