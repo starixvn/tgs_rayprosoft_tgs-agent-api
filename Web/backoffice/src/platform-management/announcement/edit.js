@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Stack,
   Box,
@@ -19,9 +18,12 @@ import {
   Verify as VerifyMenu,
   View as ViewMenu
 } from "./menu"
-import { useIsDisplayMenuByRoute } from "../../user/context"
+import {
+  useIsDisplayMenuByRoute,
+  useUserLicenseeId,
+  useUserResellerId
+} from "../../user/context"
 import { FieldValues } from "../../layout/Grid"
-import FormDialog from "../../form/Dialog"
 import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
 import {
@@ -30,10 +32,12 @@ import {
   useVerifyAnnouncement
 } from "./client"
 import { Trans, useTrans } from "../../i18n"
-import { Field as InputField } from "../../input/Field"
-import DateField from "../../date/Field"
 import parseDate from "date-fns/fp/parseISO"
 import { CancelText } from "../../button/ActionButtons"
+import HookFormDialog from "../../form/HookFormDialog"
+import HookFormInputField from "../../input/InputField"
+import HookFormDateInput from "../../date/DateInput"
+import { useForm, useFormContext } from "react-hook-form"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -55,9 +59,20 @@ export const AddButton = ({ onSubmitted, ...props }) => {
   )
 }
 
-const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
+const AddDialog = ({ onSubmitted, dialog, ...props }) => {
+  let resellerId = useUserResellerId()
+  let licenseeId = useUserLicenseeId()
+
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useAddAnnouncement(data)
+
+  const onSubmit = ({ form, to, ...formData }) => {
+    setSubmit({
+      form: form ? form.toISOString() : form,
+      to: to ? to.toISOString() : to,
+      ...formData
+    })
+  }
 
   const clearResult = () => {
     setSubmit(undefined)
@@ -69,14 +84,14 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   })
 
   return (
-    <FormDialog
-      initialValues={{
+    <HookFormDialog
+      defaultValues={{
         subject: "",
         from: null,
         to: null,
         content: ""
       }}
-      onSubmit={setSubmit}
+      onSubmit={onSubmit}
       isLoading={isLoading}
       result={result}
       error={error}
@@ -84,12 +99,13 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
       placement="top"
       css={DialogCss}
     >
-      <EditBody />
-    </FormDialog>
+      <>
+        <EditBody />
+      </>
+    </HookFormDialog>
   )
 }
 
@@ -131,7 +147,7 @@ export const ViewButton = ({ record, ...props }) => {
   )
 }
 
-const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
+const ViewDialog = ({ record, dialog, ...props }) => {
   let from = parseDate(record.from)
   let to = parseDate(record.to)
 
@@ -139,11 +155,11 @@ const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
     zh: "查看公告",
     en: "View Announcement"
   })
+
   return (
-    <FormDialog
-      initialValues={{
+    <HookFormDialog
+      defaultValues={{
         ...record,
-        remarks: record.remarks ?? "",
         from,
         to
       }}
@@ -161,7 +177,7 @@ const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
       }
     >
       <VerifyBody readonly />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
@@ -176,8 +192,16 @@ const EditDialog = ({
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useEditAnnouncement(id, data)
 
+  const onSubmit = ({ from, to, ...formData }) => {
+    setSubmit({
+      from: from?.toISOString(),
+      to: to?.toISOString(),
+      ...formData
+    })
+  }
+
   const clearResult = () => {
-    setSubmit(null)
+    setSubmit(undefined)
   }
 
   let title = useTrans({
@@ -185,16 +209,14 @@ const EditDialog = ({
     en: "Edit Announcement"
   })
 
-  let from = parseDate(record.from)
-  let to = parseDate(record.to)
   return (
-    <FormDialog
-      initialValues={{
+    <HookFormDialog
+      defaultValues={{
         ...record,
-        from,
-        to
+        from: parseDate(record.from),
+        to: parseDate(record.to)
       }}
-      onSubmit={setSubmit}
+      onSubmit={onSubmit}
       isLoading={isLoading}
       result={result}
       error={error}
@@ -207,14 +229,14 @@ const EditDialog = ({
       css={DialogCss}
     >
       <EditBody />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
-const EditBody = ({ readonly = false }) => {
-  let formContext = useFormikContext()
-  let minDate = readonly ? null : Reflect.get(formContext?.values, "from")
-  let maxDate = readonly ? null : Reflect.get(formContext?.values, "to")
+const EditBody = ({ readonly = false } = {}) => {
+  const { register, getValues } = useFormContext()
+  let minDate = readonly ? undefined : getValues("from")
+  let maxDate = readonly ? undefined : getValues("to")
 
   let required = !readonly
   let textareaHeight = readonly ? "15vh" : "30vh"
@@ -223,13 +245,17 @@ const EditBody = ({ readonly = false }) => {
       <Label name="subject" required={required}>
         <Trans zh="主题" en="Subject" />
       </Label>
-      <InputField name="subject" required={required} disabled={readonly} />
+      <HookFormInputField
+        name="subject"
+        required={required}
+        disabled={readonly}
+      />
 
       <Label name="from" required={required}>
         <Trans zh="开始时间" en="Start" />
       </Label>
       <Box>
-        <DateField
+        <HookFormDateInput
           name="from"
           maxDate={maxDate}
           required={required}
@@ -241,7 +267,7 @@ const EditBody = ({ readonly = false }) => {
         <Trans zh="结束时间" en="End" />
       </Label>
       <Box>
-        <DateField
+        <HookFormDateInput
           name="to"
           minDate={minDate}
           required={required}
@@ -252,9 +278,9 @@ const EditBody = ({ readonly = false }) => {
       <Label name="content" required={required}>
         <Trans zh="内容" en="Content" />
       </Label>
-      <Field
-        component={TextareaField.Formik}
+      <Textarea
         name="content"
+        textareaRef={register({ required })}
         required={required}
         disabled={readonly}
         height={textareaHeight}
@@ -315,6 +341,14 @@ const VerifyDialog = ({
   finalFocusRef,
   ...props
 }) => {
+  let defaultValues = {
+    ...record,
+    from: parseDate(record.from),
+    to: parseDate(record.to),
+    remarks: ""
+  }
+  let formMethods = useForm({ defaultValues })
+
   let [type, setType] = useState()
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useVerifyAnnouncement(
@@ -325,6 +359,13 @@ const VerifyDialog = ({
     data
   )
 
+  const onSubmit = ({ remarks }) => {
+    let data = {
+      remarks
+    }
+    setSubmit(data)
+  }
+
   const clearResult = () => {
     setSubmit(null)
   }
@@ -333,35 +374,26 @@ const VerifyDialog = ({
     zh: "审核公告",
     en: "Verify Announcement"
   })
-  let from = parseDate(record.from)
-  let to = parseDate(record.to)
+
   return (
-    <FormDialog
-      initialValues={{
-        ...record,
-        from,
-        to,
-        remarks: ""
-      }}
-      onSubmit={setSubmit}
-      clickSubmit={({ submitForm }) => (event) => {
+    <HookFormDialog
+      formMethods={formMethods}
+      onSubmit={onSubmit}
+      onClickSubmit={(event) => {
         setType("pass")
-        submitForm()
       }}
-      addonButtons={({ submitForm }) => {
-        return (
-          <Button
-            onClick={() => {
-              setType("reject")
-              submitForm()
-            }}
-            palette="danger"
-            variant="outlined"
-          >
-            <Trans zh="拒绝" en="Reject" />
-          </Button>
-        )
-      }}
+      addonButtons={
+        <Button
+          type="submit"
+          onClick={() => {
+            setType("reject")
+          }}
+          palette="danger"
+          variant="outlined"
+        >
+          <Trans zh="拒绝" en="Reject" />
+        </Button>
+      }
       isLoading={isLoading}
       result={result}
       error={error}
@@ -373,22 +405,24 @@ const VerifyDialog = ({
       dialog={dialog}
     >
       <VerifyBody />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
-const VerifyBody = ({ readonly = false }) => {
+const VerifyBody = ({ readonly = false } = {}) => {
+  let { register } = useFormContext()
   return (
     <Stack spacing="major-2">
       <EditBody readonly={true} />
-      <Box border="default" height="1px" width="100%"></Box>
+      <Box border="default" height="1px" width="100%" borderBottom="none"></Box>
+
       <FieldValues>
         <Label name="remarks">
           <Trans zh="备注" en="Remarks" />
         </Label>
-        <Field
+        <Textarea
           name="remarks"
-          component={TextareaField.Formik}
+          textareaRef={register}
           disabled={readonly}
           css={css`
             & textarea {

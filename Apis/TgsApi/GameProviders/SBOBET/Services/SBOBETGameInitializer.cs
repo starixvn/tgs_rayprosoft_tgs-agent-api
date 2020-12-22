@@ -90,8 +90,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 throw new InvalidOperationException($"No portfolio mapping is found: {gameType}");
             }
 
-            // TODO: update player bet limit before login
-
             var loginRequest = new LoginRequest
             {
                 CompanyKey = companyKey,

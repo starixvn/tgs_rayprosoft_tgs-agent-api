@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using NATS.Client.Rx.Ops;
-using TGS.Apis.FileService.DataService;
-using TGS.Apis.FileService.DataService.Model;
+using TGS.Apis.FileService.DataService.Services;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Nats.Model;
 
@@ -15,28 +14,22 @@ namespace TGS.Apis.FileService.Services
     public class NatsMessageHandler : INatsMessageHandler
     {
         private readonly INatsManager _natsManager;
-        private readonly IRepository<StationLetterFile> _repository;
+        private readonly IUploadService _service;
 
-        public NatsMessageHandler(INatsManager natsManager, IRepository<StationLetterFile> repository)
+        public NatsMessageHandler(INatsManager natsManager, IUploadService service)
         {
             _natsManager = natsManager;
-            _repository = repository;
+            _service = service;
         }
 
         Task INatsMessageHandler.SubscribeAsync()
         {
-            return Task.FromResult(_natsManager.SubscribeWithObserveAsync(nameof(ObjectFileEventModel)).Subscribe(x =>
-            {
-                var fileObject = _natsManager.Deserialize<ObjectFileEventModel>(x.Data);
-
-                var stationLetterFile = new StationLetterFile
+            return Task.FromResult(_natsManager.SubscribeWithObserveAsync(nameof(ObjectFileEventModel)).Subscribe(
+                x =>
                 {
-                    Id = fileObject.Id,
-                    Files = fileObject.FileNames
-                };
-
-                _repository.InsertAsync(stationLetterFile);
-            }));
+                    var fileObject = _natsManager.Deserialize<ObjectFileEventModel>(x.Data);
+                    _service.AddStationLetterFileAsync(fileObject);
+                }));
         }
     }
 }
