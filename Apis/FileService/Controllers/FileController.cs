@@ -26,5 +26,16 @@ namespace TGS.Apis.FileService.Controllers
                 Location = url
             };
         }
+
+        [HttpGet("{bucket}")]
+        public async Task<GetFileNamesResponse> GetFileNamesFromS3Async(string bucket)
+        {
+            var keys = await _uploadService.GetObjectsAsync(bucket);
+            return new GetFileNamesResponse
+            {
+                Valid = true,
+                Names = keys
+            };
+        }
     }
 }
