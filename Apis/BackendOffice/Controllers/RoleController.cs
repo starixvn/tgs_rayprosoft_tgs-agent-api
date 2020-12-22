@@ -85,7 +85,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 DisplayName = role.DisplayName,
                 Description = role.Description,
                 IsRoot = role.IsRoot,
-                Menus = await GetMenuSettingAsync(role.MenuSetting, role.RoleType),
+                Menus = GetMenuSettingByString(role.MenuSetting),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
@@ -226,7 +226,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetMenuResponse>(Resources.Role.MenuNotFound);
             }
 
-            var menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
+            var menus = GetMenuSettingByString(setting);
 
             return new GetMenuResponse
             {
@@ -254,19 +254,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
-
-        private async Task<MenuSetting[]> GetMenuSettingAsync(string menuSetting, RoleType type)
-        {
-            if (type != RoleType.Admin)
-            {
-                return GetMenuSettingByString(menuSetting);
-            }
-
-            var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
-            var menuSettingTemplate = GetMenuSettingByString(setting.Value);
-
-            return menuSettingTemplate;
-        }
 
         private MenuSetting[] GetMenuSettingByString(string setting) =>
             _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
