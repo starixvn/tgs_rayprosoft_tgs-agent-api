@@ -38,6 +38,8 @@ namespace TGS.Services.Operations.Extensions
 
             services.AddFactory<IGameActionQueries, GameActionQueries>();
             services.AddFactory<IRoundQueries, RoundQueries>();
+
+            services.AddFactory<IBetLimitQueries, BetLimitQueries>();
             
             #endregion
 
