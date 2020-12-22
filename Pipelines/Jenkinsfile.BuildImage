@@ -55,7 +55,7 @@ pipeline {
 							sh 'kubectl apply -f ${api}.yml --record'
 						}
 	
-						#kubernetesDeploy(configs: "${api}.yml", kubeconfigId:"k8s-kube-config2")
+						//kubernetesDeploy(configs: "${api}.yml", kubeconfigId:"k8s-kube-config2")
 					}
 				}
 			}
