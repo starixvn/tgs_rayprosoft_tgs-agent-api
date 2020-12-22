@@ -50,8 +50,12 @@ pipeline {
 					sh 'cd /code/environment/' + params.Env
 					def arr = params['Apis'].split(",")
 					for (api in arr) {
-						sh 'kubectl apply -f ${api}.yml --record'
-						kubernetesDeploy(configs: "${api}.yml", kubeconfigId:"k8s-kube-config2")
+					
+						withKubeConfig([credentialsId: 'k8s-kube-config2', serverUrl: 'https://127.0.0.1:35647']) {
+							sh 'kubectl apply -f ${api}.yml --record'
+						}
+	
+						#kubernetesDeploy(configs: "${api}.yml", kubeconfigId:"k8s-kube-config2")
 					}
 				}
 			}
