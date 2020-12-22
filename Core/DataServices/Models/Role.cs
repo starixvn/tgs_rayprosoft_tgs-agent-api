@@ -14,6 +14,8 @@ namespace TGS.Core.DataServices.Models
         public Guid? LicenseeId { get; set; }
         public Guid? BrandId { get; set; }
 
+        public bool IsAdmin { get; set; }
+
         public string Name { get; set; }
 
         public string DisplayName { get; set; }

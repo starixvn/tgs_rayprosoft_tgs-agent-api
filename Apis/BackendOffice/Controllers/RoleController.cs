@@ -52,6 +52,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Name = role.Name,
                     DisplayName = role.DisplayName,
                     Description = role.Description,
+                    IsAdmin = role.IsAdmin,
                     CreatedOn = role.CreatedOn,
                     UpdatedOn = role.UpdatedOn,
                     CreatedByUsername = role.CreatedByUsername,
@@ -80,6 +81,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Name = role.Name,
                 DisplayName = role.DisplayName,
                 Description = role.Description,
+                IsAdmin = role.IsAdmin,
                 Menus = await GetMenuSettingAsync(role.MenuSetting, role.RoleType),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
@@ -111,6 +113,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             role.Name = request.Name;
+            role.IsAdmin = request.IsAdmin;
             role.MenuSetting = _jsonSerializationProvider.SerializeToString(request.Menus);
             role.UpdatedByUsername = Username;
             role.UpdatedOn = DateTimeOffset.Now;
@@ -156,7 +159,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var newRole = CreateRole(request.Name, role.DisplayName, role.Description, role.ResellerId,
-                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting);
+                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting, role.IsAdmin);
 
             await _roleCommands.CreateAsync(newRole);
             return CreateValidResponse<MessageResponse>();
@@ -173,7 +176,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var role = CreateRole(request.Name, request.DisplayName, request.Description, request.ResellerId,
                 request.RoleType, request.LicenseeId, request.BrandId,
-                _jsonSerializationProvider.SerializeToString(request.Menus));
+                _jsonSerializationProvider.SerializeToString(request.Menus), request.IsAdmin);
 
             await _roleCommands.CreateAsync(role);
             return CreateValidResponse<MessageResponse>();
@@ -202,10 +205,11 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
-            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting) =>
+            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting, bool IsAdmin) =>
             new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                IsAdmin = IsAdmin,
                 Name = name,
                 Description = description ?? string.Empty,
                 DisplayName = displayName ?? string.Empty,
