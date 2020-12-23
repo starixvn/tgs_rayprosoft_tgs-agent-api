@@ -66,7 +66,6 @@ namespace TGS.Services.GameOperations
             await ValidatePlayerAsync(player, gameProviderId, gameProviderConfigurationId, data.PlatformType);
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
-            var lang = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, player.CultureCode);
             
             var brand = await _brandOperations.GetCachedBrandAsync(brandId);
 
@@ -74,7 +73,6 @@ namespace TGS.Services.GameOperations
             {
                 Balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false),
                 GameProviderCurrency = cur,
-                Language = lang,
                 Username = player.Username,
                 IsTestPlayer = player.IsTestPlayer,
                 BrandCode = brand.Code,

@@ -38,7 +38,7 @@ namespace TGS.Core.Infrastructures.WebApiServices
                     var statusCode = errorMapper.GetHttpStatusByException(exception);
                     var message = exception.GetMessageChain();
 
-                    log.LogError($"Catched globla error on :{context.Request.Host} with message: {message}", exception);
+                    log.LogError($"Caught global error on :{context.Request.Host} with message: {message}", exception);
 
                     context.Response.ContentType = "application/json";
                     context.Response.StatusCode = statusCode;

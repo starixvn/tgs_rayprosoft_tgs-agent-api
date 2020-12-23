@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.Models;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace TGS.Apis.TgsApi
 {

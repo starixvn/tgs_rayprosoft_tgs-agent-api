@@ -6,7 +6,8 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using TGS.Apis.OperatorApi.Models;
+using System.Threading.Tasks;
+using TGS.Apis.OperatorApi.Models.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
@@ -16,17 +17,16 @@ namespace TGS.Apis.OperatorApi.Services
 {
     public interface ICaptchaService
     {
-        CaptchaInfo Create(int charCount = 4, int width = 85, int height = 40);
+        Task<CaptchaInfo> CreateAsync(int charCount = 4, int width = 85, int height = 40);
 
-        void Verify(string answer, string captcha, int timeOut = 600);
+        Task VerifyAsync(string answer, string captcha, int timeOut = 600);
     }
 
     public sealed class CaptchaService : ICaptchaService
     {
-        private static IList<char> _characters;
-
         private const string ContentType = "image/jpeg";
-        private const string Secret = "TCAPTCHA";
+        private const string Secret = "XyfqwI9h";
+        private static IList<char> _characters;
 
         private static readonly IList<string> FontNames = new[]
         {
@@ -34,7 +34,7 @@ namespace TGS.Apis.OperatorApi.Services
         };
 
         // use thread safe dictionary to prevent the brute-force attack from bots
-        private static readonly ConcurrentDictionary<string, DateTime> Dic = new ConcurrentDictionary<string, DateTime>();
+        private static readonly ConcurrentDictionary<string, DateTime> Dic = new();
 
         private readonly ISymmetricCryptoProvider _cryptoProvider;
 
@@ -42,13 +42,14 @@ namespace TGS.Apis.OperatorApi.Services
         {
             _characters = new List<char>();
 
-            //去掉0、o、O
+            // remove 0、o、O
             for (var c = '0'; c <= '9'; c++)
             {
                 if (c == '0')
                 {
                     continue;
                 }
+
                 _characters.Add(c);
             }
 
@@ -58,6 +59,7 @@ namespace TGS.Apis.OperatorApi.Services
                 {
                     continue;
                 }
+
                 _characters.Add(c);
             }
 
@@ -67,13 +69,14 @@ namespace TGS.Apis.OperatorApi.Services
                 {
                     continue;
                 }
+
                 _characters.Add(c);
             }
 
             _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.DES);
         }
 
-        CaptchaInfo ICaptchaService.Create(int charCount, int width, int height)
+        async Task<CaptchaInfo> ICaptchaService.CreateAsync(int charCount, int width, int height)
         {
             var random = new Random();
             var chars = Enumerable.Range(0, charCount)
@@ -114,20 +117,20 @@ namespace TGS.Apis.OperatorApi.Services
                 x = x + width / charCount;
             }
 
-            using var memoryStream = new MemoryStream();
+            await using var memoryStream = new MemoryStream();
             bitmap.Save(memoryStream, ImageFormat.Jpeg);
 
-            var answer = GetAnswer(chars);
+            var answer = await GetAnswerAsync(chars);
 
-            return new CaptchaInfo
+            return new()
             {
                 Image = memoryStream.ToArray(),
-                Answer = answer,
+                Captcha = answer,
                 ContentType = ContentType
             };
         }
 
-        void ICaptchaService.Verify(string answer, string captcha, int timeout = 600)
+        async Task ICaptchaService.VerifyAsync(string answer, string captcha, int timeout)
         {
             if (answer.IsNullOrEmpty() || captcha.IsNullOrEmpty())
             {
@@ -152,7 +155,7 @@ namespace TGS.Apis.OperatorApi.Services
                 }
             }
 
-            var value = _cryptoProvider.DecryptString(captcha, Secret, Secret);
+            var value = await _cryptoProvider.DecryptStringAsync(captcha, Secret, Secret);
             var temp = value.Split('|');
             if (!DateTime.TryParse(temp[1], out var dateTime))
             {
@@ -173,16 +176,17 @@ namespace TGS.Apis.OperatorApi.Services
             }
         }
 
-        private string GetAnswer(char[] chars)
+        private Task<string> GetAnswerAsync(char[] chars)
         {
             var answer = chars.JoinAsString(string.Empty);
-            return _cryptoProvider.EncryptString($"{answer}|{DateTime.Now}", Secret, Secret);
+            return _cryptoProvider.EncryptStringAsync($"{answer}|{DateTime.Now}", Secret, Secret);
         }
 
         /// <summary>
         /// Draw disorder lines and points
         /// </summary>
-        private static void DrawDisorderLinesAndPoints(Random random, Bitmap bitmap, Graphics graphics, int lineCount, int pointCount)
+        private static void DrawDisorderLinesAndPoints(Random random, Bitmap bitmap, Graphics graphics, int lineCount,
+            int pointCount)
         {
             var colors = new[]
             {

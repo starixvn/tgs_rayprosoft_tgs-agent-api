@@ -14,11 +14,10 @@ BEGIN
     (
         SELECT 
             p.BrandId,
-	        p.Type,
+	        p.[Type],
 	        p.Username,
-	        p.Status,
+	        p.[Status],
 	        p.DefaultWalletId,
-	        p.CultureCode,
 	        p.BetLimitId,
 	        p.PlayerCode
         FROM dbo.[Players] p

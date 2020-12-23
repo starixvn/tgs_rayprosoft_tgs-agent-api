@@ -62,7 +62,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 throw new MissingTokenException(Resources.Player.MissingPlayerToken);
             }
 
-            var data = tokenProvider.Decrypt<PlayerTokenData>(sub);
+            var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
             context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, data);
 
             var playerCode = data.PlayerCode;
@@ -81,7 +81,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var payload = hashProvider.Hash($"{sub}:{jti}");
             var signature = $"{payload}:{secretKey}";
 
-            handler.ValidateToken(token, new TokenValidationParameters
+            handler.ValidateToken(token, new()
                 {
                     ValidateIssuer = true,
                     ValidIssuer = Consts.Site,

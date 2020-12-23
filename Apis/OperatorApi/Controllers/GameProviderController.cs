@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
-using TGS.Apis.OperatorApi.Models.Messages.GameProviders;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
@@ -27,12 +27,12 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class GameProviderController : ControllerBase
     {
-        private readonly IRedisCacheManager _cacheManager;
-        private readonly IJsonSerializationProvider _json;
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
         private readonly IBrandOperations _brandOperations;
+        private readonly IRedisCacheManager _cacheManager;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IJsonSerializationProvider _json;
         private readonly ILocalizationOperations _localizationOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<Status> _validStatus;
@@ -91,16 +91,16 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
+            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
             var cacheType = RedisCacheType.BrandGameProvidersWithConditions;
             var cacheKey = $"{brandId}";
             var field = $"{currencyCode}:{platformType}:{(int) playerType}:{culture}";
-           
+
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, field);
             if (value.HasValue)
             {
-                return new GetGameProvidersResponse
+                return new()
                 {
                     GameProviders = _json.DeserializeFromString<GetGameProvidersResponse.GameProviderModel[]>(value)
                 };
@@ -110,10 +110,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
             {
-                new (field, _json.SerializeToString(providers))
+                new(field, _json.SerializeToString(providers))
             }, TimeSpan.FromHours(12));
 
-            return new GetGameProvidersResponse
+            return new()
             {
                 GameProviders = providers
             };
@@ -157,7 +157,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Code = gameProvider.Code,
                     Name = _localizationOperations.Parse(store, key, GameProviderName, gameProvider.Name),
                     Description =
-                                _localizationOperations.Parse(store, key, GameProviderDescription, gameProvider.Description),
+                        _localizationOperations.Parse(store, key, GameProviderDescription, gameProvider.Description),
                     Status = gameProvider.Status
                 };
 

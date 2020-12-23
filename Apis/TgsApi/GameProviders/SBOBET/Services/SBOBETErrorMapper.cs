@@ -8,6 +8,7 @@ using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
+using static TGS.Apis.TgsApi.GameModels.SBOBET.Enums.GameApiError;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
@@ -17,30 +18,39 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
-                {typeof(PlayerDisabledException), GameApiError.UserBlocked},
-                {typeof(PlayerLoginExpiredException), GameApiError.PlayerNotLogin},
-                {typeof(PlayerNotFoundException), GameApiError.PlayerNotFound},
-                {typeof(ArgumentException), GameApiError.InvalidArguments},
-                {typeof(FormatException), GameApiError.IncorrectFormat},
-                {typeof(InvalidAmountException), GameApiError.InvalidAmount},
-                {typeof(InvalidOperationException), GameApiError.SystemError},
-                {typeof(InvalidStatusException), GameApiError.SystemError},
-                {typeof(InvalidGameActionException), GameApiError.InvalidGameAction},
-                {typeof(GameProviderUnderMaintenanceException), GameApiError.UnderMaintenance},
-                {typeof(GameUnderMaintenanceException), GameApiError.UnderMaintenance},
-                {typeof(BrandUnderMaintenanceException), GameApiError.UnderMaintenance},
-                {typeof(InvalidCredentialsException), GameApiError.InvalidCredentials}
+                {typeof(InvalidCredentialsException), InvalidCredentials},
+                {typeof(MissingTokenException), PlayerNotLogin},
+                {typeof(PlayerLoginExpiredException), PlayerNotLogin},
+
+                {typeof(PlayerNotFoundException), PlayerNotFound},
+                {typeof(PlayerDisabledException), UserBlocked},
+                {typeof(CountryRestrictedException), CountryRestricted},
+                {typeof(CurrencyNotMatchingException), CurrencyMismatch},
+                {typeof(PlayerHasInsufficientFundsException), InsufficientFunds},
+
+                {typeof(InvalidGameActionException), InvalidGameAction},
+                {typeof(InvalidAmountException), InvalidAmount},
+
+                {typeof(ArgumentException), InvalidArguments},
+                {typeof(ModelBindingException), InvalidArguments},
+                {typeof(FormatException), IncorrectFormat},
+                {typeof(BrandUnderMaintenanceException), UnderMaintenance},
+                {typeof(GameProviderUnderMaintenanceException), UnderMaintenance},
+                {typeof(GameUnderMaintenanceException), UnderMaintenance},
+                {typeof(InvalidStatusException), SystemError},
+
+                {typeof(InvalidOperationException), SystemError}
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
             ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    {Settled, GameApiError.BetAlreadySettled},
-                    {TransactionNotFound, GameApiError.BetNotExists},
-                    {TransactionBeingCancelledNotFound, GameApiError.BetNotExists},
-                    {TransactionBeingReferencedNotFound, GameApiError.BetNotExists},
-                    {RoundNotFound, GameApiError.BetNotExists}
+                    {Settled, BetAlreadySettled},
+                    {TransactionNotFound, BetNotExists},
+                    {TransactionBeingCancelledNotFound, BetNotExists},
+                    {TransactionBeingReferencedNotFound, BetNotExists},
+                    {RoundNotFound, BetNotExists}
                 };
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>
@@ -53,7 +63,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         {
             if (exception == null)
             {
-                return (int) GameApiError.Success;
+                return (int) Success;
             }
 
             if (exception is InvalidGameActionException e &&
@@ -63,12 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             }
 
             var type = exception.GetType();
-            if (!ApiErrorByException.TryGetValue(type, out error))
-            {
-                error = GameApiError.SystemError;
-            }
-
-            return (int) error;
+            return ApiErrorByException.TryGetValue(type, out error) ? (int) error : (int) SystemError;
         }
     }
 }

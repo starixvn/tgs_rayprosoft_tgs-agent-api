@@ -23,7 +23,9 @@
         GamesByPlatform,
         SubGames,
         UsernameToPlayerCode,
+        InvitationCodeToPlayerCode,
         Setting,
         Localization,
+        BrandDefaultBetLimit,
     }
 }

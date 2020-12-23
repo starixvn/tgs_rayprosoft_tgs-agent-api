@@ -254,8 +254,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 var invitationCode = Generator.RandomString(6);
 
                 return CreatePlayer(playerCode, p.Username, p.RealName, salt, password,
-                    vipId, p.Type, invitationCode, brandId: p.BrandId, currencyCode: p.CurrencyCode,
-                    cultureCode: p.CultureCode);
+                    vipId, p.Type, invitationCode, brandId: p.BrandId, currencyCode: p.CurrencyCode);
             }).ToArray();
 
             var randomPlayers = Enumerable.Range(1, 20)
@@ -290,7 +289,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private Player CreatePlayer(string playerCode, string username, string realName, byte[] salt,
             byte[] password, Guid vipId, PlayerType playerType, string invitationCode,
             string parentPlayerCode = null, string parentInvitationCode = null,
-            Guid? brandId = null, string currencyCode = "CNY", string cultureCode = "en-US")
+            Guid? brandId = null, string currencyCode = "CNY")
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
@@ -307,7 +306,6 @@ namespace TGS.Core.DataServices.DataInitializers
                 InvitationCode = invitationCode,
                 Password = password,
                 Salt = salt,
-                CultureCode = cultureCode,
                 DefaultWalletId = defaultWalletId,
                 DefaultWalletCurrencyCode = currencyCode,
                 Status = PlayerStatus.Enabled,
@@ -473,7 +471,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var relation = _repository.SportMarketTypes.ToArray();
 
             var players = from p in _players.Where(p => p.Type == PlayerType.TestPlayer)
-                group p by new {p.DefaultWalletCurrencyCode, p.CultureCode}
+                group p by p.DefaultWalletCurrencyCode
                 into g
                 select g.First();
 

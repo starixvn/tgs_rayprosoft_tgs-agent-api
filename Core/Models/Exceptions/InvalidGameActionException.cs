@@ -5,7 +5,7 @@ namespace TGS.Core.Models.Exceptions
 {
     public sealed class InvalidGameActionException : Exception
     {
-        public InvalidGameActionErrorCode ErrorCode { get; } = InvalidGameActionErrorCode.None;
+        public InvalidGameActionErrorCode ErrorCode { get; }
 
         public InvalidGameActionException(string message, InvalidGameActionErrorCode errorCode = InvalidGameActionErrorCode.None) : base(message)
         {

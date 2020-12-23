@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,6 +44,7 @@ namespace TGS.Apis.OperatorApi
                 .AddBetRepository(_configuration, "Bet");
 
             services.AddSingleton<ICaptchaService, CaptchaService>();
+            services.AddScoped<IInvitationCodeValidator, InvitationCodeValidator>();
 
             services.AddNats(_configuration)
                 .AddWebApiServices()
@@ -55,13 +57,20 @@ namespace TGS.Apis.OperatorApi
                 .AddApiClient()
                 .AddPluggalbeGameProviderApiClient();
 
-            services.AddControllers();
+            services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
+                .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
+                .AddFluentValidation(c =>
+                {
+                    c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Singleton);
+                    c.LocalizationEnabled = false;
+                    c.ImplicitlyValidateChildProperties = true;
+                });
 
             if (!_env.IsProduction())
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo {Title = "TGS Operator API", Version = "v1"});
+                    c.SwaggerDoc("v1", new() {Title = "TGS Operator API", Version = "v1"});
 
                     var securityScheme = new OpenApiSecurityScheme
                     {

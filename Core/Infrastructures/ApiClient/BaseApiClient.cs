@@ -5,29 +5,20 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.ApiClient
 {
-    public interface IApiClient
-    {
-        string Prefix { get; set; }
-        TimeSpan Timeout { get; set; }
-    }
-
-    public abstract class BaseApiClient : IApiClient
+    public abstract class BaseApiClient
     {
         private const char Slash = '/';
         private static readonly char[] UrlTrimChars = {Slash, ' '};
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(60);
 
         private readonly HttpClient _client;
 
-        protected IApiClientLogger Logger;
         protected IJsonSerializationProvider Json;
-
-        public string Prefix { get; set; }
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(60);
+        protected IApiClientLogger Logger;
 
         protected BaseApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
         {
@@ -36,26 +27,25 @@ namespace TGS.Core.Infrastructures.ApiClient
             _client = client;
         }
 
-        protected Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) =>
-            Logger == null ?
-                SendWithTimeoutAsync(request) :
-                SendAndLogAsync(request);
+        protected Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+            string logPrefix, TimeSpan? timeout = null) =>
+            Logger == null ? SendWithTimeoutAsync(request, timeout) : SendAndLogAsync(request, logPrefix, timeout);
 
-        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(
-            HttpMethod method, string path, TRequest request,
-            IReadOnlyDictionary<string, string> headers = null,
-            IReadOnlyDictionary<string, string> contentHeaders = null)
+        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, string path,
+            TRequest request, IReadOnlyDictionary<string, string> headers = null,
+            IReadOnlyDictionary<string, string> contentHeaders = null,
+            string logPrefix = null, TimeSpan? timeout = null)
         {
             var requestMessage = CreateHttpRequestMessage(path, method);
             var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
-            var response = await SendAsync(httpRequestMessage);
+            var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content);
         }
 
-        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(
-            HttpMethod method, Uri apiUrl, string path, TRequest request,
-            IReadOnlyDictionary<string, string> headers = null,
-            IReadOnlyDictionary<string, string> contentHeaders = null)
+        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, Uri apiUrl,
+            string path, TRequest request, IReadOnlyDictionary<string, string> headers = null,
+            IReadOnlyDictionary<string, string> contentHeaders = null,
+            string logPrefix = null, TimeSpan? timeout = null)
         {
             var uriString = apiUrl.AbsoluteUri.Trim(UrlTrimChars);
             if (!string.IsNullOrWhiteSpace(path))
@@ -65,7 +55,7 @@ namespace TGS.Core.Infrastructures.ApiClient
 
             var requestMessage = CreateHttpRequestMessage(uriString, method);
             var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
-            var response = await SendAsync(httpRequestMessage);
+            var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content);
         }
 
@@ -81,9 +71,10 @@ namespace TGS.Core.Infrastructures.ApiClient
 
         #region Private Methods
 
-        private async Task<HttpResponseMessage> SendAndLogAsync(HttpRequestMessage request)
+        private async Task<HttpResponseMessage> SendAndLogAsync(HttpRequestMessage request, string logPrefix,
+            TimeSpan? timeout)
         {
-            var prefix = Prefix ?? GetType().Name;
+            logPrefix ??= GetType().Name;
             // Have to serialize request content first.
             // https://github.com/dotnet/corefx/pull/19082
             var requestContent = request.Content != null ? await request.Content.ReadAsStringAsync() : string.Empty;
@@ -91,9 +82,9 @@ namespace TGS.Core.Infrastructures.ApiClient
 
             try
             {
-                var response = await SendWithTimeoutAsync(request);
+                var response = await SendWithTimeoutAsync(request, timeout);
                 sw.Stop();
-                await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, prefix);
+                await Logger.LogHttpResponseAsync(response, (int) sw.ElapsedMilliseconds, requestContent, logPrefix);
 
                 return response;
             }
@@ -104,11 +95,12 @@ namespace TGS.Core.Infrastructures.ApiClient
                 var response = new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.InternalServerError,
-                    Content = new StringContent($"Connect to remote host timeout {Environment.NewLine}{Environment.NewLine}{ex}"),
+                    Content = new StringContent(
+                        $"Connect to remote host timeout {Environment.NewLine}{Environment.NewLine}{ex}"),
                     RequestMessage = request
                 };
 
-                await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, prefix);
+                await Logger.LogHttpResponseAsync(response, (int) sw.ElapsedMilliseconds, requestContent, logPrefix);
                 throw;
             }
             catch (Exception ex)
@@ -117,19 +109,21 @@ namespace TGS.Core.Infrastructures.ApiClient
                 var response = new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.InternalServerError,
-                    Content = new StringContent($"Internal TGS exception{Environment.NewLine}{Environment.NewLine}{ex}"),
+                    Content =
+                        new StringContent($"Internal TGS exception{Environment.NewLine}{Environment.NewLine}{ex}"),
                     RequestMessage = request
                 };
 
-                await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, prefix);
+                await Logger.LogHttpResponseAsync(response, (int) sw.ElapsedMilliseconds, requestContent, logPrefix);
 
                 throw;
             }
         }
 
-        private Task<HttpResponseMessage> SendWithTimeoutAsync(HttpRequestMessage request)
+        private Task<HttpResponseMessage> SendWithTimeoutAsync(HttpRequestMessage request, TimeSpan? timeout)
         {
-            using var cts = new CancellationTokenSource(Timeout);
+            timeout ??= DefaultTimeout;
+            using var cts = new CancellationTokenSource(timeout.Value);
             return _client.SendAsync(request, cts.Token);
         }
 
@@ -156,7 +150,8 @@ namespace TGS.Core.Infrastructures.ApiClient
             }
         }
 
-        private static void AddHeaders(HttpRequestMessage request, IReadOnlyDictionary<string, string> headers, IReadOnlyDictionary<string, string> contentHeaders)
+        private static void AddHeaders(HttpRequestMessage request, IReadOnlyDictionary<string, string> headers,
+            IReadOnlyDictionary<string, string> contentHeaders)
         {
             if (headers != null)
             {
@@ -166,6 +161,7 @@ namespace TGS.Core.Infrastructures.ApiClient
                     {
                         request.Headers.Remove(key);
                     }
+
                     request.Headers.Add(key, value);
                 }
             }
@@ -181,11 +177,12 @@ namespace TGS.Core.Infrastructures.ApiClient
                 {
                     request.Content.Headers.Remove(key);
                 }
+
                 request.Content.Headers.Add(key, value);
             }
         }
 
-        private static HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method) => 
+        private static HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method) =>
             new(method, path);
 
         private async Task<T> ReadJsonContentAsync<T>(HttpContent content)

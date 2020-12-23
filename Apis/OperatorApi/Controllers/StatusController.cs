@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Core.DataServices;
 using EnvironmentVariable = TGS.Core.Models.Consts.EnvironmentVariable;
 

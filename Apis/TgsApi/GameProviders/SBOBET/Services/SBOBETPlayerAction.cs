@@ -1,15 +1,13 @@
 ﻿// ReSharper disable IdentifierTypo
 // ReSharper disable InconsistentNaming
 
-using System;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Outgoing;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages.Pluggables;
 using TGS.Core.Models.Services.Data;
@@ -21,13 +19,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
     public sealed class SBOBETPlayerAction : IPlayerAction
     {
-        private readonly ISBOApiClient _client;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IBetLimitQueries _betLimitQueries;
+        private readonly ISBOApiClient _client;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
 
-        public SBOBETPlayerAction(ISettingOperations settingOperations, 
+        public SBOBETPlayerAction(ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBetLimitQueries betLimitQueries,
@@ -53,13 +51,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     PlayerCode = request.PlayerCode
                 });
 
-            return response.Error.Code != None
-                ? new PlayerKickResponse
-                {
-                    Error = (int) TgsApiError.ProviderApiError,
-                    ErrorMessage = response.Error.Message
-                }
-                : new();
+            if (response.Error.Code != None)
+            {
+                throw new GameProviderApiErrorException(response.Error.Message);
+            }
+
+            return new();
         }
 
         async Task<PlayerUpdateSportBetLimitsResponse> IPlayerAction.UpdateSportBetLimitsAsync(
@@ -77,13 +74,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             var response = await UpdatePlayerBetLimitsAsync(playerCode, betLimits, configuration);
 
-            return response.Error.Code != None
-                ? new PlayerUpdateSportBetLimitsResponse
-                {
-                    Error = (int) TgsApiError.ProviderApiError,
-                    ErrorMessage = response.Error.Message
-                }
-                : new();
+            if (response.Error.Code != None)
+            {
+                throw new GameProviderApiErrorException(response.Error.Message);
+            }
+
+            return new();
         }
 
         private async Task<BaseResponse> UpdatePlayerBetLimitsAsync(string playerCode, SportBetLimitResult[] betLimits,
