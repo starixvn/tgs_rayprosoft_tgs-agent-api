@@ -16,10 +16,11 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "../providers/menu"
 import { EditDisclosure } from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
-import { useUpdateProvider } from "../providers/client"
+import { useUpdateBrandGame } from "./client"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
+import HookFormDialog from "../../form/HookFormDialog"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -28,6 +29,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
     return null
   }
 
+  return null
   return (
     <>
       <EditDisclosure {...dialog} />
@@ -40,7 +42,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
 
 const EditDialog = ({ record, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, isLoading, error, mutate, deleteCache } = useUpdateProvider(
+  let { result, isLoading, error, mutate, deleteCache } = useUpdateBrandGame(
     record?.id,
     submitData
   )
@@ -55,9 +57,10 @@ const EditDialog = ({ record, dialog, ...props }) => {
     zh: "编辑",
     en: "Edit"
   })
+
   return (
-    <FormDialog
-      initialValues={{ ...record }}
+    <HookFormDialog
+      defaultValues={{ ...record }}
       onSubmit={setSubmit}
       result={result}
       isLoading={isLoading}
@@ -77,13 +80,13 @@ const EditDialog = ({ record, dialog, ...props }) => {
       maxWidth="unset"
     >
       <EditBody record={record} />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
 const EditBody = ({ record = {} }) => {
   let { name } = record
-  let { values } = useFormikContext()
+  let { watch } = useFormContext()
   return (
     <Stack orientation="vertical" width="500px">
       <Heading use="h5">

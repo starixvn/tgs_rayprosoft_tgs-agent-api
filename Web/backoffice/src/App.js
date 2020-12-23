@@ -63,7 +63,7 @@ function App() {
 
 const HeaderHeight = "60px"
 const sidebarWidth = 250
-const FooterHeight = "30px"
+const FooterHeight = "0px" //"30px"
 
 const Layout = ({ children }) => {
   return (
@@ -86,7 +86,7 @@ const Layout = ({ children }) => {
         `}
       >
         <Box minHeight={`calc(100% - ${FooterHeight})`}>{children}</Box>
-        <Footer />
+        {/* <Footer /> */}
       </PageWithSidebar>
     </PageWithHeader>
   )
