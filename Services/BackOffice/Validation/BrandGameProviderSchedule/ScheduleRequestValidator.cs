@@ -3,7 +3,7 @@ using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
 namespace TGS.Services.BackOffice.Validation.BrandGameProviderSchedule
 {
-    public class ScheduleRequestValidator : AbstractValidator<ScheduleRequest>
+    public class ScheduleRequestValidator : AbstractValidator<BrandGameProviderRequest>
     {
         public ScheduleRequestValidator()
         {

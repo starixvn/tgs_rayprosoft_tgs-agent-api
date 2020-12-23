@@ -1,0 +1,67 @@
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using TGS.Core.DataServices;
+using TGS.Core.DataServices.Models;
+using TGS.Services.BackOffice.Application.Models.BetLimit;
+
+namespace TGS.Services.BackOffice.Infrastructure.DataService
+{
+    public interface IBetLimitService
+    {
+        Task<BetLimit> GetBetLimitAsync(Expression<Func<BetLimit, bool>> predicate,
+            Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery = null);
+
+        IQueryable<BetLimit> GetBetLimitsAsync(Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery = null,
+            bool tracking = false);
+
+        Task CreateBetLimitAsync(CreateBetLimitRequest request);
+        Task UpdateBetLimitAsync(BetLimit betLimit, UpdateBetLimitRequest request);
+    }
+
+    public class BetLimitService : BaseService, IBetLimitService
+    {
+        public BetLimitService(ITgsRepository tgsRepository) : base(tgsRepository)
+        {
+        }
+
+        async Task IBetLimitService.CreateBetLimitAsync(CreateBetLimitRequest request)
+        {
+            var brand = new BetLimit
+            {
+                CurrencyCode = request.CurrencyCode,
+                MinBet = request.MinBet,
+                MaxBet = request.MaxBet,
+                MaxBetPerMatch = request.MaxBetPerMatch,
+                CreatedByUsername = request.Username,
+                UpdatedByUsername = request.Username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            await CreateEntityAsync(brand);
+        }
+
+        Task<BetLimit> IBetLimitService.GetBetLimitAsync(Expression<Func<BetLimit, bool>> predicate,
+            Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery) =>
+            GetEntityFirstOrDefaultAsync(predicate, preQuery);
+
+        Task IBetLimitService.UpdateBetLimitAsync(BetLimit betLimit, UpdateBetLimitRequest request)
+        {
+            betLimit.CurrencyCode = request.CurrencyCode;
+            betLimit.MinBet = request.MinBet;
+            betLimit.MaxBet = request.MaxBet;
+            betLimit.MaxBetPerMatch = request.MaxBetPerMatch;
+            betLimit.UpdatedByUsername = request.Username;
+            betLimit.UpdatedOn = DateTimeOffset.Now;
+
+            return UpdateEntityAsync(betLimit);
+        }
+
+        IQueryable<BetLimit> IBetLimitService.GetBetLimitsAsync(
+            Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery,
+            bool tracking) =>
+            GetQueriesAsync(preQuery, tracking);
+    }
+}

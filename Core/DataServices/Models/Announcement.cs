@@ -9,6 +9,8 @@ namespace TGS.Core.DataServices.Models
         public string Subject { get; set; }
         public string Content { get; set; }
         public string Remarks { get; set; }
+        public Guid BrandId { get; set; }
+        public virtual Brand Brand { get; set; }
         public AnnounceStatus Status { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }

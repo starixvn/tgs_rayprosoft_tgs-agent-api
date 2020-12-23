@@ -8,11 +8,11 @@ using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
-    public partial class BrandGameProviderScheduleController
+    public partial class BrandGameProviderController
     {
         [HttpPut("{id}/{status}")]
-        [Description("Change a brand game provider schedule status")]
+        [Description("Change a brand game provider status")]
         public Task<MessageResponse> UpdateBrandStatusAsync(Guid id, Status status) =>
-            _mediator.Send(new UpdateScheduleStatusRequest(id, status));
+            _mediator.Send(new UpdateGameProviderStatusRequest(id, status));
     }
 }

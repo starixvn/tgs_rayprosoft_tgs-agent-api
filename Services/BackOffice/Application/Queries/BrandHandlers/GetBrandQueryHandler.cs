@@ -61,6 +61,30 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                             Id = x.GameProviderId,
                             Name = x.GameProvider.Name
                         }).ToArray(),
+                    BrandGames = brand.Games.Select(x => new BrandGameModel
+                    {
+                        GameId = x.GameId
+                    }).ToArray(),
+                    BetLimits = brand.BetLimits.Select(x => new BrandBetLimitModel
+                    {
+                        Id = x.BetLimitId,
+                        IsDefault = x.IsDefault
+                    }).ToArray(),
+                    BrandGroups = brand.BrandGroups.Select(x => new BrandGroupModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Code = x.Code,
+                        Description = x.Description,
+                        IsSports = x.IsSports,
+                        BrandGameIds = x.BrandGames.Select(g => g.BrandGame.GameId).ToArray(),
+                        GameProviderBetLimits = x.BrandGroupBetLimits.SelectMany(bgb => bgb.GameProviderBetLimits)
+                            .Select(b => new BrandGroupGameProviderBetLimitModel
+                            {
+                                BrandBetLimitId = b.BrandGroupBetLimit.BetLimitId,
+                                GameProviderBetLimitId = b.GameProviderBetLimitId
+                            }).ToArray()
+                    }).ToArray(),
 
                     Description = brand.Description,
                     OperationalEmail = brand.OperationalEmail,

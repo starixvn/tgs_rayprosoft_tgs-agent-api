@@ -49,6 +49,10 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
             builder.HasOne(p => p.Licensee)
                 .WithMany(p => p.Brands)
                 .HasForeignKey(p => p.LicenseeId);
+
+            builder.HasMany(c => c.Announcements)
+                .WithOne(c => c.Brand)
+                .HasForeignKey(c => c.BrandId);
         }
     }
 }

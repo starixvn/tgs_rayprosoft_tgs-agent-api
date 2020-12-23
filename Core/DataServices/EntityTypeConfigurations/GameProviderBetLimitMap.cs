@@ -15,23 +15,20 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
 
             builder.Property(e => e.CurrencyCode)
                 .HasColumnType(ColumnTypes.Nvarchar(16));
-            
+
             builder.Property(e => e.MinBet)
                 .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
-            
+
             builder.Property(e => e.MaxBet)
                 .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
-            
+
             builder.Property(e => e.MaxBetPerMatch)
                 .HasColumnType(ColumnTypes.Int);
-            
+
             builder.Property(e => e.ExternalSetting)
                 .HasColumnType(ColumnTypes.Nvarchar(255))
-                .IsRequired();
-
-            builder.Property(e => e.IsDefault)
                 .IsRequired();
 
             builder.HasOne(e => e.Currency)

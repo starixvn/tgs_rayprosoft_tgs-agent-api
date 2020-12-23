@@ -575,8 +575,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 MinBet = b.MinBet,
                 MaxBet = b.MaxBet,
                 MaxBetPerMatch = b.MaxBetPerMatch,
-                ExternalSetting = b.ExternalSetting,
-                IsDefault = b.IsDefault
+                ExternalSetting = b.ExternalSetting
             }).ToHashSet();
 
             return gp;
@@ -672,8 +671,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var gameProviderCodes = IntersectGameProviderCodes(reseller.GameProviders, licensee.GameProviders);
             gameProviderCodes = IntersectGameProviderCodes(gameProviderCodes, brand.GameProviders);
             var gameProviders = GetGameProviders(gameProviderCodes);
-            var gameProviderBetLimits = gameProviders.SelectMany(gp => gp.BetLimits)
-                .Where(l => l.IsDefault).ToArray();
+            var gameProviderBetLimits = gameProviders.SelectMany(gp => gp.BetLimits).ToArray();
 
             var brandGameProviders = gameProviders.Select(gp =>
             {

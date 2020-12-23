@@ -168,4 +168,10 @@
   <data name="NameExists" xml:space="preserve">
     <value>名称已存在</value>
   </data>
+  <data name="BetLimitDefaultRequired" xml:space="preserve">
+    <value>默认限红必填</value>
+  </data>
+  <data name="GameProviderBetLimitCountIncorrect" xml:space="preserve">
+    <value>游戏提供商的限红笔数不正确</value>
+  </data>
 </root>

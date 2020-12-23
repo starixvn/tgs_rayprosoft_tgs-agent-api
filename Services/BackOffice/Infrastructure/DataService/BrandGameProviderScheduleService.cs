@@ -61,7 +61,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 BrandGameProviderId = request.BrandGameProviderId,
                 From = x.From,
                 To = x.To,
-                Status = request.Status,
+                Status = request.ScheduleStatus,
                 IsDefault = false
             }).ToArray();
 

@@ -11,30 +11,6 @@ namespace TGS.Core.DataServices.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
-                name: "Announcements",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Subject = table.Column<string>(type: "nvarchar(256)", nullable: true),
-                    Content = table.Column<string>(type: "nvarchar(4000)", nullable: true),
-                    Remarks = table.Column<string>(type: "nvarchar(512)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    From = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    To = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    DisplayOrder = table.Column<short>(type: "smallint", nullable: false),
-                    VerifiedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: true),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Announcements", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Currencies",
                 schema: "dbo",
                 columns: table => new
@@ -340,8 +316,7 @@ namespace TGS.Core.DataServices.Migrations
                     MinBet = table.Column<int>(type: "int", nullable: false),
                     MaxBet = table.Column<int>(type: "int", nullable: false),
                     MaxBetPerMatch = table.Column<int>(type: "int", nullable: true),
-                    ExternalSetting = table.Column<string>(type: "nvarchar(255)", nullable: false),
-                    IsDefault = table.Column<bool>(type: "bit", nullable: false)
+                    ExternalSetting = table.Column<string>(type: "nvarchar(255)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1028,6 +1003,38 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Announcements",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(256)", nullable: true),
+                    Content = table.Column<string>(type: "nvarchar(4000)", nullable: true),
+                    Remarks = table.Column<string>(type: "nvarchar(512)", nullable: true),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    From = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    To = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    DisplayOrder = table.Column<short>(type: "smallint", nullable: false),
+                    VerifiedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: true),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Announcements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Announcements_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalSchema: "dbo",
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BrandBetLimits",
                 schema: "dbo",
                 columns: table => new
@@ -1141,9 +1148,9 @@ namespace TGS.Core.DataServices.Migrations
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Tag = table.Column<short>(type: "smallint", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    Rebate = table.Column<bool>(type: "bit", nullable: false),
-                    EffectiveBettingPercentage = table.Column<decimal>(type: "decimal(18,6)", nullable: false)
+                    DisplayOrder = table.Column<int>(type: "int", nullable: true),
+                    Rebate = table.Column<bool>(type: "bit", nullable: true),
+                    EffectiveBettingPercentage = table.Column<decimal>(type: "decimal(18,6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1173,6 +1180,7 @@ namespace TGS.Core.DataServices.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsSports = table.Column<bool>(type: "bit", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -1647,6 +1655,12 @@ namespace TGS.Core.DataServices.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Announcements_BrandId",
+                schema: "dbo",
+                table: "Announcements",
+                column: "BrandId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BetLimits_CurrencyCode_Id",
                 schema: "dbo",
                 table: "BetLimits",
@@ -1984,7 +1998,7 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-
+            
             InitAfterRun(migrationBuilder);
         }
 

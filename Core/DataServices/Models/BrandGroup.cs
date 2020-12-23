@@ -7,9 +7,11 @@ namespace TGS.Core.DataServices.Models
     {
         public Guid BrandId { get; set; }
 
-        public virtual Brand Brand { get; set;}
+        public virtual Brand Brand { get; set; }
 
         public string Description { get; set; }
+
+        public bool IsSports { get; set; }
 
         public virtual ICollection<BrandGroupGame> BrandGames { get; set; }
 

@@ -8,5 +8,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Announcement
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public string Content { get; set; }
+        public Guid BrandId { get; set; }
     }
 }

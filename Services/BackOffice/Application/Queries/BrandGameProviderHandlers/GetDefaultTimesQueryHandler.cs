@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +31,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                 {
                     From = x.From,
                     To = x.To,
-                    IsExpired = DateTimeOffset.Compare(x.To, DateTimeOffset.UtcNow) < 0
+                    ScheduleStatus = x.Status
                 }).ToArrayAsync(cancellationToken);
 
             return new GetDefaultTimesResponse

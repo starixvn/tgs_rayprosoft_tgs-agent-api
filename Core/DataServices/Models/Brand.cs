@@ -9,9 +9,9 @@ namespace TGS.Core.DataServices.Models
         public Status Status { get; set; }
 
         public string Description { get; set; }
-        
+
         public string OperationalEmail { get; set; }
-        
+
         public string TimeZoneId { get; set; }
 
         public Guid LicenseeId { get; set; }
@@ -39,5 +39,6 @@ namespace TGS.Core.DataServices.Models
         public virtual ICollection<BrandGroup> BrandGroups { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
+        public virtual ICollection<Announcement> Announcements { get; set; }
     }
 }
