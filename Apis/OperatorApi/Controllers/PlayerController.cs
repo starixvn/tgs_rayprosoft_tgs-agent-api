@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
-using TGS.Apis.OperatorApi.Models;
-using TGS.Apis.OperatorApi.Models.Messages.Players;
+using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Resources;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
@@ -19,7 +19,6 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 
@@ -31,12 +30,12 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class PlayerController : ControllerBase
     {
+        private readonly IBrandOperations _brandOperations;
         private readonly ICaptchaService _captchaService;
         private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
         private readonly IHashProvider _hashProvider;
+        private readonly IInvitationCodeValidator _invitationCodeValidator;
         private readonly IJwtTokenHandler _jwtTokenHandler;
-        private readonly IBrandLanguageCodeMapper _languageCodeMapper;
-        private readonly IBrandOperations _brandOperations;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
         private readonly IPlayerQueries _playerQueries;
@@ -49,14 +48,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             IBrandCurrencyCodeMapper currencyCodeMapper,
-            IBrandLanguageCodeMapper languageCodeMapper,
             ICaptchaService captchaService,
             IJwtTokenHandler jwtTokenHandler,
             ITokenProvider tokenProvider,
             IHashProvider hashProvider,
             IPasswordHandler passwordHandler,
             IStatusValidator statusValidator,
-            IRequestAnalyzer requestAnalyzer)
+            IRequestAnalyzer requestAnalyzer,
+            IInvitationCodeValidator invitationCodeValidator)
         {
             _tokenProvider = tokenProvider;
             _hashProvider = hashProvider;
@@ -66,10 +65,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _currencyCodeMapper = currencyCodeMapper;
-            _languageCodeMapper = languageCodeMapper;
             _requestAnalyzer = requestAnalyzer;
             _captchaService = captchaService;
             _jwtTokenHandler = jwtTokenHandler;
+            _invitationCodeValidator = invitationCodeValidator;
         }
 
         /// <summary>
@@ -77,20 +76,28 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet]
         [Route("captcha")]
-        public CaptchaInfo GetCaptcha() => _captchaService.Create();
+        public async Task<GetCaptchaResponse> GetCaptchaAsync()
+        {
+            var info = await _captchaService.CreateAsync();
+            return new()
+            {
+                Image = info.Image,
+                ContentType = info.ContentType,
+                Captcha = info.Captcha
+            };
+        }
 
         /// <summary>
         /// Check username exists
         /// </summary>
         [HttpPost]
         [Route("checkUsername")]
-        [VerifyCaptcha]
         public async Task<CheckPlayerResponse> UsernameExistsAsync(CheckPlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, request.Username);
 
-            return new CheckPlayerResponse
+            return new()
             {
                 Exists = playerCode.IsNotNullOrEmpty()
             };
@@ -111,34 +118,40 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNotNullOrEmpty())
             {
-                return new CreatePlayerResponse {IsNew = false};
+                return new() {IsNew = false};
             }
 
             var externalCurrency = request.CurrencyCode;
             var currency = await _currencyCodeMapper.ExternalToInternalAsync(externalCurrency, brandId);
-            var language = await _languageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
 
             var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
 
-            // TODO: get parent player code via parent invitation code
+            var invitationCode = request.ParentInvitationCode;
+            var parentPlayerCode = string.Empty;
+            if (invitationCode.IsNotNullOrEmpty())
+            {
+                parentPlayerCode = await _playerOperations.GetPlayerCodeByInvitationCodeAsync(invitationCode);
+                await _invitationCodeValidator.VerifyInviteeAsync(parentPlayerCode, brandId, currency, invitationCode);
+            }
 
-            await _playerOperations.CreatePlayerAsync(new CreatePlayerData
+            var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(brandId, currency);
+
+            await _playerOperations.CreatePlayerAsync(new()
             {
                 BrandId = brandId,
                 Username = username,
                 Salt = salt,
                 Password = password,
-                CultureCode = language,
                 CurrencyCode = currency,
                 ExternalCurrencyCode = externalCurrency,
+                BetLimitId = betLimitId,
+                ParentPlayerCode = parentPlayerCode,
                 ParentInvitationCode = request.ParentInvitationCode,
-                BetLimitGroup = 1,
-                ParentPlayerCode = "",
                 Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
                 HasAgent = request.HasAgent
             });
 
-            return new CreatePlayerResponse
+            return new()
             {
                 IsNew = true
             };
@@ -148,7 +161,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Player login
         /// </summary>
         [HttpPost]
-        [Route("login")] 
+        [Route("login")]
         [VerifyCaptcha]
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
@@ -159,13 +172,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNullOrEmpty())
             {
-                throw new PlayerNotFoundException(username, Resources.Player.NotFound);
+                throw new PlayerNotFoundException(username, Player.NotFound);
             }
 
             var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
             if (!_passwordHandler.Verify(password, salt, request.Password))
             {
-                throw new InvalidCredentialsException(Resources.Player.PasswordMismatched);
+                throw new InvalidCredentialsException(Player.PasswordMismatched);
             }
 
             _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
@@ -173,7 +186,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var createdOn = DateTimeOffset.UtcNow;
             var ipAddress = _requestAnalyzer.GetIp(HttpContext);
 
-            var record = await _playerOperations.PlayerLoginAsync(new PlayerLoginData
+            var record = await _playerOperations.PlayerLoginAsync(new()
             {
                 BrandId = brandId,
                 Username = username,
@@ -184,17 +197,15 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ExpiredOn = createdOn.AddSeconds(Core.Models.Consts.TokenExpireSeconds.PlayerLogin)
             });
 
-            var playerTokenData = new PlayerTokenData
+            var token = await GeneratePlayerJwtToken(brandId, new()
             {
                 PlayerCode = playerCode,
                 LoginRecordId = record.Id,
                 PlatformType = record.PlatformType,
                 ExpiredOn = record.ExpiredOn
-            };
+            });
 
-            var token = await GeneratePlayerJwtToken(brandId, playerTokenData);
-
-            return new LoginResponse
+            return new()
             {
                 PlayerToken = token,
                 LoginTime = createdOn
@@ -218,11 +229,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
             if (cachedPlayer == null)
             {
-                throw new PlayerNotFoundException(playerCode, Resources.Player.NotFound);
+                throw new PlayerNotFoundException(playerCode, Player.NotFound);
             }
 
             var updatedOn = DateTimeOffset.UtcNow;
-            await _playerOperations.PlayerLogoutAsync(new PlayerLogoutData
+            await _playerOperations.PlayerLogoutAsync(new()
             {
                 Username = cachedPlayer.Username,
                 PlayerCode = playerCode,
@@ -230,7 +241,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedOn = updatedOn
             });
 
-            return new LogoutResponse
+            return new()
             {
                 UpdateTime = updatedOn
             };
@@ -253,10 +264,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             var player = await _playerOperations.GetPlayerByCodeAsync(playerCode);
             if (player == null)
             {
-                throw new PlayerNotFoundException(playerCode, Resources.Player.NotFound);
+                throw new PlayerNotFoundException(playerCode, Player.NotFound);
             }
 
-            return new GetPlayerResponse
+            return new()
             {
                 Data = new()
                 {
@@ -297,7 +308,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var updatedOn = DateTimeOffset.UtcNow;
 
-            await _playerOperations.UpdatePlayerAsync(new UpdatePlayerData
+            await _playerOperations.UpdatePlayerAsync(new()
             {
                 Username = cachedPlayer.Username,
                 PlayerCode = cachedPlayer.PlayerCode,
@@ -309,7 +320,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedOn = updatedOn
             });
 
-            return new UpdatePlayerResponse
+            return new()
             {
                 UpdateTime = updatedOn
             };
@@ -332,14 +343,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
             if (!_passwordHandler.Verify(password, salt, request.OldPassword))
             {
-                throw new InvalidCredentialsException(Resources.Player.PasswordMismatched);
+                throw new InvalidCredentialsException(Player.PasswordMismatched);
             }
 
             var username = await _playerOperations.GetUsernameByPlayerCodeAsync(playerCode);
             var updatedOn = DateTimeOffset.UtcNow;
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(request.NewPassword);
-            await _playerOperations.ChangePlayerPasswordAsync(new ChangePlayerPasswordData
+            await _playerOperations.ChangePlayerPasswordAsync(new()
             {
                 Username = username,
                 PlayerCode = playerCode,
@@ -348,7 +359,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 UpdatedOn = updatedOn
             });
 
-            return new ChangePasswordResponse
+            return new()
             {
                 UpdateTime = updatedOn
             };
@@ -356,7 +367,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         private async Task<string> GeneratePlayerJwtToken(Guid brandId, PlayerTokenData playerTokenData)
         {
-            var data = _tokenProvider.Encrypt(playerTokenData);
+            var data = await _tokenProvider.EncryptAsync(playerTokenData);
 
             var jti = Guid.NewGuid().ToString();
             var identity = new ClaimsIdentity(new[]

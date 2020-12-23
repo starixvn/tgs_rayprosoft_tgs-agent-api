@@ -37,10 +37,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Nvarchar(6))
                 .IsRequired(false);
 
-            builder.Property(c => c.CultureCode)
-                .HasColumnType(ColumnTypes.Nvarchar(6))
-                .IsRequired();
-
             builder.Property(c => c.Password)
                 .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();

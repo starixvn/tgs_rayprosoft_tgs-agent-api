@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Models;
@@ -72,9 +71,8 @@ namespace TGS.Services.Operations.Commands
                                 Username = username,
                                 Password = data.Password,
                                 Salt = data.Salt,
-                                InvitationCode = StringGenerator.GenerateAlphanumericString(6),
+                                InvitationCode = InvitationCodeGenerator.NewId(),
                                 BrandId = data.BrandId,
-                                CultureCode = data.CultureCode,
                                 DefaultWalletId = walletId,
                                 DefaultWalletCurrencyCode = data.CurrencyCode,
                                 ParentInvitationCode = data.ParentInvitationCode,
@@ -82,13 +80,13 @@ namespace TGS.Services.Operations.Commands
                                 LastActiveOn = createdOn,
                                 Status = PlayerStatus.Enabled,
                                 Type = data.Type,
-                                BetLimitId = data.BetLimitGroup,
+                                BetLimitId = data.BetLimitId,
                                 HasAgent = data.HasAgent,
                                 UpdatedByUsername = username,
                                 UpdatedOn = createdOn,
                                 Wallets = new HashSet<Wallet>
                                 {
-                                    new Wallet
+                                    new()
                                     {
                                         Id = walletId,
                                         PlayerCode = playerCode,

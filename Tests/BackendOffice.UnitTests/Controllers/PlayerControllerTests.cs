@@ -356,7 +356,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var fixture = new Fixture();
             fixture.Customize<Player>(u => u
                 .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Name = "Vip"})
-                .With(s => s.Language, new Language())
                 .With(s => s.Brand, new Brand())
                 .With(s => s.ParentPlayer, new Player())
                 .With(s => s.BetLimit, new BetLimit())

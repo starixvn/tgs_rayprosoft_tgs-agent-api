@@ -26,6 +26,8 @@ namespace TGS.Services.Operations.Queries
         Task<Player> GetPlayerByCodeAsync(string playerCode);
 
         Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
+
+        Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -92,6 +94,12 @@ namespace TGS.Services.Operations.Queries
         Task<(byte[] salt, byte[] password)> IPlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(string playerCode) =>
             _repository.Players.Where(p => p.PlayerCode == playerCode)
                 .Select(p => new Tuple<byte[], byte[]>(p.Salt, p.Password).ToValueTuple())
+                .FirstOrDefaultAsync();
+
+        Task<string> IPlayerQueries.GetPlayerCodeByInvitationCodeAsync(string invitationCode) =>
+            _repository.Players
+                .Where(p => p.InvitationCode == invitationCode)
+                .Select(p => p.PlayerCode)
                 .FirstOrDefaultAsync();
     }
 }

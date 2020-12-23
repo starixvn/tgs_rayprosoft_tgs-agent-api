@@ -36,7 +36,7 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
         [HttpPost]
         [Route("gameurl")]
         public Task<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request) =>
-            _initializerFactory(request.GameProvider.Code).GetGameUrlAsync(request);
+            _initializerFactory(request.GameProviderCode).GetGameUrlAsync(request);
 
         [HttpPost]
         [Route("history/round")]

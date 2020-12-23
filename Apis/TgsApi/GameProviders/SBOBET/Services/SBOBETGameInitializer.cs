@@ -10,6 +10,7 @@ using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages.Pluggables;
 using TGS.Core.Models.Services.Caches;
@@ -21,7 +22,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     public sealed class SBOBETGameInitializer : IGameInitializer
     {
         private readonly ISettingOperations _settingOperations;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly ISBOApiClient _client;
 
@@ -33,48 +36,54 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         public SBOBETGameInitializer(
             ISettingOperations settingOperations,
+            IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
+            IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             ISBOApiClient client)
         {
             _settingOperations = settingOperations;
+            _playerOperations = playerOperations;
             _brandOperations = brandOperations;
+            _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
             _client = client;
         }
 
         async Task<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
-            var brandId = request.Player.BrandId;
-            var gameProviderId = request.GameProvider.Id;
-            var player = request.Player;
-            var gameType = request.Game.Type;
+            var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+            var gameType = await _gameProviderOperations.GetGameTypeAsync(gameProviderId, request.GameId);
+
+            if (!gameType.HasValue)
+            {
+                throw new InvalidOperationException($"Game with id '{request.GameId}' doesn't exist");
+            }
+
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
                     .GameProviderConfigurations.SBOBET);
 
             var response =
-                await PlayerLoginAsync(configuration.ApiUrl, configuration.CompanyKey, player, gameType);
+                await PlayerLoginAsync(configuration.ApiUrl, configuration.CompanyKey, player, gameType.Value);
 
             if (response.Error.Code != None)
             {
-                return new()
-                {
-                    Error = (int) TgsApiError.ProviderApiError,
-                    ErrorMessage = response.Error.Message
-                };
+                throw new GameProviderApiErrorException(response.Error.Message);
             }
 
+            var brandId = player.BrandId;
             var platform = request.Token.PlatformType;
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
             var loginResponse = (LoginResponse) response;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
-                request.LanguageCode);
+                request.Language);
 
             var url = gameType switch
             {
-                GameType.VirtualSports => $"https://{loginResponse.Url}&lang={cultureCode}",
+                GameType.VirtualSports => $"{loginResponse.Url}&lang={cultureCode}",
                 GameType.Sportsbook    => GetSportsbookUrl(bgpc.QueryStrings, platform, loginResponse.Url, cultureCode),
                 _                      => default
             };
@@ -132,7 +141,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             if (queryString.IsNullOrEmpty())
             {
-                queryString = "&oddstyle=MY&theme=sbo&oddsmode=double";
+                queryString = "oddstyle=MY&theme=sbo&oddsmode=double";
             }
 
             return $"{url}&device={device}&lang={cultureCode}&{queryString}";

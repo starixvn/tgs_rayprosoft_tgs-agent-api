@@ -25,8 +25,6 @@ namespace TGS.Core.DataServices.Models
 
         public virtual ICollection<LocalizedString> LocalizedStrings { get; set; }
 
-        public virtual ICollection<Player> Players { get; set; }
-
         public DateTimeOffset CreatedOn { get; set; }
 
         public DateTimeOffset UpdatedOn { get; set; }

@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TechTalk.SpecFlow;
-using TGS.Apis.OperatorApi.Models.Messages.Authentications;
-using TGS.Apis.OperatorApi.Models.Messages.Players;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Bet;
@@ -19,8 +15,6 @@ using TGS.Core.DataServices.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Tests.ApiClients.Operators;
@@ -70,7 +64,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 var r = await apiClient.GetBrandTokenAsync(new AuthRequest
                 {
-                    ApiKey =  brand.ApiKey,
+                    ApiKey = brand.ApiKey,
                     Currency = player.DefaultWalletCurrencyCode
                 });
 
@@ -108,20 +102,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             var sql = "UPDATE Wallets SET Balance=@balance WHERE PlayerCode=@playerCode";
-            await db.ExecuteSqlCommandAsync(sql, CommandType.Text, parameters: new SqlParameter[]
+            await db.ExecuteSqlCommandAsync(sql, CommandType.Text, new()
             {
-                new ()
-                {
-                    ParameterName = "@balance",
-                    Value = balance,
-                    DbType = DbType.Decimal
-                },
-                new ()
-                {
-                    ParameterName = "@playerCode",
-                    Value = playerCode,
-                    DbType = DbType.String
-                }
+                ParameterName = "@balance",
+                Value = balance,
+                DbType = DbType.Decimal
+            }, new()
+            {
+                ParameterName = "@playerCode",
+                Value = playerCode,
+                DbType = DbType.String
             });
         }
 
@@ -188,8 +178,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
             await cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
         }
-        
-        protected async Task ChangeGameProviderConfigurationStatusAsync(IServiceProvider serviceProvider, string gameProviderCode, Status status)
+
+        protected async Task ChangeGameProviderConfigurationStatusAsync(IServiceProvider serviceProvider,
+            string gameProviderCode, Status status)
         {
             if (!HasTag("ChangeGameProviderConfigurationStatus"))
             {
@@ -215,10 +206,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await db.SaveChangesAsync();
 
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-            await cacheManager.ClearCacheAsync(RedisCacheType.GameProviderConfiguration, gameProviderConfiguration.GameProviderId);
+            await cacheManager.ClearCacheAsync(RedisCacheType.GameProviderConfiguration,
+                gameProviderConfiguration.GameProviderId);
         }
-        
-        protected async Task ChangeGameStatusAsync(IServiceProvider serviceProvider, string gameProviderCode, string externalGameId, GameStatus gameStatus)
+
+        protected async Task ChangeGameStatusAsync(IServiceProvider serviceProvider, string gameProviderCode,
+            string externalGameId, GameStatus gameStatus)
         {
             if (!HasTag("ChangeGameStatus"))
             {
@@ -230,7 +223,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             var game = await (
-                from g in db.Games 
+                from g in db.Games
                 join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
                     on g.GameProviderId equals gameProvider.Id
                 where g.ExternalId == externalGameId && g.PlatformType == platformType

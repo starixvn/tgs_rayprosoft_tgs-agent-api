@@ -12,9 +12,6 @@ namespace TGS.Core.DataServices.Models
         public string InvitationCode { get; set; }
         public byte[] Password { get; set; }
         public byte[] Salt { get; set; }
-
-        public string CultureCode { get; set; }
-        public virtual Language Language { get; set; }
         public Guid DefaultWalletId { get; set; }
         public string DefaultWalletCurrencyCode { get; set; }
         public Guid BrandId { get; set; }

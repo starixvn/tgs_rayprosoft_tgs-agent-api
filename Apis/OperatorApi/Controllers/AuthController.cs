@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.OperatorApi.Models.Messages.Authentications;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Services.Operations;
@@ -59,7 +59,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var token = _handler.GenerateToken(identity, Encoding.UTF8.GetBytes(signature),
                 Consts.Site, expires);
 
-            return new AuthResponse
+            return new()
             {
                 Token = token,
                 ExpireTime = new DateTimeOffset(expires).ToUnixTimeMilliseconds()

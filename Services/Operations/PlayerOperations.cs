@@ -44,6 +44,8 @@ namespace TGS.Services.Operations
         Task<Guid> GetMainWalletIdByPlayerCodeAsync(string playerCode);
 
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
+
+        Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -120,7 +122,7 @@ namespace TGS.Services.Operations
             var cacheKey = brandId;
             var field = username;
 
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, username);
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, field);
             if (value.HasValue)
             {
                 return value;
@@ -130,17 +132,19 @@ namespace TGS.Services.Operations
             await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
             {
                 new(field, playerCode)
-            }, TimeSpan.FromHours(2));
+            }, TimeSpan.FromHours(12));
 
             return playerCode;
         }
 
         async Task<string> IPlayerOperations.CreatePlayerAsync(CreatePlayerData data)
         {
-            var playerCode = await _playerCommands.CreatePlayerAsync(data);
+            var playerCode= await _playerCommands.CreatePlayerAsync(data);
 
-            await _cacheManager.SafeCacheAsync(RedisCacheType.UsernameToPlayerCode, data.Username,
-                TimeSpan.FromHours(2), playerCode);
+            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.UsernameToPlayerCode, data.BrandId, new HashEntry[]
+            {
+                new(data.Username, playerCode)
+            }, TimeSpan.FromHours(12), true);
 
             return playerCode;
         }
@@ -189,6 +193,27 @@ namespace TGS.Services.Operations
                 value => (string) value,
                 cachedPlayer => cachedPlayer?.Username);
 
+        async Task<string> IPlayerOperations.GetPlayerCodeByInvitationCodeAsync(string invitationCode)
+        {
+            var cacheType = RedisCacheType.InvitationCodeToPlayerCode;
+            var field = invitationCode;
+
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, null, field);
+            if (value.HasValue)
+            {
+                return value;
+            }
+
+            var playerCode = await _playerQueriesFactory().GetPlayerCodeByInvitationCodeAsync(invitationCode);
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, null, new HashEntry[]
+            {
+                new(field, playerCode)
+            }, TimeSpan.FromDays(1));
+
+            return playerCode;
+        }
+
+
         #region Private Methods
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
@@ -200,7 +225,6 @@ namespace TGS.Services.Operations
                 CachedPlayerFields.Type,
                 CachedPlayerFields.Username,
                 CachedPlayerFields.DefaultWalletId,
-                CachedPlayerFields.CultureCode,
                 CachedPlayerFields.BetLimitId,
                 CachedPlayerFields.BrandCode,
                 CachedPlayerFields.DefaultWalletCurrencyCode,
@@ -217,11 +241,10 @@ namespace TGS.Services.Operations
                     Type = (PlayerType) (int) values[2],
                     Username = values[3],
                     DefaultWalletId = Guid.Parse(values[4]),
-                    CultureCode = values[5],
-                    BetLimitId = (int) values[6],
-                    BrandCode = values[7],
-                    DefaultWalletCurrencyCode = values[8],
-                    ExternalCurrencyCode = values[9]
+                    BetLimitId = (int) values[5],
+                    BrandCode = values[6],
+                    DefaultWalletCurrencyCode = values[7],
+                    ExternalCurrencyCode = values[8]
                 };
             }
 
@@ -239,7 +262,6 @@ namespace TGS.Services.Operations
                 new(CachedPlayerFields.Status, (int) player.Status),
                 new(CachedPlayerFields.DefaultWalletId, player.DefaultWalletId.ToString()),
                 new(CachedPlayerFields.DefaultWalletCurrencyCode, player.DefaultWalletCurrencyCode),
-                new(CachedPlayerFields.CultureCode, player.CultureCode),
                 new(CachedPlayerFields.BetLimitId, player.BetLimitId),
                 new(CachedPlayerFields.ExternalCurrencyCode, player.ExternalCurrencyCode)
             };
@@ -295,8 +317,7 @@ namespace TGS.Services.Operations
             public const string Status = "status";
             public const string DefaultWalletId = "defaultWalletId";
             public const string DefaultWalletCurrencyCode = "defaultWalletCurrencyCode";
-            public const string CultureCode = "cultureCode";
-            public const string BetLimitId = "betLimitGroupId";
+            public const string BetLimitId = "betLimitId";
             public const string ExternalCurrencyCode = "externalCurrencyCode";
         }
 

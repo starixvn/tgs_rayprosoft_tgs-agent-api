@@ -17,14 +17,12 @@ namespace TGS.Core.DataServices.DataInitializers
                     let prefix = type == PlayerType.RealPlayer ? "RP" : "TP"
                     from b in brands
                     from curr in b.Currencies
-                    from lang in b.Languages
                     from idx in Enumerable.Range(0, playerCountForPlayerType)
-                    let name = $"{prefix}{idx + 1:00}_{curr.Code.ToLower()}_{lang.Code.ToLower()}"
-                    select new TgsPlayer(b.Id, name, name, lang.Code, curr.Code, type)
+                    let name = $"{prefix}{idx + 1:00}_{curr.Code.ToLower()}"
+                    select new TgsPlayer(b.Id, name, name, curr.Code, type)
                 ).ToArray();
         }
 
-        internal record TgsPlayer(Guid BrandId, string Username, string RealName, string CultureCode,
-            string CurrencyCode, PlayerType Type);
+        internal record TgsPlayer(Guid BrandId, string Username, string RealName, string CurrencyCode, PlayerType Type);
     }
 }

@@ -1339,10 +1339,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CultureCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(6)");
-
                     b.Property<string>("DefaultWalletCurrencyCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(16)");
@@ -1422,8 +1418,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasAlternateKey("BrandId", "Username");
 
                     b.HasIndex("BetLimitId");
-
-                    b.HasIndex("CultureCode");
 
                     b.HasIndex("ParentPlayerCode");
 
@@ -2552,12 +2546,6 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
-                        .WithMany("Players")
-                        .HasForeignKey("CultureCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
                         .WithMany("SubPlayers")
                         .HasForeignKey("ParentPlayerCode");
@@ -2569,8 +2557,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("BetLimit");
 
                     b.Navigation("Brand");
-
-                    b.Navigation("Language");
 
                     b.Navigation("ParentPlayer");
 
@@ -2940,8 +2926,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("LicenseeLanguages");
 
                     b.Navigation("LocalizedStrings");
-
-                    b.Navigation("Players");
 
                     b.Navigation("ResellerLanguages");
                 });

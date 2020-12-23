@@ -45,42 +45,16 @@ namespace TGS.Core.Infrastructures.Extensions
             return services;
         }
 
-        private static void AddService(IServiceCollection services, Type type, ServiceLifetime lifetime)
-        {
-            switch (lifetime)
-            {
-                case ServiceLifetime.Scoped:
-                    services.AddScoped(type);
-                    break;
-
-                case ServiceLifetime.Singleton:
-                    services.AddSingleton(type);
-                    break;
-
-                default:
-                    services.AddTransient(type);
-                    break;
-            }
-        }
+        private static void AddService(IServiceCollection services, Type type, ServiceLifetime lifetime) =>
+            services.Add(new(type, type, lifetime));
+        
 
         private static void AddResolver<TInterface>(IServiceCollection services,
             Func<IServiceProvider, string, TInterface> resolver, ServiceLifetime lifetime)
             where TInterface : class
         {
-            switch (lifetime)
-            {
-                case ServiceLifetime.Scoped:
-                    services.AddScoped<Func<string, TInterface>>(provider => key => resolver(provider, key));
-                    break;
-
-                case ServiceLifetime.Singleton:
-                    services.AddSingleton<Func<string, TInterface>>(provider => key => resolver(provider, key));
-                    break;
-
-                default:
-                    services.AddTransient<Func<string, TInterface>>(provider => key => resolver(provider, key));
-                    break;
-            }
+            Func<string, TInterface> Resolve(IServiceProvider provider) => key => resolver(provider, key);
+            services.Add(new(typeof(Func<string, TInterface>), Resolve, lifetime));
         }
     }
 }

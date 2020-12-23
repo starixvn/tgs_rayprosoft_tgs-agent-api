@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TGS.Apis.OperatorApi.Models.Messages.Authentications;
-using TGS.Apis.OperatorApi.Models.Messages.Players;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 
@@ -16,16 +15,16 @@ namespace TGS.Tests.ApiClients.Operators
 
     public sealed class PlayerApiClient : BaseApiClient, IPlayerApiClient
     {
-        public PlayerApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) 
-            :base(client, logger, json)
+        public PlayerApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
+            : base(client, logger, json)
         {
-            
         }
 
         Task<AuthResponse> IPlayerApiClient.GetBrandTokenAsync(AuthRequest request) =>
             ExecuteJsonRequestAsync<AuthRequest, AuthResponse>(HttpMethod.Post, "api/auth/jwt", request);
-                
-        Task<LoginResponse> IPlayerApiClient.PlayerLoginAsync(LoginRequest request, IReadOnlyDictionary<string, string> headers) => 
+
+        Task<LoginResponse> IPlayerApiClient.PlayerLoginAsync(LoginRequest request,
+            IReadOnlyDictionary<string, string> headers) =>
             ExecuteJsonRequestAsync<LoginRequest, LoginResponse>(HttpMethod.Post, "api/player/login", request, headers);
     }
 }

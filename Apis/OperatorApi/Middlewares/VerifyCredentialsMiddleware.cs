@@ -54,7 +54,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var secretKey = await brandOperations.GetBrandSecretKeyAsync(licenseeId);
             var signature = $"{licenseeId}:{currency}:{secretKey}";
 
-            handler.ValidateToken(token, new TokenValidationParameters
+            handler.ValidateToken(token, new()
                 {
                     ValidateIssuer = true,
                     ValidIssuer = Consts.Site,
@@ -65,7 +65,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                     ClockSkew = TimeSpan.Zero
                 },
                 exception => throw new InvalidCredentialsException(exception.Message),
-                _ => throw new InvalidCredentialsException("token expired"));
+                _ => throw new InvalidCredentialsException("Token is expired"));
 
             context.Items.Add(Core.Models.Consts.ContextItems.BrandId, licenseeId);
 

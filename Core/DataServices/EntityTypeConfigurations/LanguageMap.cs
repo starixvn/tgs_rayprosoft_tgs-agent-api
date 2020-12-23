@@ -44,10 +44,6 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.HasMany(l => l.Players)
-                .WithOne(p => p.Language)
-                .HasForeignKey(p => p.CultureCode);
-
             builder.HasMany(l => l.LicenseeLanguages)
                 .WithOne(bl => bl.Language)
                 .HasForeignKey(bl => bl.CultureCode);

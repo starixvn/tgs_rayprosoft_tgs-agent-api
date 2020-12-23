@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
+using static TGS.Core.Models.Enums.TgsApiError;
 
 namespace TGS.Core.Infrastructures.ErrorMappers
 {
@@ -14,95 +15,117 @@ namespace TGS.Core.Infrastructures.ErrorMappers
         private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
             new Dictionary<Type, TgsApiError>
             {
-                { typeof(PlayerDisabledException), TgsApiError.UserBlocked },
-                { typeof(PlayerNotFoundException), TgsApiError.PlayerNotFound },
-                { typeof(ArgumentException), TgsApiError.InvalidArguments },
-                { typeof(FormatException), TgsApiError.IncorrectFormat },
-                { typeof(InvalidAmountException), TgsApiError.InvalidAmount },
-                { typeof(InvalidOperationException), TgsApiError.SystemError },
-                { typeof(InvalidStatusException), TgsApiError.SystemError },
-                { typeof(InvalidGameActionException), TgsApiError.InvalidGameAction },
-                { typeof(GameProviderUnderMaintenanceException), TgsApiError.UnderMaintenance },
-                { typeof(GameUnderMaintenanceException), TgsApiError.UnderMaintenance },
-                { typeof(InvalidCredentialsException), TgsApiError.InvalidCredentials },
-                { typeof(ClientIdNotFoundException), TgsApiError.ClientIdNotFound },
-                { typeof(InvalidCaptchaException), TgsApiError.InvalidCaptcha },
+                {typeof(InvalidCredentialsException), InvalidCredentials},
+                {typeof(MissingTokenException), InvalidOrExpiredPlayerToken},
+                {typeof(PlayerLoginExpiredException), InvalidOrExpiredPlayerToken},
+                {typeof(InvalidCaptchaException), InvalidCaptcha},
+                {typeof(ClientIdNotFoundException), ClientIdNotFound},
+
+                {typeof(PlayerNotFoundException), PlayerNotFound},
+                {typeof(PlayerDisabledException), UserBlocked},
+                {typeof(CountryRestrictedException), CountryRestricted},
+                {typeof(CurrencyNotMatchingException), CurrencyMismatch},
+                {typeof(PlayerHasInsufficientFundsException), InsufficientFunds},
+                {typeof(InvalidInvitationCodeException), InvalidInvitationCode},
+
+                {typeof(InvalidGameActionException), InvalidGameAction},
+                {typeof(InvalidAmountException), InvalidAmount},
+
+                {typeof(ArgumentException), InvalidArguments},
+                {typeof(ModelBindingException), InvalidArguments},
+                {typeof(FormatException), IncorrectFormat},
+                {typeof(BrandUnderMaintenanceException), UnderMaintenance},
+                {typeof(GameProviderUnderMaintenanceException), UnderMaintenance},
+                {typeof(GameUnderMaintenanceException), UnderMaintenance},
+                {typeof(InvalidStatusException), InvalidStatus},
+
+                {typeof(InvalidOperationException), SystemError},
+                {typeof(OperationNotAllowedException), OperationNotAllowed},
+                {typeof(GameProviderApiErrorException), ProviderApiError}
             };
 
-        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, TgsApiError> TgsApiErrorByInvalidGameActionErrorCode =
-            new Dictionary<InvalidGameActionErrorCode, TgsApiError>
-            {
-                { Duplicate, TgsApiError.DuplicateTransaction },
-                { TransactionNotFound, TgsApiError.TransactionIdNotFound },
-                { TransactionBeingCancelledNotFound, TgsApiError.TransactionIdNotFound },
-                { TransactionBeingReferencedNotFound, TgsApiError.TransactionIdNotFound }
-            };
+        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, TgsApiError>
+            TgsApiErrorByInvalidGameActionErrorCode =
+                new Dictionary<InvalidGameActionErrorCode, TgsApiError>
+                {
+                    {Duplicate, DuplicateTransaction},
+                    {TransactionNotFound, TransactionIdNotFound},
+                    {TransactionBeingCancelledNotFound, TransactionIdNotFound},
+                    {TransactionBeingReferencedNotFound, TransactionIdNotFound},
+                    {RoundNotFound, RoundIdNotFound}
+                };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> HttpCodeByException =
-           new Dictionary<TgsApiError, int>
-           {
-               { TgsApiError.InvalidArguments, StatusCodes.Status500InternalServerError},
-               { TgsApiError.ClientIdNotFound, StatusCodes.Status401Unauthorized },
-               { TgsApiError.InvalidCredentials, StatusCodes.Status401Unauthorized},
-               { TgsApiError.InvalidCaptcha, StatusCodes.Status401Unauthorized},
-               { TgsApiError.PlayerNotFound, StatusCodes.Status401Unauthorized },
-               { TgsApiError.TransactionIdNotFound, StatusCodes.Status500InternalServerError },
-               { TgsApiError.DuplicateTransaction, StatusCodes.Status400BadRequest },
-               { TgsApiError.CurrencyMismatch, StatusCodes.Status500InternalServerError },
-               { TgsApiError.SystemError, StatusCodes.Status500InternalServerError },
-               { TgsApiError.UnderMaintenance, StatusCodes.Status503ServiceUnavailable },
-               { TgsApiError.OperationNotAllowed, StatusCodes.Status405MethodNotAllowed },
-               { TgsApiError.CountryRestricted, StatusCodes.Status403Forbidden },
-               { TgsApiError.TestPlayerStakeAmountCapExceeded, StatusCodes.Status500InternalServerError },
-           };
+            new Dictionary<TgsApiError, int>
+            {
+                {InvalidCredentials, Status401Unauthorized},
+                {InvalidOrExpiredPlayerToken, Status401Unauthorized},
+                {InvalidCaptcha, Status401Unauthorized},
+                {ClientIdNotFound, Status401Unauthorized},
+
+                {PlayerNotFound, Status401Unauthorized},
+                {UserBlocked, Status403Forbidden},
+                {CountryRestricted, Status403Forbidden},
+                {CurrencyMismatch, Status500InternalServerError},
+                {InsufficientFunds, Status500InternalServerError},
+                {InvalidInvitationCode, Status500InternalServerError},
+
+                {InvalidGameAction, Status500InternalServerError},
+                {TransactionIdNotFound, Status500InternalServerError},
+                {DuplicateTransaction, Status500InternalServerError},
+                {InvalidAmount, Status500InternalServerError},
+
+                {InvalidArguments, Status400BadRequest},
+                {IncorrectFormat, Status400BadRequest},
+                {UnderMaintenance, Status500InternalServerError},
+                {InvalidStatus, Status500InternalServerError},
+
+                {SystemError, Status500InternalServerError},
+                {OperationNotAllowed, Status405MethodNotAllowed},
+                {ProviderApiError, Status500InternalServerError}
+            };
 
         int IErrorMapper.GetApiErrorByException(Exception exception)
         {
             if (exception == null)
             {
-                return (int)TgsApiError.None;
+                return (int) TgsApiError.None;
             }
 
             if (exception is InvalidGameActionException e &&
-                TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out TgsApiError error))
+                TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
-                return (int)error;
+                return (int) error;
             }
 
             var type = exception.GetType();
-            if (!TgsApiErrorByException.TryGetValue(type, out error))
-            {
-                error = TgsApiError.SystemError;
-            }
-
-            return (int)error;
+            return TgsApiErrorByException.TryGetValue(type, out error) ? (int) error : (int) SystemError;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception)
         {
             if (exception == null)
             {
-                return StatusCodes.Status200OK;
+                return Status200OK;
             }
 
-            if (exception is not InvalidGameActionException e ||
-                !TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
+            int statusCode;
+            if (exception is InvalidGameActionException e &&
+                TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
-                var type = exception.GetType();
-                if (!TgsApiErrorByException.TryGetValue(type, out error))
-                {
-                    return StatusCodes.Status500InternalServerError;
-                }
+                return HttpCodeByException.TryGetValue(error, out statusCode)
+                    ? statusCode
+                    : Status500InternalServerError;
             }
 
-            return HttpCodeByException.TryGetValue(error, out var statusCode) ?
-                statusCode :
-                StatusCodes.Status500InternalServerError;
+            var type = exception.GetType();
+            return TgsApiErrorByException.TryGetValue(type, out error) &&
+                HttpCodeByException.TryGetValue(error, out statusCode)
+                    ? statusCode
+                    : Status500InternalServerError;
         }
 
-        string IErrorMapper.GetMessageByException(Exception exception)
-        {
-            return exception.Message;
-        }
+        string IErrorMapper.GetMessageByException(Exception exception) =>
+            exception.Message;
     }
 }

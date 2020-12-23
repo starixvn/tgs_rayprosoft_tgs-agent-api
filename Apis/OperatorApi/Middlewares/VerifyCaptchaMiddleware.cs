@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Attributes;
-using TGS.Apis.OperatorApi.Models.Messages.Players;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.Infrastructures.Extensions;
 
@@ -31,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             if (!bypassCaptcha)
             {
-                captchaService.Verify(request.Answer, request.Captcha);
+                await captchaService.VerifyAsync(request.Answer, request.Captcha);
             }
 
             await _next(context);
