@@ -34,6 +34,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                 .Select(x => new ScheduleModel
                 {
                     Id = x.Id,
+                    Status = x.Status,
                     BrandGameProviderId = x.BrandGameProviderId,
                     GameProviderName = x.BrandGameProvider.GameProvider.Name,
                     From = x.From,

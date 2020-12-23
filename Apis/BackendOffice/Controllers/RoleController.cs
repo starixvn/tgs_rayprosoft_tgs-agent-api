@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -74,7 +75,26 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (role == null)
             {
-                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
+                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
+            }
+
+            string menuSetting;
+
+            if (UserRoleType == RoleType.Admin)
+            {
+                var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
+                menuSetting = setting.Value;
+            }
+            else
+            {
+                var templateRole = await _roleQueries.GetSingleAsync(x => x.Id == role.TemplateId);
+
+                if (templateRole == null)
+                {
+                    return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
+                }
+
+                menuSetting = templateRole.MenuSetting;
             }
 
             var roleModel = new RoleModel
@@ -85,7 +105,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 DisplayName = role.DisplayName,
                 Description = role.Description,
                 IsRoot = role.IsRoot,
-                Menus = GetMenuSettingByString(role.MenuSetting),
+                Menus = GetMenuSettingAsync(menuSetting, role.MenuSetting),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
@@ -107,12 +127,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
             if (role == null)
             {
-                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NotFound}");
+                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
             }
 
             if (request.Name != role.Name && await _roleQueries.ExistsAsync(p => p.Name == request.Name))
             {
-                return CreateInvalidResponse<GetRoleResponse>($"{Resources.Role.NameExists}");
+                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
             role.Name = request.Name;
@@ -165,7 +185,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var newRole = CreateRole(request.Name, role.DisplayName, role.Description, role.ResellerId,
-                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting, role.IsRoot);
+                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting, role.IsRoot, role.TemplateId);
 
             await _roleCommands.CreateAsync(newRole);
             return CreateValidResponse<MessageResponse>();
@@ -180,34 +200,30 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
-            if (request.IsRoot && request.RoleType == RoleType.Brand &&
-                await _roleQueries.GetCountAsync(x => x.IsRoot && x.BrandId == request.BrandId) > 0)
+            switch (request.IsRoot)
             {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.BrandRootExisted);
-            }
+                case true when request.RoleType == RoleType.Brand &&
+                               await _roleQueries.GetCountAsync(x => x.IsRoot && x.BrandId == request.BrandId) > 0:
+                    return CreateInvalidResponse<GetRoleResponse>(Resources.Role.BrandRootExisted);
 
-            if (request.IsRoot && request.RoleType == RoleType.Licensee &&
-                await _roleQueries.GetCountAsync(x => x.IsRoot && x.LicenseeId == request.LicenseeId) > 0)
-            {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.LicenseeRootExisted);
-            }
+                case true when request.RoleType == RoleType.Licensee &&
+                               await _roleQueries.GetCountAsync(x => x.IsRoot && x.LicenseeId == request.LicenseeId) >
+                               0:
+                    return CreateInvalidResponse<GetRoleResponse>(Resources.Role.LicenseeRootExisted);
 
-            if (request.IsRoot && request.RoleType == RoleType.Reseller &&
-                await _roleQueries.GetCountAsync(x => x.IsRoot && x.ResellerId == request.ResellerId) > 0)
-            {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.ResellerRootExisted);
-            }
+                case true when request.RoleType == RoleType.Reseller &&
+                               await _roleQueries.GetCountAsync(x => x.IsRoot && x.ResellerId == request.ResellerId) >
+                               0:
+                    return CreateInvalidResponse<GetRoleResponse>(Resources.Role.ResellerRootExisted);
 
-            if (request.IsRoot && request.RoleType == RoleType.Admin &&
-                await _roleQueries.GetCountAsync(x =>
-                    x.IsRoot && x.ResellerId == null && x.LicenseeId == null && x.BrandId == null) > 0)
-            {
-                return CreateInvalidResponse<GetRoleResponse>(Resources.Role.RootExixted);
+                case true when request.RoleType == RoleType.Admin && await _roleQueries.GetCountAsync(x =>
+                    x.IsRoot && x.ResellerId == null && x.LicenseeId == null && x.BrandId == null) > 0:
+                    return CreateInvalidResponse<GetRoleResponse>(Resources.Role.RootExixted);
             }
 
             var role = CreateRole(request.Name, request.DisplayName, request.Description, request.ResellerId,
                 request.RoleType, request.LicenseeId, request.BrandId,
-                _jsonSerializationProvider.SerializeToString(request.Menus), request.IsRoot);
+                _jsonSerializationProvider.SerializeToString(request.Menus), request.IsRoot, request.TemplateId);
 
             await _roleCommands.CreateAsync(role);
             return CreateValidResponse<MessageResponse>();
@@ -236,10 +252,11 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
-            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting, bool isRoot) =>
+            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting, bool isRoot, Guid templateId) =>
             new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                TemplateId = templateId,
                 IsRoot = isRoot,
                 Name = name,
                 Description = description ?? name,
@@ -257,5 +274,32 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private MenuSetting[] GetMenuSettingByString(string setting) =>
             _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
+
+        private MenuSetting[] GetMenuSettingAsync(string template, string menuSetting)
+        {
+            var templateMenus = GetMenuSettingByString(template);
+            var roleMenus = GetMenuSettingByString(menuSetting);
+
+            foreach (var menu in templateMenus)
+            {
+                var roleMenuLevel1 = SetMenuDisplay(menu, roleMenus);
+
+                foreach (var subMenu in menu.SubMenus)
+                {
+                    var roleMenuLevel2 = SetMenuDisplay(subMenu, roleMenuLevel1?.SubMenus);
+
+                    foreach (var permission in subMenu.SubMenus) SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
+                }
+            }
+
+            return templateMenus;
+        }
+
+        private static MenuSetting SetMenuDisplay(MenuSetting menuTemplate, IEnumerable<MenuSetting> roleMenus)
+        {
+            var roleMenuLevel1 = roleMenus?.FirstOrDefault(p => p.Code == menuTemplate.Code);
+            menuTemplate.IsDisplay = roleMenuLevel1?.IsDisplay ?? false;
+            return roleMenuLevel1;
+        }
     }
 }

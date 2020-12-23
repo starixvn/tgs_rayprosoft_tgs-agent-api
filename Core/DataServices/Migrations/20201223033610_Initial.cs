@@ -221,6 +221,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleType = table.Column<byte>(type: "tinyint", nullable: false),
                     ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

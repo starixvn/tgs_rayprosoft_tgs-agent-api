@@ -586,7 +586,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var gameProviders = GetGameProviders(reseller.GameProviders);
 
-            return new Reseller()
+            return new Reseller
             {
                 Id = reseller.Id,
                 Code = reseller.Code,
@@ -630,7 +630,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             var gameProviders = GetGameProviders(gameProviderCodes);
 
-            return new Licensee()
+            return new Licensee
             {
                 Id = licensee.Id,
                 Code = licensee.Code,
@@ -720,7 +720,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
-            return new Brand()
+            return new Brand
             {
                 Id = brand.Id,
                 Code = brand.Code,
@@ -868,6 +868,8 @@ namespace TGS.Core.DataServices.DataInitializers
             return roles.Select(role => new Role
             {
                 Id = role.Id,
+                TemplateId = role.TemplateId,
+                IsRoot = role.IsRoot,
                 Name = role.Name,
                 DisplayName = role.Name,
                 ResellerId = role.ResellerId,

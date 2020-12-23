@@ -253,6 +253,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
             var request = new Fixture().Create<CopyRoleRequest>();
+            role.IsRoot = false;
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -301,6 +302,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<CopyRoleRequest>();
+            role.IsRoot = false;
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))

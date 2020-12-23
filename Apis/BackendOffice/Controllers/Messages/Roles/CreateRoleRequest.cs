@@ -6,6 +6,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
 {
     public class CreateRoleRequest
     {
+        public Guid TemplateId { get; set; }
         public string Name { get; set; }
         public string DisplayName { get; set; }
         public string Description { get; set; }

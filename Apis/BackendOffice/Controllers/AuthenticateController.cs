@@ -119,6 +119,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 new(Consts.UserInfo.UsernameKey, user.Username),
                 new(Consts.UserInfo.RolenameKey, user.Role.Name),
+                new(Consts.UserInfo.RoleTypeKey, user.Role.RoleType.ToString()),
                 new(Consts.UserInfo.ResellerKey, user.Role.ResellerId.ToString()),
                 new(Consts.UserInfo.LicenseeKey, user.Role.LicenseeId.ToString()),
                 new(Consts.UserInfo.BrandKey, user.Role.BrandId.ToString()),
