@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Application\Resources\BetLimit.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BetLimit.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\Brand.Designer.cs">
       <DependentUpon>Brand.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -29,14 +34,23 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BrandGame.resx</DependentUpon>
     </Compile>
-    <Compile Update="Application\Resources\BrandGameProviderSchedule.Designer.cs">
+    <Compile Update="Application\Resources\BrandGameProviderSchedule - Copy.Designer.cs">
+      <DependentUpon>BrandGameProviderSchedule.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>BrandGameProviderSchedule.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\BrandGameProvider.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BrandGameProvider.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Application\Resources\BetLimit.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>BetLimit.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\Brand.resx">
       <LastGenOutput>Brand.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
@@ -45,9 +59,13 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>BrandGame.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\BrandGameProvider.resx">
+      <LastGenOutput>BrandGameProvider.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\BrandGameProviderSchedule.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>BrandGameProviderSchedule.Designer.cs</LastGenOutput>
+      <LastGenOutput>BrandGameProvider.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

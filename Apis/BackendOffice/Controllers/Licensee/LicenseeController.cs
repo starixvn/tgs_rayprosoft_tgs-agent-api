@@ -87,6 +87,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                             Id = x.GameProviderId,
                             Name = x.GameProvider.Name
                         }).ToArray(),
+                    BetLimits = licensee.BetLimits
+                        .Select(x => new LicenseeBetLimitModel
+                        {
+                            Id = x.BetLimitId,
+                            CurrencyCode = x.BetLimit.CurrencyCode,
+                            MinBet = x.BetLimit.MinBet,
+                            MaxBet = x.BetLimit.MaxBet
+                        }).ToArray(),
 
                     Description = licensee.Description,
                     OperationalEmail = licensee.OperationalEmail,

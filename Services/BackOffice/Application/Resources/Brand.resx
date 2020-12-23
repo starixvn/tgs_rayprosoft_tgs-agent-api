@@ -148,4 +148,10 @@
   <data name="NameExists" xml:space="preserve">
     <value>Name exists already.</value>
   </data>
+  <data name="BetLimitDefaultRequired" xml:space="preserve">
+    <value>Default bet Limit is required.</value>
+  </data>
+  <data name="GameProviderBetLimitCountIncorrect" xml:space="preserve">
+    <value>Game provider bet limit count incorrect.</value>
+  </data>
 </root>

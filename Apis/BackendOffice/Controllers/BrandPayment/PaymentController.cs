@@ -104,11 +104,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<MessageResponse>(Resources.Payment.NotFound);
             }
 
-            if (vendor.Code == request.Code)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Payment.CodeExists);
-            }
-
             vendor.Name = request.Name;
             vendor.Description = request.Description;
             vendor.UpdatedByUsername = Username;

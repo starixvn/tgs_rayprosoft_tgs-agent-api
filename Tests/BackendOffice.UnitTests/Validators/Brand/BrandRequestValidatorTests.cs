@@ -78,5 +78,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
             result.ShouldHaveValidationErrorFor(request => request.BrandCultures)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.CultureRequired);
         }
+
+        [Test]
+        public void Should_have_error_when__brand_default_bet_limit_is_not_in_currencies()
+        {
+            var model = new BrandRequest
+            {
+                CurrencyCodes = new[] {"CNY", "RMB"},
+                BrandBetLimits = new[] {new BrandBetLimitModel {Id = 1, CurrencyCode = "CNY", IsDefault = false}}
+            };
+            var result = _validator.TestValidate(model);
+            result.ShouldHaveValidationErrorFor(request => request.CurrencyCodes)
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.BetLimitDefaultRequired);
+        }
     }
 }

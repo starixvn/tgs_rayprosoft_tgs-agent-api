@@ -3,8 +3,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule
 {
-    public class GetSchedulesRequest : PageableRequest, IRequest<PagedResponse<ScheduleModel>>
+    public class UpdateBrandGameProviderRequest : BrandGameProviderRequest, IRequest<MessageResponse>
     {
-        public string Keyword { get; set; }
     }
 }

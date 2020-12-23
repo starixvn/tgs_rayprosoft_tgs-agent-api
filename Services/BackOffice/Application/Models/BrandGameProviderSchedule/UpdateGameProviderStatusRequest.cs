@@ -5,15 +5,15 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule
 {
-    public class UpdateScheduleStatusRequest : BaseRequest, IRequest<MessageResponse>
+    public class UpdateGameProviderStatusRequest : BaseRequest, IRequest<MessageResponse>
     {
-        public UpdateScheduleStatusRequest(Guid scheduleId, Status status)
+        public UpdateGameProviderStatusRequest(Guid id, Status status)
         {
-            ScheduleId = scheduleId;
+            Id = id;
             Status = status;
         }
 
-        public Guid ScheduleId { get; set; }
+        public Guid Id { get; set; }
         public Status Status { get; set; }
     }
 }

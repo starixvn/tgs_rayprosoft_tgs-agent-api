@@ -40,8 +40,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     GameType = brandGame.Game.Type,
                     GameProviderName = brandGame.Game.GameProvider.Name,
                     Platform = brandGame.Game.PlatformType,
-                    //TODO: Get from game model property
-                    SupportHtml5 = true,
+                    SupportHtml5 = brandGame.Game.Html5,
                     EffectiveBettingProportion = brandGame.EffectiveBettingPercentage,
                     Rebate = brandGame.Rebate
                 }

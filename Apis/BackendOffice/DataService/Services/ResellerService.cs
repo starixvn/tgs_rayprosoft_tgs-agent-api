@@ -52,7 +52,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             reseller.Languages = GenerateResellerLanguages(reseller, request);
             reseller.Currencies = GenerateResellerCurrencies(reseller, request);
             reseller.GameProviders = GenerateResellerGameProviders(reseller, request);
-
+            reseller.BetLimits = GenerateResellerBetLimits(reseller, request);
 
             _repository.Resellers.AddAsync(reseller);
             return _repository.SaveChangesAsync();
@@ -72,6 +72,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository.ResellerLanguages.RemoveRange(reseller.Languages);
             _repository.ResellerCurrencies.RemoveRange(reseller.Currencies);
             _repository.ResellerGameProviders.RemoveRange(reseller.GameProviders);
+            _repository.ResellerBetLimits.RemoveRange(reseller.BetLimits);
 
             reseller.Code = request.Code;
             reseller.Name = request.Name;
@@ -82,16 +83,15 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             reseller.Languages = GenerateResellerLanguages(reseller, request);
             reseller.Currencies = GenerateResellerCurrencies(reseller, request);
             reseller.GameProviders = GenerateResellerGameProviders(reseller, request);
+            reseller.BetLimits = GenerateResellerBetLimits(reseller, request);
 
             _repository.Entry(reseller).State = EntityState.Modified;
 
             return _repository.SaveChangesAsync();
         }
 
-        IQueryable<Reseller> IResellerService.GetResellersAsync(bool tracking)
-        {
-            return tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
-        }
+        IQueryable<Reseller> IResellerService.GetResellersAsync(bool tracking) =>
+            tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
 
         Task IResellerService.ChangeStatusAsync(Reseller reseller, Status status, string username)
         {
@@ -104,10 +104,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        Task<bool> IResellerService.ExistsAsync(Expression<Func<Reseller, bool>> predicate)
-        {
-            return _repository.Resellers.AnyAsync(predicate);
-        }
+        Task<bool> IResellerService.ExistsAsync(Expression<Func<Reseller, bool>> predicate) =>
+            _repository.Resellers.AnyAsync(predicate);
 
         private HashSet<ResellerLanguage> GenerateResellerLanguages(Reseller reseller, ResellerRequest request)
         {
@@ -143,6 +141,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                         GameProviderId = x.Id
                     });
             return new HashSet<ResellerGameProvider>(resellerGameProviders);
+        }
+
+        private HashSet<ResellerBetLimit> GenerateResellerBetLimits(Reseller reseller, ResellerRequest request)
+        {
+            var resellerBetLimits = _repository.BetLimits
+                .Where(x => request.BetLimitIds.Contains(x.Id)).Select(x =>
+                    new ResellerBetLimit
+                    {
+                        ResellerId = reseller.Id,
+                        BetLimitId = x.Id
+                    });
+            return new HashSet<ResellerBetLimit>(resellerBetLimits);
         }
     }
 }

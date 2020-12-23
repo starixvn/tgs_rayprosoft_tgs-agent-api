@@ -12,5 +12,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller
         public Guid[] GameProviderIds { get; set; }
         public string[] CurrencyCodes { get; set; }
         public string[] CultureCodes { get; set; }
+        public int[] BetLimitIds { get; set; }
     }
 }

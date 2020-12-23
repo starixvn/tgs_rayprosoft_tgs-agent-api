@@ -23,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         }
 
         [HttpGet]
-        [Description("Get resellers: 公司列表")]
+        [Description("Get resellers: 總公司列表")]
         public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
         {
             return _service.GetResellersAsync()
@@ -84,6 +84,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                         {
                             Id = x.GameProviderId,
                             Name = x.GameProvider.Name
+                        }).ToArray(),
+                    BetLimits = reseller.BetLimits
+                        .Select(x => new ResellerBetLimitModel
+                        {
+                            Id = x.BetLimitId,
+                            CurrencyCode = x.BetLimit.CurrencyCode,
+                            MinBet = x.BetLimit.MinBet,
+                            MaxBet = x.BetLimit.MaxBet
                         }).ToArray(),
 
                     Description = reseller.Description,
