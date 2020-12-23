@@ -3,8 +3,6 @@ import { getTrans } from "../../i18n"
 
 export const Code = "gameproviders"
 
-export const View = "view"
-
 export const Update = "update"
 
 export const label = ({ codes, locale }) => {
@@ -12,14 +10,6 @@ export const label = ({ codes, locale }) => {
   code = code.toLowerCase()
 
   switch (code) {
-    case View:
-      return getTrans(
-        {
-          zh: "查看",
-          en: "View"
-        },
-        locale
-      )
     case Update:
       return getTrans({
         zh: "修改",

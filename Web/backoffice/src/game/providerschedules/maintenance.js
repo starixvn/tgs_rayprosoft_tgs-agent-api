@@ -2,13 +2,15 @@ import React, { useState, useEffect, useMemo } from "react"
 import { css, Stack, Heading, Box, Button } from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update as UpdateMenu } from "./menu"
+import { Update as UpdateMenu } from "../providers/menu"
 import { Disclosure } from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
-import { useUpdatePresetMaintenance } from "./client"
+import { useChangeGameProviderScheduleStatus } from "./client"
+
+export const MaintenanceStatus = {}
 
 export const EditPresetButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -17,6 +19,7 @@ export const EditPresetButton = ({ record, onSubmitted, ...props }) => {
     return null
   }
 
+  return null
   return (
     <>
       <Disclosure {...dialog}>
@@ -37,7 +40,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
     error,
     mutate,
     deleteCache
-  } = useUpdatePresetMaintenance(record?.id, submitData)
+  } = useChangeGameProviderScheduleStatus(record?.id, submitData)
 
   const reset = () => {
     deleteCache()

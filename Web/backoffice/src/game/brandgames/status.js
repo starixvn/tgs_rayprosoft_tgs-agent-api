@@ -10,7 +10,7 @@ import {
   DropdownMenu
 } from "bumbag"
 import { useFormikContext } from "formik"
-import { useChangeProviderStatus } from "./client"
+import { useUpdateBrandGameStatus } from "./client"
 import Alert from "../../dialog/Alert"
 import { Field } from "../../select/Field"
 import { useTrans, Trans } from "../../i18n"
@@ -77,7 +77,7 @@ export const StatusMenu = ({ record = {}, ...props }) => {
     error,
     deleteCache,
     mutate
-  } = useChangeProviderStatus(id, newState)
+  } = useUpdateBrandGameStatus(id, newState)
 
   const reset = () => {
     deleteCache()

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
-import { useFormikContext } from "formik"
+import { useForm, useFormContext } from "react-hook-form"
 import {
   css,
   Stack,
@@ -13,16 +13,22 @@ import {
 } from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update as UpdateMenu } from "./menu"
+import { Update as UpdateMenu } from "../providers/menu"
 import { EditDisclosure } from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
-import { useUpdateProvider } from "./client"
+import { useUpdateGameProviderSchedule } from "./client"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
-import { StatusMenuField } from "./status"
-import { DaySelectField } from "../../date/week"
-import { TimeSelectField } from "../../date/time"
+import { WeekDaySelect } from "../../date/week"
+import {
+  formatHourMinute,
+  TimeSelectField,
+  hourMinuteToDate
+} from "../../date/time"
+import HookFormDialog from "../../form/HookFormDialog"
+import parseDate from "date-fns/fp/parseISO"
+import { MaintenanceStatusToggleButton } from "./MaintenanceStatus"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -43,10 +49,23 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
 
 const EditDialog = ({ record, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
-  let { result, isLoading, error, mutate, deleteCache } = useUpdateProvider(
-    record?.id,
-    submitData
-  )
+  let {
+    result,
+    isLoading,
+    error,
+    mutate,
+    deleteCache
+  } = useUpdateGameProviderSchedule(record?.id, submitData)
+
+  const onSubmit = ({ from, to, ...formData }) => {
+    from = hourMinuteToDate(from)
+    to = hourMinuteToDate(to)
+    setSubmit({
+      ...formData,
+      from,
+      to
+    })
+  }
 
   const reset = () => {
     deleteCache()
@@ -58,10 +77,18 @@ const EditDialog = ({ record, dialog, ...props }) => {
     zh: "编辑",
     en: "Edit"
   })
+
+  let from = formatHourMinute(parseDate(record.from))
+  let to = formatHourMinute(parseDate(record.to))
+
   return (
-    <FormDialog
-      initialValues={{ ...record }}
-      onSubmit={setSubmit}
+    <HookFormDialog
+      defaultValues={{
+        ...record,
+        from,
+        to
+      }}
+      onSubmit={onSubmit}
       result={result}
       isLoading={isLoading}
       error={error}
@@ -80,13 +107,16 @@ const EditDialog = ({ record, dialog, ...props }) => {
       maxWidth="unset"
     >
       <EditBody record={record} />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
 const EditBody = ({ record = {} }) => {
-  let { name } = record
-  let { values } = useFormikContext()
+  let { gameProviderName } = record
+  let { watch } = useFormContext()
+  let from = watch("from")
+  let to = watch("to")
+
   return (
     <Stack orientation="vertical" width="500px">
       <Heading use="h5">
@@ -96,7 +126,7 @@ const EditBody = ({ record = {} }) => {
         <Label>
           <Trans zh="厂商" en="Vendor" />
         </Label>
-        <ValueBlock>{name}</ValueBlock>
+        <ValueBlock>{gameProviderName}</ValueBlock>
       </FieldValues>
 
       <Heading use="h5">
@@ -107,26 +137,26 @@ const EditBody = ({ record = {} }) => {
           <Trans zh="状态" en="Status" />
         </Label>
         <Box>
-          <StatusMenuField name="status" size="small" />
+          <MaintenanceStatusToggleButton name="status" required />
         </Box>
 
         <Label>
           <Trans zh="每周" en="Weekly" />
         </Label>
         <Box>
-          <DaySelectField name="day" />
+          <WeekDaySelect name="dayOfWeek" required />
         </Box>
 
         <Label>
           <Trans zh="开始时间" en="Start Time" />
         </Label>
         <Flex alignY="top" justifyContent="space-between">
-          <TimeSelectField name="start" max={values?.end} />
+          <TimeSelectField name="from" required max={to} />
           <Set orientation="horizontal">
             <Label marginRight="major-2">
               <Trans zh="结束时间" en="End Time" />
             </Label>
-            <TimeSelectField name="end" min={values?.start} />
+            <TimeSelectField name="to" required min={from} />
           </Set>
         </Flex>
       </FieldValues>
