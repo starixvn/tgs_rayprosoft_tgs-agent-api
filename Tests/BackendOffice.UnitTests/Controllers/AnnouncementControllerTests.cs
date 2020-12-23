@@ -399,7 +399,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Fixture CreateAnnouncementFixture()
         {
             var fixture = new Fixture();
-
+            fixture.Customize<Announcement>(u => u
+                .With(s => s.Brand, new Brand()));
             return fixture;
         }
     }

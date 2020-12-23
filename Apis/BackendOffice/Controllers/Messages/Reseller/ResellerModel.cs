@@ -14,6 +14,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller
         public ResellerGameProviderModel[] GameProviders { get; set; }
         public ResellerCurrencyModel[] Currencies { get; set; }
         public ResellerLanguageModel[] Languages { get; set; }
+        public ResellerBetLimitModel[] BetLimits { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }

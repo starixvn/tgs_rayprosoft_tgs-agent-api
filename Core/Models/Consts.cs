@@ -1,9 +1,13 @@
-﻿namespace TGS.Core.Models
+﻿using TGS.Core.Models.Enums;
+
+namespace TGS.Core.Models
 {
     public static class Consts
     {
         public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
+
+        public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
 
         public static class CachePrefix
         {
@@ -27,7 +31,7 @@
         public static class TokenExpireSeconds
         {
             public const int PlayerLogin = 3600 * 12; // 12 hours
-            public const int Jwt = 60 * 60;        // 1 hours
+            public const int Jwt = 60 * 60; // 1 hours
         }
 
         public static class GameProvider

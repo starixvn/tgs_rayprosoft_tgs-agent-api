@@ -16,17 +16,17 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
     [TestFixture]
     [Parallelizable]
-    public class BrandGameProviderScheduleControllerTests : BaseTests
+    public class BrandGameProviderControllerTests : BaseTests
     {
         [SetUp]
         public override void Setup()
         {
             base.Setup();
-            _controller = new BrandGameProviderScheduleController(
+            _controller = new BrandGameProviderController(
                 _mediatorMock.Object);
         }
 
-        private BrandGameProviderScheduleController _controller;
+        private BrandGameProviderController _controller;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]
@@ -34,10 +34,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Get_Schedules(bool showAll)
         {
             var list = CreateScheduleModelFixture()
-                .CreateMany<ScheduleModel>(99)
+                .CreateMany<BrandGameProviderModel>(99)
                 .ToArray();
 
-            var request = new GetSchedulesRequest
+            var request = new GetBrandGameProvidersRequest
             {
                 Keyword = "keyword",
                 Page = 1,
@@ -52,14 +52,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
             _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetSchedulesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<ScheduleModel>
+                .Setup(m => m.Send(It.IsAny<GetBrandGameProvidersRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PagedResponse<BrandGameProviderModel>
                 {
                     Valid = true,
                     Items = expectedRoles
                 });
 
-            var response = await _controller.GetBrandGameProviderSchedulesAsync(request);
+            var response = await _controller.GetBrandGameProvidersAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
@@ -68,7 +68,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].GameProviderName.Should().Be(expectedRoles[i].GameProviderName);
             }
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetSchedulesRequest>(), It.IsAny<CancellationToken>()));
+            _mediatorMock.Verify(x => x.Send(It.IsAny<GetBrandGameProvidersRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [Test]
@@ -101,17 +101,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Update_Schedule()
         {
-            var schedule = CreateScheduleModelFixture().Create<ScheduleModel>();
-            var request = new Fixture().Create<UpdateScheduleRequest>();
+            var schedule = CreateScheduleModelFixture().Create<BrandGameProviderModel>();
+            var request = new Fixture().Create<UpdateBrandGameProviderRequest>();
 
             _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdateScheduleRequest>(), It.IsAny<CancellationToken>()))
+                .Setup(m => m.Send(It.IsAny<UpdateBrandGameProviderRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new MessageResponse {Valid = true});
 
-            var response = await _controller.UpdateBrandGameProviderScheduleAsync(schedule.Id, request);
+            var response = await _controller.UpdateBrandGameProviderAsync(schedule.Id, request);
 
             response.Valid.Should().BeTrue();
-            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateScheduleRequest>(), It.IsAny<CancellationToken>()));
+            _mediatorMock.Verify(x =>
+                x.Send(It.IsAny<UpdateBrandGameProviderRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [Test]

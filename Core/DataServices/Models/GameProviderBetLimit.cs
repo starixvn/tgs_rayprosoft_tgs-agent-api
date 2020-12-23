@@ -23,8 +23,6 @@ namespace TGS.Core.DataServices.Models
 
         public string ExternalSetting { get; set; }
 
-        public bool IsDefault { get; set; }
-
         public virtual ICollection<BrandGroupGameProviderBetLimit> BrandGroupBetLimits { get; set; }
     }
 }

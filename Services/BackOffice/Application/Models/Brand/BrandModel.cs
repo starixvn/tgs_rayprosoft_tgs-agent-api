@@ -14,6 +14,9 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public BrandGameProviderModel[] GameProviders { get; set; }
         public BrandCurrencyModel[] Currencies { get; set; }
         public BrandLanguageModel[] Languages { get; set; }
+        public BrandBetLimitModel[] BetLimits { get; set; }
+        public BrandGameModel[] BrandGames { get; set; }
+        public BrandGroupModel[] BrandGroups { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
