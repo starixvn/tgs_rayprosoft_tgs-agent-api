@@ -7,13 +7,13 @@ namespace TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule
 {
     public class UpdateScheduleStatusRequest : BaseRequest, IRequest<MessageResponse>
     {
-        public UpdateScheduleStatusRequest(Guid scheduleId, SwitchStatus status)
+        public UpdateScheduleStatusRequest(Guid scheduleId, Status status)
         {
             ScheduleId = scheduleId;
             Status = status;
         }
 
         public Guid ScheduleId { get; set; }
-        public SwitchStatus Status { get; set; }
+        public Status Status { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Models
         public virtual BrandGameProvider BrandGameProvider { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
-        public SwitchStatus Status { get; set; }
+        public Status Status { get; set; }
         public DayOfWeek? DayOfWeek { get; set; }
         public bool IsDefault { get; set; }
     }
