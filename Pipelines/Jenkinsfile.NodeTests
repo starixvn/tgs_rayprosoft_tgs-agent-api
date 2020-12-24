@@ -9,6 +9,6 @@ node('hwzx-cmp') {
       echo "3.Build Stage"
     }
     stage('Deploy') {
-      echo "4\. Deploy Stage"
+      echo "4. Deploy Stage"
     }
 }
