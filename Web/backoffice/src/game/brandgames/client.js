@@ -17,7 +17,11 @@ export const useBrandGameList = (searchParams) => {
 
 export const useBrandGame = (id) => {
   let url = id ? `${API}/${id}` : undefined
-  return useGet(url)
+  let { data, ...result } = useGet(url)
+  return {
+    data: data?.brandGame,
+    ...result
+  }
 }
 
 export const useUpdateBrandGame = (id, data) => {
@@ -28,12 +32,14 @@ export const useUpdateBrandGame = (id, data) => {
 export const useUpdateBrandGameTag = (data) => {
   let url =
     data?.id && data?.tag
-      ? `${API}/${id}/${data.tag}/${Boolean(data.enabled).toString()}`
+      ? `${API}/${data.id}/${data.tag}/${Boolean(data.enabled).toString()}`
       : undefined
 
   return usePut(url)
 }
 
-export const useUpdateBrandGameStatus = () => {
-  console.warn("TODO: useUpdateBrandGameStatus")
+export const useChangeBrandGameStatus = (data) => {
+  let url =
+    data?.id && data?.status ? `${API}/${data.id}/${data.status}` : undefined
+  return usePut(url)
 }

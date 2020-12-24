@@ -32,6 +32,6 @@ export const GamePlatformLabel = ({ value }) => {
       return <Trans {...MobileTrans} />
 
     default:
-      return value
+      return value ?? null
   }
 }

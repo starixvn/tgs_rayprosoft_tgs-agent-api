@@ -32,8 +32,9 @@ import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
 import { GameTypeLabel } from "../games/GameType"
 import { GamePlatformLabel } from "../games/GamePlatform"
-import { GameTag, GameTagSwitch } from "../games/GameTag"
-import { GameStatusToggleSwitch } from "../games/GameStatus"
+import { GameTag } from "../games/GameTag"
+import { GameTagSwitch } from "./GameTagSwitch"
+import { GameStatusToggleSwitch } from "./GameStatusToggleSwitch"
 
 export { Code } from "./menu"
 
@@ -237,7 +238,8 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
       }
     },
     {
-      accessor: "isHot",
+      id: "isHot",
+      accessor: (record) => record,
       Header: <Trans zh="热门游戏" en="Hot" />,
       disableSortBy: true,
       headCell: {
@@ -247,11 +249,13 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
+        let { id, isHot } = value
         return (
           <Text.Block whiteSpace="nowrap">
             <GameTagSwitch
+              id={id}
               tag={GameTag.Hot}
-              checked={value}
+              checked={isHot}
               onSubmitted={mutate}
             />
           </Text.Block>
@@ -259,7 +263,8 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
       }
     },
     {
-      accessor: "isNew",
+      id: "isNew",
+      accessor: (record) => record,
       Header: <Trans zh="最新游戏" en="New" />,
       disableSortBy: true,
       headCell: {
@@ -269,11 +274,13 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
+        let { id, isNew } = value
         return (
           <Text.Block whiteSpace="nowrap">
             <GameTagSwitch
+              id={id}
               tag={GameTag.New}
-              checked={value}
+              checked={isNew}
               onSubmitted={mutate}
             />
           </Text.Block>
@@ -281,7 +288,8 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
       }
     },
     {
-      accessor: "isRecommend",
+      id: "isRecommend",
+      accessor: (record) => record,
       Header: <Trans zh="推荐游戏" en="Recommend" />,
       disableSortBy: true,
       headCell: {
@@ -291,11 +299,13 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
+        let { id, isRecommend } = value
         return (
           <Text.Block whiteSpace="nowrap">
             <GameTagSwitch
+              id={id}
               tag={GameTag.Recommend}
-              checked={value}
+              checked={isRecommend}
               onSubmitted={mutate}
             />
           </Text.Block>
@@ -303,7 +313,8 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
       }
     },
     {
-      accessor: "status",
+      id: "status",
+      accessor: (record) => record,
       Header: <Trans zh="状态" en="Status" />,
       disableSortBy: true,
       headCell: {
@@ -313,9 +324,14 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
+        let { id, status } = value
         return (
           <Box alignX="center">
-            <GameStatusToggleSwitch value={value} />
+            <GameStatusToggleSwitch
+              id={id}
+              value={status}
+              onSubmitted={mutate}
+            />
           </Box>
         )
       }

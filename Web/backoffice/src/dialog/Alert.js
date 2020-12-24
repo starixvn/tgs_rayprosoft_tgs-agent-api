@@ -20,7 +20,7 @@ import { Trans } from "../i18n"
 
 const BumbagZIndex = 19900410
 
-export default ({
+export const AlertDialog = ({
   title,
   errors = [],
   visible = true,
@@ -64,3 +64,5 @@ export default ({
     </Modal.State>
   )
 }
+
+export default AlertDialog

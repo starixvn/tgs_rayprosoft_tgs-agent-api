@@ -140,6 +140,6 @@ export const GameTypeLabel = ({ value }) => {
       return <Trans {...TableGameTrans} />
 
     default:
-      return value
+      return value ?? null
   }
 }
