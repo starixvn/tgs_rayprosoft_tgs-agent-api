@@ -94,7 +94,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.BrandGame.GameType.Should().Be(brandGame.GameType);
             response.BrandGame.Platform.Should().Be(brandGame.Platform);
             response.BrandGame.SupportHtml5.Should().Be(brandGame.SupportHtml5);
-            response.BrandGame.EffectiveBettingProportion.Should().Be(brandGame.EffectiveBettingProportion);
+            response.BrandGame.EffectiveBettingPercentage.Should().Be(brandGame.EffectiveBettingPercentage);
             response.BrandGame.Rebate.Should().Be(brandGame.Rebate);
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<GetBrandGameRequest>(), It.IsAny<CancellationToken>()));
