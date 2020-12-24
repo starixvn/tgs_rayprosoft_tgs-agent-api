@@ -13,86 +13,86 @@ import { useTrans, Trans } from "../../i18n"
 
 const Sportsbook = "Sportsbook"
 const SportsbookTrans = {
-  zh: "Sportsbook",
+  zh: "体育竞赛",
   en: "Sportsbook"
 }
 
 const VirtualSports = "VirtualSports"
 const VirtualSportsTrans = {
-  zh: "VirtualSports",
-  en: "VirtualSports"
+  zh: "虚拟体育",
+  en: "Virtual Sports"
 }
 
 const ESports = "ESports"
 const ESportsTrans = {
-  zh: "ESports",
-  en: "ESports"
+  zh: "电竞体育",
+  en: "E-sports"
 }
 
 const LiveDealer = "LiveDealer"
 const LiveDealerTrans = {
-  zh: "LiveDealer",
-  en: "LiveDealer"
+  zh: "真人娱乐",
+  en: "Live Dealer"
 }
 
 const LiveDealerLobby = "LiveDealerLobby"
 const LiveDealerLobbyTrans = {
-  zh: "LiveDealerLobby",
-  en: "LiveDealerLobby"
+  zh: "真人视讯大厅",
+  en: "Live Dealer Lobby"
 }
 
 const CardGame = "CardGame"
 const CardGameTrans = {
-  zh: "CardGame",
-  en: "CardGame"
+  zh: "棋牌游戏",
+  en: "Card Game"
 }
 
 const CardGameLobby = "CardGameLobby"
 const CardGameLobbyTrans = {
-  zh: "CardGameLobby",
-  en: "CardGameLobby"
+  zh: "棋牌游戏大厅",
+  en: "Card Game Lobby"
 }
 
 const Fishing = "Fishing"
 const FishingTrans = {
-  zh: "Fishing",
-  en: "Fishing"
+  zh: "捕鱼游戏",
+  en: "Fishing Game"
 }
 
 const FishingLobby = "FishingLobby"
 const FishingLobbyTrans = {
-  zh: "FishingLobby",
-  en: "FishingLobby"
+  zh: "捕鱼游戏大厅",
+  en: "Fishing Game Lobby"
 }
 
 const Arcade = "Arcade"
 const ArcadeTrans = {
-  zh: "Arcade",
-  en: "Arcade"
+  zh: "街机游戏",
+  en: "Arcade Game"
 }
 
 const ArcadeLobby = "ArcadeLobby"
 const ArcadeLobbyTrans = {
-  zh: "ArcadeLobby",
-  en: "ArcadeLobby"
+  zh: "接机游戏大厅",
+  en: "Arcade Game Lobby"
 }
 
 const Slot = "Slot"
 const SlotTrans = {
-  zh: "Slot",
-  en: "Slot"
+  zh: "电子游艺",
+  en: "Slot Game"
 }
 
 const Lottery = "Lottery"
 const LotteryTrans = {
-  zh: "Lottery",
+  zh: "彩票游戏",
   en: "Lottery"
 }
 
 const TableGame = "TableGame"
 const TableGameTrans = {
-  zh: "TableGame",
-  en: "TableGame"
+  zh: "桌面游戏",
+  en: "Table Game"
 }
 
 export const GameTypeLabel = ({ value }) => {

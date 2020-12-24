@@ -28,7 +28,7 @@ import {
 } from "../../date/time"
 import HookFormDialog from "../../form/HookFormDialog"
 import parseDate from "date-fns/fp/parseISO"
-import { MaintenanceStatusToggleButton } from "./MaintenanceStatus"
+import { MaintenanceStatusToggleButton } from "./ScheduleStatus"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -137,7 +137,7 @@ const EditBody = ({ record = {} }) => {
           <Trans zh="状态" en="Status" />
         </Label>
         <Box>
-          <MaintenanceStatusToggleButton name="status" required />
+          <MaintenanceStatusToggleButton name="scheduleStatus" required />
         </Box>
 
         <Label>

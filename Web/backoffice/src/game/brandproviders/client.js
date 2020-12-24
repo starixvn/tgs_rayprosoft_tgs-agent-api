@@ -8,7 +8,7 @@ import {
   usePostFormData
 } from "../../client"
 
-const API = "/api/brandgameproviderschedule"
+const API = "/api/brandgameprovider"
 
 export const useGameProviderScheduleList = (searchParams) => {
   let url = searchParams ? urlWith(searchParams, API) : ""

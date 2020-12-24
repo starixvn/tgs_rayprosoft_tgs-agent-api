@@ -90,8 +90,8 @@ services:
 
   backoffice-site:
     build:
-      context: ./Web/backoffice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Web/backoffice/Dockerfile
     image: backoffice-site
     container_name: backoffice-site
     labels:
