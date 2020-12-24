@@ -10,27 +10,32 @@ import {
 
 const API = "/api/brandgameprovider"
 
-export const useGameProviderScheduleList = (searchParams) => {
+export const useBrandGameProviderList = (searchParams) => {
   let url = searchParams ? urlWith(searchParams, API) : ""
   return useGet(url)
 }
 
-export const useUpdateGameProviderSchedule = (id, data) => {
+export const useUpdateBrandGameProvider = (id, data) => {
   let url = id ? `${API}/${id}` : ""
   return usePutData(url, data)
 }
 
-export const useGameProviderSchedulePresetMaintenanceList = (id) => {
+export const useBrandGameProviderPresetMaintenanceList = (id) => {
   let url = id ? `${API}/${id}/defaultTimes` : ""
-  return useGet(url)
+  let { data, ...result } = useGet(url)
+
+  return {
+    items: data?.defaultTimes,
+    ...result
+  }
 }
 
-export const useUpdateGameProviderSchedulePresetMaintenance = (id, data) => {
+export const useUpdateBrandGameProviderPresetMaintenance = (id, data) => {
   let url = id ? `${API}/${id}/defaultTimes` : ""
   return usePutData(url, data)
 }
 
-export const useChangeGameProviderScheduleStatus = (id, status) => {
+export const useChangeBrandGameProviderScheduleStatus = (id, status) => {
   let url = id && status ? `${API}/${id}/${status}` : ""
   return usePut(url)
 }

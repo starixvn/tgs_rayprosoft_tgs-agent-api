@@ -14,13 +14,13 @@ import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
-import { useGameProviderScheduleList } from "./client"
+import { useBrandGameProviderList } from "./client"
 import { useFormattedTimeString } from "../../date/format"
 import { useFormattedDay } from "../../date/week"
 import formatISO from "date-fns/fp/formatISO"
 import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
-import { EditPresetButton } from "./maintenance"
+import { EditPresetButton } from "./PresetMaintenance"
 
 export { Code }
 
@@ -41,9 +41,7 @@ const Body = () => {
   })
   let { pageIndex, pageSize, keyword } = state
 
-  let { data, isLoading, mutate } = useGameProviderScheduleList(
-    toApiParams(state)
-  )
+  let { data, isLoading, mutate } = useBrandGameProviderList(toApiParams(state))
 
   let columns = useColumns({ items: data?.items, mutate })
 
@@ -199,7 +197,7 @@ const useColumns = ({ items = [], mutate }) => {
         return (
           <Set orientation="vertical" alignX="center">
             <EditButton record={value} onSubmitted={mutate} />
-            <EditPresetButton />
+            <EditPresetButton record={value} onSubmitted={mutate} />
           </Set>
         )
       }

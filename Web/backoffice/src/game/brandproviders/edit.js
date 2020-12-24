@@ -16,7 +16,7 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "../providers/menu"
 import { EditDisclosure } from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
-import { useUpdateGameProviderSchedule } from "./client"
+import { useUpdateBrandGameProvider } from "./client"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
@@ -55,7 +55,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
     error,
     mutate,
     deleteCache
-  } = useUpdateGameProviderSchedule(record?.id, submitData)
+  } = useUpdateBrandGameProvider(record?.id, submitData)
 
   const onSubmit = ({ from, to, ...formData }) => {
     from = hourMinuteToDate(from)

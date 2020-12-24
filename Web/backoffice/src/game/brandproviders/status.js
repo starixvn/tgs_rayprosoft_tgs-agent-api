@@ -10,7 +10,7 @@ import {
   DropdownMenu
 } from "bumbag"
 import { useForm, useFormContext, Controller } from "react-hook-form"
-import { useChangeGameProviderScheduleStatus } from "./client"
+import { useChangeBrandGameProviderScheduleStatus } from "./client"
 import Alert from "../../dialog/Alert"
 import { useTrans, Trans } from "../../i18n"
 
@@ -70,7 +70,7 @@ export const StatusMenu = ({ record = {}, onSubmitted, ...props }) => {
     error,
     deleteCache,
     mutate
-  } = useChangeGameProviderScheduleStatus(id, newState)
+  } = useChangeBrandGameProviderScheduleStatus(id, newState)
 
   const reset = () => {
     deleteCache()

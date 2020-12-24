@@ -10,7 +10,7 @@ import {
   DropdownMenu
 } from "bumbag"
 import { useForm, useFormContext, Controller } from "react-hook-form"
-import { useChangeGameProviderScheduleStatus } from "./client"
+import { useChangeBrandGameProviderScheduleStatus } from "./client"
 import Alert from "../../dialog/Alert"
 import { useTrans, Trans } from "../../i18n"
 
@@ -26,7 +26,12 @@ const DisabledTrans = {
   en: Disabled
 }
 
-export const ScheduleStatus = ({ value = "" }) => {
+export const ScheduleStatus = {
+  Enabled,
+  Disabled
+}
+
+export const ScheduleStatusLabel = ({ value = "" }) => {
   switch (value) {
     case Enabled:
       return <Trans {...EnabledTrans} />
@@ -78,7 +83,7 @@ export const MaintenanceStatusToggleButton = ({
               setValue(name, status)
             }}
           >
-            <ScheduleStatus value={value} />
+            <ScheduleStatusLabel value={value} />
           </Button>
         )
       }}

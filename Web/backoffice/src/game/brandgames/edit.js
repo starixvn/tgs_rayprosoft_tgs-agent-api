@@ -51,7 +51,9 @@ const EditDialog = ({ record = {}, dialog, ...props }) => {
   let {
     data: brandGame,
     isLoading: isLoadingBrandGame,
-    error: brandGameError
+    error: brandGameError,
+    mutate: mutatebrandGame,
+    deleteCache: deleteBrandGameCache
   } = useBrandGame(id)
 
   let [submitData, setSubmit] = useState()
@@ -65,7 +67,9 @@ const EditDialog = ({ record = {}, dialog, ...props }) => {
   }
 
   const reset = () => {
-    deleteCache()
+    mutatebrandGame(undefined, false)
+    deleteBrandGameCache()
+
     mutate(undefined, false)
     setSubmit(undefined)
   }
@@ -100,10 +104,7 @@ const EditDialog = ({ record = {}, dialog, ...props }) => {
       showActionButtons={false}
       dialog={dialog}
       footer={
-        <ConfirmButtonFooter
-          isLoading={isLoadingBrandGame}
-          disabled={isLoadingBrandGame}
-        />
+        <ConfirmButtonFooter isLoading={isLoading} disabled={isLoading} />
       }
       maxWidth="unset"
     >
@@ -193,7 +194,7 @@ const EditBody = ({ record = {} }) => {
         </Label>
         <ValueBlock>
           <HookFormInputField
-            name="effectiveBettingProportion"
+            name="effectiveBettingPercentage"
             type="number"
             registerOptions={{
               valueAsNumber: true
