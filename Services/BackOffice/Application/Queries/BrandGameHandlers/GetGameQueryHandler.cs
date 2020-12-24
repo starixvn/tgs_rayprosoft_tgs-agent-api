@@ -41,8 +41,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     GameProviderName = brandGame.Game.GameProvider.Name,
                     Platform = brandGame.Game.PlatformType,
                     SupportHtml5 = brandGame.Game.Html5,
-                    EffectiveBettingProportion = brandGame.EffectiveBettingPercentage,
-                    Rebate = brandGame.Rebate
+                    EffectiveBettingProportion = brandGame.EffectiveBettingPercentage ?? 0,
+                    Rebate = brandGame.Rebate ?? false
                 }
             };
         }
