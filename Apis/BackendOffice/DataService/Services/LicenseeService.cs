@@ -63,6 +63,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             licensee.Languages = GenerateLicenseeLanguages(licensee, request);
             licensee.Currencies = GenerateLicenseeCurrencies(licensee, request);
             licensee.GameProviders = GenerateLicenseeGameProviders(licensee, request);
+            licensee.BetLimits = GenerateLicenseeBetLimits(licensee, request);
 
             _repository.Licensees.AddAsync(licensee);
             return _repository.SaveChangesAsync();
@@ -77,21 +78,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(licensee).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<Licensee> ILicenseeService.GetLicenseesAsync(bool tracking)
-        {
-            return tracking ? _repository.Licensees : _repository.Licensees.AsNoTracking();
-        }
+        IQueryable<Licensee> ILicenseeService.GetLicenseesAsync(bool tracking) =>
+            tracking ? _repository.Licensees : _repository.Licensees.AsNoTracking();
 
-        Task<bool> ILicenseeService.ExistsAsync(Expression<Func<Licensee, bool>> predicate)
-        {
-            return _repository.Licensees.AnyAsync(predicate);
-        }
+        Task<bool> ILicenseeService.ExistsAsync(Expression<Func<Licensee, bool>> predicate) =>
+            _repository.Licensees.AnyAsync(predicate);
 
         Task ILicenseeService.UpdateLicenseeAsync(Licensee licensee, UpdateLicenseeRequest request, string username)
         {
             _repository.LicenseeLanguages.RemoveRange(licensee.Languages);
             _repository.LicenseeCurrencies.RemoveRange(licensee.Currencies);
             _repository.LicenseeGameProviders.RemoveRange(licensee.GameProviders);
+            _repository.LicenseeBetLimits.RemoveRange(licensee.BetLimits);
 
             licensee.Code = request.Code;
             licensee.Name = request.Name;
@@ -102,6 +100,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             licensee.Languages = GenerateLicenseeLanguages(licensee, request);
             licensee.Currencies = GenerateLicenseeCurrencies(licensee, request);
             licensee.GameProviders = GenerateLicenseeGameProviders(licensee, request);
+            licensee.BetLimits = GenerateLicenseeBetLimits(licensee, request);
 
             _repository.Entry(licensee).State = EntityState.Modified;
 
@@ -142,6 +141,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                         GameProviderId = x.Id
                     });
             return new HashSet<LicenseeGameProvider>(licenseeGameProviders);
+        }
+
+        private HashSet<LicenseeBetLimit> GenerateLicenseeBetLimits(Licensee licensee, LicenseeRequest request)
+        {
+            var licenseeBetLimits = _repository.BetLimits
+                .Where(x => request.BetLimits.Contains(x.Id)).Select(x =>
+                    new LicenseeBetLimit
+                    {
+                        LicenseeId = licensee.Id,
+                        BetLimitId = x.Id
+                    });
+            return new HashSet<LicenseeBetLimit>(licenseeBetLimits);
         }
     }
 }

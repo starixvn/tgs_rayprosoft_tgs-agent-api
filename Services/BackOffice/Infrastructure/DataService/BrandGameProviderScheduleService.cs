@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices;
 using TGS.Core.DataServices.Models;
-using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
@@ -62,7 +61,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 BrandGameProviderId = request.BrandGameProviderId,
                 From = x.From,
                 To = x.To,
-                Status = SwitchStatus.Enabled,
+                Status = request.ScheduleStatus,
                 IsDefault = false
             }).ToArray();
 

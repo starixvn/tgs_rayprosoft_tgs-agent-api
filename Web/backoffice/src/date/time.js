@@ -12,18 +12,14 @@ import addMinutes from "date-fns/addMinutes"
 import setHours from "date-fns/setHours"
 import setMinutes from "date-fns/setMinutes"
 import { faClock } from "@fortawesome/free-regular-svg-icons"
+import { useForm, useFormContext } from "react-hook-form"
 
 export const TimeIcon = () => <Icon icon={faClock} type="font-awesome" />
 
-/*
-export const TimeSelect = ({ min, max, ...props }) => {
-  let options = rangeOptions()
-  return <Select options={options} {...props} />
-}
-*/
-
 export const TimeSelectField = ({
   name,
+  selectRef,
+  required,
   min,
   max,
   addonBefore = (
@@ -33,44 +29,41 @@ export const TimeSelectField = ({
   ),
   ...props
 }) => {
-  /* TODO: use min and max range options?
-  let minDate = toDate(min, startOfDay(new Date()))
-  let maxDate = toDate(max, endOfDay(new Date()))
-  let options = rangeOptions(minDate, maxDate)
-    */
-  let minDate = toDate(min, startOfDay(new Date()))
-  let maxDate = toDate(max, endOfDay(new Date()))
-  let options = rangeOptions()
-  return (
-    <Field
-      name={name}
-      validate={(value) => {
-        if (value && minDate && !isAfter(toDate(value), minDate)) {
-          return "min"
-        }
+  let minDate = hourMinuteToDate(min, startOfDay(new Date()))
+  let maxDate = hourMinuteToDate(max, endOfDay(new Date()))
+  let options = rangeOptions() //rangeOptions(minDate, maxDate)
 
-        if (value && maxDate && !isBefore(toDate(value), maxDate)) {
-          return "max"
-        }
-      }}
-      {...props}
-    >
-      {({ field, form, state, validationText }) => {
-        // validationText={validationText}
-        return (
-          <SelectField.Formik
-            options={options}
-            addonBefore={addonBefore}
-            state={state}
-            {...field}
-          />
-        )
-      }}
-    </Field>
+  let { register, errors } = useFormContext()
+
+  const validate = (value) => {
+    if (value && minDate && !isAfter(hourMinuteToDate(value), minDate)) {
+      return "min"
+    }
+
+    if (value && maxDate && !isBefore(hourMinuteToDate(value), maxDate)) {
+      return "max"
+    }
+  }
+
+  if (!selectRef) {
+    selectRef = register({ required, validate })
+  }
+
+  let error = errors?.[name]
+  let state = error && "danger"
+  return (
+    <SelectField
+      name={name}
+      selectRef={selectRef}
+      required={required}
+      options={options}
+      addonBefore={addonBefore}
+      state={state}
+    />
   )
 }
 
-const toDate = (value = "", defaultValue) => {
+export const hourMinuteToDate = (value = "", defaultValue) => {
   if (value) {
     let [hours, minutes] = value.split(":")
     value = setHours(new Date(), parseInt(hours))
@@ -80,6 +73,8 @@ const toDate = (value = "", defaultValue) => {
   return defaultValue
 }
 
+export const formatHourMinute = (date) => format(date, "HH:mm")
+
 const rangeOptions = (
   start = startOfDay(new Date()),
   end = endOfDay(new Date()),
@@ -87,7 +82,7 @@ const rangeOptions = (
 ) => {
   let options = []
   while (isBefore(start, end)) {
-    let time = format(start, "HH:mm")
+    let time = formatHourMinute(start)
     options.push({
       label: time,
       value: time

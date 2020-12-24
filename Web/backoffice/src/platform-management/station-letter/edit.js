@@ -12,7 +12,8 @@ import {
   Input,
   Set,
   Popover,
-  List
+  List,
+  useModalState
 } from "bumbag"
 import {
   Create as CreateMenu,
@@ -34,12 +35,16 @@ import {
 import { CancelText } from "../../button/ActionButtons"
 import TargetSelectField, {
   AllPlayers,
-  DesignatedPlayers
+  DesignatedPlayers,
+  TargetSelect
 } from "./TargetSelectField"
 import Alert from "../../dialog/Alert"
+import { useForm, useFormContext, Controller } from "react-hook-form"
+import HookFormInputField from "../../input/InputField"
+import HookFormDialog from "../../form/HookFormDialog"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
-  let dialog = Modal.useState()
+  let dialog = useModalState()
   let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
   if (!isDisplay) {
     return null
@@ -57,7 +62,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
   )
 }
 
-const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
+const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   let [data, setSubmit] = useState()
   let { result, isLoading, error } = useAddStationLetter(data)
 
@@ -69,6 +74,37 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
     zh: "新增站内信",
     en: "Add Station Letter"
   })
+
+  /*
+  return (
+    <HookFormDialog
+      defaultValues={{
+        target: AllPlayers,
+        subject: "",
+        content: ""
+      }}
+      onSubmit={({ target, ...data }) => {
+        if (target === AllPlayers) {
+          data.assignedAllPlayers = true
+        }
+
+        console.log("submit", data)
+        // setSubmit(data)
+      }}
+      isLoading={isLoading}
+      result={result}
+      error={error}
+      onCloseErrorAlert={clearResult}
+      onSubmitted={onSubmitted}
+      title={title}
+      dialog={dialog}
+      placement="top"
+      css={DialogCss}
+    >
+      <HookFormEditBody dialog={dialog} />
+    </HookFormDialog>
+  )
+  */
 
   return (
     <FormDialog
@@ -91,7 +127,6 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
       placement="top"
       css={DialogCss}
     >
@@ -115,6 +150,216 @@ const DialogCss = css`
   }
 `
 
+/*
+const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
+  let { setValue, control, watch, ...formMethods } = useForm()
+  let target = watch("target")
+  let playerUsernames = watch("playerUsernames")
+
+  let contentEditorRef = useRef()
+  let required = !readonly
+  let locale = useLocale()
+  let language = locale === Locales.zh ? "zh_CN" : ""
+  let [editor, setEditor] = useState()
+  let uploadInputRef = useRef()
+
+  // let [playerUsernames, setPlayers] = useState()
+  let [formData, setFormData] = useState()
+  let { result, isLoading, error, deleteCache } = useStationLetterUpload(
+    formData
+  )
+
+  const resetFormData = () => {
+    if (uploadInputRef?.current) {
+      uploadInputRef.current.value = ""
+    }
+    deleteCache()
+    setFormData(undefined)
+  }
+
+  useEffect(() => {
+    if (Array.isArray(result?.players) && !error) {
+      console.warn("verify playerUsernames value")
+      setValue(
+        "playerUsernames",
+        result?.players.map((item) => item.username)
+      )
+    }
+  }, [formData, result])
+
+  const setupEditor = () => {
+    if (!contentEditorRef.current) {
+      return
+    }
+
+    let selector = `textarea.${contentEditorRef.current.className}`
+    tinymce.remove(selector)
+
+    let options = {
+      selector,
+      readonly,
+      base_url: "/tinymce",
+      height: readonly ? 280 : 380,
+      plugins:
+        "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
+      menubar: "file edit insert view format table upload",
+      menu: {
+        upload: { title: "Upload", items: "image", icon: "upload" }
+      },
+      toolbar: [
+        "searchreplace | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | undo redo | removeformat superscript subscript code codesample",
+        "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
+      ],
+      toolbar_mode: "sliding",
+      images_upload_url: "/fs/file/uploadFileS3",
+      setup: (editor) => {
+        editor.on("Change", (event) => {
+          let content = event.target.getContent()
+          console.log("set content", content)
+          setValue("content", content)
+        })
+      },
+      resize: false
+    }
+    if (language) {
+      options.language = language
+    }
+
+    tinymce.init(options).then(([instance]) => {
+      console.log("editor instance", instance)
+      setEditor(instance)
+    })
+  }
+
+  useEffect(() => {
+    if (dialog.visible && contentEditorRef.current) {
+      setupEditor()
+    }
+  }, [dialog.visible, contentEditorRef.current])
+
+  return (
+    <FieldValues>
+      <Label name="target" required={required}>
+        <Trans zh="对象" en="Target" />
+      </Label>
+      <Set>
+        <TargetSelect required={required} disabled={readonly} />
+        {!readonly && target === DesignatedPlayers && (
+          <>
+            <input
+              ref={uploadInputRef}
+              type="file"
+              onChange={(event) => {
+                let [file] = event.target.files
+                if (file) {
+                  let formData = new FormData()
+                  formData.append("file", file, file.name)
+                  setFormData(formData)
+                } else {
+                  resetFormData()
+                }
+              }}
+              css={css`
+                display: none;
+              `}
+            />
+            <Button
+              type="button"
+              palette="primary"
+              size="small"
+              onClick={(event) => {
+                uploadInputRef?.current.click()
+              }}
+              isLoading={isLoading}
+              disabled={isLoading}
+            >
+              <Trans zh="上传文件" en="Upload file" />
+            </Button>
+            <Button
+              use="a"
+              href="/download/payments/list.xlsx"
+              download="players.xlsx"
+              palette="primary"
+              size="small"
+            >
+              <Trans zh="下载文件格式" en="Download Format File" />
+            </Button>
+            {error && <Alert {...error} onClickClose={resetFormData} />}
+          </>
+        )}
+        {readonly &&
+          target === DesignatedPlayers &&
+          playerUsernames.length > 0 && (
+            <Popover.State>
+              <Popover.Disclosure
+                use={Button}
+                palette="primary"
+                background="primary"
+              >
+                <Trans zh="玩家列表" en="Players" />
+              </Popover.Disclosure>
+              <Popover hasArrow>
+                <List maxHeight="15em" overflow="auto">
+                  {playerUsernames.map((name, index) => (
+                    <List.Item key={index}>{name}</List.Item>
+                  ))}
+                </List>
+              </Popover>
+            </Popover.State>
+          )}
+      </Set>
+
+      <Label name="subject" required={required}>
+        <Trans zh="主题" en="Subject" />
+      </Label>
+      <HookFormInputField
+        name="subject"
+        required={required}
+        disabled={readonly}
+      />
+
+      <Label name="content" required={required}>
+        <Trans zh="内容" en="Content" />
+      </Label>
+      <Controller
+        control={control}
+        name="content"
+        rules={{ required }}
+        render={(
+          { onChange, onBlur, value, ref, ...props },
+          { invalid, isTouched, isDirty }
+        ) => {
+          // let error = errors[name]
+          // let state = error && "danger"
+          return (
+            <>
+              <Global
+                styles={css`
+                  body .tox-tinymce-aux {
+                    z-index: 19900420;
+                  }
+                `}
+              />
+              <textarea
+                id="content"
+                name="content"
+                ref={contentEditorRef}
+                required={required}
+                disabled={readonly}
+                css={css`
+                  display: none;
+                `}
+                defaultValue={value}
+              ></textarea>
+            </>
+          )
+        }}
+      />
+    </FieldValues>
+  )
+}
+*/
+
 const EditBody = ({ readonly = false, dialog }) => {
   let {
     values,
@@ -122,6 +367,7 @@ const EditBody = ({ readonly = false, dialog }) => {
     isSubmitting,
     ...formContext
   } = useFormikContext()
+
   let contentEditorRef = useRef()
   let required = !readonly
   let locale = useLocale()
@@ -310,9 +556,7 @@ const EditBody = ({ readonly = false, dialog }) => {
               />
               <textarea
                 id="content"
-                name="content"
                 ref={contentEditorRef}
-                required={required}
                 disabled={readonly}
                 css={css`
                   display: none;
@@ -345,7 +589,7 @@ export const ViewButton = ({ record, ...props }) => {
   )
 }
 
-const ViewDialog = ({ record, dialog, finalFocusRef, ...props }) => {
+const ViewDialog = ({ record, dialog, ...props }) => {
   let title = useTrans({
     zh: "查看站内信",
     en: "View Station Letter"
@@ -399,13 +643,7 @@ export const VerifyButton = ({ record, onSubmitted, ...props }) => {
   )
 }
 
-const VerifyDialog = ({
-  record,
-  onSubmitted,
-  dialog,
-  finalFocusRef,
-  ...props
-}) => {
+const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
   let [type, setType] = useState()
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useVerifyStationLetter({

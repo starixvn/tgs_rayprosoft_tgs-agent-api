@@ -152,34 +152,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 r.Code == payment.Code)), Times.Never);
         }
 
-        [Test]
-        public async Task Cannot_Update_Payment_With_Code_Exists()
-        {
-            var payment = CreatePaymentFixture().Create<Payment>();
-            var request = new Fixture().Create<UpdatePaymentRequest>();
-            request.Code = payment.Code;
-            _queriesMock.Setup(s => s.GetSingleAsync(
-                    It.IsAny<Expression<Func<Payment, bool>>>(),
-                    It.IsAny<Func<IQueryable<Payment>,
-                        IQueryable<Payment>>>()))
-                .Returns(Task.FromResult(payment));
-
-            _queriesMock.Setup(s =>
-                    s.ExistsAsync(It.IsAny<Expression<Func<Payment, bool>>>()))
-                .Returns(Task.FromResult(true));
-
-            var response = await _controller.UpdateAsync(payment.Id, request);
-
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Payment.CodeExists);
-            _queriesMock.Verify(s => s.GetSingleAsync(
-                It.IsAny<Expression<Func<Payment, bool>>>(),
-                It.IsAny<Func<IQueryable<Payment>,
-                    IQueryable<Payment>>>()));
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Payment>(r =>
-                r.Code == payment.Code)), Times.Never);
-        }
-
         private Fixture CreatePaymentFixture()
         {
             var fixture = new Fixture();

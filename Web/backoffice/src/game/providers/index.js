@@ -14,13 +14,6 @@ import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
-import { useProviderList } from "./client"
-import { useFormattedTimeString } from "../../date/format"
-import { useFormattedDay } from "../../date/week"
-import formatISO from "date-fns/fp/formatISO"
-import { StatusMenu } from "./status"
-import { EditButton } from "./edit"
-import { EditPresetButton } from "./maintenance"
 
 export { Code }
 

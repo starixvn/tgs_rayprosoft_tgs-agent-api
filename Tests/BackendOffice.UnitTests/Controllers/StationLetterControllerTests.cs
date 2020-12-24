@@ -273,7 +273,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var fixture = new Fixture();
             fixture.Customize<Player>(u => u
                 .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Name = "Vip"})
-                .With(s => s.Language, new Language())
                 .With(s => s.Brand, new Brand())
                 .With(s => s.ParentPlayer, new Player())
                 .With(s => s.BetLimit, new BetLimit())
@@ -290,7 +289,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 })
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new[] {new Wallet {Balance = 0}}));
+                .With(s => s.Wallets, new[] {new Wallet {Balance = 0}})
+                .With(s => s.SportsBetLimits, new PlayerSportsBetLimit[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

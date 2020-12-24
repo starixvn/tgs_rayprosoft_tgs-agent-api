@@ -15,7 +15,6 @@ using TGS.Services.GameOperations.Validators;
 using TGS.Services.Operations.Validators;
 using static TGS.Core.Models.Enums.GameActionType;
 using GameActionData = TGS.Services.GameOperations.Models.Data.GameActionData;
-using GameActionResult = TGS.Services.GameOperations.Models.Data.GameActionResult;
 
 namespace TGS.Services.GameOperations.Data
 {
@@ -438,14 +437,28 @@ namespace TGS.Services.GameOperations.Data
             return ga;
         }
 
-        private static Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
+        private static async Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
         {
             var repository = s.Repository;
             var walletId = s.PlayerData.Wallet.Id;
 
-            return s.HasWalletUpdate && s.Amount != 0
-                ? AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
-                : GetBalanceAsync(repository, walletId);
+            decimal balance;
+            if (s.HasWalletUpdate && s.Amount != 0)
+            {
+                balance =
+                    await AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow);
+
+                if (balance < 0 && s.GameActionType.IsOneOf(PlaceBet, LockAmount))
+                {
+                    throw new PlayerHasInsufficientFundsException();
+                }
+            }
+            else
+            {
+                balance = await GetBalanceAsync(repository, walletId);
+            }
+
+            return balance;
         }
 
         private static async Task<Guid> CreateOrUpdateRoundAsync(GameActionState s)

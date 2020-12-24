@@ -254,8 +254,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 var invitationCode = Generator.RandomString(6);
 
                 return CreatePlayer(playerCode, p.Username, p.RealName, salt, password,
-                    vipId, p.Type, invitationCode, brandId: p.BrandId, currencyCode: p.CurrencyCode,
-                    cultureCode: p.CultureCode);
+                    vipId, p.Type, invitationCode, brandId: p.BrandId, currencyCode: p.CurrencyCode);
             }).ToArray();
 
             var randomPlayers = Enumerable.Range(1, 20)
@@ -290,7 +289,7 @@ namespace TGS.Core.DataServices.DataInitializers
         private Player CreatePlayer(string playerCode, string username, string realName, byte[] salt,
             byte[] password, Guid vipId, PlayerType playerType, string invitationCode,
             string parentPlayerCode = null, string parentInvitationCode = null,
-            Guid? brandId = null, string currencyCode = "CNY", string cultureCode = "en-US")
+            Guid? brandId = null, string currencyCode = "CNY")
         {
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
@@ -307,7 +306,6 @@ namespace TGS.Core.DataServices.DataInitializers
                 InvitationCode = invitationCode,
                 Password = password,
                 Salt = salt,
-                CultureCode = cultureCode,
                 DefaultWalletId = defaultWalletId,
                 DefaultWalletCurrencyCode = currencyCode,
                 Status = PlayerStatus.Enabled,
@@ -473,7 +471,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var relation = _repository.SportMarketTypes.ToArray();
 
             var players = from p in _players.Where(p => p.Type == PlayerType.TestPlayer)
-                group p by new {p.DefaultWalletCurrencyCode, p.CultureCode}
+                group p by p.DefaultWalletCurrencyCode
                 into g
                 select g.First();
 
@@ -577,8 +575,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 MinBet = b.MinBet,
                 MaxBet = b.MaxBet,
                 MaxBetPerMatch = b.MaxBetPerMatch,
-                ExternalSetting = b.ExternalSetting,
-                IsDefault = b.IsDefault
+                ExternalSetting = b.ExternalSetting
             }).ToHashSet();
 
             return gp;
@@ -588,7 +585,7 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var gameProviders = GetGameProviders(reseller.GameProviders);
 
-            return new Reseller()
+            return new Reseller
             {
                 Id = reseller.Id,
                 Code = reseller.Code,
@@ -632,7 +629,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
             var gameProviders = GetGameProviders(gameProviderCodes);
 
-            return new Licensee()
+            return new Licensee
             {
                 Id = licensee.Id,
                 Code = licensee.Code,
@@ -674,8 +671,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var gameProviderCodes = IntersectGameProviderCodes(reseller.GameProviders, licensee.GameProviders);
             gameProviderCodes = IntersectGameProviderCodes(gameProviderCodes, brand.GameProviders);
             var gameProviders = GetGameProviders(gameProviderCodes);
-            var gameProviderBetLimits = gameProviders.SelectMany(gp => gp.BetLimits)
-                .Where(l => l.IsDefault).ToArray();
+            var gameProviderBetLimits = gameProviders.SelectMany(gp => gp.BetLimits).ToArray();
 
             var brandGameProviders = gameProviders.Select(gp =>
             {
@@ -722,7 +718,7 @@ namespace TGS.Core.DataServices.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
-            return new Brand()
+            return new Brand
             {
                 Id = brand.Id,
                 Code = brand.Code,
@@ -870,6 +866,8 @@ namespace TGS.Core.DataServices.DataInitializers
             return roles.Select(role => new Role
             {
                 Id = role.Id,
+                TemplateId = role.TemplateId,
+                IsRoot = role.IsRoot,
                 Name = role.Name,
                 DisplayName = role.Name,
                 ResellerId = role.ResellerId,

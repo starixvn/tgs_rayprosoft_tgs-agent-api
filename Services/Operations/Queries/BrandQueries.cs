@@ -35,6 +35,8 @@ namespace TGS.Services.Operations.Queries
         Task<Dictionary<string, string>> GetBrandCurrenciesByInternalCodeAsync(Guid brandId);
 
         Task<CachedBrandGameProvider[]> GetBrandGameProvidersAsync(Guid brandId);
+
+        Task<int?> GetBrandDefaultBetLimitAsync(Guid brandId, string currency);
     }
 
     public sealed class BrandQueries : IBrandQueries
@@ -170,5 +172,10 @@ namespace TGS.Services.Operations.Queries
 
             return r.ToArray();
         }
+
+        Task<int?> IBrandQueries.GetBrandDefaultBetLimitAsync(Guid brandId, string currency) =>
+            _repository.BrandBetLimits.Where(bl =>
+                    bl.BrandId == brandId && bl.BetLimit.CurrencyCode == currency && bl.IsDefault)
+                .Select(bl => (int?) bl.BetLimitId).FirstOrDefaultAsync();
     }
 }

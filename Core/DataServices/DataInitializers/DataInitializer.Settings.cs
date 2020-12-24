@@ -180,19 +180,17 @@ namespace TGS.Core.DataServices.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("GameProviders")
+                        new MenuSetting("ProviderSchedules")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View"),
                                 new MenuSetting("Update")
                             }
                         },
-                        new MenuSetting("Games")
+                        new MenuSetting("BrandGames")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View"),
                                 new MenuSetting("Update")
                             }
                         }

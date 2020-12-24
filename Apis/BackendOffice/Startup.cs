@@ -42,7 +42,6 @@ namespace TGS.Apis.BackendOffice
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
 

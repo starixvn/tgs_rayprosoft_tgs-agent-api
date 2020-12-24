@@ -14,6 +14,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee
         public LicenseeGameProviderModel[] GameProviders { get; set; }
         public LicenseeCurrencyModel[] Currencies { get; set; }
         public LicenseeLanguageModel[] Languages { get; set; }
+        public LicenseeBetLimitModel[] BetLimits { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }

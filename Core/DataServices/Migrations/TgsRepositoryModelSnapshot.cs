@@ -26,6 +26,9 @@ namespace TGS.Core.DataServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(4000)");
 
@@ -65,6 +68,8 @@ namespace TGS.Core.DataServices.Migrations
                         .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
 
                     b.ToTable("Announcements", "dbo");
                 });
@@ -221,16 +226,16 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("DisplayOrder")
+                    b.Property<int?>("DisplayOrder")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("EffectiveBettingPercentage")
+                    b.Property<decimal?>("EffectiveBettingPercentage")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Rebate")
+                    b.Property<bool?>("Rebate")
                         .HasColumnType("bit");
 
                     b.Property<int>("Status")
@@ -349,6 +354,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsSports")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -760,9 +768,6 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
 
                     b.Property<int>("MaxBet")
                         .HasColumnType("int");
@@ -1339,10 +1344,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CultureCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(6)");
-
                     b.Property<string>("DefaultWalletCurrencyCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(16)");
@@ -1422,8 +1423,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasAlternateKey("BrandId", "Username");
 
                     b.HasIndex("BetLimitId");
-
-                    b.HasIndex("CultureCode");
 
                     b.HasIndex("ParentPlayerCode");
 
@@ -1683,6 +1682,9 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("IsRoot")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1702,6 +1704,9 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
+
+                    b.Property<Guid>("TemplateId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -2040,6 +2045,17 @@ namespace TGS.Core.DataServices.Migrations
                     b.HasIndex("ResellerId");
 
                     b.ToTable("Whitelists", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Models.Announcement", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Models.Brand", "Brand")
+                        .WithMany("Announcements")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.BetLimit", b =>
@@ -2549,12 +2565,6 @@ namespace TGS.Core.DataServices.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Models.Language", "Language")
-                        .WithMany("Players")
-                        .HasForeignKey("CultureCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TGS.Core.DataServices.Models.Player", "ParentPlayer")
                         .WithMany("SubPlayers")
                         .HasForeignKey("ParentPlayerCode");
@@ -2566,8 +2576,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("BetLimit");
 
                     b.Navigation("Brand");
-
-                    b.Navigation("Language");
 
                     b.Navigation("ParentPlayer");
 
@@ -2822,6 +2830,8 @@ namespace TGS.Core.DataServices.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Models.Brand", b =>
                 {
+                    b.Navigation("Announcements");
+
                     b.Navigation("BetLimits");
 
                     b.Navigation("BrandGroups");
@@ -2937,8 +2947,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Navigation("LicenseeLanguages");
 
                     b.Navigation("LocalizedStrings");
-
-                    b.Navigation("Players");
 
                     b.Navigation("ResellerLanguages");
                 });

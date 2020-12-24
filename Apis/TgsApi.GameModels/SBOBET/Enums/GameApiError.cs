@@ -41,13 +41,17 @@ namespace TGS.Apis.TgsApi.GameModels.SBOBET.Enums
         // custom errors
 
         UserBlocked = 2004,
-        IncorrectFormat = 2005,
-        InvalidArguments = 2006,
-        InvalidAmount = 2007,
-        InvalidGameAction = 2008,
-        UnderMaintenance = 2009,
-        PlayerNotLogin = 2010,
+        CountryRestricted = 2005,
+        CurrencyMismatch = 2006,
+
+        IncorrectFormat = 2007,
+        InvalidArguments = 2008,
+        InvalidAmount = 2009,
+        InvalidGameAction = 2010,
+        UnderMaintenance = 2011,
+        PlayerNotLogin = 2012,
+
         [Description("Bet Already Exists")]
-        BetAlreadyExists = 2011,
+        BetAlreadyExists = 2013,
     }
 }

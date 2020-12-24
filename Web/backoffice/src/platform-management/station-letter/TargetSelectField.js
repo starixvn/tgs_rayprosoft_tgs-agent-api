@@ -12,6 +12,7 @@ import {
 } from "bumbag"
 import _Field from "../../select/Field"
 import { useTrans } from "../../i18n"
+import { useFormContext } from "react-hook-form"
 
 export const AllPlayers = "AllPlayers"
 const AllPlayersTrans = {
@@ -28,6 +29,42 @@ const DesignatedPlayersTrans = {
 export const Option = {
   AllPlayers,
   DesignatedPlayers
+}
+
+export const TargetSelect = ({
+  name = "target",
+  selectRef,
+  required,
+  ...props
+}) => {
+  let { register, errors } = useFormContext()
+  if (!selectRef) {
+    selectRef = register({ required })
+  }
+
+  let options = [
+    {
+      label: useTrans(AllPlayersTrans),
+      value: AllPlayers
+    },
+    {
+      label: useTrans(DesignatedPlayersTrans),
+      value: DesignatedPlayers
+    }
+  ]
+
+  let error = errors[name]
+  let state = error && "danger"
+  return (
+    <_Select
+      name={name}
+      options={options}
+      selectRef={selectRef}
+      state={state}
+      placeholder=""
+      {...props}
+    />
+  )
 }
 
 const Select = ({ required, ...props }) => {

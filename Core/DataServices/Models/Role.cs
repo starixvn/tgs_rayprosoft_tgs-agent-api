@@ -7,12 +7,14 @@ namespace TGS.Core.DataServices.Models
     public class Role
     {
         public Guid Id { get; set; }
-
+        public Guid TemplateId { get; set; }
         public RoleType RoleType { get; set; }
 
         public Guid? ResellerId { get; set; }
         public Guid? LicenseeId { get; set; }
         public Guid? BrandId { get; set; }
+
+        public bool IsRoot { get; set; }
 
         public string Name { get; set; }
 

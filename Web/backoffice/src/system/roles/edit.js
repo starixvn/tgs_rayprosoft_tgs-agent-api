@@ -43,7 +43,7 @@ import Disclosure from "../../dialog/Disclosure"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
-import { Modal, useModalState } from "../../dialog/Modal"
+import { useModalState } from "../../dialog/Modal"
 import cloneDeep from "clone-deep"
 import {
   RoleTypeSelect,
@@ -59,6 +59,7 @@ import { HookFormDialog } from "../../form/HookFormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
 import { HookFormInputField } from "../../input/InputField"
+import { Code as RoleMenuCode } from "./menu"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -126,8 +127,9 @@ const AddDialog = ({ dialog, onSubmitted }) => {
   let { result, error, isLoading } = useAddRole(submitData)
 
   useEffect(() => {
-    setMenus(cloneDeep(menus))
-  }, [JSON.stringify(menus)])
+    let isSame = userRoleType == roleType
+    setMenus(cloneDeep(isSame ? dropRoleModule(menus) : menus))
+  }, [JSON.stringify(menus), userRoleType, roleType])
 
   let title = useTrans({
     zh: "新增权限组",
@@ -198,6 +200,17 @@ const AddDialog = ({ dialog, onSubmitted }) => {
               </Set>
             </Box>
 
+            {userRoleType != roleType && (
+              <>
+                <Label name="root">
+                  <Trans zh="根管理权限" en="Root Admin" />
+                </Label>
+                <Box alignY="center">
+                  <Checkbox name="isRoot" checkboxRef={register} />
+                </Box>
+              </>
+            )}
+
             {showRoleSelect && (
               <>
                 <Label name="roleType">
@@ -220,6 +233,17 @@ const AddDialog = ({ dialog, onSubmitted }) => {
       </>
     </HookFormDialog>
   )
+}
+
+const dropRoleModule = (menus = []) => {
+  return menus.map((menu) => {
+    return {
+      ...menu,
+      subMenus: menu.subMenus.filter(
+        (menu) => menu.code.toLowerCase() != RoleMenuCode
+      )
+    }
+  })
 }
 
 const pickDisplayMenus = (menus = []) => {
@@ -382,6 +406,9 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 }
 
 const EditRoleDialog = ({ id, dialog, onSubmitted }) => {
+  let userRoleType = useUserRoleType()
+  let userRoleId = useUserRoleId()
+
   let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole(
     id
   )

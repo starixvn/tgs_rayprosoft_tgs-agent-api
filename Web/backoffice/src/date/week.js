@@ -5,15 +5,16 @@ import isValid from "date-fns/isValid"
 import { enUS, zhCN } from "date-fns/locale"
 import { useLocale, Locales } from "../i18n"
 import { Select, DropdownMenu, Button } from "bumbag"
-import { Field } from "../input/Field"
+import { useForm, useFormContext } from "react-hook-form"
+// import { Field } from "../input/Field"
 
-const Sunday = 0
-const Monday = 1
-const Tuesday = 2
-const Wednesday = 3
-const Thursday = 4
-const Friday = 5
-const Saturday = 6
+const Sunday = "Sunday"
+const Monday = "Monday"
+const Tuesday = "Tuesday"
+const Wednesday = "Wednesday"
+const Thursday = "Thursday"
+const Friday = "Friday"
+const Saturday = "Saturday"
 
 export const Day = {
   Sunday,
@@ -34,16 +35,34 @@ const toLocale = (code) => {
   }
 }
 
-export const useFormattedDay = (value = Sunday) => {
+export const fromWeekDayString = (value) => {
+  const map = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6
+  }
+  return map[value]
+}
+
+export const useFormattedDay = (value) => {
+  value = typeof value === "string" ? fromWeekDayString(value) : value
+
   let code = useLocale()
   let locale = toLocale(code)
   let date = setDay(new Date(), value)
   return format(date, `EEEE`, { locale })
 }
 
-//TODO: use DropdownMenu or SelectMenu?
-//TODO: value type string or number?
-export const DaySelect = ({ ...props }) => {
+export const WeekDaySelect = ({ name, required, selectRef, ...props }) => {
+  let { register, errors } = useFormContext()
+  if (!selectRef) {
+    selectRef = register({ required })
+  }
+
   let options = [
     {
       label: useFormattedDay(Monday),
@@ -70,18 +89,21 @@ export const DaySelect = ({ ...props }) => {
       value: Saturday
     },
     {
-      label: useFormattedDay(Saturday),
-      value: Saturday
+      label: useFormattedDay(Sunday),
+      value: Sunday
     }
   ]
 
-  return <Select options={options} {...props} />
-}
-
-export const DaySelectField = ({ name, ...props }) => {
+  let error = errors?.[name]
+  let state = error && "danger"
   return (
-    <Field name={name} {...props}>
-      {({ field }) => <DaySelect name={name} {...field} />}
-    </Field>
+    <Select
+      name={name}
+      options={options}
+      required={required}
+      state={state}
+      selectRef={selectRef}
+      {...props}
+    />
   )
 }

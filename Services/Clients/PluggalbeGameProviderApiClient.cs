@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages.Pluggables;
 
 namespace TGS.Services.Clients
 {
-    public interface IPluggalbeGameProviderApiClient : IApiClient
+    public interface IPluggalbeGameProviderApiClient
     {
         Task<GetGameUrlResponse> GetGameUrlAsync(Uri apiUrl, GetGameUrlRequest request);
     }
@@ -21,9 +21,9 @@ namespace TGS.Services.Clients
 
         Task<GetGameUrlResponse> IPluggalbeGameProviderApiClient.GetGameUrlAsync(Uri apiUrl, GetGameUrlRequest request)
         {
-            Prefix = $"{request.GameProvider.Code}.GetGameUrl";
+            var prefix = $"Pluggable.{request.GameProviderCode}.GetGameUrl";
             return ExecuteJsonRequestAsync<GetGameUrlRequest, GetGameUrlResponse>(HttpMethod.Post, apiUrl,
-                "/api/pluggable/gameurl", request);
+                "/api/pluggable/gameurl", request, logPrefix: prefix);
         }
     }
 }

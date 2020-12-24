@@ -81,16 +81,14 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddDataAnnotationsLocalization()
                 .AddFluentValidation(c =>
                 {
-                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly(),
+                        lifetime: ServiceLifetime.Singleton);
                 })
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
-
-            services.AddHealthChecks()
-                .AddCheck<HealthCheck>("example_health_check");
 
             services.AddAntiforgery(options =>
             {

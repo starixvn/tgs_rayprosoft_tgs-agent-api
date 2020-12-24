@@ -15,7 +15,6 @@ namespace TGS.Core.Models.Services.Caches
         public bool IsTestPlayer => Type == PlayerType.TestPlayer;
         public Guid DefaultWalletId { get; init; }
         public string DefaultWalletCurrencyCode { get; init; }
-        public string CultureCode { get; init; }
         public int BetLimitId { get; init; }
     }
 }

@@ -78,6 +78,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Subject = a.Subject,
                     Content = a.Content,
                     Remarks = a.Remarks,
+                    BrandName = a.Brand.Name,
                     CreatedByUsername = a.CreatedByUsername,
                     VerifiedByUsername = a.VerifiedByUsername,
                     From = a.From,
@@ -161,6 +162,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var announcement = new Announcement
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                BrandId = request.BrandId,
                 DisplayOrder = 99,
                 Subject = request.Subject,
                 Content = request.Content,

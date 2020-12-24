@@ -9,6 +9,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Role
         {
             RuleFor(x => x.Name)
                 .NotNull()
+                .NotEmpty()
                 .WithMessage(Resources.Role.NameRequired);
 
             RuleFor(x => x.Name)

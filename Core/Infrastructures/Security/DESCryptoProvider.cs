@@ -1,14 +1,17 @@
-﻿using System;
+﻿// ReSharper disable InconsistentNaming
+
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.Infrastructures.Security
 {
     internal sealed class DESCryptoProvider : ISymmetricCryptoProvider
     {
-        string ISymmetricCryptoProvider.DecryptString(string encrypted, string iv, string key, CipherMode mode,
+        async Task<string> ISymmetricCryptoProvider.DecryptStringAsync(string encrypted, string iv, string key, CipherMode mode,
             PaddingMode padding, Encoding encoding)
         {
             if (encrypted.IsNullOrEmpty())
@@ -29,17 +32,17 @@ namespace TGS.Core.Infrastructures.Security
             };
 
             using var ct = des.CreateDecryptor();
-            using var ms = new MemoryStream();
-            using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
+            await using var ms = new MemoryStream();
+            await using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
 
             var bytes = Convert.FromBase64String(encrypted);
-            cs.Write(bytes, 0, bytes.Length);
-            cs.FlushFinalBlock();
+            await cs.WriteAsync(bytes.AsMemory(0, bytes.Length));
+            await cs.FlushFinalBlockAsync();
 
             return encoding.GetString(ms.ToArray());
         }
 
-        string ISymmetricCryptoProvider.EncryptString(string original, string iv, string key, CipherMode mode,
+        async Task<string> ISymmetricCryptoProvider.EncryptStringAsync(string original, string iv, string key, CipherMode mode,
             PaddingMode padding, Encoding encoding)
         {
             if (original.IsNullOrEmpty())
@@ -60,12 +63,12 @@ namespace TGS.Core.Infrastructures.Security
             };
 
             using var ct = des.CreateEncryptor();
-            using var ms = new MemoryStream();
-            using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
+            await using var ms = new MemoryStream();
+            await using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
 
             var bytes = encoding.GetBytes(original);
-            cs.Write(bytes, 0, bytes.Length);
-            cs.FlushFinalBlock();
+            await cs.WriteAsync(bytes.AsMemory(0, bytes.Length));
+            await cs.FlushFinalBlockAsync();
 
             return Convert.ToBase64String(ms.ToArray());
         }

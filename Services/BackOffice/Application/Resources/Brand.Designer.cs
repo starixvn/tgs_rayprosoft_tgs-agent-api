@@ -70,6 +70,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default bet Limit is required..
+        /// </summary>
+        public static string BetLimitDefaultRequired {
+            get {
+                return ResourceManager.GetString("BetLimitDefaultRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ClientId is required..
         /// </summary>
         public static string ClientIdRequired {
@@ -138,6 +147,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         public static string DesktopEndpointRequired {
             get {
                 return ResourceManager.GetString("DesktopEndpointRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game provider bet limit count incorrect..
+        /// </summary>
+        public static string GameProviderBetLimitCountIncorrect {
+            get {
+                return ResourceManager.GetString("GameProviderBetLimitCountIncorrect", resourceCulture);
             }
         }
         

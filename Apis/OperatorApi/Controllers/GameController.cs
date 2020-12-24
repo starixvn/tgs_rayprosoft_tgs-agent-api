@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
-using TGS.Apis.OperatorApi.Models.Messages.Games;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
@@ -104,7 +104,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.Language, brandId);
+            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
             var cacheType = RedisCacheType.BrandGamesWithConditions;
             var cacheKey = $"{brandId}";
@@ -115,7 +115,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             if (value.HasValue)
             {
-                return new GetGamesResponse
+                return new()
                 {
                     Games = _json.DeserializeFromString<GetGamesResponse.GameModel[]>(value)
                 };
@@ -129,7 +129,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 new(field, _json.SerializeToString(gameModels))
             }, TimeSpan.FromHours(1));
 
-            return new GetGamesResponse
+            return new()
             {
                 Games = gameModels
             };
@@ -150,28 +150,39 @@ namespace TGS.Apis.OperatorApi.Controllers
             await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platformType);
 
             var gameProviderCode = request.GameProviderCode;
-            var gameCode = request.GameCode;
+            var gameId = request.GameId;
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
-            var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
-            var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameCode, platformType);
 
             var playerType = cachedPlayer.Type;
             var statuses = _validStatus.GetStatus(playerType);
             var gameStatuses = _validGameStatus.GetStatus(playerType);
             await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(cachedPlayer.BrandId, gameProviderId,
-                game.Id, gameCode,
-                statuses, gameStatuses);
+                gameId, gameId.ToString(), statuses, gameStatuses);
 
+            var gamePlatformType = await _gameProviderOperations.GetGamePlatformTypeAsync(gameProviderId, gameId);
+            if (gamePlatformType == null)
+            {
+                throw new InvalidOperationException($"Game with id '{gameId}' doesn't exist");
+            }
+
+            if (gamePlatformType.Value != platformType)
+            {
+                throw new InvalidOperationException(
+                    $"Launch game platform is expected as '{gamePlatformType.Value}' but player login as '{platformType}'");
+            }
+
+            var language =
+                await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, cachedPlayer.BrandId);
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(gameProviderCode);
             var r = await _pluggableApiClient.GetGameUrlAsync(serviceUrl, new()
             {
                 Token = playerTokenData,
-                Player = cachedPlayer,
-                GameProvider = gameProvider,
-                Game = game
+                GameProviderCode = gameProviderCode,
+                GameId = gameId,
+                Language = language
             });
 
-            return new GetGameUrlResponse
+            return new()
             {
                 Error = r.Error,
                 ErrorMessage = r.ErrorMessage,
@@ -223,7 +234,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Type = g.Type,
                         IsActive = IsGameActive(statuses, cachedGameProvider.Status, brandGameProviderStatus,
                             gameStatuses, g.Status, bg.BrandGameStatus),
-                        Tag = new GetGamesResponse.Tag
+                        Tag = new()
                         {
                             New = bg.Tag.IsNew(),
                             Hot = bg.Tag.IsHot(),
@@ -234,8 +245,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         private static bool IsGameActive(Status[] statuses, Status gameProviderStatus, Status brandGameProviderStatus,
             GameStatus[] gameStatuses, GameStatus gameStatus, GameStatus brandGameStatus) =>
-            statuses.Contains(gameProviderStatus) &&
-            gameStatuses.Contains(gameStatus) &&
+            statuses.Contains(gameProviderStatus) && gameStatuses.Contains(gameStatus) &&
             statuses.Contains(brandGameProviderStatus) && gameStatuses.Contains(brandGameStatus);
 
         #endregion
