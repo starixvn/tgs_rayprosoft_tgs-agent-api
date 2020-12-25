@@ -44,6 +44,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             return _roleQueries.GetQueries()
                 .Where(request.IsRoot, x => x.IsRoot == request.IsRoot)
+                .Where(request.ResellerId, x => x.ResellerId == request.ResellerId)
+                .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
+                .Where(request.BrandId, x => x.ResellerId == request.BrandId)
                 .Where(ResellerId != null, r => r.ResellerId == ResellerId)
                 .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
                 .Where(BrandId != null, l => l.BrandId == BrandId)
@@ -78,24 +81,23 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
             }
 
-            string menuSetting;
-
-            if (UserRoleType == RoleType.Admin)
+            var menuSetting = role.IsRoot switch
             {
-                var setting = await _settingQueries.GetSingleAsync(p => p.Key == "Menus");
-                menuSetting = setting.Value;
-            }
-            else
-            {
-                var templateRole = await _roleQueries.GetSingleAsync(x => x.Id == role.TemplateId);
-
-                if (templateRole == null)
-                {
-                    return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
-                }
-
-                menuSetting = templateRole.MenuSetting;
-            }
+                true when role.BrandId != null => (await _roleQueries.GetSingleAsync(x =>
+                    x.IsRoot && x.LicenseeId == role.LicenseeId)).MenuSetting,
+                true when role.LicenseeId != null => (await _roleQueries.GetSingleAsync(x =>
+                    x.IsRoot && x.ResellerId == role.ResellerId)).MenuSetting,
+                true when role.ResellerId != null =>
+                    (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value,
+                false when role.BrandId != null => (await _roleQueries.GetSingleAsync(x =>
+                    x.IsRoot && x.BrandId == role.BrandId)).MenuSetting,
+                false when role.LicenseeId != null => (await _roleQueries.GetSingleAsync(x =>
+                    x.IsRoot && x.LicenseeId == role.LicenseeId)).MenuSetting,
+                false when role.ResellerId != null => (await _roleQueries.GetSingleAsync(x =>
+                    x.IsRoot && x.ResellerId == role.ResellerId)).MenuSetting,
+                false => (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value,
+                _ => null
+            };
 
             var roleModel = new RoleModel
             {
@@ -105,7 +107,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 DisplayName = role.DisplayName,
                 Description = role.Description,
                 IsRoot = role.IsRoot,
-                Menus = GetMenuSettingAsync(menuSetting, role.MenuSetting),
+                Menus = GetMenuSettingAsync(menuSetting, role.MenuSetting, role.IsRoot),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
@@ -155,7 +157,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
 
-            if (role.Users.Any())
+            if (role.Users.Any() || role.IsRoot)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRole);
             }
@@ -185,7 +187,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var newRole = CreateRole(request.Name, role.DisplayName, role.Description, role.ResellerId,
-                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting, role.IsRoot, role.TemplateId);
+                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting, role.IsRoot);
 
             await _roleCommands.CreateAsync(newRole);
             return CreateValidResponse<MessageResponse>();
@@ -223,7 +225,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var role = CreateRole(request.Name, request.DisplayName, request.Description, request.ResellerId,
                 request.RoleType, request.LicenseeId, request.BrandId,
-                _jsonSerializationProvider.SerializeToString(request.Menus), request.IsRoot, request.TemplateId);
+                _jsonSerializationProvider.SerializeToString(request.Menus), request.IsRoot);
 
             await _roleCommands.CreateAsync(role);
             return CreateValidResponse<MessageResponse>();
@@ -252,11 +254,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
-            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting, bool isRoot, Guid templateId) =>
+            RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting, bool isRoot) =>
             new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
-                TemplateId = templateId,
                 IsRoot = isRoot,
                 Name = name,
                 Description = description ?? name,
@@ -275,7 +276,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private MenuSetting[] GetMenuSettingByString(string setting) =>
             _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
 
-        private MenuSetting[] GetMenuSettingAsync(string template, string menuSetting)
+        private MenuSetting[] GetMenuSettingAsync(string template, string menuSetting, bool isRoot)
         {
             var templateMenus = GetMenuSettingByString(template);
             var roleMenus = GetMenuSettingByString(menuSetting);
