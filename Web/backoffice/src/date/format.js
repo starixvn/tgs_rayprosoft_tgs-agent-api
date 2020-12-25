@@ -1,3 +1,4 @@
+import parseISO from "date-fns/parseISO"
 import format from "date-fns/format"
 import isValid from "date-fns/isValid"
 import { enUS, zhCN } from "date-fns/locale"
@@ -15,5 +16,7 @@ export const useFormattedTimeString = (value) => {
   return isValid(date) ? format(date, `HH:mm`) : ""
 }
 
-export default (date) =>
-  isValid(date) ? format(date, `${Format.Date} ${Format.Time}`) : ""
+export default (date) => {
+  date = typeof date == "string" ? parseISO(date) : date
+  return isValid(date) ? format(date, `${Format.Date} ${Format.Time}`) : ""
+}

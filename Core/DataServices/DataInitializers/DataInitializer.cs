@@ -245,19 +245,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var playerCodes = new List<string>();
             var invitationCodes = new List<string>();
 
-            var tgsPlayer = GenerateTgsPlayers();
-
-            _players = tgsPlayer.Select(p =>
-            {
-                var playerCode = PlayerCodeGenerator.NewId();
-                var vipId = _vipLevels[rnd.Next(0, 6)].Id;
-                var invitationCode = Generator.RandomString(6);
-
-                return CreatePlayer(playerCode, p.Username, p.RealName, salt, password,
-                    vipId, p.Type, invitationCode, brandId: p.BrandId, currencyCode: p.CurrencyCode);
-            }).ToArray();
-
-            var randomPlayers = Enumerable.Range(1, 20)
+            _players = Enumerable.Range(1, 20)
                 .Select(p =>
                 {
                     var playerCode = PlayerCodeGenerator.NewId();
@@ -279,8 +267,6 @@ namespace TGS.Core.DataServices.DataInitializers
                         vipId, PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
                 }).ToArray();
 
-            _players = _players.Concat(randomPlayers).ToArray();
-
             await _repository.BulkInsertAsync(_players);
             await _repository.BulkInsertAsync(_players.SelectMany(p => p.Wallets).ToArray());
             await _repository.BulkInsertAsync(_players.SelectMany(p => p.Banks).ToArray());
@@ -298,7 +284,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
-            return new Player
+            return new Player()
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -866,7 +852,6 @@ namespace TGS.Core.DataServices.DataInitializers
             return roles.Select(role => new Role
             {
                 Id = role.Id,
-                TemplateId = role.TemplateId,
                 IsRoot = role.IsRoot,
                 Name = role.Name,
                 DisplayName = role.Name,

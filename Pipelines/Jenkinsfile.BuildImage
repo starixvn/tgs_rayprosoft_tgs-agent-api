@@ -38,8 +38,8 @@ pipeline {
 					for (i = 0;i < arr.length; i++) {
 						println "now got ${i}"
 						def data = arr[i].split("::")
-						sh "sudo docker build -f ${data[0]} -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env} ."
-						sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${params.Env}"
+						sh "sudo docker build -f ${data[0]} -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${DOCKER_TAG} ."
+						sh "sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${data[1]}:${DOCKER_TAG}"
 					}
 				}
 			}
@@ -63,4 +63,9 @@ pipeline {
 			}
 		}
     }
+}
+
+def getDockerTag(){
+    def tag  = sh script: 'git rev-parse HEAD', returnStdout: true
+    return tag
 }

@@ -28,7 +28,7 @@ import FormDialog from "../../form/Dialog"
 import { useCopyRole } from "./client"
 import { Trans, useTrans } from "../../i18n"
 
-export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
+export const CopyButton = ({ id, name, onSubmitted, disabled, ...props }) => {
   let dialog = Modal.useState()
   let disclosureRef = useRef()
 
@@ -39,7 +39,7 @@ export const CopyButton = ({ id, name, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure {...dialog}>
+      <Disclosure disabled={disabled} {...dialog}>
         <Trans zh="复制" en="Copy" />
       </Disclosure>
       {dialog.visible && (

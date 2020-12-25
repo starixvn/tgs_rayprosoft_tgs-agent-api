@@ -197,7 +197,6 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleType = table.Column<byte>(type: "tinyint", nullable: false),
                     ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -224,7 +223,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Key = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),

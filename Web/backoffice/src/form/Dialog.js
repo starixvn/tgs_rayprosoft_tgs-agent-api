@@ -105,7 +105,12 @@ export const ConfirmButtonFooter = ({
 }) => {
   return (
     <Box width={width} alignX={alignX} {...props}>
-      <Button type="submit" isLoading={isLoading} disabled={disabled}>
+      <Button
+        palette="primary"
+        type="submit"
+        isLoading={isLoading}
+        disabled={disabled}
+      >
         <SubmitText />
       </Button>
     </Box>

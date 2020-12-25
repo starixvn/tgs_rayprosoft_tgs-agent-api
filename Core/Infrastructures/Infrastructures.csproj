@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="3.1.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="3.2.0" />
     <PackageReference Include="FluentValidation" Version="9.3.0" />
     <PackageReference Include="MessagePack" Version="2.2.60" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
@@ -25,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 

@@ -10,29 +10,34 @@ import {
   DropdownMenu
 } from "bumbag"
 import { useForm, useFormContext, Controller } from "react-hook-form"
-import { useChangeGameProviderScheduleStatus } from "./client"
+import { useChangeBrandGameProviderScheduleStatus } from "./client"
 import Alert from "../../dialog/Alert"
 import { useTrans, Trans } from "../../i18n"
 
-const Active = "Active"
-const ActiveTrans = {
+const Enabled = "Enabled"
+const EnabledTrans = {
   zh: "开启",
   en: "Enabled"
 }
 
-const Inactive = "Inactive"
-const InactiveTrans = {
+const Disabled = "Disabled"
+const DisabledTrans = {
   zh: "关闭",
-  en: Inactive
+  en: Disabled
 }
 
-export const MaintenanceStatusLabel = ({ value = "" }) => {
-  switch (value) {
-    case Active:
-      return <Trans {...ActiveTrans} />
+export const ScheduleStatus = {
+  Enabled,
+  Disabled
+}
 
-    case Inactive:
-      return <Trans {...InactiveTrans} />
+export const ScheduleStatusLabel = ({ value = "" }) => {
+  switch (value) {
+    case Enabled:
+      return <Trans {...EnabledTrans} />
+
+    case Disabled:
+      return <Trans {...DisabledTrans} />
 
     default:
       return value
@@ -41,9 +46,9 @@ export const MaintenanceStatusLabel = ({ value = "" }) => {
 
 const toPalette = (value) => {
   switch (value) {
-    case Active:
+    case Enabled:
       return "success"
-    case Inactive:
+    case Disabled:
       return "danger"
     default:
       return "default"
@@ -74,11 +79,11 @@ export const MaintenanceStatusToggleButton = ({
           <Button
             palette={toPalette(value)}
             onClick={(event) => {
-              let status = value == Active ? Inactive : Active
+              let status = value == Enabled ? Disabled : Enabled
               setValue(name, status)
             }}
           >
-            <MaintenanceStatusLabel value={value} />
+            <ScheduleStatusLabel value={value} />
           </Button>
         )
       }}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
 import { Formik, Field } from "formik"
-import { Box, Button, InputField, Set } from "bumbag"
+import { Box, Button, InputField, Set, Icon } from "bumbag"
+import { faCheck } from "@fortawesome/free-solid-svg-icons"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
@@ -129,6 +130,25 @@ const useTableColumns = ({ fetchTable }) => {
         textAlign: "center"
       },
       width: 400
+    },
+    {
+      id: "isRoot",
+      accessor: "isRoot",
+      Header: "根管理权限",
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value: isRoot }) => {
+        return (
+          <Box alignX="center">
+            {isRoot ? <Icon icon={faCheck} type="font-awesome" /> : ""}
+          </Box>
+        )
+      }
     }
   ]
 
@@ -136,12 +156,7 @@ const useTableColumns = ({ fetchTable }) => {
   if (hasAnyMenu) {
     columns.push({
       disableSortBy: true,
-      accessor: (row) => {
-        return {
-          id: row.id,
-          name: row.name
-        }
-      },
+      accessor: (row) => row,
       Header: "操作",
       headCell: {
         textAlign: "center"
@@ -150,12 +165,17 @@ const useTableColumns = ({ fetchTable }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        let { id, name } = value
+        let { id, name, isRoot } = value
         return (
           <Box alignX="center">
             <Set>
               <EditButton id={id} onSubmitted={fetchTable} />
-              <CopyButton id={id} name={name} onSubmitted={fetchTable} />
+              <CopyButton
+                id={id}
+                name={name}
+                onSubmitted={fetchTable}
+                disabled={isRoot}
+              />
               <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
             </Set>
           </Box>

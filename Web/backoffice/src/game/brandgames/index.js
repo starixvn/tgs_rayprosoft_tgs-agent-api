@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
 import { Formik, Form, Field, useFormikContext } from "formik"
-import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
+import {
+  Heading,
+  Stack,
+  Button,
+  InputField,
+  Set,
+  Text,
+  Box,
+  Input,
+  Switch
+} from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -20,6 +30,11 @@ import { useFormattedDay } from "../../date/week"
 import formatISO from "date-fns/fp/formatISO"
 import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
+import { GameTypeLabel } from "../games/GameType"
+import { GamePlatformLabel } from "../games/GamePlatform"
+import { GameTag } from "../games/GameTag"
+import { GameTagSwitch } from "./GameTagSwitch"
+import { GameStatusToggleSwitch } from "./GameStatusToggleSwitch"
 
 export { Code } from "./menu"
 
@@ -29,43 +44,99 @@ export const Content = () => {
     return null
   }
 
+  return null
   return <Body />
 }
 
 export const CodeContentPair = [Code, Content]
 
 export const Body = () => {
-  return ""
+  let { state, setState, setPageIndex, setSortOrder } = useTable({})
+  let { pageIndex, pageSize, keyword } = state
+  let { data, isLoading, mutate } = useBrandGameList(toApiParams(state))
+
+  let [displayOrders, setDisplayOrder] = useState({})
+  const changeDisplayOrder = ({ id, value }) => {
+    let newDisplayOrders = {
+      ...displayOrders
+    }
+    Reflect.set(newDisplayOrders, id, value)
+    setDisplayOrder(newDisplayOrders)
+  }
+
+  let columns = useColumns({ items: data?.items, changeDisplayOrder, mutate })
+
+  return (
+    <PageContent
+      title={<Trans zh="游戏列表" en="Game List" />}
+      actionBar={
+        <SearchBar
+          keyword={keyword}
+          search={(data) => {
+            let newState = {
+              pageIndex: 0,
+              ...data
+            }
+            if (equals(newState, { pageIndex, keyword })) {
+              mutate()
+            }
+            setState(newState)
+          }}
+        />
+      }
+    >
+      <Table
+        columns={columns}
+        data={data?.items}
+        pageCount={pageCount(pageSize, data?.totalCount)}
+        setPageIndex={setPageIndex}
+        setSortOrder={setSortOrder}
+        isLoading={isLoading}
+      />
+    </PageContent>
+  )
 }
 
-const useColumns = ({ items = [], mutate }) => {
+const SearchBar = ({ name: keyword = "", search, isLoading, ...props }) => {
+  let searchPlaceHolder = useTrans({
+    zh: "关键字输入框",
+    en: "Input keyword"
+  })
+  return (
+    <Formik
+      initialValues={{
+        name: keyword
+      }}
+      onSubmit={search}
+    >
+      {(formProps) => (
+        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
+          <Set>
+            <Field
+              name="keyword"
+              component={InputField.Formik}
+              addonAfter={
+                <Button onClick={() => formProps.setFieldValue("keyword", "")}>
+                  X
+                </Button>
+              }
+              placeholder={searchPlaceHolder}
+              autocomplete="off"
+            />
+            <SearchButton isLoading={isLoading} disabled={isLoading} />
+          </Set>
+        </form>
+      )}
+    </Formik>
+  )
+}
+
+const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
   let columns = [
     {
-      accessor: "id",
-      Header: <Trans zh="ID" en="ID" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "name",
-      Header: <Trans zh="厂商名称" en="Name" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      id: "maintenanceTime",
+      id: "displayOrder",
       accessor: (record) => record,
-      Header: <Trans zh="定期维护时间" en="Periodic Maintenance Time" />,
+      Header: <Trans zh="序" en="Order" />,
       disableSortBy: true,
       headCell: {
         textAlign: "center"
@@ -74,16 +145,176 @@ const useColumns = ({ items = [], mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        let { day, start, end } = value
+        let { id, displayOrder = "" } = value
+        return (
+          <Input
+            type="number"
+            size="small"
+            min="0"
+            minLength="1"
+            width="5em"
+            defaultValue={displayOrder}
+            onChange={(event) => {
+              let value = event.target.value
+              let number = parseInt(value)
+              if (Number.isFinite(number)) {
+                changeDisplayOrder({
+                  id,
+                  value: number
+                })
+              }
+            }}
+          />
+        )
+      }
+    },
+    {
+      accessor: "gameId",
+      Header: <Trans zh="游戏ID" en="ID" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      }
+    },
+    {
+      accessor: "gameProviderName",
+      Header: <Trans zh="厂商名称" en="Game Provider Name" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      }
+    },
+    {
+      accessor: "gameName",
+      Header: <Trans zh="游戏名称" en="Game Name" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      }
+    },
+    {
+      accessor: "gameType",
+      Header: <Trans zh="游戏类型" en="Game Type" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
         return (
           <Text.Block whiteSpace="nowrap">
-            {`${useFormattedDay(day)} ${start} - ${end}`}
+            <GameTypeLabel value={value} />
           </Text.Block>
         )
       }
     },
     {
-      accessor: "status",
+      accessor: "platform",
+      Header: <Trans zh="支持设备" en="Platform" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        return (
+          <Text.Block whiteSpace="nowrap">
+            <GamePlatformLabel value={value} />
+          </Text.Block>
+        )
+      }
+    },
+    {
+      id: "isHot",
+      accessor: (record) => record,
+      Header: <Trans zh="热门游戏" en="Hot" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        let { id, isHot } = value
+        return (
+          <Text.Block whiteSpace="nowrap">
+            <GameTagSwitch
+              id={id}
+              tag={GameTag.Hot}
+              checked={isHot}
+              onSubmitted={mutate}
+            />
+          </Text.Block>
+        )
+      }
+    },
+    {
+      id: "isNew",
+      accessor: (record) => record,
+      Header: <Trans zh="最新游戏" en="New" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        let { id, isNew } = value
+        return (
+          <Text.Block whiteSpace="nowrap">
+            <GameTagSwitch
+              id={id}
+              tag={GameTag.New}
+              checked={isNew}
+              onSubmitted={mutate}
+            />
+          </Text.Block>
+        )
+      }
+    },
+    {
+      id: "isRecommend",
+      accessor: (record) => record,
+      Header: <Trans zh="推荐游戏" en="Recommend" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
+      },
+      Cell: ({ value }) => {
+        let { id, isRecommend } = value
+        return (
+          <Text.Block whiteSpace="nowrap">
+            <GameTagSwitch
+              id={id}
+              tag={GameTag.Recommend}
+              checked={isRecommend}
+              onSubmitted={mutate}
+            />
+          </Text.Block>
+        )
+      }
+    },
+    {
+      id: "status",
+      accessor: (record) => record,
       Header: <Trans zh="状态" en="Status" />,
       disableSortBy: true,
       headCell: {
@@ -93,9 +324,14 @@ const useColumns = ({ items = [], mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
+        let { id, status } = value
         return (
           <Box alignX="center">
-            <StatusMenu value={value} />
+            <GameStatusToggleSwitch
+              id={id}
+              value={status}
+              onSubmitted={mutate}
+            />
           </Box>
         )
       }
@@ -122,7 +358,6 @@ const useColumns = ({ items = [], mutate }) => {
         return (
           <Set orientation="vertical" alignX="center">
             <EditButton record={value} onSubmitted={mutate} />
-            <EditPresetButton />
           </Set>
         )
       }

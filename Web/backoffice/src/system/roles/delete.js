@@ -36,13 +36,16 @@ export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
 
 const DeleteDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
   let [deleteId, setDelete] = useState()
-  let { result, error, isLoading, mutate } = useDeleteRole(deleteId)
+  let { result, error, isLoading, mutate, deleteCache } = useDeleteRole(
+    deleteId
+  )
 
   const submit = () => {
     setDelete(id)
   }
 
-  const clearResult = () => {
+  const reset = () => {
+    deleteCache()
     mutate(undefined, false)
     setDelete(undefined)
   }
@@ -57,9 +60,9 @@ const DeleteDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
       isLoading={isLoading}
       result={result}
       error={error}
-      onCloseErrorAlert={clearResult}
+      onCloseErrorAlert={reset}
       onSubmitted={() => {
-        mutate(undefined, false)
+        reset()
         onSubmitted?.()
       }}
       title={title}

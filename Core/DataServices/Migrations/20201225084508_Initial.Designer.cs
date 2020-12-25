@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201223082846_Initial")]
+    [Migration("20201225084508_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1707,9 +1707,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
 
-                    b.Property<Guid>("TemplateId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -1747,7 +1744,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Key");
 
