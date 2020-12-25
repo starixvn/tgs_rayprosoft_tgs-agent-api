@@ -8,7 +8,7 @@ using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Models.Messages;
-using Setting = TGS.Core.DataServices.Models.Setting;
+using Setting = TGS.Core.DataServices.Tgs.Models.Setting;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {

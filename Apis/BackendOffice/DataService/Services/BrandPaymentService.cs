@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.DataService.Services

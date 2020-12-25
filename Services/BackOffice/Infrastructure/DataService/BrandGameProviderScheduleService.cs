@@ -3,8 +3,8 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService

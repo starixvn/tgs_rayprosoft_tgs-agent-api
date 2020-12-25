@@ -11,7 +11,7 @@ using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -304,7 +304,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             };
         }
 
-        private static string[] GetDesignatedUsersAsync(Core.DataServices.Models.BrandPayment brandPayment)
+        private static string[] GetDesignatedUsersAsync(Core.DataServices.Tgs.Models.BrandPayment brandPayment)
         {
             var vipLevelIds = brandPayment.VipLevels.Select(x => x.VipLevelId).ToArray();
             var playerCodes = brandPayment.PaymentPlayerList.Where(x => x.ListType == PlayerListType.White)

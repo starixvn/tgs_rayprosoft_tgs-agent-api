@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.GlobalApi.Models.Data;
 using TGS.Apis.GlobalApi.Models.Messages;
-using TGS.Core.DataServices;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;

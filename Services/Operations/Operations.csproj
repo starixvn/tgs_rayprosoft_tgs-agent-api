@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
-    <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
   </ItemGroup>

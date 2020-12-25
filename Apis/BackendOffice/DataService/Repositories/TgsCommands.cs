@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {

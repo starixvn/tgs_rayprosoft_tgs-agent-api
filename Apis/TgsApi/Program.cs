@@ -7,8 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models;
 
 namespace TGS.Apis.TgsApi

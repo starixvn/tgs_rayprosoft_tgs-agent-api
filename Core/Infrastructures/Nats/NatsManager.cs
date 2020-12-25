@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 using NATS.Client;
 using NATS.Client.Rx;
 using NATS.Client.Rx.Ops;
-using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Core.Infrastructures.Nats
 {

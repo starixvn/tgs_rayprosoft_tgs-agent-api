@@ -1,0 +1,17 @@
+﻿using System;
+using TGS.Core.Models.Enums;
+
+namespace TGS.Core.DataServices.Tgs.Models
+{
+    public class BrandGameProviderSchedule
+    {
+        public Guid Id { get; set; }
+        public Guid BrandGameProviderId { get; set; }
+        public virtual BrandGameProvider BrandGameProvider { get; set; }
+        public DateTimeOffset From { get; set; }
+        public DateTimeOffset To { get; set; }
+        public SwitchStatus Status { get; set; }
+        public DayOfWeek? DayOfWeek { get; set; }
+        public bool IsDefault { get; set; }
+    }
+}
