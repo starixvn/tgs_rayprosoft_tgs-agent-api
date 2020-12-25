@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.BackOffice.Application.Models.BrandGame;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -22,7 +23,11 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
             GetBrandGameRequest request,
             CancellationToken cancellationToken)
         {
-            var brandGame = await _service.GetBrandGameAsync(x => x.Id == request.Id);
+            var brandGame = await _service.GetBrandGameAsync(x => x.Id == request.Id, x => x
+                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, b => b.BrandId == BrandId)
+            );
             if (brandGame == null)
             {
                 return CreateInvalidResponse<GetBrandGameResponse>(BrandGame.NotFound);

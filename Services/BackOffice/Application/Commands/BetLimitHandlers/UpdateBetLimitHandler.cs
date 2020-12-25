@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BetLimit;
+using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BetLimit
+namespace TGS.Services.BackOffice.Application.Commands.BetLimitHandlers
 {
     public class UpdateBetLimitHandler : Handler<UpdateBetLimitRequest, MessageResponse>
     {
@@ -23,7 +24,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BetLimit
 
             if (betLimit == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.BetLimit.NotFound);
+                return CreateInvalidResponse<MessageResponse>(BetLimit.NotFound);
             }
 
             await _service.UpdateBetLimitAsync(betLimit, request);

@@ -23,11 +23,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
     public class BrandGameProviderService : BaseService, IBrandGameProviderService
     {
-        private readonly ITgsRepository _repository;
-
         public BrandGameProviderService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
-            _repository = tgsRepository;
         }
 
         Task<BrandGameProvider> IBrandGameProviderService.GetBrandGameProviderAsync(

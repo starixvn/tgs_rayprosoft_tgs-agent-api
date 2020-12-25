@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
@@ -25,6 +26,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
             CancellationToken cancellationToken)
         {
             var defaultTimes = await _service.GetBrandGameProviderSchedulesAsync()
+                .Where(ResellerId != null, r => r.BrandGameProvider.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.BrandGameProvider.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, b => b.BrandGameProvider.BrandId == BrandId)
                 .Where(x => x.BrandGameProviderId == request.BrandGameProviderId)
                 .Where(x => !x.IsDefault)
                 .Select(x => new DefaultTimeModel

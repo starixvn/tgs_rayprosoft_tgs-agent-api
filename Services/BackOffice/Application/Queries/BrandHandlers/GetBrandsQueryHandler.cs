@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -39,8 +38,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     OperationalEmail = x.OperationalEmail,
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn
-                })
-                .AsNoTracking().CreatePagedResponseAsync(request);
+                }).CreatePagedResponseAsync(request);
         }
     }
 }

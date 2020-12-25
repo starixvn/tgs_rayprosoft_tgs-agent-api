@@ -1,4 +1,5 @@
-﻿using TGS.Core.Models.Messages;
+﻿using System;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
 {
@@ -6,5 +7,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
     {
         public bool? IsRoot { get; set; }
         public string Name { get; set; }
+        public Guid? ResellerId { get; set; }
+        public Guid? LicenseeId { get; set; }
+        public Guid? BrandId { get; set; }
     }
 }
