@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Services.Data;
 
 namespace TGS.Services.Operations.Queries

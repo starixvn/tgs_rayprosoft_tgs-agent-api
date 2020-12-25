@@ -5,7 +5,7 @@ docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=1qaz2wsx!@" -p 1433:1433 --name sq
 ## Migration Command 
 
 #TGS
-add-migration <MigrationName> -c TgsRepository -p DataServices -s TgsApi
+add-migration <MigrationName> -c TgsRepository -p DataServices.Tgs -s TgsApi
 
 #Bet
 add-migration <MigrationName> -c BetRepository -p  DataServices.Bet -s TgsApi

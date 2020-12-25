@@ -5,11 +5,11 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS publish
 WORKDIR /src
 COPY ["Apis/GlobalApi/GlobalApi.csproj", "Apis/GlobalApi/"]
 COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
-COPY ["Core/DataServices/DataServices.csproj", "Core/DataServices/"]
+COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
 COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
@@ -17,10 +17,7 @@ COPY ["Core/DataServices.Bet/DataServices.Bet.csproj", "Core/DataServices.Bet/"]
 RUN dotnet restore "Apis/GlobalApi/GlobalApi.csproj"
 COPY . .
 WORKDIR "/src/Apis/GlobalApi"
-RUN dotnet build "GlobalApi.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "GlobalApi.csproj" -c Release -o /app/publish
+RUN dotnet publish "GlobalApi.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app

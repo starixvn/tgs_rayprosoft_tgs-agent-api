@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
-using TGS.Apis.BackendOffice.Extensions;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.User
 {

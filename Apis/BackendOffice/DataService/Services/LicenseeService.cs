@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
-using TGS.Core.DataServices;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.DataService.Services

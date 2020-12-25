@@ -5,7 +5,7 @@
     <AssemblyName>TGS.Apis.TgsApi</AssemblyName>
     <RootNamespace>TGS.Apis.TgsApi</RootNamespace>
     <UserSecretsId>8becd8f5-1a79-4b6e-87c1-63da6719254c</UserSecretsId>
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
@@ -14,13 +14,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;8618;8601;8602</NoWarn>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Models\GameLauncher\**" />
-    <Content Remove="Models\GameLauncher\**" />
-    <EmbeddedResource Remove="Models\GameLauncher\**" />
-    <None Remove="Models\GameLauncher\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
@@ -38,7 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
-    <ProjectReference Include="..\..\Core\DataServices\DataServices.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using TGS.Apis.GlobalApi.Models.Messages;
-using TGS.Core.DataServices;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;

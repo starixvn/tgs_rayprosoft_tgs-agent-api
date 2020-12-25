@@ -11,7 +11,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.BrandPayment;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {

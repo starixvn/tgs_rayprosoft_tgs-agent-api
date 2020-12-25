@@ -12,7 +12,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 using TGS.Apis.BackendOffice.Controllers.Reseller;
 using TGS.Apis.BackendOffice.DataService.Services;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {

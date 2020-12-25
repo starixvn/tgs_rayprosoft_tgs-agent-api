@@ -1,4 +1,4 @@
-﻿using TGS.Core.DataServices;
+﻿using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 

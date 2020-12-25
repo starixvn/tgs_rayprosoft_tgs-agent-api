@@ -11,7 +11,6 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
-using TokenExpireSeconds = TGS.Core.Models.Consts.TokenExpireSeconds;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -54,7 +53,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
             var signature = $"{brandId}:{currency}:{secretKey}";
-            var expires = DateTime.Now.AddSeconds(TokenExpireSeconds.Jwt);
+            var expires = DateTime.Now.AddSeconds(Core.Models.Consts.TokenExpireSeconds.Jwt);
 
             var token = _handler.GenerateToken(identity, Encoding.UTF8.GetBytes(signature),
                 Consts.Site, expires);
