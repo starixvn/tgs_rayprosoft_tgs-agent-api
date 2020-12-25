@@ -75,8 +75,8 @@ services:
 
   mocksite:
     build:
-      context: ./Web/mocksite
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Web/mocksite/Dockerfile
     image: mocksite
     container_name: mocksite
     labels:
