@@ -9,7 +9,7 @@ import {
   Password as PasswordField
 } from "../../input/Field"
 import { Trans, useTrans } from "../../i18n"
-import { Select as StatusSelect, from as statusFrom } from "./status"
+import { Select as StatusSelect } from "./status"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { useAddAdmin, useEditAdmin, useEditPassword } from "./client"
@@ -252,10 +252,6 @@ const EditDialog = ({
   let { result, error, mutate, isLoading } = useEditAdmin(user?.id, submitData)
 
   const submit = (data) => {
-    data = {
-      ...data,
-      status: statusFrom(data.status)
-    }
     setSubmit(data)
   }
 

@@ -50,7 +50,8 @@ import {
   RoleTypes,
   useRoleTypeOptions,
   RoleTypeLabel,
-  adminOrNextRoleType
+  adminOrNextRoleType,
+  isNextRoleType
 } from "./type"
 import { useBrandList } from "../../merchant/brands/client"
 import { Reseller } from "../../merchant/resellers"
@@ -82,28 +83,19 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
 const AddDialog = ({ dialog, onSubmitted }) => {
   let formMethods = useForm()
-  let { register, watch, setValue } = formMethods
+  let { register, watch, setValue, getValues } = formMethods
 
   let userRoleType = useUserRoleType()
   let roleType = watch("roleType")
+  let sameRoleType = userRoleType === roleType
 
   let userRoleId = useUserRoleId()
-  let roleId = watch("roleId")
+  let templateId = watch("templateId")
 
   let [formData, setMenusData] = useState({
     roleType: userRoleType,
     roleId: userRoleId
   })
-
-  useEffect(() => {
-    let newState = {
-      roleType,
-      roleId
-    }
-    if (newState.roleType && roleType.roleId && !equals(newState, formData)) {
-      setMenusData(newState)
-    }
-  }, [roleType, roleId])
 
   let {
     menus,
@@ -127,9 +119,23 @@ const AddDialog = ({ dialog, onSubmitted }) => {
   let { result, error, isLoading } = useAddRole(submitData)
 
   useEffect(() => {
-    let isSame = userRoleType == roleType
-    setMenus(cloneDeep(isSame ? dropRoleModule(menus) : menus))
-  }, [JSON.stringify(menus), userRoleType, roleType])
+    let roleId = sameRoleType ? userRoleId : templateId
+
+    let newState = {
+      roleType,
+      roleId
+    }
+
+    if (newState.roleType && newState.roleId && !equals(newState, formData)) {
+      setMenusData(newState)
+    }
+  }, [roleType, templateId])
+
+  let isRoot = watch("isRoot")
+
+  useEffect(() => {
+    setMenus(cloneDeep(sameRoleType || !isRoot ? dropRoleModule(menus) : menus))
+  }, [JSON.stringify(menus), userRoleType, roleType, isRoot])
 
   let title = useTrans({
     zh: "新增权限组",
@@ -140,16 +146,28 @@ const AddDialog = ({ dialog, onSubmitted }) => {
     setSubmit(undefined)
   }
 
-  let showRoleSelect =
-    userRoleType != RoleTypes.Admin &&
-    ((roleType === RoleTypes.Licensee && resellerId) ||
-      (roleType === RoleTypes.Brand && licenseeId))
+  //Note.
+  // same role type -> user role id
+  // next role type + isRoot -> user role id
+  // others will not use user role id, template id will be required
+  let useUserRoleAsTemplate =
+    sameRoleType || (isNextRoleType(userRoleType, roleType) && isRoot)
+  let roleTemplateRequired = !useUserRoleAsTemplate
 
   return (
     <HookFormDialog
       formMethods={formMethods}
       onSubmit={(data) => {
+        let templateId = useUserRoleAsTemplate
+          ? userRoleId
+          : getValues("templateId")
+
+        if (!templateId) {
+          console.error("templateId required, but nil")
+        }
+
         setSubmit({
+          templateId,
           roleType,
           resellerId,
           licenseeId,
@@ -211,18 +229,18 @@ const AddDialog = ({ dialog, onSubmitted }) => {
               </>
             )}
 
-            {showRoleSelect && (
+            {roleTemplateRequired && (
               <>
-                <Label name="roleType">
-                  <Trans zh="权限组" en="Role" />
+                <Label name="roleType" required>
+                  <Trans zh="权限组样板" en="Role Template" />
                 </Label>
                 <Box>
-                  <RoleIdSelect
-                    name="roleId"
+                  <RoleTemplateSelect
                     defaultValue={userRoleId}
                     roleType={roleType}
                     resellerId={resellerId}
                     licenseeId={licenseeId}
+                    brandId={brandId}
                   />
                 </Box>
               </>
@@ -255,30 +273,76 @@ const pickDisplayMenus = (menus = []) => {
     })
 }
 
-const RoleIdSelect = ({
-  name = "roleId",
+const useRoleListParams = () => {
+  let { register, watch, getValues } = useFormContext()
+  let showAll = true
+  let roleType = watch("roleType")
+  let isRoot = watch("isRoot")
+  let resellerId = watch("resellerId")
+  let licenseeId = watch("licenseeId")
+  let brandId = watch("brandId")
+
+  if (isRoot) {
+    switch (roleType) {
+      case RoleTypes.Reseller: //from admin
+        return {
+          showAll
+        }
+      case RoleTypes.Licensee:
+        return {
+          isRoot: true,
+          resellerId
+        }
+      case RoleTypes.Brand:
+        return {
+          isRoot: true,
+          resellerId,
+          licenseeId
+        }
+    }
+  } else if (!isRoot) {
+    switch (roleType) {
+      case RoleTypes.Reseller: //from admin
+        return {
+          showAll,
+          isRoot: true,
+          resellerId
+        }
+      case RoleTypes.Licensee:
+        return {
+          showAll,
+          isRoot: true,
+          resellerId,
+          licenseeId
+        }
+      case RoleTypes.Brand:
+        return {
+          showAll,
+          isRoot: true,
+          resellerId,
+          licenseeId,
+          brandId
+        }
+    }
+  }
+}
+
+const RoleTemplateSelect = ({
+  name = "templateId",
   defaultValue,
   roleType,
   resellerId,
   licenseeId,
   ...props
 }) => {
-  let { register } = useFormContext()
-  let { data: roleData } = useRoleList(
-    roleType === RoleTypes.Licensee && resellerId
-      ? { showAll: true, resellerId }
-      : roleType === RoleTypes.Brand && licenseeId
-      ? { showAll: true, licenseeId }
-      : undefined
-  )
+  let { register, watch } = useFormContext()
+  let params = useRoleListParams()
 
+  let { data: roleData } = useRoleList(params)
   let placeholder = useTrans({
-    zh: "预设",
-    en: "Default"
+    zh: "选择样板",
+    en: "Select Template"
   })
-  if (!roleData?.items) {
-    return null
-  }
 
   return (
     <Select
@@ -287,10 +351,12 @@ const RoleIdSelect = ({
       defaultValue={defaultValue}
       selectRef={register({ required: true })}
       placeholder={placeholder}
-      options={roleData.items.map((role) => ({
-        label: role.name,
-        value: role.id
-      }))}
+      options={
+        roleData?.items?.map((role) => ({
+          label: role.name,
+          value: role.id
+        })) ?? []
+      }
     />
   )
 }
@@ -406,19 +472,25 @@ export const EditButton = ({ id, onSubmitted, ...props }) => {
 }
 
 const EditRoleDialog = ({ id, dialog, onSubmitted }) => {
-  let userRoleType = useUserRoleType()
-  let userRoleId = useUserRoleId()
-
   let { role, isLoading, isValidating, error, mutate, deleteCache } = useRole(
     id
   )
+  let userRoleType = useUserRoleType()
+  let [menus, setMenus] = useState()
 
-  if (isLoading) {
-    return <LoadingBackdrop visible={true} />
-  }
+  useEffect(() => {
+    if (role && !role.isRoot /*&& userRoleType === role.roleType*/) {
+      role.menus = dropRoleModule(role.menus)
+    }
+    setMenus(role?.menus)
+  }, [userRoleType, role])
 
   if (error) {
     return <AlertDialog {...error} onClickClose={dialog.hide} />
+  }
+
+  if (isLoading || !menus) {
+    return <LoadingBackdrop visible={true} />
   }
 
   return (
@@ -426,7 +498,7 @@ const EditRoleDialog = ({ id, dialog, onSubmitted }) => {
       id={id}
       role={role}
       name={role?.name}
-      menus={role?.menus}
+      menus={menus}
       dialog={dialog}
       onSubmitted={(data) => {
         mutate(false, undefined)
