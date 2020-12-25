@@ -295,7 +295,6 @@ services:
     environment:
       - SERVICES=s3
       - DEBUG=1
-      - USE_SSL=true
       - DATA_DIR=/tmp/localstack/data
     volumes:
       - ./.docker/localstack/data:/tmp/localstack

@@ -284,7 +284,7 @@ namespace TGS.Core.DataServices.DataInitializers
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
-            return new()
+            return new Player()
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -852,7 +852,6 @@ namespace TGS.Core.DataServices.DataInitializers
             return roles.Select(role => new Role
             {
                 Id = role.Id,
-                TemplateId = role.TemplateId,
                 IsRoot = role.IsRoot,
                 Name = role.Name,
                 DisplayName = role.Name,

@@ -7,7 +7,6 @@ namespace TGS.Core.DataServices.Models
     public class Role
     {
         public Guid Id { get; set; }
-        public Guid TemplateId { get; set; }
         public RoleType RoleType { get; set; }
 
         public Guid? ResellerId { get; set; }

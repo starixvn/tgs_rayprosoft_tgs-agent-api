@@ -15,7 +15,6 @@ namespace TGS.Core.DataServices.DataInitializers
             Guid? LicenseeId { get; }
             Guid? BrandId { get; }
             bool IsRoot { get; }
-            Guid TemplateId { get; }
         }
 
         internal static class Roles
@@ -37,7 +36,6 @@ namespace TGS.Core.DataServices.DataInitializers
             Guid? IRole.LicenseeId => null;
             Guid? IRole.BrandId => null;
             bool IRole.IsRoot => true;
-            Guid IRole.TemplateId => new("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44E");
         }
 
 
@@ -51,7 +49,6 @@ namespace TGS.Core.DataServices.DataInitializers
             Guid? IRole.LicenseeId => null;
             Guid? IRole.BrandId => null;
             bool IRole.IsRoot => true;
-            Guid IRole.TemplateId => new("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44E");
         }
 
         internal class LicenseeAdminRole : IRole
@@ -64,7 +61,6 @@ namespace TGS.Core.DataServices.DataInitializers
             Guid? IRole.LicenseeId => new Guid("66C5FEF5-217B-4929-9A08-72C2479A8F4E");
             Guid? IRole.BrandId => null;
             bool IRole.IsRoot => true;
-            Guid IRole.TemplateId => new("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44A");
         }
 
         internal class BrandRole : IRole
@@ -77,7 +73,6 @@ namespace TGS.Core.DataServices.DataInitializers
             Guid? IRole.LicenseeId => new Guid("66C5FEF5-217B-4929-9A08-72C2479A8F4E");
             Guid? IRole.BrandId => new Guid("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A");
             bool IRole.IsRoot => true;
-            Guid IRole.TemplateId => new("7AA2E39B-9DA9-4E2E-9BDE-B74FDC5DE44C");
         }
     }
 }

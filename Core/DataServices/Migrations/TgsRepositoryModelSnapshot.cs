@@ -1705,9 +1705,6 @@ namespace TGS.Core.DataServices.Migrations
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
 
-                    b.Property<Guid>("TemplateId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
