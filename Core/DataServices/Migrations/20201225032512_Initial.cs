@@ -224,7 +224,7 @@ namespace TGS.Core.DataServices.Migrations
                 columns: table => new
                 {
                     Key = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(4000)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -1998,7 +1998,7 @@ namespace TGS.Core.DataServices.Migrations
                 schema: "dbo",
                 table: "Whitelists",
                 column: "ResellerId");
-            
+
             InitAfterRun(migrationBuilder);
         }
 

@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.EntityTypeConfigurations
                 .IsUnicode();
 
             builder.Property(c => c.Value)
-                .HasColumnType(ColumnTypes.Nvarchar(4000))
+                .HasColumnType(ColumnTypes.NvarcharMax)
                 .IsRequired();
 
             builder.Property(c => c.Description)
