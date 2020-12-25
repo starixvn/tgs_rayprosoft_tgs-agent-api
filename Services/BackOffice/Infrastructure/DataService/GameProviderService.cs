@@ -117,7 +117,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await CreateEntityAsync(gameProvider);
         }
 
-        private static HashSet<Game> GenerateGames(GameProvider gameProvider, CreateGameProviderRequest request)
+        private static HashSet<Game> GenerateGames(GameProvider gameProvider, GameProviderRequest request)
         {
             var games = request.Games.Select((x, count) => new Game
             {
@@ -145,17 +145,19 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         private static (HashSet<Game>, IEnumerable<int> deleteGameIds) GenerateUpdateGames(GameProvider gameProvider,
-            UpdateGameProviderRequest request)
+            GameProviderRequest request)
         {
-            var newGames = request.Games.Where(x => x.Id == 0);
             var deleteGameIds = gameProvider.Games.Select(x => x.Id).Except(request.Games.Select(x => x.Id));
-            var maxNumber = gameProvider.Games.Max(x => x.Id);
+            var maxNumberStr = gameProvider.Games.Max(x => x.Id).ToString();
+            var maxNumber = int.Parse(maxNumberStr[^4..]);
             var games = request.Games.Select(x =>
             {
-                var id = x.Id == 0 ? int.Parse($"{gameProvider.UniqueId}{maxNumber++:0000}") : x.Id;
+                var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
+                var id = originGame == null ? int.Parse($"{gameProvider.UniqueId}{maxNumber += 1:0000}") : x.Id;
                 return new Game
                 {
                     Id = id,
+                    Code = x.Code,
                     Name = x.Name,
                     Status = x.Status,
                     ExternalId = x.ExternalId,
@@ -166,10 +168,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                     Html5 = x.Html5,
                     AvailableCurrencies = x.AvailableCurrencies,
-                    CreatedByUsername = x.Id == 0 ? request.Username : x.CreatedByUsername,
-                    UpdatedByUsername = x.Id == 0 ? request.Username : x.UpdatedByUsername,
-                    CreatedOn = x.Id == 0 ? DateTimeOffset.UtcNow : x.CreatedOn,
-                    UpdatedOn = x.Id == 0 ? DateTimeOffset.Now : x.UpdatedOn
+                    CreatedByUsername = originGame == null ? request.Username : x.CreatedByUsername,
+                    UpdatedByUsername = originGame == null ? request.Username : x.UpdatedByUsername,
+                    CreatedOn = originGame == null ? DateTimeOffset.UtcNow : x.CreatedOn,
+                    UpdatedOn = originGame == null ? DateTimeOffset.Now : x.UpdatedOn
                 };
             });
 
@@ -206,7 +208,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new HashSet<GameProviderLanguage>(gameProviderLanguages);
         }
 
-        private HashSet<GameProviderBetLimit> GenerateBetLimits(GameProvider gameProvider,
+        private static HashSet<GameProviderBetLimit> GenerateBetLimits(GameProvider gameProvider,
             GameProviderRequest request)
         {
             var gameProviderBetLimits = request.BetLimits.Select(x => new GameProviderBetLimit
@@ -221,7 +223,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new HashSet<GameProviderBetLimit>(gameProviderBetLimits);
         }
 
-        private HashSet<GameProviderBetLimit> GenerateNewBetLimits(GameProvider gameProvider,
+        private static HashSet<GameProviderBetLimit> GenerateNewBetLimits(GameProvider gameProvider,
             GameProviderRequest request)
         {
             var gameProviderBetLimits = request.BetLimits.Where(x => x.Id.Equals(Guid.Empty)).Select(x =>

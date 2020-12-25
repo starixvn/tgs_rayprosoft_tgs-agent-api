@@ -10,7 +10,7 @@ using TGS.Core.DataServices;
 namespace TGS.Core.DataServices.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201225084508_Initial")]
+    [Migration("20201225094753_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
