@@ -1745,7 +1745,7 @@ namespace TGS.Core.DataServices.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Key");
 

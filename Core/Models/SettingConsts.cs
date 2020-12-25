@@ -1,10 +1,13 @@
-﻿namespace TGS.Core.Models
+﻿// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+namespace TGS.Core.Models
 {
     public static class SettingConsts
     {
         public const string Menus = "Menus";
         public const string Vip = "Vip";
-        public const string Department = "Department";
+        public const string SuperLicenseeCodes ="SuperLicenseeCodes";
 
         public static class GameProviderConfigurations
         {

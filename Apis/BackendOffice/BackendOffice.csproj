@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>827b100c-3b6a-419b-9e30-399f8af05d7a</UserSecretsId>
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <AssemblyName>TGS.Apis.BackendOffice</AssemblyName>
@@ -42,14 +42,14 @@
   </ItemGroup>
 
   <ItemGroup>
-	<Compile Include="..\..\GlobalAssemblyInfo.cs">
+    <Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-	<Compile Update="Resources\Brand.Designer.cs">
-	  <DesignTime>True</DesignTime>
-	  <AutoGen>True</AutoGen>
-	  <DependentUpon>Brand.resx</DependentUpon>
-	</Compile>
+    <Compile Update="Resources\Brand.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Brand.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Department.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -211,6 +211,5 @@
       <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 
 </Project>

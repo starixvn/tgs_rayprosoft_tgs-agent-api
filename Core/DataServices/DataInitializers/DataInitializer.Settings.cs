@@ -14,20 +14,24 @@ namespace TGS.Core.DataServices.DataInitializers
         {
             var options = new JsonSerializerOptions
             {
-                WriteIndented = true
+                WriteIndented = false
             };
 
             var commonSettings = new[]
             {
-                CreateSetting(SettingConsts.Menus, _jsonSerializationProvider.SerializeToString(GetMenuSettings()),
-                    "For menus used")
+                CreateSetting(SettingConsts.Menus,
+                    _jsonSerializationProvider.SerializeToString(GetMenuSettings(), options),
+                    "For menus used"),
+                CreateSetting(SettingConsts.SuperLicenseeCodes,
+                    _jsonSerializationProvider.SerializeToString(new[] {"TGS"}, options),
+                    "Super Licensee Codes")
             };
 
             var gameProviderSettings = _gameProviders.Select(gp =>
             {
                 var configuration = gp.GetConfiguration();
                 return CreateSetting(SettingConsts.GameProviderConfigurations.Template.Args(gp.Code),
-                    _jsonSerializationProvider.SerializeToString(configuration, configuration.GetType()),
+                    _jsonSerializationProvider.SerializeToString(configuration, configuration.GetType(), options),
                     $"JSON based configuration of {gp.Code}");
             }).ToArray();
 
@@ -50,7 +54,7 @@ namespace TGS.Core.DataServices.DataInitializers
             };
         }
 
-        private MenuSetting[] GetMenuSettings()
+        private static MenuSetting[] GetMenuSettings()
         {
             var menus = new[]
             {
@@ -93,7 +97,7 @@ namespace TGS.Core.DataServices.DataInitializers
                         }
                     }
                 },
-                new MenuSetting("AdminMenagement")
+                new MenuSetting("AdminManagement")
                 {
                     SubMenus = new[]
                     {
