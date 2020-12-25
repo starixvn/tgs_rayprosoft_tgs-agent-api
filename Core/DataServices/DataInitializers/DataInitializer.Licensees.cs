@@ -31,7 +31,7 @@ namespace TGS.Core.DataServices.DataInitializers
 
         internal record TgsLicensee : ILicensee
         {
-            Guid ILicensee.Id => new Guid("66C5FEF5-217B-4929-9A08-72C2479A8F4E");
+            Guid ILicensee.Id => new("66C5FEF5-217B-4929-9A08-72C2479A8F4E");
 
             string ILicensee.Code => "TGS";
 

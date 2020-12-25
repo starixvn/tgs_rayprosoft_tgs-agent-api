@@ -12,6 +12,7 @@ namespace TGS.Core.Infrastructures.Log
         /// <summary>
         /// Dependency Injections of Infrastructure.Log, needs to add the following dependencies beforehand:
         /// 1. AddWebApiServices() in Infrastructure.WebApiServices
+        /// 2. AddNats() in Infrastructure.Nats
         /// </summary>
         public static IServiceCollection AddTgsLog(this IServiceCollection services)
         {
