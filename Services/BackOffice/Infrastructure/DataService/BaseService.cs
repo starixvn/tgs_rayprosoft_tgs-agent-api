@@ -32,10 +32,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return tracking ? preQuery(_repository.Set<T>()) : preQuery(_repository.Set<T>()).AsNoTracking();
         }
 
-        protected Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class
-        {
-            return _repository.Set<T>().AnyAsync(predicate);
-        }
+        protected Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class =>
+            _repository.Set<T>().AnyAsync(predicate);
 
         protected Task CreateEntityAsync<T>(T entity) where T : class
         {

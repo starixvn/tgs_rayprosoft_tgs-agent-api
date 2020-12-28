@@ -138,4 +138,10 @@
   <data name="LanguageRequired" xml:space="preserve">
     <value>语系必填</value>
   </data>
+  <data name="CodeExists" xml:space="preserve">
+    <value>代码已存在</value>
+  </data>
+  <data name="NameExists" xml:space="preserve">
+    <value>名称已存在</value>
+  </data>
 </root>

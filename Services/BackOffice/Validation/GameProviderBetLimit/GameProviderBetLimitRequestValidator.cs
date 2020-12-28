@@ -7,11 +7,6 @@ namespace TGS.Services.BackOffice.Validation.GameProviderBetLimit
     {
         public GameProviderBetLimitRequestValidator()
         {
-            RuleFor(x => x.GameProviderId)
-                .NotEmpty()
-                .NotNull()
-                .WithMessage(Application.Resources.GameProviderBetLimit.GameProviderIdRequired);
-
             RuleFor(x => x.CurrencyCode)
                 .NotEmpty()
                 .NotNull()

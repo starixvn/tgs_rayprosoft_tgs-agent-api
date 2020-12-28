@@ -26,6 +26,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task CreateGameProviderAsync(CreateGameProviderRequest request);
         Task UpdateGameProviderAsync(GameProvider gameProvider, UpdateGameProviderRequest request);
         Task ChangeStatusAsync(GameProvider gameProvider, UpdateGameProviderStatusRequest request);
+        Task<bool> ExistsAsync(Expression<Func<Brand, bool>> predicate);
     }
 
     public class GameProviderService : BaseService, IGameProviderService
@@ -113,6 +114,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await CreateEntityAsync(gameProvider);
         }
+
+        Task<bool> IGameProviderService.ExistsAsync(Expression<Func<Brand, bool>> predicate) => ExistsAsync(predicate);
 
         private static HashSet<Game> GenerateGames(GameProvider gameProvider, GameProviderRequest request)
         {
