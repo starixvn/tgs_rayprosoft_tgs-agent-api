@@ -100,4 +100,22 @@
   <data name="NotFound" xml:space="preserve">
     <value>Game provider is not found.</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>Code is required.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="StatusRequired" xml:space="preserve">
+    <value>Status is required.</value>
+  </data>
+  <data name="GameRequired" xml:space="preserve">
+    <value>Game is required.</value>
+  </data>
+  <data name="CurrencyRequired" xml:space="preserve">
+    <value>Currency is required.</value>
+  </data>
+  <data name="LanguageRequired" xml:space="preserve">
+    <value>Language is required.</value>
+  </data>
 </root>

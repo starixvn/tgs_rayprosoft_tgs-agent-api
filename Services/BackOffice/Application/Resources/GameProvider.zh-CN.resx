@@ -120,4 +120,22 @@
   <data name="NotFound" xml:space="preserve">
     <value>找不到游戏提供商</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>代码必填</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>名称必填</value>
+  </data>
+  <data name="StatusRequired" xml:space="preserve">
+    <value>状态必填</value>
+  </data>
+  <data name="GameRequired" xml:space="preserve">
+    <value>游戏必填</value>
+  </data>
+  <data name="CurrencyRequired" xml:space="preserve">
+    <value>货币必填</value>
+  </data>
+  <data name="LanguageRequired" xml:space="preserve">
+    <value>语系必填</value>
+  </data>
 </root>

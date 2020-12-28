@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.BackOffice.Application.Models.GameProvider
+namespace TGS.Services.BackOffice.Application.Models.GameProviderBetLimit
 {
     public class GameProviderBetLimitModel
     {

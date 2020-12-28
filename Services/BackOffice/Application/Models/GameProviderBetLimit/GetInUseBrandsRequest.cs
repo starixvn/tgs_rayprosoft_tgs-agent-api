@@ -1,7 +1,7 @@
 ﻿using System;
 using MediatR;
 
-namespace TGS.Services.BackOffice.Application.Models.GameProvider
+namespace TGS.Services.BackOffice.Application.Models.GameProviderBetLimit
 {
     public class GetInUseBrandsRequest : IRequest<GetInUseBrandsResponse>
     {

@@ -19,7 +19,6 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         public GameProviderGameModel[] Games { get; set; }
         public GameProviderCurrencyModel[] Currencies { get; set; }
         public GameProviderLanguageModel[] Languages { get; set; }
-        public GameProviderBetLimitModel[] BetLimits { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public string UpdatedByUsername { get; set; }
     }

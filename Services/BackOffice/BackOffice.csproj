@@ -54,6 +54,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>GameProvider.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\GameProviderBetLimit.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GameProviderBetLimit.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -78,8 +83,12 @@
       <LastGenOutput>BrandGameProviderSchedule.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\GameProvider.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProvider.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\GameProviderBetLimit.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>GameProviderBetLimit.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

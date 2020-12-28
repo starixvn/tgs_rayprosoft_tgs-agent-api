@@ -29,13 +29,6 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         public Task<GetGameProviderResponse> GetGameProviderAsync(Guid id) =>
             _mediator.Send(new GetGameProviderRequest(id));
 
-        [HttpGet("{gameProviderId}/betLimits")]
-        [Description("Get game provider bet limits")]
-        public Task<GetGameProviderBetLimitsResponse>
-            GetGameProviderBetLimitsAsync(Guid gameProviderId) =>
-            _mediator.Send(new GetGameProviderBetLimitsRequest(gameProviderId));
-
-
         [HttpPost]
         [Description("Create a game provider")]
         public Task<MessageResponse> CreateBrandAsync(CreateGameProviderRequest request) => _mediator.Send(request);

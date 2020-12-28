@@ -72,8 +72,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
 
-            //await CreateEntityAsync(GenerateNewBetLimits(gameProvider, request));
-
             await UpdateEntityAsync(gameProvider);
 
             await tran.CommitAsync();
@@ -112,7 +110,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.Games = GenerateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
-            //gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await CreateEntityAsync(gameProvider);
         }
@@ -206,37 +203,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     request.Languages.First(c => c.CultureCode == x.CultureCode).GameProviderCultureCode
             });
             return new HashSet<GameProviderLanguage>(gameProviderLanguages);
-        }
-
-        private static HashSet<GameProviderBetLimit> GenerateBetLimits(GameProvider gameProvider,
-            GameProviderRequest request)
-        {
-            var gameProviderBetLimits = request.BetLimits.Select(x => new GameProviderBetLimit
-            {
-                GameProviderId = gameProvider.Id,
-                CurrencyCode = x.CurrencyCode,
-                MinBet = x.MinBet,
-                MaxBet = x.MaxBet,
-                MaxBetPerMatch = x.MaxBetPerMatch,
-                ExternalSetting = x.ExternalSetting
-            });
-            return new HashSet<GameProviderBetLimit>(gameProviderBetLimits);
-        }
-
-        private static HashSet<GameProviderBetLimit> GenerateNewBetLimits(GameProvider gameProvider,
-            GameProviderRequest request)
-        {
-            var gameProviderBetLimits = request.BetLimits.Where(x => x.Id.Equals(Guid.Empty)).Select(x =>
-                new GameProviderBetLimit
-                {
-                    GameProviderId = gameProvider.Id,
-                    CurrencyCode = x.CurrencyCode,
-                    MinBet = x.MinBet,
-                    MaxBet = x.MaxBet,
-                    MaxBetPerMatch = x.MaxBetPerMatch,
-                    ExternalSetting = x.ExternalSetting
-                });
-            return new HashSet<GameProviderBetLimit>(gameProviderBetLimits);
         }
     }
 }

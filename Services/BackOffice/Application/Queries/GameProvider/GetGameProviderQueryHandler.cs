@@ -41,6 +41,11 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProvider
                     Code = gameProvider.Code,
                     UniqueId = gameProvider.UniqueId,
                     Description = gameProvider.Description,
+                    AutoCloseRound = gameProvider.AutoCloseRound,
+                    SupportTestPlayer = gameProvider.SupportTestPlayer,
+                    AllowKickPlayer = gameProvider.AllowKickPlayer,
+                    PlaceBetTimeout = gameProvider.PlaceBetTimeout,
+                    SettleBetTimeout = gameProvider.SettleBetTimeout,
                     Games = gameProvider.Games.Select(x => new GameProviderGameModel
                     {
                         Id = x.Id,
