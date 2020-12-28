@@ -49,6 +49,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BrandGameProviderSchedule.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\GameProvider.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GameProvider.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +76,10 @@
     <EmbeddedResource Update="Application\Resources\BrandGameProviderSchedule.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>BrandGameProviderSchedule.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\GameProvider.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>GameProvider.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

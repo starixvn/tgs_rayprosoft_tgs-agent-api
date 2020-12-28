@@ -72,7 +72,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
 
-            await CreateEntityAsync(GenerateNewBetLimits(gameProvider, request));
+            //await CreateEntityAsync(GenerateNewBetLimits(gameProvider, request));
 
             await UpdateEntityAsync(gameProvider);
 
@@ -112,7 +112,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.Games = GenerateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
-            gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
+            //gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await CreateEntityAsync(gameProvider);
         }

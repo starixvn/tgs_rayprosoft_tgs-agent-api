@@ -26,6 +26,11 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProvider
                 .Where(BrandId != null, b => b.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
             );
 
+            if (gameProvider == null)
+            {
+                return CreateInvalidResponse<GetGameProviderResponse>(Resources.GameProvider.NotFound);
+            }
+
             return new GetGameProviderResponse
             {
                 Valid = true,
@@ -66,15 +71,6 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProvider
                     {
                         CultureCode = x.CultureCode,
                         GameProviderCultureCode = x.GameProviderCultureCode
-                    }).ToArray(),
-                    BetLimits = gameProvider.BetLimits.Select(x => new GameProviderBetLimitModel
-                    {
-                        Id = x.Id,
-                        CurrencyCode = x.CurrencyCode,
-                        MinBet = x.MinBet,
-                        MaxBet = x.MaxBet,
-                        MaxBetPerMatch = x.MaxBetPerMatch,
-                        ExternalSetting = x.ExternalSetting
                     }).ToArray(),
                     UpdatedByUsername = gameProvider.UpdatedByUsername,
                     UpdatedOn = gameProvider.UpdatedOn
