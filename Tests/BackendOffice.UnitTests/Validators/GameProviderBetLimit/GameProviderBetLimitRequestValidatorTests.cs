@@ -1,10 +1,9 @@
 ﻿using FluentValidation.TestHelper;
 using NUnit.Framework;
 using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
-using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Validation.GameProviderBetLimit;
 
-namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
+namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProviderBetLimit
 {
     [TestFixture]
     public class GameProviderBetLimitRequestValidatorTests
@@ -26,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
             };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.CurrencyCode)
-                .WithErrorMessage(GameProviderBetLimit.CurrencyRequired);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.GameProviderBetLimit.CurrencyRequired);
         }
 
         [Test]
@@ -38,7 +37,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
             };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.MinBet)
-                .WithErrorMessage(GameProviderBetLimit.MinbetGreaterThanZero);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.GameProviderBetLimit.MinbetGreaterThanZero);
         }
 
         [Test]
@@ -51,7 +50,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
             };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.MaxBet)
-                .WithErrorMessage(GameProviderBetLimit.MaxbetGreaterThanMinbet);
+                .WithErrorMessage(
+                    Services.BackOffice.Application.Resources.GameProviderBetLimit.MaxbetGreaterThanMinbet);
         }
     }
 }

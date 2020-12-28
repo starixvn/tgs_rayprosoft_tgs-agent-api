@@ -333,6 +333,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
+            role.Users = new List<User>();
+            role.IsRoot = false;
 
             var response = await _controller.DeleteAsync(role.Id);
 
@@ -343,6 +345,24 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
                 r.Description == role.Description)));
+        }
+
+        [Test]
+        public async Task Can_Not_Delete_Role()
+        {
+            var role = CreateRoleFixture().Create<Role>();
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            var response = await _controller.DeleteAsync(role.Id);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Role.CannotDeleteRole);
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
         }
 
         [Test]
