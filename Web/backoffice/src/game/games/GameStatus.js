@@ -22,8 +22,3 @@ export const GameStatus = {
   Active,
   Inactive
 }
-
-export const GameStatusToggleSwitch = ({ value }) => {
-  let isActive = value == Active
-  return <Switch checked={isActive} />
-}

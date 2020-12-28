@@ -4,7 +4,7 @@ import { Menu as _Menu, findlLabel } from "../menu"
 import {
   Code as GameProviderScheduleCode,
   codeLabelPair as gameProviderSchedulePair
-} from "./providerschedules/menu"
+} from "./brandproviders/menu"
 import {
   Code as BrandGameCode,
   codeLabelPair as brandGamePair

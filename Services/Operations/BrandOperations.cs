@@ -38,6 +38,8 @@ namespace TGS.Services.Operations
         Task<Guid> GetBrandIdByClientIdAsync(string clientId);
 
         Task<Guid> GetBrandIdByApiKeyAsync(string apiKey);
+        
+        Task<Guid> GetBrandIdByCodeAsync(string brandCode);
 
         Task<string> GetBrandSecretKeyAsync(Guid brandId);
 
@@ -49,7 +51,7 @@ namespace TGS.Services.Operations
 
         Task<GameStatus?> GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, int gameId);
 
-        Task<int> GetBrandDefaultBetLimitAsync(Guid brandId, string currency);
+        Task<int> GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -187,6 +189,10 @@ namespace TGS.Services.Operations
             _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Brand, apiKey, TimeSpan.FromHours(2),
                 () => _brandQueries.GetBrandIdByApiKeyAsync(apiKey));
 
+        Task<Guid> IBrandOperations.GetBrandIdByCodeAsync(string brandCode) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Brand, brandCode, TimeSpan.FromHours(2),
+                () => _brandQueries.GetBrandIdByCodeAsync(brandCode));
+
         Task<string> IBrandOperations.GetBrandSecretKeyAsync(Guid brandId) =>
             GetCachedBrandValueAsync(brandId, CachedBrandFields.SecretKey, v => (string) v,
                 brand => brand?.SecretKey);
@@ -215,25 +221,25 @@ namespace TGS.Services.Operations
             return game?.BrandGameStatus;
         }
 
-        async Task<int> IBrandOperations.GetBrandDefaultBetLimitAsync(Guid brandId, string currency)
+        async Task<int> IBrandOperations.GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode)
         {
             const RedisCacheType type = RedisCacheType.BrandDefaultBetLimit;
-            var value = await _cacheManager.SafeGetHashSetAsync(type, brandId, currency);
+            var value = await _cacheManager.SafeGetHashSetAsync(type, brandId, currencyCode);
             if (value.HasValue)
             {
                 return (int) value;
             }
 
-            var betLimitId = await _brandQueries.GetBrandDefaultBetLimitAsync(brandId, currency);
+            var betLimitId = await _brandQueries.GetBrandDefaultBetLimitAsync(brandId, currencyCode);
             if (!betLimitId.HasValue)
             {
                 throw new InvalidOperationException(
-                    $"Brand with id '{brandId}' doesn't have default bet limit for currency '{currency}'");
+                    $"Brand with id '{brandId}' doesn't have default bet limit for currency '{currencyCode}'");
             }
 
             await _cacheManager.SafeCacheHashSetAsync(type, brandId, new HashEntry[]
                 {
-                    new(currency, betLimitId.Value)
+                    new(currencyCode, betLimitId.Value)
                 }, TimeSpan.FromHours(2));
 
             return betLimitId.Value;

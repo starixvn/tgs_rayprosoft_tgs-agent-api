@@ -1,6 +1,5 @@
 ﻿using System;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Core.Infrastructures.Redis
 {

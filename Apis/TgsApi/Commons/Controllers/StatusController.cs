@@ -4,13 +4,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using TGS.Apis.TgsApi.Models;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 

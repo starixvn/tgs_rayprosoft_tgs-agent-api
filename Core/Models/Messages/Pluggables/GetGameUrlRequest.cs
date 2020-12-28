@@ -1,7 +1,6 @@
 ﻿// ReSharper disable IdentifierTypo
 
 using System.Text.Json.Serialization;
-using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 
 namespace TGS.Core.Models.Messages.Pluggables

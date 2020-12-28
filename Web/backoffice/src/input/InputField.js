@@ -26,6 +26,7 @@ import { useTrans } from "../i18n"
 export const HookFormInputField = ({
   name,
   register,
+  registerOptions = {},
   inputRef,
   validationText,
   errors,
@@ -56,7 +57,8 @@ export const HookFormInputField = ({
         maxLength: props.maxLength,
         validate: props.validate
         */
-      validate
+      validate,
+      ...registerOptions
     })
   }
 

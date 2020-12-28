@@ -48,7 +48,12 @@ export const HookFormDialog = ({
       <Dialog.Modal
         wrap={(children) => (
           <FormProvider {...formMethods}>
-            <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+            <form
+              onSubmit={formMethods.handleSubmit(onSubmit)}
+              css={css`
+                height: 100%;
+              `}
+            >
               {children}
             </form>
           </FormProvider>

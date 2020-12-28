@@ -13,7 +13,7 @@ namespace TGS.Services.BackOffice.Application.Models.BrandGame
         public GameType GameType { get; set; }
         public PlatformType Platform { get; set; }
         public bool SupportHtml5 { get; set; }
-        public decimal? EffectiveBettingProportion { get; set; }
-        public bool? Rebate { get; set; }
+        public decimal EffectiveBettingPercentage { get; set; }
+        public bool Rebate { get; set; }
     }
 }

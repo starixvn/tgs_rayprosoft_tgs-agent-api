@@ -8,10 +8,10 @@ namespace TGS.Services.BackOffice.Validation.BrandGame
         public UpdateBrandGameRequestValidator()
         {
             RuleFor(x => x.EffectiveBettingPercentage)
-                .GreaterThan(100)
-                .WithMessage(Application.Resources.BrandGameProviderSchedule.PercentageGreaterThan100)
-                .LessThan(0)
-                .WithMessage(Application.Resources.BrandGameProviderSchedule.PercentageLessThan0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(Application.Resources.BrandGameProviderSchedule.PercentageLessThan0)
+                .LessThanOrEqualTo(100)
+                .WithMessage(Application.Resources.BrandGameProviderSchedule.PercentageGreaterThan100);
         }
     }
 }

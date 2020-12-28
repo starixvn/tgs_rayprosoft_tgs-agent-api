@@ -11,7 +11,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers

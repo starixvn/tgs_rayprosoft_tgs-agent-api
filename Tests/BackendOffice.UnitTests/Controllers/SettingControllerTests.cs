@@ -12,7 +12,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
 using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Interfaces;
-using Setting = TGS.Core.DataServices.Models.Setting;
+using Setting = TGS.Core.DataServices.Tgs.Models.Setting;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {

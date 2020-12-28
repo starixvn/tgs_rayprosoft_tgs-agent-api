@@ -26,7 +26,7 @@ namespace TGS.Apis.FileService.Extensions
 
                 return new AmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey, new AmazonS3Config
                 {
-                    UseHttp = false,
+                    UseHttp = settings.UseHttp,
                     ServiceURL = settings.S3.ServiceUrl,
                     ForcePathStyle = true
                 });

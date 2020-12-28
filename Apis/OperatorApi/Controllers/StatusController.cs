@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Core.DataServices;
-using EnvironmentVariable = TGS.Core.Models.Consts.EnvironmentVariable;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -33,7 +32,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 MachineName = Environment.MachineName,
                 HostName = hostName,
                 HostIp = hostIp.ToString(),
-                Environment = Environment.GetEnvironmentVariable(EnvironmentVariable.Environment),
+                Environment = Environment.GetEnvironmentVariable(Core.Models.Consts.EnvironmentVariable.Environment),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectTgsDb = await _repository.CanConnectionAsync(),

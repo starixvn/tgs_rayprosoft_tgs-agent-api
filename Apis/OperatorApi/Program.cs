@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Bet;
-using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Apis.OperatorApi
 {

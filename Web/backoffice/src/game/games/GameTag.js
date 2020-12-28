@@ -21,7 +21,3 @@ export const GameTag = {
   Hot,
   Recommend
 }
-
-export const GameTagSwitch = ({ tag, checked }) => {
-  return <Switch checked={checked} />
-}

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Generics;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
@@ -26,6 +26,8 @@ namespace TGS.Services.Operations.Queries
 
         Task<Guid> GetBrandIdByApiKeyAsync(string apiKey);
 
+        Task<Guid> GetBrandIdByCodeAsync(string brandCode);
+
         Task<Dictionary<string, string>> GetBrandLanguagesByExternalCodeAsync(Guid brandId);
 
         Task<Dictionary<string, string>> GetBrandLanguagesByInternalCodeAsync(Guid brandId);
@@ -36,7 +38,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<CachedBrandGameProvider[]> GetBrandGameProvidersAsync(Guid brandId);
 
-        Task<int?> GetBrandDefaultBetLimitAsync(Guid brandId, string currency);
+        Task<int?> GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode);
     }
 
     public sealed class BrandQueries : IBrandQueries
@@ -100,6 +102,10 @@ namespace TGS.Services.Operations.Queries
 
         Task<Guid> IBrandQueries.GetBrandIdByApiKeyAsync(string apiKey) =>
             _repository.Brands.Where(b => b.ApiKey == apiKey)
+                .Select(b => b.Id).FirstOrDefaultAsync();
+
+        Task<Guid> IBrandQueries.GetBrandIdByCodeAsync(string brandCode) =>
+            _repository.Brands.Where(b => b.Code == brandCode)
                 .Select(b => b.Id).FirstOrDefaultAsync();
 
         async Task<Dictionary<string, string>> IBrandQueries.GetBrandLanguagesByExternalCodeAsync(Guid brandId)
@@ -173,9 +179,9 @@ namespace TGS.Services.Operations.Queries
             return r.ToArray();
         }
 
-        Task<int?> IBrandQueries.GetBrandDefaultBetLimitAsync(Guid brandId, string currency) =>
+        Task<int?> IBrandQueries.GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode) =>
             _repository.BrandBetLimits.Where(bl =>
-                    bl.BrandId == brandId && bl.BetLimit.CurrencyCode == currency && bl.IsDefault)
+                    bl.BrandId == brandId && bl.BetLimit.CurrencyCode == currencyCode && bl.IsDefault)
                 .Select(bl => (int?) bl.BetLimitId).FirstOrDefaultAsync();
     }
 }
