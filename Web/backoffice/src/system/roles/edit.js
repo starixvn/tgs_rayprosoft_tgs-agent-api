@@ -51,7 +51,9 @@ import {
   useRoleTypeOptions,
   RoleTypeLabel,
   adminOrNextRoleType,
-  isNextRoleType
+  isNextRoleType,
+  findParentRoleType,
+  isSameOrAfterRoleType
 } from "./type"
 import { useBrandList } from "../../merchant/brands/client"
 import { Reseller } from "../../merchant/resellers"
@@ -162,11 +164,7 @@ const AddDialog = ({ dialog, onSubmitted }) => {
           ? userRoleId
           : getValues("templateId")
 
-        if (!templateId) {
-          console.error("templateId required, but nil")
-        }
-
-        setSubmit({
+        let formData = {
           templateId,
           roleType,
           resellerId,
@@ -174,7 +172,28 @@ const AddDialog = ({ dialog, onSubmitted }) => {
           brandId,
           menus: pickDisplayMenus(menusState),
           ...data
-        })
+        }
+
+        if (
+          isSameOrAfterRoleType(RoleTypes.Reseller, userRoleType) &&
+          !formData.resellerId
+        ) {
+          formData.resellerId = userResellerId
+        }
+        if (
+          isSameOrAfterRoleType(RoleTypes.Licensee, userRoleType) &&
+          !formData.licenseeId
+        ) {
+          formData.licenseeId = userLicenseeId
+        }
+        if (
+          isSameOrAfterRoleType(RoleTypes.Brand, userRoleType) &&
+          !formData.brandId
+        ) {
+          formData.brandId = userBrandId
+        }
+
+        setSubmit(formData)
       }}
       isLoading={isLoading}
       result={result}
@@ -274,13 +293,17 @@ const pickDisplayMenus = (menus = []) => {
 }
 
 const useRoleListParams = () => {
+  let userResellerId = useUserResellerId()
+  let userLicenseeId = useUserLicenseeId()
+  let userBrandId = useUserBrandId()
+
   let { register, watch, getValues } = useFormContext()
   let showAll = true
   let roleType = watch("roleType")
   let isRoot = watch("isRoot")
-  let resellerId = watch("resellerId")
-  let licenseeId = watch("licenseeId")
-  let brandId = watch("brandId")
+  let resellerId = watch("resellerId") ?? userResellerId
+  let licenseeId = watch("licenseeId") ?? userLicenseeId
+  let brandId = watch("brandId") ?? userBrandId
 
   if (isRoot) {
     switch (roleType) {
@@ -330,12 +353,19 @@ const useRoleListParams = () => {
 const RoleTemplateSelect = ({
   name = "templateId",
   defaultValue,
-  roleType,
-  resellerId,
-  licenseeId,
   ...props
 }) => {
-  let { register, watch } = useFormContext()
+  let { register, watch, setValue, formState } = useFormContext()
+  let isRoot = watch("isRoot")
+
+  let roleType = watch("roleType")
+  let resellerId = watch("resellerId")
+  let licenseeId = watch("licenseeId")
+  let brandId = watch("brandId")
+
+  let templateId = watch(name)
+
+  let targetRoleType = isRoot ? findParentRoleType(roleType) : roleType
   let params = useRoleListParams()
 
   let { data: roleData } = useRoleList(params)
@@ -344,6 +374,30 @@ const RoleTemplateSelect = ({
     en: "Select Template"
   })
 
+  let options =
+    roleData?.items
+      ?.filter((item) => item.roleType === targetRoleType)
+      .map((role) => ({
+        label: role.name,
+        value: role.id
+      })) ?? []
+
+  useEffect(() => {
+    if (!templateId && options.length === 1) {
+      //auto select if there's only 1 option
+      let option = options[0]
+      setValue(name, option.value)
+    }
+
+    /* TODO: able to fix side effects? */
+    /*
+    let isRootTouched = formState?.touched?.isRoot
+    if (!isRootTouched && !isRoot && roleData?.totalCount === 0) {
+      setValue("isRoot", true)
+    }
+    */
+  }, [options, isRoot, resellerId, licenseeId, brandId])
+
   return (
     <Select
       name={name}
@@ -351,12 +405,7 @@ const RoleTemplateSelect = ({
       defaultValue={defaultValue}
       selectRef={register({ required: true })}
       placeholder={placeholder}
-      options={
-        roleData?.items?.map((role) => ({
-          label: role.name,
-          value: role.id
-        })) ?? []
-      }
+      options={options}
     />
   )
 }
@@ -479,7 +528,7 @@ const EditRoleDialog = ({ id, dialog, onSubmitted }) => {
   let [menus, setMenus] = useState()
 
   useEffect(() => {
-    if (role && !role.isRoot /*&& userRoleType === role.roleType*/) {
+    if (role && !role.isRoot) {
       role.menus = dropRoleModule(role.menus)
     }
     setMenus(role?.menus)
@@ -539,7 +588,7 @@ const EditDialog = ({
     <HookFormDialog
       onSubmit={(data) => {
         setSubmit({
-          menus: menusState,
+          menus: pickDisplayMenus(menusState),
           ...data
         })
       }}

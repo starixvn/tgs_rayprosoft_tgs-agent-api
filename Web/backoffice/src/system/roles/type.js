@@ -71,6 +71,21 @@ export const isNextRoleType = (userRoleType, roleType) => {
   return userRoleIndex >= 0 && userRoleIndex + 1 === index
 }
 
+export const isSameOrAfterRoleType = (roleType, userRoleType) => {
+  let list = [Admin, Reseller, Licensee, Brand]
+  let roleTypeIndex = list.findIndex((item) => item === roleType)
+  let userRoleIndex = list.findIndex((item) => item === userRoleType)
+  return (
+    userRoleIndex >= 0 && roleTypeIndex >= 0 && roleTypeIndex <= userRoleIndex
+  )
+}
+
+export const findParentRoleType = (roleType) => {
+  let list = [Admin, Reseller, Licensee, Brand]
+  let index = list.findIndex((item) => item === roleType)
+  return list[index - 1]
+}
+
 export const useRoleTypeOptions = () => {
   let userRoleType = useUserRoleType()
   let list = [Admin, Reseller, Licensee, Brand]
