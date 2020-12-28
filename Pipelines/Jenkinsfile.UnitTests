@@ -13,18 +13,24 @@ pipeline {
              ])
            }
         }
-		stage('Restore packages'){
-			steps{
-				sh "dotnet restore tgs.sln"
-				echo "restore tgs.sln"
-			  }
-		}
+		
 		stage('Build') {
 			steps {
 				sh "dotnet build tgs.sln"
 				echo "build solution"
 			}
 		}
+		
+		stage('Deploy') {
+			steps {
+				docker build -f Web\backoffice\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:dev .
+				docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:dev
+				
+				withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+				sh "kubectl apply -f 13.backoffice-api.yml --record"
+			}
+		}
+								
 		stage('Test') {
 			steps {
 				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
