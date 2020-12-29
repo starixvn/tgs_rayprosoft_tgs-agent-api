@@ -124,4 +124,7 @@
   <data name="NameExists" xml:space="preserve">
     <value>Name exists already.</value>
   </data>
+  <data name="GameInUse" xml:space="preserve">
+    <value>Game in use for brands.</value>
+  </data>
 </root>

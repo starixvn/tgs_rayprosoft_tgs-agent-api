@@ -51,8 +51,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         async Task IGameProviderService.UpdateGameProviderAsync(
             GameProvider gameProvider, UpdateGameProviderRequest request)
         {
-            var (games, deleteGameIds) = GenerateUpdateGames(gameProvider, request);
-
             gameProvider.Name = request.Name;
             gameProvider.AutoCloseRound = request.AutoCloseRound;
             gameProvider.SupportTestPlayer = request.SupportTestPlayer;
@@ -65,11 +63,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
-            await DeleteEntitiesAsync(_repository.Games.Where(x => deleteGameIds.Contains(x.Id)));
             await DeleteEntitiesAsync(gameProvider.Currencies);
             await DeleteEntitiesAsync(gameProvider.Languages);
 
-            gameProvider.Games = games;
+            gameProvider.Games = GenerateUpdateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
 
@@ -121,7 +118,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var games = request.Games.Select((x, count) => new Game
             {
-                Id = int.Parse($"{gameProvider.UniqueId}{count + 1:0000}"),
+                Id = int.Parse($"{gameProvider.UniqueId}{count + 1:00000}"),
                 Code = x.Code,
                 Name = x.Name,
                 Status = x.Status,
@@ -144,10 +141,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new HashSet<Game>(games);
         }
 
-        private static (HashSet<Game>, IEnumerable<int> deleteGameIds) GenerateUpdateGames(GameProvider gameProvider,
+        private static HashSet<Game> GenerateUpdateGames(GameProvider gameProvider,
             GameProviderRequest request)
         {
-            var deleteGameIds = gameProvider.Games.Select(x => x.Id).Except(request.Games.Select(x => x.Id));
             var maxNumberStr = gameProvider.Games.Max(x => x.Id).ToString();
             var maxNumber = int.Parse(maxNumberStr[^4..]);
             var games = request.Games.Select(x =>
@@ -175,7 +171,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 };
             });
 
-            return (new HashSet<Game>(games), deleteGameIds);
+            return new HashSet<Game>(games);
         }
 
         private async Task<HashSet<GameProviderCurrency>> GenerateCurrencies(GameProvider gameProvider,

@@ -88,6 +88,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Game in use for brands..
+        /// </summary>
+        public static string GameInUse {
+            get {
+                return ResourceManager.GetString("GameInUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Game is required..
         /// </summary>
         public static string GameRequired {
