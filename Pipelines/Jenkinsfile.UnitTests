@@ -26,10 +26,6 @@ pipeline {
 				sh  "docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p oD2cksJhGN1tgUuaE6C9"  
 				sh  "docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:dev ."
 				sh  "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:dev"
-			
-				withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.default.svc']) {
-					sh "kubectl apply -f 13.backoffice-api.yml --record"
-				}
 			}
 		}
 
