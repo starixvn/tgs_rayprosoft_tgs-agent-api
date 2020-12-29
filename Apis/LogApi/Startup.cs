@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Mime;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,33 +16,35 @@ using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Log;
+using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models;
 
 namespace TGS.Apis.LogApi
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<LoggerServiceConfig>(Configuration.GetSection("LoggerServiceConfig"));
-            services.AddRepository<ILogRepository, LogRepository>(Configuration, "Log");
-            
+            services.Configure<LoggerServiceConfig>(_configuration.GetSection("LoggerServiceConfig"));
+            services.AddRepository<ILogRepository, LogRepository>(_configuration, "Log");
+
             services.AddRedis()
-                    .AddNats(Configuration)
-                    .AddWebApiServices()
-                    .AddTgsLog();
-            
+                .AddNats(_configuration)
+                .AddWebApiServices()
+                .AddTgsLog();
+
             services.AddSingleton<IMessageHandler, NatsMessageHandler>();
 
             services.AddScoped<ApiLogWriter>();
@@ -49,15 +52,15 @@ namespace TGS.Apis.LogApi
             services.AddScoped<AdminLogWriter>();
 
             services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
-              {
-                  return key switch
-                  {
-                      nameof(ApiLogEvent) => serviceProvider.GetRequiredService<ApiLogWriter>(),
-                      nameof(LogRecordEvent) => serviceProvider.GetRequiredService<LogRecordWriter>(),
-                      nameof(AdminLogEvent) => serviceProvider.GetRequiredService<AdminLogWriter>(),
-                      _ => throw new KeyNotFoundException()
-                  };
-              });
+            {
+                return key switch
+                {
+                    nameof(ApiLogEvent)    => serviceProvider.GetRequiredService<ApiLogWriter>(),
+                    nameof(LogRecordEvent) => serviceProvider.GetRequiredService<LogRecordWriter>(),
+                    nameof(AdminLogEvent)  => serviceProvider.GetRequiredService<AdminLogWriter>(),
+                    _                      => throw new KeyNotFoundException()
+                };
+            });
 
             services
                 .AddControllers(options =>
@@ -74,13 +77,17 @@ namespace TGS.Apis.LogApi
                     {
                         var result = new BadRequestObjectResult(context.ModelState);
 
-                        // TODO: add `using System.Net.Mime;` to resolve MediaTypeNames
                         result.ContentTypes.Add(MediaTypeNames.Application.Json);
                         result.ContentTypes.Add(MediaTypeNames.Application.Xml);
 
                         return result;
                     };
                 });
+
+            services.AddHealthChecks()
+                .AddSqlServer(_configuration, "Log", name: "log-db")
+                .AddRedis(_configuration)
+                .AddNats();
         }
 
         protected void OnApplicationStarted(IServiceProvider serviceProvider)
@@ -95,18 +102,12 @@ namespace TGS.Apis.LogApi
             messageHandler.StopReceiveMessages();
         }
 
-        public void Configure(
-            IApplicationBuilder app, 
-            IWebHostEnvironment env, 
-            IHostApplicationLifetime appLifetime)
-        {            
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        {
             appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             appLifetime.ApplicationStopped.Register(() => OnApplicationStopped(app.ApplicationServices));
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseGlobalExceptionHandler();
 
             app.UseRouting();
 
@@ -115,6 +116,27 @@ namespace TGS.Apis.LogApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) => HealthCheckResponseWriter.CreateResponseAsync(httpContext,
+                        result, env, sp =>
+                        {
+                            var handler = sp.GetRequiredService<IMessageHandler>();
+                            IReadOnlyDictionary<string, object> data = new Dictionary<string, object>
+                            {
+                                {"last_error", handler.LastLogInsertError},
+                                {"last_log_insert_time", handler.LastLogInsertTime},
+                                {"last_event", handler.LastBusEvent?.GetType().Name ?? string.Empty},
+                                {"last_received_event_time", handler.LastReceivedEventTime},
+                                {"last_startup_time", handler.LastStartUpTime},
+                                {"log_received_count", handler.LogReceivedCount}
+                            };
+
+                            return Task.FromResult(data);
+                        })
+                });
             });
         }
     }

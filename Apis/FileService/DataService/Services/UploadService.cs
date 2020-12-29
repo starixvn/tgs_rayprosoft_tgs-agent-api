@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using TGS.Apis.FileService.DataService.Model;
+using TGS.Core.Infrastructures.Aws;
 using TGS.Core.Infrastructures.Nats.Model;
 using TGS.Core.Infrastructures.Utility;
 using File = TGS.Apis.FileService.DataService.Model.File;
@@ -20,21 +20,23 @@ namespace TGS.Apis.FileService.DataService.Services
     public interface IUploadService
     {
         Task<ListBucketsResponse> ListBucketsAsync();
+        
         Task<string> UploadFileS3Async(IFormFile formFile);
+       
         Task AddStationLetterFileAsync(ObjectFileEventModel model);
 
         Task<string[]> GetObjectsAsync(string bucket, string prefix = null,
             IDictionary<string, object> additionalProperties = null);
     }
 
-    public class UploadService : IUploadService
+    public sealed class UploadService : IUploadService
     {
         private readonly IAmazonS3 _amazonS3;
-        private readonly IOptions<AwsSettings> _awsSettings;
+        private readonly AwsSettings _awsSettings;
         private readonly IRepository<File> _fileRepository;
         private readonly IRepository<StationLetterFile> _stationLetterRepository;
 
-        public UploadService(IAmazonS3 amazonS3, IOptions<AwsSettings> awsSettings, IRepository<File> fileRepository,
+        public UploadService(IAmazonS3 amazonS3, AwsSettings awsSettings, IRepository<File> fileRepository,
             IRepository<StationLetterFile> stationLetterRepository)
         {
             _amazonS3 = amazonS3;
@@ -50,7 +52,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
             var request = new PutObjectRequest
             {
-                BucketName = _awsSettings.Value.S3.Bucket,
+                BucketName = _awsSettings.S3.Bucket,
                 Key = randomFileName,
                 InputStream = formFile.OpenReadStream()
             };
@@ -74,7 +76,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
             await _fileRepository.InsertAsync(file);
 
-            return $"{_awsSettings.Value.ServiceUrl}/{_awsSettings.Value.S3.Bucket}/{randomFileName}";
+            return $"{_awsSettings.ServiceUrl}/{_awsSettings.S3.Bucket}/{randomFileName}";
         }
 
         async Task IUploadService.AddStationLetterFileAsync(ObjectFileEventModel model)
@@ -139,7 +141,7 @@ namespace TGS.Apis.FileService.DataService.Services
 
                 var request = new DeleteObjectsRequest
                 {
-                    BucketName = _awsSettings.Value.S3.Bucket,
+                    BucketName = _awsSettings.S3.Bucket,
                     Objects = keysAndVersions
                 };
 

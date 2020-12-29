@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.HealthChecks;
+using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -43,6 +45,12 @@ namespace TGS.Apis.BackendOffice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("health",  new()
+                {
+                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
             });
 
             var requestLocalizationOptions =

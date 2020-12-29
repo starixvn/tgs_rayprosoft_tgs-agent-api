@@ -1,4 +1,7 @@
-﻿using TGS.Core.Models.Enums;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models
 {
@@ -8,6 +11,14 @@ namespace TGS.Core.Models
         public const string Default = "default";
 
         public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
+
+        public static readonly IDictionary<HealthStatus, int> HealthCheckResultStatusCodes =
+            new Dictionary<HealthStatus, int>
+            {
+                {HealthStatus.Healthy, StatusCodes.Status200OK},
+                {HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable},
+                {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
+            };
 
         public static class CachePrefix
         {
@@ -31,7 +42,7 @@ namespace TGS.Core.Models
         public static class TokenExpireSeconds
         {
             public const int PlayerLogin = 3600 * 12; // 12 hours
-            public const int Jwt = 60 * 60; // 1 hours
+            public const int Jwt = 60 * 60;           // 1 hours
         }
 
         public static class GameProvider

@@ -23,7 +23,8 @@ namespace TGS.Apis.FileService.DataService
             (_settings, _mongoClient, _clientSessionHandle) =
                 (settings, mongoClient, clientSessionHandle);
 
-            if (!_mongoClient.GetDatabase(_settings.DatabaseName).ListCollectionNames().ToList()
+            var list = _mongoClient.GetDatabase(_settings.DatabaseName).ListCollectionNames().ToList();
+            if (!list
                 .Contains(typeof(T).Name))
             {
                 _mongoClient.GetDatabase(_settings.DatabaseName).CreateCollection(typeof(T).Name);
