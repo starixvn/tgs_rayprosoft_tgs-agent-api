@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models;
 using TGS.Services.BackOffice.Application.Models.BrandGame;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
@@ -41,5 +42,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         [Description("Change a brand game tag")]
         public Task<MessageResponse> UpdateBrandTagAsync(Guid id, GameTag tag, bool enabled) =>
             _mediator.Send(new UpdateBrandGameTagRequest(id, tag, enabled));
+
+        [HttpPut("ChangeOrders")]
+        [Description("Change brand game order")]
+        public Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request) => _mediator.Send(request);
     }
 }
