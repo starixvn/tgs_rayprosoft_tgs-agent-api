@@ -3,25 +3,24 @@ using Amazon.CloudWatchLogs;
 using Amazon.S3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
-namespace TGS.Apis.FileService.Extensions
+namespace TGS.Core.Infrastructures.Aws
 {
-    public static class AwsServiceExtensions
+    public static class ServiceExtensions
     {
-        public static IServiceCollection AddAwsService(this IServiceCollection services,
-            IConfiguration configuration, string configSectionName = "aws")
+        public static IServiceCollection AddAws(this IServiceCollection services,
+            IConfiguration configuration, string configSectionName = "AWS")
         {
             services.Configure<AwsSettings>(configuration.GetSection(configSectionName));
-            var awsSettings = configuration.GetSection(configSectionName).Get<AwsSettings>();
-            configuration.Bind(awsSettings);
-            services.AddSingleton(awsSettings);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<AwsSettings>>().Value);
 
-            services.AddSingleton<IAmazonS3>(provider =>
+            services.AddSingleton<IAmazonS3>(sp =>
             {
-                var settings = provider.GetService<AwsSettings>();
+                var settings = sp.GetRequiredService<AwsSettings>();
                 if (settings == null)
                 {
-                    throw new Exception("can't get aws settings");
+                    throw new ArgumentException("can't get aws settings");
                 }
 
                 return new AmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey, new AmazonS3Config
@@ -31,9 +30,10 @@ namespace TGS.Apis.FileService.Extensions
                     ForcePathStyle = true
                 });
             });
-            services.AddSingleton<IAmazonCloudWatchLogs>(provider =>
+
+            services.AddSingleton<IAmazonCloudWatchLogs>(sp =>
             {
-                var settings = provider.GetService<AwsSettings>();
+                var settings = sp.GetRequiredService<AwsSettings>();
                 return new AmazonCloudWatchLogsClient(new AmazonCloudWatchLogsConfig
                 {
                     UseHttp = true,

@@ -16,6 +16,7 @@ using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -24,6 +25,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Clients.Extensions;
 using TGS.Services.Operations.Extensions;
+using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -66,6 +68,11 @@ namespace TGS.Apis.OperatorApi
                     c.ImplicitlyValidateChildProperties = true;
                 });
 
+            services.AddHealthChecks()
+                .AddSqlServer(_configuration, "Tgs", name: "tgs-db")
+                .AddSqlServer(_configuration, "Bet", name: "bet-db")
+                .AddRedis(_configuration);
+
             if (!_env.IsProduction())
             {
                 services.AddSwaggerGen(c =>
@@ -80,7 +87,7 @@ namespace TGS.Apis.OperatorApi
                         Type = SecuritySchemeType.Http,
                         BearerFormat = "JWT",
                         Scheme = "bearer",
-                        Reference = new OpenApiReference
+                        Reference = new()
                         {
                             Id = JwtBearerDefaults.AuthenticationScheme,
                             Type = ReferenceType.SecurityScheme
@@ -103,17 +110,20 @@ namespace TGS.Apis.OperatorApi
         {
             app.UseGlobalExceptionHandler();
 
-            if (!_env.IsDevelopment())
-            {
-                app.UseHsts();
-                // app.UseHttpsRedirection();
-            }
-
             app.UseRouting();
 
             app.UseVerifyJwtTokenMiddlewares();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
+            });
 
             if (!_env.IsProduction())
             {

@@ -4,7 +4,7 @@
     "BackOffice": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/status",
+      "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -13,7 +13,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Docker"
       },

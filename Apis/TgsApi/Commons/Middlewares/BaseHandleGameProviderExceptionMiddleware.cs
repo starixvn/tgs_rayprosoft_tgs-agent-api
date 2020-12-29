@@ -11,17 +11,18 @@ namespace TGS.Apis.TgsApi.Commons.Middlewares
 {
     public abstract class BaseHandleGameProviderExceptionMiddleware : IMiddleware
     {
-        protected string LoggerName { get; }
-        protected IErrorMapper ErrorMapper { get; }
-        protected ITgsLog Log { get; }
-
-        protected BaseHandleGameProviderExceptionMiddleware(Func<string, IErrorMapper> mapper, string mapperKey, ITgsLog log, string loggerName)
+        protected BaseHandleGameProviderExceptionMiddleware(Func<string, IErrorMapper> mapper, string mapperKey,
+            ITgsLog log, string loggerName)
         {
             LoggerName = loggerName;
 
             ErrorMapper = mapper(mapperKey);
             Log = log.SetLogger(LoggerName);
         }
+
+        protected string LoggerName { get; }
+        protected IErrorMapper ErrorMapper { get; }
+        protected ITgsLog Log { get; }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -34,16 +35,19 @@ namespace TGS.Apis.TgsApi.Commons.Middlewares
                 var errorCode = ErrorMapper.GetApiErrorByException(exception);
                 var statusCode = ErrorMapper.GetHttpStatusByException(exception);
 
-                var message = await GetErrorMessage(context, $"{LoggerName} Api Error", errorCode.ToString(), statusCode);
+                var message =
+                    await GetErrorMessage(context, $"{LoggerName} Api Error", errorCode.ToString(), statusCode);
                 Log.LogError(message, exception);
 
                 await CreateResponseAsync(context, statusCode, errorCode, exception);
             }
         }
 
-        protected abstract Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode, Exception exception);
+        protected abstract Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
+            Exception exception);
 
-        private static async Task<string> GetErrorMessage(HttpContext context, string type, string errorMessage, int statusCode)
+        private static async Task<string> GetErrorMessage(HttpContext context, string type, string errorMessage,
+            int statusCode)
         {
             string body;
 
@@ -65,8 +69,7 @@ namespace TGS.Apis.TgsApi.Commons.Middlewares
                 requestMethod = context.Request.Method,
                 requestUrl = context.Request.Path,
                 request = body
-            }
-            .ToJson();
+            }.ToJson();
         }
 
         private static string GetRequestHeadersAsString(HttpRequest request)
