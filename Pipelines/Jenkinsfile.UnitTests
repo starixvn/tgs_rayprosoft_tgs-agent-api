@@ -44,7 +44,7 @@ pipeline {
 		
 		stage('Kubectl apply') {
 			steps {
-				sh  "pwd"  
+				sh  "cd dev"  
 				
 				withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.default.svc']) {
 					sh "kubectl apply -f 13.backoffice-api.yml --record"
@@ -54,6 +54,7 @@ pipeline {
 		
 		stage('Test') {
 			steps {
+				sh  "cd .."  
 				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
 				echo "test tgs.sln"
 			}
