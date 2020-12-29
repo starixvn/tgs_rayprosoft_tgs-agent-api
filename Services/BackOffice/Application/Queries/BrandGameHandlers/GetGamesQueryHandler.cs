@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Messages;
@@ -26,9 +25,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
             GetBrandGamesRequest request,
             CancellationToken cancellationToken)
         {
-            return _service.GetBrandGamesAsync(x => x
-                    .Include(g => g.Game)
-                    .ThenInclude(g => g.GameProvider))
+            return _service.GetBrandGamesAsync()
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(request.GameProviderId, x => x.Game.GameProviderId == request.GameProviderId)
                 .Where(request.GameType, x => x.Game.Type == request.GameType)
                 .Where(request.Keyword, x => x.Game.GameProvider.Name.Contains(request.Keyword) ||

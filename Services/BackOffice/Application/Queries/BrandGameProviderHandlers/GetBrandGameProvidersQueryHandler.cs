@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
@@ -27,13 +26,16 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
             CancellationToken cancellationToken)
         {
             return _service.GetBrandGameProvidersAsync()
-                .Include(x => x.Schedules)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(request.Keyword, x => x.GameProvider.Name.Contains(request.Keyword))
+                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.Id == BrandId)
                 .Select(x => new BrandGameProviderModel
                 {
                     Id = x.Id,
                     Status = x.Status,
-                    BrandGameProviderId = x.Id,
+                    GameProviderId = x.GameProviderId,
                     GameProviderName = x.GameProvider.Name,
                     From = x.Schedules.FirstOrDefault(s => s.IsDefault).From,
                     To = x.Schedules.FirstOrDefault(s => s.IsDefault).To,
