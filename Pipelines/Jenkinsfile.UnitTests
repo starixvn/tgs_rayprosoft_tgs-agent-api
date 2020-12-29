@@ -44,9 +44,11 @@ pipeline {
 		
 		stage('Kubectl apply') {
 			steps {
-				sh  "pwd"  
+				sh  "pwd" 
+				sh  "ls"  				
+				sh  "cd dev"
+				sh  "ls"
 				sh  "cd dev"  
-				sh  "ls"  
 				withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.default.svc']) {
 					sh "kubectl apply -f 13.backoffice-api.yml --record"
 				}
