@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Resources;
@@ -23,9 +22,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
             CancellationToken cancellationToken)
         {
             var brand = await _service.GetBrandAsync(x => x.Id == request.Id,
-                x => x.Include(i => i.Currencies)
-                    .Include(i => i.Languages)
-                    .Include(i => i.GameProviders)
+                x => x
                     .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
                     .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
                     .Where(BrandId != null, l => l.Id == BrandId));
