@@ -31,6 +31,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                 .Where(BrandId != null, b => b.BrandGameProvider.BrandId == BrandId)
                 .Where(x => x.BrandGameProviderId == request.BrandGameProviderId)
                 .Where(x => !x.IsDefault)
+                .Where(ResellerId != null, r => r.BrandGameProvider.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.BrandGameProvider.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.Id == BrandId)
                 .Select(x => new DefaultTimeModel
                 {
                     From = x.From,

@@ -26,15 +26,19 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
             CancellationToken cancellationToken)
         {
             return _service.GetBrandGameProvidersAsync()
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
                 .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
                 .Where(BrandId != null, b => b.BrandId == BrandId)
                 .Where(request.Keyword, x => x.GameProvider.Name.Contains(request.Keyword))
+                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.Id == BrandId)
                 .Select(x => new BrandGameProviderModel
                 {
                     Id = x.Id,
                     Status = x.Status,
-                    BrandGameProviderId = x.Id,
+                    GameProviderId = x.GameProviderId,
                     GameProviderName = x.GameProvider.Name,
                     From = x.Schedules.FirstOrDefault(s => s.IsDefault).From,
                     To = x.Schedules.FirstOrDefault(s => s.IsDefault).To,

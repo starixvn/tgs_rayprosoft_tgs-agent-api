@@ -26,6 +26,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
             CancellationToken cancellationToken)
         {
             return _service.GetBrandGamesAsync()
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
                 .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
                 .Where(BrandId != null, b => b.BrandId == BrandId)
