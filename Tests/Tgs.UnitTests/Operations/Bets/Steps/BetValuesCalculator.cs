@@ -9,8 +9,6 @@ using TGS.Services.GameOperations.Models.Data;
 using TGS.Tests.TestsCommon;
 using TGS.Tests.TestsCommon.Extensions;
 
-using Calculators = TGS.Services.GameOperations.Calculators;
-
 namespace TGS.UnitTests.Operations.Bets.Steps
 {
     [Binding, Scope(Tag = "BetValuesCalculator")]
@@ -76,7 +74,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
             var previousInput = new List<BetActionData>();
             var previousOutput = new List<BetValuesResult>();
-            var calculator = (IBetValuesCalculator)new Calculators.BetValuesCalculator();
+            var calculator = (IBetValuesCalculator)new Services.GameOperations.Calculators.BetValuesCalculator();
 
             foreach (var current in rows)
             {

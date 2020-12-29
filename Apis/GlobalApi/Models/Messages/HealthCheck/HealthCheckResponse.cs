@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TGS.Apis.GlobalApi.Models.Messages.HealthCheck
+﻿namespace TGS.Apis.GlobalApi.Models.Messages.HealthCheck
 {
     public record HealthCheckResponse
     {

@@ -13,7 +13,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services;

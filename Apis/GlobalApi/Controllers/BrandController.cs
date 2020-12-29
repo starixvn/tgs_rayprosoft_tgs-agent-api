@@ -8,7 +8,7 @@ using TGS.Apis.GlobalApi.Models.Messages;
 
 namespace TGS.Apis.GlobalApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("global-api/[controller]")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]

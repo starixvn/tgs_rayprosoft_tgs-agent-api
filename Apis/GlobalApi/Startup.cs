@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using TGS.Apis.GlobalApi.Models.Messages.HealthCheck;
 using TGS.Core.DataServices.Bet.Extensions;
-using TGS.Core.DataServices.Extensions;
+using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.DataServices;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;

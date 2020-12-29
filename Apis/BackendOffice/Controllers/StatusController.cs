@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Core.DataServices;
-using EnvironmentVariable = TGS.Core.Models.Consts.EnvironmentVariable;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -35,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 MachineName = Environment.MachineName,
                 HostName = hostName,
                 HostIp = hostIp.ToString(),
-                Environment = Environment.GetEnvironmentVariable(EnvironmentVariable.Environment),
+                Environment = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.Environment),
                 OsVersion = $"{Environment.OSVersion}",
                 ProcessCount = Environment.ProcessorCount,
                 CanConnectBackendOfficeDb = await _repository.CanConnectionAsync(),

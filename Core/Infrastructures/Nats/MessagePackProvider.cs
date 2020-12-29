@@ -1,6 +1,5 @@
 using System;
 using MessagePack;
-using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Core.Infrastructures.Nats
 {

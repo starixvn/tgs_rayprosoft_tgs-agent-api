@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Models;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
@@ -46,11 +46,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(request.IsRoot, x => x.IsRoot == request.IsRoot)
                 .Where(request.ResellerId, x => x.ResellerId == request.ResellerId)
                 .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
-                .Where(request.BrandId, x => x.ResellerId == request.BrandId)
-                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.BrandId == BrandId)
-                .Where(request.Name, p => p.Name.Contains(request.Name))
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .Where(ResellerId != null, x => x.ResellerId == ResellerId)
+                .Where(LicenseeId != null, x => x.LicenseeId == LicenseeId)
+                .Where(BrandId != null, x => x.BrandId == BrandId)
+                .Where(request.Name, x => x.Name.Contains(request.Name))
                 .Select(role => new RoleModel
                 {
                     Id = role.Id,
