@@ -10,9 +10,9 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 {
     public partial class GameProviderController
     {
-        [HttpPut("{brandId:guid}/{status}")]
+        [HttpPut("{id:guid}/{status}")]
         [Description("change a game provider status")]
-        public Task<MessageResponse> UpdateGameProviderStatusAsync(Guid brandId, Status status) =>
-            _mediator.Send(new UpdateGameProviderStatusRequest(brandId, status));
+        public Task<MessageResponse> UpdateGameProviderStatusAsync(Guid id, Status status) =>
+            _mediator.Send(new UpdateGameProviderStatusRequest(id, status));
     }
 }
