@@ -5,6 +5,7 @@ using Amazon.S3.Model;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TGS.Core.Infrastructures.Aws;
 
 namespace TGS.Apis.FileService
 {
@@ -31,7 +32,7 @@ namespace TGS.Apis.FileService
             using var scope = services.CreateScope();
             var sp = scope.ServiceProvider;
             var amazonS3 = sp.GetRequiredService<IAmazonS3>();
-            var settings = sp.GetService<AwsSettings>();
+            var settings = sp.GetRequiredService<AwsSettings>();
             if (settings != null && !await amazonS3.DoesS3BucketExistAsync(settings.S3.Bucket))
             {
                 var putBucketRequest = new PutBucketRequest

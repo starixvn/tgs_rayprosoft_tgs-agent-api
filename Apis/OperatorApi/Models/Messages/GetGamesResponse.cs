@@ -11,7 +11,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         public record GameModel
         {
-            [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
+            [JsonPropertyName("id")]
             public int Id { get; init; }
 
             [JsonPropertyName("code")]
@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
             [JsonPropertyName("description")]
             public string Description { get; init; }
 
-            [JsonPropertyName("gameprovidercode")]
+            [JsonPropertyName("gpcode")]
             public string GameProviderCode { get; init; }
 
             [JsonPropertyName("isactive")]

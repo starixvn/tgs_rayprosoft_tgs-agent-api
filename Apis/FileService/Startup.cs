@@ -12,8 +12,11 @@ using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
 using TGS.Apis.FileService.Services;
+using TGS.Core.Infrastructures.Aws;
+using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Models;
 
 namespace TGS.Apis.FileService
 {
@@ -32,10 +35,10 @@ namespace TGS.Apis.FileService
                 _configuration.GetSection(nameof(DatabaseSettings)));
             services.AddSingleton<IDatabaseSettings>(provider =>
                 provider.GetRequiredService<IOptions<DatabaseSettings>>().Value);
+
             services.AddSingleton<IMongoClient>(c =>
             {
                 var settings = _configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
-
                 return new MongoClient(settings.ConnectionString);
             });
 
@@ -46,18 +49,19 @@ namespace TGS.Apis.FileService
                 .AddNats(_configuration)
                 .AddTgsLog()
                 .AddFile(_configuration)
-                .AddAwsService(_configuration);
-
+                .AddAws(_configuration);
 
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<IUploadService, UploadService>();
             services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
 
             services.AddControllers()
-                .AddFluentValidation(c =>
-                {
-                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-                });
+                .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
+
+            services.AddHealthChecks()
+                .AddNats()
+                .AddMongoDb(_configuration, "DatabaseSettings")
+                .AddAwsS3();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
@@ -75,6 +79,12 @@ namespace TGS.Apis.FileService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("fs/health", new()
+                {
+                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
+                });
             });
         }
 
