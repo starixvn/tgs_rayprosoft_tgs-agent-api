@@ -134,12 +134,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NotFound);
             }
 
-            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            if (await _service.ExistsAsync(x => x.Id != id && x.Name == request.Name))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NameExists);
             }
 
-            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            if (await _service.ExistsAsync(x => x.Id != id && x.Code == request.Code))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.CodeExists);
             }

@@ -27,6 +27,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
         {
             return _service.GetBrandGamesAsync()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, b => b.BrandId == BrandId)
                 .Where(request.GameProviderId, x => x.Game.GameProviderId == request.GameProviderId)
                 .Where(request.GameType, x => x.Game.Type == request.GameType)
                 .Where(request.Keyword, x => x.Game.GameProvider.Name.Contains(request.Keyword) ||
@@ -42,7 +45,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     Platform = x.Game.PlatformType,
                     IsHot = x.Tag.IsHot(),
                     IsNew = x.Tag.IsNew(),
-                    IsRecommend = x.Tag.IsRecommend()
+                    IsRecommend = x.Tag.IsRecommend(),
+                    DisplayOrder = x.DisplayOrder.Value
                 }).CreatePagedResponseAsync(request);
         }
     }

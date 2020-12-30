@@ -3,7 +3,7 @@ using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule
+namespace TGS.Services.BackOffice.Application.Models.GameProvider
 {
     public class UpdateGameProviderStatusRequest : BaseRequest, IRequest<MessageResponse>
     {
