@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record ChangePasswordRequest
+    public record ChangePasswordRequest : IRequest<ChangePasswordResponse>
     {
         [JsonPropertyName("oldpwd")]
         public string OldPassword { get; set; }
