@@ -149,7 +149,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var games = request.Games.Select(x =>
             {
                 var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
-                var id = originGame == null ? int.Parse($"{gameProvider.UniqueId}{maxNumber += 1:0000}") : x.Id;
+                var id = originGame == null ? int.Parse($"{gameProvider.UniqueId}{maxNumber += 1:00000}") : x.Id;
                 return new Game
                 {
                     Id = id,

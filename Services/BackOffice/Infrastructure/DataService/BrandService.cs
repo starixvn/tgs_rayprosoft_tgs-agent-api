@@ -66,9 +66,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedOn = DateTimeOffset.Now
             };
 
+            var (gameProviders, _) = await GenerateBrandGameProviders(brand, request);
+
             brand.Languages = await GenerateBrandLanguages(brand, request);
             brand.Currencies = GenerateBrandCurrencies(brand, request);
-            brand.GameProviders = await GenerateBrandGameProviders(brand, request);
+            brand.GameProviders = gameProviders;
             brand.BetLimits = await GenerateBetLimits(brand, request);
             brand.Games = await GenerateWithCreateGamesAsync(brand);
             brand.BrandGroups = GenerateWithCreateGroups(brand, request);
@@ -96,26 +98,31 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
+            var (gameProviders, deleteBrandGameProviderIds) = await GenerateBrandGameProviders(brand, request);
+            var (games, deleteGameIds) = await GenerateWithUpdateGamesAsync(brand, request);
+
             await DeleteEntitiesAsync(brand.BetLimits);
             await DeleteEntitiesAsync(brand.Languages);
             await DeleteEntitiesAsync(brand.Currencies);
-            await DeleteEntitiesAsync(brand.GameProviders);
-            await DeleteEntitiesAsync(brand.GameProviders.Select(x =>
-                x.GameProviderConfiguration));
+            await DeleteEntitiesAsync(brand.GameProviders.Where(x => deleteBrandGameProviderIds.Contains(x.Id)));
+            await DeleteEntitiesAsync(brand.GameProviders.Where(x => deleteBrandGameProviderIds.Contains(x.Id)).Select(
+                x =>
+                    x.GameProviderConfiguration));
             await DeleteEntitiesAsync(brand.BrandGroups.SelectMany(x => x.BrandGroupBetLimits)
                 .SelectMany(x => x.GameProviderBetLimits));
             await DeleteEntitiesAsync(brand.BrandGroups.SelectMany(x => x.BrandGroupBetLimits));
             await DeleteEntitiesAsync(brand.BrandGroups.SelectMany(x => x.BrandGames));
             await DeleteEntitiesAsync(brand.BrandGroups);
-            await DeleteEntitiesAsync(brand.Games);
+            await DeleteEntitiesAsync(brand.Games.Where(x => deleteGameIds.Contains(x.GameId)));
 
             brand.Languages = await GenerateBrandLanguages(brand, request);
             brand.Currencies = GenerateBrandCurrencies(brand, request);
-            brand.GameProviders = await GenerateBrandGameProviders(brand, request);
             brand.BetLimits = await GenerateBetLimits(brand, request);
-            brand.Games = await GenerateWithUpdateGamesAsync(brand, request);
             brand.BrandGroups = GenerateWithUpdateGroups(brand, request);
 
+            await CreateOrUpdateEntitiesAsync(gameProviders.Select(x => x.GameProviderConfiguration).ToArray());
+            await CreateOrUpdateEntitiesAsync(gameProviders.ToArray());
+            await CreateOrUpdateEntitiesAsync(games.ToArray());
             await UpdateEntityAsync(brand);
 
             await tran.CommitAsync();
@@ -203,13 +210,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var brandGames = await _repository.Games
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
-            var games = brandGames.Select(x =>
+            var games = brandGames.Select((x, count) =>
                 new BrandGame
                 {
                     Id = Guid.NewGuid(),
                     BrandId = brand.Id,
                     GameId = x.Id,
-                    Game = x
+                    Game = x,
+                    DisplayOrder = count,
+                    Rebate = false,
+                    EffectiveBettingPercentage = decimal.Zero
                 });
             return new HashSet<BrandGame>(games);
         }
@@ -240,21 +250,37 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new HashSet<BrandGroup>(brandBetLimits);
         }
 
-        private async Task<HashSet<BrandGame>> GenerateWithUpdateGamesAsync(Brand brand, UpdateBrandRequest request)
+        private async Task<(HashSet<BrandGame>, int[] deleteGameIds)> GenerateWithUpdateGamesAsync(Brand brand,
+            UpdateBrandRequest request)
         {
+            var deleteGameIds = brand.Games.Select(x => x.GameId).Except(request.BrandGames.Select(x => x.GameId))
+                .ToArray();
             var gameIds = request.BrandGames.Select(x => x.GameId);
 
             var brandGames = await _repository.Games
                 .Where(x => gameIds.Contains(x.Id)).ToArrayAsync();
 
             var games = brandGames.Select(x =>
-                new BrandGame
+            {
+                var originBrandGame = brand.Games.FirstOrDefault(g => g.GameId == x.Id);
+
+                var brandGame = new BrandGame
                 {
                     BrandId = brand.Id,
                     GameId = x.Id,
                     Game = x
-                });
-            return new HashSet<BrandGame>(games);
+                };
+
+                if (originBrandGame != null)
+                {
+                    brandGame.Id = originBrandGame.Id;
+                }
+
+                return brandGame;
+            });
+
+
+            return (new HashSet<BrandGame>(games), deleteGameIds);
         }
 
         private static HashSet<BrandGroupGame> GenerateWithUpdateBrandGroupGames(Brand brand, BrandGroup brandGroup,
@@ -263,7 +289,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
             {
                 BrandGroup = brandGroup,
-                BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id,
+                //BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id,
                 BrandGame = brand.Games.First(g => g.GameId == brandGameId)
             });
             return new HashSet<BrandGroupGame>(brandGroupGames);
@@ -280,26 +306,39 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new HashSet<BrandGroupGame>(brandGroupGames);
         }
 
-        private async Task<HashSet<BrandGameProvider>> GenerateBrandGameProviders(Brand brand, BrandRequest request)
+        private async Task<(HashSet<BrandGameProvider>, Guid[] deleteBrandGameProviderIds)> GenerateBrandGameProviders(
+            Brand brand, BrandRequest request)
         {
+            var deleteBrandGameProviderIds =
+                brand.GameProviders?.Select(x => x.Id).Except(request.GameProviders.Select(x => x.Id)).ToArray();
+
             var gameProviders = await _repository.GameProviders
-                .Where(x => request.GameProviders.Select(g => g.Id).Contains(x.Id)).ToArrayAsync();
+                .Where(x => request.GameProviders.Select(g => g.GameProviderId).Contains(x.Id)).ToArrayAsync();
             var brandGameProviders = gameProviders.Select(x =>
                 {
-                    var configuration = request.GameProviders.First(m => m.Id == x.Id).Configuration;
+                    var brandGameProviderId = brand.GameProviders.FirstOrDefault(g => g.GameProviderId == x.Id)?.Id;
+                    var requestBrandGameProvider = request.GameProviders.First(m => m.GameProviderId == x.Id);
                     var gameProviderConfiguration =
-                        GenerateGameProviderConfiguration(x, configuration, request.Username);
-                    return new BrandGameProvider
+                        GenerateGameProviderConfiguration(x, requestBrandGameProvider.Configuration, request.Username);
+                    var brandGameProvider = new BrandGameProvider
                     {
                         BrandId = brand.Id,
                         GameProviderId = x.Id,
                         GameProvider = x,
                         DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode,
-                        GameProviderConfiguration = gameProviderConfiguration
+                        GameProviderConfiguration = gameProviderConfiguration,
+                        DesktopQueryString = requestBrandGameProvider.DesktopQueryString,
+                        MobileQueryString = requestBrandGameProvider.MobileQueryString
                     };
+                    if (brandGameProviderId.HasValue)
+                    {
+                        brandGameProvider.Id = brandGameProviderId.Value;
+                    }
+
+                    return brandGameProvider;
                 }
             );
-            return new HashSet<BrandGameProvider>(brandGameProviders);
+            return (new HashSet<BrandGameProvider>(brandGameProviders), deleteBrandGameProviderIds);
         }
 
         private static GameProviderConfiguration GenerateGameProviderConfiguration(GameProvider gameProvider,

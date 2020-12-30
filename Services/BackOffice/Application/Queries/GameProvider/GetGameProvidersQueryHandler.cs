@@ -31,6 +31,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProvider
                 .Select(x => new GameProviderModel
                 {
                     Id = x.Id,
+                    UniqueId = x.UniqueId,
                     Name = x.Name,
                     Code = x.Code,
                     Status = x.Status,
