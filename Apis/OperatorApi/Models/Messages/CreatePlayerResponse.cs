@@ -3,15 +3,12 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetCaptchaResponse : TgsResponse
+    public record CreatePlayerResponse : TgsResponse
     {
-        [JsonPropertyName("image")]
-        public byte[] Image { get; init; }
+        [JsonPropertyName("uid")]
+        public string PlayerCode { get; init; }
 
-        [JsonPropertyName("captcha")]
-        public string Captcha { get; set; }
-
-        [JsonPropertyName("contenttype")]
-        public string ContentType { get; set; }
+        [JsonPropertyName("isnew")]
+        public bool IsNew { get; init; }
     }
 }

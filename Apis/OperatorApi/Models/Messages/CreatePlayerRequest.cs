@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record CreatePlayerRequest : BaseUserRequest
+    public record CreatePlayerRequest : BaseUserRequest, IRequest<CreatePlayerResponse>
     {
         [JsonPropertyName("currency")]
         public string CurrencyCode { get; init;  }

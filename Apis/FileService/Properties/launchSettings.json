@@ -4,7 +4,7 @@
     "FileService": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "fs/status",
+      "launchUrl": "fs/health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -15,7 +15,7 @@
       "commandName": "Docker",
       //"commandLineArgs": "-v $env:USERPROFILE\\.aspnet\\https:/https/ mcr.microsoft.com/dotnet/core/samples:aspnetapp",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/fs/status",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/fs/health",
       "environmentVariables": {
         "ASPNETCORE_Kestrel__Certificates__Default__Path": "/https/aspnetapp.pfx",
         "ASPNETCORE_URLS": "https://+;http://+",

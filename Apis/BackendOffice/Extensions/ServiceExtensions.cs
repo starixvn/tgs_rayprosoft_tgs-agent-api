@@ -25,6 +25,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Log;
 using TGS.Core.DataServices.Tgs.Extensions;
+using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -90,6 +91,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
+            services.AddHealthChecks()
+                .AddSqlServer(configuration, "Tgs", name: "tgs-db")
+                .AddSqlServer(configuration, "Bet", name: "bet-db")
+                .AddSqlServer(configuration, "Log", name: "log-db")
+                .AddNats();
+
             services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
@@ -100,7 +107,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new PathString("/api/auth");
+                    options.LoginPath = new("/api/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.Events.OnRedirectToLogin = context =>
                     {
@@ -121,7 +128,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                     new CultureInfo(zhCNCulture)
                 };
 
-                options.DefaultRequestCulture = new RequestCulture(zhCNCulture, zhCNCulture);
+                options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 

@@ -4,9 +4,9 @@
     "TgsApi-RedTiger": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/status",
+      "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "SBO",
+        "GameProviderCode": "RT",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:62330"
@@ -14,7 +14,7 @@
     "TgsApi-SBO": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/status",
+      "launchUrl": "health",
       "environmentVariables": {
         "GameProviderCode": "SBO",
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -24,7 +24,7 @@
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/status",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "GameProviderCode": "SBO",
         "ASPNETCORE_ENVIRONMENT": "Development"

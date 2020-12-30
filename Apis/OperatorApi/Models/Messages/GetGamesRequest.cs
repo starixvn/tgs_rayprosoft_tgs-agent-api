@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetGamesRequest
+    public record GetGamesRequest : IRequest<GetGamesResponse>
     {
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }

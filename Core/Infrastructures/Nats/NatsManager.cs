@@ -21,7 +21,7 @@ namespace TGS.Core.Infrastructures.Nats
         INATSObservable<Msg> SubscribeWithObserveAsync(string topic);
 
         T Deserialize<T>(byte[] data);
-        string GetConnectStatus();
+        ConnState GetConnectStatus();
     }
 
     public class NatsManager : INatsManager
@@ -40,35 +40,26 @@ namespace TGS.Core.Infrastructures.Nats
             CreateConnection();
         }
 
-        string INatsManager.GetConnectStatus()
-        {
-            return _connectionFactory.Value.State.ToString();
-        }
+        ConnState INatsManager.GetConnectStatus() =>
+            _connectionFactory.Value.State;
 
-        Task INatsManager.PublishAsync<T>(string topic, T content)
-        {
-            return PublishAsync(topic, content);
-        }
+        Task INatsManager.PublishAsync<T>(string topic, T content) =>
+            PublishAsync(topic, content);
 
-        Task INatsManager.PublishAsync<T>(T content)
-        {
-            return PublishAsync(typeof(T).Name, content);
-        }
+        Task INatsManager.PublishAsync<T>(T content) =>
+            PublishAsync(typeof(T).Name, content);
 
-        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, string queueName, Action<NatsMessage<T>> action)
-        {
-            return _connectionFactory.Value?.SubscribeAsync(
+        IAsyncSubscription INatsManager.
+            SubscribeAsync<T>(string topic, string queueName, Action<NatsMessage<T>> action) =>
+            _connectionFactory.Value?.SubscribeAsync(
                 topic,
                 queueName,
                 EventHandlerFactory(action));
-        }
 
-        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, Action<NatsMessage<T>> action)
-        {
-            return _connectionFactory.Value?.SubscribeAsync(
+        IAsyncSubscription INatsManager.SubscribeAsync<T>(string topic, Action<NatsMessage<T>> action) =>
+            _connectionFactory.Value?.SubscribeAsync(
                 topic,
                 EventHandlerFactory(action));
-        }
 
         void IDisposable.Dispose()
         {
@@ -81,19 +72,14 @@ namespace TGS.Core.Infrastructures.Nats
             _connectionFactory.Value?.Dispose();
         }
 
-        INATSObservable<Msg> INatsManager.SubscribeWithObserveAsync(string topic)
-        {
-            return _connectionFactory.Value?.Observe(topic).Where(m => m.Data?.Any() == true);
-        }
+        INATSObservable<Msg> INatsManager.SubscribeWithObserveAsync(string topic) =>
+            _connectionFactory.Value?.Observe(topic).Where(m => m.Data?.Any() == true);
 
-        T INatsManager.Deserialize<T>(byte[] data)
-        {
-            return _messagePackProvider.Deserialize<T>(data);
-        }
+        T INatsManager.Deserialize<T>(byte[] data) => _messagePackProvider.Deserialize<T>(data);
 
         private void CreateConnection()
         {
-            _connectionFactory = new Lazy<IConnection>(Connect);
+            _connectionFactory = new(Connect);
         }
 
         private IConnection Connect()
@@ -159,16 +145,14 @@ namespace TGS.Core.Infrastructures.Nats
             };
         }
 
-        private NatsMessage<T> NatMessageFactory<T>(MsgHandlerEventArgs args)
-        {
-            return new NatsMessage<T>(
+        private NatsMessage<T> NatMessageFactory<T>(MsgHandlerEventArgs args) =>
+            new(
                 args.Message.Subject,
                 args.Message.Reply,
                 args.Message.Data,
                 _messagePackProvider.Deserialize<T>(args.Message.Data),
                 args.Message.ArrivalSubscription
             );
-        }
 
         private void ReconnectedEventHandler(object sender, ConnEventArgs e)
         {
@@ -188,9 +172,7 @@ namespace TGS.Core.Infrastructures.Nats
             Console.WriteLine($"NATS connection closed. {e.Conn.Opts.Url}");
         }
 
-        private void AsyncErrorEventHandler(object sender, ErrEventArgs e)
-        {
+        private static void AsyncErrorEventHandler(object sender, ErrEventArgs e) =>
             Console.WriteLine($"Error occurred. Subject:{e.Subscription.Subject} Error:{e.Error}");
-        }
     }
 }
