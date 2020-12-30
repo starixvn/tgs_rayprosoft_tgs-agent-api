@@ -284,7 +284,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
-            return new Player()
+            return new Player
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -531,7 +531,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             gp.Games = gameProvider.Games.OrderBy(g => g.Code).ThenBy(g => g.PlatformType)
                 .Select((g, idx) => new Models.Game
                 {
-                    Id = int.Parse($"{gp.UniqueId}{idx + 1:0000}"),
+                    Id = int.Parse($"{gp.UniqueId}{idx + 1:00000}"),
                     Name = g.Name,
                     ExternalId = g.ExternalId,
                     Code = g.Code,
@@ -894,7 +894,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CreateUser("brand.disabled", UserStatus.Disabled, Roles.Brand, Departments[MarketDepartment])
             };
 
-            users.AddRange(usernames.Select<string, User>(username =>
+            users.AddRange(usernames.Select(username =>
                 CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
 
             return _repository.BulkInsertAsync(users);

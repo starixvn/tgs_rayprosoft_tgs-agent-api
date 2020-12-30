@@ -6,10 +6,10 @@ using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderScheduleHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderHandlers
 {
     public class
-        UpdateBrandGameProviderScheduleStatusHandler : Handler<UpdateGameProviderStatusRequest, MessageResponse>
+        UpdateBrandGameProviderScheduleStatusHandler : Handler<UpdateBrandGameProviderStatusRequest, MessageResponse>
     {
         private readonly IBrandGameProviderService _service;
 
@@ -19,7 +19,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderSchedule
             _service = service;
         }
 
-        public override async Task<MessageResponse> Handle(UpdateGameProviderStatusRequest request,
+        public override async Task<MessageResponse> Handle(UpdateBrandGameProviderStatusRequest request,
             CancellationToken cancellationToken)
         {
             var brandGameProvider = await _service.GetBrandGameProviderAsync(q => q.Id == request.Id);

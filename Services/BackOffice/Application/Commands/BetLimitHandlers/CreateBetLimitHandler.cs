@@ -5,7 +5,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BetLimit;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BetLimit
+namespace TGS.Services.BackOffice.Application.Commands.BetLimitHandlers
 {
     public class CreateBetLimitHandler : Handler<CreateBetLimitRequest, MessageResponse>
     {
