@@ -12,7 +12,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     {
         [HttpPut("{id}/{status}")]
         [Description("Change a brand game provider status")]
-        public Task<MessageResponse> UpdateBrandStatusAsync(Guid id, Status status) =>
+        public Task<MessageResponse> UpdateBrandGameProviderStatusAsync(Guid id, Status status) =>
             _mediator.Send(new UpdateBrandGameProviderStatusRequest(id, status));
     }
 }
