@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,7 +46,6 @@ namespace TGS.Apis.OperatorApi
             services.AddTgsRepository(_configuration, "Tgs")
                 .AddBetRepository(_configuration, "Bet");
 
-            services.AddSingleton<ICaptchaService, CaptchaService>();
             services.AddScoped<IInvitationCodeValidator, InvitationCodeValidator>();
 
             services.AddNats(_configuration)
@@ -67,6 +67,10 @@ namespace TGS.Apis.OperatorApi
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
                 });
+
+            services.AddHttpContextAccessor();
+
+            services.AddMediatR(typeof(Startup).Assembly);
 
             services.AddHealthChecks()
                 .AddSqlServer(_configuration, "Tgs", name: "tgs-db")

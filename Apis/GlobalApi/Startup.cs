@@ -43,7 +43,7 @@ namespace TGS.Apis.GlobalApi
                 .AddErrorMappers()
                 .AddOperations();
 
-            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddMediatR(typeof(Startup).Assembly);
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
