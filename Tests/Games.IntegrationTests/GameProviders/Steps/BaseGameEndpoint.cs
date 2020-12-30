@@ -84,9 +84,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Username = username,
                 Password = "TgsP@ssw0rd",
                 PlatformType = platformType,
-                Captcha = "111",
-                Answer = "111",
-                BypassCaptcha = true
             }, headers);
 
             Set(SR.BrandCode, brandCode);

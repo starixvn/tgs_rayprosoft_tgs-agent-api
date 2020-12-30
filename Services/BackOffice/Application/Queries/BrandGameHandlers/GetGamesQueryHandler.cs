@@ -46,7 +46,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     IsHot = x.Tag.IsHot(),
                     IsNew = x.Tag.IsNew(),
                     IsRecommend = x.Tag.IsRecommend(),
-                    DisplayOrder = x.DisplayOrder.Value
+                    DisplayOrder = x.DisplayOrder
                 }).CreatePagedResponseAsync(request);
         }
     }

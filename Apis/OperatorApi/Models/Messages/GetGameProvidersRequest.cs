@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetGameProvidersRequest
+    public record GetGameProvidersRequest : IRequest<GetGameProvidersResponse>
     {
         [JsonPropertyName("platformtype")]
         public PlatformType PlatformType { get; init; }

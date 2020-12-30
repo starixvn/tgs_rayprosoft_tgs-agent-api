@@ -226,16 +226,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("DisplayOrder")
+                    b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("EffectiveBettingPercentage")
+                    b.Property<decimal>("EffectiveBettingPercentage")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("Rebate")
+                    b.Property<bool>("Rebate")
                         .HasColumnType("bit");
 
                     b.Property<int>("Status")

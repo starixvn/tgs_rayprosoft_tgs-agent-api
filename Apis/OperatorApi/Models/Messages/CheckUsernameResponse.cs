@@ -3,7 +3,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record CheckPlayerResponse : TgsResponse
+    public record CheckUsernameResponse : TgsResponse
     {
         [JsonPropertyName("isexist")]
         public bool Exists { get; init; }
