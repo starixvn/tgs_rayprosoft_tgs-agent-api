@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, Field, useFormikContext } from "formik"
 import {
   Heading,
   Stack,
@@ -10,7 +9,8 @@ import {
   Text,
   Box,
   Input,
-  Switch
+  Switch,
+  Dialog
 } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -24,17 +24,22 @@ import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
-import { useBrandGameList } from "./client"
+import { useBrandGameList, useChangeBrandGameOrders } from "./client"
 import { useFormattedTimeString } from "../../date/format"
 import { useFormattedDay } from "../../date/week"
 import formatISO from "date-fns/fp/formatISO"
 import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
-import { GameTypeLabel } from "../games/GameType"
+import { GameTypeLabel, GameTypeSelect } from "../games/GameType"
 import { GamePlatformLabel } from "../games/GamePlatform"
 import { GameTag } from "../games/GameTag"
 import { GameTagSwitch } from "./GameTagSwitch"
 import { GameStatusToggleSwitch } from "./GameStatusToggleSwitch"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
+import HookFormInputField from "../../input/InputField"
+import { BrandGameProviderSelect } from "../brandproviders/BrandGameProviderSelect"
+// import InfiniteScroll from "react-infinite-scroll-component"
+import { useInView, InView } from "react-intersection-observer"
 
 export { Code } from "./menu"
 
@@ -44,40 +49,40 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
 export const CodeContentPair = [Code, Content]
 
 export const Body = () => {
-  let { state, setState, setPageIndex, setSortOrder } = useTable({})
-  let { pageIndex, pageSize, keyword } = state
-  let { data, isLoading, mutate } = useBrandGameList(toApiParams(state))
-
-  let [displayOrders, setDisplayOrder] = useState({})
-  const changeDisplayOrder = ({ id, value }) => {
-    let newDisplayOrders = {
-      ...displayOrders
-    }
-    Reflect.set(newDisplayOrders, id, value)
-    setDisplayOrder(newDisplayOrders)
-  }
-
-  let columns = useColumns({ items: data?.items, changeDisplayOrder, mutate })
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    gameProviderId: "",
+    gameType: "",
+    keyword: ""
+  })
+  let { pageIndex, pageSize, gameProviderId, gameType, keyword } = state
+  let { data, isLoading, mutate } = useBrandGameList({
+    ...state,
+    sortby: "displayOrder",
+    showAll: true
+  })
 
   return (
     <PageContent
       title={<Trans zh="游戏列表" en="Game List" />}
       actionBar={
         <SearchBar
+          gameProviderId={gameProviderId}
+          gameType={gameType}
           keyword={keyword}
           search={(data) => {
             let newState = {
               pageIndex: 0,
               ...data
             }
-            if (equals(newState, { pageIndex, keyword })) {
+            if (
+              equals(newState, { pageIndex, keyword, gameProviderId, gameType })
+            ) {
               mutate()
             }
             setState(newState)
@@ -85,53 +90,170 @@ export const Body = () => {
         />
       }
     >
-      <Table
-        columns={columns}
-        data={data?.items}
-        pageCount={pageCount(pageSize, data?.totalCount)}
-        setPageIndex={setPageIndex}
-        setSortOrder={setSortOrder}
+      <DataTable
+        state={state}
+        data={data}
+        mutate={mutate}
         isLoading={isLoading}
       />
     </PageContent>
   )
 }
 
-const SearchBar = ({ name: keyword = "", search, isLoading, ...props }) => {
+const DataTable = ({ data, isLoading, mutate }) => {
+  let formMethods = useForm()
+  let [displayOrders, setDisplayOrders] = useState({})
+
+  const setDisplayOrder = (id, displayOrder) => {
+    setDisplayOrders((state) => {
+      Reflect.set(state, id, displayOrder)
+      return state
+    })
+  }
+
+  let [submitData, setSubmit] = useState()
+
+  let {
+    result,
+    isLoading: isChangingDisplayOrder,
+    error
+  } = useChangeBrandGameOrders(submitData)
+
+  const onSubmit = (formData) => {
+    let orders = []
+    Object.entries(displayOrders).forEach(([id, value]) => {
+      orders.push({
+        id,
+        displayOrder: value
+      })
+    })
+
+    setSubmit({
+      orders
+    })
+  }
+
+  const reset = () => {
+    setDisplayOrders({})
+    setSubmit(undefined)
+  }
+
+  useEffect(() => {
+    if (result && !error) {
+      reset()
+      //TODO: need to clear cache?
+      mutate()
+    }
+  }, [result, error])
+
+  const scrollThreshold = "200px"
+  const lazySize = 10
+  const [lazyIndex, setLazyIndex] = useState(lazySize)
+  const items = data?.items.slice(0, lazyIndex) ?? []
+
+  let columns = useColumns({
+    items,
+    mutate,
+    formMethods,
+    displayOrders,
+    setDisplayOrder
+  })
+
+  return (
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Stack spacing="major-1">
+          <Table
+            columns={columns}
+            data={items}
+            isLoading={isLoading}
+            usePagination={false}
+          />
+          {lazyIndex < data?.items.length && (
+            <InView
+              key="lazy-loader"
+              as="div"
+              style={{
+                visibility: "hidden",
+                width: "1px",
+                height: "1px",
+                display: "block"
+              }}
+              rootMargin={scrollThreshold}
+              onChange={(inView, entry) => {
+                console.log("inView ", inView, "lazyIndex", lazyIndex)
+                if (inView) {
+                  setLazyIndex((value) => {
+                    return value + lazySize
+                  })
+                }
+              }}
+            ></InView>
+          )}
+          <Dialog.Footer position="sticky" bottom="0">
+            <Button isLoading={isChangingDisplayOrder} type="submit">
+              <Trans zh="确认排序" en="Confirm Order" />
+            </Button>
+          </Dialog.Footer>
+        </Stack>
+      </form>
+    </FormProvider>
+  )
+}
+
+const SearchBar = ({
+  gameProviderId = "",
+  gameType = "",
+  keyword = "",
+  search,
+  isLoading,
+  ...props
+}) => {
+  let formMethods = useForm({
+    defaultValues: {
+      keyword: ""
+    }
+  })
+
   let searchPlaceHolder = useTrans({
     zh: "关键字输入框",
     en: "Input keyword"
   })
+
+  const onSubmit = (data) => search(data)
+
   return (
-    <Formik
-      initialValues={{
-        name: keyword
-      }}
-      onSubmit={search}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <Field
-              name="keyword"
-              component={InputField.Formik}
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("keyword", "")}>
-                  X
-                </Button>
-              }
-              placeholder={searchPlaceHolder}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isLoading} disabled={isLoading} />
-          </Set>
-        </form>
-      )}
-    </Formik>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <BrandGameProviderSelect name="gameProviderId" />
+          <GameTypeSelect name="gameType" />
+          <HookFormInputField
+            name="keyword"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("keyword", "")}>
+                X
+              </Button>
+            }
+            placeholder={searchPlaceHolder}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 
-const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
+const useColumns = ({
+  items = [],
+  mutate,
+  formMethods,
+  displayOrders = {},
+  setDisplayOrder
+}) => {
+  let { register, getValues } = formMethods
+
   let columns = [
     {
       id: "displayOrder",
@@ -145,9 +267,20 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
         textAlign: "center"
       },
       Cell: ({ value }) => {
-        let { id, displayOrder = "" } = value
+        let { id } = value
+        let displayOrder = displayOrders[id] ?? value.displayOrder
         return (
           <Input
+            name={id}
+            inputRef={register({
+              valueAsNumber: true
+              /*
+              setValueAs: (value) => {
+                let displayOrder = parseInt(value)
+                setDisplayOrder(id, displayOrder)
+              }
+              */
+            })}
             type="number"
             size="small"
             min="0"
@@ -155,13 +288,9 @@ const useColumns = ({ items = [], changeDisplayOrder, mutate }) => {
             width="5em"
             defaultValue={displayOrder}
             onChange={(event) => {
-              let value = event.target.value
-              let number = parseInt(value)
-              if (Number.isFinite(number)) {
-                changeDisplayOrder({
-                  id,
-                  value: number
-                })
+              let displayOrder = parseInt(event.target.value)
+              if (Number.isFinite(displayOrder)) {
+                setDisplayOrder(id, displayOrder)
               }
             }}
           />

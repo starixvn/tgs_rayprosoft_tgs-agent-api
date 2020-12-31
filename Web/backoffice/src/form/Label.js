@@ -26,7 +26,7 @@ const Label = ({
   </_Label>
 )
 
-export const Normal = ({ fontWeight = "normal", children, ...props }) => (
+export const NormalLabel = ({ fontWeight = "normal", children, ...props }) => (
   <Label fontWeight={fontWeight} {...props}>
     {children}
   </Label>

@@ -10,6 +10,7 @@ import {
   DropdownMenu
 } from "bumbag"
 import { useTrans, Trans } from "../../i18n"
+import { HookFormSelect } from "../../select/HookFormSelect"
 
 const Sportsbook = "Sportsbook"
 const SportsbookTrans = {
@@ -95,6 +96,40 @@ const TableGameTrans = {
   en: "Table Game"
 }
 
+const GameTypeList = [
+  Sportsbook,
+  VirtualSports,
+  ESports,
+  LiveDealer,
+  LiveDealerLobby,
+  CardGame,
+  CardGameLobby,
+  Fishing,
+  FishingLobby,
+  Arcade,
+  ArcadeLobby,
+  Slot,
+  Lottery,
+  TableGame
+]
+
+const GameTypeTrans = {
+  Sportsbook: SportsbookTrans,
+  VirtualSports: VirtualSportsTrans,
+  ESports: ESportsTrans,
+  LiveDealer: LiveDealerTrans,
+  LiveDealerLobby: LiveDealerLobbyTrans,
+  CardGame: CardGameTrans,
+  CardGameLobby: CardGameLobbyTrans,
+  Fishing: FishingTrans,
+  FishingLobby: FishingLobbyTrans,
+  Arcade: ArcadeTrans,
+  ArcadeLobby: ArcadeLobbyTrans,
+  Slot: SlotTrans,
+  Lottery: LotteryTrans,
+  TableGame: TableGameTrans
+}
+
 export const GameTypeLabel = ({ value }) => {
   switch (value) {
     case Sportsbook:
@@ -142,4 +177,20 @@ export const GameTypeLabel = ({ value }) => {
     default:
       return value ?? null
   }
+}
+
+export const GameTypeSelect = ({ placeholder, ...props } = {}) => {
+  let defaultPlaceholder = useTrans({
+    zh: "游戏类型",
+    en: "Game Type"
+  })
+  placeholder = placeholder ?? defaultPlaceholder
+
+  let options = GameTypeList.map((gameType) => ({
+    label: useTrans(GameTypeTrans[gameType]),
+    value: gameType
+  }))
+  return (
+    <HookFormSelect placeholder={placeholder} options={options} {...props} />
+  )
 }
