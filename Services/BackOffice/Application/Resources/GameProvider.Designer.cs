@@ -106,6 +106,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Games exists already..
+        /// </summary>
+        public static string GamesExists {
+            get {
+                return ResourceManager.GetString("GamesExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Language is required..
         /// </summary>
         public static string LanguageRequired {

@@ -41,5 +41,10 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
             request.Id = id;
             return _mediator.Send(request);
         }
+
+        [HttpPost("upload")]
+        [Description("Upload games")]
+        public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request) =>
+            _mediator.Send(request);
     }
 }

@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Services.BackOffice.Application.Middlewares;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.BackOffice.Infrastructure.Services;
 
 namespace TGS.Services.BackOffice.Application.Extensions
 {
@@ -21,6 +22,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<IBrandGameProviderScheduleService, BrandGameProviderScheduleService>();
             services.AddTransient<IGameProviderService, GameProviderService>();
             services.AddTransient<IGameProviderBetLimitService, GameProviderBetLimitService>();
+            services.AddTransient<IUploadService, UploadService>();
 
             return services;
         }
