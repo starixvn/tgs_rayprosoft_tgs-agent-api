@@ -43,3 +43,8 @@ export const useChangeBrandGameStatus = (data) => {
     data?.id && data?.status ? `${API}/${data.id}/${data.status}` : undefined
   return usePut(url)
 }
+
+export const useChangeBrandGameOrders = (data) => {
+  let url = `${API}/changeorders`
+  return usePutData(url, data)
+}

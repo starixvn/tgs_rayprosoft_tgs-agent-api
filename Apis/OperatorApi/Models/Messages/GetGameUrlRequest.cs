@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public class GetGameUrlRequest
+    public record GetGameUrlRequest : IRequest<GetGameUrlResponse>
     {
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }

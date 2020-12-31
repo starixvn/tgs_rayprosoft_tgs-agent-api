@@ -10,7 +10,7 @@ import Disclosure from "../../dialog/Disclosure"
 import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
 import { useUpdatePaymentHandingFee } from "./client"
 import { FieldValues } from "../../layout/Grid"
-import { Normal as Label } from "../../form/Label"
+import { NormalLabel as Label } from "../../form/Label"
 import InputField from "../../input/Field"
 
 const HandlingFeeTrans = {

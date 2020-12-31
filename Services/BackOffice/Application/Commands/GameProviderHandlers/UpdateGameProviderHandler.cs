@@ -43,9 +43,11 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
                 return CreateInvalidResponse<MessageResponse>(GameProvider.CodeExists);
             }
 
+            var ids = request.Games.Where(g => g.Status != GameStatus.Active).Select(g => g.Id).ToArray();
             if (await _brandGameService.GetBrandGamesAsync()
                 .AnyAsync(
-                    x => request.Games.Where(g => g.Status != GameStatus.Active).Select(g => g.Id).Contains(x.GameId),
+                    x =>
+                        ids.Contains(x.GameId),
                     cancellationToken))
             {
                 return CreateInvalidResponse<MessageResponse>(GameProvider.GameInUse);

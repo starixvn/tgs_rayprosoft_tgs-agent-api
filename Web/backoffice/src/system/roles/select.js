@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, useFormikContext } from "formik"
 import {
   Spinner,
   Stack,
@@ -26,6 +25,12 @@ import {
 import { Field as _Field } from "../../select/Field"
 import AlertDialog from "../../dialog/Alert"
 import { useRoleList } from "./client"
+import {
+  useUserBrandId,
+  useUserLicenseeId,
+  useUserResellerId,
+  useUserRoleType
+} from "../../user/context"
 
 export const Field = ({ required, validate, ...props }) => {
   let { name } = props
@@ -37,7 +42,16 @@ export const Field = ({ required, validate, ...props }) => {
 }
 
 export const Select = ({ ...props }) => {
-  let { error, data = {}, isLoading } = useRoleList({ showAll: true })
+  let userResellerId = useUserResellerId()
+  let userLicenseeId = useUserLicenseeId()
+  let userBrandId = useUserBrandId()
+
+  let { error, data = {}, isLoading } = useRoleList({
+    showAll: true,
+    resellerId: userResellerId,
+    licenseeId: userLicenseeId,
+    brandId: userBrandId
+  })
   let { items = [] } = data
   let options = items.map(({ id, name }) => ({
     label: name,

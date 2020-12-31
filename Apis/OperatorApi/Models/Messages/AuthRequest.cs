@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record AuthRequest
+    public record AuthRequest : IRequest<AuthResponse>
     {
         [JsonPropertyName("client")]
         public string ApiKey { get; init;}

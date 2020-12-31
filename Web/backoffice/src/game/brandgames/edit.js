@@ -92,7 +92,7 @@ const EditDialog = ({ record = {}, dialog, ...props }) => {
       defaultValues={{ ...brandGame }}
       onSubmit={onSubmit}
       result={result}
-      isLoading={isLoadingBrandGame}
+      isLoading={isLoading}
       error={error}
       onCloseErrorAlert={reset}
       onSubmitted={() => {

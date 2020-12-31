@@ -7,25 +7,20 @@ import {
   usePutData,
   usePostFormData
 } from "../../client"
-//TODO
-const API = ""
 
-export const useProviderList = (searchParams) => {
+const API = "/api/GameProvider"
+
+export const useGameProviderList = (searchParams) => {
   let url = searchParams ? urlWith(searchParams, API) : ""
   return useGet(url)
 }
 
-export const useAddProvider = (data) => {
+export const useAddGameProvider = (data) => {
   return usePostData(API, data)
 }
 
-export const useUpdateProvider = (id, data) => {
+export const useUpdateGameProvider = (id, data) => {
   let url = id ? `${API}/${id}` : ""
-  return usePutData(url, data)
-}
-
-export const useUpdatePresetMaintenance = (id, data) => {
-  let url = id ? `${API}/${id}/TODO` : ""
   return usePutData(url, data)
 }
 

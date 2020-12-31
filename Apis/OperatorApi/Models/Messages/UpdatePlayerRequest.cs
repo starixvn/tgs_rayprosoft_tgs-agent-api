@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record UpdatePlayerRequest
+    public record UpdatePlayerRequest : IRequest<UpdatePlayerResponse>
     {
         [JsonPropertyName("realname")]
         public string RealName { get; init; }
