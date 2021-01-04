@@ -39,6 +39,7 @@ import HookFormDialog from "../../form/HookFormDialog"
 import HookFormInputField from "../../input/InputField"
 import HookFormDateInput from "../../date/DateInput"
 import { useForm, useFormContext } from "react-hook-form"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -61,16 +62,13 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 }
 
 const AddDialog = ({ onSubmitted, dialog, ...props }) => {
-  let resellerId = useUserResellerId()
-  let licenseeId = useUserLicenseeId()
-  let brandId = useUserBrandId()
-  console.warn("TODO: select brand if brandId is nil")
-
+  let userBrandId = useUserBrandId()
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useAddAnnouncement(data)
 
-  const onSubmit = ({ form, to, ...formData }) => {
+  const onSubmit = ({ brandId = userBrandId, form, to, ...formData }) => {
     setSubmit({
+      brandId,
       form: form ? form.toISOString() : form,
       to: to ? to.toISOString() : to,
       ...formData
@@ -105,9 +103,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
       placement="top"
       css={DialogCss}
     >
-      <>
-        <EditBody />
-      </>
+      <EditBody isAdd={true} />
     </HookFormDialog>
   )
 }
@@ -236,7 +232,9 @@ const EditDialog = ({
   )
 }
 
-const EditBody = ({ readonly = false } = {}) => {
+const EditBody = ({ readonly = false, isAdd = false } = {}) => {
+  let brandId = useUserBrandId()
+
   const { register, getValues } = useFormContext()
   let minDate = readonly ? undefined : getValues("from")
   let maxDate = readonly ? undefined : getValues("to")
@@ -245,6 +243,13 @@ const EditBody = ({ readonly = false } = {}) => {
   let textareaHeight = readonly ? "15vh" : "30vh"
   return (
     <FieldValues>
+      {isAdd && !brandId && (
+        <Label required={required}>
+          <Trans zh="品牌" en="Brand" />
+        </Label>
+      )}
+      {isAdd && !brandId && <MerchantIdSelect />}
+
       <Label name="subject" required={required}>
         <Trans zh="主题" en="Subject" />
       </Label>

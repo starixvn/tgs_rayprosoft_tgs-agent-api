@@ -1,75 +1,23 @@
 import useSWR, { cache } from "swr"
-import {
-  urlWith,
-  useGet,
-  usePostData,
-  usePut,
-  usePutData,
-  usePostFormData
-} from "../../client"
+import { urlWith, useGet, usePostData, usePutData } from "../../client"
 
-const API = "/api/payment"
+const PaymentAPI = "/api/payment"
 
 export const usePaymentList = (searchParams) => {
-  let url = searchParams ? urlWith(searchParams, API) : ""
+  let url = searchParams ? urlWith(searchParams, PaymentAPI) : ""
   return useGet(url)
 }
 
 export const usePayment = (id) => {
-  let url = id ? `${API}/${id}` : ""
+  let url = id ? `${PaymentAPI}/${id}` : ""
   return useGet(url)
 }
 
 export const useAddPayment = (data) => {
-  return usePostData(API, data)
+  return usePostData(PaymentAPI, data)
 }
 
 export const useUpdatePayment = (id, data) => {
-  let url = id ? `${API}/${id}` : ""
+  let url = id ? `${PaymentAPI}/${id}` : ""
   return usePutData(url, data)
-}
-
-export const useEnablePayment = (id) => {
-  let url = id ? `${API}/${id}/enable` : ""
-  return usePutData(url, {})
-}
-
-export const useDisablePayment = (id) => {
-  let url = id ? `${API}/${id}/disable` : ""
-  return usePutData(url, {})
-}
-
-export const usePaymentHandingFee = (id) => {
-  let url = id ? `${API}/${id}/handingFee` : ""
-  return useGet(url)
-}
-
-export const useUpdatePaymentHandingFee = (id, data) => {
-  let url = id ? `${API}/${id}/handingFee` : ""
-  return usePutData(url, data)
-}
-
-export const usePaymentUpload = (file) => {
-  let url = file ? `${API}/upload` : ""
-  return usePostFormData(url, file)
-}
-
-export const useChangePaymentOrders = (data) => {
-  let url = `${API}/ChangeOrders`
-  return usePutData(url, data)
-}
-
-export const useChangePaymentStatus = (id, status) => {
-  let url = id && status ? `${API}/${id}/${status}` : ""
-  return usePut(url)
-}
-
-export const usePaymentLogs = (id) => {
-  let url = id ? `${API}/${id}/auditLogs` : ""
-  return useGet(url)
-}
-
-export const usePaymentDesignatedUsers = (id) => {
-  let url = id ? `${API}/${id}/designatedUsers` : ""
-  return useGet(url)
 }

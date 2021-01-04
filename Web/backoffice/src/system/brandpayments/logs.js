@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { Stack, Box, Button, Text, Modal, Dialog } from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { View as ViewMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import Disclosure from "../../dialog/Disclosure"
-import { usePaymentLogs } from "./client"
+import { useBrandPaymentLogs } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert from "../../dialog/Alert"
 import { Table, useTable } from "../../table"
@@ -38,7 +37,7 @@ const LogsDialog = ({ record = {}, dialog, ...props }) => {
     en: "Logs"
   })
 
-  let { data, isLoading, error } = usePaymentLogs(record?.id)
+  let { data, isLoading, error } = useBrandPaymentLogs(record?.id)
   let items = data?.auditLogs
   let columns = useColumns({ items })
 
@@ -160,10 +159,8 @@ const useColumns = ({ items = [] }) => {
                 depositedAmountMax: value?.beforeDepositedAmountMax,
                 depositedAmountUnlimited: value?.beforeDepositedAmountUnlimited,
                 identityAuthentication: value?.beforeIdentityAuthentication,
-                phoneAuthentication: value?.beforePhoneAuthentication
-                /* TODO: needed?
-              vipLevelIds: [],
-              */
+                phoneAuthentication: value?.beforePhoneAuthentication,
+                vipLevelIds: value?.beforeVipLevelIds
               }}
               color="textTint"
             />
@@ -175,10 +172,8 @@ const useColumns = ({ items = [] }) => {
                 depositedAmountMax: value?.afterDepositedAmountMax,
                 depositedAmountUnlimited: value?.afterDepositedAmountUnlimited,
                 identityAuthentication: value?.afterIdentityAuthentication,
-                phoneAuthentication: value?.afterPhoneAuthentication
-                /* TODO: needed?
-              vipLevelIds: [],
-              */
+                phoneAuthentication: value?.afterPhoneAuthentication,
+                vipLevelIds: value?.afterVipLevelIds
               }}
             />
           </Stack>

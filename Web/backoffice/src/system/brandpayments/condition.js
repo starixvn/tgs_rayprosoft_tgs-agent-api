@@ -2,24 +2,17 @@ import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
 import { Formik, Form, Field } from "formik"
 import { Trans, useTrans } from "../../i18n"
-import { Type as TransferType } from "./transfer"
-import {
-  Text,
-  RadioGroup as _RadioGroup,
-  RadioGroupField as _RadioGroupField,
-  SwitchField,
-  CheckboxGroupField
-} from "bumbag"
+import { Text } from "bumbag"
 import { useVipLevelList } from "../../vip-levels/client"
+import { RadioGroup } from "../../radio/RadioGroup"
+import { Switch } from "../../switch/Switch"
 
-// const All = 0
 export const All = "All"
 const AllTrans = {
   zh: "满足所有",
   en: "All"
 }
 
-// const Someone = 1
 export const Someone = "Someone"
 const SomeoneTrans = {
   zh: "满足其一",
@@ -91,27 +84,19 @@ export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
   )
 }
 
-let getOptions = () => [
-  { label: useTrans(AllTrans), value: All },
-  { label: useTrans(SomeoneTrans), value: Someone }
-]
+export const PlayerListConditionRadioGroup = ({
+  name = "playerListCondition",
+  ...props
+}) => {
+  let options = [
+    { label: useTrans(AllTrans), value: All },
+    { label: useTrans(SomeoneTrans), value: Someone }
+  ]
 
-export const RadioGroupField = ({ ...props }) => {
-  return (
-    <Field
-      orientation="horizontal"
-      component={_RadioGroupField.Formik}
-      options={getOptions()}
-      {...props}
-    />
-  )
+  return <RadioGroup name={name} options={options} {...props} />
 }
 
 export const AllPlayerText = () => <Trans {...AllPlayerTrans} />
-
-export const AllPlayerSwitchField = ({ name = "allPlayers", ...props }) => {
-  return <Field name={name} component={SwitchField.Formik} {...props} />
-}
 
 export const UnlimitedText = () => <Trans {...UnlimitedTrans} />
 
@@ -123,23 +108,9 @@ export const IdentityAuthenticationText = () => (
   <Trans {...IdentityAuthenticationTrans} />
 )
 
-export const IdentityAuthenticationSwitchField = ({
-  name = "identityAuthentication",
-  ...props
-}) => {
-  return <Field name={name} component={SwitchField.Formik} {...props} />
-}
-
 export const PhoneAuthenticationText = () => (
   <Trans {...PhoneAuthenticationTrans} />
 )
-
-export const PhoneAuthenticationSwitchField = ({
-  name = "phoneAuthentication",
-  ...props
-}) => {
-  return <Field name={name} component={SwitchField.Formik} {...props} />
-}
 
 export const PlayerLabel = ({ value }) => {
   switch (value) {

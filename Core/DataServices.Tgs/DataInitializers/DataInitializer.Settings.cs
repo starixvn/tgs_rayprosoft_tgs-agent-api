@@ -271,7 +271,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("Delete")
                             }
                         },
-                        new MenuSetting("Payments")
+                        new MenuSetting("BrandPayments")
                         {
                             SubMenus = new[]
                             {

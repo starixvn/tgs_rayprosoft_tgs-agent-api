@@ -38,8 +38,6 @@ import { GameStatusToggleSwitch } from "./GameStatusToggleSwitch"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import HookFormInputField from "../../input/InputField"
 import { BrandGameProviderSelect } from "../brandproviders/BrandGameProviderSelect"
-// import InfiniteScroll from "react-infinite-scroll-component"
-import { useInView, InView } from "react-intersection-observer"
 
 export { Code } from "./menu"
 
@@ -62,9 +60,8 @@ export const Body = () => {
   })
   let { pageIndex, pageSize, gameProviderId, gameType, keyword } = state
   let { data, isLoading, mutate } = useBrandGameList({
-    ...state,
-    sortby: "displayOrder",
-    showAll: true
+    ...toApiParams(state),
+    sortby: "displayOrder"
   })
 
   return (
@@ -93,6 +90,9 @@ export const Body = () => {
       <DataTable
         state={state}
         data={data}
+        pageSize={pageSize}
+        setPageIndex={setPageIndex}
+        setSortOrder={setSortOrder}
         mutate={mutate}
         isLoading={isLoading}
       />
@@ -100,7 +100,14 @@ export const Body = () => {
   )
 }
 
-const DataTable = ({ data, isLoading, mutate }) => {
+const DataTable = ({
+  data,
+  pageSize,
+  setPageIndex,
+  setSortOrder,
+  isLoading,
+  mutate
+}) => {
   let formMethods = useForm()
   let [displayOrders, setDisplayOrders] = useState({})
 
@@ -146,10 +153,7 @@ const DataTable = ({ data, isLoading, mutate }) => {
     }
   }, [result, error])
 
-  const scrollThreshold = "200px"
-  const lazySize = 10
-  const [lazyIndex, setLazyIndex] = useState(lazySize)
-  const items = data?.items.slice(0, lazyIndex) ?? []
+  const items = data?.items ?? []
 
   let columns = useColumns({
     items,
@@ -166,30 +170,11 @@ const DataTable = ({ data, isLoading, mutate }) => {
           <Table
             columns={columns}
             data={items}
+            pageCount={pageCount(pageSize, data?.totalCount)}
+            setPageIndex={setPageIndex}
+            setSortOrder={setSortOrder}
             isLoading={isLoading}
-            usePagination={false}
           />
-          {lazyIndex < data?.items.length && (
-            <InView
-              key="lazy-loader"
-              as="div"
-              style={{
-                visibility: "hidden",
-                width: "1px",
-                height: "1px",
-                display: "block"
-              }}
-              rootMargin={scrollThreshold}
-              onChange={(inView, entry) => {
-                console.log("inView ", inView, "lazyIndex", lazyIndex)
-                if (inView) {
-                  setLazyIndex((value) => {
-                    return value + lazySize
-                  })
-                }
-              }}
-            ></InView>
-          )}
           <Dialog.Footer position="sticky" bottom="0">
             <Button isLoading={isChangingDisplayOrder} type="submit">
               <Trans zh="确认排序" en="Confirm Order" />
@@ -274,12 +259,6 @@ const useColumns = ({
             name={id}
             inputRef={register({
               valueAsNumber: true
-              /*
-              setValueAs: (value) => {
-                let displayOrder = parseInt(value)
-                setDisplayOrder(id, displayOrder)
-              }
-              */
             })}
             type="number"
             size="small"
