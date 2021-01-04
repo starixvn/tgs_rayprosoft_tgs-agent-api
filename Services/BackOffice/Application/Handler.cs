@@ -32,30 +32,33 @@ namespace TGS.Services.BackOffice.Application
         protected Guid? BrandId => GetIdByKey(Consts.UserInfo.BrandKey);
         public abstract Task<TOut> Handle(T request, CancellationToken cancellationToken);
 
-        protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new()
-        {
-            return new()
+        protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new() =>
+            new()
             {
                 Valid = true
             };
-        }
 
         protected static TResponse CreateInvalidResponse<TResponse>(string message)
-            where TResponse : MessageResponse, new()
-        {
-            return new()
+            where TResponse : MessageResponse, new() =>
+            new()
             {
                 Valid = false,
                 Message = message
             };
-        }
 
-        private Guid? GetIdByKey(string key)
-        {
-            return !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
-                   !Guid.TryParse(value, out var id)
+        protected static TResponse CreateInvalidResponse<TResponse>(string message, string[] errors)
+            where TResponse : MessageResponse, new() =>
+            new()
+            {
+                Valid = false,
+                Message = message,
+                Errors = errors
+            };
+
+        private Guid? GetIdByKey(string key) =>
+            !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
+            !Guid.TryParse(value, out var id)
                 ? (Guid?) null
                 : id;
-        }
     }
 }
