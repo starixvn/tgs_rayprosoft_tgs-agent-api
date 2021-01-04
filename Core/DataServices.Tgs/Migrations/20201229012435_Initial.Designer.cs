@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201230053808_Initial")]
+    [Migration("20201229012435_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -228,16 +228,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("DisplayOrder")
+                    b.Property<int?>("DisplayOrder")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("EffectiveBettingPercentage")
+                    b.Property<decimal?>("EffectiveBettingPercentage")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Rebate")
+                    b.Property<bool?>("Rebate")
                         .HasColumnType("bit");
 
                     b.Property<int>("Status")

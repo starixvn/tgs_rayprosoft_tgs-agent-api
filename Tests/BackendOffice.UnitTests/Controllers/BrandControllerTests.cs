@@ -83,11 +83,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateBrandRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = Brand.CodeExists});
+                .ReturnsAsync(new MessageResponse {Valid = false, Message = Brand.CodeExisted});
 
             var response = await _controller.CreateBrandAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Brand.CodeExists);
+            response.Message.Should().Be(Brand.CodeExisted);
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<CreateBrandRequest>(), It.IsAny<CancellationToken>()));
         }

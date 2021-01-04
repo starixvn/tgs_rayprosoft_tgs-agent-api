@@ -48,15 +48,13 @@ namespace TGS.Core.DataServices.Base.Extensions
         }
 
         public static Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IEnumerable<TModel> query,
-            int totalCount)
-        {
-            return Task.FromResult(new PagedResponse<TModel>
+            int totalCount) =>
+            Task.FromResult(new PagedResponse<TModel>
             {
                 Valid = true,
                 TotalCount = totalCount,
                 Items = query.ToArray()
             });
-        }
 
         public static PagedArray<T> ToPagedArray<T>(this IQueryable<T> query, int page, int pageSize)
         {

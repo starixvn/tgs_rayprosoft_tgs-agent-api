@@ -88,11 +88,11 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Code exists already..
+        ///   Looks up a localized string similar to Code existed already..
         /// </summary>
-        public static string CodeExists {
+        public static string CodeExisted {
             get {
-                return ResourceManager.GetString("CodeExists", resourceCulture);
+                return ResourceManager.GetString("CodeExisted", resourceCulture);
             }
         }
         
@@ -187,11 +187,11 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name exists already..
+        ///   Looks up a localized string similar to Name existed already..
         /// </summary>
-        public static string NameExists {
+        public static string NameExisted {
             get {
-                return ResourceManager.GetString("NameExists", resourceCulture);
+                return ResourceManager.GetString("NameExisted", resourceCulture);
             }
         }
         

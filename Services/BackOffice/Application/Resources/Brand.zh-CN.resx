@@ -162,10 +162,10 @@
   <data name="CultureRequired" xml:space="preserve">
     <value>语系必填</value>
   </data>
-  <data name="CodeExists" xml:space="preserve">
+  <data name="CodeExisted" xml:space="preserve">
     <value>代码已存在</value>
   </data>
-  <data name="NameExists" xml:space="preserve">
+  <data name="NameExisted" xml:space="preserve">
     <value>名称已存在</value>
   </data>
   <data name="BetLimitDefaultRequired" xml:space="preserve">
