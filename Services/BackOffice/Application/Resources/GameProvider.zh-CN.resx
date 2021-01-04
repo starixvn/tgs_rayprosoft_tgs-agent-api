@@ -147,4 +147,7 @@
   <data name="GameInUse" xml:space="preserve">
     <value>包网商使用的游戏</value>
   </data>
+  <data name="DuplicateGames" xml:space="preserve">
+    <value>游戏重复，请检查游戏列表。</value>
+  </data>
 </root>

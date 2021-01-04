@@ -88,6 +88,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate games, please check game list..
+        /// </summary>
+        public static string DuplicateGames {
+            get {
+                return ResourceManager.GetString("DuplicateGames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Game in use for brands..
         /// </summary>
         public static string GameInUse {

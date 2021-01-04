@@ -150,4 +150,7 @@
   <data name="GamesExisted" xml:space="preserve">
     <value>Games existed already.</value>
   </data>
+  <data name="DuplicateGames" xml:space="preserve">
+    <value>Duplicate games, please check game list.</value>
+  </data>
 </root>

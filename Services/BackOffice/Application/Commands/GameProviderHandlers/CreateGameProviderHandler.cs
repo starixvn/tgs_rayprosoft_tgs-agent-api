@@ -1,13 +1,14 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
+using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
 {
-    public class CreateGameProviderHandler : Handler<CreateGameProviderRequest, MessageResponse>
+    public class CreateGameProviderHandler : Handler<CreateGameProviderRequest, GameProviderResponse>
     {
         private readonly IGameProviderService _service;
 
@@ -16,12 +17,22 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
             _service = service;
         }
 
-        public override async Task<MessageResponse> Handle(CreateGameProviderRequest request,
+        public override async Task<GameProviderResponse> Handle(CreateGameProviderRequest request,
             CancellationToken cancellationToken)
         {
+            var games = request.Games.GroupBy(x => new {x.ExternalId, x.PlatformType}).Where(x => x.Count() > 1)
+                .Select(x => x.Key.ExternalId).ToArray();
+
+            if (games.Length > 0)
+            {
+                var response = CreateInvalidResponse<GameProviderResponse>(GameProvider.DuplicateGames);
+                response.DuplicateGameExternalIds = games;
+                return response;
+            }
+
             await _service.CreateGameProviderAsync(request);
 
-            return CreateValidResponse<MessageResponse>();
+            return CreateValidResponse<GameProviderResponse>();
         }
     }
 }
