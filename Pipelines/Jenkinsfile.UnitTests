@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-			    print "${env.BRANCH_NAME}"
+			    print "Current Branch: ${env.BRANCH_NAME}"
 				sh "git checkout -f ${env.BRANCH_NAME}"
             }
         }
