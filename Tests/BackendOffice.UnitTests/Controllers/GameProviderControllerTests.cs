@@ -84,11 +84,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = GameProvider.CodeExists});
+                .ReturnsAsync(new MessageResponse {Valid = false, Message = GameProvider.CodeExisted});
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(GameProvider.CodeExists);
+            response.Message.Should().Be(GameProvider.CodeExisted);
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()));
         }

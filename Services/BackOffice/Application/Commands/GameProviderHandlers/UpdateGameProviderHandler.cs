@@ -35,12 +35,12 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
 
             if (await _service.ExistsAsync(x => request.Id != x.Id && x.Name == request.Name))
             {
-                return CreateInvalidResponse<MessageResponse>(GameProvider.NameExists);
+                return CreateInvalidResponse<MessageResponse>(GameProvider.NameExisted);
             }
 
             if (await _service.ExistsAsync(x => request.Id != x.Id && x.Code == request.Code))
             {
-                return CreateInvalidResponse<MessageResponse>(GameProvider.CodeExists);
+                return CreateInvalidResponse<MessageResponse>(GameProvider.CodeExisted);
             }
 
             var ids = request.Games.Where(g => g.Status != GameStatus.Active).Select(g => g.Id).ToArray();

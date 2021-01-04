@@ -36,12 +36,12 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
                     g.ExternalId == x.ExternalId &&
                     Enum.Parse(typeof(PlatformType), x.Platform, true).Equals(g.PlatformType)) ?? false).ToArray();
 
-            return existedGames.Any()
+            return existedGames.Length > 0
                 ? new UploadGamesResponse
                 {
                     Valid = false,
-                    Message = GameProvider.GamesExists,
-                    Games = existedGames.ToArray()
+                    Message = GameProvider.GamesExisted,
+                    Games = existedGames
                 }
                 : new UploadGamesResponse
                 {
