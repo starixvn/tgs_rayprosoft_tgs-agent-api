@@ -16,17 +16,17 @@ pipeline {
             }
         }
 		
-		stage('Checkout Environment') {
-          steps {
-            checkout([
-              $class: 'GitSCM',
-			  branches: [[name: "*/master" ]],
-              userRemoteConfigs: [[
-                url: 'https://gitlab.com/rayprosoft/environment.git',
-                credentialsId: 'gitlab-user-pwd',
-              ]]
-             ])
-           }
-        }
+		//stage('Checkout Environment') {
+        //  steps {
+        //    checkout([
+        //      $class: 'GitSCM',
+		//	  branches: [[name: "*/master" ]],
+        //      userRemoteConfigs: [[
+        //        url: 'https://gitlab.com/rayprosoft/environment.git',
+        //        credentialsId: 'gitlab-user-pwd',
+        //      ]]
+        //     ])
+        //   }
+        //}
     }
 }
