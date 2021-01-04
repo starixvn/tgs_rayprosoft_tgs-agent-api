@@ -10,6 +10,12 @@ pipeline {
             }            
         }
 		
+		stage('Checkout') {
+            steps {
+			    print "Current Branch: ${env.BRANCH_NAME}"
+            }
+        }
+		
 		stage('Checkout Environment') {
           steps {
             checkout([
@@ -21,13 +27,6 @@ pipeline {
               ]]
              ])
            }
-        }
-		
-        stage('Checkout') {
-            steps {
-			    print "Current Branch: ${env.BRANCH_NAME}"
-				sh "git checkout -f ${env.BRANCH_NAME}"
-            }
         }
     }
 }
