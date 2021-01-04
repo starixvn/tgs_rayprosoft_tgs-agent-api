@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Box, Set, Button, Text, Switch, Input, Stack } from "bumbag"
+import { Box, Set, Button, Text, Switch, Input, Stack, Dialog } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
@@ -62,7 +62,7 @@ const AsyncContentBody = ({}) => {
   let { data = {}, isLoading, mutate, clearCache } = useAnnouncementList(
     isEffectiveTab
       ? {
-          showAll: true,
+          ...toApiParams(state),
           sortby: "displayOrder",
           status: [statusFrom(EffectiveName), statusFrom(InvalidName)]
         }
@@ -140,8 +140,9 @@ const AsyncContentBody = ({}) => {
             <EffectiveTable
               statusName={statusName}
               data={data}
-              state={state}
+              setPageIndex={setPageIndex}
               setSortOrder={setSortOrder}
+              state={state}
               isLoading={isLoading}
               mutate={mutate}
               clearCache={clearCache}
@@ -225,12 +226,14 @@ const AsyncTable = ({
 const EffectiveTable = ({
   statusName,
   state,
+  setPageIndex,
   setSortOrder,
   data,
   isLoading,
   mutate,
   clearCache
 }) => {
+  let { pageSize } = state
   let [displayOrders, setDisplayOrder] = useState({})
   let [submitData, setSubmit] = useState()
 
@@ -282,22 +285,25 @@ const EffectiveTable = ({
           controlledState={state}
           columns={columns}
           data={data?.items}
-          usePagination={false}
+          pageCount={pageCount(pageSize, data?.totalCount)}
+          setPageIndex={setPageIndex}
           setSortOrder={setSortOrder}
           isLoading={isLoading}
         />
-        <Button
-          isLoading={isChangingDisplayOrder}
-          onClick={() => {
-            let list = Object.entries(displayOrders).map(([key, value]) => ({
-              id: key,
-              displayOrder: value
-            }))
-            setSubmit({ orders: list })
-          }}
-        >
-          <Trans zh="确认排序" en="Confirm Order" />
-        </Button>
+        <Dialog.Footer position="sticky" bottom="0">
+          <Button
+            isLoading={isChangingDisplayOrder}
+            onClick={() => {
+              let list = Object.entries(displayOrders).map(([key, value]) => ({
+                id: key,
+                displayOrder: value
+              }))
+              setSubmit({ orders: list })
+            }}
+          >
+            <Trans zh="确认排序" en="Confirm Order" />
+          </Button>
+        </Dialog.Footer>
       </Stack>
     </>
   )

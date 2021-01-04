@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, Field } from "formik"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import {
   Heading,
   Stack,
@@ -29,15 +29,11 @@ import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import {
-  Field as StatusSelectField,
+  BrandPaymentStatusSelect,
   ToggleButton as StatusToggleButton
 } from "./status"
 import { Type as TransferType } from "./transfer"
-import {
-  useChangePaymentOrders,
-  usePaymentList,
-  usePaymentDesignatedUsers
-} from "./client"
+import { useChangeBrandPaymentOrders, useBrandPaymentList } from "./client"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import Disclosure from "../../dialog/Disclosure"
 import { useModalState } from "../../dialog/Modal"
@@ -49,6 +45,7 @@ import { ViewButton as LogsButton } from "./logs"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert from "../../dialog/Alert"
 import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
+import HookFormInputField from "../../input/InputField"
 
 export { Code }
 
@@ -62,19 +59,16 @@ export const Content = () => {
 }
 
 const Body = () => {
-  let [state, set] = useState({
-    transferType: TransferType.Deposit,
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
     paymentStatus: null,
     keyword: ""
   })
+  let [transferType, setTransferType] = useState(TransferType.Deposit)
 
-  const setState = (state) => set((prevState) => ({ ...prevState, ...state }))
-
-  let { transferType } = state
-  let { data, isLoading, mutate } = usePaymentList({
-    ...state,
-    sortby: "number",
-    showAll: true
+  let { data, isLoading, mutate } = useBrandPaymentList({
+    ...toApiParams(state),
+    transferType,
+    sortby: "number"
   })
 
   let tab = useTabState({
@@ -85,8 +79,10 @@ const Body = () => {
     if (transferType === newTransferType) {
       mutate()
     }
+
+    setTransferType(newTransferType)
     setState({
-      transferType: newTransferType,
+      pageIndex: 0,
       paymentStatus: null,
       keyword: ""
     })
@@ -107,7 +103,7 @@ const Body = () => {
               ) {
                 mutate()
               }
-              setState(newState)
+              setState({ pageIndex: 0, ...newState })
             }}
             isLoading={isLoading}
           />
@@ -141,6 +137,8 @@ const Body = () => {
             <DataTable
               state={state}
               data={data}
+              setPageIndex={setPageIndex}
+              setSortOrder={setSortOrder}
               transferType={transferType}
               mutate={mutate}
               isLoading={isLoading}
@@ -152,6 +150,8 @@ const Body = () => {
             <DataTable
               state={state}
               data={data}
+              setPageIndex={setPageIndex}
+              setSortOrder={setSortOrder}
               transferType={transferType}
               mutate={mutate}
               isLoading={isLoading}
@@ -165,14 +165,23 @@ const Body = () => {
 
 export const CodeContentPair = [Code, Content]
 
-const DataTable = ({ state, data, transferType, mutate, isLoading }) => {
+const DataTable = ({
+  state,
+  data,
+  setPageIndex,
+  setSortOrder,
+  transferType,
+  mutate,
+  isLoading
+}) => {
+  let { pageSize } = state
   let [displayOrders, setDisplayOrder] = useState({})
   let [submitData, setSubmit] = useState()
   let {
     result,
     isLoading: isChangingDisplayOrder,
     error
-  } = useChangePaymentOrders(submitData)
+  } = useChangeBrandPaymentOrders(submitData)
 
   const reset = () => {
     setDisplayOrder({})
@@ -205,54 +214,54 @@ const DataTable = ({ state, data, transferType, mutate, isLoading }) => {
       <Table
         columns={columns}
         data={data?.items}
+        pageCount={pageCount(pageSize, data?.totalCount)}
+        setPageIndex={setPageIndex}
+        setSortOrder={setSortOrder}
         isLoading={isLoading}
-        usePagination={false}
       />
-      <Button
-        isLoading={isChangingDisplayOrder}
-        onClick={() => {
-          let list = Object.entries(displayOrders).map(([key, value]) => ({
-            id: key,
-            displayOrder: value
-          }))
-          setSubmit({ orders: list })
-        }}
-      >
-        <Trans zh="确认排序" en="Confirm Order" />
-      </Button>
+      <Dialog.Footer position="sticky" bottom="0">
+        <Button
+          isLoading={isChangingDisplayOrder}
+          onClick={() => {
+            let list = Object.entries(displayOrders).map(([key, value]) => ({
+              id: key,
+              displayOrder: value
+            }))
+            setSubmit({ orders: list })
+          }}
+        >
+          <Trans zh="确认排序" en="Confirm Order" />
+        </Button>
+      </Dialog.Footer>
     </Stack>
   )
 }
 
 const SearchBar = ({ search, isLoading, ...props }) => {
+  let formMethods = useForm()
+
+  const onSubmit = (data) => search(data)
+
   return (
-    <Formik
-      initialValues={{
-        paymentStatus: "",
-        keyword: ""
-      }}
-      onSubmit={search}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <StatusSelectField name="paymentStatus" />
-            <Field
-              name="keyword"
-              component={InputField.Formik}
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("keyword", "")}>
-                  X
-                </Button>
-              }
-              placeholder={searchInputPlaceHolder()}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isLoading} />
-          </Set>
-        </form>
-      )}
-    </Formik>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <BrandPaymentStatusSelect name="paymentStatus" />
+          <HookFormInputField
+            name="keyword"
+            defaultValue=""
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("keyword", "")}>
+                X
+              </Button>
+            }
+            placeholder={searchInputPlaceHolder()}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 
@@ -300,7 +309,7 @@ const useColumns = ({
       }
     },
     {
-      accessor: "paymentVendorName",
+      accessor: "paymentName",
       Header: <Trans zh="支付厂商" en="Payment Vendor" />,
       disableSortBy: true,
       headCell: {

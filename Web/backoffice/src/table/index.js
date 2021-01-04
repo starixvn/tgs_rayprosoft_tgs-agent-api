@@ -7,7 +7,7 @@ import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
 
 const DefaultState = {
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: 20,
   sortBy: []
 }
 

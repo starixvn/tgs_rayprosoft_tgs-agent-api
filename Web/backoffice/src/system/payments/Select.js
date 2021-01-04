@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { Select as _Select } from "bumbag"
 import SelectField from "../../../select/Field"
-import { usePaymentVendorList } from "./client"
+import { usePaymentList } from "./client"
 import AlertDialog from "../../../dialog/Alert"
 
 export const Select = ({ required, ...props }) => {
-  let { data, isLoading, error } = usePaymentVendorList()
+  let { data, isLoading, error } = usePaymentList()
 
   console.warn("TODO: map item for i18n?")
   let options = data?.items.map((item) => item) ?? []

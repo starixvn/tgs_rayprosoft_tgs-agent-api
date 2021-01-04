@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { Stack, Box, Button, Text, Modal, Dialog, Heading } from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import Disclosure from "../../dialog/Disclosure"
-import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
-import { useUpdatePaymentHandingFee } from "./client"
+import { ConfirmButtonFooter } from "../../form/Dialog"
+import { useUpdateBrandPaymentHandingFee } from "./client"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel as Label } from "../../form/Label"
-import InputField from "../../input/Field"
+import HookFormInputField from "../../input/InputField"
+import HookFormDialog from "../../form/HookFormDialog"
 
 const HandlingFeeTrans = {
   zh: "手续费",
@@ -38,31 +38,35 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
   )
 }
 
-//TODO:?
-export const ViewButton = ({}) => {}
-
 const EditDialog = ({ record = {}, dialog, onSubmitted, ...props }) => {
-  //TODO: custom footer
   let title = useTrans({
     zh: "手续费",
     en: "Handling Fee"
   })
 
   let [submitData, setSubmit] = useState()
-  let { result, isLoading, error } = useUpdatePaymentHandingFee(
-    record?.id,
-    submitData
-  )
+  let {
+    result,
+    isLoading,
+    error,
+    mutate,
+    deleteCache
+  } = useUpdateBrandPaymentHandingFee(record?.id, submitData)
+
+  const reset = () => {
+    deleteCache()
+    mutate(undefined, false)
+    setSubmit(undefined)
+  }
+
   return (
-    <FormDialog
-      initialValues={{
-        ...record.paymentFee
-      }}
+    <HookFormDialog
+      defaultValues={record.paymentFee}
       onSubmit={setSubmit}
       result={result}
       isLoading={isLoading}
       error={error}
-      onCloseErrorAlert={() => setSubmit(undefined)}
+      onCloseErrorAlert={reset}
       onSubmitted={onSubmitted}
       title={title}
       showCloseButton
@@ -78,12 +82,11 @@ const EditDialog = ({ record = {}, dialog, onSubmitted, ...props }) => {
       dialog={dialog}
     >
       <EditBody record={record} dialog={dialog} />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
 const EditBody = ({ record = {}, dialog, ...props }) => {
-  let { values, setFieldValue } = useFormikContext()
   return (
     <Stack orientation="vertical" spacing="minor-1">
       <Heading use="h5">
@@ -109,10 +112,11 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
           <Trans {...HandlingFeeTrans} />
         </Label>
         <Box>
-          <InputField
+          <HookFormInputField
             name="feePercentage"
             type="number"
             min="0"
+            max="100"
             step="0.01"
             required
             addonAfter={<Button isStatic>%</Button>}
@@ -123,14 +127,24 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
           <Trans zh="最低手续费" en="Minimum Handling Fee" />
         </Label>
         <Box>
-          <InputField name="lowestFee" type="number" step="0.01" required />
+          <HookFormInputField
+            name="lowestFee"
+            type="number"
+            step="0.01"
+            required
+          />
         </Box>
 
         <Label required>
           <Trans zh="最高手续费" en="Maximum Handling Fee" />
         </Label>
         <Box required>
-          <InputField name="highestFee" type="number" step="0.01" required />
+          <HookFormInputField
+            name="highestFee"
+            type="number"
+            step="0.01"
+            required
+          />
         </Box>
       </FieldValues>
     </Stack>

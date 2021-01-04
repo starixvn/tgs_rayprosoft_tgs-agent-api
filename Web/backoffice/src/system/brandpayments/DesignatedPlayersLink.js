@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, Field } from "formik"
 import {
   Heading,
   Stack,
@@ -17,7 +16,7 @@ import {
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert from "../../dialog/Alert"
-import { usePaymentDesignatedUsers } from "./client"
+import { useBrandPaymentDesignatedUsers } from "./client"
 import Disclosure from "../../dialog/Disclosure"
 import { CloseButtonFooter, useModalState } from "../../dialog/Modal"
 import { Trans, useTrans } from "../../i18n"
@@ -46,7 +45,7 @@ const PlayersDialog = ({ id, dialog }) => {
     zh: "特定用户",
     en: "Designated Users"
   })
-  let { data, isLoading, error, mutate } = usePaymentDesignatedUsers(
+  let { data, isLoading, error, mutate } = useBrandPaymentDesignatedUsers(
     dialog.visible && id
   )
   if (isLoading) {
