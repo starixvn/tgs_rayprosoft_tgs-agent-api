@@ -15,18 +15,5 @@ pipeline {
 			    print "Current Branch: ${env.BRANCH_NAME}"
             }
         }
-		
-		//stage('Checkout Environment') {
-        //  steps {
-        //    checkout([
-        //      $class: 'GitSCM',
-		//	  branches: [[name: "*/master" ]],
-        //      userRemoteConfigs: [[
-        //        url: 'https://gitlab.com/rayprosoft/environment.git',
-        //        credentialsId: 'gitlab-user-pwd',
-        //      ]]
-        //     ])
-        //   }
-        //}
     }
 }
