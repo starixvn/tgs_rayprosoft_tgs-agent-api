@@ -84,7 +84,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = GameProvider.CodeExisted});
+                .ReturnsAsync(new GameProviderResponse {Valid = false, Message = GameProvider.CodeExisted});
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeFalse();
@@ -100,7 +100,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new GameProviderResponse {Valid = true});
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeTrue();
@@ -116,7 +116,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new GameProviderResponse {Valid = true});
 
             var response = await _controller.UpdateGameProviderAsync(brand.Id, request);
 
