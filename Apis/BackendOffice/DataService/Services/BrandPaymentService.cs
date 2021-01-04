@@ -105,6 +105,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             };
 
             payment.ChannelName = request.ChannelName;
+            payment.PaymentStatus = request.PaymentStatus;
             payment.TransferLimitFrom = request.TransferLimitFrom;
             payment.TransferLimitTo = request.TransferLimitTo;
             payment.PlayerListCondition = request.PlayerListCondition;
