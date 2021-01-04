@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
 using TGS.Core.DataServices.Tgs;
@@ -188,13 +187,20 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         Task IBrandPaymentService.ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
         {
-            var beforePayment =
-                JsonConvert.DeserializeObject<BrandPayment>(JsonConvert.SerializeObject(payment,
-                    new JsonSerializerSettings
-                    {
-                        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                    }));
+            var beforePayment = new BrandPayment
+            {
+                ChannelName = payment.ChannelName,
+                PaymentStatus = payment.PaymentStatus,
+                TransferLimitFrom = payment.TransferLimitFrom,
+                TransferLimitTo = payment.TransferLimitTo,
+                PlayerListCondition = payment.PlayerListCondition,
+                AllPlayers = payment.AllPlayers,
+                IdentityAuthentication = payment.IdentityAuthentication,
+                PhoneAuthentication = payment.PhoneAuthentication,
+                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                DepositedAmountMin = payment.DepositedAmountMin,
+                DepositedAmountMax = payment.DepositedAmountMax
+            };
 
             payment.PaymentStatus = status;
             payment.UpdatedOn = DateTimeOffset.Now;
