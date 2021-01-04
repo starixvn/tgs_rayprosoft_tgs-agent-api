@@ -22,12 +22,12 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers
         {
             if (await _service.ExistsAsync(x => x.Name == request.Name))
             {
-                return CreateInvalidResponse<MessageResponse>(Brand.NameExists);
+                return CreateInvalidResponse<MessageResponse>(Brand.NameExisted);
             }
 
             if (await _service.ExistsAsync(x => x.Code == request.Code))
             {
-                return CreateInvalidResponse<MessageResponse>(Brand.CodeExists);
+                return CreateInvalidResponse<MessageResponse>(Brand.CodeExisted);
             }
 
             await _service.CreateBrandAsync(request);
