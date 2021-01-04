@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/develop" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
+        }
+		
+		stage('Build') {
+			steps {
+				sh "dotnet build tgs.sln"
+				echo "build solution"
+			}
+		}
+		
+		stage('Docker Build and Push') {
+			steps {
+				sh  "docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p oD2cksJhGN1tgUuaE6C9"  
+				sh  "docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:dev ."
+				sh  "docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:dev"
+			}
+		}
+
+        stage('Checkout Environment') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/master" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/environment.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
+        }
+		
+		stage('Kubectl apply') {
+			steps {
+				withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+					sh "kubectl apply -f dev/13.backoffice-api.yml --record"
+				}
+			}
+		}
+		
+		stage('Test') {
+			steps {
+				sh  "cd .."  
+				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
+				echo "test tgs.sln"
+			}
+		}
+		stage('Coder') {
+			steps {
+				//sh  "dotcover()"  
+				echo "dotcover tgs.sln"
+			}
+		}
+    }
+}
