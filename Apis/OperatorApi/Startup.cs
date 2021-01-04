@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -117,7 +118,10 @@ namespace TGS.Apis.OperatorApi
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins(corsDomain.Urls);
+                        builder.WithOrigins(corsDomain.Urls)
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .SetIsOriginAllowed(_ => true);
                     });
             });
         }
@@ -127,6 +131,8 @@ namespace TGS.Apis.OperatorApi
             app.UseGlobalExceptionHandler();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseVerifyJwtTokenMiddlewares();
 
@@ -146,8 +152,6 @@ namespace TGS.Apis.OperatorApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
             }
-
-            app.UseCors();
         }
     }
 }
