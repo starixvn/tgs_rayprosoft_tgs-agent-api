@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    stages {
+		stage('Get Branch') {
+          steps {
+            	print 'Branch:' + params.Branch
+           }
+        }
+		
+        stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/develop" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
+        }
+    }
+}

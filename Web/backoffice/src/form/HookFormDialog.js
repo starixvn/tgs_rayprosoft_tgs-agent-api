@@ -24,6 +24,7 @@ export const HookFormDialog = ({
   children,
   dialog,
   hideOnClickOutside = false,
+  showCloseButton = true,
   showActionButtons = true,
   cancelText = <CancelText />,
   submitText = <SubmitText />,
@@ -71,6 +72,7 @@ export const HookFormDialog = ({
               : addonButtons,
           ...actionButtonsProps
         }}
+        showCloseButton={showCloseButton}
         hideOnClickOutside={hideOnClickOutside}
         {...dialog}
         {...props}

@@ -101,7 +101,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
   } = useUpdateBrandGameProviderPresetMaintenance(record?.id, submitData)
 
   const onSubmit = (formData) => {
-    setSubmit({ defaultTimes })
+    setSubmit({ defaultTimes, scheduleStatus: formData.scheduleStatus })
   }
 
   const reset = () => {

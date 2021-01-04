@@ -21,6 +21,8 @@ import formatISO from "date-fns/fp/formatISO"
 import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
 import { EditPresetButton } from "./PresetMaintenance"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
+import HookFormInputField from "../../input/InputField"
 
 export { Code }
 
@@ -77,10 +79,39 @@ const Body = () => {
 }
 
 const SearchBar = ({ name: keyword = "", search, isLoading, ...props }) => {
+  let formMethods = useForm({
+    defaultValues: {
+      keyword: ""
+    }
+  })
+
   let searchPlaceHolder = useTrans({
     zh: "厂商输入框",
     en: "Input vendor name"
   })
+
+  const onSubmit = (data) => search(data)
+
+  return (
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <HookFormInputField
+            name="keyword"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("keyword", "")}>
+                X
+              </Button>
+            }
+            placeholder={searchPlaceHolder}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
+  )
+
   return (
     <Formik
       initialValues={{
