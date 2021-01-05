@@ -41,5 +41,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
         public virtual ICollection<Announcement> Announcements { get; set; }
         public virtual ICollection<StationLetter> StationLetters { get; set; }
+        public virtual ICollection<VipLevel> VipLevels { get; set; }
+        public virtual ICollection<Department> Departments { get; set; }
     }
 }

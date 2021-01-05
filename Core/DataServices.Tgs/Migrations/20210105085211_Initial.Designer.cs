@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210105034207_Initial")]
+    [Migration("20210105085211_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -713,6 +713,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -724,9 +727,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<Guid>("LicenseeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("ResellerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -736,6 +745,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("LicenseeId");
+
+                    b.HasIndex("ResellerId");
 
                     b.ToTable("Departments", "dbo");
                 });
@@ -1941,6 +1956,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("varchar(16)");
@@ -1951,6 +1969,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1963,7 +1984,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .IsClustered(false);
+
+                    b.HasIndex("BrandId");
 
                     b.ToTable("VipLevels", "dbo");
                 });
@@ -2345,6 +2369,33 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("BrandPayment");
 
                     b.Navigation("VipLevel");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Department", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brands")
+                        .WithMany("Departments")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensees")
+                        .WithMany("Departments")
+                        .HasForeignKey("LicenseeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Reseller", "Reseller")
+                        .WithMany("Departments")
+                        .HasForeignKey("ResellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Brands");
+
+                    b.Navigation("Licensees");
+
+                    b.Navigation("Reseller");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>
@@ -2798,6 +2849,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.VipLevel", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany("VipLevels")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Wallet", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Currency", "Currency")
@@ -2861,6 +2923,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Navigation("Currencies");
 
+                    b.Navigation("Departments");
+
                     b.Navigation("GameProviders");
 
                     b.Navigation("Games");
@@ -2872,6 +2936,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Players");
 
                     b.Navigation("StationLetters");
+
+                    b.Navigation("VipLevels");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGame", b =>
@@ -2984,6 +3050,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Navigation("Currencies");
 
+                    b.Navigation("Departments");
+
                     b.Navigation("GameProviders");
 
                     b.Navigation("Languages");
@@ -3028,6 +3096,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("BetLimits");
 
                     b.Navigation("Currencies");
+
+                    b.Navigation("Departments");
 
                     b.Navigation("GameProviders");
 

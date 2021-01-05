@@ -12,7 +12,6 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Department;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -38,7 +37,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [TestCase(false)]
         public async Task Can_Get_Departments(bool showAll)
         {
-            var request = new PageableRequest
+            var request = new GetDepartmentsRequest
             {
                 Page = 1,
                 Rows = 10,

@@ -26,6 +26,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(e => e.BusinessType)
                 .HasColumnType(ColumnTypes.TinyInt)
                 .IsRequired();
+
+            builder.HasMany(c => c.Departments)
+                .WithOne(c => c.Reseller)
+                .HasForeignKey(c => c.ResellerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

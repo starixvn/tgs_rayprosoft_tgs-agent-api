@@ -1,16 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class VipLevelMap : IEntityTypeConfiguration<VipLevel>
+    internal class VipLevelMap : BaseConfiguration, IEntityTypeConfiguration<VipLevel>
     {
         void IEntityTypeConfiguration<VipLevel>.Configure(EntityTypeBuilder<VipLevel> builder)
         {
             builder.ToTable("VipLevels", "dbo");
-            builder.HasKey(bc => bc.Id);
+            BaseConfigureProperties<VipLevel, Guid>(builder);
 
             builder.Property(c => c.Code)
                 .HasColumnType(ColumnTypes.Varchar(16))

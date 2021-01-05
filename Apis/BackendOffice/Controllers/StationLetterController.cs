@@ -61,6 +61,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
         {
             return _queries.GetQueries()
+                .Where(x => x.Id == request.BrandId)
+                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId)
                 .Where(p => p.Status == request.Status)
                 .Select(a => new StationLetterModel
                 {
@@ -198,7 +202,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost("export")]
-        [Description("Export player file")]
+        [Description("Export player file for example")]
         public async Task<HttpResponseMessage> ExportAsync()
         {
             var wb = await Task.Run(() =>
