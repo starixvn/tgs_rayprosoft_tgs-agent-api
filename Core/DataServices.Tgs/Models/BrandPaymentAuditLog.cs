@@ -3,10 +3,10 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class PaymentAuditLog
+    public class BrandPaymentAuditLog
     {
         public Guid Id { get; set; }
-        public Guid PaymentId { get; set; }
+        public Guid BrandPaymentId { get; set; }
         public string BeforeChannelName { get; set; }
         public string AfterChannelName { get; set; }
         public SwitchStatus BeforePaymentStatus { get; set; }

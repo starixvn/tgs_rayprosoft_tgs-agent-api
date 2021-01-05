@@ -1,17 +1,21 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record GetGameUrlRequest : IRequest<GetGameUrlResponse>
     {
-        [JsonPropertyName("gpcode")]
+        [Required]
+        [BindProperty(Name = "gpcode", SupportsGet = true)]
         public string GameProviderCode { get; init; }
 
-        [JsonPropertyName("gid")]
+        [Required]
+        [BindProperty(Name = "gid", SupportsGet = true)]
         public int GameId { get; init; }
-        
-        [JsonPropertyName("language")]
+
+        [Required]
+        [BindProperty(Name = "language", SupportsGet = true)]
         public string LanguageCode { get; init; }
     }
 }

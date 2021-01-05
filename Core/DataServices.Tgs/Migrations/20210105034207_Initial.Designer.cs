@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210104102113_Initial")]
+    [Migration("20210105034207_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -542,6 +542,135 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("PaymentMethodId");
 
                     b.ToTable("BrandPayments", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AfterAllPlayers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("AfterChannelName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("AfterDepositedAmountMax")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("AfterDepositedAmountMin")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<bool>("AfterDepositedAmountUnlimited")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AfterIdentityAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AfterPaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("AfterPhoneAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AfterPlayerListCondition")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("AfterTransferLimitFrom")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("AfterTransferLimitTo")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<bool>("BeforeAllPlayers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BeforeChannelName")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("BeforeDepositedAmountMax")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("BeforeDepositedAmountMin")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<bool>("BeforeDepositedAmountUnlimited")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("BeforeIdentityAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BeforePaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("BeforePhoneAuthentication")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BeforePlayerListCondition")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("BeforeTransferLimitFrom")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("BeforeTransferLimitTo")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<Guid>("BrandPaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<short>("Operation")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandPaymentId");
+
+                    b.ToTable("BrandPaymentAuditLogs", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentPlayer", b =>
+                {
+                    b.Property<Guid>("BrandPaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<int>("ListType")
+                        .HasColumnType("int");
+
+                    b.HasKey("BrandPaymentId", "PlayerCode");
+
+                    b.HasIndex("PlayerCode");
+
+                    b.ToTable("BrandPaymentPlayers", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentVipLevel", b =>
+                {
+                    b.Property<Guid>("BrandPaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VipLevelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BrandPaymentId", "VipLevelId");
+
+                    b.HasIndex("VipLevelId");
+
+                    b.ToTable("BrandPaymentVipLevels", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Currency", b =>
@@ -1116,102 +1245,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("Payments", "dbo");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentAuditLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("AfterAllPlayers")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("AfterChannelName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("AfterDepositedAmountMax")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("AfterDepositedAmountMin")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<bool>("AfterDepositedAmountUnlimited")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("AfterIdentityAuthentication")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("AfterPaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("AfterPhoneAuthentication")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("AfterPlayerListCondition")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("AfterTransferLimitFrom")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("AfterTransferLimitTo")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<bool>("BeforeAllPlayers")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("BeforeChannelName")
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("BeforeDepositedAmountMax")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("BeforeDepositedAmountMin")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<bool>("BeforeDepositedAmountUnlimited")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("BeforeIdentityAuthentication")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("BeforePaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("BeforePhoneAuthentication")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("BeforePlayerListCondition")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("BeforeTransferLimitFrom")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("BeforeTransferLimitTo")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<short>("Operation")
-                        .HasColumnType("smallint");
-
-                    b.Property<Guid>("PaymentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentId");
-
-                    b.ToTable("PaymentAuditLogs", "dbo");
-                });
-
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentChannel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1295,39 +1328,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("PaymentId");
 
                     b.ToTable("PaymentMethods", "dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentPlayerList", b =>
-                {
-                    b.Property<Guid>("PaymentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("PlayerCode")
-                        .HasColumnType("varchar(16)");
-
-                    b.Property<int>("ListType")
-                        .HasColumnType("int");
-
-                    b.HasKey("PaymentId", "PlayerCode");
-
-                    b.HasIndex("PlayerCode");
-
-                    b.ToTable("PaymentPlayerList", "dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentVipLevel", b =>
-                {
-                    b.Property<Guid>("PaymentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("VipLevelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("PaymentId", "VipLevelId");
-
-                    b.HasIndex("VipLevelId");
-
-                    b.ToTable("PaymentVipLevels", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Player", b =>
@@ -1419,6 +1419,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("Wechat")
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<byte[]>("WithdrawPassword")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
+
+                    b.Property<byte[]>("WithdrawSalt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(128)");
 
                     b.HasKey("PlayerCode");
 
@@ -2301,6 +2309,44 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("PaymentMethod");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentPlayer", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "BrandPayment")
+                        .WithMany("BrandPaymentPlayers")
+                        .HasForeignKey("BrandPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany("BrandPaymentPlayers")
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BrandPayment");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentVipLevel", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "BrandPayment")
+                        .WithMany("VipLevels")
+                        .HasForeignKey("BrandPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", "VipLevel")
+                        .WithMany("PaymentVipLevels")
+                        .HasForeignKey("VipLevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BrandPayment");
+
+                    b.Navigation("VipLevel");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
@@ -2515,44 +2561,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Payment");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentPlayerList", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "Payment")
-                        .WithMany("PaymentPlayerList")
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithMany("PaymentPlayerList")
-                        .HasForeignKey("PlayerCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Payment");
-
-                    b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentVipLevel", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "Payment")
-                        .WithMany("VipLevels")
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", "VipLevel")
-                        .WithMany("PaymentVipLevels")
-                        .HasForeignKey("VipLevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Payment");
-
-                    b.Navigation("VipLevel");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Player", b =>
@@ -2890,7 +2898,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
-                    b.Navigation("PaymentPlayerList");
+                    b.Navigation("BrandPaymentPlayers");
 
                     b.Navigation("VipLevels");
                 });
@@ -3002,9 +3010,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Navigation("Banks");
 
-                    b.Navigation("Letters");
+                    b.Navigation("BrandPaymentPlayers");
 
-                    b.Navigation("PaymentPlayerList");
+                    b.Navigation("Letters");
 
                     b.Navigation("PlayerLoginRecords");
 

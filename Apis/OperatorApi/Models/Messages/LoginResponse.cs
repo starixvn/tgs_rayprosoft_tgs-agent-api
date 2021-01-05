@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
@@ -9,7 +8,10 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("token")]
         public string PlayerToken {  get; init; }
 
+        /// <summary>
+        ///     unix timestamp to milliseconds
+        /// </summary>
         [JsonPropertyName("logintime")]
-        public DateTimeOffset LoginTime { get; init; }
+        public long LoginTime { get; init; }
     }
 }

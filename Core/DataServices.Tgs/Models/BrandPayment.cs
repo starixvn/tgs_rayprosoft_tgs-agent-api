@@ -34,7 +34,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
-        public virtual ICollection<PaymentPlayerList> PaymentPlayerList { get; set; }
-        public virtual ICollection<PaymentVipLevel> VipLevels { get; set; }
+        public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
+        public virtual ICollection<BrandPaymentVipLevel> VipLevels { get; set; }
     }
 }

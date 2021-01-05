@@ -89,37 +89,56 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
-            var cacheType = RedisCacheType.BrandGamesWithConditions;
-            var cacheKey = $"{brandId}";
-            var field = $"{gameProviderId}:{platformType}:{currencyCode}:{(int) playerType}:{cultureCode}";
+            const RedisCacheType cacheType = RedisCacheType.BrandGamesWithConditions;
+            var cacheKey = brandId;
+            var field = $"{gameProviderId}:{platformType}:{currencyCode}:{(int) playerType}";
 
             var value =
                 await _cacheManger.SafeGetHashSetAsync(cacheType, cacheKey, field);
 
+            GameModel[] games;
+
             if (value.HasValue)
             {
-                return new()
+                games = _json.DeserializeFromString<GameModel[]>(value);
+            }
+            else
+            {
+                games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode,
+                    playerType);
+
+                await _cacheManger.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
                 {
-                    Games = _json.DeserializeFromString<GetGamesResponse.GameModel[]>(value)
-                };
+                    new(field, _json.SerializeToString(games))
+                }, TimeSpan.FromHours(2));
             }
 
-            var gameModels = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, cultureCode,
-                playerType);
+            var types = request.Types ?? Array.Empty<GameType>();
+            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
 
-            await _cacheManger.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
-            {
-                new(field, _json.SerializeToString(gameModels))
-            }, TimeSpan.FromHours(1));
+            var translatedGames = games
+                .Where(g => types.Length == 0 || types.Contains(g.Type))
+                .Select(g =>
+                {
+                    var key = g.Id.ToString();
+
+                    return g with
+                    {
+                        Name = _localizationOperations.Parse(store, key,
+                            Core.Models.Consts.LocalizationContext.GameName, g.Name),
+                        Description = _localizationOperations.Parse(store, key,
+                            Core.Models.Consts.LocalizationContext.GameDescription, g.Description)
+                    };
+                }).ToArray();
 
             return new()
             {
-                Games = gameModels
+                Games = translatedGames
             };
         }
 
-        private async Task<GetGamesResponse.GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
-            PlatformType platformType, string currencyCode, string culture, PlayerType playerType)
+        private async Task<GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
+            PlatformType platformType, string currencyCode, PlayerType playerType)
         {
             var statuses = _validStatus.GetStatus(playerType);
             var gameStatuses = _validGameStatus.GetStatus(playerType);
@@ -131,7 +150,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
                 if (!isCurrencySupported)
                 {
-                    return Array.Empty<GetGamesResponse.GameModel>();
+                    return Array.Empty<GameModel>();
                 }
             }
 
@@ -141,21 +160,16 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId);
 
-            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, culture);
-
             return (from bg in brandGames.Where(g => g.GameProviderId == gameProviderId)
                     join g in cachedGames on bg.GameId equals g.Id
                     where g.AvailableCurrencies.Length == 0 ||
                         g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase)
-                    let key = g.Id.ToString()
-                    select new GetGamesResponse.GameModel
+                    select new GameModel
                     {
                         Id = bg.GameId,
                         Code = g.Code,
-                        Name = _localizationOperations.Parse(store, key,
-                            Core.Models.Consts.LocalizationContext.GameName, g.Name),
-                        Description = _localizationOperations.Parse(store, key,
-                            Core.Models.Consts.LocalizationContext.GameDescription, g.Description),
+                        Name = g.Name,
+                        Description = g.Description,
                         GameProviderCode = cachedGameProvider.Code,
                         Type = g.Type,
                         IsActive = IsGameActive(statuses, cachedGameProvider.Status, brandGameProviderStatus,
@@ -168,7 +182,6 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                         }
                     }).ToArray();
         }
-
 
         private static bool IsGameActive(Status[] statuses, Status gameProviderStatus, Status brandGameProviderStatus,
             GameStatus[] gameStatuses, GameStatus gameStatus, GameStatus brandGameStatus) =>

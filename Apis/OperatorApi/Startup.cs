@@ -67,6 +67,7 @@ namespace TGS.Apis.OperatorApi
                 .AddFluentValidation(c =>
                 {
                     c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Singleton);
+                    c.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
                 });

@@ -4,17 +4,17 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class PaymentVipLevelMap : IEntityTypeConfiguration<PaymentVipLevel>
+    internal class BrandPaymentVipLevelMap : IEntityTypeConfiguration<BrandPaymentVipLevel>
     {
-        void IEntityTypeConfiguration<PaymentVipLevel>.Configure(EntityTypeBuilder<PaymentVipLevel> builder)
+        void IEntityTypeConfiguration<BrandPaymentVipLevel>.Configure(EntityTypeBuilder<BrandPaymentVipLevel> builder)
         {
-            builder.ToTable("PaymentVipLevels", "dbo");
-            builder.HasKey(bc => new {bc.PaymentId, bc.VipLevelId});
+            builder.ToTable("BrandPaymentVipLevels", "dbo");
+            builder.HasKey(bc => new {PaymentId = bc.BrandPaymentId, bc.VipLevelId});
 
             builder
-                .HasOne(bc => bc.Payment)
+                .HasOne(bc => bc.BrandPayment)
                 .WithMany(c => c.VipLevels)
-                .HasForeignKey(bc => bc.PaymentId);
+                .HasForeignKey(bc => bc.BrandPaymentId);
 
             builder
                 .HasOne(bc => bc.VipLevel)

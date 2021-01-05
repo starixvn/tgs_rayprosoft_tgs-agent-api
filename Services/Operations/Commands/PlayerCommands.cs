@@ -31,245 +31,161 @@ namespace TGS.Services.Operations.Commands
     {
         private const int RetryCount = 3;
         private readonly ITgsLog _log;
-        private readonly Func<ITgsRepository> _repositoryFactory;
-        private readonly ITransactionManager _transactionManager;
+        private readonly ITgsRepository _repository;
 
         public PlayerCommands(
-            Func<ITgsRepository> repositoryFactory,
-            ITransactionManager transactionManager,
+            ITgsRepository repository,
             ITgsLog log)
         {
-            _repositoryFactory = repositoryFactory;
-            _transactionManager = transactionManager;
+            _repository = repository;
             _log = log;
         }
 
         async Task<string> IPlayerCommands.CreatePlayerAsync(CreatePlayerData data)
         {
             var retries = 0;
+
             var username = data.Username;
+            var walletId = GuidExtensions.NewSequentialGuid();
+            var createdOn = DateTimeOffset.UtcNow;
+            var playerCode = default(string);
 
-            return await _transactionManager.ExecuteTransactionAsync(
-                _repositoryFactory,
-                IsolationLevel.ReadCommitted,
-                username,
-                async repo =>
+            while (retries < RetryCount)
+            {
+                playerCode = PlayerCodeGenerator.NewId();
+
+                try
                 {
-                    var walletId = GuidExtensions.NewSequentialGuid();
-                    var createdOn = DateTimeOffset.UtcNow;
-                    var playerCode = default(string);
-
-                    while (retries < RetryCount)
+                    var player = new Player
                     {
-                        playerCode = PlayerCodeGenerator.NewId();
-
-                        try
+                        PlayerCode = playerCode,
+                        Username = username,
+                        Password = data.Password,
+                        Salt = data.Salt,
+                        WithdrawPassword = data.WithdrawPassword,
+                        WithdrawSalt = data.WithdrawSalt,
+                        InvitationCode = InvitationCodeGenerator.NewId(),
+                        BrandId = data.BrandId,
+                        DefaultWalletId = walletId,
+                        DefaultWalletCurrencyCode = data.CurrencyCode,
+                        ParentInvitationCode = data.ParentInvitationCode,
+                        RegisteredOn = createdOn,
+                        LastActiveOn = createdOn,
+                        Status = PlayerStatus.Enabled,
+                        Type = data.Type,
+                        BetLimitId = data.BetLimitId,
+                        HasAgent = data.HasAgent,
+                        UpdatedByUsername = username,
+                        UpdatedOn = createdOn,
+                        Wallets = new HashSet<Wallet>
                         {
-                            var player = new Player
+                            new()
                             {
+                                Id = walletId,
                                 PlayerCode = playerCode,
-                                Username = username,
-                                Password = data.Password,
-                                Salt = data.Salt,
-                                InvitationCode = InvitationCodeGenerator.NewId(),
-                                BrandId = data.BrandId,
-                                DefaultWalletId = walletId,
-                                DefaultWalletCurrencyCode = data.CurrencyCode,
-                                ParentInvitationCode = data.ParentInvitationCode,
-                                RegisteredOn = createdOn,
-                                LastActiveOn = createdOn,
-                                Status = PlayerStatus.Enabled,
-                                Type = data.Type,
-                                BetLimitId = data.BetLimitId,
-                                HasAgent = data.HasAgent,
-                                UpdatedByUsername = username,
-                                UpdatedOn = createdOn,
-                                Wallets = new HashSet<Wallet>
-                                {
-                                    new()
-                                    {
-                                        Id = walletId,
-                                        PlayerCode = playerCode,
-                                        CurrencyCode = data.CurrencyCode,
-                                        ExternalCurrencyCode = data.ExternalCurrencyCode,
-                                        Balance = 0,
-                                        CreatedOn = createdOn,
-                                        UpdatedOn = createdOn
-                                    }
-                                }
-                            };
-
-                            await repo.Players.AddAsync(player);
-
-                            CreateAuditLog(repo, username, $"Create Player '{username}'", createdOn);
-
-                            await repo.SaveChangesAsync();
-
-                            break;
-                        }
-                        catch (Exception e) when (e.InnerException?.InnerException is SqlException exception)
-                        {
-                            retries++;
-                            var err =
-                                $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
-
-                            _log.LogError(err, e);
-
-                            if (retries == RetryCount)
-                            {
-                                throw new InvalidOperationException(err, e);
-                            }
-
-                            if (exception.Number == 2601) // 2601 is "unique index"
-                            {
-                                break;
+                                CurrencyCode = data.CurrencyCode,
+                                ExternalCurrencyCode = data.ExternalCurrencyCode,
+                                Balance = 0,
+                                CreatedOn = createdOn,
+                                UpdatedOn = createdOn
                             }
                         }
+                    };
+
+                    await _repository.Players.AddAsync(player);
+                    await _repository.SaveChangesAsync();
+
+                    break;
+                }
+                catch (Exception e) when (e.InnerException?.InnerException is SqlException exception)
+                {
+                    retries++;
+                    var err =
+                        $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
+
+                    _log.LogError(err, e);
+
+                    if (retries == RetryCount)
+                    {
+                        throw new InvalidOperationException(err, e);
                     }
 
-                    return playerCode;
-                });
+                    if (exception.Number == 2601) // 2601 is "unique index"
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return playerCode;
         }
 
-        async Task IPlayerCommands.UpdatePlayerAsync(UpdatePlayerData data)
+        Task IPlayerCommands.UpdatePlayerAsync(UpdatePlayerData data)
         {
-            var username = data.Username;
+            var player = new Player
+            {
+                PlayerCode = data.PlayerCode,
+                RealName = data.RealName,
+                Email = data.Email,
+                Phone = data.Phone,
+                QQ = data.QQ,
+                Wechat = data.Wechat,
+                UpdatedOn = data.UpdatedOn
+            };
 
-            _ = await _transactionManager.ExecuteTransactionAsync(
-                _repositoryFactory,
-                IsolationLevel.ReadCommitted,
-                username,
-                async repo =>
-                {
-                    var player = new Player
-                    {
-                        PlayerCode = data.PlayerCode,
-                        RealName = data.RealName,
-                        Email = data.Email,
-                        Phone = data.Phone,
-                        QQ = data.QQ,
-                        Wechat = data.Wechat,
-                        UpdatedOn = data.UpdatedOn
-                    };
+            _repository.Players.Attach(player);
+            _repository.Entry(player).Property(nameof(player.RealName)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.Email)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.Phone)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.QQ)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.Wechat)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
 
-                    repo.Players.Attach(player);
-                    repo.Entry(player).Property(nameof(player.RealName)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.Email)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.Phone)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.QQ)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.Wechat)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
-
-                    CreateAuditLog(repo, username, "Update player information", data.UpdatedOn);
-
-                    await repo.SaveChangesAsync();
-
-                    return Task.CompletedTask;
-                });
+            return _repository.SaveChangesAsync();
         }
 
-        async Task IPlayerCommands.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        Task IPlayerCommands.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
         {
-            var username = data.Username;
+            var player = new Player
+            {
+                PlayerCode = data.PlayerCode,
+                Salt = data.Salt,
+                Password = data.Password,
+                UpdatedOn = data.UpdatedOn
+            };
 
-            _ = await _transactionManager.ExecuteTransactionAsync(
-                _repositoryFactory,
-                IsolationLevel.ReadCommitted,
-                username,
-                async repo =>
-                {
-                    var player = new Player
-                    {
-                        PlayerCode = data.PlayerCode,
-                        Salt = data.Salt,
-                        Password = data.Password,
-                        UpdatedOn = data.UpdatedOn
-                    };
+            _repository.Players.Attach(player);
+            _repository.Entry(player).Property(nameof(player.Salt)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.Password)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
 
-                    repo.Players.Attach(player);
-                    repo.Entry(player).Property(nameof(player.Salt)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.Password)).IsModified = true;
-                    repo.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
-
-                    CreateAuditLog(repo, username, "Update player password", data.UpdatedOn);
-
-                    await repo.SaveChangesAsync();
-
-                    return Task.CompletedTask;
-                });
+            return _repository.SaveChangesAsync();
         }
 
         async Task<PlayerLoginRecord> IPlayerCommands.PlayerLoginAsync(PlayerLoginData data)
         {
-            var username = data.Username;
+            var loginRecord = new PlayerLoginRecord
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                PlayerCode = data.PlayerCode,
+                BrandId = data.BrandId,
+                Status = LoginStatus.Enabled,
+                PlatformType = data.PlatformType,
+                IpAddress = data.IpAddress,
+                CreatedOn = data.CreatedOn,
+                ExpiredOn = data.ExpiredOn
+            };
 
-            var loginRecord = await _transactionManager.ExecuteTransactionAsync(
-                _repositoryFactory,
-                IsolationLevel.ReadCommitted,
-                username,
-                async repo =>
-                {
-                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.PlatformType);
-
-                    var record = new PlayerLoginRecord
-                    {
-                        Id = GuidExtensions.NewSequentialGuid(),
-                        PlayerCode = data.PlayerCode,
-                        BrandId = data.BrandId,
-                        Status = LoginStatus.Enabled,
-                        PlatformType = data.PlatformType,
-                        IpAddress = data.IpAddress,
-                        CreatedOn = data.CreatedOn,
-                        ExpiredOn = data.ExpiredOn
-                    };
-
-                    await repo.PlayerLoginRecords.AddAsync(record);
-
-                    CreateAuditLog(repo, username, $"Player '{username}' login.", data.CreatedOn);
-
-                    await repo.SaveChangesAsync();
-
-                    return record;
-                });
+            await _repository.PlayerLoginRecords.AddAsync(loginRecord);
+            await _repository.SaveChangesAsync();
 
             return loginRecord;
         }
 
-        async Task IPlayerCommands.PlayerLogoutAsync(PlayerLogoutData data)
-        {
-            var username = data.Username;
-
-            _ = await _transactionManager.ExecuteTransactionAsync(
-                _repositoryFactory,
-                IsolationLevel.ReadCommitted,
-                username,
-                async repo =>
-                {
-                    await DeauthorizePlayerAsync(repo, data.PlayerCode, data.LoginRecordId);
-
-                    CreateAuditLog(repo, username, $"Player '{username}' logout.", data.UpdatedOn);
-
-                    await repo.SaveChangesAsync();
-
-                    return Task.CompletedTask;
-                });
-        }
+        Task IPlayerCommands.PlayerLogoutAsync(PlayerLogoutData data) =>
+            DeauthorizePlayerAsync(_repository, data.PlayerCode, data.LoginRecordId);
 
         #region Private Methods
-
-        private static void CreateAuditLog(ITgsRepository repo, string username, string operation,
-            DateTimeOffset createdOn)
-        {
-            repo.AuditLogs.Add(new PlayerAuditLog
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                ModuleName = "Player",
-                CreatedByUsername = username,
-                CreatedOn = createdOn,
-                Operation = operation,
-                Username = username
-            });
-        }
 
         private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, Guid loginRecordId)
         {
@@ -291,7 +207,8 @@ namespace TGS.Services.Operations.Commands
             });
         }
 
-        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, PlatformType? platformType)
+        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode,
+            PlatformType? platformType)
         {
             const string sql = "usp_Player_DeauthorizeByPlatform";
             return repo.ExecuteSqlCommandAsync(sql, parameters: new SqlParameter[]

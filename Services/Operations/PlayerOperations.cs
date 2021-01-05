@@ -25,6 +25,8 @@ namespace TGS.Services.Operations
 
         Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
 
+        Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
+
         Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
 
         Task<Player> GetPlayerByCodeAsync(string playerCode);
@@ -116,9 +118,15 @@ namespace TGS.Services.Operations
                 : await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
         }
 
+        Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLoginRecordAsync(Guid loginRecordId)
+        {
+            return _cacheManager.SafeGetAndCacheAsync(RedisCacheType.PlayerLoginRecords, loginRecordId,
+                TimeSpan.FromHours(2), () => _playerQueriesFactory().GetPlayerLoginRecordAsync(loginRecordId));
+        }
+
         async Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid brandId, string username)
         {
-            var cacheType = RedisCacheType.UsernameToPlayerCode;
+            const RedisCacheType cacheType = RedisCacheType.UsernameToPlayerCode;
             var cacheKey = brandId;
             var field = username;
 
@@ -139,7 +147,7 @@ namespace TGS.Services.Operations
 
         async Task<string> IPlayerOperations.CreatePlayerAsync(CreatePlayerData data)
         {
-            var playerCode= await _playerCommands.CreatePlayerAsync(data);
+            var playerCode = await _playerCommands.CreatePlayerAsync(data);
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.UsernameToPlayerCode, data.BrandId, new HashEntry[]
             {
@@ -195,7 +203,7 @@ namespace TGS.Services.Operations
 
         async Task<string> IPlayerOperations.GetPlayerCodeByInvitationCodeAsync(string invitationCode)
         {
-            var cacheType = RedisCacheType.InvitationCodeToPlayerCode;
+            const RedisCacheType cacheType = RedisCacheType.InvitationCodeToPlayerCode;
             var field = invitationCode;
 
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, null, field);
@@ -233,7 +241,7 @@ namespace TGS.Services.Operations
 
             if (values.All(a => !a.IsNull))
             {
-                return new CachedPlayer
+                return new()
                 {
                     PlayerCode = playerCode,
                     BrandId = Guid.Parse(values[0]),
@@ -282,6 +290,7 @@ namespace TGS.Services.Operations
 
             var loginRecords = results.Select(r => new CachedPlayerLoginRecord
             {
+                PlayerCode = playerCode,
                 PlatformType = r.PlatformType,
                 ExpiredOn = r.ExpiredOn
             }).ToArray();

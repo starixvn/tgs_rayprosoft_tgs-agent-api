@@ -5,15 +5,15 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    public class PaymentAuditLogMap : IEntityTypeConfiguration<PaymentAuditLog>
+    public class BrandPaymentAuditLogMap : IEntityTypeConfiguration<BrandPaymentAuditLog>
     {
-        void IEntityTypeConfiguration<PaymentAuditLog>.Configure(EntityTypeBuilder<PaymentAuditLog> builder)
+        void IEntityTypeConfiguration<BrandPaymentAuditLog>.Configure(EntityTypeBuilder<BrandPaymentAuditLog> builder)
         {
-            builder.ToTable("PaymentAuditLogs", "dbo");
+            builder.ToTable("BrandPaymentAuditLogs", "dbo");
 
             builder.HasKey(p => p.Id);
 
-            builder.HasIndex(p => p.PaymentId);
+            builder.HasIndex(p => p.BrandPaymentId);
 
             builder.Property(c => c.BeforeChannelName)
                 .HasColumnType(ColumnTypes.Nvarchar(50));

@@ -284,7 +284,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
-            return new Player
+            return new()
             {
                 PlayerCode = playerCode,
                 Username = username,
@@ -292,6 +292,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 InvitationCode = invitationCode,
                 Password = password,
                 Salt = salt,
+                WithdrawPassword = password,
+                WithdrawSalt = salt,
                 DefaultWalletId = defaultWalletId,
                 DefaultWalletCurrencyCode = currencyCode,
                 Status = PlayerStatus.Enabled,
