@@ -69,24 +69,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Departments",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Departments", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "GameProviders",
                 schema: "dbo",
                 columns: table => new
@@ -233,24 +215,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Settings", x => x.Key);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VipLevels",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Code = table.Column<string>(type: "varchar(16)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VipLevels", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -645,46 +609,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         column: x => x.ResellerId,
                         principalSchema: "dbo",
                         principalTable: "Resellers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<byte>(type: "tinyint", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    LastLoginIp = table.Column<string>(type: "nvarchar(128)", nullable: true),
-                    LastLoginTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(30)", nullable: false),
-                    TimeZone = table.Column<string>(type: "nvarchar(256)", nullable: true),
-                    Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Users_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalSchema: "dbo",
-                        principalTable: "Departments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Users_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalSchema: "dbo",
-                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1207,70 +1131,43 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Players",
+                name: "Departments",
                 schema: "dbo",
                 columns: table => new
                 {
-                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    RealName = table.Column<string>(type: "nvarchar(32)", nullable: true),
-                    InvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
-                    Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    WithdrawPassword = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    WithdrawSalt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
-                    DefaultWalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RegisteredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastActiveOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    BetLimitId = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<byte>(type: "tinyint", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(64)", nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(32)", nullable: true),
-                    QQ = table.Column<string>(type: "nvarchar(64)", nullable: true),
-                    Wechat = table.Column<string>(type: "nvarchar(64)", nullable: true),
-                    HasAgent = table.Column<bool>(type: "bit", nullable: false),
-                    IdentityAuthentication = table.Column<bool>(type: "bit", nullable: false),
-                    PhoneAuthentication = table.Column<bool>(type: "bit", nullable: false),
-                    AccumulatedDeposit = table.Column<decimal>(type: "decimal(18,6)", nullable: false, defaultValue: 0m),
-                    ParentPlayerCode = table.Column<string>(type: "varchar(16)", nullable: true),
-                    ParentInvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: true),
-                    VipId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UpdatedByUsername = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(128)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Players", x => x.PlayerCode);
-                    table.UniqueConstraint("AK_Players_BrandId_Username", x => new { x.BrandId, x.Username });
+                    table.PrimaryKey("PK_Departments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Players_BetLimits_BetLimitId",
-                        column: x => x.BetLimitId,
-                        principalSchema: "dbo",
-                        principalTable: "BetLimits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Players_Brands_BrandId",
+                        name: "FK_Departments_Brands_BrandId",
                         column: x => x.BrandId,
                         principalSchema: "dbo",
                         principalTable: "Brands",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Players_Players_ParentPlayerCode",
-                        column: x => x.ParentPlayerCode,
-                        principalSchema: "dbo",
-                        principalTable: "Players",
-                        principalColumn: "PlayerCode",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Players_VipLevels_VipId",
-                        column: x => x.VipId,
+                        name: "FK_Departments_Licensees_LicenseeId",
+                        column: x => x.LicenseeId,
                         principalSchema: "dbo",
-                        principalTable: "VipLevels",
+                        principalTable: "Licensees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Departments_Resellers_ResellerId",
+                        column: x => x.ResellerId,
+                        principalSchema: "dbo",
+                        principalTable: "Resellers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -1298,6 +1195,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     table.PrimaryKey("PK_StationLetters", x => x.Id);
                     table.ForeignKey(
                         name: "FK_StationLetters_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalSchema: "dbo",
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VipLevels",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "varchar(16)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VipLevels", x => x.Id)
+                        .Annotation("SqlServer:Clustered", false);
+                    table.ForeignKey(
+                        name: "FK_VipLevels_Brands_BrandId",
                         column: x => x.BrandId,
                         principalSchema: "dbo",
                         principalTable: "Brands",
@@ -1347,33 +1272,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalTable: "Resellers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BrandPaymentVipLevels",
-                schema: "dbo",
-                columns: table => new
-                {
-                    BrandPaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VipLevelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BrandPaymentVipLevels", x => new { x.BrandPaymentId, x.VipLevelId });
-                    table.ForeignKey(
-                        name: "FK_BrandPaymentVipLevels_BrandPayments_BrandPaymentId",
-                        column: x => x.BrandPaymentId,
-                        principalSchema: "dbo",
-                        principalTable: "BrandPayments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BrandPaymentVipLevels_VipLevels_VipLevelId",
-                        column: x => x.VipLevelId,
-                        principalSchema: "dbo",
-                        principalTable: "VipLevels",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1457,6 +1355,169 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalTable: "BrandGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    LastLoginIp = table.Column<string>(type: "nvarchar(128)", nullable: true),
+                    LastLoginTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(30)", nullable: false),
+                    TimeZone = table.Column<string>(type: "nvarchar(256)", nullable: true),
+                    Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalSchema: "dbo",
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "dbo",
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BrandPaymentVipLevels",
+                schema: "dbo",
+                columns: table => new
+                {
+                    BrandPaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VipLevelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandPaymentVipLevels", x => new { x.BrandPaymentId, x.VipLevelId });
+                    table.ForeignKey(
+                        name: "FK_BrandPaymentVipLevels_BrandPayments_BrandPaymentId",
+                        column: x => x.BrandPaymentId,
+                        principalSchema: "dbo",
+                        principalTable: "BrandPayments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BrandPaymentVipLevels_VipLevels_VipLevelId",
+                        column: x => x.VipLevelId,
+                        principalSchema: "dbo",
+                        principalTable: "VipLevels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Players",
+                schema: "dbo",
+                columns: table => new
+                {
+                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    RealName = table.Column<string>(type: "nvarchar(32)", nullable: true),
+                    InvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
+                    Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    WithdrawPassword = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    WithdrawSalt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    DefaultWalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegisteredOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastActiveOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    BetLimitId = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<byte>(type: "tinyint", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(64)", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(32)", nullable: true),
+                    QQ = table.Column<string>(type: "nvarchar(64)", nullable: true),
+                    Wechat = table.Column<string>(type: "nvarchar(64)", nullable: true),
+                    HasAgent = table.Column<bool>(type: "bit", nullable: false),
+                    IdentityAuthentication = table.Column<bool>(type: "bit", nullable: false),
+                    PhoneAuthentication = table.Column<bool>(type: "bit", nullable: false),
+                    AccumulatedDeposit = table.Column<decimal>(type: "decimal(18,6)", nullable: false, defaultValue: 0m),
+                    ParentPlayerCode = table.Column<string>(type: "varchar(16)", nullable: true),
+                    ParentInvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: true),
+                    VipId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedByUsername = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Players", x => x.PlayerCode);
+                    table.UniqueConstraint("AK_Players_BrandId_Username", x => new { x.BrandId, x.Username });
+                    table.ForeignKey(
+                        name: "FK_Players_BetLimits_BetLimitId",
+                        column: x => x.BetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "BetLimits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Players_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalSchema: "dbo",
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Players_Players_ParentPlayerCode",
+                        column: x => x.ParentPlayerCode,
+                        principalSchema: "dbo",
+                        principalTable: "Players",
+                        principalColumn: "PlayerCode",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Players_VipLevels_VipId",
+                        column: x => x.VipId,
+                        principalSchema: "dbo",
+                        principalTable: "VipLevels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BrandGroupGameProviderBetLimits",
+                schema: "dbo",
+                columns: table => new
+                {
+                    BrandGroupBetLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GameProviderBetLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandGroupGameProviderBetLimits", x => new { x.BrandGroupBetLimitId, x.GameProviderBetLimitId });
+                    table.ForeignKey(
+                        name: "FK_BrandGroupGameProviderBetLimits_BrandGroupBetLimits_BrandGroupBetLimitId",
+                        column: x => x.BrandGroupBetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "BrandGroupBetLimits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BrandGroupGameProviderBetLimits_GameProviderBetLimits_GameProviderBetLimitId",
+                        column: x => x.GameProviderBetLimitId,
+                        principalSchema: "dbo",
+                        principalTable: "GameProviderBetLimits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1576,38 +1637,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wallets",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
-                    CurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
-                    ExternalCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Wallets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Wallets_Currencies_CurrencyCode",
-                        column: x => x.CurrencyCode,
-                        principalSchema: "dbo",
-                        principalTable: "Currencies",
-                        principalColumn: "Code",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Wallets_Players_PlayerCode",
-                        column: x => x.PlayerCode,
-                        principalSchema: "dbo",
-                        principalTable: "Players",
-                        principalColumn: "PlayerCode",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "StationLetterPlayers",
                 schema: "dbo",
                 columns: table => new
@@ -1637,30 +1666,35 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BrandGroupGameProviderBetLimits",
+                name: "Wallets",
                 schema: "dbo",
                 columns: table => new
                 {
-                    BrandGroupBetLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GameProviderBetLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
+                    ExternalCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BrandGroupGameProviderBetLimits", x => new { x.BrandGroupBetLimitId, x.GameProviderBetLimitId });
+                    table.PrimaryKey("PK_Wallets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BrandGroupGameProviderBetLimits_BrandGroupBetLimits_BrandGroupBetLimitId",
-                        column: x => x.BrandGroupBetLimitId,
+                        name: "FK_Wallets_Currencies_CurrencyCode",
+                        column: x => x.CurrencyCode,
                         principalSchema: "dbo",
-                        principalTable: "BrandGroupBetLimits",
-                        principalColumn: "Id",
+                        principalTable: "Currencies",
+                        principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BrandGroupGameProviderBetLimits_GameProviderBetLimits_GameProviderBetLimitId",
-                        column: x => x.GameProviderBetLimitId,
+                        name: "FK_Wallets_Players_PlayerCode",
+                        column: x => x.PlayerCode,
                         principalSchema: "dbo",
-                        principalTable: "GameProviderBetLimits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Players",
+                        principalColumn: "PlayerCode",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -1796,6 +1830,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "Brands",
                 column: "LicenseeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_BrandId",
+                schema: "dbo",
+                table: "Departments",
+                column: "BrandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_LicenseeId",
+                schema: "dbo",
+                table: "Departments",
+                column: "LicenseeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_ResellerId",
+                schema: "dbo",
+                table: "Departments",
+                column: "ResellerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GameProviderBetLimits_CurrencyCode",
@@ -1983,6 +2035,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "Users",
                 column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VipLevels_BrandId",
+                schema: "dbo",
+                table: "VipLevels",
+                column: "BrandId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wallets_CurrencyCode",
@@ -2216,10 +2274,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Brands",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
                 name: "PaymentMethods",
                 schema: "dbo");
 
@@ -2232,11 +2286,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "Licensees",
+                name: "Brands",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "Payments",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "Licensees",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

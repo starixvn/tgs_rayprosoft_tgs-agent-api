@@ -66,9 +66,12 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get announcements")]
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
-            //TODO: create a job to change announcement status
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
             return _queries.GetQueries()
+                .Where(x => x.Id == request.BrandId)
+                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId)
                 .Where(hasExpiredStatus, p => DateTimeOffset.Now > p.To)
                 .Where(!hasExpiredStatus,
                     p => request.Status.Contains(p.Status) && DateTimeOffset.Now < p.To)

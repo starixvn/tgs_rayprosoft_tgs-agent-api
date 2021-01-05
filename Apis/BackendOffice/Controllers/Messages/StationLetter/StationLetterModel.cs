@@ -6,6 +6,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
     {
         public Guid Id { get; set; }
         public Guid BrandId { get; set; }
+        public string BrandName { get; set; }
         public string Subject { get; set; }
         public string Content { get; set; }
         public string Remarks { get; set; }

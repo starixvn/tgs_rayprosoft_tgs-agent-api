@@ -58,6 +58,16 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .WithOne(c => c.Brand)
                 .HasForeignKey(c => c.BrandId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.VipLevels)
+                .WithOne(c => c.Brand)
+                .HasForeignKey(c => c.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Departments)
+                .WithOne(c => c.Brands)
+                .HasForeignKey(c => c.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

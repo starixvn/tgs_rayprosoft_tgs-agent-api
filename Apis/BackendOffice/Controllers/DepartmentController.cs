@@ -30,9 +30,15 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet]
         [Description("Get departments")]
-        public Task<PagedResponse<DepartmentModel>> GetListAsync([FromQuery] PageableRequest request)
+        public Task<PagedResponse<DepartmentModel>> GetListAsync([FromQuery] GetDepartmentsRequest request)
         {
             return _queries.GetQueries()
+                .Where(request.ResellerId, r => r.ResellerId == request.ResellerId)
+                .Where(request.LicenseeId, l => l.LicenseeId == request.LicenseeId)
+                .Where(request.BrandId, l => l.BrandId == request.BrandId)
+                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
+                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId != null, l => l.BrandId == BrandId)
                 .Select(d => new DepartmentModel
                 {
                     Id = d.Id,

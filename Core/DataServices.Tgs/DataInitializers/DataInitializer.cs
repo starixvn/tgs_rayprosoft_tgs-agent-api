@@ -66,18 +66,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             new AdminRole(), new ResellerAdminRole(), new LicenseeAdminRole(), new BrandRole()
         };
 
-        private readonly VipLevel[] _vipLevels =
-        {
-            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 0", Name = "名称A"},
-            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 1", Name = "名称B"},
-            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 2", Name = "名称C"},
-            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 3", Name = "名称D"},
-            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 4", Name = "名称E"},
-            new() {Id = GuidExtensions.NewSequentialGuid(), Code = "VIP 5", Name = "名称F"}
-        };
-
+        private VipLevel[] _vipLevels;
         private BetLimit[] _betLimits;
-
         private Player[] _players;
 
         public DataInitializer(ITgsRepository repository, IWebHostEnvironment env)
@@ -107,9 +97,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await LogSeedingTimeAsync(GenerateCurrenciesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateLanguagesAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateBetLimitsAsync, _logBuilder);
-            await LogSeedingTimeAsync(GenerateVipLevelAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateGameProvidersAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateResellersWithDescendantsAsync, _logBuilder);
+            await LogSeedingTimeAsync(GenerateVipLevelAsync, _logBuilder);
             await LogSeedingTimeAsync(GeneratePlayersAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, _logBuilder);
             await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, _logBuilder);
@@ -146,13 +136,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private Task GenerateVipLevelAsync()
         {
-            foreach (var vip in _vipLevels)
-            {
-                vip.CreatedByUsername = AdminUsername;
-                vip.UpdatedByUsername = AdminUsername;
-                vip.CreatedOn = Now;
-                vip.UpdatedOn = Now;
-            }
+            _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+                .Select(brand => new VipLevel
+                {
+                    Id = GuidExtensions.NewSequentialGuid(),
+                    Code = "Default",
+                    Name = "Default Level",
+                    IsDefault = true,
+                    BrandId = brand.Id,
+                    CreatedByUsername = AdminUsername,
+                    UpdatedByUsername = AdminUsername,
+                    CreatedOn = Now,
+                    UpdatedOn = Now
+                })
+                .ToArray();
 
             return _repository.BulkInsertOrUpdateAsync(_vipLevels);
         }
@@ -259,12 +256,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     playerCodes.Add(playerCode);
                     invitationCodes.Add(invitationCode);
 
+                    var brandId = Resellers[0].Licensees[0].Brands[0].Id;
+
                     var username = Generator.RandomString(12);
                     var realName = Generator.RandomString(12);
-                    var vipId = _vipLevels[rnd.Next(0, 6)].Id;
+                    var vipId = _vipLevels.First(x => x.BrandId == brandId).Id;
 
                     return CreatePlayer(playerCode, username, realName, salt, password,
-                        vipId, PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
+                        vipId, PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode, brandId);
                 }).ToArray();
 
             await _repository.BulkInsertAsync(_players);
