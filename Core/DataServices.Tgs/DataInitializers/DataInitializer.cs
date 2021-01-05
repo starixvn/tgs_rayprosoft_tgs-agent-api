@@ -66,10 +66,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             new AdminRole(), new ResellerAdminRole(), new LicenseeAdminRole(), new BrandRole()
         };
 
-        private readonly VipLevel[] _vipLevels;
-
+        private VipLevel[] _vipLevels;
         private BetLimit[] _betLimits;
-
         private Player[] _players;
 
         public DataInitializer(ITgsRepository repository, IWebHostEnvironment env)
@@ -138,12 +136,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private Task GenerateVipLevelAsync()
         {
-            var _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+            _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Select(brand => new VipLevel
                 {
                     Id = GuidExtensions.NewSequentialGuid(),
-                    Code = "DefaultVip",
-                    Name = "DefaultVip",
+                    Code = "Default",
+                    Name = "Default Level",
                     IsDefault = true,
                     BrandId = brand.Id,
                     CreatedByUsername = AdminUsername,
@@ -153,7 +151,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 })
                 .ToArray();
 
-            return _repository.BulkInsertOrUpdateAsync(this._vipLevels);
+            return _repository.BulkInsertOrUpdateAsync(_vipLevels);
         }
 
         private Task GenerateLanguagesAsync()
