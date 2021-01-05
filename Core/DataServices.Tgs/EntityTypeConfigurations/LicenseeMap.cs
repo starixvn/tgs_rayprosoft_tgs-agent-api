@@ -26,6 +26,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasOne(p => p.Reseller)
                 .WithMany(p => p.Licensees)
                 .HasForeignKey(p => p.ResellerId);
+
+            builder.HasMany(c => c.Departments)
+                .WithOne(c => c.Licensees)
+                .HasForeignKey(c => c.LicenseeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -41,6 +41,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 Code = request.Code,
                 Name = request.Name,
                 Status = Status.Active,
+                BusinessType = request.BusinessType,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
                 CreatedByUsername = username,
