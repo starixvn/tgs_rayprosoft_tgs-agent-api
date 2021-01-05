@@ -40,5 +40,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
         public virtual ICollection<Announcement> Announcements { get; set; }
+        public virtual ICollection<StationLetter> StationLetters { get; set; }
     }
 }

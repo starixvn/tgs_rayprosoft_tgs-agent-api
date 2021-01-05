@@ -1802,6 +1802,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<bool>("AssignedAllPlayers")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(4000)");
 
@@ -1832,6 +1835,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
 
                     b.ToTable("StationLetters", "dbo");
                 });
@@ -2734,6 +2739,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("GameProvider");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.StationLetter", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany("StationLetters")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.StationLetterPlayer", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
@@ -2844,6 +2860,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("PlayerLoginRecords");
 
                     b.Navigation("Players");
+
+                    b.Navigation("StationLetters");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGame", b =>

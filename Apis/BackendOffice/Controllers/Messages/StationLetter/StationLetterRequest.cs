@@ -4,6 +4,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
 {
     public class StationLetterRequest
     {
+        public Guid BrandId { get; set; }
         public string Subject { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
