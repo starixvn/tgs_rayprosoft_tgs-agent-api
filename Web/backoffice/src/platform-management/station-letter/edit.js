@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Formik, Field, Form, useFormikContext } from "formik"
+import { useForm, useFormContext, Controller } from "react-hook-form"
 import {
   Stack,
   Box,
   Button,
   Text,
   Modal,
-  Textarea,
-  TextareaField,
   Input,
   Set,
   Popover,
@@ -20,28 +19,34 @@ import {
   Verify as VerifyMenu,
   View as ViewMenu
 } from "./menu"
-import { useIsDisplayMenuByRoute } from "../../user/context"
+import {
+  useIsDisplayMenuByRoute,
+  useUserBrandId,
+  useUserLicenseeId,
+  useUserResellerId,
+  useUserRoleType
+} from "../../user/context"
 import { FieldValues } from "../../layout/Grid"
-import FormDialog from "../../form/Dialog"
 import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
 import { Trans, useTrans, useLocale, Locales } from "../../i18n"
-import { Field as InputField } from "../../input/Field"
 import {
   useAddStationLetter,
   useStationLetterUpload,
   useVerifyStationLetter
 } from "./client"
 import { CancelText } from "../../button/ActionButtons"
-import TargetSelectField, {
+import {
   AllPlayers,
   DesignatedPlayers,
-  TargetSelect
-} from "./TargetSelectField"
+  PlayerTargetSelect
+} from "./PlayerTargetSelect"
 import Alert from "../../dialog/Alert"
-import { useForm, useFormContext, Controller } from "react-hook-form"
 import HookFormInputField from "../../input/InputField"
 import HookFormDialog from "../../form/HookFormDialog"
+import Textarea from "../../textarea"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { nextRoleType } from "../../system/roles/type"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -63,6 +68,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 }
 
 const AddDialog = ({ onSubmitted, dialog, ...props }) => {
+  let userBrandId = useUserBrandId()
   let [data, setSubmit] = useState()
   let { result, isLoading, error } = useAddStationLetter(data)
 
@@ -75,7 +81,6 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
     en: "Add Station Letter"
   })
 
-  /*
   return (
     <HookFormDialog
       defaultValues={{
@@ -83,13 +88,15 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
         subject: "",
         content: ""
       }}
-      onSubmit={({ target, ...data }) => {
+      onSubmit={({ target, brandId = userBrandId, ...data }) => {
         if (target === AllPlayers) {
           data.assignedAllPlayers = true
         }
 
-        console.log("submit", data)
-        // setSubmit(data)
+        setSubmit({
+          ...data,
+          brandId
+        })
       }}
       isLoading={isLoading}
       result={result}
@@ -101,43 +108,14 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
       placement="top"
       css={DialogCss}
     >
-      <HookFormEditBody dialog={dialog} />
+      <EditBody isAdd dialog={dialog} />
     </HookFormDialog>
-  )
-  */
-
-  return (
-    <FormDialog
-      initialValues={{
-        target: AllPlayers,
-        subject: "",
-        content: ""
-      }}
-      onSubmit={({ target, ...data }) => {
-        if (target === AllPlayers) {
-          data.assignedAllPlayers = true
-        }
-
-        setSubmit(data)
-      }}
-      isLoading={isLoading}
-      result={result}
-      error={error}
-      onCloseErrorAlert={clearResult}
-      onSubmitted={onSubmitted}
-      title={title}
-      dialog={dialog}
-      placement="top"
-      css={DialogCss}
-    >
-      <EditBody dialog={dialog} />
-    </FormDialog>
   )
 }
 
 const DialogCss = css`
-  min-width: 65vw;
-  min-height: 80vh;
+  min-width: 80vw;
+  min-height: 90vh;
 
   & .bb-DialogContent {
     min-height: 80vh;
@@ -150,9 +128,13 @@ const DialogCss = css`
   }
 `
 
-/*
-const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
-  let { setValue, control, watch, ...formMethods } = useForm()
+const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
+  let resellerId = useUserResellerId()
+  let licenseeId = useUserLicenseeId()
+  let brandId = useUserBrandId()
+  let userRoleType = useUserRoleType()
+
+  let { setValue, control, watch, formState, ...formMethods } = useFormContext()
   let target = watch("target")
   let playerUsernames = watch("playerUsernames")
 
@@ -163,7 +145,6 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
   let [editor, setEditor] = useState()
   let uploadInputRef = useRef()
 
-  // let [playerUsernames, setPlayers] = useState()
   let [formData, setFormData] = useState()
   let { result, isLoading, error, deleteCache } = useStationLetterUpload(
     formData
@@ -179,7 +160,6 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
 
   useEffect(() => {
     if (Array.isArray(result?.players) && !error) {
-      console.warn("verify playerUsernames value")
       setValue(
         "playerUsernames",
         result?.players.map((item) => item.username)
@@ -215,7 +195,6 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
       setup: (editor) => {
         editor.on("Change", (event) => {
           let content = event.target.getContent()
-          console.log("set content", content)
           setValue("content", content)
         })
       },
@@ -226,7 +205,6 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
     }
 
     tinymce.init(options).then(([instance]) => {
-      console.log("editor instance", instance)
       setEditor(instance)
     })
   }
@@ -243,49 +221,65 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
         <Trans zh="对象" en="Target" />
       </Label>
       <Set>
-        <TargetSelect required={required} disabled={readonly} />
+        {isAdd && !brandId && (
+          <MerchantIdSelect
+            start={nextRoleType(userRoleType)}
+            resellerId={resellerId}
+            licenseeId={licenseeId}
+          />
+        )}
+        <PlayerTargetSelect required={required} disabled={readonly} />
         {!readonly && target === DesignatedPlayers && (
-          <>
-            <input
-              ref={uploadInputRef}
-              type="file"
-              onChange={(event) => {
-                let [file] = event.target.files
-                if (file) {
-                  let formData = new FormData()
-                  formData.append("file", file, file.name)
-                  setFormData(formData)
-                } else {
-                  resetFormData()
-                }
-              }}
-              css={css`
-                display: none;
-              `}
-            />
-            <Button
-              type="button"
-              palette="primary"
-              size="small"
-              onClick={(event) => {
-                uploadInputRef?.current.click()
-              }}
-              isLoading={isLoading}
-              disabled={isLoading}
-            >
-              <Trans zh="上传文件" en="Upload file" />
-            </Button>
-            <Button
-              use="a"
-              href="/download/payments/list.xlsx"
-              download="players.xlsx"
-              palette="primary"
-              size="small"
-            >
-              <Trans zh="下载文件格式" en="Download Format File" />
-            </Button>
-            {error && <Alert {...error} onClickClose={resetFormData} />}
-          </>
+          <Controller
+            control={control}
+            name="playerUsernames"
+            render={(
+              { onChange, onBlur, value, name, ref },
+              { invalid, isTouched, isDirty }
+            ) => (
+              <>
+                <input
+                  ref={uploadInputRef}
+                  type="file"
+                  onChange={(event) => {
+                    let [file] = event.target.files
+                    if (file) {
+                      let formData = new FormData()
+                      formData.append("file", file, file.name)
+                      setFormData(formData)
+                    } else {
+                      resetFormData()
+                    }
+                  }}
+                  css={css`
+                    display: none;
+                  `}
+                />
+                <Button
+                  type="button"
+                  palette="primary"
+                  size="small"
+                  onClick={(event) => {
+                    uploadInputRef?.current.click()
+                  }}
+                  isLoading={isLoading}
+                  disabled={isLoading}
+                >
+                  <Trans zh="上传文件" en="Upload file" />
+                </Button>
+                <Button
+                  use="a"
+                  href="/download/payments/list.xlsx"
+                  download="players.xlsx"
+                  palette="primary"
+                  size="small"
+                >
+                  <Trans zh="下载文件格式" en="Download Format File" />
+                </Button>
+                {error && <Alert {...error} onClickClose={resetFormData} />}
+              </>
+            )}
+          />
         )}
         {readonly &&
           target === DesignatedPlayers &&
@@ -329,8 +323,12 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
           { onChange, onBlur, value, ref, ...props },
           { invalid, isTouched, isDirty }
         ) => {
-          // let error = errors[name]
-          // let state = error && "danger"
+          useEffect(() => {
+            if (formState.isSubmitting && invalid) {
+              editor?.focus()
+            }
+          }, [formState.isSubmitting])
+
           return (
             <>
               <Global
@@ -342,9 +340,7 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
               />
               <textarea
                 id="content"
-                name="content"
                 ref={contentEditorRef}
-                required={required}
                 disabled={readonly}
                 css={css`
                   display: none;
@@ -355,218 +351,6 @@ const HookFormEditBody = ({ readonly = false, dialog } = {}) => {
           )
         }}
       />
-    </FieldValues>
-  )
-}
-*/
-
-const EditBody = ({ readonly = false, dialog }) => {
-  let {
-    values,
-    setFieldValue,
-    isSubmitting,
-    ...formContext
-  } = useFormikContext()
-
-  let contentEditorRef = useRef()
-  let required = !readonly
-  let locale = useLocale()
-  let language = locale === Locales.zh ? "zh_CN" : ""
-  let [editor, setEditor] = useState()
-  let uploadInputRef = useRef()
-
-  let [formData, setFormData] = useState()
-  let { result, isLoading, error, deleteCache } = useStationLetterUpload(
-    formData
-  )
-
-  const resetFormData = () => {
-    if (uploadInputRef?.current) {
-      uploadInputRef.current.value = ""
-    }
-    deleteCache()
-    setFormData(undefined)
-  }
-
-  useEffect(() => {
-    if (Array.isArray(result?.players) && !error) {
-      setFieldValue(
-        "playerUsernames",
-        result?.players.map((item) => item.username)
-      )
-    }
-  }, [formData, result])
-
-  const setupEditor = () => {
-    if (!contentEditorRef.current) {
-      return
-    }
-
-    let selector = `textarea.${contentEditorRef.current.className}`
-    tinymce.remove(selector)
-
-    let options = {
-      selector,
-      readonly,
-      base_url: "/tinymce",
-      height: readonly ? 280 : 380,
-      plugins:
-        "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
-      menubar: "file edit insert view format table upload",
-      menu: {
-        upload: { title: "Upload", items: "image", icon: "upload" }
-      },
-      toolbar: [
-        "searchreplace | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | undo redo | removeformat superscript subscript code codesample",
-        "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
-      ],
-      toolbar_mode: "sliding",
-      images_upload_url: "/fs/file/uploadFileS3",
-      setup: (editor) => {
-        editor.on("Change", (event) => {
-          let content = event.target.getContent()
-          setFieldValue("content", content)
-        })
-      },
-      resize: false
-    }
-    if (language) {
-      options.language = language
-    }
-
-    tinymce.init(options).then(([instance]) => {
-      setEditor(instance)
-    })
-  }
-
-  useEffect(() => {
-    if (dialog.visible && contentEditorRef.current) {
-      setupEditor()
-    }
-  }, [dialog.visible, contentEditorRef.current])
-
-  return (
-    <FieldValues>
-      <Label name="target" required={required}>
-        <Trans zh="对象" en="Target" />
-      </Label>
-      <Set>
-        <TargetSelectField
-          name="target"
-          required={required}
-          disabled={readonly}
-        />
-        {!readonly && values.target === DesignatedPlayers && (
-          <>
-            <input
-              ref={uploadInputRef}
-              type="file"
-              onChange={(event) => {
-                let [file] = event.target.files
-                if (file) {
-                  let formData = new FormData()
-                  formData.append("file", file, file.name)
-                  setFormData(formData)
-                } else {
-                  resetFormData()
-                }
-              }}
-              css={css`
-                display: none;
-              `}
-            />
-            <Button
-              type="button"
-              palette="primary"
-              size="small"
-              onClick={(event) => {
-                uploadInputRef?.current.click()
-              }}
-              isLoading={isLoading}
-              disabled={isLoading}
-            >
-              <Trans zh="上传文件" en="Upload file" />
-            </Button>
-            <Button
-              use="a"
-              href="/download/payments/list.xlsx"
-              download="players.xlsx"
-              palette="primary"
-              size="small"
-            >
-              <Trans zh="下载文件格式" en="Download Format File" />
-            </Button>
-            {error && <Alert {...error} onClickClose={resetFormData} />}
-          </>
-        )}
-        {readonly &&
-          values.target === DesignatedPlayers &&
-          values.playerUsernames.length > 0 && (
-            <Popover.State>
-              <Popover.Disclosure
-                use={Button}
-                palette="primary"
-                background="primary"
-              >
-                <Trans zh="玩家列表" en="Players" />
-              </Popover.Disclosure>
-              <Popover hasArrow>
-                <List maxHeight="15em" overflow="auto">
-                  {values.playerUsernames.map((name, index) => (
-                    <List.Item key={index}>{name}</List.Item>
-                  ))}
-                </List>
-              </Popover>
-            </Popover.State>
-          )}
-      </Set>
-
-      <Label name="subject" required={required}>
-        <Trans zh="主题" en="Subject" />
-      </Label>
-      <InputField name="subject" required={required} disabled={readonly} />
-
-      <Label name="content" required={required}>
-        <Trans zh="内容" en="Content" />
-      </Label>
-      <Field
-        name="content"
-        validate={(value) => {
-          if (required && !value) {
-            return "Required"
-          }
-          return ""
-        }}
-      >
-        {({ field, form, meta }) => {
-          let state = meta.error && meta.touched && "danger"
-          useEffect(() => {
-            if (isSubmitting && meta.error) {
-              editor?.focus()
-            }
-          }, [isSubmitting])
-          return (
-            <>
-              <Global
-                styles={css`
-                  body .tox-tinymce-aux {
-                    z-index: 19900420;
-                  }
-                `}
-              />
-              <textarea
-                id="content"
-                ref={contentEditorRef}
-                disabled={readonly}
-                css={css`
-                  display: none;
-                `}
-                defaultValue={values?.content ?? ""}
-              ></textarea>
-            </>
-          )
-        }}
-      </Field>
     </FieldValues>
   )
 }
@@ -596,8 +380,8 @@ const ViewDialog = ({ record, dialog, ...props }) => {
   })
 
   return (
-    <FormDialog
-      initialValues={{
+    <HookFormDialog
+      defaultValues={{
         ...record,
         target: record.assignedAllPlayers ? AllPlayers : DesignatedPlayers
       }}
@@ -615,7 +399,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
       }
     >
       <VerifyBody readonly={true} dialog={dialog} />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
@@ -644,6 +428,13 @@ export const VerifyButton = ({ record, onSubmitted, ...props }) => {
 }
 
 const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
+  let defaultValues = {
+    ...record,
+    target: record.assignedAllPlayers ? AllPlayers : DesignatedPlayers,
+    remarks: ""
+  }
+  let formMethods = useForm({ defaultValues })
+
   let [type, setType] = useState()
   let [data, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useVerifyStationLetter({
@@ -653,7 +444,7 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
   })
 
   const clearResult = () => {
-    setSubmit(null)
+    setSubmit(undefined)
   }
 
   let title = useTrans({
@@ -662,31 +453,24 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
   })
 
   return (
-    <FormDialog
-      initialValues={{
-        ...record,
-        target: record.assignedAllPlayers ? AllPlayers : DesignatedPlayers,
-        remarks: ""
-      }}
+    <HookFormDialog
+      formMethods={formMethods}
       onSubmit={setSubmit}
-      clickSubmit={({ submitForm }) => (event) => {
+      onClickSubmit={(event) => {
         setType("pass")
-        submitForm()
       }}
-      addonButtons={({ submitForm }) => {
-        return (
-          <Button
-            onClick={() => {
-              setType("reject")
-              submitForm()
-            }}
-            palette="danger"
-            variant="outlined"
-          >
-            <Trans zh="拒绝" en="Reject" />
-          </Button>
-        )
-      }}
+      addonButtons={
+        <Button
+          type="submit"
+          onClick={() => {
+            setType("reject")
+          }}
+          palette="danger"
+          variant="outlined"
+        >
+          <Trans zh="拒绝" en="Reject" />
+        </Button>
+      }
       isLoading={isLoading}
       result={result}
       error={error}
@@ -698,7 +482,7 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
       dialog={dialog}
     >
       <VerifyBody dialog={dialog} readonly={false} />
-    </FormDialog>
+    </HookFormDialog>
   )
 }
 
@@ -711,9 +495,8 @@ const VerifyBody = ({ readonly = false, dialog }) => {
         <Label name="remarks">
           <Trans zh="备注" en="Remarks" />
         </Label>
-        <Field
+        <Textarea
           name="remarks"
-          component={TextareaField.Formik}
           disabled={readonly}
           css={css`
             & textarea {

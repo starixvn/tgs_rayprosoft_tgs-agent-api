@@ -97,7 +97,9 @@ export const MerchantIdSelect = ({
   let {
     data: licenseeData,
     isLoading: isLicenseeDataLoading
-  } = useLicenseeList(isLicenseeActive ? { showAll: true } : undefined)
+  } = useLicenseeList(
+    isLicenseeActive ? { showAll: true, resellerId } : undefined
+  )
   let licenseeOptions =
     licenseeData?.items.map((licensee) => ({
       label: licensee.code,
@@ -108,7 +110,7 @@ export const MerchantIdSelect = ({
   let brandId = watch(brandIdName)
   let brandError = errors[brandIdName]
   let { data: brandData, isLoading: isBrandDataLoading } = useBrandList(
-    isBrandActive ? { showAll: true } : undefined
+    isBrandActive ? { showAll: true, licenseeId } : undefined
   )
   let brandOptions =
     brandData?.items.map((brand) => ({

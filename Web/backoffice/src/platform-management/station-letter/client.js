@@ -18,7 +18,7 @@ export const useStationLetterList = (searchParams = {}) => {
 }
 
 export const useVerifyStationLetter = ({ id, type, data } = {}) => {
-  let url = `${API}/${id}/${type}`
+  let url = id && type ? `${API}/${id}/${type}` : undefined
   return usePutData(url, data)
 }
 

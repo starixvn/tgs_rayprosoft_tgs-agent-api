@@ -22,7 +22,8 @@ import {
   useIsDisplayMenuByRoute,
   useUserBrandId,
   useUserLicenseeId,
-  useUserResellerId
+  useUserResellerId,
+  useUserRoleType
 } from "../../user/context"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
@@ -40,6 +41,7 @@ import HookFormInputField from "../../input/InputField"
 import HookFormDateInput from "../../date/DateInput"
 import { useForm, useFormContext } from "react-hook-form"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { nextRoleType } from "../../system/roles/type"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -233,7 +235,10 @@ const EditDialog = ({
 }
 
 const EditBody = ({ readonly = false, isAdd = false } = {}) => {
+  let resellerId = useUserResellerId()
+  let licenseeId = useUserLicenseeId()
   let brandId = useUserBrandId()
+  let userRoleType = useUserRoleType()
 
   const { register, getValues } = useFormContext()
   let minDate = readonly ? undefined : getValues("from")
@@ -248,7 +253,13 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
           <Trans zh="品牌" en="Brand" />
         </Label>
       )}
-      {isAdd && !brandId && <MerchantIdSelect />}
+      {isAdd && !brandId && (
+        <MerchantIdSelect
+          start={nextRoleType(userRoleType)}
+          resellerId={resellerId}
+          licenseeId={licenseeId}
+        />
+      )}
 
       <Label name="subject" required={required}>
         <Trans zh="主题" en="Subject" />

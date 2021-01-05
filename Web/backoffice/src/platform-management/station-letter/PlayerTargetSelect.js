@@ -10,7 +10,6 @@ import {
   Input,
   Stack
 } from "bumbag"
-import _Field from "../../select/Field"
 import { useTrans } from "../../i18n"
 import { useFormContext } from "react-hook-form"
 
@@ -31,7 +30,7 @@ export const Option = {
   DesignatedPlayers
 }
 
-export const TargetSelect = ({
+export const PlayerTargetSelect = ({
   name = "target",
   selectRef,
   required,
@@ -67,30 +66,4 @@ export const TargetSelect = ({
   )
 }
 
-const Select = ({ required, ...props }) => {
-  let options = [
-    {
-      label: useTrans(AllPlayersTrans),
-      value: AllPlayers
-    },
-    {
-      label: useTrans(DesignatedPlayersTrans),
-      value: DesignatedPlayers
-    }
-  ]
-  if (!required) {
-    options = [{ label: "", value: "" }, ...options]
-  }
-
-  return <_Select options={options} {...props} />
-}
-
-export const Field = ({ name, required, disabled, ...props }) => {
-  return (
-    <_Field name={name} required={required}>
-      {(props) => <Select required={required} disabled={disabled} {...props} />}
-    </_Field>
-  )
-}
-
-export default Field
+export default PlayerTargetSelect
