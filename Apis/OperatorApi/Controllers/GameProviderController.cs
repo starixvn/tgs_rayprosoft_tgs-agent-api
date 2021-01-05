@@ -9,7 +9,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     public class GameProviderController : ControllerBase
     {
@@ -23,10 +22,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         ///     Get game provider list
         /// </summary>
-        [HttpPost]
+        [HttpGet]
         [Route("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public Task<GetGameProvidersResponse> GetGameProvidersAsync(GetGameProvidersRequest request) =>
+        public Task<GetGameProvidersResponse> GetGameProvidersAsync([FromQuery] GetGameProvidersRequest request) =>
             _mediator.Send(request);
     }
 }

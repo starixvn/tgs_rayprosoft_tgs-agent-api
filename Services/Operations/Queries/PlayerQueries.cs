@@ -21,6 +21,8 @@ namespace TGS.Services.Operations.Queries
         Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(string playerCode,
             params LoginStatus[] statuses);
 
+        Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
+
         Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
 
         Task<Player> GetPlayerByCodeAsync(string playerCode);
@@ -28,6 +30,7 @@ namespace TGS.Services.Operations.Queries
         Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
 
         Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
+        
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -79,6 +82,15 @@ namespace TGS.Services.Operations.Queries
 
             return results.ToArray();
         }
+
+        Task<CachedPlayerLoginRecord> IPlayerQueries.GetPlayerLoginRecordAsync(Guid loginRecordId) =>
+            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
+                .Select(r => new CachedPlayerLoginRecord
+                {
+                    PlayerCode = r.PlayerCode,
+                    PlatformType = r.PlatformType,
+                    ExpiredOn = r.ExpiredOn
+                }).FirstOrDefaultAsync();
 
         Task<string> IPlayerQueries.GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
             _repository.Players

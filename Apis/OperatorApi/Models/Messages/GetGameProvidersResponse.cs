@@ -7,25 +7,28 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record GetGameProvidersResponse : TgsResponse
     {
-        [JsonPropertyName("gameproviders")]
+        [JsonPropertyName("data")]
         public GameProviderModel[] GameProviders { get; init; }
+    }
 
-        public record GameProviderModel
-        {
-            [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-            public Guid Id { get; init; }
+    public record GameProviderModel
+    {
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
+        public Guid Id { get; init; }
 
-            [JsonPropertyName("code")]
-            public string Code { get; init; }
+        [JsonPropertyName("code")]
+        public string Code { get; init; }
 
-            [JsonPropertyName("name")]
-            public string Name { get; init; }
+        [JsonPropertyName("name")]
+        public string Name { get; init; }
 
-            [JsonPropertyName("description")]
-            public string Description { get; init; }
+        [JsonPropertyName("description")]
+        public string Description { get; init; }
 
-            [JsonPropertyName("status")]
-            public Status Status { get; init; }
-        }
+        [JsonPropertyName("status")]
+        public Status Status { get; init; }
+
+        [JsonPropertyName("gametypes")]
+        public GameType[] GameTypes { get; init; }
     }
 }

@@ -66,7 +66,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, data);
 
             var playerCode = data.PlayerCode;
-            await expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, data.PlatformType);
+            await expirationValidator.ThrowIfPlayerLoginExpiredAsync(data.LoginRecordId, playerCode);
 
             if (!attribute.NeedAuthorize)
             {

@@ -1,21 +1,30 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
+    [BindProperties(SupportsGet = true)]
     public record GetGamesRequest : IRequest<GetGamesResponse>
     {
-        [JsonPropertyName("gpcode")]
+        [Required]
+        [BindProperty(Name = "gpcode")]
         public string GameProviderCode { get; init; }
 
-        [JsonPropertyName("platformtype")]
+        [Required]
+        [BindProperty(Name = "platformtype")]
         public PlatformType PlatformType { get; init; }
 
-        [JsonPropertyName("language")]
+        [Required]
+        [BindProperty(Name = "language")]
         public string LanguageCode { get; init; }
 
-        [JsonPropertyName("currency")]
+        [Required]
+        [BindProperty(Name = "currency")]
         public string CurrencyCode { get; init; }
+
+        [BindProperty(Name = "gametypes")]
+        public GameType[] Types { get; init; }
     }
 }

@@ -133,31 +133,31 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     FeePercentage = 50,
                     LowestFee = 50,
                     HighestFee = 500,
-                    PaymentPlayerList = new[]
+                    BrandPaymentPlayers = new[]
                     {
-                        new PaymentPlayerList
+                        new BrandPaymentPlayer
                         {
                             PlayerCode = _players[0].PlayerCode,
                             ListType = PlayerListType.White,
-                            PaymentId = paymentId
+                            BrandPaymentId = paymentId
                         },
-                        new PaymentPlayerList
+                        new BrandPaymentPlayer
                         {
                             PlayerCode = _players[1].PlayerCode,
                             ListType = PlayerListType.Black,
-                            PaymentId = paymentId
+                            BrandPaymentId = paymentId
                         }
                     },
                     VipLevels = new[]
                     {
-                        new PaymentVipLevel
+                        new BrandPaymentVipLevel
                         {
-                            PaymentId = paymentId,
+                            BrandPaymentId = paymentId,
                             VipLevelId = _vipLevels[0].Id
                         },
-                        new PaymentVipLevel
+                        new BrandPaymentVipLevel
                         {
-                            PaymentId = paymentId,
+                            BrandPaymentId = paymentId,
                             VipLevelId = _vipLevels[1].Id
                         }
                     },
@@ -169,7 +169,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
             await _repository.BulkInsertAsync(brandPayments);
             await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.VipLevels).ToArray());
-            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.PaymentPlayerList).ToArray());
+            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.BrandPaymentPlayers).ToArray());
         }
     }
 }

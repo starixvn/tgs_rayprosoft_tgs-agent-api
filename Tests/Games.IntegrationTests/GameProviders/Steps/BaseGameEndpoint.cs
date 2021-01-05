@@ -71,7 +71,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 brandToken = r.Token;
 
                 Set(brandTokenCacheKey, brandToken);
-                Set(brandTokenExpireTimeCacheKey, r.ExpireTime);
+                Set(brandTokenExpireTimeCacheKey, r.ExpiredOn);
             }
 
             var headers = new Dictionary<string, string>

@@ -6,7 +6,10 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record LogoutResponse : TgsResponse
     {
+        /// <summary>
+        ///     unix timestamp to milliseconds
+        /// </summary>
         [JsonPropertyName("updatetime")]
-        public DateTimeOffset UpdateTime { get; init; }
+        public long UpdateTime { get; init; }
     }
 }

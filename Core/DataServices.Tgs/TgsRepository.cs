@@ -56,7 +56,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
         DbSet<PlayerBank> PlayerBanks { get; set; }
         DbSet<VipLevel> VipLevels { get; set; }
-        DbSet<PlayerAuditLog> AuditLogs { get; set; }
+        DbSet<PlayerAuditLog> PlayerAuditLogs { get; set; }
         DbSet<Announcement> Announcements { get; set; }
         DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
         DbSet<StationLetter> StationLetters { get; set; }
@@ -64,9 +64,9 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PaymentMethod> PaymentMethods { get; set; }
         DbSet<PaymentChannel> PaymentChannels { get; set; }
         DbSet<BrandPayment> BrandPayments { get; set; }
-        DbSet<PaymentPlayerList> PaymentPlayerList { get; set; }
-        DbSet<PaymentVipLevel> PaymentVipLevels { get; set; }
-        DbSet<PaymentAuditLog> PaymentAuditLogs { get; set; }
+        DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
         DbSet<User> Users { get; set; }
         DbSet<Role> Roles { get; set; }
         DbSet<Department> Departments { get; set; }
@@ -116,7 +116,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
         DbSet<PlayerBank> ITgsRepository.PlayerBanks { get; set; }
         DbSet<VipLevel> ITgsRepository.VipLevels { get; set; }
-        DbSet<PlayerAuditLog> ITgsRepository.AuditLogs { get; set; }
+        DbSet<PlayerAuditLog> ITgsRepository.PlayerAuditLogs { get; set; }
         DbSet<Announcement> ITgsRepository.Announcements { get; set; }
         DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
         DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
@@ -124,9 +124,9 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
         DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
         DbSet<BrandPayment> ITgsRepository.BrandPayments { get; set; }
-        DbSet<PaymentPlayerList> ITgsRepository.PaymentPlayerList { get; set; }
-        DbSet<PaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
-        DbSet<PaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
+        DbSet<BrandPaymentPlayer> ITgsRepository.PaymentPlayerList { get; set; }
+        DbSet<BrandPaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
+        DbSet<BrandPaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
         DbSet<Brand> ITgsRepository.Brands { get; set; }
         DbSet<BrandCurrency> ITgsRepository.BrandCurrencies { get; set; }
         DbSet<BrandLanguage> ITgsRepository.BrandLanguages { get; set; }
@@ -236,7 +236,7 @@ namespace TGS.Core.DataServices.Tgs
             modelBuilder.ApplyConfiguration(new PlayerLoginRecordMap());
             modelBuilder.ApplyConfiguration(new PlayerBankMap());
             modelBuilder.ApplyConfiguration(new VipLevelMap());
-            modelBuilder.ApplyConfiguration(new AuditLogMap());
+            modelBuilder.ApplyConfiguration(new PlayerAuditLogMap());
 
             modelBuilder.ApplyConfiguration(new AnnouncementMap());
             modelBuilder.ApplyConfiguration(new StationLetterPlayerMap());
@@ -246,9 +246,9 @@ namespace TGS.Core.DataServices.Tgs
             modelBuilder.ApplyConfiguration(new PaymentMap());
             modelBuilder.ApplyConfiguration(new PaymentMethodMap());
             modelBuilder.ApplyConfiguration(new PaymentChannelMap());
-            modelBuilder.ApplyConfiguration(new PaymentPlayerListMap());
-            modelBuilder.ApplyConfiguration(new PaymentVipLevelMap());
-            modelBuilder.ApplyConfiguration(new PaymentAuditLogMap());
+            modelBuilder.ApplyConfiguration(new BrandPaymentPlayerMap());
+            modelBuilder.ApplyConfiguration(new BrandPaymentVipLevelMap());
+            modelBuilder.ApplyConfiguration(new BrandPaymentAuditLogMap());
 
             modelBuilder.ApplyConfiguration(new UserMap());
             modelBuilder.ApplyConfiguration(new RoleMap());

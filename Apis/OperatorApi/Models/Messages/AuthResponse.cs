@@ -8,7 +8,10 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("token")]
         public string Token { get; init; }
 
+        /// <summary>
+        ///     unix timestamp to milliseconds
+        /// </summary>
         [JsonPropertyName("expires")]
-        public long ExpireTime { get; init; }
+        public long ExpiredOn { get; init; }
     }
 }

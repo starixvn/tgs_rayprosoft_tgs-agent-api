@@ -98,6 +98,7 @@ namespace TGS.Apis.GlobalApi.Handlers
 
             var walletId = GuidExtensions.NewSequentialGuid();
             var (salt, password) = _passwordHandler.GenerateCredential(pwd);
+            var (withdrawSalt, withdrawPassword) = _passwordHandler.GenerateCredential(pwd);
             var username = $"{prefix}{num:00}_{currencyCode.ToLower()}";
             var playerCode = PlayerCodeGenerator.NewId();
 
@@ -109,6 +110,8 @@ namespace TGS.Apis.GlobalApi.Handlers
                 BrandId = brandId,
                 Salt = salt,
                 Password = password,
+                WithdrawSalt = withdrawSalt,
+                WithdrawPassword = withdrawPassword,
                 BetLimitId = betLimit,
                 InvitationCode = InvitationCodeGenerator.NewId(),
                 Status = PlayerStatus.Enabled,

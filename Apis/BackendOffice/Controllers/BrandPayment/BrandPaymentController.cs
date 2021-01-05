@@ -21,7 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
     [ApiController]
     public partial class BrandPaymentController : BaseContextController
     {
-        private readonly ITgsQueries<PaymentAuditLog> _auditLogQueries;
+        private readonly ITgsQueries<BrandPaymentAuditLog> _auditLogQueries;
         private readonly IBrandPaymentService _brandPaymentService;
         private readonly ITgsQueries<Player> _playerQueries;
         private readonly IUploadService _uploadService;
@@ -30,7 +30,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             ITgsQueries<Player> playerQueries,
             IUploadService uploadService,
             IBrandPaymentService brandPaymentService,
-            ITgsQueries<PaymentAuditLog> auditLogQueries)
+            ITgsQueries<BrandPaymentAuditLog> auditLogQueries)
         {
             _uploadService = uploadService;
             _playerQueries = playerQueries;
@@ -43,7 +43,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request)
         {
             return _brandPaymentService.GetPaymentsAsync()
-                .Include(p => p.PaymentPlayerList).ThenInclude(pp => pp.Player)
+                .Include(p => p.BrandPaymentPlayers).ThenInclude(pp => pp.Player)
                 .Include(p => p.VipLevels)
                 .Where(request.TransferType, p => p.TransferType == request.TransferType)
                 .Where(request.PaymentStatus, p => p.PaymentStatus == request.PaymentStatus)
@@ -94,7 +94,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     .Include(pm => pm.Payment)
                     .Include(pm => pm.PaymentMethod)
                     .Include(pm => pm.PaymentChannel)
-                    .Include(pm => pm.PaymentPlayerList)
+                    .Include(pm => pm.BrandPaymentPlayers)
                     .ThenInclude(pp => pp.Player)
                     .Include(pm => pm.VipLevels)
                     .ThenInclude(pp => pp.VipLevel)
@@ -126,12 +126,12 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     DepositedAmountUnlimited = brandPayment.DepositedAmountUnlimited,
                     DepositedAmountMin = brandPayment.DepositedAmountMin,
                     DepositedAmountMax = brandPayment.DepositedAmountMax,
-                    DesignatedUsers = brandPayment.PaymentPlayerList.Count > 0,
+                    DesignatedUsers = brandPayment.BrandPaymentPlayers.Count > 0,
                     PaymentStatus = brandPayment.PaymentStatus,
                     Reason = brandPayment.Reason,
-                    Whitelist = brandPayment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.White)
+                    Whitelist = brandPayment.BrandPaymentPlayers.Where(p => p.ListType == PlayerListType.White)
                         .Select(p => p.Player.Username).ToArray(),
-                    Blacklist = brandPayment.PaymentPlayerList.Where(p => p.ListType == PlayerListType.Black)
+                    Blacklist = brandPayment.BrandPaymentPlayers.Where(p => p.ListType == PlayerListType.Black)
                         .Select(p => p.Player.Username).ToArray(),
                     VipLevelIds = brandPayment.VipLevels.Select(p => p.VipLevelId).ToArray(),
                     CreatedByUsername = brandPayment.CreatedByUsername,
@@ -286,7 +286,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         public async Task<GetDesignatedUsersResponse> GetDesignatedUsersAsync(Guid id)
         {
             var brandPayment = await _brandPaymentService.GetPaymentAsync(x => x.Id == id,
-                x => x.Include(p => p.PaymentPlayerList)
+                x => x.Include(p => p.BrandPaymentPlayers)
                     .ThenInclude(p => p.Player)
                     .Include(p => p.VipLevels).AsNoTracking());
 
@@ -307,11 +307,11 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         private static string[] GetDesignatedUsersAsync(Core.DataServices.Tgs.Models.BrandPayment brandPayment)
         {
             var vipLevelIds = brandPayment.VipLevels.Select(x => x.VipLevelId).ToArray();
-            var playerCodes = brandPayment.PaymentPlayerList.Where(x => x.ListType == PlayerListType.White)
+            var playerCodes = brandPayment.BrandPaymentPlayers.Where(x => x.ListType == PlayerListType.White)
                 .Select(p => p.PlayerCode).ToArray();
             var isAll = brandPayment.PlayerListCondition == PlayerListCondition.All;
 
-            return brandPayment.PaymentPlayerList
+            return brandPayment.BrandPaymentPlayers
                 .Where(x => playerCodes.Contains(x.PlayerCode))
                 .Where(x =>
                     x.Player.AccumulatedDeposit >= brandPayment.DepositedAmountMin &&

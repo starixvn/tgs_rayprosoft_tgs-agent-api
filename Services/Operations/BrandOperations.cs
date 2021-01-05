@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
@@ -52,6 +53,8 @@ namespace TGS.Services.Operations
         Task<GameStatus?> GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, int gameId);
 
         Task<int> GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode);
+
+        Task<CachedAnnouncement[]> GetEffectiveAnnouncementsAsync(Guid brandId);
     }
 
     public sealed class BrandOperations : IBrandOperations
@@ -245,6 +248,12 @@ namespace TGS.Services.Operations
             return betLimitId.Value;
         }
 
+        Task<CachedAnnouncement[]> IBrandOperations.GetEffectiveAnnouncementsAsync(Guid brandId) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Announcements, brandId, TimeSpan.FromMinutes(10),
+                () => _brandQueries.GetEffectiveAnnouncementsAsync(brandId));
+
+        #region Private Methods
+
         private async Task<CachedBrand> GetCachedBrandOrNullAsync(Guid brandId)
         {
             try
@@ -388,5 +397,7 @@ namespace TGS.Services.Operations
             public const string ClientId = "clientId";
             public const string SecretKey = "secretKey";
         }
+
+        #endregion
     }
 }

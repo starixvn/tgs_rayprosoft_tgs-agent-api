@@ -69,18 +69,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             var playerList = whitelist.Union(blacklist);
 
-            payment.PaymentPlayerList = new HashSet<PaymentPlayerList>(playerList);
+            payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
             var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id))
                 .ToArrayAsync();
-            var vipLevels = vips.Select(vip => new PaymentVipLevel
+            var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                PaymentId = paymentId,
+                BrandPaymentId = paymentId,
                 VipLevelId = vip.Id,
                 VipLevel = vip
             }).ToArray();
 
-            payment.VipLevels = new HashSet<PaymentVipLevel>(vipLevels);
+            payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
 
             await _repository.BrandPayments.AddAsync(payment);
             await _repository.SaveChangesAsync();
@@ -120,7 +120,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.UpdatedOn = DateTimeOffset.Now;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            _repository.PaymentPlayerList.RemoveRange(payment.PaymentPlayerList);
+            _repository.PaymentPlayerList.RemoveRange(payment.BrandPaymentPlayers);
             _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
 
             await _repository.SaveChangesAsync();
@@ -129,17 +129,17 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist, PlayerListType.Black);
             var playerList = whitelist.Union(blacklist).ToArray();
 
-            payment.PaymentPlayerList = new HashSet<PaymentPlayerList>(playerList);
+            payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
             var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
-            var vipLevels = vips.Select(vip => new PaymentVipLevel
+            var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                PaymentId = payment.Id,
+                BrandPaymentId = payment.Id,
                 VipLevelId = vip.Id,
                 VipLevel = vip
             }).ToArray();
 
-            payment.VipLevels = new HashSet<PaymentVipLevel>(vipLevels);
+            payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
 
             _repository.Entry(payment).State = EntityState.Modified;
 
@@ -212,27 +212,27 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        private async Task<PaymentPlayerList[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
+        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
             PlayerListType playerListType)
         {
             var playerWhitelist = list != null
                 ? await _repository.Players.Where(x => list.Contains(x.Username))
                     .ToArrayAsync()
                 : Array.Empty<Player>();
-            return playerWhitelist.Select(player => new PaymentPlayerList
+            return playerWhitelist.Select(player => new BrandPaymentPlayer
             {
                 ListType = playerListType,
-                PaymentId = paymentId,
+                BrandPaymentId = paymentId,
                 PlayerCode = player.PlayerCode,
                 Player = player
             }).ToArray();
         }
 
-        private PaymentAuditLog GeneratePaymentAuditLog(BrandPayment payment, BrandPayment beforePayment) =>
+        private BrandPaymentAuditLog GeneratePaymentAuditLog(BrandPayment payment, BrandPayment beforePayment) =>
             new()
             {
                 Id = Guid.NewGuid(),
-                PaymentId = payment.Id,
+                BrandPaymentId = payment.Id,
                 BeforeChannelName = beforePayment.ChannelName,
                 AfterChannelName = payment.ChannelName,
                 BeforePaymentStatus = beforePayment.PaymentStatus,

@@ -52,7 +52,7 @@ namespace TGS.Services.Operations
                 return value.HasValue
                     ? _json.DeserializeFromString<Dictionary<string, Dictionary<string, string>>>(
                         value)
-                    : new Dictionary<string, Dictionary<string, string>>();
+                    : new();
             }
 
             var r = await _localizationStringQueries.GetLocalizationByGameProviderIdAsync(gameProviderId);

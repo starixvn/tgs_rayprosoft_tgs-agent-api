@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Generics;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
@@ -39,6 +40,8 @@ namespace TGS.Services.Operations.Queries
         Task<CachedBrandGameProvider[]> GetBrandGameProvidersAsync(Guid brandId);
 
         Task<int?> GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode);
+
+        Task<CachedAnnouncement[]> GetEffectiveAnnouncementsAsync(Guid brandId);
     }
 
     public sealed class BrandQueries : IBrandQueries
@@ -183,5 +186,23 @@ namespace TGS.Services.Operations.Queries
             _repository.BrandBetLimits.Where(bl =>
                     bl.BrandId == brandId && bl.BetLimit.CurrencyCode == currencyCode && bl.IsDefault)
                 .Select(bl => (int?) bl.BetLimitId).FirstOrDefaultAsync();
+
+        Task<CachedAnnouncement[]> IBrandQueries.GetEffectiveAnnouncementsAsync(Guid brandId)
+        {
+            var now = DateTimeOffset.UtcNow;
+
+            return _repository.Announcements
+                .Where(a => a.BrandId == brandId &&
+                    a.Status == AnnounceStatus.Effective &&
+                    now >= a.From && now < a.To)
+                .Select(a => new CachedAnnouncement
+                {
+                    Id = a.Id,
+                    Subject = a.Subject,
+                    Content = a.Content,
+                    From = a.From,
+                    To = a.To
+                }).ToArrayAsync();
+        }
     }
 }

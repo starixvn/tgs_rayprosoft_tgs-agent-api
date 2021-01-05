@@ -104,7 +104,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             return new()
             {
                 PlayerToken = token,
-                LoginTime = createdOn
+                LoginTime = createdOn.ToUnixTimeMilliseconds()
             };
         }
 

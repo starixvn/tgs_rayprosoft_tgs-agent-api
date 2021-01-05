@@ -14,7 +14,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         [Description("Get a payment's audit log")]
         public async Task<GetBrandPaymentAuditLogResponse> GetAuditLogAsync(Guid paymentId)
         {
-            var auditLogs = await _auditLogQueries.GetQueries().Where(q => q.PaymentId == paymentId).ToArrayAsync();
+            var auditLogs = await _auditLogQueries.GetQueries().Where(q => q.BrandPaymentId == paymentId).ToArrayAsync();
 
             return new GetBrandPaymentAuditLogResponse
             {
@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 AuditLogs = auditLogs.Select(x => new PaymentAuditLogModel
                 {
                     Id = x.Id,
-                    PaymentId = x.PaymentId,
+                    PaymentId = x.BrandPaymentId,
                     BeforeChannelName = x.BeforeChannelName,
                     AfterChannelName = x.AfterChannelName,
                     BeforePaymentStatus = x.BeforePaymentStatus,

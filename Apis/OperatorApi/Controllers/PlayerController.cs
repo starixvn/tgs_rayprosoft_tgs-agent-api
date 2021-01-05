@@ -10,85 +10,87 @@ namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     public class PlayerController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public PlayerController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         /// <summary>
-        /// Check username exists
+        ///     Check username exists
         /// </summary>
-        [HttpPost]
+        [HttpGet]
         [Route("checkUsername")]
-        public Task<CheckUsernameResponse> CheckUsernameAsync(CheckUsernameRequest request) => 
+        public Task<CheckUsernameResponse> CheckUsernameAsync([FromQuery] CheckUsernameRequest request) =>
             _mediator.Send(request);
-        
+
         /// <summary>
-        /// Create a player
+        ///     Create a player
         /// </summary>
         [HttpPost]
         [Route("create")]
-        public Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request) => 
+        [Consumes(MediaTypeNames.Application.Json)]
+        public Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request) =>
             _mediator.Send(request);
 
         /// <summary>
-        /// Player login
+        ///     Player login
         /// </summary>
         [HttpPost]
         [Route("login")]
-        public Task<LoginResponse> LoginAsync(LoginRequest request) => 
+        [Consumes(MediaTypeNames.Application.Json)]
+        public Task<LoginResponse> LoginAsync(LoginRequest request) =>
             _mediator.Send(request);
 
         /// <summary>
-        /// Player logout, player login is needed when use this
+        ///     Player logout, player login is needed when use this
         /// </summary>
-        [HttpPost]
+        [HttpDelete]
         [Route("logout")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<LogoutResponse> LogoutAsync(LogoutRequest request) => 
-            _mediator.Send(request);
+        public Task<LogoutResponse> LogoutAsync() =>
+            _mediator.Send(new LogoutRequest());
 
         /// <summary>
-        /// Get player information
+        ///     Get player information
         /// </summary>
         [HttpGet]
         [Route("info")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetPlayerResponse> GetPlayerAsync(GetPlayerRequest request) => 
-            _mediator.Send(request);
+        public Task<GetPlayerResponse> GetPlayerAsync() =>
+            _mediator.Send(new GetPlayerRequest());
 
         /// <summary>
-        /// Player forget password
+        ///     Player forget password
         /// </summary>
         [HttpPost]
         [Route("forgotPassword")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public Task ForgotPasswordAsync(ForgotPasswordRequest request)
-        {
-            throw new NotImplementedException();
-        }
+        public Task ForgotPasswordAsync(ForgotPasswordRequest request) => throw new NotImplementedException();
 
         /// <summary>
-        /// Update player information, player login is needed when use this
+        ///     Update player information, player login is needed when use this
         /// </summary>
         [HttpPut]
         [Route("update")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) => 
+        [Consumes(MediaTypeNames.Application.Json)]
+        public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) =>
             _mediator.Send(request);
 
         /// <summary>
-        /// Player change password, player login is needed when use this
+        ///     Player changes password, player login is needed when use this
         /// </summary>
         [HttpPut]
         [Route("changePassword")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request) => 
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request) =>
             _mediator.Send(request);
     }
 }

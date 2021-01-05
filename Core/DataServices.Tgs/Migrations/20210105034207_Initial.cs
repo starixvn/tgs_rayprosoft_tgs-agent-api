@@ -11,6 +11,45 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
+                name: "BrandPaymentAuditLogs",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandPaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BeforeChannelName = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    AfterChannelName = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    BeforePaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    AfterPaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    BeforeTransferLimitFrom = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    AfterTransferLimitFrom = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    BeforeTransferLimitTo = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    AfterTransferLimitTo = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    BeforePlayerListCondition = table.Column<int>(type: "int", nullable: false),
+                    AfterPlayerListCondition = table.Column<int>(type: "int", nullable: false),
+                    BeforeAllPlayers = table.Column<bool>(type: "bit", nullable: false),
+                    AfterAllPlayers = table.Column<bool>(type: "bit", nullable: false),
+                    BeforeIdentityAuthentication = table.Column<bool>(type: "bit", nullable: false),
+                    AfterIdentityAuthentication = table.Column<bool>(type: "bit", nullable: false),
+                    BeforePhoneAuthentication = table.Column<bool>(type: "bit", nullable: false),
+                    AfterPhoneAuthentication = table.Column<bool>(type: "bit", nullable: false),
+                    BeforeDepositedAmountUnlimited = table.Column<bool>(type: "bit", nullable: false),
+                    AfterDepositedAmountUnlimited = table.Column<bool>(type: "bit", nullable: false),
+                    BeforeDepositedAmountMin = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    AfterDepositedAmountMin = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    BeforeDepositedAmountMax = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    AfterDepositedAmountMax = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(4000)", nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
+                    Operation = table.Column<short>(type: "smallint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandPaymentAuditLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Currencies",
                 schema: "dbo",
                 columns: table => new
@@ -91,45 +130,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Languages", x => x.CultureCode);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PaymentAuditLogs",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BeforeChannelName = table.Column<string>(type: "nvarchar(50)", nullable: true),
-                    AfterChannelName = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    BeforePaymentStatus = table.Column<int>(type: "int", nullable: false),
-                    AfterPaymentStatus = table.Column<int>(type: "int", nullable: false),
-                    BeforeTransferLimitFrom = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    AfterTransferLimitFrom = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    BeforeTransferLimitTo = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    AfterTransferLimitTo = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    BeforePlayerListCondition = table.Column<int>(type: "int", nullable: false),
-                    AfterPlayerListCondition = table.Column<int>(type: "int", nullable: false),
-                    BeforeAllPlayers = table.Column<bool>(type: "bit", nullable: false),
-                    AfterAllPlayers = table.Column<bool>(type: "bit", nullable: false),
-                    BeforeIdentityAuthentication = table.Column<bool>(type: "bit", nullable: false),
-                    AfterIdentityAuthentication = table.Column<bool>(type: "bit", nullable: false),
-                    BeforePhoneAuthentication = table.Column<bool>(type: "bit", nullable: false),
-                    AfterPhoneAuthentication = table.Column<bool>(type: "bit", nullable: false),
-                    BeforeDepositedAmountUnlimited = table.Column<bool>(type: "bit", nullable: false),
-                    AfterDepositedAmountUnlimited = table.Column<bool>(type: "bit", nullable: false),
-                    BeforeDepositedAmountMin = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    AfterDepositedAmountMin = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    BeforeDepositedAmountMax = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    AfterDepositedAmountMax = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(4000)", nullable: true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    Operation = table.Column<short>(type: "smallint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentAuditLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -1217,6 +1217,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     InvitationCode = table.Column<string>(type: "nvarchar(6)", nullable: false),
                     Password = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     Salt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    WithdrawPassword = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
+                    WithdrawSalt = table.Column<byte[]>(type: "varbinary(128)", nullable: false),
                     DefaultWalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DefaultWalletCurrencyCode = table.Column<string>(type: "nvarchar(16)", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -1348,25 +1350,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PaymentVipLevels",
+                name: "BrandPaymentVipLevels",
                 schema: "dbo",
                 columns: table => new
                 {
-                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandPaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VipLevelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PaymentVipLevels", x => new { x.PaymentId, x.VipLevelId });
+                    table.PrimaryKey("PK_BrandPaymentVipLevels", x => new { x.BrandPaymentId, x.VipLevelId });
                     table.ForeignKey(
-                        name: "FK_PaymentVipLevels_BrandPayments_PaymentId",
-                        column: x => x.PaymentId,
+                        name: "FK_BrandPaymentVipLevels_BrandPayments_BrandPaymentId",
+                        column: x => x.BrandPaymentId,
                         principalSchema: "dbo",
                         principalTable: "BrandPayments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PaymentVipLevels_VipLevels_VipLevelId",
+                        name: "FK_BrandPaymentVipLevels_VipLevels_VipLevelId",
                         column: x => x.VipLevelId,
                         principalSchema: "dbo",
                         principalTable: "VipLevels",
@@ -1458,26 +1460,26 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PaymentPlayerList",
+                name: "BrandPaymentPlayers",
                 schema: "dbo",
                 columns: table => new
                 {
                     PlayerCode = table.Column<string>(type: "varchar(16)", nullable: false),
-                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrandPaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ListType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PaymentPlayerList", x => new { x.PaymentId, x.PlayerCode });
+                    table.PrimaryKey("PK_BrandPaymentPlayers", x => new { x.BrandPaymentId, x.PlayerCode });
                     table.ForeignKey(
-                        name: "FK_PaymentPlayerList_BrandPayments_PaymentId",
-                        column: x => x.PaymentId,
+                        name: "FK_BrandPaymentPlayers_BrandPayments_BrandPaymentId",
+                        column: x => x.BrandPaymentId,
                         principalSchema: "dbo",
                         principalTable: "BrandPayments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PaymentPlayerList_Players_PlayerCode",
+                        name: "FK_BrandPaymentPlayers_Players_PlayerCode",
                         column: x => x.PlayerCode,
                         principalSchema: "dbo",
                         principalTable: "Players",
@@ -1754,6 +1756,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "CultureCode");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BrandPaymentAuditLogs_BrandPaymentId",
+                schema: "dbo",
+                table: "BrandPaymentAuditLogs",
+                column: "BrandPaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BrandPaymentPlayers_PlayerCode",
+                schema: "dbo",
+                table: "BrandPaymentPlayers",
+                column: "PlayerCode");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BrandPayments_PaymentChannelId",
                 schema: "dbo",
                 table: "BrandPayments",
@@ -1770,6 +1784,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "BrandPayments",
                 column: "PaymentMethodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BrandPaymentVipLevels_VipLevelId",
+                schema: "dbo",
+                table: "BrandPaymentVipLevels",
+                column: "VipLevelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Brands_LicenseeId",
@@ -1851,12 +1871,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "CultureCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PaymentAuditLogs_PaymentId",
-                schema: "dbo",
-                table: "PaymentAuditLogs",
-                column: "PaymentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PaymentChannels_PaymentId",
                 schema: "dbo",
                 table: "PaymentChannels",
@@ -1873,18 +1887,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "PaymentMethods",
                 column: "PaymentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentPlayerList_PlayerCode",
-                schema: "dbo",
-                table: "PaymentPlayerList",
-                column: "PlayerCode");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentVipLevels_VipLevelId",
-                schema: "dbo",
-                table: "PaymentVipLevels",
-                column: "VipLevelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerBanks_PlayerCode",
@@ -2046,6 +2048,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "BrandPaymentAuditLogs",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "BrandPaymentPlayers",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "BrandPaymentVipLevels",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "GameProviderCurrencies",
                 schema: "dbo");
 
@@ -2071,18 +2085,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.DropTable(
                 name: "LocalizedStrings",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "PaymentAuditLogs",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "PaymentPlayerList",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "PaymentVipLevels",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

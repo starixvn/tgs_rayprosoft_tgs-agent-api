@@ -5,7 +5,7 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    public sealed class AuditLogMap : IEntityTypeConfiguration<PlayerAuditLog>
+    public sealed class PlayerAuditLogMap : IEntityTypeConfiguration<PlayerAuditLog>
     {
         void IEntityTypeConfiguration<PlayerAuditLog>.Configure(EntityTypeBuilder<PlayerAuditLog> builder)
         {
@@ -33,7 +33,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.CreatedOn)
                 .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
-
         }
     }
 }

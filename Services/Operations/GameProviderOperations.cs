@@ -102,6 +102,7 @@ namespace TGS.Services.Operations
             Guid gameProviderId, Guid gameProviderConfigurationId)
         {
             var gpc = await GetCachedGameProviderConfigurationOrNullAsync(gameProviderId, gameProviderConfigurationId);
+            
             if (gpc != null)
             {
                 return gpc;
@@ -143,12 +144,10 @@ namespace TGS.Services.Operations
             return gpc.Status;
         }
 
-        Task<Guid> IGameProviderOperations.GetGameProviderIdByCodeAsync(string gameProviderCode)
-        {
-            return _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderIdByCode, gameProviderCode,
+        Task<Guid> IGameProviderOperations.GetGameProviderIdByCodeAsync(string gameProviderCode) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderIdByCode, gameProviderCode,
                 TimeSpan.FromHours(2),
                 () => _gameProviderQueries.GetGameProviderIdByCodeAsync(gameProviderCode));
-        }
 
         async Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId)
         {
@@ -238,7 +237,7 @@ namespace TGS.Services.Operations
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, string externalGameId)
         {
-            var cacheType = RedisCacheType.GamesByExternalId;
+            const RedisCacheType cacheType = RedisCacheType.GamesByExternalId;
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, externalGameId);
             if (value.HasValue)
             {
@@ -258,7 +257,7 @@ namespace TGS.Services.Operations
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType)
         {
-            var cacheType = RedisCacheType.GamesByPlatform;
+            const RedisCacheType cacheType = RedisCacheType.GamesByPlatform;
             var field = $"{platformType}";
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, field);
             if (value.HasValue)
