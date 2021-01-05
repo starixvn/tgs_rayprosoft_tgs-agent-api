@@ -58,7 +58,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
 
             return new()
             {
-                UpdateTime = updatedOn
+                UpdateTime = updatedOn.ToUnixTimeMilliseconds()
             };
         }
     }

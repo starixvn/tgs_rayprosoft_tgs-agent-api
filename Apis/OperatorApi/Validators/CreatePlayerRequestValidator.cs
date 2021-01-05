@@ -22,10 +22,6 @@ namespace TGS.Apis.OperatorApi.Validators
             RuleFor(x => x.Password)
                 .Equal(x => x.ConfirmPassword)
                 .WithMessage(x => $"{GetJsonPropertyName(x, nameof(x.Password))} does not equals to {GetJsonPropertyName(x, nameof(x.ConfirmPassword))}");
-
-            RuleFor(x => x.HasAgent)
-                .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.HasAgent)));
         }
     }
 }

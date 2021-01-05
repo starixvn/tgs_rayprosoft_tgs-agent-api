@@ -27,6 +27,8 @@
         Setting,
         Localization,
         BrandDefaultBetLimit,
-        BrandApiKeys
+        BrandApiKeys,
+        Announcements
+
     }
 }

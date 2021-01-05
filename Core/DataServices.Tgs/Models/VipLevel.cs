@@ -6,6 +6,6 @@ namespace TGS.Core.DataServices.Tgs.Models
     public class VipLevel : BaseEntity<Guid>
     {
         public virtual ICollection<Player> Players { get; set; }
-        public virtual ICollection<PaymentVipLevel> PaymentVipLevels { get; set; }
+        public virtual ICollection<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
     }
 }

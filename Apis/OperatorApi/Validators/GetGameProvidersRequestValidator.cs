@@ -10,15 +10,15 @@ namespace TGS.Apis.OperatorApi.Validators
         {
             RuleFor(x => x.CurrencyCode)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.CurrencyCode)));
+                .WithName(x => GetBindPropertyName(x, nameof(x.CurrencyCode)));
 
             RuleFor(x => x.LanguageCode)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.LanguageCode)));
+                .WithName(x => GetBindPropertyName(x, nameof(x.LanguageCode)));
 
             RuleFor(x => x.PlatformType)
                 .IsInEnum()
-                .WithMessage(x => $"{GetJsonPropertyName(x, nameof(x.PlatformType))} does not exist");
+                .WithMessage(x => $"{GetBindPropertyName(x, nameof(x.PlatformType))} does not exist");
         }
     }
 }

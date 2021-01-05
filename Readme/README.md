@@ -13,8 +13,6 @@ add-migration <MigrationName> -c BetRepository -p  DataServices.Bet -s TgsApi
 #Log
 add-migration <MigrationName> -c LogRepository -p DataServices.Log -s LogApi
 
-#Backend Office
-add-migration <MigrationName> -c BackendOfficeRepository -p BackendOffice -s BackendOffice
 
 
 ## Install Redis using Docker
@@ -26,8 +24,6 @@ docker run --name redis-tgs -p 6379:6379 -d redis
 ##Install Nats using Docker
 
 docker run -d -p 4222:4222 -p 8222:8222 --name nats nats
-
-
 
 
 #Get IP from comtainer

@@ -12,6 +12,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string InvitationCode { get; set; }
         public byte[] Password { get; set; }
         public byte[] Salt { get; set; }
+        public byte[] WithdrawPassword { get; set; }
+        public byte[] WithdrawSalt { get; set; }
         public Guid DefaultWalletId { get; set; }
         public string DefaultWalletCurrencyCode { get; set; }
         public Guid BrandId { get; set; }
@@ -46,7 +48,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<Player> SubPlayers { get; set; }
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
         public virtual ICollection<StationLetterPlayer> Letters { get; set; }
-        public virtual ICollection<PaymentPlayerList> PaymentPlayerList { get; set; }
+        public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
         public virtual ICollection<PlayerSportsBetLimit> SportsBetLimits { get; set;}
     }
 }

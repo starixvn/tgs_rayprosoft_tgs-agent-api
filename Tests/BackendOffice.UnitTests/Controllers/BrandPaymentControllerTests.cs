@@ -37,7 +37,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private BrandPaymentController _controller;
         private readonly Mock<IBrandPaymentService> _paymentServiceMock = new();
 
-        private readonly Mock<ITgsQueries<PaymentAuditLog>> _auditLogQueriesMock =
+        private readonly Mock<ITgsQueries<BrandPaymentAuditLog>> _auditLogQueriesMock =
             new();
 
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock =
@@ -214,8 +214,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<BrandPayment>(u => u
-                .With(s => s.PaymentPlayerList, new PaymentPlayerList[] { })
-                .With(s => s.VipLevels, new PaymentVipLevel[] { }));
+                .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
+                .With(s => s.VipLevels, new BrandPaymentVipLevel[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

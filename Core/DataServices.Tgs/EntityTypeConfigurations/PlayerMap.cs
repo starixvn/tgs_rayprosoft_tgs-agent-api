@@ -45,6 +45,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
+            builder.Property(c => c.WithdrawPassword)
+                .HasColumnType(ColumnTypes.Varbinary(128))
+                .IsRequired();
+
+            builder.Property(c => c.WithdrawSalt)
+                .HasColumnType(ColumnTypes.Varbinary(128))
+                .IsRequired();
+
             builder.Property(c => c.BetLimitId)
                 .HasColumnType(ColumnTypes.Int)
                 .IsRequired();

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TGS.Core.Infrastructures.Extensions
 {
@@ -24,11 +25,11 @@ namespace TGS.Core.Infrastructures.Extensions
                 table.Columns.Add(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
             }
 
-            object[] values = new object[properties.Properties.Length];
+            var values = new object[properties.Properties.Length];
 
             foreach (var item in source)
             {
-                for (int i = 0; i < properties.Properties.Length; i++)
+                for (var i = 0; i < properties.Properties.Length; i++)
                 {
                     var cellValueGetter = properties.ValueGetterByName[properties.Properties[i].Name];
                     values[i] = cellValueGetter(item) ?? DBNull.Value;
@@ -40,10 +41,15 @@ namespace TGS.Core.Infrastructures.Extensions
             return table;
         }
 
+        public static Task<T[]> WhenAll<T>(this IEnumerable<Task<T>> source) =>
+            Task.WhenAll(source);
+
         private static PropertyInfomation GetPropertyInfo(Type type)
         {
             if (EntityProperties.TryGetValue(type, out _))
+            {
                 return EntityProperties[type];
+            }
 
             var properties = type.GetProperties();
 
@@ -55,7 +61,7 @@ namespace TGS.Core.Infrastructures.Extensions
                 property => property.Name,
                 property => property.CreateSetter());
 
-            EntityProperties[type] = new PropertyInfomation(properties, propertyGetter, propertySetter);
+            EntityProperties[type] = new(properties, propertyGetter, propertySetter);
 
             return EntityProperties[type];
         }

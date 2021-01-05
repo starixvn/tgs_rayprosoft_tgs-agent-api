@@ -53,7 +53,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Auth
             return new()
             {
                 Token = token,
-                ExpireTime = new DateTimeOffset(expires).ToUnixTimeMilliseconds()
+                ExpiredOn = new DateTimeOffset(expires).ToUnixTimeMilliseconds()
             };
         }
     }
