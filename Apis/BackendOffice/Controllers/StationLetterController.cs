@@ -65,6 +65,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Select(a => new StationLetterModel
                 {
                     Id = a.Id,
+                    BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
                     Remarks = a.Remarks,
@@ -136,6 +137,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var stationLetter = new StationLetter
             {
+                BrandId = request.BrandId,
                 Id = GuidExtensions.NewSequentialGuid(),
                 Subject = request.Subject,
                 Content = request.Content,

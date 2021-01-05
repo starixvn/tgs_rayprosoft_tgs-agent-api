@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20201229012435_Initial")]
+    [Migration("20210104102113_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -228,16 +228,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("DisplayOrder")
+                    b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("EffectiveBettingPercentage")
+                    b.Property<decimal>("EffectiveBettingPercentage")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("Rebate")
+                    b.Property<bool>("Rebate")
                         .HasColumnType("bit");
 
                     b.Property<int>("Status")
@@ -1804,6 +1804,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<bool>("AssignedAllPlayers")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(4000)");
 
@@ -1834,6 +1837,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
 
                     b.ToTable("StationLetters", "dbo");
                 });
@@ -2736,6 +2741,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("GameProvider");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.StationLetter", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany("StationLetters")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.StationLetterPlayer", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
@@ -2846,6 +2862,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("PlayerLoginRecords");
 
                     b.Navigation("Players");
+
+                    b.Navigation("StationLetters");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGame", b =>

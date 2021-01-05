@@ -7,6 +7,8 @@ namespace TGS.Core.DataServices.Tgs.Models
     public class StationLetter
     {
         public Guid Id { get; set; }
+        public Guid BrandId { get; set; }
+        public virtual Brand Brand { get; set; }
         public string Subject { get; set; }
         public string Content { get; set; }
         public string Remarks { get; set; }

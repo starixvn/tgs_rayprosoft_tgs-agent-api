@@ -53,6 +53,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasMany(c => c.Announcements)
                 .WithOne(c => c.Brand)
                 .HasForeignKey(c => c.BrandId);
+
+            builder.HasMany(c => c.StationLetters)
+                .WithOne(c => c.Brand)
+                .HasForeignKey(c => c.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
