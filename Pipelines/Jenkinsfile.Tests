@@ -1,15 +1,15 @@
 pipeline {
     agent any
 
-	stage('Test') {
-		steps {
-			echo "current build number: ${currentBuild.number}"
-			echo "previous build number: ${currentBuild.previousBuild.getNumber()}"
-			echo "env build number: ${env.Build_Number}"
-		}
-	}
-	
     stages {
+		stage('Test') {
+			steps {
+				echo "current build number: ${currentBuild.number}"
+				echo "previous build number: ${currentBuild.previousBuild.getNumber()}"
+				echo "env build number: ${env.Build_Number}"
+			}
+		}
+		
 		stage('Checkout SCM') {
           steps {
             checkout([
