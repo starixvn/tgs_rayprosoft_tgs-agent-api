@@ -4,6 +4,8 @@ pipeline {
     stages {
 		stage('Test') {
 			steps {
+			    def num = sh 'git log -1 --pretty=%h'
+				echo "num : ${num}"
 				echo "current build number: ${currentBuild.number}"
 				echo "previous build number: ${currentBuild.previousBuild.getNumber()}"
 				echo "env build number: ${env.Build_Number}"
