@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210105085211_Initial")]
+    [Migration("20210107012605_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -713,7 +713,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BrandId")
+                    b.Property<Guid?>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CreatedByUsername")
@@ -727,14 +727,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<Guid>("LicenseeId")
+                    b.Property<Guid?>("LicenseeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid>("ResellerId")
+                    b.Property<Guid?>("ResellerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UpdatedByUsername")
@@ -2376,20 +2376,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brands")
                         .WithMany("Departments")
                         .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensees")
                         .WithMany("Departments")
                         .HasForeignKey("LicenseeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Reseller", "Reseller")
                         .WithMany("Departments")
                         .HasForeignKey("ResellerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Brands");
 
