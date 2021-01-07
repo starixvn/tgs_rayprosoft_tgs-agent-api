@@ -13,7 +13,7 @@ pipeline {
 				script {
 					def now = new Date()
 					TAG = now.format("yyyy-MM-dd_HH-mm")
-
+					echo "Tag: ${TAG}"
 					sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 				}
 			}
