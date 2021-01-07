@@ -35,11 +35,11 @@ pipeline {
 		stage('Checkout SCM') {
 			steps {
 				script {
-					sh 'docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${DATE_TAG} . '
-					sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${DATE_TAG}'
+					sh 'docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG} . '
+					sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG}'
 				
 					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
-						sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${DATE_TAG} --record -n dev"
+						sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG} --record -n dev"
 					}
 				}
 			}
