@@ -42,6 +42,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Select(d => new DepartmentModel
                 {
                     Id = d.Id,
+                    ResellerId = d.ResellerId,
+                    LicenseeId = d.LicenseeId,
+                    BrandId = d.BrandId,
                     Name = d.Name
                 })
                 .CreatePagedResponseAsync(request);
@@ -102,6 +105,9 @@ namespace TGS.Apis.BackendOffice.Controllers
             var department = new Department
             {
                 Id = GuidExtensions.NewSequentialGuid(),
+                ResellerId = request.ResellerId,
+                LicenseeId = request.LicenseeId,
+                BrandId = request.BrandId,
                 Name = request.Name,
                 Description = request.Name,
                 CreatedByUsername = Username,

@@ -61,7 +61,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
         {
             return _queries.GetQueries()
-                .Where(x => x.Id == request.BrandId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
                 .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
                 .Where(BrandId != null, l => l.BrandId == BrandId)
@@ -141,8 +141,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var stationLetter = new StationLetter
             {
-                BrandId = request.BrandId,
                 Id = GuidExtensions.NewSequentialGuid(),
+                BrandId = request.BrandId,
                 Subject = request.Subject,
                 Content = request.Content,
                 AssignedAllPlayers = request.AssignedAllPlayers,
