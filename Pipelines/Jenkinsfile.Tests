@@ -4,13 +4,9 @@ pipeline {
     stages {
 	    stage('Test') {
             steps {
-               echo "current build number: ${currentBuild.number}"
+                echo "current build number: ${currentBuild.number}"
 				echo "previous build number: ${currentBuild.previousBuild.getNumber()}"
-				def causes = currentBuild.rawBuild.getCauses()
-				echo "causes: ${causes}"
-				def rebuildCause0 = currentBuild.rawBuild.getCause(com.sonyericsson.rebuild.RebuildCause)
-				echo "rebuildCause0: ${rebuildCause0}"
-				echo "rebuild up number: ${rebuildCause0.getUpstreamBuild()}"
+				echo "env build number: ${env.Build_Number}"
             }
         }
 	}			
