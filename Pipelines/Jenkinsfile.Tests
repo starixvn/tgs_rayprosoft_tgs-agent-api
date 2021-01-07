@@ -1,13 +1,26 @@
 pipeline {
     agent any
-	
+
     stages {
-	    stage('Test') {
-            steps {
-                echo "current build number: ${currentBuild.number}"
+		stage('Test') {
+			steps {
+				echo "current build number: ${currentBuild.number}"
 				echo "previous build number: ${currentBuild.previousBuild.getNumber()}"
 				echo "env build number: ${env.Build_Number}"
-            }
+			}
+		}
+		
+		stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/develop" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
         }
 	}			
 }
