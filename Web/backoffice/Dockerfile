@@ -4,6 +4,8 @@ WORKDIR /src
 
 # Copy package.json and package-lock.json
 COPY ./Web/backoffice/package* ./
+# Copy snowpack env file
+COPY ./Web/backoffice/snowpack.env ./.env
 
 # Install packages
 RUN npm install
