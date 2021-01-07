@@ -1,10 +1,10 @@
 pipeline {
     agent any
 	
-	script {
-		DATE_TAG = java.time.LocalDate.now()
-		DATETIME_TAG = java.time.LocalDateTime.now()
-	}
+	//script {
+	//	DATE_TAG = java.time.LocalDate.now()
+	//	DATETIME_TAG = java.time.LocalDateTime.now()
+	//}
 	environment {
 		//TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}" OK
 		//TAG = "${sh (script: 'new Date().format(\''YY-MM-dd_HH-mm\'', TimeZone.getTimeZone('UTC'))', returnStdout: true).trim()}"
@@ -25,7 +25,7 @@ pipeline {
 			steps {
 				script {
 					def now = new Date()
-					//TAG = now.format("yyyy-MM-dd_HH-mm")
+					TAG = now.format("yyyy-MM-dd_HH-mm")
 					echo "Tag: ${TAG}"
 					sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 				}
