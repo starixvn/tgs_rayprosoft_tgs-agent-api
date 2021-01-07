@@ -9,9 +9,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Hosting;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.DataServices.Bet.DataInitializers;
 using TGS.Core.DataServices.Bet.EntityTypeConfigurations;
 using TGS.Core.DataServices.Bet.Models;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.DataServices.Bet
 {
@@ -82,6 +85,12 @@ namespace TGS.Core.DataServices.Bet
             if (isMigrate)
             {
                 await Database.MigrateAsync();
+            }
+
+            if (env.IsDevelopmentOrDocker())
+            {
+                IDataInitializer data = new DataInitializer(this);
+                await data.SetInitialDataAsync();
             }
         }
 
