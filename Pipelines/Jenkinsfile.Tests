@@ -2,7 +2,7 @@ pipeline {
     agent any
 	
 	environment {
-		TAG = 'dev'
+		TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}"
 		Component = 'backoffice-site'
 		
 	}
