@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { Stack, Box, Button, Text, Modal } from "bumbag"
-import { useFormikContext } from "formik"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import FormDialog from "../../form/Dialog"
 import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
 import { useAddPaymentVendor, usePaymentVendorList } from "./client"
 import { useAddPaymentChannel } from "../brandpayments/channels/client"
 import { useAddPaymentMethod } from "../brandpayments/methods/client"
-import InputField from "../../input/Field"
 import { Trans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
+import { InputField } from "../../input/Input"
+import FormDialog from "../../form/FormDialog"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -46,7 +45,7 @@ const AddVendorDialog = ({ onSubmitted, dialog, ...props }) => {
   let title = "Create Payment Vendor"
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         code: "",
         name: ""
       }}
@@ -65,18 +64,21 @@ const AddVendorDialog = ({ onSubmitted, dialog, ...props }) => {
 }
 
 const VendorEditBody = ({}) => {
-  const { values, submitForm, resetForm } = useFormikContext()
   return (
     <FieldValues>
       <Label name="name" required>
         <Trans zh="支付厂商" en="Payment Vendor" />
       </Label>
-      <InputField name="name" required />
+      <Box>
+        <InputField name="name" required />
+      </Box>
 
       <Label name="code" required>
         <Trans zh="编码" en="Code" />
       </Label>
-      <InputField name="code" required />
+      <Box>
+        <InputField name="code" required />
+      </Box>
     </FieldValues>
   )
 }
@@ -131,7 +133,7 @@ const AddPaymentMethodDialog = ({
   let title = "Create Payment Method"
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         code: "",
         name: "",
         description: ""
@@ -161,17 +163,23 @@ const PaymentMethodEditBody = ({}) => {
       <Label name="name" required>
         <Trans zh="支付方式" en="Payment Name" />
       </Label>
-      <InputField name="name" required />
+      <Box>
+        <InputField name="name" required />
+      </Box>
 
       <Label name="code" required>
         <Trans zh="支付编码" en="Payment Code" />
       </Label>
-      <InputField name="code" required />
+      <Box>
+        <InputField name="code" required />
+      </Box>
 
       <Label name="description">
         <Trans zh="说明" en="Description" />
       </Label>
-      <InputField name="description" />
+      <Box>
+        <InputField name="description" />
+      </Box>
     </FieldValues>
   )
 }
@@ -211,7 +219,7 @@ const AddChannelDialog = ({ onSubmitted, dialog, ...props }) => {
   let title = "Add Channel"
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         code: "",
         name: "",
         paymentVendorId: "",
@@ -238,12 +246,16 @@ const ChannelEditBOdy = () => {
       <Label name="name" required>
         <Trans zh="支付通道" en="Payment Channel" />
       </Label>
-      <InputField name="name" required />
+      <Box>
+        <InputField name="name" />
+      </Box>
 
       <Label name="code" required>
         <Trans zh="编码" en="Code" />
       </Label>
-      <InputField name="code" required />
+      <Box>
+        <InputField name="code" required />
+      </Box>
 
       <Label name="paymentVendorId" required>
         <Trans zh="支付厂商" en="Payment Vendor" />
@@ -258,7 +270,9 @@ const ChannelEditBOdy = () => {
       <Label name="description">
         <Trans zh="说明" en="Description" />
       </Label>
-      <InputField name="description" />
+      <Box>
+        <InputField name="description" required />
+      </Box>
     </FieldValues>
   )
 }

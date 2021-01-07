@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useLocation, useRouteMatch } from "react-router-dom"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { Stack, Box, Text, Dialog } from "bumbag"
 import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"

@@ -1,22 +1,36 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { Group, Input, Box, Icon, Button, css } from "bumbag"
-import DatePicker from "react-datepicker"
+import { useForm, useFormContext, Controller } from "react-hook-form"
 import "react-datepicker/dist/react-datepicker.css"
 import { useLocale, useTrans } from "../i18n"
 import format, { DateTimeFormat } from "./format"
 import isValid from "date-fns/fp/isValid"
+import DateTimeInput from "./DateTimeInput"
 
-export const RangeInput = ({
+export const DateTimeRangeInput = ({
+  startName = "start",
+  endName = "end"
+  /*
   start,
   end,
-  validate,
+  validate = true
   onChangeStart,
   onChangeEnd
+  */
 }) => {
+  return (
+    <Group>
+      <DateTimeInput name={startName} />
+      <Button isStatic>-</Button>
+      <DateTimeInput name={endName} />
+    </Group>
+  )
+  /*
   let startInputRef = useRef()
   let endInputRef = useRef()
 
   let locale = useLocale()
+
   let validateStart = validate || validate === "start" || validate === "both"
   let validateEnd = validate || validate === "end" || validate === "both"
   return (
@@ -83,6 +97,7 @@ export const RangeInput = ({
       />
     </Group>
   )
+  */
 }
 
-export default RangeInput
+export default DateTimeRangeInput

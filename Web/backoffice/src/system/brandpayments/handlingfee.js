@@ -6,12 +6,12 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import Disclosure from "../../dialog/Disclosure"
-import { ConfirmButtonFooter } from "../../form/Dialog"
+import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { useUpdateBrandPaymentHandingFee } from "./client"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel as Label } from "../../form/Label"
-import HookFormInputField from "../../input/InputField"
-import HookFormDialog from "../../form/HookFormDialog"
+import HookFormInputField from "../../input/Input"
+import FormDialog from "../../form/FormDialog"
 
 const HandlingFeeTrans = {
   zh: "手续费",
@@ -60,7 +60,7 @@ const EditDialog = ({ record = {}, dialog, onSubmitted, ...props }) => {
   }
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={record.paymentFee}
       onSubmit={setSubmit}
       result={result}
@@ -82,7 +82,7 @@ const EditDialog = ({ record = {}, dialog, onSubmitted, ...props }) => {
       dialog={dialog}
     >
       <EditBody record={record} dialog={dialog} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

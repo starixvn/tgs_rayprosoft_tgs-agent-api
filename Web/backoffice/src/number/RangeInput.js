@@ -23,8 +23,7 @@ import {
   useClassName,
   Group
 } from "bumbag"
-import InputField from "../input/Field"
-import HookFormInputField from "../input/InputField"
+import HookFormInputField from "../input/Input"
 
 export const FieldGroup = ({
   names = [],
@@ -70,30 +69,6 @@ export const FieldGroup = ({
             {...inputFieldProps}
           />
         )
-
-        /*
-        return (
-          <InputField
-            key={name}
-            name={name}
-            type={type}
-            required={isRequiredList ? required[index] : required}
-            disabled={isDisabledList ? disabled[index] : disabled}
-            min={isMinList ? min[index] : min}
-            max={isMaxList ? max[index] : max}
-            size={size}
-            flex={hasNext ? "1.1" : "1"}
-            addonAfter={
-              hasNext && (
-                <Separator isStatic size={size} borderRadius="0">
-                  -
-                </Separator>
-              )
-            }
-            {...inputFieldProps}
-          />
-        )
-        */
       })}
     </Group>
   )

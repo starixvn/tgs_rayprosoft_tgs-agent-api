@@ -4,8 +4,7 @@ import { Alert, Button, Text, Modal } from "bumbag"
 import { Delete as DeleteMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
-import FormDialog from "../../form/Dialog"
-import { HookFormDialog } from "../../form/HookFormDialog"
+import { FormDialog } from "../../form/FormDialog"
 import { Trans, useTrans } from "../../i18n"
 import { useDeleteRole } from "./client"
 
@@ -55,7 +54,7 @@ const DeleteDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
     en: "Delete Role"
   })
   return (
-    <HookFormDialog
+    <FormDialog
       onSubmit={submit}
       isLoading={isLoading}
       result={result}
@@ -85,6 +84,6 @@ const DeleteDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
           />
         </Text>
       </Alert>
-    </HookFormDialog>
+    </FormDialog>
   )
 }

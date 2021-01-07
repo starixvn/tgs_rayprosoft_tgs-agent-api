@@ -15,19 +15,19 @@ import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "../providers/menu"
 import { EditDisclosure } from "../../dialog/Disclosure"
-import { ConfirmButtonFooter } from "../../form/Dialog"
+import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { useUpdateBrandGame } from "./client"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
-import HookFormDialog from "../../form/HookFormDialog"
+import FormDialog from "../../form/FormDialog"
 import { GameTypeLabel } from "../games/GameType"
 import { GamePlatformLabel } from "../games/GamePlatform"
 import { useFormContext } from "react-hook-form"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import { useBrandGame } from "./client"
 import AlertDialog from "../../dialog/Alert"
-import HookFormInputField from "../../input/InputField"
+import HookFormInputField from "../../input/Input"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -88,7 +88,7 @@ const EditDialog = ({ record = {}, dialog, ...props }) => {
   }
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{ ...brandGame }}
       onSubmit={onSubmit}
       result={result}
@@ -109,7 +109,7 @@ const EditDialog = ({ record = {}, dialog, ...props }) => {
       maxWidth="unset"
     >
       <EditBody record={brandGame} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

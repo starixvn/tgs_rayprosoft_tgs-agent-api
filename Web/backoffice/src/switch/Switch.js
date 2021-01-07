@@ -10,10 +10,10 @@ export const Switch = ({
   registerOptions = {},
   ...props
 }) => {
-  let { errors, ...formContext } = useFormContext()
-  register = register ?? formContext.register
+  let formContext = useFormContext()
+  register = register ?? formContext?.register
 
-  if (!switchRef) {
+  if (!switchRef && register) {
     switchRef = register({
       required: props.required,
       min: props.min,
@@ -25,7 +25,7 @@ export const Switch = ({
     })
   }
 
-  let error = errors[name]
+  let error = formContext?.errors[name]
   let state = error && "danger"
 
   return <_Switch name={name} switchRef={switchRef} state={state} {...props} />

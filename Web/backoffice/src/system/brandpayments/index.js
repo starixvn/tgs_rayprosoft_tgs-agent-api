@@ -45,7 +45,7 @@ import { ViewButton as LogsButton } from "./logs"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert from "../../dialog/Alert"
 import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
-import HookFormInputField from "../../input/InputField"
+import HookFormInputField from "../../input/Input"
 
 export { Code }
 

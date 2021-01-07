@@ -4,7 +4,7 @@ import { Button } from "bumbag"
 import { Trans, useTrans } from "../../i18n"
 import AlertDialog from "../../dialog/Alert"
 import { useChangeBrandPaymentStatus } from "./client"
-import { HookFormSelect } from "../../select/HookFormSelect"
+import { Select } from "../../select/Select"
 import { useFormContext, Controller } from "react-hook-form"
 
 const Enabled = "Enabled"
@@ -50,9 +50,7 @@ export const BrandPaymentStatusSelect = ({ placeholder, ...props }) => {
     }
   ]
 
-  return (
-    <HookFormSelect placeholder={placeholder} options={options} {...props} />
-  )
+  return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export const BrandPaymentStatusToggleButton = ({ name = "paymentStatus" }) => {

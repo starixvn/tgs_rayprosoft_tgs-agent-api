@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Stack, Modal } from "bumbag"
+import { Stack, Modal, Box } from "bumbag"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Field as InputField } from "../../input/Field"
 import { Trans, useTrans } from "../../i18n"
 import { useAddDepartment, useEditDepartment } from "./client"
 import Label from "../../form/Label"
 import { FieldValues } from "../../layout/Grid"
-import FormDialog from "../../form/Dialog"
 import Disclosure from "../../dialog/Disclosure"
+import { useForm, useFormContext, FormProvider } from "react-hook-form"
+import FormDialog from "../../form/FormDialog"
+import HookFormInputField from "../../input/Input"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -45,7 +46,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
 
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         name: ""
       }}
       onSubmit={setSubmit}
@@ -66,7 +67,9 @@ const EditBody = () => (
   <Stack spacing="major-3" margin="major-1">
     <FieldValues>
       <Label name="name" label={<Trans zh="部门名称" en="Department Name" />} />
-      <InputField name="name" required />
+      <Box>
+        <HookFormInputField name="name" required />
+      </Box>
     </FieldValues>
   </Stack>
 )
@@ -110,7 +113,7 @@ const EditDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
 
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         name
       }}
       onSubmit={setSubmit}

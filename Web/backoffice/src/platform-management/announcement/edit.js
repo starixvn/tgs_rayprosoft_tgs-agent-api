@@ -36,9 +36,9 @@ import {
 import { Trans, useTrans } from "../../i18n"
 import parseDate from "date-fns/fp/parseISO"
 import { CancelText } from "../../button/ActionButtons"
-import HookFormDialog from "../../form/HookFormDialog"
-import HookFormInputField from "../../input/InputField"
-import HookFormDateInput from "../../date/DateInput"
+import FormDialog from "../../form/FormDialog"
+import HookFormInputField from "../../input/Input"
+import DateTimeInput from "../../date/DateTimeInput"
 import { useForm, useFormContext } from "react-hook-form"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
@@ -87,7 +87,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         subject: "",
         from: null,
@@ -106,7 +106,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
       css={DialogCss}
     >
       <EditBody isAdd={true} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -158,7 +158,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         ...record,
         from,
@@ -178,7 +178,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
       }
     >
       <VerifyBody readonly />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -211,7 +211,7 @@ const EditDialog = ({
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         ...record,
         from: parseDate(record.from),
@@ -230,7 +230,7 @@ const EditDialog = ({
       css={DialogCss}
     >
       <EditBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -274,7 +274,7 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
         <Trans zh="开始时间" en="Start" />
       </Label>
       <Box>
-        <HookFormDateInput
+        <DateTimeInput
           name="from"
           maxDate={maxDate}
           required={required}
@@ -286,7 +286,7 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
         <Trans zh="结束时间" en="End" />
       </Label>
       <Box>
-        <HookFormDateInput
+        <DateTimeInput
           name="to"
           minDate={minDate}
           required={required}
@@ -395,7 +395,7 @@ const VerifyDialog = ({
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       formMethods={formMethods}
       onSubmit={onSubmit}
       onClickSubmit={(event) => {
@@ -424,7 +424,7 @@ const VerifyDialog = ({
       dialog={dialog}
     >
       <VerifyBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

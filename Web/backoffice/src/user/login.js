@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { css } from "@emotion/react"
 import { useAuth } from "./context"
-import { Formik, Field } from "formik"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import {
   Flex,
   Box,
@@ -14,14 +14,45 @@ import {
   Modal
 } from "bumbag"
 import AlertDialog from "../dialog/Alert"
+import HookFormInputField from "../input/Input"
+import { PasswordInputField } from "../input/PasswordInput"
+import { useTrans } from "../i18n"
 
 export const Path = "/login"
 
 export const Form = () => {
+  let formMethods = useForm({
+    defaultValues: { username: "", password: "" }
+  })
+
   const login = useAuth()
 
   const dialog = Modal.useState()
   let [error, setError] = useState()
+
+  const onSubmit = (data) => {
+    setError(null)
+
+    login(data).catch((error) => {
+      setError(error.message ?? error.title)
+      dialog.show()
+    })
+  }
+
+  let loginLabel = useTrans({
+    zh: "登录",
+    en: "Login"
+  })
+
+  let usernameLabel = useTrans({
+    zh: "帐号",
+    en: "Username"
+  })
+
+  let passwordLabel = useTrans({
+    zh: "密码",
+    en: "Password"
+  })
 
   return (
     <Box
@@ -32,7 +63,7 @@ export const Form = () => {
       `}
     >
       <Card
-        title="Login"
+        title={loginLabel}
         css={css`
           width: 370px;
           @media screen and (max-width: 576px) {
@@ -40,49 +71,26 @@ export const Form = () => {
           }
         `}
       >
-        <Formik
-          initialValues={{ username: "", password: "" }}
-          onSubmit={(data) => {
-            setError(null)
-
-            login(data).catch((error) => {
-              setError(error.message ?? error.title)
-              dialog.show()
-            })
-          }}
-        >
-          {({ errors, touched, ...formProps }) => (
-            <form
-              onReset={formProps.handleReset}
-              onSubmit={formProps.handleSubmit}
-            >
-              <Set orientation="vertical" isFilled>
-                <Field
-                  component={InputField.Formik}
-                  name="username"
-                  placeholder="Username"
-                  autoComplete="username"
-                />
-                <Text>
-                  {errors.username && touched.username && errors.username}
-                </Text>
-                <Field
-                  component={InputField.Formik}
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  autoComplete="current-password"
-                />
-                <Text>
-                  {errors.password && touched.password && errors.password}
-                </Text>
-                <Button type="submit" palette="primary">
-                  Login
-                </Button>
-              </Set>
-            </form>
-          )}
-        </Formik>
+        <FormProvider {...formMethods}>
+          <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+            <Set orientation="vertical" isFilled>
+              <HookFormInputField
+                name="username"
+                placeholder={usernameLabel}
+                autoComplete="username"
+              />
+              <PasswordInputField
+                name="password"
+                type="password"
+                placeholder={passwordLabel}
+                autoComplete="current-password"
+              />
+              <Button type="submit" palette="primary">
+                {loginLabel}
+              </Button>
+            </Set>
+          </form>
+        </FormProvider>
       </Card>
       <ErrorDialog error={error} dialog={dialog} />
     </Box>

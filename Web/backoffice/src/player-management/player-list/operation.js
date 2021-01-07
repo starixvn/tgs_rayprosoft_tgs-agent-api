@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field } from "formik"
 import {
   Spinner,
   Stack,
@@ -20,9 +19,10 @@ import { useOperations } from "./client"
 import { Trans } from "../../i18n"
 import format from "../../date/format"
 import { pastWeek } from "../../date/range"
-import DateTimeRangeInput from "../../date/RangeInput"
+import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import SearchButton from "../../button/SearchButton"
 import { Tab as _Tab, TabPanel } from "../../tab"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
 
 export const Key = "operation"
 
@@ -84,36 +84,20 @@ export const Panel = ({ playerCode, ...props }) => {
   )
 }
 
-const SearchBar = ({
-  start: startDate,
-  end: endDate,
-  search,
-  isLoading,
-  ...props
-}) => {
-  let [start, setStart] = useState(startDate)
-  let [end, setEnd] = useState(endDate)
+const SearchBar = ({ start, end, search, isLoading, ...props }) => {
+  let formMethods = useForm()
+
+  const onSubmit = (data) => search(data)
 
   return (
-    <Set>
-      <DateTimeRangeInput
-        start={start}
-        end={end}
-        validate
-        onChangeStart={(date) => {
-          setStart(date)
-        }}
-        onChangeEnd={(date) => {
-          setEnd(date)
-        }}
-      />
-      <SearchButton
-        isLoading={isLoading}
-        onClick={() => {
-          search({ start, end })
-        }}
-      />
-    </Set>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <DateTimeRangeInput startName="start" endName="end" />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 

@@ -15,7 +15,7 @@ import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "../providers/menu"
 import { EditDisclosure } from "../../dialog/Disclosure"
-import FormDialog, { ConfirmButtonFooter } from "../../form/Dialog"
+import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { useUpdateBrandGameProvider } from "./client"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
@@ -26,7 +26,7 @@ import {
   TimeSelectField,
   hourMinuteToDate
 } from "../../date/time"
-import HookFormDialog from "../../form/HookFormDialog"
+import FormDialog from "../../form/FormDialog"
 import parseDate from "date-fns/fp/parseISO"
 import { MaintenanceStatusToggleButton } from "./ScheduleStatus"
 
@@ -82,7 +82,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
   let to = formatHourMinute(parseDate(record.to))
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         ...record,
         from,
@@ -107,7 +107,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
       maxWidth="unset"
     >
       <EditBody record={record} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

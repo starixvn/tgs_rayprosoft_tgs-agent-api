@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { useLocale, Locales } from "../i18n"
 import { Select, SelectField, DropdownMenu, Button, Icon } from "bumbag"
-import { useFormikContext } from "formik"
-import { Field } from "../input/Field"
 import startOfDay from "date-fns/startOfDay"
 import endOfDay from "date-fns/endOfDay"
 import isBefore from "date-fns/isBefore"

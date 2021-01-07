@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import {
   Stack,
@@ -42,8 +41,8 @@ import {
   PlayerTargetSelect
 } from "./PlayerTargetSelect"
 import Alert from "../../dialog/Alert"
-import HookFormInputField from "../../input/InputField"
-import HookFormDialog from "../../form/HookFormDialog"
+import HookFormInputField from "../../input/Input"
+import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
@@ -82,7 +81,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         target: AllPlayers,
         subject: "",
@@ -109,7 +108,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
       css={DialogCss}
     >
       <EditBody isAdd dialog={dialog} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -380,7 +379,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         ...record,
         target: record.assignedAllPlayers ? AllPlayers : DesignatedPlayers
@@ -399,7 +398,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
       }
     >
       <VerifyBody readonly={true} dialog={dialog} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -453,7 +452,7 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
   })
 
   return (
-    <HookFormDialog
+    <FormDialog
       formMethods={formMethods}
       onSubmit={setSubmit}
       onClickSubmit={(event) => {
@@ -482,7 +481,7 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
       dialog={dialog}
     >
       <VerifyBody dialog={dialog} readonly={false} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

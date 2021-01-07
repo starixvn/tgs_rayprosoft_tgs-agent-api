@@ -5,49 +5,41 @@ import {
   Heading,
   Box,
   Button,
-  Select as _Select,
   SelectMenu,
   DropdownMenu
 } from "bumbag"
-import { useFormikContext } from "formik"
 import { useChangeBrandGameStatus } from "./client"
 import Alert from "../../dialog/Alert"
-import { Field } from "../../select/Field"
 import { useTrans, Trans } from "../../i18n"
+import { useFormContext } from "react-hook-form"
 
-const Enabled = 0
-const EnabledName = "Enabled"
+const Enabled = "Enabled"
 const EnabledTrans = {
   zh: "开启",
   en: "Enabled"
 }
 
-const Disabled = 1
-const DisabledName = "Disabled"
+const Disabled = "Disabled"
 const DisabledTrans = {
   zh: "关闭",
-  en: DisabledName
+  en: "Disabled"
 }
 
-const Maintenance = 2
-const MaintenanceName = "Maintenance"
+const Maintenance = "Maintenance"
 const MaintenanceTrans = {
   zh: "维护",
-  en: MaintenanceName
+  en: "Maintenance"
 }
 
 export const Label = ({ value = "" }) => {
   switch (value) {
     case Enabled:
-    case EnabledName:
       return <Trans {...EnabledTrans} />
 
     case Disabled:
-    case DisabledName:
       return <Trans {...DisabledTrans} />
 
     case Maintenance:
-    case MaintenanceName:
       return <Trans {...MaintenanceTrans} />
 
     default:
@@ -57,11 +49,11 @@ export const Label = ({ value = "" }) => {
 
 const toPalette = (value) => {
   switch (value) {
-    case EnabledName:
+    case Enabled:
       return "success"
-    case DisabledName:
+    case Disabled:
       return "danger"
-    case MaintenanceName:
+    case Maintenance:
       return "warning"
     default:
       return "default"
@@ -97,14 +89,14 @@ export const StatusMenu = ({ record = {}, ...props }) => {
       <DropdownMenu
         menu={
           <>
-            <DropdownMenu.Item onClick={() => setSubmit(EnabledName)}>
-              <Label value={EnabledName} />
+            <DropdownMenu.Item onClick={() => setSubmit(Enabled)}>
+              <Label value={Enabled} />
             </DropdownMenu.Item>
-            <DropdownMenu.Item onClick={() => setSubmit(DisabledName)}>
-              <Label value={DisabledName} />
+            <DropdownMenu.Item onClick={() => setSubmit(Disabled)}>
+              <Label value={Disabled} />
             </DropdownMenu.Item>
-            <DropdownMenu.Item onClick={() => setSubmit(MaintenanceName)}>
-              <Label value={MaintenanceName} />
+            <DropdownMenu.Item onClick={() => setSubmit(Maintenance)}>
+              <Label value={Maintenance} />
             </DropdownMenu.Item>
           </>
         }
@@ -122,24 +114,22 @@ export const StatusMenu = ({ record = {}, ...props }) => {
   )
 }
 
-export const StatusMenuField = ({ name, size, ...props }) => {
-  let { values, setFieldValue } = useFormikContext()
-  let status = Reflect.get(values, name)
+export const BrandGameStatusMenuField = ({ name, size, ...props }) => {
+  let { watch } = useFormContext()
+  let status = watch(name)
 
   return (
     <DropdownMenu
       menu={
         <>
-          <DropdownMenu.Item onClick={() => setFieldValue(name, EnabledName)}>
-            <Label value={EnabledName} />
+          <DropdownMenu.Item onClick={() => setFieldValue(name, Enabled)}>
+            <Label value={Enabled} />
           </DropdownMenu.Item>
-          <DropdownMenu.Item onClick={() => setFieldValue(name, DisabledName)}>
-            <Label value={DisabledName} />
+          <DropdownMenu.Item onClick={() => setFieldValue(name, Disabled)}>
+            <Label value={Disabled} />
           </DropdownMenu.Item>
-          <DropdownMenu.Item
-            onClick={() => setFieldValue(name, MaintenanceName)}
-          >
-            <Label value={MaintenanceName} />
+          <DropdownMenu.Item onClick={() => setFieldValue(name, Maintenance)}>
+            <Label value={Maintenance} />
           </DropdownMenu.Item>
         </>
       }

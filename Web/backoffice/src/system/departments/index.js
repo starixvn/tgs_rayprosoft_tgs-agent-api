@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Button, InputField, Set } from "bumbag"
+import { Box, Button, Set } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
@@ -22,26 +22,24 @@ export const Content = () => {
     return null
   }
 
-  return <AsyncContent />
+  return <Body />
 }
 
 export const CodeContentPair = [Code, Content]
 
-const AsyncContent = () => {
+const Body = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable()
-
-  let { pageIndex, pageSize, sortby, orderby } = state
+  let { pageIndex, pageSize } = state
 
   let { data, isLoading, mutate } = useDepartmentList(toApiParams(state))
-  const fetchTable = mutate
-  let columns = useTableColumns({ fetchTable })
+  let columns = useColumns({ mutate })
 
   return (
     <PageContent
       title={<Trans zh="部门管理" en="Departments" />}
       actionBar={
         <Box alignX="right">
-          <AddButton onSubmitted={fetchTable} />
+          <AddButton onSubmitted={mutate} />
         </Box>
       }
     >
@@ -58,7 +56,7 @@ const AsyncContent = () => {
   )
 }
 
-const useTableColumns = ({ fetchTable }) => {
+const useColumns = ({ mutate }) => {
   let columns = [
     sequenceColumn(),
     {
@@ -97,8 +95,8 @@ const useTableColumns = ({ fetchTable }) => {
           <Box alignX="center">
             {
               <Set>
-                <EditButton id={id} name={name} onSubmitted={fetchTable} />
-                <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
+                <EditButton id={id} name={name} onSubmitted={mutate} />
+                <DeleteButton id={id} name={name} onSubmitted={mutate} />
               </Set>
             }
           </Box>

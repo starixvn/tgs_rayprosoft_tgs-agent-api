@@ -10,10 +10,10 @@ export const Checkbox = ({
   registerOptions = {},
   ...props
 }) => {
-  let { errors, ...formContext } = useFormContext()
-  register = register ?? formContext.register
+  let formContext = useFormContext()
+  register = register ?? formContext?.register
 
-  if (!checkboxRef) {
+  if (!checkboxRef && register) {
     checkboxRef = register({
       required: props.required,
       min: props.min,
@@ -25,7 +25,7 @@ export const Checkbox = ({
     })
   }
 
-  let error = errors[name]
+  let error = formContext?.errors[name]
   let state = error && "danger"
 
   return (

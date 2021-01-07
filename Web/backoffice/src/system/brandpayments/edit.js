@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-// import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   useForm,
   FormProvider,
@@ -27,10 +26,9 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import { EditDisclosure } from "../../dialog/Disclosure"
-import { ConfirmButtonFooter } from "../../form/Dialog"
+import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel as Label } from "../../form/Label"
-import InputField from "../../input/Field"
 import { BrandPaymentStatusToggleButton } from "./status"
 import {
   useBrandPayment,
@@ -50,9 +48,9 @@ import {
 import { VipLevelCheckboxGroup } from "../../vip-levels/CheckboxGroup"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import { FieldGroup as NumberRangeInputFieldGroup } from "../../number/RangeInput"
-import HookFormDialog from "../../form/HookFormDialog"
+import FormDialog from "../../form/FormDialog"
 import HookFormTextarea from "../../textarea"
-import HookFormInputField from "../../input/InputField"
+import HookFormInputField from "../../input/Input"
 import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 
@@ -102,7 +100,7 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
   }
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         ...brandPaymentData.payment,
         reason: ""
@@ -158,7 +156,7 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
       dialog={dialog}
     >
       <EditBody record={brandPaymentData.payment} />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

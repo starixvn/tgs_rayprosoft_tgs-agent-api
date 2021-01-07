@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, Field, useFormikContext } from "formik"
-import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
+import { Heading, Stack, Button, Set, Text, Box } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -22,7 +21,7 @@ import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
 import { EditPresetButton } from "./PresetMaintenance"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import HookFormInputField from "../../input/InputField"
+import { InputField } from "../../input/Input"
 
 export { Code }
 
@@ -96,7 +95,7 @@ const SearchBar = ({ name: keyword = "", search, isLoading, ...props }) => {
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)}>
         <Set>
-          <HookFormInputField
+          <InputField
             name="keyword"
             addonAfter={
               <Button onClick={() => formMethods.setValue("keyword", "")}>
@@ -110,34 +109,6 @@ const SearchBar = ({ name: keyword = "", search, isLoading, ...props }) => {
         </Set>
       </form>
     </FormProvider>
-  )
-
-  return (
-    <Formik
-      initialValues={{
-        name: keyword
-      }}
-      onSubmit={search}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <Field
-              name="keyword"
-              component={InputField.Formik}
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("keyword", "")}>
-                  X
-                </Button>
-              }
-              placeholder={searchPlaceHolder}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isLoading} disabled={isLoading} />
-          </Set>
-        </form>
-      )}
-    </Formik>
   )
 }
 

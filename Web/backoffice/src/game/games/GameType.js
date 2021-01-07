@@ -1,16 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react"
-import {
-  css,
-  Stack,
-  Heading,
-  Box,
-  Button,
-  Select,
-  SelectMenu,
-  DropdownMenu
-} from "bumbag"
+import { css, Stack, Heading, Box, SelectMenu, DropdownMenu } from "bumbag"
 import { useTrans, Trans } from "../../i18n"
-import { HookFormSelect } from "../../select/HookFormSelect"
+import { Select } from "../../select/Select"
 
 const Sportsbook = "Sportsbook"
 const SportsbookTrans = {
@@ -190,7 +181,5 @@ export const GameTypeSelect = ({ placeholder, ...props } = {}) => {
     label: useTrans(GameTypeTrans[gameType]),
     value: gameType
   }))
-  return (
-    <HookFormSelect placeholder={placeholder} options={options} {...props} />
-  )
+  return <Select placeholder={placeholder} options={options} {...props} />
 }

@@ -3,7 +3,7 @@ import { css, Global } from "@emotion/react"
 import { useModalState, Stack } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
-import HookFormDialog from "../../form/HookFormDialog"
+import FormDialog from "../../form/FormDialog"
 import { Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 
@@ -29,9 +29,9 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
 const AddDialog = ({ onSubmitted, dialog }) => {
   return (
-    <HookFormDialog dialog={dialog}>
+    <FormDialog dialog={dialog}>
       <EditBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -61,8 +61,8 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
 
 const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
   return (
-    <HookFormDialog dialog={dialog}>
+    <FormDialog dialog={dialog}>
       <EditBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }

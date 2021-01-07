@@ -1,28 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Label,
-  Input,
-  InputField,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  Select as _Select,
-  SelectField,
-  Dialog,
-  Modal,
-  Table,
-  useClassName
-} from "bumbag"
-import { Field as _Field } from "../../select/Field"
+import { SelectField, Dialog, Modal, Table, useClassName } from "bumbag"
 import AlertDialog from "../../dialog/Alert"
 import { useRoleList } from "./client"
 import {
@@ -31,17 +9,9 @@ import {
   useUserResellerId,
   useUserRoleType
 } from "../../user/context"
+import Select from "../../select/Select"
 
-export const Field = ({ required, validate, ...props }) => {
-  let { name } = props
-  return (
-    <_Field name={name} required={required}>
-      {(props) => <Select {...props} />}
-    </_Field>
-  )
-}
-
-export const Select = ({ ...props }) => {
+export const RoleSelect = ({ ...props }) => {
   let userResellerId = useUserResellerId()
   let userLicenseeId = useUserLicenseeId()
   let userBrandId = useUserBrandId()
@@ -60,11 +30,7 @@ export const Select = ({ ...props }) => {
 
   return (
     <>
-      <_Select
-        isLoading={isLoading}
-        options={[{ label: "", value: "" }, ...options]}
-        {...props}
-      />
+      <Select isLoading={isLoading} options={options} {...props} />
       {error && <AlertDialog {...error} />}
     </>
   )

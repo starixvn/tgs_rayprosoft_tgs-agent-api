@@ -73,6 +73,7 @@ export const MerchantIdSelect = ({
 
   brandId: initialBrandId = "",
   brandIdName = "brandId",
+  onBrandChange,
 
   ...props
 }) => {
@@ -117,6 +118,10 @@ export const MerchantIdSelect = ({
       label: brand.code,
       value: brand.id
     })) ?? []
+
+  useEffect(() => {
+    onBrandChange?.(brandId)
+  }, [brandId])
 
   let resellerPlaceholder = useResellerPlaceholder()
   let licenseePlaceholder = useLicenseePlaceholder()

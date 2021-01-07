@@ -1,16 +1,22 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Select as _Select, Text } from "bumbag"
+import Select from "../../select/Select"
 import { Locales, Trans, useTrans } from "../../i18n"
-import { Field } from "../../select/Field"
 import { useGameProviderList } from "./client"
 import AlertDialog from "../../dialog/Alert"
 
 export const GameProviderSelect = ({
+  placeholder,
   valueField = "id",
   required,
   ...props
 }) => {
+  let defaultPlaceholder = useTrans({
+    zh: "游戏厂商",
+    en: "Game Provider"
+  })
+  placeholder = placeholder ?? defaultPlaceholder
+
   let { data, isLoading, error } = useGameProviderList()
   let options =
     data?.items.map((item) => ({
@@ -21,7 +27,12 @@ export const GameProviderSelect = ({
   return (
     <>
       {/* {error && <AlertDialog {...error} />} */}
-      <_Select isLoading={isLoading} options={options} {...props} />
+      <Select
+        isLoading={isLoading}
+        placeholder={placeholder}
+        options={options}
+        {...props}
+      />
     </>
   )
 }

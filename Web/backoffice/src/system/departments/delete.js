@@ -4,9 +4,9 @@ import { Alert, Button, Modal } from "bumbag"
 import { Delete as DeleteMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
-import FormDialog from "../../form/Dialog"
 import { Trans, useTrans } from "../../i18n"
 import { useDeleteDepartment } from "./client"
+import FormDialog from "../../form/FormDialog"
 
 export const DeleteButton = ({ id, name, onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -67,7 +67,6 @@ const DeleteDialog = ({
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
     >
       <Alert
         title={

@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import {
-  Heading,
-  Stack,
-  Button,
-  InputField,
-  Set,
-  Text,
-  Box,
-  Select
-} from "bumbag"
-import { HookFormSelect } from "../../select/HookFormSelect"
+import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
+import { Select } from "../../select/Select"
 import { useBrandGameProviderList } from "./client"
 import { useTrans } from "../../i18n"
 
@@ -33,7 +24,7 @@ export const BrandGameProviderSelect = ({ placeholder, ...props }) => {
     })) ?? []
 
   return (
-    <HookFormSelect
+    <Select
       placeholder={placeholder}
       isLoading={isLoading}
       options={options}
@@ -41,3 +32,5 @@ export const BrandGameProviderSelect = ({ placeholder, ...props }) => {
     />
   )
 }
+
+export default BrandGameProviderSelect

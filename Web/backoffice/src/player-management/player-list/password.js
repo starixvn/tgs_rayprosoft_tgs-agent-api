@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Spinner,
   Stack,
@@ -22,13 +21,14 @@ import {
   Table,
   useClassName
 } from "bumbag"
-import { Password, Password as PasswordField } from "../../input/Field"
 import { FieldValues } from "../../layout/Grid"
 import AlertDialog from "../../dialog/Alert"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 import { useEditPlayerPassword } from "./client"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
+import { PasswordInputField } from "../../input/PasswordInput"
+import { FormProvider, useForm, useFormContext } from "react-hook-form"
 
 export const Key = "password"
 
@@ -46,6 +46,8 @@ export const Panel = ({
   onClickClose,
   ...props
 }) => {
+  let formMethods = useForm()
+
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useEditPlayerPassword(
     playerCode,
@@ -53,56 +55,50 @@ export const Panel = ({
   )
   useEffect(() => {
     if (result) {
-      onSubmitted && onSubmitted()
+      onSubmitted?.()
     }
   }, [result])
 
-  const submit = (data) => {
+  const onSubmit = (data) => {
     setSubmit(data)
   }
 
-  const clearResult = () => {
-    setSubmit(null)
+  const reset = () => {
+    setSubmit(undefined)
   }
 
   return (
     <TabPanel tabId={Key} {...props}>
-      {error && <AlertDialog {...error} onClickClose={clearResult} />}
-      <Formik
-        initialValues={{
-          password: "",
-          confirmPassword: ""
-        }}
-        onSubmit={submit}
-      >
-        <EditForm isLoading={isLoading} onClickClose={onClickClose} />
-      </Formik>
+      {error && <AlertDialog {...error} onClickClose={reset} />}
+      <FormProvider {...formMethods}>
+        <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+          <Body isLoading={isLoading} onClickClose={onClickClose} />
+        </form>
+      </FormProvider>
     </TabPanel>
   )
 }
 
-const EditForm = ({ isLoading, onClickClose, ...props }) => {
-  let { values = {}, submitForm } = useFormikContext()
-  let { password = "" } = values
+const Body = ({ isLoading, onClickClose, ...props }) => {
+  let { watch } = useFormContext()
+  let password = watch("password")
   return (
-    <Form>
-      <Stack spacing="major-1" margin="major-1">
-        <FieldValues>
-          <NewPasswordLabel />
-          <PasswordField name="password" />
-
-          <ConfirmPasswordLabel />
-          <PasswordField name="confirmPassword" matchPassword={password} />
-        </FieldValues>
-        <Box alignX="right">
-          <SubmitCancel
-            isLoading={isLoading}
-            onClickSubmit={submitForm}
-            onClickCancel={onClickClose}
-          />
+    <Stack spacing="major-1" margin="major-1">
+      <FieldValues>
+        <NewPasswordLabel />
+        <Box>
+          <PasswordInputField name="password" />
         </Box>
-      </Stack>
-    </Form>
+
+        <ConfirmPasswordLabel />
+        <Box>
+          <PasswordInputField name="confirmPassword" matchPassword={password} />
+        </Box>
+      </FieldValues>
+      <Box alignX="right">
+        <SubmitCancel isLoading={isLoading} />
+      </Box>
+    </Stack>
   )
 }
 

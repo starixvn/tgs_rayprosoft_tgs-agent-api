@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field } from "formik"
-import { Heading, Stack, Button, InputField, Set, Text } from "bumbag"
+import { Heading, Stack, Button, Set, Text } from "bumbag"
 import PageContent from "../../page/Content"
 import { AddButton, EditButton, EditPasswordButton } from "./edit"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import { Label as StatusLabel } from "./status"
+import { AdminStatusLabel } from "./AdminStatus"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
@@ -17,6 +16,8 @@ import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
+import { FormProvider, useForm } from "react-hook-form"
+import { InputField } from "../../input/Input"
 
 export { Code }
 
@@ -26,12 +27,12 @@ export const Content = () => {
     return null
   }
 
-  return <AsyncContent />
+  return <Body />
 }
 
 export const CodeContentPair = [Code, Content]
 
-const AsyncContent = () => {
+const Body = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable({
     username: ""
   })
@@ -39,15 +40,14 @@ const AsyncContent = () => {
   let { pageIndex, pageSize, username = "" } = state
 
   let { data, isLoading, mutate } = useAdminList(toApiParams(state))
-  const fetchTable = mutate
-  let columns = useTableColumns({ fetchTable })
+  let columns = useColumns({ mutate })
 
   return (
     <PageContent
       title={<Trans zh="管理员列表" en="Admins" />}
       actionBar={
         <>
-          <SearchForm
+          <SearchBar
             search={(data) => {
               let newState = {
                 pageIndex: 0,
@@ -60,7 +60,7 @@ const AsyncContent = () => {
             }}
             isPending={isLoading}
           />
-          <AddButton onSubmitted={fetchTable} />
+          <AddButton onSubmitted={mutate} />
         </>
       }
     >
@@ -77,43 +77,41 @@ const AsyncContent = () => {
   )
 }
 
-const SearchForm = ({ search, isPending, ...props }) => {
+const SearchBar = ({ search, isLoading, ...props }) => {
+  let formMethods = useForm({
+    defaultValues: { username: "" }
+  })
+
+  const onSubmit = search
+
   return (
-    <Formik
-      initialValues={{ username: "" }}
-      onSubmit={(data) => {
-        search(data)
-      }}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <Field
-              component={InputField.Formik}
-              name="username"
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("username", "")}>
-                  X
-                </Button>
-              }
-              placeholder={searchInputPlaceHolder()}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isPending} />
-          </Set>
-        </form>
-      )}
-    </Formik>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <InputField
+            name="username"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("username", "")}>
+                X
+              </Button>
+            }
+            placeholder={useSearchInputPlaceHolder()}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 
-const searchInputPlaceHolder = () =>
+const useSearchInputPlaceHolder = () =>
   useTrans({
     zh: "管理员用户名输入框",
     en: "Input admin user name"
   })
 
-const useTableColumns = ({ fetchTable }) => {
+const useColumns = ({ mutate }) => {
   let columns = [
     sequenceColumn(),
     {
@@ -199,7 +197,7 @@ const useTableColumns = ({ fetchTable }) => {
             white-space: nowrap;
           `}
         >
-          <StatusLabel value={value} />
+          <AdminStatusLabel value={value} />
         </Text.Block>
       )
     }
@@ -223,8 +221,8 @@ const useTableColumns = ({ fetchTable }) => {
       Cell: ({ value }) => {
         return (
           <Set orientation="vertical" alignX="center">
-            <EditButton user={value} onSubmitted={fetchTable} />
-            <EditPasswordButton user={value} onSubmitted={fetchTable} />
+            <EditButton user={value} onSubmitted={mutate} />
+            <EditPasswordButton user={value} onSubmitted={mutate} />
           </Set>
         )
       }

@@ -36,7 +36,7 @@ import { GameTag } from "../games/GameTag"
 import { GameTagSwitch } from "./GameTagSwitch"
 import { GameStatusToggleSwitch } from "./GameStatusToggleSwitch"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import HookFormInputField from "../../input/InputField"
+import HookFormInputField from "../../input/Input"
 import { BrandGameProviderSelect } from "../brandproviders/BrandGameProviderSelect"
 
 export { Code } from "./menu"

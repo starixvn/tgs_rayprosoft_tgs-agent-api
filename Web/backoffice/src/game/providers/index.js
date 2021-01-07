@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, Field, useFormikContext } from "formik"
-import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
+import { Heading, Stack, Button, Set, Text, Box } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -14,6 +13,8 @@ import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
+import { FormProvider, useForm } from "react-hook-form"
+import { InputField } from "../../input/Input"
 
 export { Code }
 
@@ -84,36 +85,34 @@ const Body = () => {
 }
 
 const SearchBar = ({ name = "", search, isLoading, ...props }) => {
+  let formMethods = useForm({
+    defaultValues: {
+      name
+    }
+  })
+
   let searchPlaceHolder = useTrans({
     zh: "厂商输入框",
     en: "Input vendor name"
   })
   return (
-    <Formik
-      initialValues={{
-        name
-      }}
-      onSubmit={search}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <Field
-              name="name"
-              component={InputField.Formik}
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("name", "")}>
-                  X
-                </Button>
-              }
-              placeholder={searchPlaceHolder}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isLoading} disabled={isLoading} />
-          </Set>
-        </form>
-      )}
-    </Formik>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(search)}>
+        <Set>
+          <InputField
+            name="name"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("name", "")}>
+                X
+              </Button>
+            }
+            placeholder={searchPlaceHolder}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 

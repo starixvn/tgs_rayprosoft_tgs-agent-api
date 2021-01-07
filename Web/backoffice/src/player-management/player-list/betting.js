@@ -1,20 +1,22 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { Spinner, Stack, Text, Box, Button, Set, Tabs as _Tabs } from "bumbag"
 import { Trans, FormattedNumber } from "../../i18n"
 import format from "../../date/format"
 import { useTable, Table, pageCount } from "../../table"
-import { Select as GameTypeSelect } from "../../game/type"
-import GameProviderSelect from "../../game/providers/Select"
+//TODO: use BrandGameType instead?
+import { GameTypeSelect } from "../../game/GameType"
+//TODO: use BrandGameProviderSelect instead?
+import GameProviderSelect from "../../game/providers/GameProviderSelect"
 import { pastWeek } from "../../date/range"
-import DateTimeRangeInput from "../../date/RangeInput"
+import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import SearchButton from "../../button/SearchButton"
 import { useBettings } from "./client"
 import equals from "fast-deep-equal"
 import dateTimeColumn from "../../table/column/dateTime"
 import BettingDetail from "./BettingDetailButton"
 import { Tab as _Tab, TabPanel } from "../../tab"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
 
 export const Key = "betting"
 
@@ -31,8 +33,8 @@ export const Panel = ({ playerCode, ...props }) => {
   let isActive = selectedId === Key
   let dateRange = pastWeek()
   let { state, setState, setPageIndex, setSortOrder } = useTable({
-    gameType,
-    gameProvider,
+    gameType: "",
+    gameProvider: "",
     from: dateRange.start,
     to: dateRange.end
   })
@@ -58,6 +60,9 @@ export const Panel = ({ playerCode, ...props }) => {
   })
 
   let columns = useColumns()
+
+  //TODO:
+  return <TabPanel tabId={Key} {...props}></TabPanel>
 
   return (
     <TabPanel tabId={Key} {...props}>
@@ -109,12 +114,36 @@ export const Panel = ({ playerCode, ...props }) => {
 const SearchBar = ({
   gameType,
   gameProvider,
+  start,
+  end,
+  /*
+  gameType,
+  gameProvider,
   start: startDate,
   end: endDate,
+  */
   search,
   isLoading,
   ...props
 }) => {
+  let formMethods = useForm()
+
+  const onSubmit = (data) => search(data)
+
+  return (
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <GameTypeSelect name="gameType" />
+          <GameProviderSelect name="gameProvider" />
+          <DateTimeRangeInput startName="start" endName="end" />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
+  )
+
+  /*
   let [gameTypeState, setGameType] = useState(gameType)
   let [gameProviderState, setGameProvider] = useState(gameProvider)
   let [start, setStart] = useState(startDate)
@@ -158,6 +187,7 @@ const SearchBar = ({
       />
     </Set>
   )
+  */
 }
 
 const useColumns = () =>

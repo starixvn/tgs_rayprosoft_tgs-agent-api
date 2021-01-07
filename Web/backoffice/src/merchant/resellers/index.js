@@ -24,7 +24,7 @@ import dateTimeColumn from "../../table/column/dateTime"
 import { AddButton, EditButton } from "./edit"
 import { SearchButton } from "../../button/SearchButton"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import HookFormInputField from "../../input/InputField"
+import HookFormInputField from "../../input/Input"
 import equals from "fast-deep-equal"
 import { MerchantStatusMenu } from "../status"
 

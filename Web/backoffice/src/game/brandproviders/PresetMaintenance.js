@@ -14,7 +14,7 @@ import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update as UpdateMenu } from "../providers/menu"
 import { Disclosure } from "../../dialog/Disclosure"
-import { ConfirmButtonFooter } from "../../form/Dialog"
+import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
@@ -22,10 +22,10 @@ import {
   useUpdateBrandGameProviderPresetMaintenance,
   useBrandGameProviderPresetMaintenanceList
 } from "./client"
-import HookFormDialog from "../../form/HookFormDialog"
+import FormDialog from "../../form/FormDialog"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
-import HookFormDateInput from "../../date/DateInput"
+import DateTimeInput from "../../date/DateTimeInput"
 import cloneDeep from "clone-deep"
 import {
   Controller,
@@ -126,7 +126,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
   }
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         scheduleStatus: "",
         from: null,
@@ -158,7 +158,7 @@ const EditDialog = ({ record, dialog, ...props }) => {
         add={add}
         deletePresetMaintenance={deletePresetMaintenance}
       />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -249,14 +249,14 @@ const AddPresetMaintenance = ({ add }) => {
         <Button isStatic>
           <StartTimeLabel />
         </Button>
-        <HookFormDateInput name="from" maxDate={maxDate} />
+        <DateTimeInput name="from" maxDate={maxDate} />
       </Group>
 
       <Group>
         <Button isStatic>
           <EndTimeLabel />
         </Button>
-        <HookFormDateInput name="to" minDate={minDate} />
+        <DateTimeInput name="to" minDate={minDate} />
       </Group>
 
       <Button

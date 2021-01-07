@@ -1,22 +1,20 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import { Stack, Box, Button, Text, Modal } from "bumbag"
-import { Field as DepartmentSelectField } from "../departments/select"
-import { Field as RoleSelectField } from "../roles/select"
-import {
-  Field as InputField,
-  Password as PasswordField
-} from "../../input/Field"
+import { DepartmentSelect } from "../departments/DepartmentSelect"
+import { RoleSelect } from "../roles/select"
 import { Trans, useTrans } from "../../i18n"
-import { Select as StatusSelect } from "./status"
+import { AdminStatusSelect } from "./AdminStatus"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { useAddAdmin, useEditAdmin, useEditPassword } from "./client"
 import { FieldValues } from "../../layout/Grid"
-import FormDialog from "../../form/Dialog"
 import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
+import FormDialog from "../../form/FormDialog"
+import { PasswordInputField } from "../../input/PasswordInput"
+import { useFormContext } from "react-hook-form"
+import { InputField } from "../../input/Input"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -78,13 +76,7 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
   )
 }
 
-const PasswordDialog = ({
-  user = {},
-  onSubmitted,
-  dialog,
-  finalFocusRef,
-  ...props
-}) => {
+const PasswordDialog = ({ user = {}, onSubmitted, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useEditPassword(
     user?.id,
@@ -98,7 +90,7 @@ const PasswordDialog = ({
   let title = usePasswordTitle()
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         password: "",
         confirmPassword: ""
       }}
@@ -110,7 +102,6 @@ const PasswordDialog = ({
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
-      finalFocusRef={finalFocusRef}
     >
       <PasswordBody dialog={dialog} />
     </FormDialog>
@@ -118,24 +109,28 @@ const PasswordDialog = ({
 }
 
 const PasswordBody = ({ dialog }) => {
-  const { values, submitForm, resetForm } = useFormikContext()
-
+  let { watch } = useFormContext()
+  let password = watch("password")
   return (
     <Stack spacing="major-3" margin="major-1">
       <FieldValues>
         <Label name="password" required>
           <Trans zh="密码" en="Password" />
         </Label>
-        <PasswordField name="password" autoComplete="new-password" />
+        <Box>
+          <PasswordInputField name="password" autoComplete="off" />
+        </Box>
 
         <Label name="confirmassword" required>
           <Trans zh="确认密码" en="Confirm Password" />
         </Label>
-        <PasswordField
-          name="confirmPassword"
-          matchPassword={values?.password ?? ""}
-          autoComplete="new-password"
-        />
+        <Box>
+          <PasswordInputField
+            name="confirmPassword"
+            matchPassword={password}
+            autoComplete="off"
+          />
+        </Box>
       </FieldValues>
     </Stack>
   )
@@ -152,7 +147,7 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
   let title = useCreateTitle()
   return (
     <FormDialog
-      initialValues={{
+      defaultValues={{
         username: "",
         departmentId: "",
         roleId: "",
@@ -176,42 +171,47 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
 }
 
 const AddBody = ({ dialog }) => {
-  const { values, submitForm, resetForm } = useFormikContext()
+  let { watch } = useFormContext()
+  let password = watch("password")
 
   return (
     <Stack spacing="major-3" margin="major-1">
       <FieldValues>
         <UsernameLabel required />
-        <InputField name="username" required />
+        <Box>
+          <InputField name="username" required />
+        </Box>
 
         <DepartmentLabel required />
         <Box>
-          {dialog.visible && (
-            <DepartmentSelectField name="departmentId" required />
-          )}
+          {dialog.visible && <DepartmentSelect name="departmentId" required />}
         </Box>
 
         <RoleLabel required />
-        <Box>
-          {dialog.visible && <RoleSelectField name="roleId" required />}
-        </Box>
+        <Box>{dialog.visible && <RoleSelect name="roleId" required />}</Box>
 
         <NameLabel required />
-        <InputField name="name" required />
+        <Box>
+          <InputField name="name" required />
+        </Box>
 
         <Label name="password" required>
           <Trans zh="密码" en="Password" />
         </Label>
-        <PasswordField name="password" autoComplete="new-password" />
+        <Box>
+          <PasswordInputField name="password" autoComplete="off" />
+        </Box>
 
         <Label name="confirmPassword" required>
           <Trans zh="确认密码" en="Confirm Password" />
         </Label>
-        <PasswordField
-          name="confirmPassword"
-          matchPassword={values?.password ?? ""}
-          autoComplete="new-password"
-        />
+        <Box>
+          <PasswordInputField
+            name="confirmPassword"
+            matchPassword={password}
+            autoComplete="off"
+          />
+        </Box>
       </FieldValues>
     </Stack>
   )
@@ -262,12 +262,7 @@ const EditDialog = ({
   let title = useUpdateTitle()
   return (
     <FormDialog
-      initialValues={{
-        departmentId: user.departmentId,
-        roleId: user.roleId,
-        name: user.name,
-        status: user.status
-      }}
+      defaultValues={user}
       onSubmit={submit}
       isLoading={isLoading}
       result={result}
@@ -284,33 +279,34 @@ const EditDialog = ({
 }
 
 const EditBody = ({ user, dialog }) => {
-  const { values, submitForm, resetForm } = useFormikContext()
   return (
     <Stack spacing="major-3" margin="major-1">
       <FieldValues>
         <UsernameLabel />
-        <InputField name="username" value={user?.username} disabled />
+        <Box>
+          <InputField name="username" disabled />
+        </Box>
 
         <DepartmentLabel />
         <Box>
-          {dialog.visible && (
-            <DepartmentSelectField name="departmentId" required />
-          )}
+          {dialog.visible && <DepartmentSelect name="departmentId" required />}
         </Box>
 
         <RoleLabel />
-        <Box>
-          {dialog.visible && <RoleSelectField name="roleId" required />}
-        </Box>
+        <Box>{dialog.visible && <RoleSelect name="roleId" required />}</Box>
 
         <NameLabel />
-        <InputField name="name" required />
+        <Box>
+          <InputField name="name" required />
+        </Box>
 
         <Label htmlFor="status">
           <Trans zh="状态" en="Status" />
           <Text color="danger">*</Text>
         </Label>
-        <StatusSelect name="status" required />
+        <Box>
+          <AdminStatusSelect name="status" required />
+        </Box>
       </FieldValues>
     </Stack>
   )

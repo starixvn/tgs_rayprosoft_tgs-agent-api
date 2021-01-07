@@ -4,7 +4,7 @@ import { useForm, useFormContext, Controller } from "react-hook-form"
 import { RadioGroup as _RadioGroup } from "bumbag"
 
 export const RadioGroup = ({ name, ...props }) => {
-  let { control } = useFormContext()
+  let { control } = useFormContext() ?? {}
 
   return (
     <Controller

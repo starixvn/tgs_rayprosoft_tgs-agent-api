@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Box, Set, Button, Text, Switch, Input, Stack } from "bumbag"
+import { Box, Flex, Set, Button, Text, Stack } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
-  useHasSubMenuByRoute
+  useHasSubMenuByRoute,
+  useUserBrandId,
+  useUserRoleType
 } from "../../user/context"
 import { useStationLetterList } from "./client"
 import { Code } from "./menu"
@@ -25,6 +27,9 @@ import {
 } from "./status"
 import { AddButton, VerifyButton, ViewButton } from "./edit"
 import { Verify as VerifyMenu, View as ViewMenu } from "./menu"
+import { useFormContext, useForm, FormProvider } from "react-hook-form"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { nextRoleType } from "../../system/roles/type"
 
 export { Code }
 
@@ -41,7 +46,9 @@ const Body = () => {
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
 
+  let userBrandId = useUserBrandId()
   let { state, setState, setPageIndex, setSortOrder } = useTable({
+    brandId: userBrandId,
     statusName: hasVerifyAuth
       ? InVerifyName
       : hasViewAuth
@@ -74,7 +81,17 @@ const Body = () => {
   return (
     <PageContent
       title={<Trans zh="站内信" en="Station Letter" />}
-      actionBar={<ActionBar mutate={mutate} />}
+      actionBar={
+        <ActionBar
+          mutate={mutate}
+          onBrandChange={(brandId) => {
+            setState({
+              pageIndex: 0,
+              brandId
+            })
+          }}
+        />
+      }
     >
       <Tabs>
         <TabList {...tab}>
@@ -146,11 +163,26 @@ const Body = () => {
   )
 }
 
-const ActionBar = ({ mutate }) => {
+const ActionBar = ({ mutate, onBrandChange }) => {
+  let roleType = useUserRoleType()
+  let brandId = useUserBrandId()
+  let formMethods = useForm()
   return (
-    <Box alignX="right" marginBottom="-1rem">
-      <AddButton onSubmitted={mutate} />
-    </Box>
+    <Flex justifyContent="space-between">
+      <Box>
+        {!brandId && (
+          <FormProvider {...formMethods}>
+            <MerchantIdSelect
+              start={nextRoleType(roleType)}
+              onBrandChange={onBrandChange}
+            />
+          </FormProvider>
+        )}
+      </Box>
+      <Box>
+        <AddButton onSubmitted={mutate} />
+      </Box>
+    </Flex>
   )
 }
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Formik, Field } from "formik"
-import { Box, Button, InputField, Set, Icon } from "bumbag"
+import { Box, Button, Set, Icon } from "bumbag"
 import { faCheck } from "@fortawesome/free-solid-svg-icons"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -20,6 +19,8 @@ import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
+import { useForm, useFormContext, FormProvider } from "react-hook-form"
+import { InputField } from "../../input/Input"
 
 export { Code }
 
@@ -29,12 +30,12 @@ export const Content = ({}) => {
     return null
   }
 
-  return <AsyncContent />
+  return <Body />
 }
 
 export const CodeContentPair = [Code, Content]
 
-const AsyncContent = () => {
+const Body = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable({
     name: ""
   })
@@ -42,14 +43,14 @@ const AsyncContent = () => {
   let { data, isLoading, mutate } = useRoleList(toApiParams(state))
   let userRoleId = useUserRoleId()
   let items = data?.items.filter(({ id }) => id != userRoleId)
-  const fetchTable = mutate
-  let columns = useTableColumns({ fetchTable })
+
+  let columns = useColumns({ mutate })
   return (
     <PageContent
       title={<Trans zh="权限组管理" en="Roles" />}
       actionBar={
         <>
-          <SearchForm
+          <SearchBar
             search={(data) => {
               let newState = {
                 pageIndex: 0,
@@ -62,7 +63,7 @@ const AsyncContent = () => {
             }}
             isPending={isLoading}
           />
-          <AddButton onSubmitted={fetchTable} />
+          <AddButton onSubmitted={mutate} />
         </>
       }
     >
@@ -79,43 +80,39 @@ const AsyncContent = () => {
   )
 }
 
-const SearchForm = ({ search, isPending, ...props }) => {
+const SearchBar = ({ search, isLoading, ...props }) => {
+  let formMethods = useForm({
+    defaultValues: { name: "" }
+  })
+
   return (
-    <Formik
-      initialValues={{ name: "" }}
-      onSubmit={(data) => {
-        search(data)
-      }}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <Field
-              component={InputField.Formik}
-              name="name"
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("name", "")}>
-                  X
-                </Button>
-              }
-              placeholder={searchInputPlaceHolder()}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isPending} />
-          </Set>
-        </form>
-      )}
-    </Formik>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(search)}>
+        <Set>
+          <InputField
+            name="name"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("name", "")}>
+                X
+              </Button>
+            }
+            placeholder={useSearchInputPlaceHolder()}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 
-const searchInputPlaceHolder = () =>
+const useSearchInputPlaceHolder = () =>
   useTrans({
     zh: "权限组名称输入框",
     en: "Input role name"
   })
 
-const useTableColumns = ({ fetchTable }) => {
+const useColumns = ({ mutate }) => {
   let columns = [
     sequenceColumn(),
     {
@@ -169,14 +166,14 @@ const useTableColumns = ({ fetchTable }) => {
         return (
           <Box alignX="center">
             <Set>
-              <EditButton id={id} onSubmitted={fetchTable} />
+              <EditButton id={id} onSubmitted={mutate} />
               <CopyButton
                 id={id}
                 name={name}
-                onSubmitted={fetchTable}
+                onSubmitted={mutate}
                 disabled={isRoot}
               />
-              <DeleteButton id={id} name={name} onSubmitted={fetchTable} />
+              <DeleteButton id={id} name={name} onSubmitted={mutate} />
             </Set>
           </Box>
         )

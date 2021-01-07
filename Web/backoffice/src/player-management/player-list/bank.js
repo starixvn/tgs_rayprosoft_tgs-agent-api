@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Icon,
   Spinner,
@@ -19,7 +18,6 @@ import {
   useClassName
 } from "bumbag"
 import { FieldValues, TwoColumns } from "../../layout/Grid"
-import { Field as InputField } from "../../input/Field"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 import { faMinus, faCog, faPlus } from "@fortawesome/free-solid-svg-icons"
 import { SubmitCancel } from "../../button/ActionButtons"
@@ -34,7 +32,8 @@ import { Tab as _Tab, TabPanel } from "../../tab"
 import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
 import { CancelText, SubmitText } from "../../button/ActionButtons"
-import FormDialog from "../../form/Dialog"
+import HookFormInputField from "../../input/Input"
+import FormDialog from "../../form/FormDialog"
 
 export const Key = "banks"
 
@@ -163,12 +162,12 @@ const AddDialog = ({ playerCode, onSubmitted, dialog, finalFocusRef }) => {
   let [submitData, setSubmit] = useState()
   let { result, isLoading, error } = useAddPlayerBank(playerCode, submitData)
 
-  const clearResult = () => setSubmit(undefined)
+  const reset = () => setSubmit(undefined)
 
   return (
     <Backdrop {...dialog}>
       <FormDialog
-        initialValues={{
+        defaultValues={{
           realName: "",
           bankName: "",
           bankAccount: ""
@@ -177,7 +176,7 @@ const AddDialog = ({ playerCode, onSubmitted, dialog, finalFocusRef }) => {
         isLoading={isLoading}
         result={result}
         error={error}
-        onCloseErrorAlert={clearResult}
+        onCloseErrorAlert={reset}
         onSubmitted={onSubmitted}
         dialog={dialog}
       >
@@ -202,9 +201,7 @@ const EditDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
   return (
     <Backdrop {...dialog}>
       <FormDialog
-        initialValues={{
-          ...bank
-        }}
+        defaultValues={{ ...bank }}
         onSubmit={setSubmit}
         isLoading={isLoading}
         result={result}
@@ -223,13 +220,19 @@ const EditBody = ({}) => {
   return (
     <FieldValues>
       <RealnameLabel />
-      <InputField name="realName" />
+      <Box>
+        <HookFormInputField name="realName" />
+      </Box>
 
       <BankLabel />
-      <InputField name="bankName" />
+      <Box>
+        <HookFormInputField name="bankName" />
+      </Box>
 
       <BankAccount />
-      <InputField name="bankAccount" />
+      <Box>
+        <HookFormInputField name="bankAccount" />
+      </Box>
     </FieldValues>
   )
 }
@@ -239,7 +242,7 @@ const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
   let { result, isLoading, error } = useDeletePlayerBank(playerCode, id)
   useEffect(() => {
     if (result && !error) {
-      onSubmitted && onSubmitted()
+      onSubmitted?.()
       dialog.hide()
     }
   }, [result, error])

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useContext } from "react"
 import { css, Global } from "@emotion/react"
-import useSWR from "swr"
 import { useEditPlayerInfo } from "./client"
-import { Formik, Field, Form, useFormikContext } from "formik"
 import {
   Spinner,
   Stack,
@@ -12,12 +10,6 @@ import {
   Set,
   Button,
   Text,
-  Label,
-  Input,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  Select as _Select,
   Dialog,
   Modal,
   Table,
@@ -25,13 +17,14 @@ import {
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
-import { Field as InputField } from "../../input/Field"
-import { Field as StatusField, Label as StatusValueLabel } from "../status"
-import { Field as VipLevelField } from "../../vip-levels/Select"
-import { Field as _Field, FieldMinHeight } from "../../select/Field"
+import { PlayerStatusSelect, PlayerStatusLabel } from "../PlayerStatus"
+import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
+import { PlayerAgentSelect } from "../PlayerAgent"
+import { FormProvider, useForm } from "react-hook-form"
+import HookFormInputField from "../../input/Input"
 
 export const Key = "player"
 
@@ -50,6 +43,24 @@ export const EditPanel = ({
   onClickClose,
   ...props
 }) => {
+  let {
+    realName = "",
+    vipId = "",
+    parentUsername = "",
+    status = "",
+    hasAgent
+  } = player
+
+  let formMethods = useForm({
+    defaultValues: {
+      realName: realName ?? "",
+      vipId,
+      parentUsername: parentUsername ?? "",
+      status,
+      hasAgent: hasAgent.toString()
+    }
+  })
+
   let [submitData, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useEditPlayerInfo(
     playerCode,
@@ -64,11 +75,11 @@ export const EditPanel = ({
   useEffect(() => {
     if (result && !error) {
       reset()
-      onSubmitted && onSubmitted()
+      onSubmitted?.()
     }
   }, [result])
 
-  const submit = (data = {}) => {
+  const onSubmit = (data = {}) => {
     let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
     setSubmit({
       ...data,
@@ -76,96 +87,70 @@ export const EditPanel = ({
     })
   }
 
-  let {
-    realName = "",
-    vipId = "",
-    parentUsername = "",
-    status = "",
-    hasAgent
-  } = player
-
   return (
     <TabPanel tabId={Key} {...props}>
       {error && <AlertDialog {...error} onClickClose={reset} />}
-      <Formik
-        initialValues={{
-          realName: realName ?? "",
-          vipId,
-          parentUsername: parentUsername ?? "",
-          status,
-          hasAgent: hasAgent.toString()
-        }}
-        onSubmit={submit}
-      >
-        <EditForm player={player} isLoading={isLoading} onClickClose={reset} />
-      </Formik>
+      <FormProvider {...formMethods}>
+        <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+          <EditForm
+            player={player}
+            isLoading={isLoading}
+            onClickClose={reset}
+          />
+        </form>
+      </FormProvider>
     </TabPanel>
   )
 }
 
 const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
-  let { submitForm } = useFormikContext()
   let { username = "", registeredOn, balance } = player
 
-  let turnOnLabel = useTurnOnLabel()
-  let turnOffLabel = useTurnOffLabel()
   return (
-    <Form>
-      <Stack spacing="major-1" margin="major-1">
-        <FieldValues>
-          <UserNameLabel />
-          <Text>{username}</Text>
+    <Stack spacing="major-1" margin="major-1">
+      <FieldValues>
+        <UserNameLabel />
+        <Text>{username}</Text>
 
-          <RealNameLabel />
-          <Box>
-            <InputField name="realName" required />
-          </Box>
-
-          <VIPLevelLabel />
-          <Box>
-            <VipLevelField name="vipId" required />
-          </Box>
-
-          <ParentUsernameLabel />
-          <Box>
-            <InputField name="parentUsername" />
-          </Box>
-
-          <RegistrationLabel />
-          <Box>
-            <FormattedDateTime value={registeredOn} />
-          </Box>
-
-          <BalanceLabel />
-          <Box>
-            <FormattedNumber value={balance} />
-          </Box>
-
-          <StatusLabel />
-          <Box>
-            <StatusField name="status" required />
-          </Box>
-
-          <AgentLabel />
-          <Box>
-            <_Field name="hasAgent" required>
-              {(props) => (
-                <_Select
-                  options={[
-                    { label: turnOnLabel, value: "true" },
-                    { label: turnOffLabel, value: "false" }
-                  ]}
-                  {...props}
-                />
-              )}
-            </_Field>
-          </Box>
-        </FieldValues>
-        <Box alignX="right">
-          <SubmitCancel onClickCancel={onClickClose} />
+        <RealNameLabel />
+        <Box>
+          <HookFormInputField name="realName" required />
         </Box>
-      </Stack>
-    </Form>
+
+        <VIPLevelLabel />
+        <Box>
+          <VipLevelSelect name="vipId" required placeholder={false} />
+        </Box>
+
+        <ParentUsernameLabel />
+        <Box>
+          <HookFormInputField name="parentUsername" />
+        </Box>
+
+        <RegistrationLabel />
+        <Box>
+          <FormattedDateTime value={registeredOn} />
+        </Box>
+
+        <BalanceLabel />
+        <Box>
+          <FormattedNumber value={balance} />
+        </Box>
+
+        <StatusLabel />
+        <Box>
+          <PlayerStatusSelect name="status" required placeholder={false} />
+        </Box>
+
+        <AgentLabel />
+        <Box>
+          <PlayerAgentSelect name="hasAgent" required />
+        </Box>
+      </FieldValues>
+      <Box alignX="right">
+        <SubmitCancel onClickCancel={onClickClose} />
+      </Box>
+    </Stack>
   )
 }
 
@@ -216,7 +201,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
 
         <StatusLabel />
         <Box>
-          <StatusValueLabel value={status} />
+          <PlayerStatusLabel value={status} />
         </Box>
 
         <AgentLabel />

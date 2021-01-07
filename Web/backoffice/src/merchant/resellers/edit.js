@@ -3,14 +3,14 @@ import { css, Global } from "@emotion/react"
 import { useModalState, Stack, Heading, Text, Box, Set, Checkbox } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
-import HookFormDialog from "../../form/HookFormDialog"
+import FormDialog from "../../form/FormDialog"
 import { Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
-import { ConfirmButtonFooter } from "../../form/Dialog"
+import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { useAddReseller, useReseller, useUpdateReseller } from "./client"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
-import HookFormInputField from "../../input/InputField"
+import HookFormInputField from "../../input/Input"
 import { HookFormTextarea } from "../../textarea"
 import { useFormContext, useFieldArray } from "react-hook-form"
 import { useGameProviderList } from "../../game/providers/client"
@@ -75,7 +75,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
   }
 
   return (
-    <HookFormDialog
+    <FormDialog
       onSubmit={onSubmit}
       result={result}
       isLoading={isLoading}
@@ -93,7 +93,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
       }
     >
       <EditBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -297,7 +297,7 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
     }
   })
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={{
         ...reseller,
         gameProviders
@@ -323,7 +323,7 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
       dialog={dialog}
     >
       <EditBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -367,14 +367,14 @@ const ViewDialog = ({ record, dialog, ...props }) => {
   }
 
   return (
-    <HookFormDialog
+    <FormDialog
       defaultValues={record}
       title={title}
       dialog={dialog}
       footer={<ConfirmButtonFooter />}
     >
       <EditBody />
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

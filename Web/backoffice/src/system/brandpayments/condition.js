@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Form, Field } from "formik"
 import { Trans, useTrans } from "../../i18n"
 import { Text } from "bumbag"
 import { useVipLevelList } from "../../vip-levels/client"

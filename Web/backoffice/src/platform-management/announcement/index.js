@@ -1,10 +1,22 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Box, Set, Button, Text, Switch, Input, Stack, Dialog } from "bumbag"
+import {
+  Box,
+  Set,
+  Flex,
+  Button,
+  Text,
+  Switch,
+  Input,
+  Stack,
+  Dialog
+} from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
-  useHasSubMenuByRoute
+  useHasSubMenuByRoute,
+  useUserBrandId,
+  useUserRoleType
 } from "../../user/context"
 import { useChangeAnnouncementOrders, useAnnouncementList } from "./client"
 import { Code } from "./menu"
@@ -34,6 +46,9 @@ import {
 } from "./menu"
 import AlertDialog from "../../dialog/Alert"
 import { ToggleButton as StatusToggleButton } from "./status"
+import { useFormContext, useForm, FormProvider } from "react-hook-form"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { nextRoleType } from "../../system/roles/type"
 
 export { Code }
 
@@ -43,14 +58,16 @@ export const Content = () => {
     return null
   }
 
-  return <AsyncContentBody />
+  return <Body />
 }
 
-const AsyncContentBody = ({}) => {
+const Body = ({}) => {
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
 
+  let userBrandId = useUserBrandId()
   let { state, setState, setPageIndex, setSortOrder } = useTable({
+    brandId: userBrandId,
     statusName: hasVerifyAuth
       ? InVerifyName
       : hasViewAuth
@@ -91,7 +108,17 @@ const AsyncContentBody = ({}) => {
   return (
     <PageContent
       title={<Trans zh="公告管理" en="Announcements" />}
-      actionBar={<ActionBar mutate={mutate} />}
+      actionBar={
+        <ActionBar
+          mutate={mutate}
+          onBrandChange={(brandId) => {
+            setState({
+              pageIndex: 0,
+              brandId
+            })
+          }}
+        />
+      }
     >
       <Tabs>
         <TabList {...tab}>
@@ -183,11 +210,26 @@ const AsyncContentBody = ({}) => {
   )
 }
 
-const ActionBar = ({ mutate }) => {
+const ActionBar = ({ mutate, onBrandChange }) => {
+  let roleType = useUserRoleType()
+  let brandId = useUserBrandId()
+  let formMethods = useForm()
   return (
-    <Box alignX="right" marginBottom="-1rem">
-      <AddButton onSubmitted={mutate} />
-    </Box>
+    <Flex justifyContent="space-between">
+      <Box>
+        {!brandId && (
+          <FormProvider {...formMethods}>
+            <MerchantIdSelect
+              start={nextRoleType(roleType)}
+              onBrandChange={onBrandChange}
+            />
+          </FormProvider>
+        )}
+      </Box>
+      <Box>
+        <AddButton onSubmitted={mutate} />
+      </Box>
+    </Flex>
   )
 }
 

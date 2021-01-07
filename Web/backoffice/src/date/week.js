@@ -6,7 +6,6 @@ import { enUS, zhCN } from "date-fns/locale"
 import { useLocale, Locales } from "../i18n"
 import { Select, DropdownMenu, Button } from "bumbag"
 import { useForm, useFormContext } from "react-hook-form"
-// import { Field } from "../input/Field"
 
 const Sunday = "Sunday"
 const Monday = "Monday"

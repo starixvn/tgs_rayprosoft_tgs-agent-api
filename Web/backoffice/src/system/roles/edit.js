@@ -58,10 +58,10 @@ import {
 import { useBrandList } from "../../merchant/brands/client"
 import { Reseller } from "../../merchant/resellers"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
-import { HookFormDialog } from "../../form/HookFormDialog"
+import { FormDialog } from "../../form/FormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
-import { HookFormInputField } from "../../input/InputField"
+import { HookFormInputField } from "../../input/Input"
 import { Code as RoleMenuCode } from "./menu"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
@@ -157,7 +157,7 @@ const AddDialog = ({ dialog, onSubmitted }) => {
   let roleTemplateRequired = !useUserRoleAsTemplate
 
   return (
-    <HookFormDialog
+    <FormDialog
       formMethods={formMethods}
       onSubmit={(data) => {
         let templateId = useUserRoleAsTemplate
@@ -268,7 +268,7 @@ const AddDialog = ({ dialog, onSubmitted }) => {
         )}
         <DialogBody name="" menus={menusState} setMenus={setMenus} />
       </>
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 
@@ -585,7 +585,7 @@ const EditDialog = ({
   let roleTypeOptions = useRoleTypeOptions()
 
   return (
-    <HookFormDialog
+    <FormDialog
       onSubmit={(data) => {
         setSubmit({
           menus: pickDisplayMenus(menusState),
@@ -623,7 +623,7 @@ const EditDialog = ({
         )}
         <DialogBody name={name} menus={menusState} setMenus={setMenus} />
       </>
-    </HookFormDialog>
+    </FormDialog>
   )
 }
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field } from "formik"
 import { Heading, Stack, Button, InputField, Set, Text } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"

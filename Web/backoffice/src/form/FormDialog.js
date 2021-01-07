@@ -12,7 +12,7 @@ import { Dialog, Button, Box } from "bumbag"
 import { CancelText, SubmitText } from "../button/ActionButtons"
 import AlertDialog from "../dialog/Alert"
 
-export const HookFormDialog = ({
+export const FormDialog = ({
   defaultValues,
   onSubmit,
   onClickSubmit,
@@ -84,4 +84,4 @@ export const HookFormDialog = ({
   )
 }
 
-export default HookFormDialog
+export default FormDialog

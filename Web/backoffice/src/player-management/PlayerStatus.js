@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Select as _Select, Text } from "bumbag"
-import { Field as _Field } from "../select/Field"
+import { Text } from "bumbag"
 import { useTrans, Trans } from "../i18n"
+import Select from "../select/Select"
 
 const Enabled = "Enabled"
 const EnabledTrans = {
@@ -22,36 +22,13 @@ const InBlacklistTrans = {
   en: "In Blacklist"
 }
 
-//TODO: rm?
-/*
-export const from = (value) => {
-  if (value === EnabledString || value === `${Enabled}`) {
-    return Enabled
-  }
-  if (value === DisabledString || value === `${Disabled}`) {
-    return Disabled
-  }
-  if (value === InBlacklistString || value === `${InBlacklist}`) {
-    return InBlacklist
-  }
-  return value
-}
+export const PlayerStatusSelect = ({ placeholder, ...props }) => {
+  let defaultPlaceholder = useTrans({
+    zh: "状态",
+    en: "Status"
+  })
+  placeholder = placeholder ?? defaultPlaceholder
 
-export const toString = (value) => {
-  switch (value) {
-    case Enabled:
-      return EnabledString
-    case Disabled:
-      return DisabledString
-    case InBlacklist:
-      return InBlacklistString
-    default:
-      return value
-  }
-}
-*/
-
-export const Field = ({ name, required, ...props }) => {
   let options = [
     {
       label: useTrans(EnabledTrans),
@@ -67,18 +44,10 @@ export const Field = ({ name, required, ...props }) => {
     }
   ]
 
-  if (!required) {
-    options = [{ label: "", value: "" }, ...options]
-  }
-
-  return (
-    <_Field name={name} required={required}>
-      {(props) => <_Select options={options} {...props} />}
-    </_Field>
-  )
+  return <Select placeholder={placeholder} options={options} {...props} />
 }
 
-export const Label = ({ value }) => {
+export const PlayerStatusLabel = ({ value }) => {
   let code = value
   switch (code) {
     case Enabled:

@@ -1,32 +1,25 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Formik, Field } from "formik"
-import {
-  Heading,
-  Stack,
-  Box,
-  Button,
-  InputField,
-  Set,
-  useModalState
-} from "bumbag"
+import { useForm, FormProvider, useFormContext } from "react-hook-form"
+import { Heading, Stack, Box, Button, Set, useModalState } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { usePlayerList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Label as StatueLabel } from "../status"
+import { PlayerStatusLabel } from "../PlayerStatus"
 import {
   useIsDisplayMenuByRoute,
   useHasSubMenuByRoute
 } from "../../user/context"
 import { Code } from "./menu"
-import { Field as StatusField } from "../status"
-import { Field as VipLevelField } from "../../vip-levels/Select"
+import { PlayerStatusSelect } from "../PlayerStatus"
+import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import { ViewButton, EditButton } from "./button"
 import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
+import { InputField } from "../../input/Input"
 
 export { Code }
 
@@ -43,19 +36,11 @@ export const CodeContentPair = [Code, Content]
 
 const Body = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable({
-    status: null,
-    vipId: null,
+    status: "",
+    vipId: "",
     username: ""
   })
-  let {
-    pageIndex,
-    pageSize,
-    sortby,
-    orderby,
-    status,
-    vipId,
-    username = ""
-  } = state
+  let { pageIndex, pageSize, status, vipId, username = "" } = state
   let { data = {}, isLoading, isValidating, mutate } = usePlayerList(
     toApiParams(state)
   )
@@ -66,7 +51,7 @@ const Body = () => {
     <PageContent
       title={<Trans zh="玩家列表" en="Players" />}
       actionBar={
-        <SearchForm
+        <SearchBar
           search={(data) => {
             let newState = {
               pageIndex: 0,
@@ -99,36 +84,33 @@ const Body = () => {
   )
 }
 
-const SearchForm = ({ search, isPending, ...props }) => {
+const SearchBar = ({ search, isLoading, ...props }) => {
   let usernameInputPlaceholder = useSearchInputPlaceHolder()
+
+  let formMethods = useForm()
+
+  const onSubmit = (data) => search(data)
+
   return (
-    <Formik
-      initialValues={{ status: "", vipId: "", username: "" }}
-      onSubmit={(data) => {
-        search(data)
-      }}
-    >
-      {(formProps) => (
-        <form onReset={formProps.handleReset} onSubmit={formProps.handleSubmit}>
-          <Set>
-            <StatusField name="status" />
-            <VipLevelField name="vipId" />
-            <Field
-              component={InputField.Formik}
-              name="username"
-              addonAfter={
-                <Button onClick={() => formProps.setFieldValue("username", "")}>
-                  X
-                </Button>
-              }
-              placeholder={usernameInputPlaceholder}
-              autocomplete="off"
-            />
-            <SearchButton isLoading={isPending} />
-          </Set>
-        </form>
-      )}
-    </Formik>
+    <FormProvider {...formMethods}>
+      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <Set>
+          <PlayerStatusSelect name="status" />
+          <VipLevelSelect name="vipId" />
+          <InputField
+            name="username"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("username", "")}>
+                X
+              </Button>
+            }
+            placeholder={usernameInputPlaceholder}
+            autocomplete="off"
+          />
+          <SearchButton isLoading={isLoading} disabled={isLoading} />
+        </Set>
+      </form>
+    </FormProvider>
   )
 }
 
@@ -170,7 +152,7 @@ const useColumns = ({ mutate } = {}) => {
       cell: {
         textAlign: "center"
       },
-      Cell: ({ value }) => <StatueLabel value={value} />
+      Cell: ({ value }) => <PlayerStatusLabel value={value} />
     }
   ]
 

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { Select as _Select } from "bumbag"
-import SelectField from "../../../select/Field"
 import { usePaymentMethodList } from "./client"
 import AlertDialog from "../../../dialog/Alert"
+import { Select as _Select } from "../../../select/Select"
 
 export const Select = ({ required, ...props }) => {
   //TODO: need filters? payment vendor etc.

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useEditPlayerContact } from "./client"
-import { Formik, Field, Form, useFormikContext } from "formik"
+import { FormProvider, useForm } from "react-hook-form"
 import {
   Spinner,
   Stack,
@@ -18,14 +18,12 @@ import {
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
 import { Trans, useTrans } from "../../i18n"
-import {
-  Field as InputField,
-  Email as EmailField,
-  Phone as PhoneField
-} from "../../input/Field"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
+import HookFormInputField from "../../input/Input"
+import EmailInput from "../../input/EmailInput"
+import PhoneInput from "../../input/PhoneInput"
 
 export const Key = "contact"
 
@@ -65,6 +63,16 @@ export const EditPanel = ({
   onClickClose,
   ...props
 }) => {
+  let { phone, email, qq, weChat } = player
+  let formMethods = useForm({
+    defaultValues: {
+      phone: phone ?? "",
+      email: email ?? "",
+      qq: qq ?? "",
+      weChat: weChat ?? ""
+    }
+  })
+
   let [submitData, setSubmit] = useState()
   let { result, error, mutate } = useEditPlayerContact(playerCode, submitData)
   useEffect(() => {
@@ -73,49 +81,48 @@ export const EditPanel = ({
     }
   }, [result])
 
-  const submit = setSubmit
+  const onSubmit = setSubmit
 
   const clearResult = () => setSubmit(null)
-  let { phone, email, qq, weChat } = player
+
   return (
     <TabPanel tabId={Key} {...props}>
+      <FormProvider {...formMethods}>
+        <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+          <Body onClickClose={onClickClose} />
+        </form>
+      </FormProvider>
       {error && <AlertDialog {...error} onClickClose={clearResult} />}
-      <Formik
-        initialValues={{
-          phone: phone ?? "",
-          email: email ?? "",
-          qq: qq ?? "",
-          weChat: weChat ?? ""
-        }}
-        onSubmit={submit}
-      >
-        <Form>
-          <FormBody onClickClose={onClickClose} />
-        </Form>
-      </Formik>
     </TabPanel>
   )
 }
 
-const FormBody = ({ onClickClose }) => {
-  let { submitForm } = useFormikContext()
+const Body = ({ onClickClose }) => {
   return (
     <Stack spacing="major-1" margin="major-1">
       <FieldValues>
         <MobileLabel />
-        <PhoneField name="phone" />
+        <Box>
+          <PhoneInput name="phone" />
+        </Box>
 
         <EmailLabel />
-        <EmailField name="email" />
+        <Box>
+          <EmailInput name="email" />
+        </Box>
 
         <QQLabel />
-        <InputField name="qq" />
+        <Box>
+          <HookFormInputField name="qq" />
+        </Box>
 
         <WeChatLabel />
-        <InputField name="weChat" />
+        <Box>
+          <HookFormInputField name="weChat" />
+        </Box>
       </FieldValues>
       <Box alignX="right">
-        <SubmitCancel onClickSubmit={submitForm} onClickCancel={onClickClose} />
+        <SubmitCancel onClickCancel={onClickClose} />
       </Box>
     </Stack>
   )

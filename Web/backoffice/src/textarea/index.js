@@ -27,13 +27,12 @@ export const HookFormTextarea = ({
   register,
   registerOptions = {},
   textareaRef,
-  errors,
   ...props
 }) => {
   let formContext = useFormContext()
-  register = register ?? formContext.register
+  register = register ?? formContext?.register
 
-  if (!textareaRef) {
+  if (!textareaRef && register) {
     textareaRef = register({
       required: props.required,
       min: props.min,
@@ -45,8 +44,7 @@ export const HookFormTextarea = ({
     })
   }
 
-  errors = errors ?? formContext.errors
-  let error = errors[name]
+  let error = formContext?.errors[name]
   let state = error && "danger"
 
   return (
