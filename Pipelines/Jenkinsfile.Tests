@@ -9,7 +9,8 @@ pipeline {
     stages {
 		stage('initial') {
 			steps {
-				echo "num : ${sh 'git log -1 --pretty=%h'}"
+				echo "num : sh 'git log -1 --pretty=%h'"
+				TAG = sh 'git log -1 --pretty=%h'
 				sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 			}
 		}
