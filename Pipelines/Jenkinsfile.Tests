@@ -2,7 +2,8 @@ pipeline {
     agent any
 	
 	environment {
-		TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}"
+		//TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}"
+		TAG = "${sh (script: 'new Date().format("YYMMdd.HHmm", TimeZone.getTimeZone('UTC'))', returnStdout: true).trim()}"
 		Component = 'backoffice-site'
 		
 	}
@@ -20,7 +21,7 @@ pipeline {
 				sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG}'
 				
 				withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
-					sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:dev --record -n dev"
+					sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG} --record -n dev"
 				}
 			}
         }
