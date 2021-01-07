@@ -2,7 +2,7 @@ pipeline {
     agent any
 	
 	environment {
-		Tag = sh 'git log -1 --pretty=%h'
+
 		Component = 'backoffice-site'
 		
 	}
@@ -16,12 +16,16 @@ pipeline {
 		
 		stage('Checkout SCM') {
 			steps {
-				sh 'sudo docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${Tag} . '
-				sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Componen:${Tag}'
+			    def TAG = sh 'git log -1 --pretty=%h'
 				
 				withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
-						sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${Tag} --record -n dev"
-					}
+						sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:dev --record -n dev"
+				}
+				
+				sh 'sudo docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG} . '
+				sh 'sudo docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Componen:${TAG}'
+				
+
 			}
         }
 	}			
