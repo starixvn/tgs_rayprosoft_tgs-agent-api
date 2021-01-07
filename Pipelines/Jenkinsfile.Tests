@@ -2,7 +2,7 @@ pipeline {
     agent any
 	
 	environment {
-
+		TAG = 'dev'
 		Component = 'backoffice-site'
 		
 	}
@@ -16,8 +16,6 @@ pipeline {
 		
 		stage('Checkout SCM') {
 			steps {
-			    def TAG = sh 'git log -1 --pretty=%h'
-				
 				sh 'docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${TAG} . '
 				sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Componen:${TAG}'
 				
