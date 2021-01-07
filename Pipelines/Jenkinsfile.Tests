@@ -2,15 +2,17 @@ pipeline {
     agent any
 	
 	environment {
-		//TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}"
-		TAG = "${sh (script: 'new Date().format(\''YY-MM-dd_HH-mm\'', TimeZone.getTimeZone('UTC'))', returnStdout: true).trim()}"
+		TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}"
+		//TAG = "${sh (script: 'new Date().format(\''YY-MM-dd_HH-mm\'', TimeZone.getTimeZone('UTC'))', returnStdout: true).trim()}"
 		Component = 'backoffice-site'
 		
 	}
     stages {
 		stage('initial') {
 			steps {
-				echo "num : sh 'git log -1 --pretty=%h'"
+				def now = new Date()
+				TAG = now.format("yyyy-MM-dd_HH-mm")
+
 				sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 			}
 		}
