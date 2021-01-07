@@ -1,27 +1,28 @@
 pipeline {
     agent any
-
+	
+	environment {
+		Tag = sh 'git log -1 --pretty=%h'
+		Component = 'backoffice-site'
+		
+	}
     stages {
-		stage('Test') {
+		stage('initial') {
 			steps {
 				echo "num : ${sh 'git log -1 --pretty=%h'}"
-				echo "current build number: ${currentBuild.number}"
-				echo "previous build number: ${currentBuild.previousBuild.getNumber()}"
-				echo "env build number: ${env.Build_Number}"
+				sh 'sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 			}
 		}
 		
 		stage('Checkout SCM') {
-          steps {
-            checkout([
-              $class: 'GitSCM',
-			  branches: [[name: "*/develop" ]],
-              userRemoteConfigs: [[
-                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
-                credentialsId: 'gitlab-user-pwd',
-              ]]
-             ])
-           }
+			steps {
+				sh 'docker build -f Web\backoffice\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${Tag} . '
+				sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Componen:${Tag}'
+				
+				withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+						sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${Tag} --record -n dev"
+					}
+			}
         }
 	}			
 }
