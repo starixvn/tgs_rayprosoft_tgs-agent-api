@@ -75,6 +75,7 @@ export const MerchantIdSelect = ({
   brandIdName = "brandId",
   onBrandChange,
 
+  required = true,
   ...props
 }) => {
   let { register, setValue, getValues, errors, watch } = useFormContext()
@@ -131,8 +132,8 @@ export const MerchantIdSelect = ({
       {isResellerActive && (
         <Select
           name={resellerIdName}
-          required
-          selectRef={register({ required: true })}
+          required={required}
+          selectRef={register({ required })}
           state={resellerError && "danger"}
           isLoading={isResellerDataLoading}
           options={resellerOptions}
@@ -147,8 +148,8 @@ export const MerchantIdSelect = ({
       {isLicenseeActive && (
         <Select
           name={licenseeIdName}
-          required
-          selectRef={register({ required: true })}
+          required={required}
+          selectRef={register({ required })}
           state={licenseeError && "danger"}
           isLoading={isLicenseeDataLoading}
           options={licenseeOptions}
@@ -162,8 +163,8 @@ export const MerchantIdSelect = ({
       {isBrandActive && (
         <Select
           name={brandIdName}
-          required
-          selectRef={register({ required: true })}
+          required={required}
+          selectRef={register({ required })}
           state={brandError && "danger"}
           isLoading={isBrandDataLoading}
           options={brandOptions}

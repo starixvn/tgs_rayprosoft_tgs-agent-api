@@ -217,14 +217,14 @@ const ActionBar = ({ mutate, onBrandChange }) => {
   return (
     <Flex justifyContent="space-between">
       <Box>
-        {!brandId && (
+        {/* {!brandId && (
           <FormProvider {...formMethods}>
             <MerchantIdSelect
               start={nextRoleType(roleType)}
               onBrandChange={onBrandChange}
             />
           </FormProvider>
-        )}
+        )} */}
       </Box>
       <Box>
         <AddButton onSubmitted={mutate} />

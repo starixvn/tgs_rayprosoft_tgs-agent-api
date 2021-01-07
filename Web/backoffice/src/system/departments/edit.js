@@ -2,7 +2,13 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Stack, Modal, Box } from "bumbag"
 import { Create as CreateMenu, Update as UpdateMenu } from "./menu"
-import { useIsDisplayMenuByRoute } from "../../user/context"
+import {
+  useIsDisplayMenuByRoute,
+  useUserBrandId,
+  useUserLicenseeId,
+  useUserResellerId,
+  useUserRoleType
+} from "../../user/context"
 import { Trans, useTrans } from "../../i18n"
 import { useAddDepartment, useEditDepartment } from "./client"
 import Label from "../../form/Label"
@@ -11,6 +17,8 @@ import Disclosure from "../../dialog/Disclosure"
 import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import FormDialog from "../../form/FormDialog"
 import HookFormInputField from "../../input/Input"
+import { nextRoleType, RoleTypeSelect, useRoleTypeOptions } from "../roles/type"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -32,6 +40,17 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 }
 
 const AddDialog = ({ onSubmitted, dialog, ...props }) => {
+  let formMethods = useForm()
+  let { register, watch, setValue, getValues } = formMethods
+
+  let userRoleType = useUserRoleType()
+  let roleType = watch("roleType")
+  let sameRoleType = userRoleType === roleType
+
+  let userResellerId = useUserResellerId()
+  let userLicenseeId = useUserLicenseeId()
+  let userBrandId = useUserBrandId()
+
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useAddDepartment(submitData)
 
@@ -44,8 +63,11 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
     en: "Add Department"
   })
 
+  let roleTypeOptions = useRoleTypeOptions()
+
   return (
     <FormDialog
+      formMethods={formMethods}
       defaultValues={{
         name: ""
       }}
@@ -57,8 +79,28 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
+      minWidth="50vw"
+      maxWidth="unset"
     >
-      <EditBody />
+      <>
+        {roleTypeOptions.length > 1 && (
+          <FieldValues margin="major-1">
+            <Label name="roleType">
+              <Trans zh="类型" en="Type" />
+            </Label>
+            <Box>
+              <MerchantIdSelect
+                required={false}
+                start={nextRoleType(userRoleType)}
+                resellerId={userResellerId}
+                licenseeId={userLicenseeId}
+                brandId={userBrandId}
+              />
+            </Box>
+          </FieldValues>
+        )}
+        <EditBody />
+      </>
     </FormDialog>
   )
 }
