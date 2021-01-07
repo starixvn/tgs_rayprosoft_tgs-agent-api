@@ -1142,9 +1142,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     UpdatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     UpdatedByUsername = table.Column<string>(type: "nvarchar(32)", nullable: false),
-                    ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ResellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LicenseeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -67,8 +67,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
+            var q = _queries.GetQueries();
             return _queries.GetQueries()
-                .Where(x => x.Id == request.BrandId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
                 .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
                 .Where(BrandId != null, l => l.BrandId == BrandId)
@@ -78,6 +79,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
+                    BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
                     Remarks = a.Remarks,
