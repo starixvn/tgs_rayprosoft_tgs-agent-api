@@ -24,14 +24,12 @@ pipeline {
 				script {
 					def arr = params['Components'].split(",") 
 					print 'arr.length : ' + arr.length
-					for (i = 1;i <= arr.length; i++) {
+					for (i = 0;i < arr.length; i++) {
 						println arr[i]
 						def data = arr[i].split("::")
 						
-						println data[0]
-						
 						sh "docker build -f ${data[0]}/Dockerfile -t ${Registry}${Component}:${TAG} . "
-						sh 'docker push ${Registry}${data[1]}:${TAG}'
+						sh "docker push ${Registry}${data[1]}:${TAG}"
 						
 						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
 							sh "kubectl set image deployment/${data[1]} ${data[1]}=${Registry}${data[1]}:${TAG} --record -n ${params.Env}"
