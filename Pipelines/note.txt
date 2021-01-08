@@ -1,0 +1,15 @@
+Web\backoffice::backoffice-site,
+Apis\BackendOffice::backoffice-api,
+Web\mocksite::mocksite,
+Apis\OperatorApi\::operator-api,
+Apis\GlobalApi::global-api,
+Apis\LogApi::log-api,
+Apis\FileService::file-service,
+Apis\TgsApi::game-sbo
+
+
+backoffice-site,backoffice-api,mocksite,operator-api,global-api,log-api,file-service,game-sbo
+
+
+
+Web\backoffice::backoffice-site,Apis\BackendOffice::backoffice-api,Web\mocksite::mocksite,Apis\OperatorApi\::operator-api,Apis\GlobalApi::global-api,Apis\LogApi::log-api,Apis\FileService::file-service,Apis\TgsApi::game-sbo
