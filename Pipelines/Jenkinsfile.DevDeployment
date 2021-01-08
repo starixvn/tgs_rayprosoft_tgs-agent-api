@@ -2,9 +2,7 @@ pipeline {
     agent any
 	
 	environment {
-		ENV = "dev"
 		TAG = sh(script: "echo ${ENV}-`date +%m%d%H%M`", returnStdout: true).trim()
-		Component = 'backoffice-site'
 		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
 	}
     stages {
@@ -28,7 +26,7 @@ pipeline {
 						println arr[i]
 						def data = arr[i].split("::")
 						
-						sh "docker build -f ${data[0]}/Dockerfile -t ${Registry}${Component}:${TAG} . "
+						sh "docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} . "
 						sh "docker push ${Registry}${data[1]}:${TAG}"
 						
 						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
