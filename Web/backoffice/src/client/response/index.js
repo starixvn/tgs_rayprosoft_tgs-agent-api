@@ -1,6 +1,7 @@
+const UnauthorizedStatus = 401
 export const toDataOrError = (response) => {
   if (!response?.ok) {
-    if (response.statusText === "Unauthorized") {
+    if (response.status === UnauthorizedStatus) {
       location.href = "/login"
     } else {
       return response

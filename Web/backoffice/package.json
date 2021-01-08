@@ -54,7 +54,7 @@
     "react-table": "^7.6.2",
     "snowpack": "^2.18.5",
     "super-expressive": "^1.4.0",
-    "swr": "^0.3.11",
+    "swr": "^0.4.0",
     "tinymce": "^5.5.1"
   }
 }
