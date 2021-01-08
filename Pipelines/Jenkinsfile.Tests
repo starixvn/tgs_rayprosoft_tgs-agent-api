@@ -3,7 +3,7 @@ pipeline {
 	
 	environment {
 		ENV = "dev"
-		TAG = sh(script: "echo `date +%m%d%H%M`-${ENV}", returnStdout: true).trim()
+		TAG = sh(script: "echo ${ENV}-`date +%m%d%H%M`", returnStdout: true).trim()
 		Component = 'backoffice-site'
 		
 	}
