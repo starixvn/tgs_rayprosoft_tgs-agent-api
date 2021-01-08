@@ -4,7 +4,7 @@ pipeline {
     stages {	
 		stage('Building image') {
 			steps {
-				print "Tag:${params.Env}-${params.Version}" + 
+				print "Tag:${params.Env}-${params.Version}"
 				print 'Components:' + params['Components']
 				print 'Env:' + params.Env
 				
