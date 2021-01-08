@@ -26,7 +26,9 @@ pipeline {
 					print 'arr.length : ' + arr.length
 					for (i = 1;i <= arr.length; i++) {
 						println arr[i]
-						def data = "${arr[i]}".split("::")
+						def data = arr[i].split("::")
+						
+						println data[0]
 						
 						sh 'docker build -f ${data[0]}/Dockerfile -t ${Registry}${Component}:${TAG} . '
 						sh 'docker push ${Registry}${data[1]}:${TAG}'
