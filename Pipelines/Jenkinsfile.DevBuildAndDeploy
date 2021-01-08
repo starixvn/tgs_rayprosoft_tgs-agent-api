@@ -1,42 +1,40 @@
 pipeline {
     agent any
+	
+	environment {
+		TAG = sh(script: "echo ${ENV}-`date +%m%d%H%M`", returnStdout: true).trim()
+		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
+	}
     stages {
-        stage('Checkout SCM') {
-          steps {
-		    echo "branch:" + ${params.branch}
-            checkout([
-              $class: 'GitSCM',
-			  branches: [[name: "*/${params.branch}" ]],
-              userRemoteConfigs: [[
-                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
-                credentialsId: 'gitlab-user-pwd',
-              ]]
-             ])
-           }
+		stage('initial') {
+			steps {
+				script {
+					sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
+				}
+			}
+		}
+		
+		stage('Building image') {
+			steps {
+				print 'Components:' + params['Components']
+				print 'Env:' + params.Env
+				
+				script {
+					def arr = params['Components'].split(",") 
+					print 'arr.length : ' + arr.length
+					for (i = 0;i < arr.length; i++) {
+						println arr[i]
+						def data = arr[i].split("::")
+						
+						sh "docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} . "
+						sh "docker push ${Registry}${data[1]}:${TAG}"
+						
+						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+							sh "kubectl set image deployment/${data[1]} ${data[1]}=${Registry}${data[1]}:${TAG} --record -n ${params.Env}"
+						}
+					}					
+				}
+			}
         }
-		stage('Restore packages'){
-			steps{
-				sh "dotnet restore tgs.sln"
-				echo "restore tgs.sln"
-			  }
-		}
-		stage('Build') {
-			steps {
-				sh "dotnet build tgs.sln"
-				echo "build solution"
-			}
-		}
-		stage('Docker Login') {
-			steps {
-				sh  "docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p oD2cksJhGN1tgUuaE6C9"  
-				echo "test tgs.sln"
-			}
-		}
-		stage('Coder') {
-			steps {
-				sh  "dotcover()"  
-				echo "dotcover tgs.sln"
-			}
-		}
-    }
+	}			
 }
