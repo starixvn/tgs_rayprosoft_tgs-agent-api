@@ -1,32 +1,19 @@
 pipeline {
     agent any
 	
-	//script {
-	//	DATE_TAG = java.time.LocalDate.now()
-	//	DATETIME_TAG = java.time.LocalDateTime.now()
-	//}
 	environment {
-		//TAG = "${sh (script: 'git log -1 --pretty=%h', returnStdout: true).trim()}" OK
-		//TAG = "${sh (script: 'new Date().format(\''YY-MM-dd_HH-mm\'', TimeZone.getTimeZone('UTC'))', returnStdout: true).trim()}"
-
-		//script {
-		//	set TAG = new Date().format("yyyy-MM-dd_HH-mm")
-		//	echo "Tag: ${TAG}"
-		//	sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
-	    //}
-
-		TIMESTAMP = new java.text.SimpleDateFormat('yyyyMMddHHmmss').format(new Date())
-		//def TAG = sh(script: "echo `new Date().format('YY-MM-dd_HH-mm', TimeZone.getTimeZone('UTC'))`", returnStdout: true).trim()
+		ENV = "dev"
+		TAG = sh(script: "echo ${ENV}-`date +%m%d%H%M`", returnStdout: true).trim()
 		Component = 'backoffice-site'
-		
+		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
 	}
     stages {
 		stage('initial') {
 			steps {
 				script {
-					def now = new Date()
-					TAG = now.format("yyyy-MM-dd_HH-mm")
-					echo "Tag: ${TAG}"
+					//def now = new Date()
+					//TAG = now.format("yyyy-MM-dd_HH-mm")
+					//echo "Tag: ${TAG}"
 					sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 				}
 			}
@@ -35,11 +22,11 @@ pipeline {
 		stage('Checkout SCM') {
 			steps {
 				script {
-					sh 'docker build -f Web/backoffice/Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${env.TIMESTAMP} . '
-					sh 'docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${env.TIMESTAMP}'
+					sh 'docker build -f Web/backoffice/Dockerfile -t ${Registry}${Component}:${TAG} . '
+					sh 'docker push ${Registry}${Component}:${TAG}'
 				
 					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
-						sh "kubectl set image deployment/${Component} ${Component}=registry.gitlab.com/rayprosoft/turnkey-gaming-system/${Component}:${env.TIMESTAMP} --record -n dev"
+						sh "kubectl set image deployment/${Component} ${Component}=${Registry}${Component}:${TAG} --record -n ${ENV}"
 					}
 				}
 			}
