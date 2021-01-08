@@ -22,8 +22,8 @@ pipeline {
 		stage('Checkout SCM') {
 			steps {
 				script {
-					sh 'docker build -f Web/backoffice/Dockerfile -t {Registry}${Component}:${TAG} . '
-					sh 'docker push {Registry}${Component}:${TAG}'
+					sh 'docker build -f Web/backoffice/Dockerfile -t ${Registry}${Component}:${TAG} . '
+					sh 'docker push ${Registry}${Component}:${TAG}'
 				
 					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
 						sh "kubectl set image deployment/${Component} ${Component}=${Registry}${Component}:${TAG} --record -n ${ENV}"
