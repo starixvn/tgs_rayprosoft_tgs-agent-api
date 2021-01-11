@@ -264,6 +264,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var fixture = new Fixture();
             fixture.Customize<StationLetter>(u => u
                 .With(s => s.Players, new StationLetterPlayer[] { })
+                .With(s => s.Brand, new Brand())
             );
             return fixture;
         }
@@ -290,6 +291,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
                 .With(s => s.Wallets, new[] {new Wallet {Balance = 0}})
+                .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
                 .With(s => s.SportsBetLimits, new PlayerSportsBetLimit[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
