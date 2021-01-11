@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
@@ -177,8 +178,46 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Update_Role()
         {
-            var role = CreateRoleFixture().Create<Role>();
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(105)
+                .AsQueryable()
+                .BuildMock().Object;
+            var count = roles.Count(x => x.MenuSetting == null);
+            var firstId = roles.First().Id;
+            var index = 0;
+
+            var random = new Random(DateTime.Now.Millisecond);
+            var roleNumber = random.Next(0, 105);
+            var role = new Role();
+            await roles.ForEachAsync(x =>
+            {
+                if (firstId == x.Id)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                }
+
+                if (roleNumber == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Admin;
+                    role = x;
+                }
+
+                index++;
+            });
+
             var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -187,15 +226,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(false));
 
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
             var response = await _controller.UpdateAsync(role.Id, request);
 
             response.Valid.Should().BeTrue();
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
-            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)));
+            _roleCommandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<Role[]>(r =>
+                r.Length == roles.Count())));
         }
 
         [Test]
@@ -497,7 +537,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Role>(u => u
-                .With(s => s.Users, new User[] { }));
+                .With(s => s.Users, new User[] { })
+                .With(s => s.MenuSetting));
             return fixture;
         }
 

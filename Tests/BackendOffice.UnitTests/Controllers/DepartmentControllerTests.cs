@@ -232,7 +232,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Department>(u => u
-                .With(s => s.Users, new User[] { }));
+                .With(s => s.Users, new User[] { })
+                .With(s => s.Reseller, new Reseller())
+                .With(s => s.Licensees, new Licensee())
+                .With(s => s.Brands, new Brand()));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }
