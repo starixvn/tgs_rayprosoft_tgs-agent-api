@@ -1,6 +1,9 @@
 pipeline {
     agent any
 	
+	environment {
+		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
+	}
     stages {	
 		stage('Building image') {
 			steps {
