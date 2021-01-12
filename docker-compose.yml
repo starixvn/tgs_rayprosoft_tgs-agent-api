@@ -300,6 +300,39 @@ services:
       - ./.docker/localstack/data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./localstack/bin:/docker-entrypoint-initaws.d
+      
+  postgres:
+    build:
+      context: .
+      dockerfile: Core/DataServices.Base/Dockerfile
+    image: postgres_container
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tgs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1qaz2wsx!@}
+      PGDATA: /data/postgres
+    volumes:
+      - ./.docker/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - tgs
+    restart: unless-stopped
+  
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-raypro@rayprosoft.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-1qaz2wsx!@}
+    volumes:
+      - ./.docker/pgadmin/data:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - tgs
+    restart: unless-stopped
+    
 networks:
   tgs:
     driver: bridge
