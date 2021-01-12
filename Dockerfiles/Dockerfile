@@ -3,7 +3,7 @@ FROM postgres:12
 RUN apt-get update \
     &&  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
 	
-RUN TZ=Asia/Singapore \
+RUN TZ=Asia/Taipei \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone \
     && dpkg-reconfigure -f noninteractive tzdata
