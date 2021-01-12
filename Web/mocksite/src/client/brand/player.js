@@ -1,13 +1,44 @@
 import useSWR, { cache } from "swr"
 import { toDataOrError } from "../response"
 import { useBrandToken } from "./index"
+import { intValue as playerTypeIntValue } from "../../brand/player/PlayerType"
+import { fromInt } from "../../brand/player/PlayerStatus"
+import { handleError } from "../Error"
+import { DefaultSettings as PaginationDefaultSettings } from "../pagination"
 
-export const useBrandPlayerList = ({ brandCode, currency }) => {
-  //TODO:
+export const useBrandPlayerList = (formData) => {
+  let page = formData?.page ?? PaginationDefaultSettings?.page
+  let rows = formData?.rows ?? PaginationDefaultSettings?.rows
+
+  let keys = formData
+    ? `/global-api/brand/players/mocksite?brandcode=${
+        formData.brandCode
+      }&currency=${formData.currency}&playertype=${playerTypeIntValue(
+        formData.playerType
+      )}&page=${page}&rows=${rows}`
+    : undefined
+  let { data: result, error, ...rest } = useSWR(keys, (url) =>
+    fetch(url)
+      .then(toDataOrError)
+      .then((data) => ({
+        ...data,
+        items: data.items.map((player) => ({
+          ...player,
+          status: fromInt(player.status)
+        }))
+      }))
+  )
+
+  return {
+    result,
+    error,
+    isLoading: !result && !error && keys,
+    ...rest
+  }
 }
 
 export const useCreatePlayer = ({ brandCode, currency }, formData) => {
-  let { token: brandToken, mutate: mutateBrandToken } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
@@ -27,11 +58,7 @@ export const useCreatePlayer = ({ brandCode, currency }, formData) => {
       body: JSON.stringify(formData)
     })
       .then(toDataOrError)
-      .catch((error) => {
-        console.log("TODO: auto retry after get new brand token?")
-        mutateBrandToken()
-        return Promise.reject(error)
-      })
+      .catch(handleError({ brandTokenHook }))
   })
 
   return {
@@ -42,32 +69,31 @@ export const useCreatePlayer = ({ brandCode, currency }, formData) => {
   }
 }
 
-export const useCheckPlayerUsername = ({ brandCode, currency }, formData) => {
-  let { token: brandToken, mutate: mutateBrandToken } = useBrandToken({
+export const useCheckPlayerUsername = ({ brandCode, currency }, userName) => {
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
 
   let keys =
-    brandToken && formData
-      ? [`/api/Player/checkUsername`, formData, brandCode, currency]
+    brandToken && userName
+      ? [
+          `/api/Player/checkUsername?username=${userName}`,
+          userName,
+          brandCode,
+          currency
+        ]
       : undefined
 
   let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
     return fetch(url, {
-      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brandToken}`
-      },
-      body: JSON.stringify(formData)
+      }
     })
       .then(toDataOrError)
-      .catch((error) => {
-        console.log("TODO: auto retry after get new brand token?")
-        mutateBrandToken()
-        return Promise.reject(error)
-      })
+      .catch(handleError({ brandTokenHook }))
   })
 
   return {
@@ -91,7 +117,7 @@ export const usePlayerToken = (
   { brandCode, currency, username } = {},
   data
 ) => {
-  let { token: brandToken, mutate: mutateBrandToken } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
@@ -145,6 +171,7 @@ export const usePlayerToken = (
           cache.set(ResultCacheKey, result)
           return result
         })
+        .catch(handleError({ brandTokenHook }))
     },
     {
       initialData: keys && cached?.token ? cached : undefined
@@ -155,7 +182,6 @@ export const usePlayerToken = (
     token: result?.token,
     isLoading: keys && !result && !error,
     error,
-    mutate: mutateBrandToken,
     mutate: (data, shouldRevalidate) => {
       cache.delete(keys)
       cache.delete(ResultCacheKey)
@@ -171,7 +197,7 @@ export const usePlayerToken = (
 }
 
 export const useLogout = ({ brandCode, currency, username }, playerToken) => {
-  let { token: brandToken, deleteCache: deleteBrandCache } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
@@ -185,7 +211,7 @@ export const useLogout = ({ brandCode, currency, username }, playerToken) => {
   }
   let { data: result, ...rest } = useSWR(keys, (url, brandToken, playerToken) =>
     fetch(url, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brandToken}`,
@@ -193,10 +219,7 @@ export const useLogout = ({ brandCode, currency, username }, playerToken) => {
       }
     })
       .then(toDataOrError)
-      .then((result) => {
-        deletePlayerTokenCache({ brandCode, currency, username })
-        return result
-      })
+      .catch(handleError({ brandTokenHook }))
   )
 
   return {
@@ -211,7 +234,10 @@ export const useLogout = ({ brandCode, currency, username }, playerToken) => {
 }
 
 export const useCaptcha = ({ brandCode, currency }) => {
-  let { token: brandToken } = useBrandToken({ brandCode, currency })
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
+    brandCode,
+    currency
+  })
   let keys = brandToken ? [`/api/player/captcha`, brandCode] : undefined
 
   let { data = {}, ...rest } = useSWR(keys, (url, brandCode) =>
@@ -220,7 +246,9 @@ export const useCaptcha = ({ brandCode, currency }) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brandToken}`
       }
-    }).then(toDataOrError)
+    })
+      .then(toDataOrError)
+      .catch(handleError({ brandTokenHook }))
   )
 
   return {
@@ -230,11 +258,11 @@ export const useCaptcha = ({ brandCode, currency }) => {
 }
 
 export const usePlayerInfo = ({ brandCode, currency, username } = {}) => {
-  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
-  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+  let { token: playerToken, ...playerTokenHook } = usePlayerToken({
     brandCode,
     username,
     currency
@@ -252,7 +280,9 @@ export const usePlayerInfo = ({ brandCode, currency, username } = {}) => {
         Authorization: `Bearer ${brandToken}`,
         Token: playerToken
       }
-    }).then(toDataOrError)
+    })
+      .then(toDataOrError)
+      .catch(handleError({ brandTokenHook, playerTokenHook }))
   })
 
   return {
@@ -265,11 +295,11 @@ export const useUpdatePlayerInfo = (
   { brandCode, currency, username } = {},
   formData
 ) => {
-  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
-  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+  let { token: playerToken, ...playerTokenHook } = usePlayerToken({
     brandCode,
     username,
     currency
@@ -280,7 +310,7 @@ export const useUpdatePlayerInfo = (
       ? [`/api/player/update`, brandCode, currency, username, formData]
       : undefined
 
-  let { data: result, ...rest } = useSWR(
+  let { data: result, error, ...rest } = useSWR(
     keys,
     (url, brandCode, currency, username, formData) => {
       return fetch(url, {
@@ -291,13 +321,16 @@ export const useUpdatePlayerInfo = (
           Token: playerToken
         },
         body: JSON.stringify(formData)
-      }).then(toDataOrError)
+      })
+        .then(toDataOrError)
+        .catch(handleError({ brandTokenHook, playerTokenHook }))
     }
   )
 
   return {
     result,
-    isLoading: keys && !result,
+    error,
+    isLoading: keys && !result && !error,
     ...rest
   }
 }
@@ -306,11 +339,11 @@ export const useChangePlayerPassword = (
   { brandCode, currency, username } = {},
   formData
 ) => {
-  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
-  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+  let { token: playerToken, ...playerTokenHook } = usePlayerToken({
     brandCode,
     username,
     currency
@@ -332,7 +365,9 @@ export const useChangePlayerPassword = (
           Token: playerToken
         },
         body: JSON.stringify(formData)
-      }).then(toDataOrError)
+      })
+        .then(toDataOrError)
+        .catch(handleError({ brandTokenHook, playerTokenHook }))
     }
   )
 

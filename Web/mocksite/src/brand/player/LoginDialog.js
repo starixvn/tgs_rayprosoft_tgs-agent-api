@@ -86,12 +86,14 @@ const LoginDialog = ({
     auto ? undefined : { bypassCaptcha: false }
   )
 
+  /*
   let {
     image,
     answer: captcha,
     isLoading: isLoadingCaptcha,
     mutate: mutateCaptcha
   } = useCaptcha(dialog.visible ? { brandCode, currency } : undefined)
+  */
   let { token, error, isLoading, mutate } = usePlayerToken(
     dialog.visible ? { brandCode, currency, username } : undefined,
     fromData
@@ -110,8 +112,8 @@ const LoginDialog = ({
   }, [token])
 
   const errorDialog = Modal.useState()
-  const PasswordError = 30
-  const CaptchaAnsError = 31
+  const PasswordError = 103
+  // const CaptchaAnsError = 31
   useEffect(() => {
     if (error && !token) {
       if (fromData?.username) {
@@ -128,12 +130,14 @@ const LoginDialog = ({
           shouldFocus: true
         })
       }
+      /*
       if (error.err === CaptchaAnsError) {
         setError("answer", {
           type: "answer",
           shouldFocus: true
         })
       }
+      */
     }
   }, [error])
 
@@ -166,7 +170,7 @@ const LoginDialog = ({
                 label="Password"
                 defaultValue={DefaultPassword}
               />
-              <InputField
+              {/* <InputField
                 name="answer"
                 inputRef={register({ required: true })}
                 state={errors.answer ? "danger" : ""}
@@ -194,7 +198,7 @@ const LoginDialog = ({
                     )}
                   </Button>
                 }
-              />
+              /> */}
             </FieldStack>
           </Stack>
         </form>

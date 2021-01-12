@@ -36,9 +36,13 @@ const Sidebar = () => {
 }
 
 const BrandNav = ({ brand }) =>
-  brand?.code ? (
-    <SideNav.Item use={Link} to={`/${brand?.code}`} navId={`${brand?.code}`}>
-      {brand?.code}
+  brand?.brandCode ? (
+    <SideNav.Item
+      use={Link}
+      to={`/${brand?.brandCode}`}
+      navId={`${brand?.brandCode}`}
+    >
+      {brand?.brandCode}
     </SideNav.Item>
   ) : undefined
 

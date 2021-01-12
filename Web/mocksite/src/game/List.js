@@ -81,7 +81,7 @@ const GameRow = ({
   return (
     <Table.Row>
       <Table.Cell>{game.name}</Table.Cell>
-      <Table.Cell>{game.isactive?.toString()}</Table.Cell>
+      <Table.Cell>{game.status}</Table.Cell>
       <Table.Cell>
         <LaunchGameButton
           game={game}
@@ -144,7 +144,9 @@ const LaunchGameButton = ({
         onClick={(event) => {
           setSubmit({
             gameProviderCode: gameProviderCode,
-            gameCode: game?.code
+            gameCode: game?.code,
+            gameId: game?.id,
+            language
           })
 
           let win = window.open()

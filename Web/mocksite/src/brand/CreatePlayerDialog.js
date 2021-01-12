@@ -35,13 +35,20 @@ import {
   useCreatePlayer
 } from "../client/brand/player"
 
-export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
+export const CreatePlayerDialog = ({
+  brandCode,
+  currency,
+  dialog,
+  onPlayerCreated
+}) => {
+  /*
   let {
     image,
     answer: captcha,
     isLoading: isLoadingCaptcha,
     mutate: mutateCaptcha
   } = useCaptcha({ brandCode, currency })
+  */
 
   let {
     register,
@@ -51,6 +58,8 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
     errors,
     clearErrors
   } = useForm()
+  let isTestPlayer = watch("testplayer")
+  let isAgent = watch("agent")
   let [formData, setSubmit] = useState()
   let { result, error, isLoading } = useCreatePlayer(
     { brandCode, currency },
@@ -65,6 +74,7 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
   useEffect(() => {
     if (result) {
       dialog.hide()
+      onPlayerCreated?.()
     }
   }, [result])
 
@@ -110,12 +120,7 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
           onChange={(event) => {
             let username = event.target.value
             if (username) {
-              setCheckUsernameFormData({
-                username,
-                bypasscaptcha: true,
-                answer: "answer",
-                captcha: "captcha"
-              })
+              setCheckUsernameFormData(username)
             } else {
               mutate(undefined, false)
               clearErrors("")
@@ -125,12 +130,22 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
           validationText={errors?.username?.message}
           inputRef={register}
           label="Username"
-          addonBefore={
-            <Button isStatic>
-              <Checkbox name="agent" checkboxRef={register} label="Agent" />
-            </Button>
-          }
         />
+        <FieldStack orientation="horizontal">
+          <CheckboxField
+            name="testplayer"
+            defaultChecked={true}
+            checkboxRef={register}
+            label="Test Player"
+            checkboxLabel={isTestPlayer ? "Yes" : "No"}
+          />
+          <CheckboxField
+            name="agent"
+            checkboxRef={register}
+            label="Agent"
+            checkboxLabel={isAgent ? "Yes" : "No"}
+          />
+        </FieldStack>
         <InputField name="pwd" inputRef={register} label="Password" />
         <InputField
           name="confirmpwd"
@@ -146,7 +161,7 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
           inputRef={register}
           label="Invitation code"
         />
-        <InputField
+        {/* <InputField
           name="answer"
           inputRef={register({ required: true })}
           state={errors.answer ? "danger" : ""}
@@ -174,7 +189,7 @@ export const CreatePlayerDialog = ({ brandCode, currency, dialog }) => {
               )}
             </Button>
           }
-        />
+        /> */}
         {error && (
           <Modal.Backdrop zIndex="19900410" {...errorDialog}>
             <Dialog.Modal

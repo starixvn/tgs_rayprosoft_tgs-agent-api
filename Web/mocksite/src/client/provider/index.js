@@ -3,16 +3,18 @@ import { toDataOrError } from "../response"
 import { useBrandToken } from "../brand"
 import { usePlayerToken } from "../brand/player"
 import { toValue as toPlatformType } from "../../platform"
+import { gameStatusFromInt } from "../../game/GameStatus"
+import { handleError } from "../Error"
 
 export const useGameProviderList = (
   { brandCode, username, currency } = {},
   { platform, language } = {}
 ) => {
-  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
-  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+  let { token: playerToken, ...playerTokenHook } = usePlayerToken({
     brandCode,
     username,
     currency
@@ -21,43 +23,28 @@ export const useGameProviderList = (
   let keys =
     brandToken && playerToken && platform && language && currency
       ? [
-          `/api/gameProvider/list`,
+          `/api/gameProvider/list?platformtype=${toPlatformType(
+            platform
+          )}&language=${language}&currency=${currency}`,
           brandCode,
-          username,
-          platform,
-          language,
-          currency
+          username
         ]
       : undefined
 
-  let { data = {}, ...rest } = useSWR(
-    keys,
-    (url, brandCode, username, platform, language, currency) => {
-      return fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${brandToken}`,
-          Token: playerToken
-        },
-        body: JSON.stringify({
-          platformtype: toPlatformType(platform),
-          language,
-          currency
-        })
-      })
-        .then(toDataOrError)
-        .catch((error) => {
-          console.log("TODO: auto retry after get new brand token?")
-          mutatePlayerTokenCache()
-          mutateBrandTokenCache()
-          return Promise.reject(error)
-        })
-    }
-  )
+  let { data = {}, ...rest } = useSWR(keys, (url, brandCode, username) => {
+    return fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brandToken}`,
+        Token: playerToken
+      }
+    })
+      .then(toDataOrError)
+      .catch(handleError({ brandTokenHook, playerTokenHook }))
+  })
 
   return {
-    items: data?.gameproviders,
+    items: data?.data,
     ...rest
   }
 }
@@ -66,11 +53,11 @@ export const useGameList = (
   { brandCode, username, currency },
   { gameProviderCode, platform, language }
 ) => {
-  let { token: brandToken, mutate: mutateBrandTokenCache } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
-  let { token: playerToken, mutate: mutatePlayerTokenCache } = usePlayerToken({
+  let { token: playerToken, ...playerTokenHook } = usePlayerToken({
     brandCode,
     username,
     currency
@@ -84,13 +71,11 @@ export const useGameList = (
     language &&
     currency
       ? [
-          `/api/game/list`,
+          `/api/game/list?gpcode=${gameProviderCode}&platformtype=${toPlatformType(
+            platform
+          )}&language=${language}&currency=${currency}`,
           brandToken,
-          playerToken,
-          gameProviderCode,
-          platform,
-          language,
-          currency
+          playerToken
         ]
       : undefined
 
@@ -106,33 +91,26 @@ export const useGameList = (
       currency
     ) => {
       return fetch(url, {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${brandToken}`,
           Token: playerToken
-        },
-        body: JSON.stringify({
-          gpcode: gameProviderCode,
-          platformtype: toPlatformType(platform),
-          language,
-          currency
-        })
+        }
       })
         .then(toDataOrError)
-        .catch((error) => {
-          console.log("TODO: which token expired?")
-          mutateBrandTokenCache()
-          mutatePlayerTokenCache()
-
-          console.error("TODO: mutate token when 401 error")
-          return Promise.reject(error)
-        })
+        .then(({ data = [], ...rest }) => ({
+          ...rest,
+          items: data.map(({ status, ...game }) => ({
+            ...game,
+            status: gameStatusFromInt(status)
+          }))
+        }))
+        .catch(handleError({ brandTokenHook, playerTokenHook }))
     }
   )
 
   return {
-    items: data?.games ?? [],
+    items: data?.items ?? [],
     ...rest
   }
 }

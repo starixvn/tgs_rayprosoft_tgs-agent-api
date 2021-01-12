@@ -1,5 +1,6 @@
 import useSWR, { cache } from "swr"
 import { toDataOrError } from "../response"
+import { handleError } from "../Error"
 
 export const useBrandToken = ({ brandCode, currency }) => {
   let apiKey = useApiKey(brandCode)
@@ -50,23 +51,59 @@ export const useBrandToken = ({ brandCode, currency }) => {
   }
 }
 
-const brands = [
-  {
-    code: "TGS",
-    apiKey: "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV"
-  },
-  {
-    code: "GPI",
-    apiKey: "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ"
-  }
-]
-
 const useApiKey = (code) => {
-  let brand = brands.find((brand) => brand.code === code)
-
-  return brand?.apiKey ?? ""
+  let brands = useBrands()
+  return brands.find((brand) => brand.brandCode === code)?.apiKey ?? ""
 }
 
 export const useBrands = () => {
-  return brands
+  //TODO: paging required?
+  let url = `/global-api/brand/apikeys?showAll=true`
+
+  const CacheKey = url
+  let brands = cache.get(CacheKey) ?? undefined
+
+  let { data } = useSWR(
+    url,
+    (url) =>
+      fetch(url)
+        .then(toDataOrError)
+        .then((data) => {
+          let brands = data?.items
+          cache.set(CacheKey, brands)
+          return brands
+        }),
+    { initialData: brands }
+  )
+
+  return data ?? []
+}
+
+export const useBrandAnnouncementList = ({ brandCode, currency }) => {
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
+    brandCode,
+    currency
+  })
+
+  let keys =
+    brandToken && currency
+      ? [`/api/announcement/list`, brandCode, currency]
+      : undefined
+  let { data: result, error, ...rest } = useSWR(keys, (url) =>
+    fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brandToken}`
+      }
+    })
+      .then(toDataOrError)
+      .catch(handleError({ brandTokenHook }))
+  )
+
+  return {
+    items: result?.data,
+    error,
+    isLoading: keys && !result && !error,
+    ...rest
+  }
 }

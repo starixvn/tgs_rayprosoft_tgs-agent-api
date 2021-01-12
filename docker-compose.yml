@@ -237,6 +237,10 @@ services:
       dockerfile: Apis/GlobalApi/Dockerfile
     image: global-api
     container_name: global-api
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.global-api.rule=Host(`mocksite.localhost`) && PathPrefix(`/global-api`)
+      - traefik.http.routers.global-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
     # For crash debug

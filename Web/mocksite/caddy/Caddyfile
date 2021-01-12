@@ -12,6 +12,18 @@
 # Set this path to your site's directory.
 root * /usr/share/caddy
 
+@static {
+    method GET
+    path /
+    path *.html 
+    path *.js
+    path *.css
+    path *.ico
+}
+
+# https://ashton.codes/set-cache-control-max-age-1-year/#:~:text=It's%20standard%20practice%20to%20set,seconds%2C%20which%20is%20one%20year.
+header @static +Cache-Control "public, max-age=31536000, must-revalidate"
+
 @try_files {
     not path /api/* /healthcheck
     file {

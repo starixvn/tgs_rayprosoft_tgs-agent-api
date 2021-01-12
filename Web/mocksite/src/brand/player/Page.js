@@ -50,6 +50,7 @@ import {
 } from "../../client/brand/player"
 import { useForm } from "react-hook-form"
 import { ChangePasswordDialog } from "./ChangePasswordDialog"
+import { EditPlayerInfoDialog } from "./InfoDialog"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
   return (
@@ -146,7 +147,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username }) => {
         </Button>
       </DropdownMenu>
       {viewInfoDialog.visible && (
-        <ViewInfoDialog
+        <playerInfoDialog
           brandCode={brandCode}
           currency={currency}
           username={username}
@@ -154,7 +155,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username }) => {
         />
       )}
       {editInfoDialog.visible && (
-        <EditInfoDialog
+        <EditPlayerInfoDialog
           brandCode={brandCode}
           currency={currency}
           username={username}
@@ -192,117 +193,6 @@ const PlayerMenu = ({
       </DropdownMenu.Item>
       <DropdownMenu.Item onClick={logout}>Logout</DropdownMenu.Item>
     </>
-  )
-}
-
-const ViewInfoDialog = ({ brandCode, currency, username, dialog }) => {
-  let { data = {} } = usePlayerInfo({ brandCode, currency, username })
-  return (
-    <Dialog.Modal title={username} showCloseButton {...dialog}>
-      <Stack>
-        <FieldStack orientation="horizontal">
-          <FieldWrapper label="Username">
-            <Text.Block>{data?.username}</Text.Block>
-          </FieldWrapper>
-          <FieldWrapper label="Realname">
-            <Text.Block>{data?.realname}</Text.Block>
-          </FieldWrapper>
-        </FieldStack>
-
-        <FieldWrapper label="Phone">
-          <Text.Block>{data?.phone}</Text.Block>
-        </FieldWrapper>
-        <FieldWrapper label="Email">
-          <Text.Block>{data?.email}</Text.Block>
-        </FieldWrapper>
-        <FieldWrapper label="qq">
-          <Text.Block>{data?.qq}</Text.Block>
-        </FieldWrapper>
-        <FieldWrapper label="wechat">
-          <Text.Block>{data?.wechat}</Text.Block>
-        </FieldWrapper>
-      </Stack>
-    </Dialog.Modal>
-  )
-}
-
-const EditInfoDialog = ({ brandCode, currency, username, dialog }) => {
-  let { data = {} } = usePlayerInfo({ brandCode, currency, username })
-  let { register, handleSubmit, watch, setError, errors } = useForm()
-  let [formData, setSubmit] = useState()
-  let { result, isLoading, ...rest } = useUpdatePlayerInfo(
-    { brandCode, currency, username },
-    formData
-  )
-
-  const onSubmit = handleSubmit(setSubmit)
-
-  const reset = () => {
-    setSubmit(undefined)
-  }
-
-  useEffect(() => {
-    if (result) {
-      reset()
-      dialog.hide()
-    }
-  }, [result])
-
-  return (
-    <Dialog.Modal
-      title={username}
-      showCloseButton
-      showActionButtons
-      actionButtonsProps={{
-        isLoading,
-        onClickSubmit: onSubmit
-      }}
-      {...dialog}
-    >
-      <form onSubmit={onSubmit}>
-        <FieldStack>
-          <FieldStack orientation="horizontal">
-            <InputField
-              name="username"
-              inputRef={register}
-              defaultValue={data?.username}
-              label="Username"
-            />
-            <InputField
-              name="realname"
-              inputRef={register}
-              defaultValue={data?.realname}
-              label="Realname"
-            />
-          </FieldStack>
-          <InputField
-            name="phone"
-            inputRef={register}
-            defaultValue={data?.phone}
-            label="Phone"
-          />
-          <InputField
-            name="email"
-            type="email"
-            inputRef={register}
-            defaultValue={data?.email}
-            label="Email"
-          />
-          <InputField
-            name="qq"
-            inputRef={register}
-            defaultValue={data?.qq}
-            label="QQ"
-          />
-          <InputField
-            name="Wechat"
-            inputRef={register}
-            defaultValue={data?.wechat}
-            label="Wechat"
-          />
-        </FieldStack>
-      </form>
-    </Dialog.Modal>
   )
 }
 

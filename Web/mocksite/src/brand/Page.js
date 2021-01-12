@@ -15,6 +15,7 @@ import {
   State,
   useCurrency,
   usePlatform,
+  usePlayerType,
   useSetCurrency,
   useSetPlatform
 } from "./State"
@@ -48,7 +49,30 @@ const Body = ({ brandCode }) => {
   return (
     <Switch>
       <Route path={`${path}/:currency`}>
-        <PlayerList brandToken={token} />
+        <Content brandToken={token} />
+      </Route>
+    </Switch>
+  )
+}
+
+const Content = ({ brandToken }) => {
+  let location = useLocation()
+  let { path, url } = useRouteMatch()
+  let history = useHistory()
+
+  let playerType = usePlayerType()
+
+  useEffect(() => {
+    let path = `${url}/${playerType}`
+    if (!location.pathname.startsWith(path)) {
+      history.push(path)
+    }
+  }, [playerType, url, location.pathname])
+
+  return (
+    <Switch>
+      <Route path={`${path}/:playerType`}>
+        <PlayerList brandToken={brandToken} />
       </Route>
     </Switch>
   )

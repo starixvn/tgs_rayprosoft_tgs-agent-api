@@ -5,6 +5,7 @@ import { Switch, Route, Link, useParams, useRouteMatch } from "react-router-dom"
 import { Desktop } from "../platform"
 import { CNY } from "../currency"
 import { enUS, zhCN } from "../language"
+import { PlayerType } from "./player/PlayerType"
 
 const Store = createContext({})
 
@@ -13,6 +14,7 @@ export const State = ({ value, children }) => {
     platform: Desktop,
     currency: CNY,
     lang: zhCN,
+    playerType: PlayerType.Test,
     ...value
   })
 
@@ -46,6 +48,16 @@ export const useCurrency = () => {
 export const useSetCurrency = () => {
   let { set } = useContext(Store)
   return (currency) => set((prevState) => ({ ...prevState, currency }))
+}
+
+export const usePlayerType = () => {
+  let { playerType } = useContext(Store)
+  return playerType
+}
+
+export const useSetPlayerType = () => {
+  let { set } = useContext(Store)
+  return (playerType) => set((prevState) => ({ ...prevState, playerType }))
 }
 
 export const useLang = () => {

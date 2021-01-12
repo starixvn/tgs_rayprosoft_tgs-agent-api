@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react"
 import { css } from "@emotion/react"
-import { Table, Set, Button, Box, Stack, PageWithHeader, TopNav } from "bumbag"
+import {
+  Table,
+  Set,
+  Button,
+  Box,
+  Stack,
+  PageWithHeader,
+  TopNav,
+  Pagination
+} from "bumbag"
 import {
   Switch,
   Route,
@@ -12,20 +21,42 @@ import {
 import BrandHeader from "../Header"
 import PlayerPage from "./Page"
 import { LoginDialogButton } from "./LoginDialog"
+import { useBrandPlayerList } from "../../client/brand/player"
 
+const DefaultRows = 20
 export const PlayerList = ({ brandToken }) => {
-  let { brandCode, currency } = useParams()
+  let params = useParams()
+  let { brandCode, currency, playerType } = params
   let { path, url } = useRouteMatch()
+
+  let [state, setState] = useState(params)
+  let { result, error, isLoading, mutate, ...rest } = useBrandPlayerList(state)
+
+  let currentPage = Math.ceil((result?.totalCount ?? 0) / DefaultRows)
+  let players = result?.items ?? []
+
+  useEffect(() => {
+    setState({
+      ...params,
+      page: 1,
+      rows: DefaultRows
+    })
+  }, [params])
 
   return (
     <Switch>
       <Route exact path={path}>
-        <PageWithHeader header={<BrandHeader />}>
+        <PageWithHeader header={<BrandHeader onPlayerCreated={mutate} />}>
           <Stack padding="major-1">
             <PlayerTable
               brandCode={brandCode}
               brandToken={brandToken}
               currency={currency}
+              players={players}
+              currentPage={currentPage}
+              onChangePage={(page) =>
+                setState({ ...params, page, rows: DefaultRows })
+              }
             />
           </Stack>
         </PageWithHeader>
@@ -37,16 +68,39 @@ export const PlayerList = ({ brandToken }) => {
   )
 }
 
-const PlayerTable = ({ brandCode, currency, brandToken }) => {
+const PlayerTable = ({
+  brandCode,
+  currency,
+  brandToken,
+  players,
+  currentPage,
+  onChangePage
+}) => {
+  /*
+  let params = useParams()
+  let [state, setState] = useState(params)
+  let { result, error, isLoading, ...rest } = useBrandPlayerList(state)
+
+  let currentPage = Math.ceil((result?.totalCount ?? 0) / DefaultRows)
+  let players = result?.items ?? []
+
+  useEffect(() => {
+    setState({
+      ...params,
+      page: 1,
+      rows: DefaultRows
+    })
+  }, [params])
+  */
+
   return (
     <Set orientation="vertical">
       <Table width="100%" overflow="auto" isHoverable>
         <Table.Head>
           <Table.Row>
             <Table.HeadCell>Username</Table.HeadCell>
-            <Table.HeadCell>VIP</Table.HeadCell>
-            <Table.HeadCell>Status</Table.HeadCell>
-            <Table.HeadCell>Agent</Table.HeadCell>
+            <Table.HeadCell>Player Code</Table.HeadCell>
+            <Table.HeadCell>Player Status</Table.HeadCell>
             <Table.HeadCell>Actions</Table.HeadCell>
           </Table.Row>
         </Table.Head>
@@ -62,6 +116,11 @@ const PlayerTable = ({ brandCode, currency, brandToken }) => {
           ))}
         </Table.Body>
       </Table>
+      <Pagination
+        currentPage={currentPage}
+        onChangePage={onChangePage}
+        numberOfPages={DefaultRows}
+      />
     </Set>
   )
 }
@@ -70,9 +129,8 @@ const PlayerRow = ({ player, brandCode, currency, brandToken }) => {
   return (
     <Table.Row>
       <Table.Cell>{player.username}</Table.Cell>
-      <Table.Cell>{player.vipLevel}</Table.Cell>
+      <Table.Cell>{player.playerCode}</Table.Cell>
       <Table.Cell>{player.status}</Table.Cell>
-      <Table.Cell>{player.hasAgent?.toString()}</Table.Cell>
       <Table.Cell>
         <LoginDialogButton
           brandCode={brandCode}
@@ -86,76 +144,3 @@ const PlayerRow = ({ player, brandCode, currency, brandToken }) => {
 }
 
 export default PlayerTable
-
-const players = [
-  {
-    playerCode: "4ucaggtg8jap",
-    username: "TP01_cny_en-us",
-    vipLevel: "名称E",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtg9lkf",
-    username: "TP02_cny_en-us",
-    vipLevel: "名称C",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtg9ucj",
-    username: "TP01_cny_zh-cn",
-    vipLevel: "名称C",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtga2ui",
-    username: "RP01_cny_en-us",
-    vipLevel: "名称C",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtgabic",
-    username: "RP02_cny_en-us",
-    vipLevel: "名称C",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtgarxd",
-    username: "JC9Yrk3xYAPm",
-    vipLevel: "名称B",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtgb12k",
-    username: "tSaIC3AYDOVz",
-    vipLevel: "名称A",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtgba3y",
-    username: "cTGnjubMfpaO",
-    vipLevel: "名称C",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtgbj3r",
-    username: "Rde3BZ7TaTMC",
-    vipLevel: "名称A",
-    status: "Enabled",
-    hasAgent: false
-  },
-  {
-    playerCode: "4ucaggtgbrow",
-    username: "NumIDAFtm5xq",
-    vipLevel: "名称A",
-    status: "Enabled",
-    hasAgent: false
-  }
-]

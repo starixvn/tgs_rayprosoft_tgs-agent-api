@@ -2,35 +2,40 @@ import useSWR, { cache } from "swr"
 import { toDataOrError } from "../response"
 import { useBrandToken } from "../brand"
 import { usePlayerToken } from "../brand/player"
+import { handleError } from "../Error"
 
 export const useGameUrl = ({ brandCode, username, currency }, data) => {
-  let { token: brandToken, mutate: mutateBrandToken } = useBrandToken({
+  let { token: brandToken, ...brandTokenHook } = useBrandToken({
     brandCode,
     currency
   })
-  let { token: playerToken, mutate: mutatePlayerToken } = usePlayerToken({
+  let { token: playerToken, ...playerTokenHook } = usePlayerToken({
     brandCode,
     username,
     currency
   })
 
   let keys =
-    brandToken && playerToken && data?.gameProviderCode && data?.gameCode
-      ? [`/api/game/geturl`, data]
+    brandToken &&
+    playerToken &&
+    data?.gameProviderCode &&
+    data?.gameCode &&
+    data?.gameId &&
+    data?.language
+      ? [
+          `/api/game/geturl?gpcode=${data?.gameProviderCode}&gid=${data?.gameId}&language=${data?.language}`,
+          data
+        ]
       : undefined
 
-  let { data: result, ...rest } = useSWR(keys, (url, data) => {
+  let { data: result, ...rest } = useSWR(keys, (url) => {
     return fetch(url, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brandToken}`,
         Token: playerToken
-      },
-      body: JSON.stringify({
-        gpcode: data?.gameProviderCode,
-        gcode: data?.gameCode
-      })
+      }
     })
       .then(toDataOrError)
       .then((data) => {
@@ -43,14 +48,7 @@ export const useGameUrl = ({ brandCode, username, currency }, data) => {
         }
         return data
       })
-      .catch((error) => {
-        let { err, errmsg } = error
-        console.log("TODO: token expired err code")
-        // mutateBrandToken()
-        // mutatePlayerToken()
-
-        return Promise.reject(error)
-      })
+      .catch(handleError({ brandTokenHook, playerTokenHook }))
   })
 
   return {
