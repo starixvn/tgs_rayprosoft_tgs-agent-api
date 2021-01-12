@@ -221,7 +221,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.GameProviders, new LicenseeGameProvider[] { })
                 .With(s => s.Languages, new LicenseeLanguage[] { })
                 .With(s => s.Currencies, new LicenseeCurrency[] { })
-                .With(s => s.BetLimits, new LicenseeBetLimit[] { }));
+                .With(s => s.BetLimits, new LicenseeBetLimit[] { })
+                .With(s => s.Departments, new Department[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

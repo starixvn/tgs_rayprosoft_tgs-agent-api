@@ -1,28 +1,38 @@
 pipeline {
     agent any
-    environment {
-        CI = 'true'
-    }
     stages {
-		stage('Clean') {
-            steps {
-                cleanWs()
-            }            
+        stage('Checkout SCM') {
+          steps {
+            checkout([
+              $class: 'GitSCM',
+			  branches: [[name: "*/develop" ]],
+              userRemoteConfigs: [[
+                url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git',
+                credentialsId: 'gitlab-user-pwd',
+              ]]
+             ])
+           }
         }
 		
-		stage('get_commit_msg') {
+		stage('Build') {
 			steps {
-				script {
-					env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
-					print "${env.GIT_COMMIT_MSG}"
-				}
+				sh "dotnet build tgs.sln"
+				echo "build solution"
 			}
 		}
-
-		stage('Checkout') {
-            steps {
-			    print "Current Branch: ${env.BRANCH_NAME}"
-            }
-        }
+		
+		stage('Test') {
+			steps {
+				sh  "cd .."  
+				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
+				echo "test tgs.sln"
+			}
+		}
+		//stage('Coder') {
+		//	steps {
+		//		//sh  "dotcover()"  
+		//		echo "dotcover tgs.sln"
+		//	}
+		//}
     }
 }
