@@ -1,3 +1,5 @@
+** This file used for Extended Choice Parameter of jenkins **
+
 Web/backoffice::backoffice-site,
 Apis/BackendOffice::backoffice-api,
 Web/mocksite::mocksite,
