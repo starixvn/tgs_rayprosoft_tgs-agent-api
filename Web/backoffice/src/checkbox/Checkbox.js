@@ -13,7 +13,7 @@ export const Checkbox = ({
   let formContext = useFormContext()
   register = register ?? formContext?.register
 
-  if (!checkboxRef && register) {
+  if (name && !checkboxRef && register) {
     checkboxRef = register({
       required: props.required,
       min: props.min,
@@ -32,3 +32,5 @@ export const Checkbox = ({
     <_Checkbox name={name} checkboxRef={checkboxRef} state={state} {...props} />
   )
 }
+
+export default Checkbox

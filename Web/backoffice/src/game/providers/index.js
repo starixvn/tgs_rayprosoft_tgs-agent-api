@@ -15,6 +15,7 @@ import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { FormProvider, useForm } from "react-hook-form"
 import { InputField } from "../../input/Input"
+import { useGameProviderList } from "./client"
 
 export { Code }
 
@@ -24,7 +25,6 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
@@ -32,30 +32,17 @@ export const CodeContentPair = [Code, Content]
 
 const Body = () => {
   let { state, setState, setPageIndex, setSortOrder } = useTable({
+    code: "",
     name: ""
   })
   let { pageIndex, pageSize, name } = state
-  let { data, isLoading, mutate } = useProviderList(toApiParams(state))
-
-  //TODO: rm test data
-  data = {
-    totalCount: 1,
-    items: [
-      {
-        id: "xxx",
-        name: "PT",
-        day: 0,
-        start: "12:00",
-        end: "15:00"
-      }
-    ]
-  }
+  let { data, isLoading, mutate } = useGameProviderList(toApiParams(state))
 
   let columns = useColumns({ items: data?.items, mutate })
 
   return (
     <PageContent
-      title={<Trans zh="厂商管理" en="Vendor Management" />}
+      title={<Trans zh="游戏商管理" en="Game Provider Management" />}
       actionBar={
         <SearchBar
           name={name}
@@ -64,7 +51,7 @@ const Body = () => {
               pageIndex: 0,
               ...data
             }
-            if (equals(newState, { pageIndex, name })) {
+            if (equals(newState, { pageIndex, code, name })) {
               mutate()
             }
             setState(newState)
@@ -84,21 +71,37 @@ const Body = () => {
   )
 }
 
-const SearchBar = ({ name = "", search, isLoading, ...props }) => {
+const SearchBar = ({ code = "", name = "", search, isLoading, ...props }) => {
   let formMethods = useForm({
     defaultValues: {
+      code,
       name
     }
   })
 
-  let searchPlaceHolder = useTrans({
-    zh: "厂商输入框",
-    en: "Input vendor name"
+  let codePlaceHolder = useTrans({
+    zh: "游戏商代码",
+    en: "game provider code"
+  })
+
+  let namePlaceHolder = useTrans({
+    zh: "游戏商名称",
+    en: "game provider name"
   })
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(search)}>
         <Set>
+          <InputField
+            name="code"
+            addonAfter={
+              <Button onClick={() => formMethods.setValue("code", "")}>
+                X
+              </Button>
+            }
+            placeholder={codePlaceHolder}
+            autocomplete="off"
+          />
           <InputField
             name="name"
             addonAfter={
@@ -106,7 +109,7 @@ const SearchBar = ({ name = "", search, isLoading, ...props }) => {
                 X
               </Button>
             }
-            placeholder={searchPlaceHolder}
+            placeholder={namePlaceHolder}
             autocomplete="off"
           />
           <SearchButton isLoading={isLoading} disabled={isLoading} />

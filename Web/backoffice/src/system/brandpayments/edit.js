@@ -49,8 +49,8 @@ import { VipLevelCheckboxGroup } from "../../vip-levels/CheckboxGroup"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import { FieldGroup as NumberRangeInputFieldGroup } from "../../number/RangeInput"
 import FormDialog from "../../form/FormDialog"
-import HookFormTextarea from "../../textarea"
-import HookFormInputField from "../../input/Input"
+import Textarea from "../../textarea"
+import Input from "../../input/Input"
 import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 
@@ -202,7 +202,7 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
               <Label required>
                 <Trans zh="通道名称" en="Channel Name" />
               </Label>
-              <HookFormInputField name="channelName" size="small" required />
+              <Input name="channelName" size="small" required />
 
               <Label>
                 <Trans zh="状态" en="Status" />
@@ -293,7 +293,7 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
           <Trans zh="变更原因" en="Reason" />
         </Box>
 
-        <HookFormTextarea name="reason" />
+        <Textarea name="reason" />
       </Stack>
     </Stack>
   )

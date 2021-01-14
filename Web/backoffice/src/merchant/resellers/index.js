@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import {
-  Box,
-  Set,
-  Button,
-  Text,
-  Switch,
-  Input,
-  Stack,
-  InputField
-} from "bumbag"
+import { Box, Set, Button, Text, Switch, Stack } from "bumbag"
 import PageContent from "../../page/Content"
 import {
   useIsDisplayMenuByRoute,
@@ -21,10 +12,10 @@ import { Table, toApiParams, useTable, pageCount } from "../../table"
 import { useResellerList, useChangeResellerStatus } from "./client"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import { AddButton, EditButton } from "./edit"
+import { AddButton, EditButton, ViewButton } from "./edit"
 import { SearchButton } from "../../button/SearchButton"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import equals from "fast-deep-equal"
 import { MerchantStatusMenu } from "../status"
 
@@ -45,7 +36,6 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
@@ -114,7 +104,7 @@ const SearchForm = ({ search, isLoading, ...props }) => {
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)}>
         <Set>
-          <HookFormInputField
+          <Input
             name="keyword"
             addonAfter={
               <Button onClick={() => formMethods.setValue("keyword", "")}>
@@ -140,10 +130,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司代码" en="Code" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -151,10 +143,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司名称" en="Name" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -162,10 +156,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司简介" en="Description" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -232,6 +228,7 @@ const useColumns = ({ items = [], mutate }) => {
       Cell: ({ value }) => {
         return (
           <Set orientation="vertical" alignX="center">
+            <ViewButton record={value} />
             <EditButton record={value} onSubmitted={mutate} />
           </Set>
         )

@@ -19,10 +19,10 @@ import {
   Group,
   Set,
   useClassName,
-  Textarea
+  Textarea as _Textarea
 } from "bumbag"
 
-export const HookFormTextarea = ({
+export const Textarea = ({
   name,
   register,
   registerOptions = {},
@@ -48,8 +48,8 @@ export const HookFormTextarea = ({
   let state = error && "danger"
 
   return (
-    <Textarea name={name} textareaRef={textareaRef} state={state} {...props} />
+    <_Textarea name={name} textareaRef={textareaRef} state={state} {...props} />
   )
 }
 
-export default HookFormTextarea
+export default Textarea

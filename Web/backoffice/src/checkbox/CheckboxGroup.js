@@ -26,3 +26,10 @@ export const CheckboxGroup = ({ name, ...props }) => {
     />
   )
 }
+
+/* TODO
+export const CheckboxGroupTable = () => {
+}
+*/
+
+export default CheckboxGroup

@@ -1,7 +1,7 @@
 import React from "react"
 import { getTrans } from "../../i18n"
 
-export const Code = "gameproviders"
+export const Code = "providers"
 
 export const Update = "update"
 

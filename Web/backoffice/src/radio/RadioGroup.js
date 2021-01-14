@@ -24,3 +24,5 @@ export const RadioGroup = ({ name, ...props }) => {
     />
   )
 }
+
+export default RadioGroup

@@ -15,6 +15,11 @@ export const useGameProviderList = (searchParams) => {
   return useGet(url)
 }
 
+export const useGameProvider = (id) => {
+  let url = id ? `${API}/${id}` : undefined
+  return useGet(url)
+}
+
 export const useAddGameProvider = (data) => {
   return usePostData(API, data)
 }
@@ -24,7 +29,12 @@ export const useUpdateGameProvider = (id, data) => {
   return usePutData(url, data)
 }
 
-export const useChangeProviderStatus = (id, status) => {
+export const useChangeGameProviderStatus = (id, status) => {
   let url = id && status ? `${API}/${id}/${status}` : ""
   return usePut(url)
+}
+
+export const useGameProviderUploadGames = (body) => {
+  let url = body ? `${API}/upload` : undefined
+  return usePostFormData(url, body)
 }

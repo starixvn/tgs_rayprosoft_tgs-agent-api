@@ -36,6 +36,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     Id = x.Id,
                     Name = x.Name,
                     Code = x.Code,
+                    BusinessType = x.BusinessType,
                     Status = x.Status,
                     Description = x.Description,
                     OperationalEmail = x.OperationalEmail,
@@ -67,6 +68,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     Id = reseller.Id,
                     Code = reseller.Code,
                     Name = reseller.Name,
+                    BusinessType = reseller.BusinessType,
                     Status = reseller.Status,
                     Currencies = reseller.Currencies
                         .Select(x => new ResellerCurrencyModel

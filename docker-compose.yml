@@ -304,11 +304,11 @@ services:
       - ./.docker/localstack/data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./localstack/bin:/docker-entrypoint-initaws.d
-      
+
   postgres:
     build:
       context: .
-      dockerfile: Core/DataServices.Base/Dockerfile
+      dockerfile: Dockerfiles/Dockerfile
     image: postgres_container
     container_name: postgres_container
     environment:
@@ -322,7 +322,7 @@ services:
     networks:
       - tgs
     restart: unless-stopped
-  
+
   pgadmin:
     container_name: pgadmin_container
     image: dpage/pgadmin4
@@ -336,7 +336,7 @@ services:
     networks:
       - tgs
     restart: unless-stopped
-    
+
 networks:
   tgs:
     driver: bridge

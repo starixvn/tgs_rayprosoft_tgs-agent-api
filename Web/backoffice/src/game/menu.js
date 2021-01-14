@@ -2,8 +2,12 @@ import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/react"
 import { Menu as _Menu, findlLabel } from "../menu"
 import {
-  Code as GameProviderScheduleCode,
-  codeLabelPair as gameProviderSchedulePair
+  Code as GameProviderCode,
+  codeLabelPair as gameProviderPair
+} from "./providers/menu"
+import {
+  Code as BrandGameProviderCode,
+  codeLabelPair as brandGameProviderPair
 } from "./brandproviders/menu"
 import {
   Code as BrandGameCode,
@@ -42,11 +46,19 @@ export const Menu = ({
 
 const label = ({ locale, code }) => {
   switch (code) {
-    case GameProviderScheduleCode:
+    case GameProviderCode:
+      return getTrans(
+        {
+          zh: "游戏商管理",
+          en: "Game Provider Management"
+        },
+        locale
+      )
+    case BrandGameProviderCode:
       return getTrans(
         {
           zh: "厂商列表",
-          en: "Provider List"
+          en: "Game Provider List"
         },
         locale
       )
@@ -70,6 +82,6 @@ export const codeLabelPair = [
       locale,
       codes,
       label,
-      subLabelPairs: [gameProviderSchedulePair, brandGamePair]
+      subLabelPairs: [gameProviderPair, brandGameProviderPair, brandGamePair]
     })
 ]

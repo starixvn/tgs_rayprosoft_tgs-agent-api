@@ -9,7 +9,7 @@ import React, {
 import { css, Global } from "@emotion/react"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { Dialog, Button, Box } from "bumbag"
-import { CancelText, SubmitText } from "../button/ActionButtons"
+import { CancelText, CloseText, SubmitText } from "../button/ActionButtons"
 import AlertDialog from "../dialog/Alert"
 
 export const ConfirmButtonFooter = ({
@@ -28,6 +28,21 @@ export const ConfirmButtonFooter = ({
         disabled={disabled}
       >
         <SubmitText />
+      </Button>
+    </Box>
+  )
+}
+
+export const CloseButtonFooter = ({
+  width = "100%",
+  alignX = "center",
+  dialog,
+  ...props
+}) => {
+  return (
+    <Box width={width} alignX={alignX} {...props}>
+      <Button palette="primary" type="button" onClick={dialog?.hide}>
+        <CloseText />
       </Button>
     </Box>
   )
