@@ -21,18 +21,20 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
     public sealed class SBOBETGameInitializer : IGameInitializer
     {
-        private readonly ISettingOperations _settingOperations;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+        private readonly IBrandOperations _brandOperations;
         private readonly ISBOApiClient _client;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
 
         private readonly IReadOnlyDictionary<GameType, string> _portofolios = new Dictionary<GameType, string>
         {
             {GameType.Sportsbook, "SportsBook"},
-            {GameType.VirtualSports, "VirtualSports"}
+            {GameType.VirtualSports, "VirtualSports"},
+            {GameType.VirtualSportsLobby, "VirtualSports"}
         };
+
+        private readonly ISettingOperations _settingOperations;
 
         public SBOBETGameInitializer(
             ISettingOperations settingOperations,
@@ -83,12 +85,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             var url = gameType switch
             {
-                GameType.VirtualSports => $"{loginResponse.Url}&lang={cultureCode}",
-                GameType.Sportsbook    => GetSportsbookUrl(bgpc.QueryStrings, platform, loginResponse.Url, cultureCode),
-                _                      => default
+                GameType.VirtualSports or GameType.VirtualSportsLobby => $"{loginResponse.Url}&lang={cultureCode}",
+                GameType.Sportsbook => GetSportsbookUrl(bgpc.QueryStrings, platform, loginResponse.Url, cultureCode),
+                _ => default
             };
 
-            return new() {Url = url};
+            return new GetGameUrlResponse() {Url = url};
         }
 
         private async Task<BaseResponse> PlayerLoginAsync(Uri apiUrl, string companyKey, CachedPlayer player,
@@ -113,7 +115,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             }
 
             var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
-                new(player.BrandCode, player.DefaultWalletCurrencyCode)
+                new RegisterPlayerRequest(player.BrandCode, player.DefaultWalletCurrencyCode)
                 {
                     CompanyKey = companyKey,
                     PlayerCode = player.PlayerCode

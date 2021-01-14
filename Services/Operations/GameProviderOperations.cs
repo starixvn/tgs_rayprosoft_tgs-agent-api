@@ -37,6 +37,8 @@ namespace TGS.Services.Operations
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, string externalGameId);
 
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, GameType gameType);
+
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType);
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
@@ -79,7 +81,7 @@ namespace TGS.Services.Operations
             }
 
             var r = await _gameProviderQueries.GetCachedGameProviderAsync(gameProviderId);
-            cachedGameProvider = new()
+            cachedGameProvider = new CachedGameProvider
             {
                 Id = gameProviderId,
                 Code = r.Code,
@@ -102,7 +104,7 @@ namespace TGS.Services.Operations
             Guid gameProviderId, Guid gameProviderConfigurationId)
         {
             var gpc = await GetCachedGameProviderConfigurationOrNullAsync(gameProviderId, gameProviderConfigurationId);
-            
+
             if (gpc != null)
             {
                 return gpc;
@@ -116,7 +118,7 @@ namespace TGS.Services.Operations
                     $"GameProviderConfiguration doesn't exist with gameProviderId: {gameProviderId} and gameProviderConfigurationId: {gameProviderConfigurationId}");
             }
 
-            gpc = new()
+            gpc = new CachedGameProviderConfiguration
             {
                 Status = r.Status,
                 GameProviderId = gameProviderId,
@@ -255,7 +257,29 @@ namespace TGS.Services.Operations
             return games;
         }
 
-        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType)
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, GameType gameType)
+        {
+            const RedisCacheType cacheType = RedisCacheType.GamesByGameType;
+            var field = $"{gameType}";
+            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, field);
+            if (value.HasValue)
+            {
+                return _json.DeserializeFromString<CachedGame[]>(value);
+            }
+
+            var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
+            var games = cachedGames.Where(g => g.Type == gameType).ToArray();
+
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
+            {
+                new(field, _json.SerializeToString(games))
+            }, TimeSpan.FromHours(2));
+
+            return games;
+        }
+
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId,
+            PlatformType platformType)
         {
             const RedisCacheType cacheType = RedisCacheType.GamesByPlatform;
             var field = $"{platformType}";
@@ -307,7 +331,8 @@ namespace TGS.Services.Operations
             return game?.PlatformType;
         }
 
-        async Task<IdMap<int>[]> IGameProviderOperations.GetSubGameIdsAsync(Guid gameProviderId, PlatformType platformType)
+        async Task<IdMap<int>[]> IGameProviderOperations.GetSubGameIdsAsync(Guid gameProviderId,
+            PlatformType platformType)
         {
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.SubGames, gameProviderId,
                 platformType.ToString());
@@ -319,7 +344,7 @@ namespace TGS.Services.Operations
 
             return await GetAndCachedSubGameIdMapsAsync(gameProviderId, platformType);
         }
-        
+
         async Task<bool> IGameProviderOperations.GetAllowKickPlayerAsync(Guid gameProviderId)
         {
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
@@ -354,7 +379,7 @@ namespace TGS.Services.Operations
 
             if (values.All(a => !a.IsNull))
             {
-                return new()
+                return new CachedGameProvider
                 {
                     Id = Guid.Parse(values[0]),
                     Code = values[1],
