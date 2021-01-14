@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.GameProvider
+namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
 {
     public class
         GetInUseBrandsQueryHandler : Handler<GetInUseBrandsRequest,

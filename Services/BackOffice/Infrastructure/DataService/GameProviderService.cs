@@ -79,7 +79,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             gameProvider.Status = request.Status;
             gameProvider.UpdatedByUsername = request.Username;
-            gameProvider.UpdatedOn = DateTimeOffset.UtcNow;
+            gameProvider.UpdatedOn = DateTimeOffset.Now;
 
             return UpdateEntityAsync(gameProvider);
         }
@@ -136,7 +136,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 AvailableCurrencies = x.AvailableCurrencies,
                 CreatedByUsername = request.Username,
                 UpdatedByUsername = request.Username,
-                CreatedOn = DateTimeOffset.UtcNow,
+                CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             });
             return new HashSet<Game>(games);
@@ -146,7 +146,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GameProviderRequest request)
         {
             var maxNumberStr = gameProvider.Games.Max(x => x.Id).ToString();
-            var maxNumber = int.Parse(maxNumberStr[^4..]);
+            var maxNumber = int.Parse(maxNumberStr[^5..]);
             var games = request.Games.Select(x =>
             {
                 var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
@@ -167,7 +167,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     AvailableCurrencies = x.AvailableCurrencies,
                     CreatedByUsername = originGame == null ? request.Username : x.CreatedByUsername,
                     UpdatedByUsername = originGame == null ? request.Username : x.UpdatedByUsername,
-                    CreatedOn = originGame == null ? DateTimeOffset.UtcNow : x.CreatedOn,
+                    CreatedOn = originGame == null ? DateTimeOffset.Now : x.CreatedOn,
                     UpdatedOn = originGame == null ? DateTimeOffset.Now : x.UpdatedOn
                 };
             });

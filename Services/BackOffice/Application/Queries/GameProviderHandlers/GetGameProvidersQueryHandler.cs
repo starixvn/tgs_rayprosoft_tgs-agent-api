@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.GameProvider
+namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
 {
     public class GetGameProvidersQueryHandler : Handler<GetGameProvidersRequest, PagedResponse<GameProviderModel>>
     {

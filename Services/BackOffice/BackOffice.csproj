@@ -50,6 +50,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BrandGameProviderSchedule.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\Currency.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Currency.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\GameProvider.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -59,6 +64,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>GameProviderBetLimit.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\Language.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Language.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -83,6 +93,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>BrandGameProviderSchedule.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Currency.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Currency.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\GameProvider.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProvider.Designer.cs</LastGenOutput>
@@ -90,6 +104,10 @@
     <EmbeddedResource Update="Application\Resources\GameProviderBetLimit.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProviderBetLimit.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Language.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Language.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

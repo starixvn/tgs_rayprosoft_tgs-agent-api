@@ -29,11 +29,11 @@ namespace TGS.Apis.BackendOffice.Controllers.BetLimit
 
         [HttpPost]
         [Description("Create a bet limit")]
-        public Task<MessageResponse> CreateBrandAsync(CreateBetLimitRequest request) => _mediator.Send(request);
+        public Task<MessageResponse> CreateBetLimitAsync(CreateBetLimitRequest request) => _mediator.Send(request);
 
         [HttpPut("{id}")]
         [Description("Update a bet limit")]
-        public Task<MessageResponse> UpdateBrandAsync(int id, UpdateBetLimitRequest request)
+        public Task<MessageResponse> UpdateBetLimitAsync(int id, UpdateBetLimitRequest request)
         {
             request.Id = id;
             return _mediator.Send(request);
