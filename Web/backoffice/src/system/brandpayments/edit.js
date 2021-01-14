@@ -47,7 +47,7 @@ import {
 } from "./condition"
 import { VipLevelCheckboxGroup } from "../../vip-levels/CheckboxGroup"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
-import { FieldGroup as NumberRangeInputFieldGroup } from "../../number/RangeInput"
+import { NumberRangeInputGroup } from "../../number/RangeInput"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
 import Input from "../../input/Input"
@@ -214,7 +214,7 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
               <Label required>
                 <Trans zh="单笔限额" en="Limit" />
               </Label>
-              <NumberRangeInputFieldGroup
+              <NumberRangeInputGroup
                 names={["transferLimitFrom", "transferLimitTo"]}
                 required
                 min={[0, transferLimitFrom]}
@@ -307,7 +307,7 @@ const AccumulatedDepositGroup = () => {
 
   return (
     <Stack orientation="horizontal" alignY="center">
-      <NumberRangeInputFieldGroup
+      <NumberRangeInputGroup
         names={["depositedAmountMin", "depositedAmountMax"]}
         required
         min={[0, depositedAmountMin]}

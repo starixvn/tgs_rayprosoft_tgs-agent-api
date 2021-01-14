@@ -22,7 +22,7 @@ import Disclosure from "../../dialog/Disclosure"
 import { useCopyRole } from "./client"
 import { Trans, useTrans } from "../../i18n"
 import FormDialog from "../../form/FormDialog"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 
 export const CopyButton = ({ id, name, onSubmitted, disabled, ...props }) => {
   let dialog = Modal.useState()
@@ -55,7 +55,7 @@ const CopyDialog = ({ id, name = "", onSubmitted, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
   let { result, error, mutate, isLoading } = useCopyRole(id, submitData)
 
-  const clearResult = () => {
+  const reset = () => {
     setSubmit(undefined)
     //mutate()
   }
@@ -74,12 +74,12 @@ const CopyDialog = ({ id, name = "", onSubmitted, dialog, ...props }) => {
       isLoading={isLoading}
       result={result}
       error={error}
-      onCloseErrorAlert={clearResult}
+      onCloseErrorAlert={reset}
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
     >
-      <HookFormInputField name="name" required />
+      <Input name="name" required />
     </FormDialog>
   )
 }

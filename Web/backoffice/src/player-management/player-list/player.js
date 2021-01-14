@@ -24,7 +24,7 @@ import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
 import { PlayerAgentSelect } from "../PlayerAgent"
 import { FormProvider, useForm } from "react-hook-form"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 
 export const Key = "player"
 
@@ -114,7 +114,7 @@ const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
 
         <RealNameLabel />
         <Box>
-          <HookFormInputField name="realName" required />
+          <Input name="realName" required />
         </Box>
 
         <VIPLevelLabel />
@@ -124,7 +124,7 @@ const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
 
         <ParentUsernameLabel />
         <Box>
-          <HookFormInputField name="parentUsername" />
+          <Input name="parentUsername" />
         </Box>
 
         <RegistrationLabel />

@@ -1,31 +1,10 @@
 import React, { Fragment, useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useTrans } from "../i18n"
-import SuperExpressive from "super-expressive"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Label,
-  Input,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  SelectField,
-  Dialog,
-  Modal,
-  Table,
-  useClassName,
-  Group
-} from "bumbag"
-import HookFormInputField from "../input/Input"
+import { Spinner, Button, Group } from "bumbag"
+import { InputField } from "../input/Input"
 
-export const FieldGroup = ({
+export const NumberRangeInputGroup = ({
   names = [],
   type = "number",
   required,
@@ -49,7 +28,7 @@ export const FieldGroup = ({
         let isMaxList = Array.isArray(max)
 
         return (
-          <HookFormInputField
+          <InputField
             key={name}
             name={name}
             type={type}
@@ -74,4 +53,4 @@ export const FieldGroup = ({
   )
 }
 
-export default Input
+export default NumberRangeInputGroup

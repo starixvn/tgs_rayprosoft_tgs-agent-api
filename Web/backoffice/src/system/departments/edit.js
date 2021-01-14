@@ -16,7 +16,7 @@ import { FieldValues } from "../../layout/Grid"
 import Disclosure from "../../dialog/Disclosure"
 import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import FormDialog from "../../form/FormDialog"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import { nextRoleType, RoleTypeSelect, useRoleTypeOptions } from "../roles/type"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 
@@ -54,7 +54,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useAddDepartment(submitData)
 
-  const clearResult = () => {
+  const reset = () => {
     setSubmit(null)
   }
 
@@ -75,7 +75,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
       isLoading={isLoading}
       result={result}
       error={error}
-      onCloseErrorAlert={clearResult}
+      onCloseErrorAlert={reset}
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}
@@ -110,7 +110,7 @@ const EditBody = () => (
     <FieldValues>
       <Label name="name" label={<Trans zh="部门名称" en="Department Name" />} />
       <Box>
-        <HookFormInputField name="name" required />
+        <Input name="name" required />
       </Box>
     </FieldValues>
   </Stack>
@@ -144,7 +144,7 @@ const EditDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
   let [submitData, setSubmit] = useState()
   let { result, error, isLoading } = useEditDepartment(id, submitData)
 
-  const clearResult = () => {
+  const reset = () => {
     setSubmit(null)
   }
 
@@ -162,7 +162,7 @@ const EditDialog = ({ id, name = "", dialog, onSubmitted, ...props }) => {
       isLoading={isLoading}
       result={result}
       error={error}
-      onCloseErrorAlert={clearResult}
+      onCloseErrorAlert={reset}
       onSubmitted={onSubmitted}
       title={title}
       dialog={dialog}

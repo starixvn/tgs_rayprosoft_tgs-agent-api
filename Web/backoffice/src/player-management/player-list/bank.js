@@ -11,8 +11,6 @@ import {
   Button,
   Text,
   Label,
-  Input,
-  Checkbox,
   Dialog,
   Table,
   useClassName
@@ -20,7 +18,6 @@ import {
 import { FieldValues, TwoColumns } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
 import { faMinus, faCog, faPlus } from "@fortawesome/free-solid-svg-icons"
-import { SubmitCancel } from "../../button/ActionButtons"
 import {
   useEditPlayerBank,
   useDeletePlayerBank,
@@ -32,7 +29,7 @@ import { Tab as _Tab, TabPanel } from "../../tab"
 import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
 import { CancelText, SubmitText } from "../../button/ActionButtons"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 
 export const Key = "banks"
@@ -221,17 +218,17 @@ const EditBody = ({}) => {
     <FieldValues>
       <RealnameLabel />
       <Box>
-        <HookFormInputField name="realName" />
+        <Input name="realName" />
       </Box>
 
       <BankLabel />
       <Box>
-        <HookFormInputField name="bankName" />
+        <Input name="bankName" />
       </Box>
 
       <BankAccount />
       <Box>
-        <HookFormInputField name="bankAccount" />
+        <Input name="bankAccount" />
       </Box>
     </FieldValues>
   )

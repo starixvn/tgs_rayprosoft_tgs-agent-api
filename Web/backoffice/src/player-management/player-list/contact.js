@@ -12,8 +12,6 @@ import {
   Button,
   Text,
   Label,
-  Input,
-  Checkbox,
   useClassName
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
@@ -21,7 +19,7 @@ import { Trans, useTrans } from "../../i18n"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import EmailInput from "../../input/EmailInput"
 import PhoneInput from "../../input/PhoneInput"
 
@@ -113,12 +111,12 @@ const Body = ({ onClickClose }) => {
 
         <QQLabel />
         <Box>
-          <HookFormInputField name="qq" />
+          <Input name="qq" />
         </Box>
 
         <WeChatLabel />
         <Box>
-          <HookFormInputField name="weChat" />
+          <Input name="weChat" />
         </Box>
       </FieldValues>
       <Box alignX="right">

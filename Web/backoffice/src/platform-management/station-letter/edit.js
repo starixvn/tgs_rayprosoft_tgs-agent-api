@@ -7,7 +7,6 @@ import {
   Button,
   Text,
   Modal,
-  Input,
   Set,
   Popover,
   List,
@@ -41,7 +40,7 @@ import {
   PlayerTargetSelect
 } from "./PlayerTargetSelect"
 import Alert from "../../dialog/Alert"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
@@ -305,11 +304,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
       <Label name="subject" required={required}>
         <Trans zh="主题" en="Subject" />
       </Label>
-      <HookFormInputField
-        name="subject"
-        required={required}
-        disabled={readonly}
-      />
+      <Input name="subject" required={required} disabled={readonly} />
 
       <Label name="content" required={required}>
         <Trans zh="内容" en="Content" />

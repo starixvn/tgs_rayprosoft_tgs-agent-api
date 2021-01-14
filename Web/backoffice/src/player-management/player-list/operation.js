@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Label,
-  Input,
-  Checkbox
-} from "bumbag"
+import { Spinner, Stack, Flex, Box, Card, Set } from "bumbag"
 import { useTable, Table, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useOperations } from "./client"
@@ -85,7 +73,12 @@ export const Panel = ({ playerCode, ...props }) => {
 }
 
 const SearchBar = ({ start, end, search, isLoading, ...props }) => {
-  let formMethods = useForm()
+  let formMethods = useForm({
+    defaultValues: {
+      start,
+      end
+    }
+  })
 
   const onSubmit = (data) => search(data)
 

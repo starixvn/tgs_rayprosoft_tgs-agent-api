@@ -27,7 +27,7 @@ import { useFormContext } from "react-hook-form"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import { useBrandGame } from "./client"
 import AlertDialog from "../../dialog/Alert"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -193,7 +193,7 @@ const EditBody = ({ record = {} }) => {
           <Trans zh="有效投注比例" en="Effective Betting Proportion" />
         </Label>
         <ValueBlock>
-          <HookFormInputField
+          <Input
             name="effectiveBettingPercentage"
             type="number"
             registerOptions={{

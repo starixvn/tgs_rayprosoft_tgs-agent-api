@@ -1,22 +1,12 @@
 import React, { useState } from "react"
 import { css } from "@emotion/react"
-import { useAuth } from "./context"
+import { useAuth, useIsAuthLoading } from "./context"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import {
-  Flex,
-  Box,
-  Card,
-  Set,
-  Text,
-  InputField,
-  Button,
-  Dialog,
-  Modal
-} from "bumbag"
-import AlertDialog from "../dialog/Alert"
-import HookFormInputField from "../input/Input"
+import { Flex, Box, Card, Set, Button, Dialog, Modal } from "bumbag"
+import Input from "../input/Input"
 import { PasswordInputField } from "../input/PasswordInput"
 import { useTrans } from "../i18n"
+import { CloseText } from "../button/ActionButtons"
 
 export const Path = "/login"
 
@@ -26,6 +16,7 @@ export const Form = () => {
   })
 
   const login = useAuth()
+  let isAuthLoading = useIsAuthLoading()
 
   const dialog = Modal.useState()
   let [error, setError] = useState()
@@ -74,7 +65,7 @@ export const Form = () => {
         <FormProvider {...formMethods}>
           <form onSubmit={formMethods.handleSubmit(onSubmit)}>
             <Set orientation="vertical" isFilled>
-              <HookFormInputField
+              <Input
                 name="username"
                 placeholder={usernameLabel}
                 autoComplete="username"
@@ -85,7 +76,7 @@ export const Form = () => {
                 placeholder={passwordLabel}
                 autoComplete="current-password"
               />
-              <Button type="submit" palette="primary">
+              <Button type="submit" palette="primary" isLoading={isAuthLoading}>
                 {loginLabel}
               </Button>
             </Set>
@@ -97,7 +88,6 @@ export const Form = () => {
   )
 }
 
-//TODO: use alert dialog
 const ErrorDialog = ({ dialog, error, ...props }) => {
   return (
     <Dialog.Modal
@@ -113,7 +103,7 @@ const ErrorDialog = ({ dialog, error, ...props }) => {
           `}
         >
           <Modal.Disclosure use={Button} {...dialog}>
-            Close
+            <CloseText />
           </Modal.Disclosure>
         </Flex>
       }

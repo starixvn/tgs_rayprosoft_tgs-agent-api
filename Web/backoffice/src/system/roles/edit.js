@@ -8,7 +8,6 @@ import {
   Card,
   Button,
   Text,
-  Input,
   Checkbox,
   FieldStack,
   FieldWrapper,
@@ -16,9 +15,7 @@ import {
   Table,
   Select,
   Group,
-  Set,
-  useClassName,
-  InputField as _InputField
+  Set
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
@@ -55,13 +52,11 @@ import {
   findParentRoleType,
   isSameOrAfterRoleType
 } from "./type"
-import { useBrandList } from "../../merchant/brands/client"
-import { Reseller } from "../../merchant/resellers"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { FormDialog } from "../../form/FormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
-import { HookFormInputField } from "../../input/Input"
+import Input from "../../input/Input"
 import { Code as RoleMenuCode } from "./menu"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
@@ -417,7 +412,7 @@ const DialogBody = ({ name = "", menus, setMenus }) => {
         <Trans zh="权限组名称" en="Name" />
       </Label>
       <Box>
-        <HookFormInputField name="name" defaultValue={name} required />
+        <Input name="name" defaultValue={name} required />
       </Box>
 
       <Label>

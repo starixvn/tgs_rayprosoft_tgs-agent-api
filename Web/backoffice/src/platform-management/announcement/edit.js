@@ -1,17 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import {
-  Stack,
-  Box,
-  Button,
-  Text,
-  Modal,
-  Textarea,
-  TextareaField,
-  styled,
-  border,
-  palette
-} from "bumbag"
+import { Stack, Box, Button, Text, Modal, Textarea } from "bumbag"
 import {
   Create as CreateMenu,
   Update as UpdateMenu,
@@ -37,7 +26,7 @@ import { Trans, useTrans } from "../../i18n"
 import parseDate from "date-fns/fp/parseISO"
 import { CancelText } from "../../button/ActionButtons"
 import FormDialog from "../../form/FormDialog"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import DateTimeInput from "../../date/DateTimeInput"
 import { useForm, useFormContext } from "react-hook-form"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
@@ -264,11 +253,7 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
       <Label name="subject" required={required}>
         <Trans zh="主题" en="Subject" />
       </Label>
-      <HookFormInputField
-        name="subject"
-        required={required}
-        disabled={readonly}
-      />
+      <Input name="subject" required={required} disabled={readonly} />
 
       <Label name="from" required={required}>
         <Trans zh="开始时间" en="Start" />

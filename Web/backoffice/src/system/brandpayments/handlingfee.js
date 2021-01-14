@@ -10,7 +10,7 @@ import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { useUpdateBrandPaymentHandingFee } from "./client"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel as Label } from "../../form/Label"
-import HookFormInputField from "../../input/Input"
+import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 
 const HandlingFeeTrans = {
@@ -112,7 +112,7 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
           <Trans {...HandlingFeeTrans} />
         </Label>
         <Box>
-          <HookFormInputField
+          <Input
             name="feePercentage"
             type="number"
             min="0"
@@ -127,24 +127,14 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
           <Trans zh="最低手续费" en="Minimum Handling Fee" />
         </Label>
         <Box>
-          <HookFormInputField
-            name="lowestFee"
-            type="number"
-            step="0.01"
-            required
-          />
+          <Input name="lowestFee" type="number" step="0.01" required />
         </Box>
 
         <Label required>
           <Trans zh="最高手续费" en="Maximum Handling Fee" />
         </Label>
         <Box required>
-          <HookFormInputField
-            name="highestFee"
-            type="number"
-            step="0.01"
-            required
-          />
+          <Input name="highestFee" type="number" step="0.01" required />
         </Box>
       </FieldValues>
     </Stack>

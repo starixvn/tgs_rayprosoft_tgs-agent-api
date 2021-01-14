@@ -25,23 +25,30 @@ const Store = createContext({
 
 export const Provider = ({ value = initState(), children }) => {
   const [state, set] = useState(value)
-  return <Store.Provider value={{ state, set }}>{children}</Store.Provider>
+  const [isLoading, setLoading] = useState()
+  return (
+    <Store.Provider value={{ state, set, isLoading, setLoading }}>
+      {children}
+    </Store.Provider>
+  )
 }
 
 export const useAuth = () => {
   let context = useContext(Store)
-  let { set } = context
+  let { set, isLoading, setLoading } = context
   let history = useHistory()
   let location = useLocation()
   let DefaultRedirectState = { from: { pathname: "/" } }
   let { from } = location.state ?? DefaultRedirectState
 
-  return (data = {}) =>
-    client
+  return (data = {}) => {
+    setLoading(true)
+    return client
       .post("api/auth", {
         data
       })
       .then(({ userInfo, ..._ }) => {
+        setLoading(false)
         let newState = { userInfo }
         set(newState)
         history.replace(from)
@@ -52,6 +59,16 @@ export const useAuth = () => {
           //ignore
         }
       })
+      .catch((error) => {
+        setLoading(false)
+        return Promise.reject(error)
+      })
+  }
+}
+
+export const useIsAuthLoading = () => {
+  let { isLoading } = useContext(Store)
+  return isLoading
 }
 
 export const useDeauth = () => {
