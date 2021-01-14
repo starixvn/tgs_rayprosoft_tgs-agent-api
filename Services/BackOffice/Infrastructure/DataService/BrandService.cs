@@ -196,8 +196,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         GenerateBrandGroupBetLimits(brand, id, type == BrandGroupType.Sports),
                     CreatedByUsername = request.Username,
                     UpdatedByUsername = request.Username,
-                    CreatedOn = DateTimeOffset.UtcNow,
-                    UpdatedOn = DateTimeOffset.UtcNow
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
                 }).ToList();
 
             return new HashSet<BrandGroup>(groups);
@@ -237,8 +237,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     IsSports = x.IsSports,
                     CreatedByUsername = request.Username,
                     UpdatedByUsername = request.Username,
-                    CreatedOn = DateTimeOffset.UtcNow,
-                    UpdatedOn = DateTimeOffset.UtcNow
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
                 };
                 brandGroup.BrandGames = GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGameIds);
                 brandGroup.BrandGroupBetLimits =
