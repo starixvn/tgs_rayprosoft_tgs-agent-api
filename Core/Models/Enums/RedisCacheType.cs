@@ -18,7 +18,7 @@
         BrandGameProvidersWithConditions,
         BrandGames,
         BrandGamesWithConditions,
-        Games,  
+        Games,
         GamesByExternalId,
         GamesByPlatform,
         SubGames,
@@ -28,7 +28,7 @@
         Localization,
         BrandDefaultBetLimit,
         BrandApiKeys,
-        Announcements
-
+        Announcements,
+        GamesByGameType
     }
 }

@@ -6,17 +6,19 @@ namespace TGS.Core.Models.Enums
     {
         Sportsbook = 1,
         VirtualSports = 2,
-        ESports = 3,
-        LiveDealer = 4,
-        LiveDealerLobby = 5,
-        CardGame = 6,
-        CardGameLobby = 7,
-        Fishing = 8,
-        FishingLobby = 9,
-        Arcade = 10,
-        ArcadeLobby = 11,
-        Slot = 12,
+        VirtualSportsLobby = 3,
+        ESports = 4,
+        LiveDealer = 5,
+        LiveDealerLobby = 6,
+        CardGame = 7,
+        CardGameLobby = 8,
+        Fishing = 9,
+        FishingLobby = 10,
+        Arcade = 11,
+        ArcadeLobby = 12,
         Lottery = 13,
-        TableGame = 14
+        LotteryLobby = 14,
+        Slot = 15,
+        TableGame = 16
     }
 }
