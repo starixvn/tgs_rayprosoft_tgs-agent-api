@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Enums;
 
@@ -8,10 +9,11 @@ namespace TGS.Apis.OperatorApi.Validators
 {
     public class GetLobbyGameUrlRequestValidator : BaseFluentValidator<GetLobbyGameUrlRequest>
     {
-        private readonly GameType[] _gameTypes =
+        private readonly GameType[] _allowedGameTypes =
         {
-            GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ArcadeLobby, GameType.CardGameLobby,
-            GameType.FishingLobby, GameType.LiveDealerLobby, GameType.LotteryLobby
+            GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ESports, 
+            GameType.LiveDealerLobby, GameType.CardGameLobby, GameType.FishingLobby, 
+            GameType.ArcadeLobby, GameType.LotteryLobby
         };
 
         public GetLobbyGameUrlRequestValidator()
@@ -22,9 +24,9 @@ namespace TGS.Apis.OperatorApi.Validators
 
             RuleFor(x => x.GameType)
                 .IsInEnum()
-                .WithName(x => GetBindPropertyName(x, nameof(x.GameType)))
-                .Must(gameType => _gameTypes.Contains(gameType))
-                .WithMessage($"Game type must be in ({string.Join(", ", _gameTypes.ToString())})");
+                .Must(gameType => _allowedGameTypes.Contains(gameType))
+                .WithMessage(x =>
+                    $"{GetBindPropertyName(x, nameof(x.GameType))} must be in ({_allowedGameTypes.Select(t => (int) t).JoinAsStringByComma()})");
 
             RuleFor(x => x.LanguageCode)
                 .NotEmpty()

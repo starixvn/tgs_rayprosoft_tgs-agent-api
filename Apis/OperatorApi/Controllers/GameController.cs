@@ -19,18 +19,27 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        ///     get game list of specific game provider
+        /// </summary>
         [HttpGet]
         [Route("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public Task<GetGamesResponse> GetGamesAsync([FromQuery] GetGamesRequest request) =>
             _mediator.Send(request);
 
+        /// <summary>
+        ///     get game launch url via game id
+        /// </summary>
         [HttpGet]
         [Route("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public Task<GetGameUrlResponse> GetGameUrlAsync([FromQuery] GetGameUrlRequest request) =>
             _mediator.Send(request);
 
+        /// <summary>
+        ///     get game launch url for lobby type game.
+        /// </summary>
         [HttpGet]
         [Route("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
