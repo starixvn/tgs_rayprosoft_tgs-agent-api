@@ -1,17 +1,17 @@
 ** This file used for Extended Choice Parameter of jenkins **
 
-Web/backoffice::backoffice-site,
-Apis/BackendOffice::backoffice-api,
-Web/mocksite::mocksite,
-Apis/OperatorApi\::operator-api,
-Apis/GlobalApi::global-api,
+Web/backoffice::backoffice-site::backoffice-site,
+Apis/BackendOffice::backoffice-api::backoffice-api,
+Web/mocksite::mocksite::mocksite,
+Apis/OperatorApi\::operator-api::operator-api,
+Apis/GlobalApi::global-api::global-api,
 Apis/LogApi::log-api,
-Apis/FileService::file-service,
-Apis/TgsApi::game-sbo
+Apis/FileService::file-service::log-api,
+Apis/TgsApi::tgs-api::game-sbo
 
 
-backoffice-site,backoffice-api,mocksite,operator-api,global-api,log-api,file-service,game-sbo
+backoffice-site,backoffice-api,mocksite,operator-api,global-api,log-api,file-service,tgs-api
 
 
 
-Web/backoffice::backoffice-site,Apis/BackendOffice::backoffice-api,Web/mocksite::mocksite,Apis/OperatorApi::operator-api,Apis/GlobalApi::global-api,Apis/LogApi::log-api,Apis/FileService::file-service,Apis/TgsApi::game-sbo
+Web/backoffice::backoffice-site,Apis/BackendOffice::backoffice-api,Web/mocksite::mocksite,Apis/OperatorApi::operator-api,Apis/GlobalApi::global-api,Apis/LogApi::log-api,Apis/FileService::file-service,Apis/TgsApi::tgs-api

@@ -30,7 +30,7 @@ pipeline {
 						sh "docker push ${Registry}${data[1]}:${TAG}"
 						
 						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
-							sh "kubectl set image deployment/${data[1]} ${data[1]}=${Registry}${data[1]}:${TAG} --record -n ${params.Env}"
+							sh "kubectl set image deployment/${data[2]} ${data[2]}=${Registry}${data[1]}:${TAG} --record -n ${params.Env}"
 						}
 					}					
 				}
