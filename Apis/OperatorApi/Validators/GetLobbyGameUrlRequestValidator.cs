@@ -18,17 +18,17 @@ namespace TGS.Apis.OperatorApi.Validators
         {
             RuleFor(x => x.GameProviderCode)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.GameProviderCode)));
+                .WithName(x => GetBindPropertyName(x, nameof(x.GameProviderCode)));
 
             RuleFor(x => x.GameType)
                 .IsInEnum()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.GameType)))
+                .WithName(x => GetBindPropertyName(x, nameof(x.GameType)))
                 .Must(gameType => _gameTypes.Contains(gameType))
                 .WithMessage($"Game type must be in ({string.Join(", ", _gameTypes.ToString())})");
 
             RuleFor(x => x.LanguageCode)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.LanguageCode)));
+                .WithName(x => GetBindPropertyName(x, nameof(x.LanguageCode)));
         }
     }
 }
