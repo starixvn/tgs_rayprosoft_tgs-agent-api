@@ -146,7 +146,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         private HashSet<LicenseeBetLimit> GenerateLicenseeBetLimits(Licensee licensee, LicenseeRequest request)
         {
             var licenseeBetLimits = _repository.BetLimits
-                .Where(x => request.BetLimits.Contains(x.Id)).Select(x =>
+                .Where(x => request.BetLimitIds.Contains(x.Id)).Select(x =>
                     new LicenseeBetLimit
                     {
                         LicenseeId = licensee.Id,

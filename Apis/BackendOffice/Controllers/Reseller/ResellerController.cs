@@ -79,7 +79,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     Languages = reseller.Languages
                         .Select(x => new ResellerLanguageModel
                         {
-                            CultureCode = x.CultureCode
+                            CultureCode = x.CultureCode,
+                            Name = x.Language.Name
                         }).ToArray(),
                     GameProviders = reseller.GameProviders
                         .Select(x => new ResellerGameProviderModel

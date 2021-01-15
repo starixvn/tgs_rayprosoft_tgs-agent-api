@@ -17,6 +17,7 @@ export const BetLimitCheckboxGroup = ({
   ...props
 }) => {
   let { control, setValue, watch } = useFormContext()
+  let betLimits = watch(arrayFieldName)
   const { fields: betLimitFields } = useFieldArray({
     control,
     name: arrayFieldName,

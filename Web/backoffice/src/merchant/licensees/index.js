@@ -105,7 +105,7 @@ const SearchForm = ({ search, isLoading, ...props }) => {
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)}>
         <Set>
-          <Input
+          <InputField
             name="keyword"
             addonAfter={
               <Button onClick={() => formMethods.setValue("keyword", "")}>
@@ -113,7 +113,6 @@ const SearchForm = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={searchPlaceHolder}
-            autocomplete="off"
           />
 
           <SearchButton isLoading={isLoading} />
@@ -131,10 +130,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司代码" en="Code" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -142,10 +143,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司名称" en="Name" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -153,7 +156,8 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司简介" en="Description" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -164,7 +168,8 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司邮箱" en="Email" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"

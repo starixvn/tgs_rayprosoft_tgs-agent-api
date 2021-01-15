@@ -3,5 +3,7 @@
     public class LicenseeLanguageModel
     {
         public string CultureCode { get; set; }
+
+        public string Name { get; set; }
     }
 }

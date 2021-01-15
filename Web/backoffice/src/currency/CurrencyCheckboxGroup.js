@@ -15,6 +15,7 @@ export const CurrencyCheckboxGroupTable = ({
   ...props
 }) => {
   let { control, setValue, watch, register } = useFormContext()
+  let currencies = watch(fieldArrayName)
   const { fields } = useFieldArray({
     control,
     name: fieldArrayName,

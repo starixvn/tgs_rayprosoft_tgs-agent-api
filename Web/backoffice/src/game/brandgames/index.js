@@ -4,7 +4,6 @@ import {
   Heading,
   Stack,
   Button,
-  InputField,
   Set,
   Text,
   Box,
@@ -25,10 +24,6 @@ import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { useBrandGameList, useChangeBrandGameOrders } from "./client"
-import { useFormattedTimeString } from "../../date/format"
-import { useFormattedDay } from "../../date/week"
-import formatISO from "date-fns/fp/formatISO"
-import { StatusMenu } from "./status"
 import { EditButton } from "./edit"
 import { GameTypeLabel, GameTypeSelect } from "../games/GameType"
 import { GamePlatformLabel } from "../games/GamePlatform"
@@ -36,7 +31,7 @@ import { GameTag } from "../games/GameTag"
 import { GameTagSwitch } from "./GameTagSwitch"
 import { GameStatusToggleSwitch } from "./GameStatusToggleSwitch"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import HookFormInputField from "../../input/Input"
+import { InputField } from "../../input/Input"
 import { BrandGameProviderSelect } from "../brandproviders/BrandGameProviderSelect"
 
 export { Code } from "./menu"
@@ -213,7 +208,7 @@ const SearchBar = ({
         <Set>
           <BrandGameProviderSelect name="gameProviderId" />
           <GameTypeSelect name="gameType" />
-          <HookFormInputField
+          <InputField
             name="keyword"
             addonAfter={
               <Button onClick={() => formMethods.setValue("keyword", "")}>

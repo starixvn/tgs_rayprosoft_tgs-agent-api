@@ -35,6 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                 .Select(x => new LicenseeModel
                 {
                     Id = x.Id,
+                    ResellerId = x.ResellerId,
                     Name = x.Name,
                     Code = x.Code,
                     Status = x.Status,
@@ -67,6 +68,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                 Licensee = new LicenseeModel
                 {
                     Id = licensee.Id,
+                    ResellerId = licensee.ResellerId,
                     Code = licensee.Code,
                     Name = licensee.Name,
                     Status = licensee.Status,
@@ -79,7 +81,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                     Languages = licensee.Languages
                         .Select(x => new LicenseeLanguageModel
                         {
-                            CultureCode = x.CultureCode
+                            CultureCode = x.CultureCode,
+                            Name = x.Language.Name
                         }).ToArray(),
                     GameProviders = licensee.GameProviders
                         .Select(x => new LicenseeGameProviderModel

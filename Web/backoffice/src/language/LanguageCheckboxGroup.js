@@ -27,6 +27,7 @@ export const LanguageCheckboxGroupTable = ({
   ...props
 }) => {
   let { control, setValue, watch, register } = useFormContext()
+  let languages = watch(fieldArrayName)
   const { fields } = useFieldArray({
     control,
     name: fieldArrayName,
@@ -56,7 +57,7 @@ export const LanguageCheckboxGroupTable = ({
               <Trans zh="代码" en="Code" />
             </Table.HeadCell>
             <Table.HeadCell>
-              <Trans zh="币种" en="Currency" />
+              <Trans zh="语言" en="Language" />
             </Table.HeadCell>
           </Table.Row>
         </Table.Head>

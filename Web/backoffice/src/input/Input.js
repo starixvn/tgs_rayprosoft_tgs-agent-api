@@ -4,7 +4,7 @@ import { useForm, useFormContext } from "react-hook-form"
 import { Input as _Input, InputField as _InputField } from "bumbag"
 import { useTrans } from "../i18n"
 
-export const HookFormInputField = ({
+export const Input = ({
   name,
   register,
   registerOptions = {},
@@ -95,4 +95,4 @@ const useRequiredMessage = () =>
     en: "Required field"
   })
 
-export default HookFormInputField
+export default Input

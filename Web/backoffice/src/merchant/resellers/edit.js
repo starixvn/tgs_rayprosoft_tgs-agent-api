@@ -7,8 +7,7 @@ import {
   Text,
   Box,
   Set,
-  FieldStack,
-  Checkbox as BumbagCheckbox
+  FieldStack
 } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
@@ -24,7 +23,6 @@ import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import Input from "../../input/Input"
 import Textarea from "../../textarea"
-import Checkbox from "../../checkbox/Checkbox"
 import { useFormContext, useFieldArray } from "react-hook-form"
 import { useGameProviderList } from "../../game/providers/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -37,6 +35,7 @@ import { allCheckedKeys } from "../../checkbox/allCheckedKeys"
 import {
   mapChecked,
   mapCheckedByCode,
+  mapCheckedByCultureCode,
   mapCheckedById
 } from "../../checkbox/mapChecked"
 import { CurrencyCheckboxGroupTable } from "../../currency/CurrencyCheckboxGroup"
@@ -300,10 +299,7 @@ const EditDialog = ({
       dialog={dialog}
       showActionButtons={false}
       footer={
-        <ConfirmButtonFooter
-          isLoading={isLoadingReseller}
-          disabled={isLoadingReseller}
-        />
+        <ConfirmButtonFooter isLoading={isLoading} disabled={isLoading} />
       }
       dialog={dialog}
       placement="top"
@@ -319,9 +315,6 @@ const EditDialog = ({
     </FormDialog>
   )
 }
-
-const mapCheckedByCultureCode = (source = [], list = []) =>
-  mapChecked((a) => (b) => a.cultureCode == b.cultureCode, source, list)
 
 export const ViewButton = ({ record, ...props }) => {
   let dialog = useModalState()

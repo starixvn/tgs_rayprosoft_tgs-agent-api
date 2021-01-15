@@ -7,10 +7,15 @@ export const mapChecked = (fn = byId, source = [], list = []) =>
     }
   })
 
-const byId = (a = {}) => (b = {}) => a.id === b.id
-export const mapCheckedById = (source = [], list = []) =>
-  mapChecked(byId, source, list)
+const byProp = (name) => (a = {}) => (b = {}) => a[name] === b[name]
+export const mapCheckedByProp = (name, source = [], list = []) =>
+  mapChecked(byProp(name), source, list)
 
-const byCode = (a = {}) => (b = {}) => a.code === b.code
+export const mapCheckedById = (source = [], list = []) =>
+  mapCheckedByProp("id", source, list)
+
 export const mapCheckedByCode = (source = [], list = []) =>
-  mapChecked(byCode, source, list)
+  mapCheckedByProp("code", source, list)
+
+export const mapCheckedByCultureCode = (source = [], list = []) =>
+  mapCheckedByProp("cultureCode", source, list)

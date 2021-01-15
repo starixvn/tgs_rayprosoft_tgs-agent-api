@@ -6,9 +6,7 @@ import {
   Stack,
   Button,
   Set,
-  InputField,
   Text,
-  Box,
   Input,
   Link,
   Dialog,
@@ -45,7 +43,7 @@ import { ViewButton as LogsButton } from "./logs"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert from "../../dialog/Alert"
 import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
-import HookFormInputField from "../../input/Input"
+import { InputField } from "../../input/Input"
 
 export { Code }
 
@@ -247,7 +245,7 @@ const SearchBar = ({ search, isLoading, ...props }) => {
       <form onSubmit={formMethods.handleSubmit(onSubmit)}>
         <Set>
           <BrandPaymentStatusSelect name="paymentStatus" />
-          <HookFormInputField
+          <InputField
             name="keyword"
             defaultValue=""
             addonAfter={

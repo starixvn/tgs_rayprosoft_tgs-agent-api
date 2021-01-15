@@ -17,7 +17,12 @@ export const useLicenseeList = (searchParams) => {
 
 export const useLicensee = (id) => {
   let url = id ? `${API}/${id}` : ""
-  return useGet(url)
+  let { data, ...rest } = useGet(url)
+
+  return {
+    data: data?.licensee,
+    ...rest
+  }
 }
 
 export const useAddLicensee = (data) => {

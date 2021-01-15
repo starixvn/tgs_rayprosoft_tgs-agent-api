@@ -112,7 +112,6 @@ const SearchForm = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={searchPlaceHolder}
-            autocomplete="off"
           />
 
           <SearchButton isLoading={isLoading} />
@@ -160,8 +159,7 @@ const useColumns = ({ items = [], mutate }) => {
         whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
+        textAlign: "center"
       }
     },
     {
@@ -169,7 +167,8 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司邮箱" en="Email" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
