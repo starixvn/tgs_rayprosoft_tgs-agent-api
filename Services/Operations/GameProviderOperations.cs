@@ -37,7 +37,7 @@ namespace TGS.Services.Operations
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, string externalGameId);
 
-        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, GameType gameType);
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType, GameType gameType);
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType);
 
@@ -257,25 +257,10 @@ namespace TGS.Services.Operations
             return games;
         }
 
-        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, GameType gameType)
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType, GameType gameType)
         {
-            const RedisCacheType cacheType = RedisCacheType.GamesByGameType;
-            var field = $"{gameType}";
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, field);
-            if (value.HasValue)
-            {
-                return _json.DeserializeFromString<CachedGame[]>(value);
-            }
-
-            var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
-            var games = cachedGames.Where(g => g.Type == gameType).ToArray();
-
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
-            {
-                new(field, _json.SerializeToString(games))
-            }, TimeSpan.FromHours(2));
-
-            return games;
+            var games = await _interface.GetCachedGamesAsync(gameProviderId, platformType);
+            return games.Where(g => g.Type == gameType).ToArray();
         }
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId,
