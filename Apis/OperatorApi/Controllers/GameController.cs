@@ -34,6 +34,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet]
         [Route("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetGameUrlResponse> GetGameUrlAsync(GetLobbyGameUrlRequest request) => _mediator.Send(request);
+        public Task<GetGameUrlResponse> GetLobbyGameUrlAsync([FromQuery] GetLobbyGameUrlRequest request) =>
+            _mediator.Send(request);
     }
 }
