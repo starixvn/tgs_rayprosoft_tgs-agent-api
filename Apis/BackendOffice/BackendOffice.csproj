@@ -33,6 +33,7 @@
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\BackOffice\BackOffice.csproj" />
+    <ProjectReference Include="..\..\Services\Hangfire\Hangfire.csproj" />
   </ItemGroup>
 
   <ItemGroup>
