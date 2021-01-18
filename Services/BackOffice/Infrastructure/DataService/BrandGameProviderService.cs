@@ -18,13 +18,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<BrandGameProvider>, IQueryable<BrandGameProvider>> preQuery = null,
             bool tracking = false);
 
-        Task UpdateBrandGameProviderAsync(BrandGameProvider schedule);
+        Task UpdateBrandGameProviderAsync(BrandGameProvider brandGameProvider);
+        Task UpdateBrandGameProvidersAsync(BrandGameProvider[] brandGameProviders);
     }
 
     public class BrandGameProviderService : BaseService, IBrandGameProviderService
     {
+        private readonly ITgsRepository _repository;
+
         public BrandGameProviderService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
+            _repository = tgsRepository;
         }
 
         Task<BrandGameProvider> IBrandGameProviderService.GetBrandGameProviderAsync(
@@ -38,7 +42,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GetQueriesAsync(preQuery, tracking);
 
         Task IBrandGameProviderService.UpdateBrandGameProviderAsync(
-            BrandGameProvider schedule) =>
-            UpdateEntityAsync(schedule);
+            BrandGameProvider brandGameProvider) =>
+            UpdateEntityAsync(brandGameProvider);
+
+        Task IBrandGameProviderService.UpdateBrandGameProvidersAsync(BrandGameProvider[] brandGameProviders) =>
+            UpdateEntitiesAsync(brandGameProviders);
     }
 }

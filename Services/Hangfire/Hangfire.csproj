@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Services.Hangfire</AssemblyName>
+    <RootNamespace>TGS.Services.Hangfire</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.Core" Version="1.7.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
+    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <ProjectReference Include="..\BackOffice\BackOffice.csproj" />
+  </ItemGroup>
+
+</Project>

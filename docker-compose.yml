@@ -116,7 +116,7 @@ services:
     container_name: backoffice-api
     labels:
       - traefik.enable=true
-      - traefik.http.routers.backoffice-api.rule=Host(`backoffice.localhost`) && PathPrefix(`/api`)
+      - traefik.http.routers.backoffice-api.rule=Host(`backoffice.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/hangfire`))
       - traefik.http.routers.backoffice-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
@@ -132,6 +132,7 @@ services:
       - sqlserver
       - log-api
       - game-sbo
+      - redis
 
   fileservice:
     build:

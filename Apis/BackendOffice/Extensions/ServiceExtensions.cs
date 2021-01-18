@@ -25,6 +25,7 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Log;
 using TGS.Core.DataServices.Tgs.Extensions;
+using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -65,6 +66,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddJson()
                 .AddSecurity()
                 .AddWebApiServices()
+                .AddScheduler(configuration)
                 .AddTgsLog();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -95,6 +97,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddSqlServer(configuration, "Tgs", name: "tgs-db")
                 .AddSqlServer(configuration, "Bet", name: "bet-db")
                 .AddSqlServer(configuration, "Log", name: "log-db")
+                .AddMongoDb(configuration, "Hangfire", "hangfire-db")
                 .AddNats();
 
             services.AddAntiforgery(options =>
@@ -107,7 +110,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new("/api/auth");
+                    options.LoginPath = new PathString("/api/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.Events.OnRedirectToLogin = context =>
                     {
@@ -128,7 +131,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                     new CultureInfo(zhCNCulture)
                 };
 
-                options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
+                options.DefaultRequestCulture = new RequestCulture(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 

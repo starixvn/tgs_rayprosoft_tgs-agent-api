@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +57,10 @@ namespace TGS.Apis.FileService
             services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
 
             services.AddControllers()
-                .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
+                .AddFluentValidation(c =>
+                {
+                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                });
 
             services.AddHealthChecks()
                 .AddNats()
@@ -79,7 +83,7 @@ namespace TGS.Apis.FileService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("fs/health", new()
+                endpoints.MapHealthChecks("fs/health", new HealthCheckOptions
                 {
                     ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
