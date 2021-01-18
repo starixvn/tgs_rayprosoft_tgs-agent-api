@@ -70,8 +70,6 @@ const Layout = ({ children }) => {
     <PageWithHeader sticky header={<Header />} headerHeight={HeaderHeight}>
       <PageWithSidebar
         id="pageWithSidebar"
-        minHeight="unset"
-        height={`calc(100vh - ${HeaderHeight})`}
         sidebar={<Sidebar />}
         sidebarPlacement="left"
         sidebarWidth={`${sidebarWidth}px`}

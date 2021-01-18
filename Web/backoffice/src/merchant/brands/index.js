@@ -12,7 +12,7 @@ import { Table, toApiParams, useTable, pageCount } from "../../table"
 import { useBrandList, useChangeBrandStatus } from "./client"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import { AddButton, EditButton } from "./edit"
+import { AddButton, EditButton, ViewButton } from "./edit"
 import { SearchButton } from "../../button/SearchButton"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
@@ -131,10 +131,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司代码" en="Code" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -142,10 +144,12 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司名称" en="Name" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       }
     },
     {
@@ -153,7 +157,8 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司简介" en="Description" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -164,7 +169,8 @@ const useColumns = ({ items = [], mutate }) => {
       Header: <Trans zh="公司邮箱" en="Email" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -223,6 +229,7 @@ const useColumns = ({ items = [], mutate }) => {
       Cell: ({ value }) => {
         return (
           <Set orientation="vertical" alignX="center">
+            <ViewButton record={value} />
             <EditButton record={value} onSubmitted={mutate} />
           </Set>
         )

@@ -15,6 +15,12 @@ const VirtualSportsTrans = {
   en: "Virtual Sports"
 }
 
+const VirtualSportsLobby = "VirtualSportsLobby"
+const VirtualSportsLobbyTrans = {
+  zh: "虚拟体育大厅",
+  en: "Virtual Sports Lobby"
+}
+
 const ESports = "ESports"
 const ESportsTrans = {
   zh: "电竞体育",
@@ -81,6 +87,12 @@ const LotteryTrans = {
   en: "Lottery"
 }
 
+const LotteryLobby = "LotteryLobby"
+const LotteryLobbyTrans = {
+  zh: "彩票游戏大厅",
+  en: "Lottery Lobby"
+}
+
 const TableGame = "TableGame"
 const TableGameTrans = {
   zh: "桌面游戏",
@@ -90,6 +102,7 @@ const TableGameTrans = {
 export const GameType = {
   Sportsbook,
   VirtualSports,
+  VirtualSportsLobby,
   ESports,
   LiveDealer,
   LiveDealerLobby,
@@ -99,8 +112,9 @@ export const GameType = {
   FishingLobby,
   Arcade,
   ArcadeLobby,
-  Slot,
   Lottery,
+  LotteryLobby,
+  Slot,
   TableGame
 }
 
@@ -111,6 +125,9 @@ export const GameTypeLabel = ({ value }) => {
 
     case VirtualSports:
       return <Trans {...VirtualSportsTrans} />
+
+    case VirtualSportsLobby:
+      return <Trans {...VirtualSportsLobbyTrans} />
 
     case ESports:
       return <Trans {...ESportsTrans} />
@@ -139,11 +156,14 @@ export const GameTypeLabel = ({ value }) => {
     case ArcadeLobby:
       return <Trans {...ArcadeLobbyTrans} />
 
-    case Slot:
-      return <Trans {...SlotTrans} />
-
     case Lottery:
       return <Trans {...LotteryTrans} />
+
+    case LotteryLobby:
+      return <Trans {...LotteryLobbyTrans} />
+
+    case Slot:
+      return <Trans {...SlotTrans} />
 
     case TableGame:
       return <Trans {...TableGameTrans} />
@@ -167,6 +187,10 @@ export const GameTypeSelect = ({ placeholder, ...props }) => {
     {
       label: useTrans(VirtualSportsTrans),
       value: VirtualSports
+    },
+    {
+      label: useTrans(VirtualSportsLobbyTrans),
+      value: VirtualSportsLobby
     },
     {
       label: useTrans(ESportsTrans),
@@ -205,12 +229,16 @@ export const GameTypeSelect = ({ placeholder, ...props }) => {
       value: ArcadeLobby
     },
     {
-      label: useTrans(SlotTrans),
-      value: Slot
-    },
-    {
       label: useTrans(LotteryTrans),
       value: Lottery
+    },
+    {
+      label: useTrans(LotteryLobbyTrans),
+      value: LotteryLobby
+    },
+    {
+      label: useTrans(SlotTrans),
+      value: Slot
     },
     {
       label: useTrans(TableGameTrans),

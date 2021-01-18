@@ -38,6 +38,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                 Brand = new BrandModel
                 {
                     Id = brand.Id,
+                    LicenseeId = brand.LicenseeId,
                     Code = brand.Code,
                     Name = brand.Name,
                     Status = brand.Status,

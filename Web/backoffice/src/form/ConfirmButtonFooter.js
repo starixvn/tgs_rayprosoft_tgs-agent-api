@@ -37,11 +37,19 @@ export const CloseButtonFooter = ({
   width = "100%",
   alignX = "center",
   dialog,
+  onClickClose,
   ...props
 }) => {
   return (
     <Box width={width} alignX={alignX} {...props}>
-      <Button palette="primary" type="button" onClick={dialog?.hide}>
+      <Button
+        palette="primary"
+        type="button"
+        onClick={() => {
+          dialog?.hide()
+          onClickClose?.()
+        }}
+      >
         <CloseText />
       </Button>
     </Box>

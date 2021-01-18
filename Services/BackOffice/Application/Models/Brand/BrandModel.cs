@@ -6,6 +6,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
     public class BrandModel
     {
         public Guid Id { get; set; }
+        public Guid LicenseeId { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public Status Status { get; set; }

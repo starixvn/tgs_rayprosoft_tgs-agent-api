@@ -32,6 +32,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                 .Select(x => new BrandModel
                 {
                     Id = x.Id,
+                    LicenseeId = x.LicenseeId,
                     Name = x.Name,
                     Code = x.Code,
                     Status = x.Status,

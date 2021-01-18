@@ -12,7 +12,7 @@ import { Table, toApiParams, useTable, pageCount } from "../../table"
 import { useLicenseeList, useChangeLicenseeStatus } from "./client"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
-import { AddButton, EditButton } from "./edit"
+import { AddButton, EditButton, ViewButton } from "./edit"
 import { SearchButton } from "../../button/SearchButton"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { InputField } from "../../input/Input"
@@ -228,6 +228,7 @@ const useColumns = ({ items = [], mutate }) => {
       Cell: ({ value }) => {
         return (
           <Set orientation="vertical" alignX="center">
+            <ViewButton record={value} />
             <EditButton record={value} onSubmitted={mutate} />
           </Set>
         )

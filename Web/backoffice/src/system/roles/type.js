@@ -1,37 +1,31 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Trans, useTrans } from "../../i18n"
-import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Label,
-  Input,
-  InputField,
-  Checkbox,
-  FieldStack,
-  FieldWrapper,
-  Select,
-  SelectField,
-  Dialog,
-  Modal,
-  Table,
-  useClassName
-} from "bumbag"
+import { Spinner, Stack, Flex, Box, Card, Label, Select } from "bumbag"
 import { useUserRoleType } from "../../user/context"
-import { Reseller, ResellerTrans } from "../../merchant/resellers"
-import { Licensee, LicenseeTrans } from "../../merchant/licensees"
-import { Brand, BrandTrans } from "../../merchant/brands"
 
 const Admin = "Admin"
 const AdminTrans = {
   zh: "管理员",
   en: "Admin"
+}
+
+const Reseller = "Reseller"
+const ResellerTrans = {
+  zh: "总公司",
+  en: "Reseller"
+}
+
+const Licensee = "Licensee"
+const LicenseeTrans = {
+  zh: "公司",
+  en: "Licensee"
+}
+
+const Brand = "Brand"
+const BrandTrans = {
+  zh: "品牌",
+  en: "Brand"
 }
 
 export const RoleTypes = {

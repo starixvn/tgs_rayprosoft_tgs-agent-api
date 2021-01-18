@@ -17,7 +17,11 @@ export const useBrandList = (searchParams) => {
 
 export const useBrand = (id) => {
   let url = id ? `${API}/${id}` : ""
-  return useGet(url)
+  let { data, ...rest } = useGet(url)
+  return {
+    data: data?.brand,
+    ...rest
+  }
 }
 
 export const useAddBrand = (data) => {

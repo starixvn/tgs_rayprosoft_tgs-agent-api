@@ -57,15 +57,7 @@ export const AddButton = ({ onSubmitted, ...props }) => {
         <Trans zh="新增" en="Add" />
       </Disclosure>
       {dialog.visible && (
-        <LoadingDataDialog>
-          {(dataProps) => (
-            <AddDialog
-              onSubmitted={onSubmitted}
-              dialog={dialog}
-              {...dataProps}
-            />
-          )}
-        </LoadingDataDialog>
+        <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
       )}
     </>
   )
@@ -91,45 +83,17 @@ const normalizeFormData = ({
   }
 }
 
-const formDataOptionLoadings = () => [
-  ["languageData", useLanguageList({ showAll: true })],
-  ["currencyData", useCurrencyList({ showAll: true })],
-  ["gameProviderData", useGameProviderList({ showAll: true })],
-  ["betLimitData", useBetLimitList({ showAll: true })]
-]
-
-const LoadingDataDialog = ({
-  loadings = formDataOptionLoadings(),
-  dialog,
-  children
-}) => {
-  let isLoading = loadings.find(([name, { isLoading }]) => isLoading) ?? false
-
-  if (isLoading) {
-    return <LoadingBackdrop {...dialog} />
-  }
-
-  let error = loadings.find(([name, { error }]) => !!error)
-
-  if (error) {
-    return <AlertDialog {...error} onClickClose={dialog.hide} />
-  }
-
-  let dataProps = loadings.reduce((results, [name, { data }]) => {
-    Reflect.set(results, name, data)
-    return results
-  }, {})
-  return children(dataProps)
-}
-
-const AddDialog = ({
-  languageData,
-  currencyData,
-  gameProviderData,
-  betLimitData,
-  onSubmitted,
-  dialog
-}) => {
+const AddDialog = ({ onSubmitted, dialog }) => {
+  let {
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading: isLoadingData,
+    error: dataError,
+    muateGameProvider,
+    deleteGameProviderCache
+  } = useResellerData()
   let [formData, setSubmit] = useState()
   let { result, isLoading, error, mutate } = useAddReseller(formData)
 
@@ -138,6 +102,9 @@ const AddDialog = ({
   }
 
   const reset = () => {
+    muateGameProvider(undefined, false)
+    deleteGameProviderCache()
+
     mutate(undefined, false)
     setSubmit(undefined)
   }
@@ -147,10 +114,14 @@ const AddDialog = ({
     en: "Add Reseller"
   })
 
-  let languages = mapCheckedByCultureCode([], languageData?.items)
-  let currencies = mapCheckedByCode([], currencyData?.items)
-  let gameProviders = mapCheckedById([], gameProviderData?.items)
-  let betLimits = mapCheckedById([], betLimitData?.items)
+  if (isLoadingData) {
+    return <LoadingBackdrop {...dialog} />
+  }
+
+  if (dataError) {
+    return <AlertDialog {...dataError} onClickClose={dialog.hide} />
+  }
+
   return (
     <FormDialog
       defaultValues={{
@@ -170,6 +141,7 @@ const AddDialog = ({
       }}
       title={title}
       dialog={dialog}
+      onClickClose={reset}
       showActionButtons={false}
       footer={
         <ConfirmButtonFooter isLoading={isLoading} disabled={isLoading} />
@@ -202,39 +174,25 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
-        <LoadingDataDialog>
-          {(dataProps) => (
-            <EditDialog
-              record={record}
-              onSubmitted={onSubmitted}
-              dialog={dialog}
-              {...dataProps}
-            />
-          )}
-        </LoadingDataDialog>
+        <EditDialog record={record} onSubmitted={onSubmitted} dialog={dialog} />
       )}
     </>
   )
 }
 
-const EditDialog = ({
-  languageData,
-  currencyData,
-  gameProviderData,
-  betLimitData,
-  record,
-  onSubmitted,
-  dialog,
-  ...props
-}) => {
+const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
   let { id } = record
   let {
-    data: reseller,
+    reseller,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
     isLoading: isLoadingReseller,
     error: resellerError,
     mutate: mutateReseller,
     deleteCache: deleteResellerCache
-  } = useReseller(id)
+  } = useResellerData(id)
 
   let [formData, setSubmit] = useState()
   let { result, isLoading, error, mutate } = useUpdateReseller(id, formData)
@@ -267,16 +225,6 @@ const EditDialog = ({
     return <AlertDialog {...resellerError} onClickClose={dialog.hide} />
   }
 
-  let languages = mapCheckedByCultureCode(
-    reseller.languages,
-    languageData?.items
-  )
-  let currencies = mapCheckedByCode(reseller.currencies, currencyData?.items)
-  let gameProviders = mapCheckedById(
-    reseller.gameProviders,
-    gameProviderData?.items
-  )
-  let betLimits = mapCheckedById(reseller.betLimits, betLimitData?.items)
   return (
     <FormDialog
       defaultValues={{
@@ -295,6 +243,7 @@ const EditDialog = ({
         reset()
         onSubmitted?.()
       }}
+      onClickClose={reset}
       title={title}
       dialog={dialog}
       showActionButtons={false}
@@ -330,55 +279,112 @@ export const ViewButton = ({ record, ...props }) => {
       <Disclosure {...dialog} {...props}>
         <Trans zh="查看" en="View" />
       </Disclosure>
-      {dialog.visible && (
-        <LoadingDataDialog>
-          {(dataProps) => (
-            <ViewDialog id={record.id} dialog={dialog} {...dataProps} />
-          )}
-        </LoadingDataDialog>
-      )}
+      {dialog.visible && <ViewDialog id={record.id} dialog={dialog} />}
     </>
   )
 }
 
-const ViewDialog = ({
-  languageData,
-  currencyData,
-  gameProviderData,
-  betLimitData,
-  id,
-  dialog,
-  ...props
-}) => {
+const useResellerData = (id) => {
   let {
     data: reseller,
     isLoading: isLoadingReseller,
-    error: resellerError
+    error: resellerError,
+    mutate,
+    deleteCache
   } = useReseller(id)
+  let {
+    data: languageData,
+    isLoading: isLoadingLanguage,
+    error: languageError,
+    mutate: muateLanguage,
+    deleteCache: deleteLanguageCache
+  } = useLanguageList({ showAll: true })
+  let {
+    data: currencyData,
+    isLoading: isLoadingCurrency,
+    error: currencyError,
+    mutate: muateCurrency,
+    deleteCache: deleteCurrencyCache
+  } = useCurrencyList({ showAll: true })
+  let {
+    data: gameProviderData,
+    isLoading: isLoadingGameProvider,
+    error: gameProviderError,
+    mutate: muateGameProvider,
+    deleteCache: deleteGameProviderCache
+  } = useGameProviderList({ showAll: true })
+  let {
+    data: betLimitData,
+    isLoading: isLoadingBetLimit,
+    error: betLimitError,
+    mutate: muateBetLimit,
+    deleteCache: deleteBetLimitCache
+  } = useBetLimitList({ showAll: true })
+
+  return {
+    reseller,
+    languages: mapCheckedByCultureCode(
+      reseller?.languages ?? [],
+      languageData?.items ?? []
+    ),
+    currencies: mapCheckedByCode(
+      reseller?.currencies ?? [],
+      currencyData?.items
+    ),
+    gameProviders: mapCheckedById(
+      reseller?.gameProviders ?? [],
+      gameProviderData?.items ?? []
+    ),
+    betLimits: mapCheckedById(reseller?.betLimits ?? [], betLimitData?.items),
+    isLoading:
+      isLoadingReseller ||
+      isLoadingLanguage ||
+      isLoadingCurrency ||
+      isLoadingGameProvider ||
+      isLoadingBetLimit,
+    error:
+      resellerError ||
+      languageError ||
+      currencyError ||
+      gameProviderError ||
+      betLimitError,
+    mutate,
+    muateGameProvider,
+    deleteCache,
+    deleteGameProviderCache
+  }
+}
+
+const ViewDialog = ({ id, dialog, ...props }) => {
+  let {
+    reseller,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading,
+    error,
+    mutate,
+    deleteCache
+  } = useResellerData(id)
 
   let title = useTrans({
     zh: "查看总公司",
     en: "View Reseller"
   })
 
-  if (isLoadingReseller) {
+  if (isLoading) {
     return <LoadingBackdrop {...dialog} />
   }
 
-  if (resellerError) {
-    return <AlertDialog {...resellerError} onClickClose={dialog.hide} />
+  if (error) {
+    return <AlertDialog {...error} onClickClose={dialog.hide} />
   }
 
-  let languages = mapCheckedByCultureCode(
-    reseller.languages,
-    languageData?.items
-  )
-  let currencies = mapCheckedByCode(reseller.currencies, currencyData?.items)
-  let gameProviders = mapCheckedById(
-    reseller.gameProviders,
-    gameProviderData?.items
-  )
-  let betLimits = mapCheckedById(reseller.betLimits, betLimitData?.items)
+  const reset = () => {
+    mutate(undefined, false)
+    deleteCache()
+  }
 
   let record = {
     ...reseller,
@@ -392,8 +398,9 @@ const ViewDialog = ({
       defaultValues={record}
       title={title}
       dialog={dialog}
+      onClickClose={reset}
       showActionButtons={false}
-      footer={<CloseButtonFooter dialog={dialog} />}
+      footer={<CloseButtonFooter dialog={dialog} onClickClose={reset} />}
       placement="top"
       minWidth="60vw"
       maxWidth="unset"
@@ -422,7 +429,8 @@ const EditBody = ({ record = {}, readonly = false, isAdd = false }) => {
           <Trans zh="商户类型" en="Type" />
         </NormalLabel>
         <Box alignY="center">
-          <BusinessTypeRadioGroup disabled={readonly || !isAdd} />
+          {editable && <BusinessTypeRadioGroup disabled={readonly || !isAdd} />}
+          {readonly && <Text.Block>{record?.businessType}</Text.Block>}
         </Box>
 
         <NormalLabel>
