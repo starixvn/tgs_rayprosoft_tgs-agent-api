@@ -38,10 +38,20 @@ namespace TGS.Tests.BackendOffice.UnitTests
             configurationSectionStub.Setup(x => x["Urls"])
                 .Returns("nats://localhost:4222");
 
+            var hangfire = new Mock<IConfigurationSection>();
+            var hangfireConnection = new Mock<IConfigurationSection>();
+            hangfireConnection.Setup(x => x.Value)
+                .Returns(
+                    "mongodb://root:1qaz2wsx!%40@localhost:27017/Hangfire?retryWrites=true&w=majority&authSource=admin");
+            hangfire.Setup(x => x.GetSection("ConnectionString"))
+                .Returns(hangfireConnection.Object);
+
             var configurationStub = new Mock<IConfiguration>();
             configurationStub.Setup(x => x.GetSection("ConnectionStrings")).Returns(configurationSectionStub.Object);
 
             configurationStub.Setup(x => x.GetSection("NatsSetting")).Returns(urls.Object);
+
+            configurationStub.Setup(x => x.GetSection("Hangfire")).Returns(hangfire.Object);
 
             var envStub = new Mock<IWebHostEnvironment>();
             var services = new ServiceCollection();
