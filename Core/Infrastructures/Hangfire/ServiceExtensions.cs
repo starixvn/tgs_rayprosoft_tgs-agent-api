@@ -31,8 +31,7 @@ namespace TGS.Core.Infrastructures.Hangfire
                         MigrationStrategy = new MigrateMongoMigrationStrategy(),
                         BackupStrategy = new CollectionMongoBackupStrategy()
                     },
-                    Prefix = settings.Prefix,
-                    CheckConnection = true
+                    Prefix = settings.Prefix
                 })
             );
 
