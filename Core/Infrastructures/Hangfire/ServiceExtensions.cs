@@ -20,16 +20,6 @@ namespace TGS.Core.Infrastructures.Hangfire
 
             services.AddHangfire((services, option) =>
                 {
-<<<<<<< HEAD
-                    MigrationOptions = new MongoMigrationOptions
-                    {
-                        MigrationStrategy = new MigrateMongoMigrationStrategy(),
-                        BackupStrategy = new CollectionMongoBackupStrategy()
-                    },
-                    Prefix = settings.Prefix,
-                    CheckConnection = false
-                })
-=======
                     var settings = services.GetRequiredService<HangfireSettings>();
                     var mongoUrlBuilder = new MongoUrlBuilder(settings.ConnectionString);
                     var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
@@ -49,7 +39,6 @@ namespace TGS.Core.Infrastructures.Hangfire
                             Prefix = settings.Prefix
                         });
                 }
->>>>>>> 4228b6c33dcdec264e990cd4a36803811d39d370
             );
 
             return services;
