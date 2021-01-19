@@ -9,6 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS publish
 WORKDIR /src
 COPY ["Apis/BackendOffice/BackendOffice.csproj", "Apis/BackendOffice/"]
 COPY ["Services/BackOffice/BackOffice.csproj", "Services/BackOffice/"]
+COPY ["Services/Hangfire/Hangfire.csproj", "Services/Hangfire/"]
 COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
