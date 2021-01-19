@@ -4,6 +4,7 @@ using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 
@@ -14,18 +15,12 @@ namespace TGS.Core.Infrastructures.Hangfire
         public static IServiceCollection AddScheduler(this IServiceCollection services,
             IConfiguration configuration, string configSectionName = "Hangfire")
         {
-            var settings = configuration.GetSection(configSectionName).Get<HangfireSettings>();
-            var mongoUrlBuilder = new MongoUrlBuilder(settings.ConnectionString);
-            var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+            services.Configure<HangfireSettings>(configuration.GetSection(configSectionName));
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<HangfireSettings>>().Value);
 
-            services.AddHangfire(option => option
-                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UseSerializerSettings(
-                    new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Ignore})
-                .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new MongoStorageOptions
+            services.AddHangfire((services, option) =>
                 {
+<<<<<<< HEAD
                     MigrationOptions = new MongoMigrationOptions
                     {
                         MigrationStrategy = new MigrateMongoMigrationStrategy(),
@@ -34,6 +29,27 @@ namespace TGS.Core.Infrastructures.Hangfire
                     Prefix = settings.Prefix,
                     CheckConnection = false
                 })
+=======
+                    var settings = services.GetRequiredService<HangfireSettings>();
+                    var mongoUrlBuilder = new MongoUrlBuilder(settings.ConnectionString);
+                    var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+
+                    option.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                        .UseSimpleAssemblyNameTypeSerializer()
+                        .UseRecommendedSerializerSettings()
+                        .UseSerializerSettings(
+                            new JsonSerializerSettings {ReferenceLoopHandling = ReferenceLoopHandling.Ignore})
+                        .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new MongoStorageOptions
+                        {
+                            MigrationOptions = new MongoMigrationOptions
+                            {
+                                MigrationStrategy = new MigrateMongoMigrationStrategy(),
+                                BackupStrategy = new CollectionMongoBackupStrategy()
+                            },
+                            Prefix = settings.Prefix
+                        });
+                }
+>>>>>>> 4228b6c33dcdec264e990cd4a36803811d39d370
             );
 
             return services;
