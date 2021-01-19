@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Prometheus;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -57,7 +58,8 @@ namespace TGS.Apis.GlobalApi
             services.AddHealthChecks()
                 .AddSqlServer(_configuration, "Tgs", name: "tgs-db")
                 .AddSqlServer(_configuration, "Bet", name: "bet-db")
-                .AddRedis(_configuration);
+                .AddRedis(_configuration)
+                .ForwardToPrometheus(); ;
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -65,6 +67,8 @@ namespace TGS.Apis.GlobalApi
             app.UseGlobalExceptionHandler();
 
             app.UseRouting();
+
+            app.UseHttpMetrics();
 
             app.UseEndpoints(endpoints =>
             {
@@ -75,6 +79,8 @@ namespace TGS.Apis.GlobalApi
                     ResponseWriter = (httpContext, result) =>
                         HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
                 });
+
+                endpoints.MapMetrics();
             });
         }
     }

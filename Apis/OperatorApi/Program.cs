@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Infrastructures.Prometheus;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -12,6 +13,8 @@ namespace TGS.Apis.OperatorApi
     {
         public static async Task Main(string[] args)
         {
+            PrometheusService.StartCollecting();
+
             var host = CreateHostBuilder(args).Build();
             await ExecuteMigrationsAndSeedingsAsync(host.Services);
             await host.RunAsync();

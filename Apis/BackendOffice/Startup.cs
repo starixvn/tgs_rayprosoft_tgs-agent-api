@@ -1,10 +1,10 @@
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
@@ -41,6 +41,8 @@ namespace TGS.Apis.BackendOffice
 
             app.UseRouting();
 
+            app.UseHttpMetrics();
+
             app.UseAuthentication();
 
             app.UseAuthorization();
@@ -48,12 +50,13 @@ namespace TGS.Apis.BackendOffice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("health", new HealthCheckOptions
+                endpoints.MapHealthChecks("/health",  new()
                 {
                     ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
                         HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
                 });
+                endpoints.MapMetrics();
             });
 
             var requestLocalizationOptions =

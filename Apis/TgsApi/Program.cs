@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices.Bet;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Infrastructures.Prometheus;
 using TGS.Core.Models;
 
 namespace TGS.Apis.TgsApi
@@ -17,6 +18,8 @@ namespace TGS.Apis.TgsApi
     {
         public static async Task Main(string[] args)
         {
+            PrometheusService.StartCollecting();
+
             var host = CreateHostBuilder(args).Build();
             await ExecuteMigrationsAndSeedingsAsync(host.Services);
             await host.RunAsync();
