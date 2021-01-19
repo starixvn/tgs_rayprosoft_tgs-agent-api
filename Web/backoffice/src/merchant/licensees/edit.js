@@ -137,18 +137,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
         }
       `}
     >
-      <EditBody
-        isAdd
-        addonBefore={
-          <>
-            <Box>{/* <Trans zh="总公司" en="Reseller" /> */}</Box>
-            <MerchantIdSelect
-              end={RoleTypes.Reseller}
-              resellerId={resellerId}
-            />
-          </>
-        }
-      />
+      <EditBody isAdd />
     </FormDialog>
   )
 }
@@ -168,46 +157,94 @@ export const ViewButton = ({ record, ...props }) => {
         <Trans zh="查看" en="View" />
       </Disclosure>
       {dialog.visible && (
-        <LoadingDataDialog
+        <ViewDialog
           id={record?.id}
           resellerId={record?.resellerId}
+          record={record}
           dialog={dialog}
-        >
-          {({ licensee, reseller }) => {
-            return (
-              <ViewDialog
-                record={record}
-                licensee={licensee}
-                reseller={reseller}
-                dialog={dialog}
-              />
-            )
-          }}
-        </LoadingDataDialog>
+        />
       )}
     </>
   )
 }
 
-const ViewDialog = ({ licensee, reseller, resetData, dialog, ...props }) => {
+const useResellerLicensee = ({ id = "", resellerId = "" }) => {
+  let {
+    data: licensee,
+    isLoading: isLoadingLicensee,
+    error: licenseeError,
+    mutate: mutateLicensee,
+    deleteCache: deleteLicenseeCache
+  } = useLicensee(id)
+  let {
+    data: reseller,
+    isLoading: isLoadingReseller,
+    error: resellerError
+  } = useReseller(resellerId)
+
+  let languages = mapCheckedByCultureCode(
+    licensee?.languages ?? [],
+    reseller?.languages ?? []
+  )
+  let currencies = mapCheckedByCode(
+    licensee?.currencies ?? [],
+    reseller?.currencies ?? []
+  )
+  let gameProviders = mapCheckedById(
+    licensee?.gameProviders ?? [],
+    reseller?.gameProviders ?? []
+  )
+  let betLimits = mapCheckedById(licensee?.betLimits, reseller?.betLimits ?? [])
+
+  return {
+    reseller,
+    licensee,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading: isLoadingLicensee || isLoadingReseller,
+    error: licenseeError || resellerError,
+    mutateLicensee,
+    deleteLicenseeCache
+  }
+}
+
+const ViewDialog = ({ id, resellerId, dialog, ...props }) => {
+  let {
+    licensee,
+    reseller,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading,
+    error,
+    mutateLicensee,
+    deleteLicenseeCache
+  } = useResellerLicensee({ id, resellerId })
+
   let title = useTrans({
     zh: "查看公司",
     en: "View Licensee"
   })
 
-  let languages = mapCheckedByCultureCode(
-    licensee.languages,
-    reseller.languages
-  )
-  let currencies = mapCheckedByCode(licensee.currencies, reseller.currencies)
-  let gameProviders = mapCheckedById(
-    licensee.gameProviders,
-    reseller.gameProviders
-  )
-  let betLimits = mapCheckedById(licensee.betLimits, reseller.betLimits)
+  if (isLoading) {
+    return <LoadingBackdrop {...dialog} onClickClose={dialog.hide} />
+  }
+
+  if (error) {
+    return <AlertDialog {...error} {...dialog} onClickClose={dialog.hide} />
+  }
+
+  const reset = () => {
+    mutateLicensee(undefined, false)
+    deleteLicenseeCache()
+  }
 
   let record = {
     ...licensee,
+    reseller,
     languages,
     currencies,
     gameProviders,
@@ -218,9 +255,9 @@ const ViewDialog = ({ licensee, reseller, resetData, dialog, ...props }) => {
       defaultValues={record}
       title={title}
       dialog={dialog}
-      onClickClose={resetData}
+      onClickClose={reset}
       showActionButtons={false}
-      footer={<CloseButtonFooter dialog={dialog} onClickClose={resetData} />}
+      footer={<CloseButtonFooter dialog={dialog} onClickClose={reset} />}
       placement="top"
       minWidth="60vw"
       maxWidth="unset"
@@ -249,68 +286,14 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
-        <LoadingDataDialog
+        <EditDialog
           id={record?.id}
           resellerId={record?.resellerId}
           dialog={dialog}
-        >
-          {({ licensee, reseller, resetData }) => {
-            return (
-              <EditDialog
-                record={record}
-                licensee={licensee}
-                reseller={reseller}
-                resetData={resetData}
-                onSubmitted={() => {
-                  resetData()
-                  onSubmitted?.()
-                }}
-                dialog={dialog}
-              />
-            )
-          }}
-        </LoadingDataDialog>
+        />
       )}
     </>
   )
-}
-
-const LoadingDataDialog = ({ id = "", resellerId = "", dialog, children }) => {
-  let {
-    data: licensee,
-    isLoading: isLoadingLicensee,
-    error: licenseeError,
-    mutate,
-    deleteCache
-  } = useLicensee(id)
-  let {
-    data: reseller,
-    isLoading: isLoadingReseller,
-    error: resellerError
-  } = useReseller(resellerId)
-
-  if (isLoadingLicensee || isLoadingReseller) {
-    return <LoadingBackdrop {...dialog} />
-  }
-
-  if (licenseeError) {
-    return <AlertDialog {...licenseeError} onClickClose={dialog.hide} />
-  }
-
-  if (resellerError) {
-    return <AlertDialog {...resellerError} onClickClose={dialog.hide} />
-  }
-
-  const resetData = () => {
-    deleteCache()
-    mutate(undefined, false)
-  }
-
-  return children({
-    licensee,
-    reseller,
-    resetData
-  })
 }
 
 const normalizeFormData = ({
@@ -333,29 +316,32 @@ const normalizeFormData = ({
   }
 }
 
-const EditDialog = ({
-  record,
-  licensee,
-  reseller,
-  resetData,
-  onSubmitted,
-  dialog,
-  ...props
-}) => {
+const EditDialog = ({ id, resellerId, onSubmitted, dialog, ...props }) => {
+  let {
+    licensee,
+    reseller,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading: isLoadingLicensee,
+    error: licenseeError,
+    mutateLicensee,
+    deleteLicenseeCache
+  } = useResellerLicensee({ id, resellerId })
   let [formData, setSubmit] = useState()
-  let { result, isLoading, error, mutate } = useUpdateLicensee(
-    record?.id,
-    formData
-  )
+  let { result, isLoading, error, mutate } = useUpdateLicensee(id, formData)
 
   const onSubmit = (data) => {
     setSubmit(normalizeFormData(data))
   }
 
   const reset = () => {
+    mutateLicensee(undefined, false)
+    deleteLicenseeCache()
+
     mutate(undefined, false)
     setSubmit(undefined)
-    resetData?.()
   }
 
   let title = useTrans({
@@ -363,25 +349,27 @@ const EditDialog = ({
     en: "Edit Licensee"
   })
 
-  let languages = mapCheckedByCultureCode(
-    licensee.languages,
-    reseller.languages
-  )
-  let currencies = mapCheckedByCode(licensee.currencies, reseller.currencies)
-  let gameProviders = mapCheckedById(
-    licensee.gameProviders,
-    reseller.gameProviders
-  )
-  let betLimits = mapCheckedById(licensee.betLimits, reseller.betLimits)
+  if (isLoadingLicensee) {
+    return <LoadingBackdrop {...dialog} onClickClose={dialog.hide} />
+  }
+
+  if (licenseeError) {
+    return (
+      <AlertDialog {...licenseeError} {...dialog} onClickClose={dialog.hide} />
+    )
+  }
+
+  let record = {
+    ...licensee,
+    reseller,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits
+  }
   return (
     <FormDialog
-      defaultValues={{
-        ...licensee,
-        languages,
-        currencies,
-        gameProviders,
-        betLimits
-      }}
+      defaultValues={record}
       onSubmit={onSubmit}
       result={result}
       isLoading={isLoading}
@@ -407,7 +395,7 @@ const EditDialog = ({
         }
       `}
     >
-      <EditBody />
+      <EditBody record={record} />
     </FormDialog>
   )
 }
@@ -421,6 +409,8 @@ const EditBody = ({
 }) => {
   let { watch, getValues, register } = useFormContext()
 
+  let userResellerId = useUserResellerId()
+  let reseller = watch("reseller")
   let code = watch("code")
   let languages = watch("languages")
   let currencies = watch("currencies")
@@ -434,13 +424,27 @@ const EditBody = ({
         <Trans zh="基本资料" en="Basic Information" />
       </Heading>
       <FieldValues>
-        {addonBefore}
+        {!userResellerId && (
+          <>
+            <NormalLabel>
+              <Trans zh="所属总公司" en="Licensee" />
+            </NormalLabel>
+            <Box alignY="center">
+              {isAdd && <MerchantIdSelect end={RoleTypes.Reseller} />}
+              {!isAdd && <Text.Block>{reseller.name}</Text.Block>}
+            </Box>
+          </>
+        )}
 
         <NormalLabel>
           <Trans zh="公司代码" en="Code" />
         </NormalLabel>
         <Box alignY="center">
-          <Input name="code" type={isAdd ? "input" : "hidden"} />
+          <Input
+            name="code"
+            type={isAdd ? "input" : "hidden"}
+            required={isAdd}
+          />
           {!isAdd && <Text.Block>{code}</Text.Block>}
         </Box>
 

@@ -26,7 +26,7 @@ import { BetLimitCheckboxGroup } from "../../betlimit/BetLimitCheckboxGroup"
 import { allCheckedKeys } from "../../checkbox/allCheckedKeys"
 import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
-import { useBrand } from "./client"
+import { useBrand, useUpdateBrand } from "./client"
 import { useLicensee } from "../licensees/client"
 import { useFormContext } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
@@ -79,7 +79,13 @@ export const ViewButton = ({ record, ...props }) => {
       <Disclosure {...dialog} {...props}>
         <Trans zh="查看" en="View" />
       </Disclosure>
-      {dialog.visible && <ViewDialog record={record} dialog={dialog} />}
+      {dialog.visible && (
+        <ViewDialog
+          id={record?.id}
+          licenseeId={record?.licenseeId}
+          dialog={dialog}
+        />
+      )}
     </>
   )
 }
@@ -127,10 +133,10 @@ const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
   }
 }
 
-const ViewDialog = ({ record, dialog, ...props }) => {
-  let { id, licenseeId } = record
+const ViewDialog = ({ id, licenseeId, dialog, ...props }) => {
   let {
     brand,
+    licensee,
     languages,
     currencies,
     gameProviders,
@@ -159,15 +165,17 @@ const ViewDialog = ({ record, dialog, ...props }) => {
     deleteBrandCache()
   }
 
+  let record = {
+    ...brand,
+    licensee,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits
+  }
   return (
     <FormDialog
-      defaultValues={{
-        ...brand,
-        languages,
-        currencies,
-        gameProviders,
-        betLimits
-      }}
+      defaultValues={record}
       onClickClose={reset}
       title={title}
       dialog={dialog}
@@ -202,26 +210,103 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
-        <EditDialog record={record} onSubmitted={onSubmitted} dialog={dialog} />
+        <EditDialog
+          id={record?.id}
+          licenseeId={record?.licenseeId}
+          onSubmitted={onSubmitted}
+          dialog={dialog}
+        />
       )}
     </>
   )
 }
 
-const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
+const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
+  let {
+    brand,
+    licensee,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading: isLoadingBrand,
+    error: brandError,
+    mutateBrand,
+    deleteBrandCache
+  } = useLicenseeBrand({ id, licenseeId })
+
+  let [formData, setSubmit] = useState()
+  let { result, isLoading, error, mutate } = useUpdateBrand(id, formData)
+
   let title = useTrans({
     zh: "编辑品牌",
     en: "Edit Brand"
   })
 
+  if (isLoadingBrand) {
+    return <LoadingBackdrop {...dialog} onClickClose={dialog.hide} />
+  }
+
+  if (brandError) {
+    return (
+      <AlertDialog {...brandError} {...dialog} onClickClose={dialog.hide} />
+    )
+  }
+
+  const onSubmit = (data) => {
+    console.log("TODO: submit brand", data)
+  }
+
+  const reset = () => {
+    mutateBrand(undefined, false)
+    deleteBrandCache()
+
+    mutate(undefined, false)
+    setSubmit(undefined)
+  }
+
+  let record = {
+    ...brand,
+    licensee,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits
+  }
   return (
-    <FormDialog title={title} dialog={dialog}>
-      <EditBody />
+    <FormDialog
+      defaultValues={record}
+      onSubmit={onSubmit}
+      result={result}
+      isLoading={isLoading}
+      error={error}
+      onCloseErrorAlert={reset}
+      onSubmitted={() => {
+        reset()
+        onSubmitted?.()
+      }}
+      onClickClose={reset}
+      title={title}
+      showActionButtons={false}
+      footer={
+        <ConfirmButtonFooter isLoading={isLoading} disabled={isLoading} />
+      }
+      dialog={dialog}
+      placement="top"
+      minWidth="60vw"
+      maxWidth="unset"
+      css={css`
+        & .bb-DialogContent {
+          position: relative;
+        }
+      `}
+    >
+      <EditBody record={record} />
     </FormDialog>
   )
 }
 
-const EditBody = ({ record, readonly, isAdd = false, isLoadingLicensee }) => {
+const EditBody = ({ record, readonly, isAdd = false }) => {
   let { watch, getValues, register } = useFormContext()
 
   let userLicenseeId = useUserLicenseeId()
@@ -242,11 +327,9 @@ const EditBody = ({ record, readonly, isAdd = false, isLoadingLicensee }) => {
         <NormalLabel>
           <Trans zh="所属公司" en="Licensee" />
         </NormalLabel>
-        <Box>
-          {!userLicenseeId && isAdd && (
-            <MerchantIdSelect end={RoleTypes.Licensee} />
-          )}
-          {!isAdd && <Text.Block>{getValues("licensee")}</Text.Block>}
+        <Box alignY="center">
+          {isAdd && <MerchantIdSelect end={RoleTypes.Licensee} />}
+          {!isAdd && <Text.Block>{licensee?.name}</Text.Block>}
         </Box>
 
         <NormalLabel>
