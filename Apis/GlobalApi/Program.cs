@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using TGS.Core.Infrastructures.Prometheus;
 
 namespace TGS.Apis.GlobalApi
 {
@@ -7,6 +8,8 @@ namespace TGS.Apis.GlobalApi
     {
         public static void Main(string[] args)
         {
+            PrometheusService.StartCollecting();
+
             CreateHostBuilder(args).Build().Run();
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -38,6 +39,7 @@ namespace TGS.Core.Infrastructures.HealthChecks
                     HostIp = hostIp?.ToString() ?? string.Empty,
                     Environment = env.EnvironmentName,
                     OsVersion = $"{Environment.OSVersion}",
+                    Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                     ProcessCount = Environment.ProcessorCount,
                     AdditionalValues = additionalValues
                 },

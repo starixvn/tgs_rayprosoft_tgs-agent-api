@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using Prometheus;
 using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -72,7 +73,8 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddSqlServer(Configuration, "Tgs", name: "tgs-db")
                 .AddSqlServer(Configuration, "Bet", name: "bet-db")
                 .AddRedis(Configuration)
-                .AddNats();
+                .AddNats()
+                .ForwardToPrometheus(); ;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,6 +87,8 @@ namespace TGS.Apis.TgsApi.Commons
             UseCustomMiddlewares(app);
 
             app.UseRouting();
+
+            app.UseHttpMetrics();
 
             app.UseEndpoints(endpoints =>
             {
@@ -107,6 +111,8 @@ namespace TGS.Apis.TgsApi.Commons
                             };
                         })
                 });
+
+                endpoints.MapMetrics();
             });
         }
 

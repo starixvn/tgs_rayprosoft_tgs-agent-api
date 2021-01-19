@@ -15,6 +15,7 @@ namespace TGS.Core.Models.Messages.HealthCheck
         public string HostIp { get; init; }
         public string Environment { get; init; }
         public string OsVersion { get; init; }
+        public string Version { get; init; }
         public int ProcessCount { get; init; }
         public IReadOnlyDictionary<string, object> AdditionalValues { get; init; }
     }

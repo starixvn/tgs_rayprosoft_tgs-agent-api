@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Prometheus;
 using TGS.Apis.LogApi.Filters;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Loggers;
@@ -87,7 +88,8 @@ namespace TGS.Apis.LogApi
             services.AddHealthChecks()
                 .AddSqlServer(_configuration, "Log", name: "log-db")
                 .AddRedis(_configuration)
-                .AddNats();
+                .AddNats()
+                .ForwardToPrometheus(); ;
         }
 
         protected void OnApplicationStarted(IServiceProvider serviceProvider)
@@ -110,6 +112,8 @@ namespace TGS.Apis.LogApi
             app.UseGlobalExceptionHandler();
 
             app.UseRouting();
+
+            app.UseHttpMetrics();
 
             app.UseAuthorization();
 
@@ -137,6 +141,8 @@ namespace TGS.Apis.LogApi
                             return Task.FromResult(data);
                         })
                 });
+
+                endpoints.MapMetrics();
             });
         }
     }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
@@ -79,7 +80,8 @@ namespace TGS.Apis.OperatorApi
             services.AddHealthChecks()
                 .AddSqlServer(_configuration, "Tgs", name: "tgs-db")
                 .AddSqlServer(_configuration, "Bet", name: "bet-db")
-                .AddRedis(_configuration);
+                .AddRedis(_configuration)
+                .ForwardToPrometheus(); ;
 
             if (!_env.IsProduction())
             {
@@ -133,6 +135,8 @@ namespace TGS.Apis.OperatorApi
 
             app.UseRouting();
 
+            app.UseHttpMetrics();
+
             app.UseCors();
 
             app.UseVerifyJwtTokenMiddlewares();
@@ -146,6 +150,7 @@ namespace TGS.Apis.OperatorApi
                     ResponseWriter = (httpContext, result) =>
                         HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
                 });
+                endpoints.MapMetrics();
             });
 
             if (!_env.IsProduction())

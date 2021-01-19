@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices.Log;
+using TGS.Core.Infrastructures.Prometheus;
 
 namespace TGS.Apis.LogApi
 {
@@ -12,6 +13,8 @@ namespace TGS.Apis.LogApi
     {
         public static async Task Main(string[] args)
         {
+            PrometheusService.StartCollecting();
+
             var host = CreateHostBuilder(args).Build();
             
             await ExecuteMigrationAndSeedingAsync(host.Services);

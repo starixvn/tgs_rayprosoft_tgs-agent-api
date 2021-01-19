@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Core.Infrastructures.Aws;
+using TGS.Core.Infrastructures.Prometheus;
 
 namespace TGS.Apis.FileService
 {
@@ -13,6 +14,8 @@ namespace TGS.Apis.FileService
     {
         public static async Task Main(string[] args)
         {
+            PrometheusService.StartCollecting();
+
             var host = CreateHostBuilder(args).Build();
             await CreateBucketAsync(host.Services);
             await host.RunAsync();
