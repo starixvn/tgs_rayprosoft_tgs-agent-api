@@ -18,9 +18,9 @@ namespace TGS.Core.Infrastructures.Hangfire
             services.Configure<HangfireSettings>(configuration.GetSection(configSectionName));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<HangfireSettings>>().Value);
 
-            services.AddHangfire((services, option) =>
+            services.AddHangfire((sp, option) =>
                 {
-                    var settings = services.GetRequiredService<HangfireSettings>();
+                    var settings = sp.GetRequiredService<HangfireSettings>();
                     var mongoUrlBuilder = new MongoUrlBuilder(settings.ConnectionString);
                     var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
 
@@ -37,7 +37,7 @@ namespace TGS.Core.Infrastructures.Hangfire
                                 BackupStrategy = new CollectionMongoBackupStrategy()
                             },
                             Prefix = settings.Prefix,
-                            CheckConnection = false 
+                            CheckConnection = false
                         });
                 }
             );
