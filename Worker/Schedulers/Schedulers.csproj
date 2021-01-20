@@ -11,11 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.Development.json" />
-    <None Remove="appsettings.Docker.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="appsettings.Development.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
