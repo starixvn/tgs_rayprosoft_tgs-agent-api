@@ -337,7 +337,22 @@ services:
     networks:
       - tgs
     restart: unless-stopped
-
+    
+  scheduler:
+    build:
+      context: .
+      dockerfile: Worker/Schedulers/Dockerfile
+    image: scheduler
+    container_name: scheduler
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    networks:
+      tgs:
+        aliases:
+          - scheduler
+    depends_on:
+      - postgres
+      - mongodb
 networks:
   tgs:
     driver: bridge

@@ -6,14 +6,11 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ScheduleService": {
+    "Docker": {
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Docker"
       }
-    },
-    "Docker": {
-      "commandName": "Docker"
     }
   }
 }
