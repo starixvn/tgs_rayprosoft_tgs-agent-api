@@ -23,3 +23,6 @@ docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/file-service:%1
 
 docker build -f Apis\GlobalApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/global-api:%1 .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/global-api:%1
+
+docker build -f Worker\Schedulers\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/schedulers:%1 .
+docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/schedulers:%1

@@ -50,7 +50,7 @@ namespace TGS.Apis.BackendOffice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health",  new()
+                endpoints.MapHealthChecks("/api/health",  new()
                 {
                     ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
@@ -63,7 +63,7 @@ namespace TGS.Apis.BackendOffice
                 app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            app.UseHangfireDashboard("/api/hangfire", new DashboardOptions
             {
                 Authorization = new[] {new HangfireAuthorizationFilter()}
             });
