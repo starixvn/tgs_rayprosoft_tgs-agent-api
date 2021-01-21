@@ -1,4 +1,9 @@
-/** @type {import("snowpack").SnowpackUserConfig } */
+const httpProxy = require("http-proxy")
+const apiProxy = httpProxy.createServer({ target: "http://localhost:32670" })
+const globalApiProxy = httpProxy.createServer({
+  target: "http://localhost:32666"
+})
+
 module.exports = {
   mount: {
     public: "/",
@@ -9,23 +14,25 @@ module.exports = {
     "@snowpack/plugin-react-refresh",
     "@snowpack/plugin-dotenv"
   ],
-  install: [
-    /* ... */
-  ],
-  installOptions: {
-    /* ... */
-  },
   devOptions: {
     port: 4000
   },
   buildOptions: {
-    /* ... */
+    metaUrlPath: "snowpack"
   },
-  proxy: {
-    "/api": "http://localhost:32670/api",
-    "/global-api": "http://localhost:32666/global-api"
-  },
-  alias: {
-    /* ... */
-  }
+  routes: [
+    {
+      src: "/api/.*",
+      dest: (req, res) => {
+        return apiProxy.web(req, res)
+      }
+    },
+    {
+      src: "/global-api/.*",
+      dest: (req, res) => {
+        return globalApiProxy.web(req, res)
+      }
+    },
+    { match: "routes", src: ".*", dest: "/index.html" }
+  ]
 }
