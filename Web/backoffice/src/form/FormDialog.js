@@ -31,6 +31,7 @@ export const FormDialog = ({
   addonButtons,
   actionButtonsProps = {},
   formMethods,
+  stopPropagation = false,
   ...props
 }) => {
   let methods = useForm({ defaultValues })
@@ -50,7 +51,12 @@ export const FormDialog = ({
         wrap={(children) => (
           <FormProvider {...formMethods}>
             <form
-              onSubmit={formMethods.handleSubmit(onSubmit)}
+              onSubmit={(event) => {
+                if (stopPropagation) {
+                  event.stopPropagation()
+                }
+                formMethods.handleSubmit(onSubmit)(event)
+              }}
               css={css`
                 height: 100%;
               `}

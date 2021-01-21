@@ -32,6 +32,8 @@ import { useFormContext } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import Textarea from "../../textarea"
+import { BrandLanguageCheckboxGroupTable } from "./BrandLanguageCheckboxGroup"
+import { BrandGameProviderCheckboxGroupTable } from "./GameProviderCheckboxGroup"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -254,6 +256,7 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
   }
 
   const onSubmit = (data) => {
+    data = normalizeFormData(data)
     console.log("TODO: submit brand", data)
   }
 
@@ -304,6 +307,41 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
       <EditBody record={record} />
     </FormDialog>
   )
+}
+
+const normalizeFormData = ({ brandCultures, brandGameProviders, ...data }) => {
+  brandCultures = Object.entries(brandCultures).reduce(
+    (list, [key, { checked, ...props }]) => {
+      if (checked) {
+        return [...list, { cultureCode: key, ...props }]
+      }
+
+      return list
+    },
+    []
+  )
+
+  let gameProviders = Object.entries(brandGameProviders).reduce(
+    (list, [key, { checked, ...props }]) => {
+      if (checked) {
+        return [...list, props]
+      }
+
+      return list
+    },
+    []
+  )
+  console.log(
+    "gameProviders",
+    gameProviders,
+    "data.gameProviders",
+    data?.gameProviders
+  )
+  return {
+    ...data,
+    brandCultures,
+    gameProviders
+  }
 }
 
 const EditBody = ({ record, readonly, isAdd = false }) => {
@@ -369,7 +407,10 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
             <NormalLabel>
               <Trans zh="语言" en="Language" />
             </NormalLabel>
-            <LanguageCheckboxGroupTable disabled={readonly} />
+            <BrandLanguageCheckboxGroupTable
+              disabled={readonly}
+              showBrandCultureCode
+            />
           </>
         )}
 
@@ -387,9 +428,7 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
             <NormalLabel>
               <Trans zh="游戏厂商" en="Game Provider" />
             </NormalLabel>
-            <GameProviderCheckboxGroup
-              name="gameProviderIds"
-              fieldArrayName="gameProviders"
+            <BrandGameProviderCheckboxGroupTable
               marginTop="major-1"
               disabled={readonly}
             />

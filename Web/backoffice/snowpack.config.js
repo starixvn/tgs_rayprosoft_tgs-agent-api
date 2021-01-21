@@ -1,4 +1,9 @@
-/** @type {import("snowpack").SnowpackUserConfig } */
+const httpProxy = require("http-proxy")
+const apiProxy = httpProxy.createServer({ target: "http://localhost:32667" })
+const fileApiProxy = httpProxy.createServer({
+  target: "http://localhost:32671"
+})
+
 module.exports = {
   mount: {
     public: { url: "/", static: true },
@@ -10,23 +15,23 @@ module.exports = {
     "@snowpack/plugin-react-refresh",
     "@snowpack/plugin-dotenv"
   ],
-  install: [
-    /* ... */
-  ],
-  installOptions: {
-    /* ... */
-  },
   devOptions: {
     port: 3000
   },
   buildOptions: {
-    metaDir: "snowpack"
+    metaUrlPath: "snowpack"
   },
-  proxy: {
-    "/fs/file/uploadFileS3": "http://localhost:32671/api/file/uploadFileS3",
-    "/api": "http://localhost:32667/api"
-  },
-  alias: {
-    /* ... */
-  }
+  routes: [
+    {
+      src: "/api/.*",
+      dest: (req, res) => {
+        return apiProxy.web(req, res)
+      }
+    },
+    {
+      src: "/fs/.*",
+      dest: (req, res) => fileApiProxy.web(req, res)
+    },
+    { match: "routes", src: ".*", dest: "/index.html" }
+  ]
 }
