@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Prometheus;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -98,7 +99,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddSqlServer(configuration, "Bet", name: "bet-db")
                 .AddSqlServer(configuration, "Log", name: "log-db")
                 .AddMongoDb(configuration, "Hangfire", "hangfire-db")
-                .AddNats();
+                .AddNats()
+                .ForwardToPrometheus();
 
             services.AddAntiforgery(options =>
             {

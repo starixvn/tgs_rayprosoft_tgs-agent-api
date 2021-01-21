@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 
 namespace TGS.Worker.Schedulers
 {
     public static class BackgroundJob
     {
-        public static void Start(AppConfig config)
+        public static async Task StartAsync(AppConfig config, IHost host)
         {
             var mongoOptions = new MongoStorageOptions
             {
@@ -18,7 +20,7 @@ namespace TGS.Worker.Schedulers
                     MigrationStrategy = new DropMongoMigrationStrategy(),
                     BackupStrategy = new NoneMongoBackupStrategy()
                 },
-                Prefix = "hangfire.mongo"
+                Prefix = config.Hangfire.Prefix
             };
 
             var mongoStorage = new MongoStorage(
@@ -32,9 +34,12 @@ namespace TGS.Worker.Schedulers
                 SchedulePollingInterval = TimeSpan.FromSeconds(config.Hangfire.Schedule.SchedulePollingInterval)
             };
 
+            //using var server = new BackgroundJobServer(options, mongoStorage);
+            //Console.WriteLine("Hangfire Server started. Press any key to exit...");
+            //Console.ReadKey();
+
             using var server = new BackgroundJobServer(options, mongoStorage);
-            Console.WriteLine("Hangfire Server started. Press any key to exit...");
-            Console.ReadKey();
+            await host.RunAsync();
         }
     }
 }

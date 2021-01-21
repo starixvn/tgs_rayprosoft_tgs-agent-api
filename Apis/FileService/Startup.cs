@@ -2,13 +2,13 @@ using System;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Prometheus;
 using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
@@ -57,15 +57,13 @@ namespace TGS.Apis.FileService
             services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
 
             services.AddControllers()
-                .AddFluentValidation(c =>
-                {
-                    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-                });
+                .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
 
             services.AddHealthChecks()
                 .AddNats()
                 .AddMongoDb(_configuration, "DatabaseSettings")
-                .AddAwsS3();
+                .AddAwsS3()
+                .ForwardToPrometheus(); ;
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
@@ -78,17 +76,21 @@ namespace TGS.Apis.FileService
 
             app.UseRouting();
 
+            app.UseHttpMetrics();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("fs/health", new HealthCheckOptions
+                endpoints.MapHealthChecks("/fs/health", new()
                 {
                     ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
                         HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
                 });
+
+                endpoints.MapMetrics();
             });
         }
 

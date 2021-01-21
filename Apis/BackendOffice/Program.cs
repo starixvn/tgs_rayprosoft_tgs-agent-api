@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TGS.Core.Infrastructures.Prometheus;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -9,6 +10,8 @@ namespace TGS.Apis.BackendOffice
     {
         public static async Task Main(string[] args)
         {
+            PrometheusService.StartCollecting();
+
             var host = CreateHostBuilder(args).Build();
 
             await host.RunAsync();

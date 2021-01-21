@@ -1,6 +1,8 @@
-﻿using Hangfire;
+﻿using System.Threading.Tasks;
+using Hangfire;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.Hangfire;
@@ -14,14 +16,20 @@ namespace TGS.Worker.Schedulers
     {
         private static IConfigurationRoot Configuration;
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Configuration = InitConfiguration.Init();
             var config = Configuration.Get<AppConfig>();
 
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var hostBuilder = new HostBuilder()
+                .ConfigureServices((_, services) =>
+                {
+                    ConfigureServices(services);
+                });
+
+            var host = hostBuilder.UseConsoleLifetime().Build();
+            using var serviceScope = host.Services.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
 
             GlobalConfiguration.Configuration
                 .UseActivator(
@@ -31,15 +39,14 @@ namespace TGS.Worker.Schedulers
 
             RecurringJob.Jobs(serviceProvider);
 
-            BackgroundJob.Start(config);
+            await BackgroundJob.StartAsync(config, host);
         }
 
         private static void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddTgsRepository(Configuration, "Tgs")
                 .AddBackOfficeApplicationServices()
-                .AddScheduler(Configuration)
-                .AddHangfireServer();
+                .AddScheduler(Configuration);
         }
     }
 }
