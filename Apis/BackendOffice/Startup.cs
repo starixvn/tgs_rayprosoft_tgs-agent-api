@@ -50,7 +50,7 @@ namespace TGS.Apis.BackendOffice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/api/health",  new()
+                endpoints.MapHealthChecks("/health",  new()
                 {
                     ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
