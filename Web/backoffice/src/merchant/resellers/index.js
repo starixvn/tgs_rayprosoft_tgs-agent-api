@@ -15,7 +15,7 @@ import dateTimeColumn from "../../table/column/dateTime"
 import { AddButton, EditButton, ViewButton } from "./edit"
 import { SearchButton } from "../../button/SearchButton"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import Input from "../../input/Input"
+import { InputField } from "../../input/Input"
 import equals from "fast-deep-equal"
 import { MerchantStatusMenu } from "../status"
 
@@ -104,7 +104,7 @@ const SearchForm = ({ search, isLoading, ...props }) => {
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)}>
         <Set>
-          <Input
+          <InputField
             name="keyword"
             addonAfter={
               <Button onClick={() => formMethods.setValue("keyword", "")}>
