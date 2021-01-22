@@ -21,9 +21,8 @@ namespace TGS.Core.DataServices.Log.Models
         public int ExecutionTimeMs { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
 
-        public static explicit operator ApiLog(ApiLogEvent a)
-        {
-            return new ApiLog
+        public static explicit operator ApiLog(ApiLogEvent a) =>
+            new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 TrackingId = a.trackingid,
@@ -40,6 +39,5 @@ namespace TGS.Core.DataServices.Log.Models
                 ExecutionTimeMs = a.executiontimems,
                 RecordedOn = a.recordedon
             };
-        }
     }
 }

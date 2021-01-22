@@ -6,8 +6,9 @@ namespace TGS.Core.DataServices.Tgs.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddTgsRepository(this IServiceCollection services, IConfiguration configuration, string connectionName)
-        { 
+        public static IServiceCollection AddTgsRepository(this IServiceCollection services,
+            IConfiguration configuration, string connectionName)
+        {
             services.AddRepository<ITgsRepository, TgsRepository>(configuration, connectionName);
 
             return services;

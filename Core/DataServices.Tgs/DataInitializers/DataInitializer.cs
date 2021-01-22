@@ -13,14 +13,16 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
+using static TGS.Core.Models.Enums.GameType;
+using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : BaseDataInitializer
     {
+        private const string AdminUsername = "admin.enabled";
         private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
-        private static readonly string AdminUsername = "admin.enabled";
 
         private static readonly IList<IReseller> Resellers = new IReseller[]
         {
@@ -98,15 +100,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await LogSeedingTimeAsync(GenerateGameProvidersAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateResellersWithDescendantsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateVipLevelAsync, logBuilder);
-            await LogSeedingTimeAsync(GeneratePlayersAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, logBuilder);
+            await LogSeedingTimeAsync(GeneratePlayersAsync, logBuilder);
             await LogSeedingTimeAsync(GeneratePaymentAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateDepartmentsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateRolesAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateUsersAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateSportTypesAndMarketTypesAsync, logBuilder);
             await LogSeedingTimeAsync(GeneratePlayerSportsBetLimitsAsync, logBuilder);
+            await LogSeedingTimeAsync(GenerateBetDataAsync, logBuilder);
 
             timer.Stop();
 
@@ -135,6 +138,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private Task GenerateVipLevelAsync()
         {
             _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+                .Distinct()
                 .Select(brand => new VipLevel
                 {
                     Id = GuidExtensions.NewSequentialGuid(),
@@ -149,7 +153,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 })
                 .ToArray();
 
-            return _repository.BulkInsertOrUpdateAsync(_vipLevels);
+            return _repository.BulkInsertAsync(_vipLevels);
         }
 
         private Task GenerateLanguagesAsync()
@@ -791,16 +795,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 }).ToHashSet()
             };
 
-            static GameTag GetGameTag(int index)
-            {
-                return (index % 3) switch
+            static GameTag GetGameTag(int index) =>
+                (index % 3) switch
                 {
                     0 => GameTag.New,
                     1 => GameTag.New | GameTag.Recommend,
                     2 => GameTag.New | GameTag.Recommend | GameTag.Hot,
                     _ => GameTag.None
                 };
-            }
 
             static string[] IntersectGameProviderCodes(string[] parents, string[] children) =>
                 parents.Length == 0  ? children :
@@ -902,9 +904,132 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             return _repository.BulkInsertAsync(users);
         }
 
-        private GameProvider[] GetGameProviders(string[] gameProviderCodes)
+        private async Task GenerateBetDataAsync()
         {
-            return gameProviderCodes.Length == 0
+            var rand = new Random((int) (DateTime.UtcNow.Ticks % 1000000));
+            var timestamp = DateTimeOffset.UtcNow.AddDays(-2);
+
+            var players = (from p in _players
+                           group p by p.BrandId
+                           into g
+                           select g.Take(2)).SelectMany(p => p);
+
+            foreach (var p in players)
+            foreach (var gp in _gameProvidersCreated.Values.Take(3))
+            {
+                var games = (from gm in gp.Games
+                            where !gm.Type.ToString().Contains("Lobby")
+                            group gm by gm.Type into g
+                            select g.Take(1)).SelectMany(g => g);
+
+                foreach (var game in games)
+                {
+                    var createdOn = timestamp = timestamp.AddSeconds(1);
+                    var closedOn = game.Type == Sportsbook || game.Type == VirtualSports
+                        ? timestamp.AddDays(1)
+                        : timestamp.AddSeconds(3);
+
+                    var gameProviderConfiguration = gp.GameProviderConfigurations.First();
+                    var round = CreateRound(p, gp, gameProviderConfiguration, game, createdOn, closedOn);
+
+                    var externalGameActionGroupId = round.ExternalRoundId;
+                    var betAmount = ((decimal) rand.Next(5, 20)).Negate();
+                    var placeBetAction = CreateGameAction(p, betAmount, gameProviderConfiguration.Id, round.Id,
+                        PlaceBet, externalGameActionGroupId, createdOn, createdOn);
+
+                    await _repository.GameActions.AddAsync(placeBetAction);
+
+                    var v = rand.NextDouble();
+                    var resultActionType = v > 0.5 ? LoseBet : v > 0.2 && v < 0.5 ? WinBet : CancelTransaction;
+
+                    var resultAmount = resultActionType switch
+                    {
+                        LoseBet           => 0,
+                        CancelTransaction => betAmount.Negate(),
+                        _                 => betAmount.Negate() * 2
+                    };
+
+                    decimal turnover = 0, winloss = 0;
+                    if (resultActionType != CancelTransaction)
+                    {
+                        turnover = betAmount.Negate();
+                        winloss = (betAmount + resultAmount).Negate();
+
+                        round.WinLoss = winloss;
+                    }
+
+                    var resultAction = CreateGameAction(p, resultAmount, gameProviderConfiguration.Id, round.Id,
+                        resultActionType, externalGameActionGroupId, closedOn, closedOn, turnover, winloss,
+                        placeBetAction.Id);
+
+                    await _repository.GameActions.AddAsync(resultAction);
+                    await _repository.Rounds.AddAsync(round);
+                }
+            }
+
+            await _repository.SaveChangesAsync();
+        }
+
+        private static Round CreateRound(Player player, GameProvider gameProvider,
+            GameProviderConfiguration configuration, Models.Game game, DateTimeOffset createdOn,
+            DateTimeOffset closedOn)
+        {
+            var roundId = Guid.NewGuid();
+
+            return new()
+            {
+                Id = roundId,
+                ExternalRoundId = "EXT_" + roundId,
+                GameId = game.Id,
+                GameProviderId = gameProvider.Id,
+                GameProviderConfigurationId = configuration.Id,
+                WalletId = player.DefaultWalletId,
+                PlayerCode = player.PlayerCode,
+                CurrencyCode = player.DefaultWalletCurrencyCode,
+                PlatformType = game.PlatformType,
+                Status = RoundStatus.Closed,
+                BrandId = player.BrandId,
+                CreatedOn = createdOn,
+                ClosedOn = closedOn,
+                ExternalCreatedOn = createdOn,
+                ExternalClosedOn = closedOn
+            };
+        }
+
+        private static GameAction CreateGameAction(Player player, decimal amount,
+            Guid gameProviderConfigurationId, Guid roundId, GameActionType gameActionType,
+            string externalGameActionGroupId, DateTimeOffset recordedOn, DateTimeOffset sentOn, decimal turnover = 0,
+            decimal winloss = 0, Guid? refTransactionId = null, Guid? batchId = null)
+        {
+            var transactionId = Guid.NewGuid();
+            var unsettledBets = gameActionType == PlaceBet ? amount : 0;
+
+            return new()
+            {
+                Id = transactionId,
+                ExternalTransactionId = $"EXT_{transactionId}",
+                Type = gameActionType,
+                RoundId = roundId,
+                PlayerCode = player.PlayerCode,
+                WalletId = player.DefaultWalletId,
+                Turnover = turnover,
+                WinLoss = winloss,
+                UnsettledBets = unsettledBets,
+                GameProviderConfigurationId = gameProviderConfigurationId,
+                GameActionBatchId = batchId,
+                RecordedOn = recordedOn,
+                SentOn = sentOn,
+                PlayerIp = "127.0.0.1",
+                ExternalGameActionGroupId = externalGameActionGroupId,
+                ExternalBetId = $"BET_{transactionId}",
+                ReferencedGameActionId = refTransactionId,
+                Amount = amount
+            };
+        }
+
+        private GameProvider[] GetGameProviders(IReadOnlyCollection<string> gameProviderCodes)
+        {
+            return gameProviderCodes.Count == 0
                 ? _gameProvidersCreated.Values.ToArray()
                 : gameProviderCodes
                     .Select(code => _gameProvidersCreated[code])

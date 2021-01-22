@@ -9,45 +9,47 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Round>.Configure(EntityTypeBuilder<Round> builder)
         {
-            builder.ToTable("Rounds", "dbo");
-            builder.HasKey(bc => bc.Id).IsClustered(false);
-            
+            builder.ToTable("rounds");
+
+            builder.HasKey(bc => bc.Id)
+                .HasName("pk_rounds");
+
             builder.Property(c => c.ExternalRoundId)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasMaxLength(255)
                 .IsRequired();
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.GameId)
                 .IsRequired();
 
             builder.Property(c => c.GameName)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasMaxLength(255)
                 .IsRequired();
 
             builder.Property(c => c.GameType)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
-            
-            builder.Property(c => c.GameProviderId)               
+
+            builder.Property(c => c.GameProviderId)
                 .IsRequired();
 
             builder.Property(c => c.GameProviderCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.GameProviderName)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasMaxLength(255)
                 .IsRequired();
 
             builder.Property(c => c.PlayerCode)
-                .HasColumnType(ColumnTypes.Varchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.PlayerType)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.PlatformType)
@@ -55,7 +57,7 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.CurrencyCode)
-                .HasColumnType(ColumnTypes.Varchar(10))
+                .HasMaxLength(10)
                 .IsRequired();
 
             builder.Property(c => c.GameProviderConfigurationId)
@@ -68,55 +70,46 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.ResellerCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.LicenseeId)
                 .IsRequired();
 
             builder.Property(c => c.LicenseeCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.BrandId)
                 .IsRequired();
 
             builder.Property(c => c.BrandCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.Property(c => c.ClosedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset);
+            builder.Property(c => c.ClosedOn);
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.Property(c => c.ExternalCreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset);
+            builder.Property(c => c.ExternalCreatedOn);
 
-            builder.Property(c => c.ExternalClosedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset);
+            builder.Property(c => c.ExternalClosedOn);
 
             builder.Property(c => c.BetAmount)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
 
             builder.Property(c => c.WinLoss)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
 
             builder.Property(c => c.TieBetAdjustment)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
 
             builder.Property(c => c.Commission)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
-
-            builder.HasOne(p => p.RoundDetail)
-                .WithOne(p => p.Round)
-                .HasForeignKey<RoundDetail>(p => p.RoundId);
+                .HasPrecision(18, 6);
         }
     }
 }

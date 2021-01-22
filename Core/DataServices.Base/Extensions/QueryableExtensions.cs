@@ -77,12 +77,9 @@ namespace TGS.Core.DataServices.Base.Extensions
 
         public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption)
         {
-            if (!string.IsNullOrEmpty(sortOption.PropertyName))
-            {
-                return query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending);
-            }
-
-            return query;
+            return !string.IsNullOrEmpty(sortOption.PropertyName) ? 
+                query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending) :
+                query;
         }
 
         public static IQueryable<TSource> OrderByProperty<TSource>(this IQueryable<TSource> source, string propertyName,

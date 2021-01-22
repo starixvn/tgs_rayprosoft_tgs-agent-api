@@ -8,18 +8,25 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<ResellerBetLimit>.Configure(EntityTypeBuilder<ResellerBetLimit> builder)
         {
-            builder.ToTable("ResellerBetLimits", "dbo");
-            builder.HasKey(e => new {e.ResellerId, BetLimitRangeId = e.BetLimitId});
+            builder.ToTable("reseller_bet_limits");
+
+            builder.HasKey(e => new {e.ResellerId, e.BetLimitId})
+                .HasName("pk_reseller_bet_limits");
 
             builder
                 .HasOne(e => e.Reseller)
                 .WithMany(e => e.BetLimits)
-                .HasForeignKey(e => e.ResellerId);
+                .HasForeignKey(e => e.ResellerId)
+                .HasConstraintName("fk_reseller_bet_limits_resellers_reseller_id");
 
             builder
                 .HasOne(e => e.BetLimit)
                 .WithMany(e => e.ResellerBetLimits)
-                .HasForeignKey(e => e.BetLimitId);
+                .HasForeignKey(e => e.BetLimitId)
+                .HasConstraintName("fk_reseller_bet_limits_resellers_bet_limit_id");
+
+            builder.HasIndex(e => e.BetLimitId)
+                .HasDatabaseName("ix_reseller_bet_limits_bet_limit_id");
         }
     }
 }

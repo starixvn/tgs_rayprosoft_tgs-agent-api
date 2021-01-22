@@ -1,4 +1,3 @@
-using System.Reflection;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -6,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -32,8 +30,7 @@ namespace TGS.Apis.GlobalApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTgsRepository(_configuration, "Tgs")
-                .AddBetRepository(_configuration, "Bet");
+            services.AddTgsRepository(_configuration, "Tgs");
 
             services.AddJson()
                 .AddNats(_configuration)
@@ -56,8 +53,8 @@ namespace TGS.Apis.GlobalApi
                 });
 
             services.AddHealthChecks()
-                .AddSqlServer(_configuration, "Tgs", name: "tgs-db")
-                .AddSqlServer(_configuration, "Bet", name: "bet-db")
+                .AddPostgres(_configuration, "Tgs", name: "tgs-db")
+
                 .AddRedis(_configuration)
                 .ForwardToPrometheus(); ;
         }

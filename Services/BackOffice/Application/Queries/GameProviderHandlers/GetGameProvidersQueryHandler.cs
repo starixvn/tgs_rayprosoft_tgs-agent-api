@@ -23,9 +23,9 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
             CancellationToken cancellationToken)
         {
             return _service.GetGameProvidersAsync()
-                .Where(ResellerId != null, r => r.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId != null, l => l.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId != null, b => b.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
+                .Where(ResellerId, r => r.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
+                .Where(LicenseeId, l => l.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
+                .Where(BrandId, b => b.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
                 .Where(request.Code, g => g.Code == request.Code)
                 .Where(request.Name, g => g.Name == request.Name)
                 .Select(x => new GameProviderModel

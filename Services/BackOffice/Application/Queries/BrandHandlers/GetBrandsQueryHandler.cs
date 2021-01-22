@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -23,12 +24,13 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         {
             return _service.GetBrandsAsync()
                 .Where(request.BrandId, x => x.Id == request.BrandId)
-                .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.Id == BrandId)
-                .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
-                                             x.Description.Contains(request.Keyword) ||
-                                             x.OperationalEmail.Contains(request.Keyword))
+                .Where(ResellerId, r => r.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, l => l.LicenseeId == LicenseeId)
+                .Where(BrandId, l => l.Id == BrandId)
+                .Where(request.Keyword, x => EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%"))
                 .Select(x => new BrandModel
                 {
                     Id = x.Id,

@@ -97,7 +97,7 @@ namespace TGS.Services.Operations
         }
 
         Task<decimal> IPlayerOperations.GetPlayerBalanceAsync(Guid walletId, bool dirtyRead) =>
-            _walletQueriesFactory().GetBalanceAsync(walletId, dirtyRead);
+            _walletQueriesFactory().GetBalanceAsync(walletId);
 
         async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
             PlatformType? platform)
@@ -179,8 +179,20 @@ namespace TGS.Services.Operations
 
         async Task IPlayerOperations.PlayerLogoutAsync(PlayerLogoutData data)
         {
-            await _playerCommands.PlayerLogoutAsync(data);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
+            await _playerCommands.DeauthorizePlayerAsync(data.PlayerCode, data.LoginRecordId);
+            await _cacheManager.ClearCacheByBatchAsync(new CacheKey[]
+            {
+                new()
+                { 
+                     CacheType = RedisCacheType.PlayerLoginRecords,
+                     Key = data.PlayerCode
+                },
+                new()
+                { 
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = data.LoginRecordId
+                }
+            });
         }
 
         Task<Player> IPlayerOperations.GetPlayerByCodeAsync(string playerCode) =>

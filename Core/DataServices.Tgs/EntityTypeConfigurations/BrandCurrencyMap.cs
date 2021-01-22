@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,25 +8,30 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<BrandCurrency>.Configure(EntityTypeBuilder<BrandCurrency> builder)
         {
-            builder.ToTable("BrandCurrencies", "dbo");
-            builder.HasKey(bc => new {bc.BrandId, bc.CurrencyCode});
-            builder
-                .HasOne(bc => bc.Brand)
-                .WithMany(c => c.Currencies)
-                .HasForeignKey(bc => bc.BrandId);
+            builder.ToTable("brand_currencies");
 
-            builder
-                .HasOne(bc => bc.Currency)
-                .WithMany(c => c.BrandCurrencies)
-                .HasForeignKey(bc => bc.CurrencyCode);
+            builder.HasKey(e => new {e.BrandId, e.CurrencyCode});
 
-            builder.Property(c => c.CurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+            builder.Property(e => e.CurrencyCode)
+                .HasMaxLength(16)
                 .IsRequired();
 
-            builder.Property(c => c.CurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+            builder.Property(e => e.BrandCurrencyCode)
+                .HasMaxLength(32)
                 .IsRequired();
+
+            builder.HasOne(e => e.Brand)
+                .WithMany(e => e.Currencies)
+                .HasForeignKey(e => e.BrandId)
+                .HasConstraintName("fk_brand_currencies_brands_brand_id");
+
+            builder.HasOne(e => e.Currency)
+                .WithMany(e => e.BrandCurrencies)
+                .HasForeignKey(e => e.CurrencyCode)
+                .HasConstraintName("fk_brand_currencies_currencies_currency_code");
+
+            builder.HasIndex(e => e.CurrencyCode)
+                .HasDatabaseName("ix_brand_currencies_currency_code");
         }
     }
 }

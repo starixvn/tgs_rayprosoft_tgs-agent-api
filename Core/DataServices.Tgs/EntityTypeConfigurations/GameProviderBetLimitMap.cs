@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,35 +8,41 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<GameProviderBetLimit>.Configure(EntityTypeBuilder<GameProviderBetLimit> builder)
         {
-            builder.ToTable("GameProviderBetLimits", "dbo");
+            builder.ToTable("game_provider_bet_limits");
+
             builder.HasKey(e => e.Id)
-                .IsClustered(false);
+                .HasName("pk_game_provider_bet_limits");
 
             builder.Property(e => e.CurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16));
+                .HasMaxLength(16);
 
             builder.Property(e => e.MinBet)
-                .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
 
             builder.Property(e => e.MaxBet)
-                .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
 
-            builder.Property(e => e.MaxBetPerMatch)
-                .HasColumnType(ColumnTypes.Int);
+            builder.Property(e => e.MaxBetPerMatch);
 
             builder.Property(e => e.ExternalSetting)
-                .HasColumnType(ColumnTypes.Nvarchar(255))
+                .HasMaxLength(255)
                 .IsRequired();
 
             builder.HasOne(e => e.Currency)
                 .WithMany(e => e.GameProviderBetLimits)
-                .HasForeignKey(e => e.CurrencyCode);
+                .HasForeignKey(e => e.CurrencyCode)
+                .HasConstraintName("fk_game_provider_bet_limits_currencies_currency_code");
+
+            builder.HasIndex(e => e.CurrencyCode)
+                .HasDatabaseName("ix_game_provider_bet_limits_currency_code");
 
             builder.HasOne(e => e.GameProvider)
                 .WithMany(e => e.BetLimits)
-                .HasForeignKey(e => e.GameProviderId);
+                .HasForeignKey(e => e.GameProviderId)
+                .HasConstraintName("fk_game_provider_bet_limits_game_providers_game_provider_id");
+
+            builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_game_provider_bet_limits_game_provider_id");
         }
     }
 }

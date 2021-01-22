@@ -9,39 +9,40 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Game>.Configure(EntityTypeBuilder<Game> builder)
         {
-            builder.ToTable("Games", "dbo");
-            BaseConfigureProperties<Game, int>(builder);
+            builder.ToTable("games");
+
+            ConfigureBaseProperties<Game, int>(builder, "pk_games");
 
             builder.Property(e => e.Id)
                 .ValueGeneratedNever();
 
             builder.Property(e => e.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(e => e.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.ExternalId)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(e => e.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+                .HasMaxLength(128);
 
             builder.Property(e => e.EndpointPath)
-                .HasColumnType(ColumnTypes.Nvarchar(2048));
+                .HasMaxLength(2048);
 
             builder.Property(e => e.RuleUrl)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
+                .HasMaxLength(512);
 
             builder.Property(e => e.Type)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(e => e.PlatformType)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(e => e.SubGame)
@@ -57,15 +58,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValue(false);
 
             builder.Property(e => e.AvailableCurrencies)
-                .HasColumnType(ColumnTypes.Nvarchar(1024))
+                .HasMaxLength(1024)
                 .IsRequired()
                 .HasDefaultValue(string.Empty);
 
             builder.HasOne(e => e.GameProvider)
                 .WithMany(e => e.Games)
-                .HasForeignKey(e => e.GameProviderId);
+                .HasForeignKey(e => e.GameProviderId)
+                .HasConstraintName("fk_games_game_providers_game_provider_id");
 
             builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_games_game_provider_id")
                 .IncludeProperties(e => new
                 {
                     e.Id,

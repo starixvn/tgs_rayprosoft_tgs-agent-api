@@ -19,13 +19,12 @@ namespace TGS.Core.Infrastructures.HealthChecks
             return builder;
         }
 
-        public static IHealthChecksBuilder AddSqlServer(this IHealthChecksBuilder builder, IConfiguration configuration,
-            string configurationName, string healthQuery = null, string name = null, HealthStatus? failureStatus = null,
-            IEnumerable<string> tags = null,
-            TimeSpan? timeout = null)
+        public static IHealthChecksBuilder AddPostgres(this IHealthChecksBuilder builder, IConfiguration configuration,
+            string configurationName, string name = null, HealthStatus? failureStatus = null,
+            IEnumerable<string> tags = null, TimeSpan? timeout = null)
         {
             var connectionString = configuration.GetConnectionString(configurationName);
-            builder.AddSqlServer(connectionString, healthQuery, name, failureStatus, tags, timeout);
+            builder.AddNpgSql(connectionString, name: name, failureStatus: failureStatus, tags: tags, timeout: timeout);
             return builder;
         }
 
@@ -37,7 +36,8 @@ namespace TGS.Core.Infrastructures.HealthChecks
         }
 
         public static IHealthChecksBuilder AddMongoDb(this IHealthChecksBuilder builder, IConfiguration configuration,
-            string sectionName, string name = "mongodb", HealthStatus? failureStatus = null, IEnumerable<string> tags = null, TimeSpan? timeout = null)
+            string sectionName, string name = "mongodb", HealthStatus? failureStatus = null,
+            IEnumerable<string> tags = null, TimeSpan? timeout = null)
         {
             var section = configuration.GetSection(sectionName);
             var connectionString = section.GetValue<string>("ConnectionString");
@@ -46,7 +46,8 @@ namespace TGS.Core.Infrastructures.HealthChecks
             return builder;
         }
 
-        public static IHealthChecksBuilder AddAwsS3(this IHealthChecksBuilder builder, string name = null, HealthStatus? failureStatus = null, IEnumerable<string> tags = null, TimeSpan? timeout = null)
+        public static IHealthChecksBuilder AddAwsS3(this IHealthChecksBuilder builder, string name = null,
+            HealthStatus? failureStatus = null, IEnumerable<string> tags = null, TimeSpan? timeout = null)
         {
             builder.AddS3(sp =>
             {
@@ -63,7 +64,6 @@ namespace TGS.Core.Infrastructures.HealthChecks
                         ForcePathStyle = true
                     }
                 };
-
             }, name, failureStatus, tags, timeout);
 
             return builder;

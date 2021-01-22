@@ -65,7 +65,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 IsDefault = false
             }).ToArray();
 
-            await CreateOrUpdateEntitiesAsync(addSchedules);
+            await CreateEntitiesAsync(addSchedules);
             await tran.CommitAsync();
         }
     }

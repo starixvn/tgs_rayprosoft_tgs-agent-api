@@ -12,12 +12,12 @@ namespace TGS.Services.Operations.Extensions
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of Operations, need to add the following dependencies beforehand:
-        /// 1. AddRepository of Tgs, Bet database
-        /// 2. AddRedis() in Infrastructures.Redis        
+        ///     Dependency Injection of Operations, need to add the following dependencies beforehand:
+        ///     1. AddRepository of Tgs, Bet database
+        ///     2. AddRedis() in Infrastructures.Redis
         /// </summary>
         public static IServiceCollection AddOperations(this IServiceCollection services)
-        {            
+        {
             #region Code Mappers
 
             services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
@@ -28,7 +28,7 @@ namespace TGS.Services.Operations.Extensions
             #endregion
 
             #region Queries
-                        
+
             services.AddFactory<IBrandQueries, BrandQueries>();
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
@@ -40,7 +40,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IRoundQueries, RoundQueries>();
 
             services.AddFactory<IBetLimitQueries, BetLimitQueries>();
-            
+
             #endregion
 
             #region Commands
@@ -68,9 +68,9 @@ namespace TGS.Services.Operations.Extensions
 
             services.AddScoped<IStatusValidator, StatusValidator>();
             services.AddScoped<IExpirationValidator, ExpirationValidator>();
-           
+
             services.AddScoped<ITransactionManager, TransactionManager>();
-           
+
             return services;
         }
 

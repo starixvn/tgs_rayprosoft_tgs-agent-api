@@ -70,7 +70,8 @@ namespace TGS.Services.Operations
             }
 
             // log the error in saving the commit
-            _log.LogWarning($"Error during transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
+            _log.LogWarning(
+                $"Error during transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
                 errorInfo.SourceException);
 
             try

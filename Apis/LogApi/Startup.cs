@@ -86,7 +86,7 @@ namespace TGS.Apis.LogApi
                 });
 
             services.AddHealthChecks()
-                .AddSqlServer(_configuration, "Log", name: "log-db")
+                .AddPostgres(_configuration, "Log", name: "log-db")
                 .AddRedis(_configuration)
                 .AddNats()
                 .ForwardToPrometheus(); ;

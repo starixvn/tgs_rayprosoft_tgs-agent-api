@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,45 +8,49 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<StationLetter>.Configure(EntityTypeBuilder<StationLetter> builder)
         {
-            builder.ToTable("StationLetters", "dbo");
-            builder.HasKey(c => c.Id);
+            builder.ToTable("station_letters");
+
+            builder.HasKey(c => c.Id)
+                .HasName("pk_station_letters");
 
             builder.Property(c => c.Subject)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
             builder.Property(c => c.Content)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
+                .HasMaxLength(4000);
 
             builder.Property(c => c.Remarks)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
+                .HasMaxLength(512);
 
             builder.Property(c => c.VerifiedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
-                .IsRequired(false);
+                .HasMaxLength(256);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.HasMany(p => p.Players)
-                .WithOne(p => p.StationLetter)
-                .HasForeignKey(p => p.StationLetterId);
+            builder.HasOne(c => c.Brand)
+                .WithMany(c => c.StationLetters)
+                .HasForeignKey(c => c.BrandId)
+                .HasConstraintName("fk_station_letters_brands_brand_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.BrandId)
+                .HasDatabaseName("ix_station_letters_brand_id");
         }
     }
 }

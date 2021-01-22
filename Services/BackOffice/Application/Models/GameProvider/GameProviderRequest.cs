@@ -1,5 +1,6 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
+using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 
 namespace TGS.Services.BackOffice.Application.Models.GameProvider
 {
@@ -19,5 +20,6 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         public GameProviderGameModel[] Games { get; set; }
         public GameProviderCurrencyModel[] Currencies { get; set; }
         public GameProviderLanguageModel[] Languages { get; set; }
+        public GameProviderBetLimitModel[] BetLimits { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Bet;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operations.Queries
@@ -14,9 +14,9 @@ namespace TGS.Services.Operations.Queries
 
     public sealed class RoundQueries : IRoundQueries
     {
-        private readonly IBetRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public RoundQueries(IBetRepository repository)
+        public RoundQueries(ITgsRepository repository)
         {
             _repository = repository;
         }

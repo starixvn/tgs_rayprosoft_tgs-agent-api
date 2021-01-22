@@ -9,29 +9,28 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<BrandPaymentAuditLog>.Configure(EntityTypeBuilder<BrandPaymentAuditLog> builder)
         {
-            builder.ToTable("BrandPaymentAuditLogs", "dbo");
+            builder.ToTable("brand_payment_audit_logs");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.Id)
+                .HasName("pk_brand_payment_audit_logs");
 
             builder.HasIndex(p => p.BrandPaymentId);
 
             builder.Property(c => c.BeforeChannelName)
-                .HasColumnType(ColumnTypes.Nvarchar(50));
+                .HasMaxLength(50);
 
             builder.Property(c => c.AfterChannelName)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.Reason)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
+                .HasMaxLength(4000);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
-
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.Operation)
@@ -39,35 +38,35 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.BeforeTransferLimitFrom)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.BeforeTransferLimitTo)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.BeforeDepositedAmountMin)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.BeforeDepositedAmountMax)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.AfterTransferLimitFrom)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.AfterTransferLimitTo)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.AfterDepositedAmountMin)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.AfterDepositedAmountMax)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
         }
     }

@@ -11,6 +11,6 @@ namespace TGS.Services.Operations.Models.Services
         public PlatformType PlatformType { get; init; }
         public string IpAddress { get; init; }
         public DateTimeOffset CreatedOn { get; init; }
-        public DateTimeOffset ExpiredOn { get; init; }        
+        public DateTimeOffset ExpiredOn { get; init; }
     }
 }

@@ -11,7 +11,6 @@ namespace TGS.Services.Operations.CodeMappers
 {
     public interface IGameProviderCurrencyCodeMapper : ICodeMapper
     {
-
     }
 
     public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProviderCurrencyCodeMapper

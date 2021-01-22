@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,29 +8,30 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PlayerAuditLog>.Configure(EntityTypeBuilder<PlayerAuditLog> builder)
         {
-            builder.ToTable("PlayerAuditLogs", "dbo");
-            builder.HasKey(c => c.Id);
+            builder.ToTable("player_audit_logs");
+
+            builder.HasKey(c => c.Id)
+                .HasName("pk_player_audit_logs");
 
             builder.Property(c => c.Username)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired(false);
+                .HasMaxLength(32)
+                .IsRequired();
 
             builder.Property(c => c.ModuleName)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasMaxLength(256)
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.Operation)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasMaxLength(256)
                 .IsUnicode();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired()
                 .IsUnicode();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
         }
     }

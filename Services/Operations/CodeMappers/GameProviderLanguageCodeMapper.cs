@@ -11,7 +11,6 @@ namespace TGS.Services.Operations.CodeMappers
 {
     public interface IGameProviderLanguageCodeMapper : ICodeMapper
     {
-
     }
 
     public sealed class GameProviderLanguageCodeMapper : BaseCodeMapper, IGameProviderLanguageCodeMapper

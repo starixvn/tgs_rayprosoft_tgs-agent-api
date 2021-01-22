@@ -9,37 +9,33 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<GameActionBatch>.Configure(EntityTypeBuilder<GameActionBatch> builder)
         {
-            builder.ToTable("GameActionBatches", "dbo");
-            builder.HasKey(bc => bc.Id).IsClustered(false);
+            builder.ToTable("game_action_batches");
+
+            builder.HasKey(bc => bc.Id)
+                .HasName("pk_game_action_batches");
 
             builder.Property(c => c.ErrorType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.TransactionsCount)
-                .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.ExternalId)
-                .HasColumnType(ColumnTypes.Nvarchar(64))
+                .HasMaxLength(64)
                 .IsRequired();
 
             builder.Property(c => c.ErrorDescription)
-                .HasColumnType(ColumnTypes.Nvarchar(1024));
+                .HasMaxLength(1024);
 
             builder.Property(c => c.GameProviderConfigurationId)
                 .IsRequired();
 
             builder.Property(c => c.ErrorsJson)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
-
-            builder.HasMany(p => p.GameActions)
-                .WithOne(p => p.GameActionBatch)
-                .HasForeignKey(p => p.GameActionBatchId);
+                .HasMaxLength(4000);
         }
     }
 }

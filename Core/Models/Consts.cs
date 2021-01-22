@@ -35,7 +35,7 @@ namespace TGS.Core.Models
 
         public static class Db
         {
-            public const string MigrationsHistoryTable = "_MigrationsHistory";
+            public const string MigrationsHistoryTable = "__migrations_history";
             public const string Schema = "dbo";
         }
 

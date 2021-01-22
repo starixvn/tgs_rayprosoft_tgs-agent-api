@@ -27,10 +27,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
         {
             return _service.GetResellersAsync()
-                .Where(ResellerId != null, x => x.Id == ResellerId)
-                .Where(request.Keyword, x => x.Code.Contains(request.Keyword) || x.Name.Contains(request.Keyword) ||
-                                             x.Description.Contains(request.Keyword) ||
-                                             x.OperationalEmail.Contains(request.Keyword))
+                .Where(ResellerId, x => x.Id == ResellerId)
+                .Where(request.Keyword, x => EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%"))
                 .Select(x => new ResellerModel
                 {
                     Id = x.Id,

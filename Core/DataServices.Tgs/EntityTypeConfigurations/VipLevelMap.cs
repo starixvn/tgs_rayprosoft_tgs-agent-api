@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -10,36 +9,44 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<VipLevel>.Configure(EntityTypeBuilder<VipLevel> builder)
         {
-            builder.ToTable("VipLevels", "dbo");
-            BaseConfigureProperties<VipLevel, Guid>(builder);
+            builder.ToTable("vip_levels");
+
+            ConfigureBaseProperties<VipLevel, Guid>(builder, "pk_vip_levels");
+
+            builder.HasAlternateKey(c => new {c.BrandId, c.Code})
+                .HasName("ak_vip_levels_brand_id_code");
 
             builder.Property(c => c.Code)
-                .HasColumnType(ColumnTypes.Varchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.HasMany(p => p.Players)
-                .WithOne(p => p.Vip)
-                .HasForeignKey(p => p.VipId);
+            builder
+                .HasOne(c => c.Brand)
+                .WithMany(c => c.VipLevels)
+                .HasForeignKey(c => c.BrandId)
+                .HasConstraintName("fk_vip_levels_brands_brand_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => c.BrandId)
+                .HasDatabaseName("ix_vip_levels_brand_id");
         }
     }
 }

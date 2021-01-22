@@ -9,52 +9,47 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Role>.Configure(EntityTypeBuilder<Role> builder)
         {
-            builder.ToTable("Roles", "dbo");
+            builder.ToTable("roles");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(c => c.Id)
+                .HasName("pk_roles");
 
             builder.Property(c => c.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.DisplayName)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired(false);
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .HasMaxLength(128)
                 .IsRequired(false);
 
             builder.Property(c => c.MenuSetting)
-                .HasColumnType(ColumnTypes.Nvarchar(4000))
+                .HasMaxLength(4000)
                 .IsRequired();
 
-            builder.HasMany(p => p.Users)
-                .WithOne(p => p.Role)
-                .HasForeignKey(p => p.RoleId);
-
             builder.Property(c => c.RoleType)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
         }
     }

@@ -23,9 +23,8 @@ namespace TGS.Core.DataServices.Log.Models
         public int ExecutionTimeMs { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
 
-        public static explicit operator AdminLog(AdminLogEvent a)
-        {
-            return new AdminLog
+        public static explicit operator AdminLog(AdminLogEvent a) =>
+            new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 TrackingId = a.trackingid,
@@ -44,6 +43,5 @@ namespace TGS.Core.DataServices.Log.Models
                 RecordedOn = a.recordedon,
                 StackTrace = a.StackTrace ?? string.Empty
             };
-        }
     }
 }

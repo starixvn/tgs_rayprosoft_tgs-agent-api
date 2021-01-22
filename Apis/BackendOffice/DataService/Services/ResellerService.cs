@@ -144,16 +144,16 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return new HashSet<ResellerGameProvider>(resellerGameProviders);
         }
 
-        private HashSet<ResellerBetLimit> GenerateResellerBetLimits(Reseller reseller, ResellerRequest request)
+        private HashSet<ResellerBetLimit> GenerateResellerBetLimits(
+            Reseller reseller, ResellerRequest request)
         {
-            var resellerBetLimits = _repository.BetLimits
-                .Where(x => request.BetLimitIds.Contains(x.Id)).Select(x =>
-                    new ResellerBetLimit
-                    {
-                        ResellerId = reseller.Id,
-                        BetLimitId = x.Id
-                    });
-            return new HashSet<ResellerBetLimit>(resellerBetLimits);
+            var betLimits = request.BetLimitIds.Select(id =>
+                new ResellerBetLimit
+                {
+                    ResellerId = reseller.Id,
+                    BetLimitId = id
+                });
+            return new HashSet<ResellerBetLimit>(betLimits);
         }
     }
 }

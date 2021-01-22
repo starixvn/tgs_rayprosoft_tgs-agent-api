@@ -9,11 +9,11 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid SportTypeId { get; set; }
 
-        public virtual SportType SportType { get; set;}
+        public virtual SportType SportType { get; set; }
 
         public Guid MarketTypeId { get; set; }
 
-        public virtual MarketType MarketType { get; set;}
+        public virtual MarketType MarketType { get; set; }
 
         public virtual ICollection<PlayerSportsBetLimit> PlayerSportsBetLimits { get; set; }
     }

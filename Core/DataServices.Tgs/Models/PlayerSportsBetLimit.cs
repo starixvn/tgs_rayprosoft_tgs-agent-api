@@ -4,7 +4,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 {
     public class PlayerSportsBetLimit
     {
-        public string PlayerCode { get;set;}
+        public string PlayerCode { get; set; }
 
         public virtual Player Player { get; set; }
 

@@ -11,7 +11,6 @@ namespace TGS.Services.Operations.CodeMappers
 {
     public interface IBrandLanguageCodeMapper : ICodeMapper
     {
-
     }
 
     public sealed class BrandLanguageCodeMapper : BaseCodeMapper, IBrandLanguageCodeMapper
@@ -21,7 +20,7 @@ namespace TGS.Services.Operations.CodeMappers
         public BrandLanguageCodeMapper(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
-            IBrandQueries brandQueries) 
+            IBrandQueries brandQueries)
             : base(cacheManager, json)
         {
             _brandQueries = brandQueries;

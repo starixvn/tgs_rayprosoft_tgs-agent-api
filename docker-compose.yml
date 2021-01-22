@@ -129,7 +129,7 @@ services:
         aliases:
           - backoffice.api
     depends_on:
-      - sqlserver
+      - postgres
       - log-api
       - game-sbo
       - redis
@@ -187,7 +187,7 @@ services:
     networks:
       tgs:
     depends_on:
-      - sqlserver
+      - postgres
       - game-sbo
 
   game-sbo:
@@ -206,7 +206,7 @@ services:
     networks:
       tgs:
     depends_on:
-      - sqlserver
+      - postgres
       - nats
       - redis
       - log-api
@@ -228,7 +228,7 @@ services:
         aliases:
           - log.api
     depends_on:
-      - sqlserver
+      - postgres
       - nats
       - redis
 
@@ -253,19 +253,8 @@ services:
         aliases:
           - global.api
     depends_on:
-      - sqlserver
+      - postgres
       - operator-api
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-CU8-ubuntu-18.04
-    container_name: sqlserver
-    environment:
-      SA_PASSWORD: "1qaz2wsx!@"
-      ACCEPT_EULA: "Y"
-    ports:
-      - 1433:1433
-    networks:
-      tgs:
 
   nats:
     image: nats
@@ -310,11 +299,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile
-    image: postgres_container
-    container_name: postgres_container
+    image: postgres:12
+    container_name: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-tgs}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1qaz2wsx!@}
+      POSTGRES_USER: "tgs"
+      POSTGRES_PASSWORD: "1qaz2wsx!@"
       PGDATA: /data/postgres
     volumes:
       - ./.docker/postgres:/data/postgres
@@ -325,15 +314,15 @@ services:
     restart: unless-stopped
 
   pgadmin:
-    container_name: pgadmin_container
+    container_name: pgadmin4
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-raypro@rayprosoft.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-1qaz2wsx!@}
+      PGADMIN_DEFAULT_EMAIL: "tgs.dev@tgsdev.com"
+      PGADMIN_DEFAULT_PASSWORD: "1qaz2wsx!@"
     volumes:
       - ./.docker/pgadmin/data:/root/.pgadmin
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "5050:80"
     networks:
       - tgs
     restart: unless-stopped

@@ -40,9 +40,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             return _repository.BulkInsertAsync(settings);
         }
 
-        private static Setting CreateSetting(string key, string value, string description)
-        {
-            return new()
+        private static Setting CreateSetting(string key, string value, string description) =>
+            new()
             {
                 Key = key,
                 Value = value,
@@ -52,7 +51,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CreatedOn = Now,
                 UpdatedOn = Now
             };
-        }
 
         private static MenuSetting[] GetMenuSettings()
         {

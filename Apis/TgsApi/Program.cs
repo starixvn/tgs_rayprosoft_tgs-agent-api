@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TGS.Core.DataServices.Bet;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Prometheus;
 using TGS.Core.Models;
@@ -63,15 +62,8 @@ namespace TGS.Apis.TgsApi
             var sp = scope.ServiceProvider;
             var env = sp.GetRequiredService<IWebHostEnvironment>();
 
-            await using (var tgsRepo = sp.GetRequiredService<ITgsRepository>())
-            {
-                await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
-            }
-
-            await using (var betRepo = sp.GetRequiredService<IBetRepository>())
-            {
-                await betRepo.ExecuteMigrationAndSeedingAsync(env);
-            }
+            await using var tgsRepo = sp.GetRequiredService<ITgsRepository>();
+            await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
         }
     }
 }

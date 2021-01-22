@@ -42,6 +42,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var betLimit = new GameProviderBetLimit
             {
                 GameProviderId = request.GameProviderId,
+                CurrencyCode = request.CurrencyCode,
                 MinBet = request.MinBet,
                 MaxBet = request.MaxBet,
                 MaxBetPerMatch = request.MaxBetPerMatch,

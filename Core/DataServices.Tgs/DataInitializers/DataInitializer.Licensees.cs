@@ -12,8 +12,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string OperationalEmail { get; }
             IBrand[] Brands { get; }
 
-            ICurrency[] Currencies => new ICurrency[] 
-            { 
+            ICurrency[] Currencies => new ICurrency[]
+            {
                 new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
                 new INRCurrency(), new VNDCurrency(), new VND1000Currency(),
                 new THBCurrency(), new EURCurrency(), new GBPCurrency(),
@@ -38,7 +38,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string ILicensee.Name => "Turnkey Game System";
 
             string ILicensee.OperationalEmail => "tgs.services@gmail.com";
-            
+
             IBrand[] ILicensee.Brands => new IBrand[]
             {
                 new TgsBrand(), new GpiBrand()

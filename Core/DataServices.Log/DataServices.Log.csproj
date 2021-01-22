@@ -7,19 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SqlScripts\SP\usp_AdminLogs_GetLog.sql" />
-    <None Remove="SqlScripts\SP\usp_AdminLogs_GetLogs.sql" />
-    <None Remove="SqlScripts\SP\usp_ApiLogs_GetLog.sql" />
-    <None Remove="SqlScripts\SP\usp_ApiLogs_GetLogs.sql" />
+    <None Remove="SqlScripts\Indexes\adminLogs.sql" />
+    <None Remove="SqlScripts\Indexes\apiLogs.sql" />
+    <None Remove="SqlScripts\Indexes\LogRecords.sql" />
+    <None Remove="SqlScripts\Functions\log_get_admin_log.sql" />
+    <None Remove="SqlScripts\Functions\log_get_admin_logs.sql" />
+    <None Remove="SqlScripts\Functions\log_get_api_log.sql" />
+    <None Remove="SqlScripts\Functions\log_get_api_logs.sql" />
     <None Remove="SqlScripts\testData\get_adminLogs_SP_command.sql" />
     <None Remove="SqlScripts\testData\insert_adminLogs_mega_data_command.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="SqlScripts\SP\usp_ApiLogs_GetLog.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_AdminLogs_GetLog.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_ApiLogs_GetLogs.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_AdminLogs_GetLogs.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\LogRecords.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\apiLogs.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\adminLogs.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_api_log.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_admin_log.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\testData\get_adminLogs_SP_command.sql" />
     <EmbeddedResource Include="SqlScripts\testData\insert_adminLogs_mega_data_command.sql" />
   </ItemGroup>

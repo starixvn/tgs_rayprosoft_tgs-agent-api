@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
+using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
@@ -22,9 +23,9 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
             CancellationToken cancellationToken)
         {
             var gameProvider = await _service.GetGameProviderAsync(x => x.Id == request.Id, x => x
-                .Where(ResellerId != null, r => r.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId != null, l => l.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId != null, b => b.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
+                .Where(ResellerId, r => r.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
+                .Where(LicenseeId, l => l.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
+                .Where(BrandId, b => b.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
             );
 
             if (gameProvider == null)
@@ -77,6 +78,16 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     {
                         CultureCode = x.CultureCode,
                         GameProviderCultureCode = x.GameProviderCultureCode
+                    }).ToArray(),
+                    BetLimits = gameProvider.BetLimits.Select(x => new GameProviderBetLimitModel
+                    {
+                        Id = x.Id,
+                        GameProviderId = x.GameProviderId,
+                        CurrencyCode = x.CurrencyCode,
+                        MinBet = x.MinBet,
+                        MaxBet = x.MaxBet,
+                        MaxBetPerMatch = x.MaxBetPerMatch,
+                        ExternalSetting = x.ExternalSetting
                     }).ToArray(),
                     UpdatedByUsername = gameProvider.UpdatedByUsername,
                     UpdatedOn = gameProvider.UpdatedOn

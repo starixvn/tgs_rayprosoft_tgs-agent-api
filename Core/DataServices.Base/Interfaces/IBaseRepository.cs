@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -22,9 +21,9 @@ namespace TGS.Core.DataServices.Base.Interfaces
 
         IDbConnection GetDbConnection();
 
-        Task BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
+        Task BulkInsertAsync<T>(IEnumerable<T> entities) where T : class;
 
-        Task BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null) where T : class;
+        Task BulkUpdateAsync<T>(IEnumerable<T> entities) where T : class;
 
         Task SaveChangesAsync();
 

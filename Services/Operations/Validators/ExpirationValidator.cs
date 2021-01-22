@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using TGS.Core.Models.Services.Caches;
 
 namespace TGS.Services.Operations.Validators
 {
@@ -27,7 +26,7 @@ namespace TGS.Services.Operations.Validators
             var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform);
             VerifyLoginRecordExpiredTime(loginRecord?.ExpiredOn, playerCode);
         }
-        
+
         async Task IExpirationValidator.ThrowIfPlayerLoginExpiredAsync(Guid loginRecordId, string playerCode)
         {
             var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
