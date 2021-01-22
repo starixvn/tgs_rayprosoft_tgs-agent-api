@@ -22,6 +22,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<IBrandGameProviderScheduleService, BrandGameProviderScheduleService>();
             services.AddTransient<IGameProviderService, GameProviderService>();
             services.AddTransient<IGameProviderBetLimitService, GameProviderBetLimitService>();
+            services.AddTransient<IGameProviderConfigurationService, GameProviderConfigurationService>();
             services.AddTransient<IUploadService, UploadService>();
             services.AddTransient<ICurrencyService, CurrencyService>();
             services.AddTransient<ILanguageService, LanguageService>();

@@ -32,5 +32,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<GameProviderBetLimit> GameProviderBetLimits { get; set; }
 
         public virtual ICollection<BetLimit> BetLimits { get; set; }
+
+        public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }

@@ -15,8 +15,8 @@ namespace TGS.Services.Operations
     public interface ILocalizationOperations
     {
         /// <summary>
-        /// OuterKey = Key
-        /// InnerKey = Context
+        ///     OuterKey = Key
+        ///     InnerKey = Context
         /// </summary>
         Task<Dictionary<string, Dictionary<string, string>>> GetLocalizationByGameProviderIdAsync(
             Guid gameProviderId,

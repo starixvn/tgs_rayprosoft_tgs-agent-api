@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Messages;
@@ -27,13 +28,13 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
         {
             return _service.GetBrandGamesAsync()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, b => b.BrandId == BrandId)
+                .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId, b => b.BrandId == BrandId)
                 .Where(request.GameProviderId, x => x.Game.GameProviderId == request.GameProviderId)
                 .Where(request.GameType, x => x.Game.Type == request.GameType)
-                .Where(request.Keyword, x => x.Game.GameProvider.Name.Contains(request.Keyword) ||
-                                             x.Game.Name.Contains(request.Keyword))
+                .Where(request.Keyword, x => EF.Functions.ILike(x.Game.GameProvider.Name, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(x.Game.Name, $"%{request.Keyword}%"))
                 .Select(x => new BrandGameModel
                 {
                     Id = x.Id,

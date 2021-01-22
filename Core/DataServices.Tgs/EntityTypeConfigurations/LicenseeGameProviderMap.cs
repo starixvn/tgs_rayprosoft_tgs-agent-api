@@ -8,19 +8,26 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<LicenseeGameProvider>.Configure(EntityTypeBuilder<LicenseeGameProvider> builder)
         {
-            builder.ToTable("LicenseeGameProviders", "dbo");
+            builder.ToTable("licensee_game_providers");
 
-            builder.HasKey(lgp => new { lgp.LicenseeId, lgp.GameProviderId });
-
-            builder
-                .HasOne(lgp => lgp.GameProvider)
-                .WithMany(gp => gp.Licensees)
-                .HasForeignKey(bgp => bgp.GameProviderId);
+            builder.HasKey(e => new {e.LicenseeId, e.GameProviderId})
+                .HasName("pk_licensee_game_providers");
 
             builder
-                .HasOne(lgp => lgp.Licensee)
-                .WithMany(l => l.GameProviders)
-                .HasForeignKey(rgp => rgp.LicenseeId);
+                .HasOne(e => e.GameProvider)
+                .WithMany(e => e.Licensees)
+                .HasForeignKey(e => e.GameProviderId)
+                .HasConstraintName("fk_licensee_game_providers_game_providers_game_provider_id");
+
+            builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_licensee_game_providers_game_provider_id");
+
+            builder
+                .HasOne(e => e.Licensee)
+                .WithMany(e => e.GameProviders)
+                .HasForeignKey(e => e.LicenseeId)
+                .HasConstraintName("fk_licensee_game_providers_licensees_licensee_id");
+            ;
         }
     }
 }

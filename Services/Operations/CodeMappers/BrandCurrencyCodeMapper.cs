@@ -11,7 +11,6 @@ namespace TGS.Services.Operations.CodeMappers
 {
     public interface IBrandCurrencyCodeMapper : ICodeMapper
     {
-
     }
 
     public sealed class BrandCurrencyCodeMapper : BaseCodeMapper, IBrandCurrencyCodeMapper
@@ -21,7 +20,7 @@ namespace TGS.Services.Operations.CodeMappers
         public BrandCurrencyCodeMapper(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
-            IBrandQueries brandQueries) 
+            IBrandQueries brandQueries)
             : base(cacheManager, json)
         {
             _brandQueries = brandQueries;

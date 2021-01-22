@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.CustomQueryParameters;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
@@ -30,7 +29,6 @@ namespace TGS.Services.Operations.Queries
         Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
 
         Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
-        
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -44,47 +42,31 @@ namespace TGS.Services.Operations.Queries
 
         Task<CachedPlayer> IPlayerQueries.GetCachedPlayerAsync(string playerCode)
         {
-            const string spName = "usp_Player_GetPlayerForCache";
-            return _repository.SqlQuerySingleAsync<CachedPlayer>(spName, parameters: new SqlParameter
+            const string spName = "dbo.player_get_player_for_cache";
+            return _repository.SqlQuerySingleAsync<CachedPlayer>(spName, parameters: new Dictionary<string, object>
             {
-                ParameterName = "@playerCode",
-                Value = playerCode,
-                DbType = DbType.String
+                {":player_code", playerCode}
             });
         }
 
         async Task<GetPlayerLoginRecordResult[]> IPlayerQueries.GetPlayerLoginsRecordsInOneDayAsync(string playerCode,
             LoginStatus[] statuses)
         {
-            const string spName = "usp_Player_GetPlayerLoginRecords";
-            var results = await _repository.SqlQueryMultipleAsync<GetPlayerLoginRecordResult>(spName, parameters:
-                new SqlParameter[]
-                {
-                    new()
+            const string spName = "dbo.player_get_player_login_records";
+            var results = await _repository
+                .SqlQueryMultipleAsync<GetPlayerLoginRecordResult>(spName, parameters:
+                    new Dictionary<string, object>
                     {
-                        ParameterName = "@playerCode",
-                        Value = playerCode,
-                        DbType = DbType.String
-                    },
-                    new()
-                    {
-                        ParameterName = "@statuses",
-                        Value = statuses.Select(s => new {Value = (int) s}).ToDataTable(),
-                        SqlDbType = SqlDbType.Structured
-                    },
-                    new()
-                    {
-                        ParameterName = "@from",
-                        Value = DateTimeOffset.UtcNow.AddDays(-1),
-                        DbType = DbType.DateTimeOffset
-                    }
-                });
+                        {":player_code", playerCode},
+                        {":statuses", new ArrayParameter<int>(statuses.Select(s => (int) s).ToArray())},
+                        {":from", DateTimeOffset.UtcNow.AddDays(-1)}
+                    });
 
             return results.ToArray();
         }
 
         Task<CachedPlayerLoginRecord> IPlayerQueries.GetPlayerLoginRecordAsync(Guid loginRecordId) =>
-            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
+            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId && r.Status == LoginStatus.Enabled)
                 .Select(r => new CachedPlayerLoginRecord
                 {
                     PlayerCode = r.PlayerCode,
@@ -95,7 +77,7 @@ namespace TGS.Services.Operations.Queries
         Task<string> IPlayerQueries.GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
             _repository.Players
                 .Where(p => p.BrandId == brandId &&
-                    p.Username == username)
+                    p.Username.ToLower().Equals(username.ToLower()))
                 .Select(p => p.PlayerCode)
                 .FirstOrDefaultAsync();
 

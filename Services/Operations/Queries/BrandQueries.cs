@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
@@ -55,46 +53,33 @@ namespace TGS.Services.Operations.Queries
 
         Task<CachedBrand> IBrandQueries.GetCachedBrandAsync(Guid brandId)
         {
-            const string spName = "usp_Brand_GetBrandForCache";
-            return _repository.SqlQuerySingleAsync<CachedBrand>(spName, parameters: new SqlParameter
+            const string sql = "dbo.brand_get_brand_for_cache";
+            return _repository.SqlQuerySingleAsync<CachedBrand>(sql, parameters: new Dictionary<string, object>
             {
-                ParameterName = "@brandId",
-                Value = brandId,
-                DbType = DbType.Guid
+                {":brand_id", brandId}
             });
         }
 
         Task<GetCachedBrandGameProviderConfigurationResult> IBrandQueries.
             GetCachedBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
         {
-            const string spName = "usp_Brand_GetBrandGameProviderConfigurationForCache";
+            const string spName = "dbo.brand_get_brand_game_provider_configuration_for_cache";
             return _repository.SqlQuerySingleAsync<GetCachedBrandGameProviderConfigurationResult>(spName, parameters:
-                new SqlParameter[]
+                new Dictionary<string, object>
                 {
-                    new()
-                    {
-                        ParameterName = "@brandId",
-                        Value = brandId,
-                        DbType = DbType.Guid
-                    },
-                    new()
-                    {
-                        ParameterName = "@gameProviderId",
-                        Value = gameProviderId,
-                        DbType = DbType.Guid
-                    }
+                    {":brand_id", brandId},
+                    {":game_provider_id", gameProviderId}
                 });
         }
 
         async Task<CachedBrandGame[]> IBrandQueries.GetBrandGamesAsync(Guid brandId)
         {
-            const string spName = "usp_Brand_GetBrandGamesForCache";
-            var r = await _repository.SqlQueryMultipleAsync<CachedBrandGame>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@brandId",
-                Value = brandId,
-                DbType = DbType.Guid
-            });
+            const string spName = "dbo.brand_get_brand_games_for_cache";
+            var r = await _repository.SqlQueryMultipleAsync<CachedBrandGame>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {":brand_id", brandId}
+                });
 
             return r.ToArray();
         }
@@ -113,26 +98,24 @@ namespace TGS.Services.Operations.Queries
 
         async Task<Dictionary<string, string>> IBrandQueries.GetBrandLanguagesByExternalCodeAsync(Guid brandId)
         {
-            const string spName = "usp_Brand_GetLanguagesByExternalCode";
-            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@brandId",
-                Value = brandId,
-                DbType = DbType.Guid
-            });
+            const string spName = "dbo.brand_get_languages_by_external_code";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {":brand_id", brandId}
+                });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         async Task<Dictionary<string, string>> IBrandQueries.GetBrandLanguagesByInternalCodeAsync(Guid brandId)
         {
-            const string spName = "usp_Brand_GetLanguagesByInternalCode";
-            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@brandId",
-                Value = brandId,
-                DbType = DbType.Guid
-            });
+            const string spName = "dbo.brand_get_languages_by_internal_code";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {":brand_id", brandId}
+                });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -140,13 +123,12 @@ namespace TGS.Services.Operations.Queries
         async Task<Dictionary<string, string>> IBrandQueries.GetBrandCurrenciesByExternalCodeAsync(
             Guid brandId)
         {
-            const string spName = "usp_Brand_GetCurrenciesByExternalCode";
-            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@brandId",
-                Value = brandId,
-                DbType = DbType.Guid
-            });
+            const string spName = "dbo.brand_get_currencies_by_external_code";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {":brand_id", brandId}
+                });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -154,29 +136,23 @@ namespace TGS.Services.Operations.Queries
         async Task<Dictionary<string, string>> IBrandQueries.GetBrandCurrenciesByInternalCodeAsync(
             Guid brandId)
         {
-            const string spName = "usp_Brand_GetCurrenciesByInternalCode";
-            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@brandId",
-                Value = brandId,
-                DbType = DbType.Guid
-            });
+            const string spName = "dbo.brand_get_currencies_by_internal_code";
+            var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {":brand_id", brandId}
+                });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         async Task<CachedBrandGameProvider[]> IBrandQueries.GetBrandGameProvidersAsync(Guid brandId)
         {
-            const string spName = "usp_Brand_GetBrandGameProvidersForCache";
+            const string spName = "dbo.brand_get_brand_game_providers_for_cache";
             var r = await _repository.SqlQueryMultipleAsync<CachedBrandGameProvider>(spName,
-                parameters: new SqlParameter[]
+                parameters: new Dictionary<string, object>
                 {
-                    new()
-                    {
-                        ParameterName = "@brandId",
-                        Value = brandId,
-                        DbType = DbType.Guid
-                    }
+                    {":brand_id", brandId}
                 });
 
             return r.ToArray();

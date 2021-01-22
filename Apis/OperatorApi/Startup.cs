@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,7 +16,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Services;
-using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -47,8 +45,7 @@ namespace TGS.Apis.OperatorApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTgsRepository(_configuration, "Tgs")
-                .AddBetRepository(_configuration, "Bet");
+            services.AddTgsRepository(_configuration, "Tgs");
 
             services.AddScoped<IInvitationCodeValidator, InvitationCodeValidator>();
 
@@ -78,10 +75,10 @@ namespace TGS.Apis.OperatorApi
             services.AddMediatR(typeof(Startup).Assembly);
 
             services.AddHealthChecks()
-                .AddSqlServer(_configuration, "Tgs", name: "tgs-db")
-                .AddSqlServer(_configuration, "Bet", name: "bet-db")
+                .AddPostgres(_configuration, "Tgs", name: "tgs-db")
                 .AddRedis(_configuration)
-                .ForwardToPrometheus(); ;
+
+                .ForwardToPrometheus();
 
             if (!_env.IsProduction())
             {

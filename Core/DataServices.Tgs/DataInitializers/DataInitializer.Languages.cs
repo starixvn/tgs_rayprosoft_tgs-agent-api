@@ -11,7 +11,6 @@
             public USLanguage(string externalCode = null) :
                 base("en-US", externalCode)
             {
-               
             }
         }
 
@@ -20,7 +19,6 @@
             public IDLanguage(string externalCode = null) :
                 base("id-ID", externalCode)
             {
-               
             }
         }
 
@@ -29,7 +27,6 @@
             public JPLanguage(string externalCode = null) :
                 base("ja-JP", externalCode)
             {
-               
             }
         }
 
@@ -38,7 +35,6 @@
             public THLanguage(string externalCode = null) :
                 base("th-TH", externalCode)
             {
-               
             }
         }
 
@@ -47,7 +43,6 @@
             public KRLanguage(string externalCode = null) :
                 base("ko-KR", externalCode)
             {
-               
             }
         }
 
@@ -56,7 +51,6 @@
             public VNLanguage(string externalCode = null) :
                 base("vi-VN", externalCode)
             {
-               
             }
         }
 
@@ -65,7 +59,6 @@
             public CNLanguage(string externalCode = null) :
                 base("zh-CN", externalCode)
             {
-               
             }
         }
 
@@ -74,7 +67,6 @@
             public TWLanguage(string externalCode = null) :
                 base("zh-TW", externalCode)
             {
-                
             }
         }
     }

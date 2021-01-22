@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,24 +8,34 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<LocalizedString>.Configure(EntityTypeBuilder<LocalizedString> builder)
         {
-            builder.ToTable("LocalizedStrings", "dbo");
-            builder.HasKey(ls => new { ls.Key, ls.CultureCode, ls.Context });
+            builder.ToTable("localized_strings");
 
-            builder.Property(ls => ls.Key)
-                .HasColumnType(ColumnTypes.Nvarchar(64))
+            builder.HasKey(e => new {e.Key, e.CultureCode, e.Context})
+                .HasName("pk_localized_strings");
+
+            builder.Property(e => e.Key)
+                .HasMaxLength(64)
                 .IsRequired();
 
-            builder.Property(ls => ls.Context)
-                .HasColumnType(ColumnTypes.Nvarchar(64))
+            builder.Property(e => e.Context)
+                .HasMaxLength(64)
                 .IsRequired();
 
-            builder.Property(ls => ls.CultureCode)
-                .HasColumnType(ColumnTypes.Nvarchar(6))
+            builder.Property(e => e.CultureCode)
+                .HasMaxLength(6)
                 .IsRequired();
 
-            builder.Property(ls => ls.Translation)
-                .HasColumnType(ColumnTypes.Nvarchar(1024))
+            builder.Property(e => e.Translation)
+                .HasMaxLength(1024)
                 .IsRequired();
+
+            builder.HasOne(e => e.Language)
+                .WithMany(e => e.LocalizedStrings)
+                .HasForeignKey(e => e.CultureCode)
+                .HasConstraintName("fk_localized_strings_languages_culture_code");
+
+            builder.HasIndex(e => e.CultureCode)
+                .HasDatabaseName("ix_localized_strings_culture_code");
         }
     }
 }

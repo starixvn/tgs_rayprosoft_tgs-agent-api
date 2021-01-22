@@ -10,6 +10,7 @@ namespace TGS.Tests.ApiClients.Operators
     public interface IPlayerApiClient
     {
         Task<LoginResponse> PlayerLoginAsync(LoginRequest request, IReadOnlyDictionary<string, string> headers);
+        Task<CreatePlayerResponse> CreatePlayerAsync(CreatePlayerRequest request, IReadOnlyDictionary<string, string> headers);
         Task<AuthResponse> GetBrandTokenAsync(AuthRequest request);
     }
 
@@ -22,6 +23,10 @@ namespace TGS.Tests.ApiClients.Operators
 
         Task<AuthResponse> IPlayerApiClient.GetBrandTokenAsync(AuthRequest request) =>
             ExecuteJsonRequestAsync<AuthRequest, AuthResponse>(HttpMethod.Post, "api/auth/jwt", request);
+
+        Task<CreatePlayerResponse> IPlayerApiClient.CreatePlayerAsync(CreatePlayerRequest request,
+            IReadOnlyDictionary<string, string> headers) =>
+            ExecuteJsonRequestAsync<CreatePlayerRequest, CreatePlayerResponse>(HttpMethod.Post, "api/player/create", request, headers);
 
         Task<LoginResponse> IPlayerApiClient.PlayerLoginAsync(LoginRequest request,
             IReadOnlyDictionary<string, string> headers) =>

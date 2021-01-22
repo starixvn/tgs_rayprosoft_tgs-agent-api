@@ -23,7 +23,6 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Log;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.Hangfire;
@@ -44,8 +43,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             IConfiguration configuration)
         {
             services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
-            services.AddTgsRepository(configuration, "Tgs")
-                .AddBetRepository(configuration, "Bet");
+            services.AddTgsRepository(configuration, "Tgs");
 
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
@@ -95,9 +93,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                 });
 
             services.AddHealthChecks()
-                .AddSqlServer(configuration, "Tgs", name: "tgs-db")
-                .AddSqlServer(configuration, "Bet", name: "bet-db")
-                .AddSqlServer(configuration, "Log", name: "log-db")
+                .AddPostgres(configuration, "Tgs", name: "tgs-db")
+                .AddPostgres(configuration, "Log", name: "log-db")
+
                 .AddMongoDb(configuration, "Hangfire", "hangfire-db")
                 .AddNats()
                 .ForwardToPrometheus();

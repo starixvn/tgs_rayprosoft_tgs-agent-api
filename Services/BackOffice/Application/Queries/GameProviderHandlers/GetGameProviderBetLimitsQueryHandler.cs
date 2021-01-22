@@ -26,15 +26,16 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
             CancellationToken cancellationToken)
         {
             var betLimits = await _service.GetGameProviderBetLimitsAsync()
-                .Where(ResellerId != null,
+                .Where(ResellerId,
                     r => r.GameProvider.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId != null,
+                .Where(LicenseeId,
                     l => l.GameProvider.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId != null, b => b.GameProvider.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
+                .Where(BrandId, b => b.GameProvider.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
                 .Where(x => x.GameProviderId == request.GameProviderId)
                 .Select(x => new GameProviderBetLimitModel
                 {
                     Id = x.Id,
+                    GameProviderId = x.GameProviderId,
                     CurrencyCode = x.CurrencyCode,
                     MinBet = x.MinBet,
                     MaxBet = x.MaxBet,

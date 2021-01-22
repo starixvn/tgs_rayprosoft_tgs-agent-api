@@ -23,6 +23,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<ResellerGameProvider> GameProviders { get; set; }
 
         public virtual ICollection<ResellerBetLimit> BetLimits { get; set; }
+
         public virtual ICollection<Department> Departments { get; set; }
     }
 }

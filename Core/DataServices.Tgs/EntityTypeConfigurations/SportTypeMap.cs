@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,21 +8,29 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<SportType>.Configure(EntityTypeBuilder<SportType> builder)
         {
-            builder.ToTable("SportTypes", "dbo");
-            builder.HasKey(e => e.Id);
-            builder.HasAlternateKey(e => new {e.GameProviderId, Name = e.Code});
+            builder.ToTable("sport_types");
+
+            builder.HasKey(e => e.Id)
+                .HasName("pk_sport_types");
+
+            builder.HasAlternateKey(e => new {e.GameProviderId, e.Code})
+                .HasName("ak_sport_types_game_provider_id_code");
 
             builder.Property(e => e.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(64))
+                .HasMaxLength(64)
                 .IsRequired();
 
             builder.Property(e => e.ExternalId)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.HasOne(e => e.GameProvider)
                 .WithMany(e => e.SportTypes)
-                .HasForeignKey(e => e.Id);
+                .HasForeignKey(e => e.GameProviderId)
+                .HasConstraintName("fk_sport_types_game_providers_game_provider_id");
+
+            builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_sport_types_game_provider_id");
         }
     }
 }

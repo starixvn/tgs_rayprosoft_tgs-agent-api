@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructures", "Core\Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Core\Models\Models.csproj", "{3763ECF4-01E1-416E-BAAC-887FBB939516}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Bet", "Core\DataServices.Bet\DataServices.Bet.csproj", "{B3772AA4-2DAB-443A-A797-463E39EAF713}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operations", "Services\Operations\Operations.csproj", "{087A84A8-9BB1-41FC-8134-3A6876BD34D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.IntegrationTests", "Tests\Redis.IntegrationTests\Redis.IntegrationTests.csproj", "{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}"
@@ -26,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{897541B7-3AE6-4AEE-9D3E-51221088F2CC}"
 	ProjectSection(SolutionItems) = preProject
 		.gitlab-ci.yml = .gitlab-ci.yml
+		docker-compose.yml = docker-compose.yml
 		DockerImageBuild.bat = DockerImageBuild.bat
 		RunDockerPush.bat = RunDockerPush.bat
 	EndProjectSection
@@ -111,10 +110,6 @@ Global
 		{3763ECF4-01E1-416E-BAAC-887FBB939516}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3763ECF4-01E1-416E-BAAC-887FBB939516}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3763ECF4-01E1-416E-BAAC-887FBB939516}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B3772AA4-2DAB-443A-A797-463E39EAF713}.Release|Any CPU.Build.0 = Release|Any CPU
 		{087A84A8-9BB1-41FC-8134-3A6876BD34D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{087A84A8-9BB1-41FC-8134-3A6876BD34D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{087A84A8-9BB1-41FC-8134-3A6876BD34D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -218,7 +213,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E96BD952-A5FD-40E2-8946-BF730BCC07B5} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{3763ECF4-01E1-416E-BAAC-887FBB939516} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
-		{B3772AA4-2DAB-443A-A797-463E39EAF713} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{087A84A8-9BB1-41FC-8134-3A6876BD34D8} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{5C1CCE46-0C09-41B5-A6CE-44256B44492F} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}

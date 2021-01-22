@@ -56,10 +56,12 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     GameProviders = brand.GameProviders
                         .Select(x => new BrandGameProviderModel
                         {
-                            Id = x.GameProviderId,
-                            Name = x.GameProvider.Name
+                            Id = x.Id,
+                            GameProviderId = x.GameProviderId,
+                            Name = x.GameProvider.Name,
+                            ConfigurationId = x.GameProviderConfigurationId
                         }).ToArray(),
-                    BrandGames = brand.Games.Select(x => new BrandGameModel
+                    Games = brand.Games.Select(x => new BrandGameModel
                     {
                         GameId = x.GameId
                     }).ToArray(),

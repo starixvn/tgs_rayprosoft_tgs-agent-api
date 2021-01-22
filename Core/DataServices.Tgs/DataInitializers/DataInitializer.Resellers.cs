@@ -12,7 +12,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string Name { get; }
             string OperationalEmail { get; }
             BusinessType BusinessType { get; }
-            ILicensee[] Licensees { get; }           
+            ILicensee[] Licensees { get; }
+
             ICurrency[] Currencies => new ICurrency[]
             {
                 new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
@@ -32,7 +33,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         internal record TgsReseller : IReseller
         {
-            Guid IReseller.Id => new Guid("B5A2C708-AB70-4316-9F4D-5D2AD0E77460");
+            Guid IReseller.Id => new("B5A2C708-AB70-4316-9F4D-5D2AD0E77460");
 
             string IReseller.Code => "TGS";
 

@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql.Bulk;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.DataInitializers;
-using TGS.Core.DataServices.Tgs.EntityTypeConfigurations;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.Tgs
 {
@@ -74,12 +73,19 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<MarketType> MarketTypes { get; set; }
         DbSet<SportMarketType> SportMarketTypes { get; set; }
         DbSet<PlayerSportsBetLimit> PlayerSportsBetLimits { get; set; }
+        DbSet<Round> Rounds { get; set; }
+        DbSet<RoundDetail> RoundDetails { get; set; }
+        DbSet<GameAction> GameActions { get; set; }
+        DbSet<GameActionBatch> GameActionBatches { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
+        private readonly NpgsqlBulkUploader _uploader;
+
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
+            _uploader = new NpgsqlBulkUploader(this);
         }
 
         DbSet<Reseller> ITgsRepository.Resellers { get; set; }
@@ -137,6 +143,10 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<MarketType> ITgsRepository.MarketTypes { get; set; }
         DbSet<SportMarketType> ITgsRepository.SportMarketTypes { get; set; }
         DbSet<PlayerSportsBetLimit> ITgsRepository.PlayerSportsBetLimits { get; set; }
+        DbSet<Round> ITgsRepository.Rounds { get; set; }
+        DbSet<RoundDetail> ITgsRepository.RoundDetails { get; set; }
+        DbSet<GameAction> ITgsRepository.GameActions { get; set; }
+        DbSet<GameActionBatch> ITgsRepository.GameActionBatches { get; set; }
 
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
@@ -156,17 +166,16 @@ namespace TGS.Core.DataServices.Tgs
 
         Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) =>
-            this.BulkInsertAsync(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
+            _uploader.InsertAsync(entities);
 
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig,
-            Action<decimal> progress) =>
-            this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkUpdateAsync<T>(IEnumerable<T> entities) =>
+            _uploader.UpdateAsync(entities);
 
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
-                (await Database.GetPendingMigrationsAsync()).Any();
+                            (await Database.GetPendingMigrationsAsync()).Any();
 
             if (isMigrate)
             {
@@ -188,76 +197,10 @@ namespace TGS.Core.DataServices.Tgs
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("dbo");
+            modelBuilder.HasDefaultSchema(Consts.Db.Schema);
+            modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
-            modelBuilder.ApplyConfiguration(new CurrencyMap());
-            modelBuilder.ApplyConfiguration(new LanguageMap());
-            modelBuilder.ApplyConfiguration(new GameMap());
-            modelBuilder.ApplyConfiguration(new GameProviderMap());
-            modelBuilder.ApplyConfiguration(new GameProviderConfigurationMap());
-
-            modelBuilder.ApplyConfiguration(new ResellerMap());
-            modelBuilder.ApplyConfiguration(new ResellerCurrencyMap());
-            modelBuilder.ApplyConfiguration(new ResellerLanguageMap());
-            modelBuilder.ApplyConfiguration(new ResellerGameProviderMap());
-
-            modelBuilder.ApplyConfiguration(new LicenseeMap());
-            modelBuilder.ApplyConfiguration(new LicenseeCurrencyMap());
-            modelBuilder.ApplyConfiguration(new LicenseeLanguageMap());
-            modelBuilder.ApplyConfiguration(new LicenseeGameProviderMap());
-
-            modelBuilder.ApplyConfiguration(new BrandMap());
-            modelBuilder.ApplyConfiguration(new BrandCurrencyMap());
-            modelBuilder.ApplyConfiguration(new BrandLanguageMap());
-            modelBuilder.ApplyConfiguration(new BrandGameMap());
-            modelBuilder.ApplyConfiguration(new BrandGroupMap());
-            modelBuilder.ApplyConfiguration(new BrandGroupGameMap());
-            modelBuilder.ApplyConfiguration(new BrandGameProviderMap());
-            modelBuilder.ApplyConfiguration(new BrandGameProviderScheduledMap());
-
-            modelBuilder.ApplyConfiguration(new PlayerMap());
-
-            modelBuilder.ApplyConfiguration(new WhitelistTypeMap());
-            modelBuilder.ApplyConfiguration(new WalletTypeMap());
-            modelBuilder.ApplyConfiguration(new SettingMap());
-            modelBuilder.ApplyConfiguration(new LocalizedStringMap());
-
-            modelBuilder.ApplyConfiguration(new GameProviderCurrencyMap());
-            modelBuilder.ApplyConfiguration(new GameProviderLanguageMap());
-
-            modelBuilder.ApplyConfiguration(new BetLimitMap());
-            modelBuilder.ApplyConfiguration(new ResellerBetLimitMap());
-            modelBuilder.ApplyConfiguration(new LicenseeBetLimitMap());
-            modelBuilder.ApplyConfiguration(new BrandBetLimitMap());
-            modelBuilder.ApplyConfiguration(new BrandGroupBetLimitMap());
-            modelBuilder.ApplyConfiguration(new GameProviderBetLimitMap());
-            modelBuilder.ApplyConfiguration(new BrandGroupGameProviderBetLimitMap());
-
-            modelBuilder.ApplyConfiguration(new PlayerLoginRecordMap());
-            modelBuilder.ApplyConfiguration(new PlayerBankMap());
-            modelBuilder.ApplyConfiguration(new VipLevelMap());
-            modelBuilder.ApplyConfiguration(new PlayerAuditLogMap());
-
-            modelBuilder.ApplyConfiguration(new AnnouncementMap());
-            modelBuilder.ApplyConfiguration(new StationLetterPlayerMap());
-            modelBuilder.ApplyConfiguration(new StationLetterMap());
-
-            modelBuilder.ApplyConfiguration(new BrandPaymentMap());
-            modelBuilder.ApplyConfiguration(new PaymentMap());
-            modelBuilder.ApplyConfiguration(new PaymentMethodMap());
-            modelBuilder.ApplyConfiguration(new PaymentChannelMap());
-            modelBuilder.ApplyConfiguration(new BrandPaymentPlayerMap());
-            modelBuilder.ApplyConfiguration(new BrandPaymentVipLevelMap());
-            modelBuilder.ApplyConfiguration(new BrandPaymentAuditLogMap());
-
-            modelBuilder.ApplyConfiguration(new UserMap());
-            modelBuilder.ApplyConfiguration(new RoleMap());
-            modelBuilder.ApplyConfiguration(new DepartmentMap());
-
-            modelBuilder.ApplyConfiguration(new SportTypeMap());
-            modelBuilder.ApplyConfiguration(new MarketTypeMap());
-            modelBuilder.ApplyConfiguration(new SportMarketTypeMap());
-            modelBuilder.ApplyConfiguration(new PlayerSportsBetLimitMap());
+            modelBuilder.HasPostgresExtension("pg_trgm");
         }
     }
 }

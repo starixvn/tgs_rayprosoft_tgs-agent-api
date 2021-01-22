@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.json" />
     <None Remove="SqlScripts\SP\usp_GameAction_GetGameActionExternalIds.sql" />
     <None Remove="SqlScripts\SP\usp_GameAction_GetGameActionsByExternalRoundId.sql" />
     <None Remove="SqlScripts\SP\usp_GameAction_GetGameActionsInSameRound.sql" />
@@ -19,14 +18,6 @@
     <None Remove="SqlScripts\SP\usp_Round_UpdateRound.sql" />
     <None Remove="SqlScripts\TYPE\IntValuesType.sql" />
     <None Remove="SqlScripts\View\vw_ValidGameActions.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>

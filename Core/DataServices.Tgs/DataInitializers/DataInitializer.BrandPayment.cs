@@ -20,13 +20,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private static readonly Dictionary<string, Guid> Payments = new()
         {
-            {Help2Pay, new Guid("30CB4D17-2506-4D72-8470-65063B80F9C9")}
+            {Help2Pay, new("30CB4D17-2506-4D72-8470-65063B80F9C9")}
         };
 
         private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new()
         {
-            {AlipayPayment, (new Guid("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay])},
-            {WeChatPayPayment, (new Guid("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay])}
+            {AlipayPayment, (new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay])},
+            {WeChatPayPayment, (new("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay])}
         };
 
         private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
@@ -34,15 +34,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 {
                     AlipayScan,
-                    (new Guid("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment])
+                    (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment])
                 },
                 {
                     BankTransfer,
-                    (new Guid("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment])
+                    (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment])
                 },
                 {
                     WeChatPayScan,
-                    (new Guid("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment])
+                    (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment])
                 }
             };
 

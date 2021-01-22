@@ -30,6 +30,16 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
                 return response;
             }
 
+            if (await _service.ExistsAsync(x => request.Id != x.Id && x.Code == request.Code))
+            {
+                return CreateInvalidResponse<GameProviderResponse>(GameProvider.CodeExisted);
+            }
+
+            if (await _service.ExistsAsync(x => request.Id != x.Id && x.Name == request.Name))
+            {
+                return CreateInvalidResponse<GameProviderResponse>(GameProvider.NameExisted);
+            }
+
             await _service.CreateGameProviderAsync(request);
 
             return CreateValidResponse<GameProviderResponse>();

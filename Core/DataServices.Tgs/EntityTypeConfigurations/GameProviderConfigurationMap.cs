@@ -7,66 +7,71 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
     internal class GameProviderConfigurationMap : IEntityTypeConfiguration<GameProviderConfiguration>
     {
-        void IEntityTypeConfiguration<GameProviderConfiguration>.Configure(EntityTypeBuilder<GameProviderConfiguration> builder)
+        void IEntityTypeConfiguration<GameProviderConfiguration>.Configure(
+            EntityTypeBuilder<GameProviderConfiguration> builder)
         {
-            builder.ToTable("GameProviderConfigurations", "dbo");
+            builder.ToTable("game_provider_configurations");
 
             builder.HasKey(p => p.Id)
-                .IsClustered(false);
+                .HasName("pk_game_provider_configurations");
 
             builder.Property(p => p.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(255));
+                .HasMaxLength(64)
+                .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
             builder.Property(c => c.ClientId)
-                   .HasColumnType(ColumnTypes.Varchar(128))
-                   .IsRequired();
+                .HasMaxLength(128)
+                .IsRequired();
 
             builder.Property(c => c.SecretKey)
-                .HasColumnType(ColumnTypes.Varchar(64))
+                .HasMaxLength(64)
+                .IsRequired();
+
+            builder.Property(c => c.GameProviderId)
                 .IsRequired();
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.DesktopEndpoint)
-                .HasColumnType(ColumnTypes.Nvarchar(1024))
+                .HasMaxLength(1024)
                 .IsRequired();
 
             builder.Property(c => c.MobileEndpoint)
-                .HasColumnType(ColumnTypes.Nvarchar(1024))
+                .HasMaxLength(1024)
                 .IsRequired();
 
             builder.Property(c => c.ConfigurationData)
-                .HasColumnType(ColumnTypes.Nvarchar(4000))
                 .IsRequired();
 
             builder.Property(c => c.IsDefault)
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.HasOne(p => p.GameProvider)
                 .WithMany(p => p.GameProviderConfigurations)
-                .HasForeignKey(p => p.GameProviderId);
+                .HasForeignKey(p => p.GameProviderId)
+                .HasConstraintName("fk_game_provider_configurations_game_providers_game_provider_id");
 
+            builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_game_provider_configurations_game_provider_id");
         }
     }
 }

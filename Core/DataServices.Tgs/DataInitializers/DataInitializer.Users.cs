@@ -22,7 +22,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var (salt, passwordHash) = _passwordHandler.GenerateCredential(UserPassword);
             userId ??= GuidExtensions.NewSequentialGuid();
 
-            return new User
+            return new()
             {
                 Id = userId.Value,
                 RoleId = roleId,

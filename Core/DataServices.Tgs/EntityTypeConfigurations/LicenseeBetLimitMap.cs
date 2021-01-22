@@ -8,18 +8,25 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<LicenseeBetLimit>.Configure(EntityTypeBuilder<LicenseeBetLimit> builder)
         {
-            builder.ToTable("LicenseeBetLimits", "dbo");
-            builder.HasKey(e => new { e.LicenseeId, BetLimitRangeId = e.BetLimitId });
+            builder.ToTable("licensee_bet_limits");
+
+            builder.HasKey(e => new {e.LicenseeId, e.BetLimitId})
+                .HasName("pk_licensee_bet_limits");
 
             builder
                 .HasOne(e => e.Licensee)
                 .WithMany(e => e.BetLimits)
-                .HasForeignKey(e => e.LicenseeId);
+                .HasForeignKey(e => e.LicenseeId)
+                .HasConstraintName("fk_licensee_bet_limits_licensees_licensee_id");
 
             builder
                 .HasOne(e => e.BetLimit)
                 .WithMany(e => e.LicenseeBetLimits)
-                .HasForeignKey(e => e.BetLimitId);
+                .HasForeignKey(e => e.BetLimitId)
+                .HasConstraintName("fk_licensee_bet_limits_bet_limits_bet_limit_id");
+
+            builder.HasIndex(e => e.BetLimitId)
+                .HasDatabaseName("ix_licensee_bet_limits_bet_limit_id");
         }
     }
 }

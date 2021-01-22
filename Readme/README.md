@@ -1,18 +1,10 @@
-## Start Sql Server using Docker
-
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=1qaz2wsx!@" -p 1433:1433 --name sqlserver -d --restart unless-stopped  mcr.microsoft.com/mssql/server:2019-CU5-ubuntu-18.04
-
 ## Migration Command 
 
 #TGS
 add-migration <MigrationName> -c TgsRepository -p DataServices.Tgs -s TgsApi
 
-#Bet
-add-migration <MigrationName> -c BetRepository -p  DataServices.Bet -s TgsApi
-
 #Log
 add-migration <MigrationName> -c LogRepository -p DataServices.Log -s LogApi
-
 
 
 ## Install Redis using Docker

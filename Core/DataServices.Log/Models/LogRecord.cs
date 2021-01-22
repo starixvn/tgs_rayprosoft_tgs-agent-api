@@ -16,9 +16,8 @@ namespace TGS.Core.DataServices.Log.Models
         public string Message { get; set; }
         public string Exception { get; set; }
 
-        public static explicit operator LogRecord(LogRecordEvent a)
-        {
-            return new LogRecord
+        public static explicit operator LogRecord(LogRecordEvent a) =>
+            new()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 TrackingId = a.trackingid,
@@ -29,6 +28,5 @@ namespace TGS.Core.DataServices.Log.Models
                 Level = a.level,
                 Logger = a.logger
             };
-        }
     }
 }

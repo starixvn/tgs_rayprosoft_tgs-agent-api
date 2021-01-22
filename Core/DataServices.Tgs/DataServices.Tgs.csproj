@@ -7,12 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SqlScripts\SP\usp_Brand_GetBrandGameProvidersForCache.sql" />
-    <None Remove="SqlScripts\SP\usp_Localization_GetLocalizationByGameProviderId.sql" />
-    <None Remove="SqlScripts\SP\usp_Player_DeauthorizeByLoginRecordId.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <None Remove="SqlScripts\Indexes\brands.sql" />
+    <None Remove="SqlScripts\Indexes\gameProviders.sql" />
+    <None Remove="SqlScripts\Indexes\games.sql" />
+    <None Remove="SqlScripts\Indexes\licensees.sql" />
+    <None Remove="SqlScripts\Indexes\paymentChannels.sql" />
+    <None Remove="SqlScripts\Indexes\paymentMethods.sql" />
+    <None Remove="SqlScripts\Indexes\payments.sql" />
+    <None Remove="SqlScripts\Indexes\resellers.sql" />
+    <None Remove="SqlScripts\Indexes\roles.sql" />
+    <None Remove="SqlScripts\Indexes\trgm.sql" />
+    <None Remove="SqlScripts\Indexes\users.sql" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -23,38 +28,46 @@
   <ItemGroup>
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_GetGameActionsInSameRound.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameAction_InsertGameAction.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetCurrenciesByInternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetCurrenciesByExternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetLanguagesByInternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetLanguagesByExternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetSubGameIdMaps.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGamesForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByExternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetLanguagesByInternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderConfigurationForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGameProviderConfigurationForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Localization_GetLocalizationByGameProviderId.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGameProvidersForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandGamesForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Player_DeauthorizeByLoginRecordId.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Player_DeauthorizeByPlatform.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerLoginRecords.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Player_GetPlayerForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetExternalRoundIdByExternalTransactionId.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Round_GetRoundByExternalRoundId.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Round_InsertRound.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Round_UpdateRound.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_UpdateWalletBalance.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Wallet_GetBalance.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_Brand_GetBrandForCache.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByExternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetCurrenciesByInternalCode.sql" />
-    <EmbeddedResource Include="SqlScripts\SP\usp_GameProvider_GetGameProviderIdByCode.sql" />
-    <EmbeddedResource Include="SqlScripts\TYPE\IntValuesType.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_round_id.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_action_external_ids.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_action_get_valid_game_action_external_ids.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\paymentChannels.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\paymentMethods.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\licensees.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\games.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\users.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\roles.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\resellers.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\players.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_in_same_round.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_currencies_by_internal_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_currencies_by_external_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_languages_by_internal_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_languages_by_external_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_game_id_maps.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_games_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_external_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Procedures\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_internal_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_game_provider_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_game_provider_configuration_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\localization_get_localization_by_game_provider_id.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_providers_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_games_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Procedures\player_deauthorize_by_login_record_id.sql" />
+    <EmbeddedResource Include="SqlScripts\Procedures\player_deauthorize_by_platform_type.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\player_get_player_login_records.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\player_get_player_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\wallet_update_wallet_balance.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\wallet_get_balance.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_external_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_internal_code.sql" />
+    <EmbeddedResource Include="SqlScripts\Views\vw_valid_game_actions.sql" />
   </ItemGroup>
 
   <ItemGroup>

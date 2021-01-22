@@ -14,16 +14,16 @@ namespace TGS.Apis.OperatorApi.Validators
 
             RuleFor(x => x.NewPassword)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.OldPassword)));
+                .WithName(x => GetJsonPropertyName(x, nameof(x.NewPassword)));
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.OldPassword)));
+                .WithName(x => GetJsonPropertyName(x, nameof(x.ConfirmPassword)));
 
-            RuleFor(x => x.OldPassword)
+            RuleFor(x => x.NewPassword)
                 .Equal(x => x.ConfirmPassword)
                 .WithMessage(x =>
-                    $"{GetJsonPropertyName(x, nameof(x.OldPassword))} is not the same as {GetJsonPropertyName(x, nameof(x.ConfirmPassword))}");
+                    $"{GetJsonPropertyName(x, nameof(x.NewPassword))} is not the same as {GetJsonPropertyName(x, nameof(x.ConfirmPassword))}");
         }
     }
 }

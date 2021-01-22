@@ -9,12 +9,13 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PlayerLoginRecord>.Configure(EntityTypeBuilder<PlayerLoginRecord> builder)
         {
-            builder.ToTable("PlayerLoginRecords");
+            builder.ToTable("player_login_records");
+
             builder.HasKey(b => b.Id)
-                .IsClustered(false);
+                .HasName("pk_player_login_records");
 
             builder.Property(b => b.PlayerCode)
-                .HasColumnType(ColumnTypes.Varchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(b => b.BrandId)
@@ -25,26 +26,32 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(b => b.PlatformType)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(b => b.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(b => b.ExpiredOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.HasOne(b => b.Player)
                 .WithMany(b => b.PlayerLoginRecords)
                 .HasForeignKey(b => b.PlayerCode)
+                .HasConstraintName("fk_player_login_records_players_player_code")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(b => b.PlayerCode)
+                .HasDatabaseName("ix_player_login_records_player_code");
 
             builder.HasOne(b => b.Brand)
                 .WithMany(b => b.PlayerLoginRecords)
                 .HasForeignKey(b => b.BrandId)
+                .HasConstraintName("fk_player_login_records_brands_brand_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(b => b.BrandId)
+                .HasDatabaseName("ix_player_login_records_brand_id");
         }
     }
 }

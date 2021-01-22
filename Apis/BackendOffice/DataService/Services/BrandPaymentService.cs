@@ -183,7 +183,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             var payments = await _repository.BrandPayments.Where(q => ids.Contains(q.Id)).ToListAsync();
             payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
-            await _repository.BulkInsertOrUpdateAsync(payments.ToArray());
+            await _repository.BulkUpdateAsync(payments.ToArray());
         }
 
         Task IBrandPaymentService.ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)

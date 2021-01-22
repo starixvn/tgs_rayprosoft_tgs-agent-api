@@ -10,35 +10,32 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<GameProvider>.Configure(EntityTypeBuilder<GameProvider> builder)
         {
-            builder.ToTable("GameProviders", "dbo");
-            BaseConfigureProperties<GameProvider, Guid>(builder, true);
+            builder.ToTable("game_providers");
 
-            builder.Property(p => p.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+            ConfigureBaseProperties<GameProvider, Guid>(builder, "pk_game_providers");
 
-            builder.Property(p => p.Status)
+            builder.Property(e => e.Description)
+                .HasMaxLength(128);
+
+            builder.Property(e => e.Status)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
-            builder.Property(p => p.PlaceBetTimeout)
-                .HasColumnType(ColumnTypes.SmallInt)
-                .HasDefaultValue(0)
-                .IsRequired();
-
-            builder.Property(p => p.SettleBetTimeout)
+            builder.Property(e => e.PlaceBetTimeout)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .HasDefaultValue(0)
                 .IsRequired();
 
-            builder.Property(p => p.AutoCloseRound)
+            builder.Property(e => e.SettleBetTimeout)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .HasDefaultValue(0)
                 .IsRequired();
 
-            builder.Property(p => p.AllowKickPlayer)
+            builder.Property(e => e.AutoCloseRound)
                 .IsRequired();
 
-            builder.HasMany(p => p.Brands)
-                .WithOne(lgpc => lgpc.GameProvider)
-                .HasForeignKey(lgpc => lgpc.GameProviderId);
+            builder.Property(e => e.AllowKickPlayer)
+                .IsRequired();
         }
     }
 }

@@ -34,6 +34,8 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                 GameProviderBetLimit = new GameProviderBetLimitModel
                 {
                     Id = gameProviderBetLimit.Id,
+                    GameProviderId = gameProviderBetLimit.GameProviderId,
+                    CurrencyCode = gameProviderBetLimit.CurrencyCode,
                     MinBet = gameProviderBetLimit.MinBet,
                     MaxBet = gameProviderBetLimit.MaxBet,
                     MaxBetPerMatch = gameProviderBetLimit.MaxBetPerMatch,

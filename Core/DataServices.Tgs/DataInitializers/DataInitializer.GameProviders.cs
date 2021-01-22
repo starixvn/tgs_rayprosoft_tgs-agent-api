@@ -16,6 +16,32 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     partial class DataInitializer
     {
+        #region Private Method
+
+        private static IGame[] LoadGamesFromCsv(string gameProviderCode)
+        {
+            var type = typeof(DataInitializer);
+            var @namespace = type.Namespace;
+
+            if (gameProviderCode.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            var csvName = $"{@namespace}.Games.{gameProviderCode}.csv";
+            using var stream = type.Assembly.GetManifestResourceStream(csvName);
+            if (stream == null)
+            {
+                throw new FileNotFoundException($"Cannot find game setting file of '{gameProviderCode}'");
+            }
+
+            using var reader = new StreamReader(stream);
+            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            return csv.GetRecords<Game>().ToList().Cast<IGame>().ToArray();
+        }
+
+        #endregion Private Method
+
         #region Interfaces and Base Models
 
         internal interface IGameProvider
@@ -31,10 +57,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             bool SupportTestPlayer => true;
             bool AllowKickPlayer => false;
             short UniqueId { get; }
-            PluggableConfigurationBase GetConfiguration();
             GameProviderBetLimit[] BetLimits { get; }
             Dictionary<string, string> SportTypes => new();
             Dictionary<string, string> MarketTypes => new();
+            PluggableConfigurationBase GetConfiguration();
         }
 
         internal interface IGameProviderConfiguration
@@ -87,8 +113,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         internal record Game : IGame
         {
-            private readonly string _code;
             private readonly string _availableCurrencies;
+            private readonly string _code;
 
             [Name("Name")]
             public string Name { get; init; }
@@ -97,12 +123,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             public string Code
             {
                 get => _code;
-                init => _code = value.IsNotNullOrEmpty() ?
-                        value :
-                        Name.ReplaceApostropheByEmpty()
-                            .Replace("&", "And")
-                            .Replace("-", "_")
-                            .Replace("+", "Plus");
+                init => _code = value.IsNotNullOrEmpty()
+                    ? value
+                    : Name.ReplaceApostropheByEmpty()
+                        .Replace("&", "And")
+                        .Replace("-", "_")
+                        .Replace("+", "Plus");
             }
 
             [Name("ExternalId")]
@@ -141,31 +167,5 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         }
 
         #endregion Interfaces and Base Models
-
-        #region Private Method
-
-        private static IGame[] LoadGamesFromCsv(string gameProviderCode)
-        {
-            var type = typeof(DataInitializer);
-            var @namespace = type.Namespace;
-
-            if (gameProviderCode.IsNullOrEmpty())
-            {
-                return null;
-            }
-
-            var csvName = $"{@namespace}.Games.{gameProviderCode}.csv";
-            using var stream = type.Assembly.GetManifestResourceStream(csvName);
-            if (stream == null)
-            {
-                throw new FileNotFoundException($"Cannot find game setting file of '{gameProviderCode}'");
-            }
-
-            using var reader = new StreamReader(stream);
-            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-            return csv.GetRecords<Game>().ToList().Cast<IGame>().ToArray();
-        }
-
-        #endregion Private Method
     }
 }

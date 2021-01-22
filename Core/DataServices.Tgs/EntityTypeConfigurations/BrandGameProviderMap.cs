@@ -9,46 +9,74 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<BrandGameProvider>.Configure(EntityTypeBuilder<BrandGameProvider> builder)
         {
-            builder.ToTable("BrandGameProviders", "dbo");
+            builder.ToTable("brand_game_providers");
 
-            builder.HasKey(bgp => bgp.Id);
+            builder.HasKey(e => e.Id)
+                .HasName("pk_brand_game_providers");
 
-            builder.HasIndex(p => new {p.BrandId, p.GameProviderId})
-                .IsUnique();
-
-            builder.Property(bgp => bgp.Status)
+            builder.Property(e => e.Status)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
-            builder.Property(c => c.DesktopQueryString)
-                .HasColumnType(ColumnTypes.Nvarchar(512))
+            builder.Property(e => e.DesktopQueryString)
+                .HasMaxLength(512)
                 .HasDefaultValue(string.Empty)
                 .IsRequired();
 
-            builder.Property(c => c.MobileQueryString)
-                .HasColumnType(ColumnTypes.Nvarchar(512))
+            builder.Property(e => e.MobileQueryString)
+                .HasMaxLength(512)
                 .HasDefaultValue(string.Empty)
                 .IsRequired();
 
-            builder.Property(c => c.DefaultLanguageCode)
-                .HasColumnType(ColumnTypes.Nvarchar(6))
+            builder.Property(e => e.DefaultLanguageCode)
+                .HasMaxLength(6)
                 .IsRequired();
 
             builder
-                .HasOne(bgp => bgp.GameProvider)
-                .WithMany(gp => gp.Brands)
-                .HasForeignKey(bgp => bgp.GameProviderId)
+                .HasOne(e => e.GameProvider)
+                .WithMany(e => e.Brands)
+                .HasForeignKey(e => e.GameProviderId)
+                .HasConstraintName("fk_brand_game_providers_game_providers_game_provider_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_brand_game_providers_game_provider_id");
 
             builder
-                .HasOne(bgp => bgp.Brand)
-                .WithMany(b => b.GameProviders)
-                .HasForeignKey(bgp => bgp.BrandId)
+                .HasOne(e => e.Brand)
+                .WithMany(e => e.GameProviders)
+                .HasForeignKey(e => e.BrandId)
+                .HasConstraintName("fk_brand_game_providers_brands_brand_id");
+
+            builder.HasIndex(e => new {e.BrandId, e.GameProviderId})
+                .IsUnique()
+                .HasDatabaseName("ux_brand_game_providers_brand_id_game_provider_id")
+                .IncludeProperties(e => new
+                {
+                    e.GameProviderConfigurationId,
+                    e.Status,
+                    e.DefaultLanguageCode,
+                    e.DesktopQueryString,
+                    e.MobileQueryString
+                });
+
+            builder.HasOne(e => e.GameProviderConfiguration)
+                .WithMany(e => e.BrandGameProviders)
+                .HasForeignKey(e => e.GameProviderConfigurationId)
+                .HasConstraintName(
+                    "fk_brand_game_providers_game_provider_configurations_game_provider_configuration_id")
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(bgp => bgp.GameProviderConfiguration)
-                .WithMany(gpc => gpc.BrandGameProviders)
-                .HasForeignKey(bgp => bgp.GameProviderConfigurationId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(e => e.GameProviderConfigurationId)
+                .HasDatabaseName("ix_brand_game_providers_game_provider_configuration_id");
+
+            builder.HasOne(e => e.DefaultLanguage)
+                .WithMany(e => e.BrandGameProviders)
+                .HasForeignKey(e => e.DefaultLanguageCode)
+                .HasConstraintName("fk_brand_game_providers_languages_default_language_code");
+
+            builder.HasIndex(e => e.DefaultLanguageCode)
+                .HasDatabaseName("ix_brand_game_providers_default_language_code");
         }
     }
 }

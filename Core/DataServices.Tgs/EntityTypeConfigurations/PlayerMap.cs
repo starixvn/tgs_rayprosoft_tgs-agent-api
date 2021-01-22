@@ -9,111 +9,111 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Player>.Configure(EntityTypeBuilder<Player> builder)
         {
-            builder.ToTable("Players", "dbo");
-            builder.HasKey(bc => bc.PlayerCode);
-            builder.HasAlternateKey(p => new { p.BrandId, p.Username });
+            builder.ToTable("players");
+
+            builder.HasKey(bc => bc.PlayerCode)
+                .HasName("pk_player_code");
 
             builder.Property(c => c.PlayerCode)
-                .HasColumnType(ColumnTypes.Varchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.ParentPlayerCode)
-                .HasColumnType(ColumnTypes.Varchar(16))
-                .IsRequired(false);
+                .HasMaxLength(16);
 
             builder.Property(c => c.Username)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.RealName)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired(false);
+                .HasMaxLength(32);
+
+            builder.Property(c => c.Status)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
+            builder.Property(c => c.Type)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
 
             builder.Property(c => c.InvitationCode)
-                .HasColumnType(ColumnTypes.Nvarchar(6))
+                .HasMaxLength(6)
                 .IsRequired();
 
             builder.Property(c => c.ParentInvitationCode)
-                .HasColumnType(ColumnTypes.Nvarchar(6))
-                .IsRequired(false);
+                .HasMaxLength(6);
 
             builder.Property(c => c.Password)
-                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.Salt)
-                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.WithdrawPassword)
-                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.WithdrawSalt)
-                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.BetLimitId)
-                .HasColumnType(ColumnTypes.Int)
                 .IsRequired();
 
             builder.Property(c => c.DefaultWalletCurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.RegisteredOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.LastActiveOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
-            builder.Property(c => c.VipId)
-                .IsRequired(false);
+            builder.Property(c => c.VipId);
 
             builder.Property(c => c.Phone)
-                .HasColumnType(ColumnTypes.Nvarchar(32));
+                .HasMaxLength(32);
 
             builder.Property(c => c.Email)
-                .HasColumnType(ColumnTypes.Nvarchar(64));
+                .HasMaxLength(64);
 
             builder.Property(c => c.QQ)
-                .HasColumnType(ColumnTypes.Nvarchar(64));
+                .HasMaxLength(64);
 
             builder.Property(c => c.Wechat)
-                .HasColumnType(ColumnTypes.Nvarchar(64));
+                .HasMaxLength(64);
 
             builder.Property(c => c.AccumulatedDeposit)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .HasDefaultValue(0)
                 .IsRequired();
 
-            builder.HasMany(p => p.Banks)
-                .WithOne(p => p.Player)
-                .HasForeignKey(p => p.PlayerCode);
+            builder.HasOne(p => p.Brand)
+                .WithMany(p => p.Players)
+                .HasForeignKey(p => p.BrandId)
+                .HasConstraintName("fk_players_brands_brand_id");
 
             builder.HasOne(p => p.Vip)
                 .WithMany(p => p.Players)
-                .HasForeignKey(p => p.VipId);
+                .HasForeignKey(p => p.VipId)
+                .HasConstraintName("fk_players_vip_levels_vip_id");
+
+            builder.HasIndex(p => p.VipId)
+                .HasDatabaseName("ix_players_vip_id");
 
             builder.HasOne(p => p.ParentPlayer)
                 .WithMany(p => p.SubPlayers)
                 .HasForeignKey(p => p.ParentPlayerCode)
+                .HasConstraintName("fk_players_parent_player_code")
                 .IsRequired(false);
 
-            builder.HasMany(p => p.SubPlayers)
-                .WithOne(p => p.ParentPlayer)
-                .HasForeignKey(p => p.ParentPlayerCode);
-
-            builder.HasMany(p => p.Letters)
-                .WithOne(p => p.Player)
-                .HasForeignKey(p => p.PlayerCode);
-
-            builder.HasOne(e => e.BetLimit)
-                .WithMany(e => e.Players)
-                .HasForeignKey(e => e.BetLimitId)
+            builder.HasOne(p => p.BetLimit)
+                .WithMany(p => p.Players)
+                .HasForeignKey(p => p.BetLimitId)
+                .HasConstraintName("fk_players_bet_limits_bet_limit_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(p => p.BetLimitId)
+                .HasDatabaseName("ix_players_bet_limit_id");
         }
     }
 }

@@ -88,7 +88,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new RedTigerConfiguration
             {
-                ServiceEndpointUrl = new Uri("https://localhost:62331")
+                ServiceEndpointUrl = new("https://localhost:62331")
             };
         }
 

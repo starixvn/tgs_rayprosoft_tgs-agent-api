@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,32 +8,49 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PaymentChannel>.Configure(EntityTypeBuilder<PaymentChannel> builder)
         {
-            builder.ToTable("PaymentChannels", "dbo");
+            builder.ToTable("payment_channels");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(c => c.Id)
+                .HasName("pk_payment_channels");
 
             builder.Property(c => c.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+                .HasMaxLength(128);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.HasOne(c => c.Payment)
+                .WithMany(c => c.PaymentChannels)
+                .HasForeignKey(c => c.PaymentId)
+                .HasConstraintName("fk_payment_channels_payments_payment_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => c.PaymentId)
+                .HasDatabaseName("ix_payment_channels_payment_id");
+
+            builder.HasOne(c => c.PaymentMethod)
+                .WithMany(c => c.PaymentChannels)
+                .HasForeignKey(c => c.PaymentMethodId)
+                .HasConstraintName("fk_payment_channels_payment_methods_payment_method_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => c.PaymentMethodId)
+                .HasDatabaseName("ix_payment_channels_payment_method_id");
         }
     }
 }

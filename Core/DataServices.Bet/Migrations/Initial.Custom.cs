@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Bet.Migrations
             #region Store Procedure
 
             var assembly = Assembly.GetExecutingAssembly();
-            
+
             // TYPE
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.TypeSqlFormat, "IntValuesType"));
