@@ -241,7 +241,8 @@ const useColumns = ({
       Header: <Trans zh="序" en="Order" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -276,7 +277,8 @@ const useColumns = ({
       Header: <Trans zh="游戏ID" en="ID" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -287,7 +289,8 @@ const useColumns = ({
       Header: <Trans zh="厂商名称" en="Game Provider Name" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -309,7 +312,8 @@ const useColumns = ({
       Header: <Trans zh="游戏类型" en="Game Type" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -327,7 +331,8 @@ const useColumns = ({
       Header: <Trans zh="支持设备" en="Platform" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -346,7 +351,8 @@ const useColumns = ({
       Header: <Trans zh="热门游戏" en="Hot" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -371,7 +377,8 @@ const useColumns = ({
       Header: <Trans zh="最新游戏" en="New" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -396,7 +403,8 @@ const useColumns = ({
       Header: <Trans zh="推荐游戏" en="Recommend" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
@@ -421,7 +429,8 @@ const useColumns = ({
       Header: <Trans zh="状态" en="Status" />,
       disableSortBy: true,
       headCell: {
-        textAlign: "center"
+        textAlign: "center",
+        whiteSpace: "nowrap"
       },
       cell: {
         textAlign: "center"
