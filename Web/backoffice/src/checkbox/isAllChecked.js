@@ -8,6 +8,6 @@ export const isAllChecked = (a = {}) => {
 export const isAllPropChecked = (a = {}) => {
   let list = Object.values(a)
   return list.length > 0
-    ? list.find(({ checked }) => checked === false) ?? true
+    ? !list.find(({ checked }) => checked === false) ?? true
     : false
 }

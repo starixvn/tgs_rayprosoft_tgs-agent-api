@@ -33,7 +33,7 @@ import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import Textarea from "../../textarea"
 import { BrandLanguageCheckboxGroupTable } from "./BrandLanguageCheckboxGroup"
-import { BrandGameProviderCheckboxGroupTable } from "./GameProviderCheckboxGroup"
+import { BrandGameProviderCheckboxGroupTable } from "./BrandGameProviderCheckboxGroup"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()

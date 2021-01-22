@@ -7,10 +7,8 @@ import { useFormContext, useFieldArray } from "react-hook-form"
 import { isAllChecked } from "../checkbox/isAllChecked"
 import { Trans } from "../i18n"
 
-const DefaultName = "betLimitIds"
-
 export const BetLimitCheckboxGroup = ({
-  name = DefaultName,
+  name = "betLimitIds",
   arrayFieldName = "betLimits",
   width = "100%",
   disabled,
@@ -18,89 +16,86 @@ export const BetLimitCheckboxGroup = ({
 }) => {
   let { control, setValue, watch } = useFormContext()
   let betLimits = watch(arrayFieldName)
-  const { fields: betLimitFields } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: arrayFieldName,
     keyName: "_id"
   })
 
-  let betLimitIds = watch(name) ?? {}
-  let allChecked = isAllChecked(betLimitIds)
-  return (
-    <Set orientation="vertical" width={width} {...props}>
-      <Table width={width}>
-        <Table.Head>
-          <Table.Row>
-            <Table.HeadCell>
-              <Checkbox
-                checked={allChecked}
-                onChange={(event) => {
-                  let checked = event.target.checked
-                  betLimitFields.forEach((field, index) => {
-                    setValue(fieldName(name, field), checked)
-                  })
-                }}
+  let selection = watch(name) ?? {}
+  let allChecked = isAllChecked(selection)
+
+  return useMemo(() => {
+    return (
+      <Set orientation="vertical" width={width} {...props}>
+        <Table width={width}>
+          <Table.Head>
+            <Table.Row>
+              <Table.HeadCell>
+                <Checkbox
+                  checked={allChecked}
+                  onChange={(event) => {
+                    let checked = event.target.checked
+                    fields.forEach((field, index) => {
+                      setValue(fieldName(name, field), checked)
+                    })
+                  }}
+                  disabled={disabled}
+                />
+              </Table.HeadCell>
+              <Table.HeadCell textAlign="center">
+                <Trans zh="币种" en="Currency" />
+              </Table.HeadCell>
+              <Table.HeadCell textAlign="center">
+                <Trans zh="最低投注" en="Min Bet" />
+              </Table.HeadCell>
+              <Table.HeadCell textAlign="center">
+                <Trans zh="最高投注" en="Max Bet" />
+              </Table.HeadCell>
+              <Table.HeadCell textAlign="center">
+                <Trans zh="单场最高投注" en="Max Bet Per Match" />
+              </Table.HeadCell>
+            </Table.Row>
+          </Table.Head>
+          <Table.Body>
+            {fields.map((betLimitField) => (
+              <Row
+                key={betLimitField._id}
+                name={name}
                 disabled={disabled}
+                field={betLimitField}
               />
-            </Table.HeadCell>
-            <Table.HeadCell>
-              <Trans zh="币种" en="Currency" />
-            </Table.HeadCell>
-            <Table.HeadCell>
-              <Trans zh="最低投注" en="Min Bet" />
-            </Table.HeadCell>
-            <Table.HeadCell>
-              <Trans zh="最高投注" en="Max Bet" />
-            </Table.HeadCell>
-            <Table.HeadCell>
-              <Trans zh="单场最高投注" en="Max Bet Per Match" />
-            </Table.HeadCell>
-          </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {betLimitFields.map((betLimitField) => (
-            <BetLimitRow
-              key={betLimitField._id}
-              name={name}
-              disabled={disabled}
-              field={betLimitField}
-            />
-          ))}
-        </Table.Body>
-      </Table>
-    </Set>
-  )
+            ))}
+          </Table.Body>
+        </Table>
+      </Set>
+    )
+  }, [JSON.stringify(selection), JSON.stringify(fields)])
 }
 
 const fieldName = (name = DefaultName, checkboxField) =>
   `${name}.${checkboxField.id}`
 
-const BetLimitRow = ({ name, disabled, field, ...props }) => {
-  let {
-    id,
-    currencyCode,
-    currencyName,
-    minBet,
-    maxBet,
-    maxBetPerMatch,
-    checked
-  } = field
+const Row = ({ name, disabled, field, ...props }) => {
   let formContext = useFormContext()
-  return (
-    <Table.Row>
-      <Table.Cell>
-        <Checkbox
-          key={field._id}
-          name={fieldName(name, field)}
-          checkboxRef={formContext?.register?.()}
-          defaultChecked={checked}
-          disabled={disabled}
-        />
-      </Table.Cell>
-      <Table.Cell>{currencyCode}</Table.Cell>
-      <Table.Cell>{minBet}</Table.Cell>
-      <Table.Cell>{maxBet}</Table.Cell>
-      <Table.Cell>{maxBetPerMatch}</Table.Cell>
-    </Table.Row>
-  )
+
+  return useMemo(() => {
+    return (
+      <Table.Row>
+        <Table.Cell>
+          <Checkbox
+            key={field._id}
+            name={fieldName(name, field)}
+            checkboxRef={formContext?.register?.()}
+            defaultChecked={field?.checked}
+            disabled={disabled}
+          />
+        </Table.Cell>
+        <Table.Cell textAlign="center">{field?.currencyCode}</Table.Cell>
+        <Table.Cell textAlign="center">{field?.minBet}</Table.Cell>
+        <Table.Cell textAlign="center">{field?.maxBet}</Table.Cell>
+        <Table.Cell textAlign="center">{field?.maxBetPerMatch}</Table.Cell>
+      </Table.Row>
+    )
+  }, [field])
 }

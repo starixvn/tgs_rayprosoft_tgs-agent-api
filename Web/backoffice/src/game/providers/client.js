@@ -17,7 +17,11 @@ export const useGameProviderList = (searchParams) => {
 
 export const useGameProvider = (id) => {
   let url = id ? `${API}/${id}` : undefined
-  return useGet(url)
+  let { data, ...rest } = useGet(url)
+  return {
+    data: data?.gameProvider,
+    ...rest
+  }
 }
 
 export const useAddGameProvider = (data) => {

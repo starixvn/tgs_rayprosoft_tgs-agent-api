@@ -22,8 +22,15 @@ import Input, { InputField } from "../../input/Input"
 import Select, { SelectField } from "../../select/Select"
 import { Switch, SwitchField } from "../../switch/Switch"
 import Backdrop from "../../dialog/Backdrop"
-import { faCog, faDesktop, faMobile } from "@fortawesome/free-solid-svg-icons"
+import {
+  faCog,
+  faDesktop,
+  faMobile,
+  faLanguage
+} from "@fortawesome/free-solid-svg-icons"
 import { ConfirmText } from "../../button/ActionButtons"
+import { GameProviderConfigSelect } from "../../game/providers/configs/GameProviderConfigSelect"
+import { GameProviderLanguageSelect } from "../../game/providers/GameProviderLanguageSelect"
 
 export const BrandGameProviderCheckboxGroupTable = ({
   name = "brandGameProviders",
@@ -32,10 +39,6 @@ export const BrandGameProviderCheckboxGroupTable = ({
   disabled = false,
   ...props
 }) => {
-  let configDialog = useModalState()
-  let desktopQueryStringDialog = useModalState()
-  let mobileQueryStringDialog = useModalState()
-
   let { control, setValue, watch, register } = useFormContext()
   let gameProviders = watch(fieldArrayName)
   const { fields } = useFieldArray({
@@ -47,7 +50,6 @@ export const BrandGameProviderCheckboxGroupTable = ({
   let selection = watch(name) ?? {}
   let allChecked = isAllPropChecked(selection)
 
-  console.log("brandGameProviders", watch("brandGameProviders"))
   return (
     <Set orientation="vertical" width={width}>
       <Table width={width}>
@@ -80,9 +82,6 @@ export const BrandGameProviderCheckboxGroupTable = ({
               name={name}
               disabled={disabled}
               field={field}
-              configDialog={configDialog}
-              desktopQueryStringDialog={desktopQueryStringDialog}
-              mobileQueryStringDialog={mobileQueryStringDialog}
             />
           ))}
         </Table.Body>
@@ -91,16 +90,14 @@ export const BrandGameProviderCheckboxGroupTable = ({
   )
 }
 
-const Row = ({
-  name,
-  disabled,
-  field,
-  configDialog,
-  desktopQueryStringDialog,
-  mobileQueryStringDialog
-}) => {
+const Row = ({ name, disabled, field }) => {
   let formContext = useFormContext()
   let { register, unregister, setValue, control } = formContext
+
+  let configDialog = useModalState()
+  let defaultLangDialog = useModalState()
+  let desktopQueryStringDialog = useModalState()
+  let mobileQueryStringDialog = useModalState()
   return (
     <Table.Row>
       <Table.Cell textAlign="center">
@@ -132,8 +129,34 @@ const Row = ({
                       gameProvider={field}
                       configuration={value}
                       dialog={configDialog}
-                      onChange={(data) => {
-                        setValue(configName, data)
+                      onChange={(configId) => {
+                        setValue(configName, configId)
+                      }}
+                    />
+                  )}
+                </>
+              )
+            }}
+          />
+          <Controller
+            control={control}
+            name={langFieldName(name, field)}
+            render={(
+              { onChange, onBlur, value, name: fieldName, ref },
+              { invalid, isTouched, isDirty }
+            ) => {
+              return (
+                <>
+                  <Disclosure {...defaultLangDialog}>
+                    <Icon icon={faLanguage} type="font-awesome" />
+                  </Disclosure>
+                  {defaultLangDialog.visible && (
+                    <DefaultLangDialog
+                      value={value}
+                      gameProvider={field}
+                      dialog={defaultLangDialog}
+                      onChange={(code) => {
+                        setValue(fieldName, code)
                       }}
                     />
                   )}
@@ -153,14 +176,16 @@ const Row = ({
                   <Disclosure {...desktopQueryStringDialog}>
                     <Icon icon={faDesktop} type="font-awesome" />
                   </Disclosure>
-                  <QueryStringDialog
-                    type={QueryStringType.Desktop}
-                    value={value}
-                    dialog={desktopQueryStringDialog}
-                    onChange={(queryString) => {
-                      setValue(fieldName, queryString)
-                    }}
-                  />
+                  {desktopQueryStringDialog.visible && (
+                    <QueryStringDialog
+                      type={QueryStringType.Desktop}
+                      value={value}
+                      dialog={desktopQueryStringDialog}
+                      onChange={(queryString) => {
+                        setValue(fieldName, queryString)
+                      }}
+                    />
+                  )}
                 </>
               )
             }}
@@ -177,14 +202,16 @@ const Row = ({
                   <Disclosure {...mobileQueryStringDialog}>
                     <Icon icon={faMobile} type="font-awesome" />
                   </Disclosure>
-                  <QueryStringDialog
-                    type={QueryStringType.Mobile}
-                    value={value}
-                    dialog={mobileQueryStringDialog}
-                    onChange={(queryString) => {
-                      setValue(fieldName, queryString)
-                    }}
-                  />
+                  {mobileQueryStringDialog.visible && (
+                    <QueryStringDialog
+                      type={QueryStringType.Mobile}
+                      value={value}
+                      dialog={mobileQueryStringDialog}
+                      onChange={(queryString) => {
+                        setValue(fieldName, queryString)
+                      }}
+                    />
+                  )}
                 </>
               )
             }}
@@ -243,118 +270,57 @@ const QueryStringDialog = ({ type, value, dialog, onChange }) => {
 
 const ConfigDialog = ({ gameProvider, dialog, onChange }) => {
   let title = useTrans({
-    zh: `配置`,
-    en: `Configuration`
+    zh: `游戏商配置`,
+    en: `Game Provider Configuration`
+  })
+  let [isLoading, setLoading] = useState()
+  return (
+    <Backdrop {...dialog}>
+      <FormDialog
+        stopPropagation={true}
+        onSubmit={({ id, ...data }) => {
+          setLoading(true)
+          onChange(id)
+          dialog.hide()
+        }}
+        isLoading={isLoading}
+        submitText={<ConfirmText />}
+        dialog={dialog}
+        title={title}
+        hideBackdrop={true}
+        minWidth="max-content"
+      >
+        <GameProviderConfigSelect name="id" gameProviderId={gameProvider?.id} />
+      </FormDialog>
+    </Backdrop>
+  )
+}
+
+const DefaultLangDialog = ({ gameProvider, dialog, onChange }) => {
+  let title = useTrans({
+    zh: `游戏商预设语言`,
+    en: `Game Provider Default Language`
   })
   return (
     <Backdrop {...dialog}>
       <FormDialog
-        onSubmit={(data) => {
-          onChange(data)
+        stopPropagation={true}
+        onSubmit={({ code }) => {
+          onChange(code)
           dialog.hide()
         }}
         submitText={<ConfirmText />}
         dialog={dialog}
         title={title}
         hideBackdrop={true}
-        minWidth="500px"
+        minWidth="max-content"
       >
-        <FieldStack>
-          <NameInputField />
-          <DescriptionInputField />
-          <FieldStack orientation="horizontal">
-            <DefaultSwitchField />
-            <ConfigurationStatusSelectField />
-          </FieldStack>
-          <InputField name="clientId" label="Client Id" />
-          <InputField name="secretKey" label="Secret Key" />
-
-          <InputField name="desktopEndpoint" label="Desktop Endpoint" />
-          <InputField name="mobileEndpoint" label="Mobile Endpoint" />
-          {/* TODO: json textarea editor */}
-          <InputField name="configurationData" label="Configuration Data" />
-        </FieldStack>
+        <GameProviderLanguageSelect
+          name="code"
+          gameProviderId={gameProvider?.id}
+        />
       </FormDialog>
     </Backdrop>
-  )
-}
-
-const NameInputField = ({ name = "name", ...props }) => {
-  let label = useTrans({
-    zh: "名称",
-    en: "Name"
-  })
-
-  return <InputField name={name} label={label} {...props} />
-}
-
-const DescriptionInputField = ({ name = "description", ...props }) => {
-  let label = useTrans({
-    zh: "说明",
-    en: "Description"
-  })
-
-  return <InputField name={name} label={label} {...props} />
-}
-
-const DefaultSwitchField = ({ name = "isDefault" }) => {
-  let label = useTrans({
-    zh: "预设",
-    en: "Default"
-  })
-
-  return <SwitchField name={name} label={label} />
-}
-
-const Active = "Active"
-const ActiveTrans = {
-  zh: "开启",
-  en: "Enabled"
-}
-
-const Inactive = "Inactive"
-const InactiveTrans = {
-  zh: "关闭",
-  en: Inactive
-}
-
-const Maintenance = "Maintenance"
-const MaintenanceTrans = {
-  zh: "维护",
-  en: Maintenance
-}
-const ConfigurationStatusSelectField = ({ name = "status", ...props }) => {
-  let options = [
-    {
-      label: useTrans(ActiveTrans),
-      value: Active
-    },
-    {
-      label: useTrans(InactiveTrans),
-      value: Inactive
-    },
-    {
-      label: useTrans(MaintenanceTrans),
-      value: Maintenance
-    }
-  ]
-
-  let label = useTrans({
-    zh: "状态",
-    en: "Status"
-  })
-  let placeholder = useTrans({
-    zh: "选择状态",
-    en: "Select Status"
-  })
-  return (
-    <SelectField
-      name={name}
-      placeholder={placeholder}
-      label={label}
-      options={options}
-      {...props}
-    />
   )
 }
 
@@ -364,4 +330,6 @@ const checkedFieldName = (name, checkboxField) =>
 const queryStringFieldName = (name, field, type) =>
   `${name}.${field.id}.${type}`
 
-const configFieldName = (name, field) => `${name}.${field.id}.configuration`
+const configFieldName = (name, field) => `${name}.${field.id}.configurationId`
+
+const langFieldName = (name, field) => `${name}.${field.id}.defaultLanguageCode`
