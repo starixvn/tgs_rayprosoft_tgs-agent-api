@@ -113,74 +113,76 @@ const useSearchInputPlaceHolder = () =>
   })
 
 const useColumns = ({ mutate, items = [] }) => {
-  let columns = [
-    sequenceColumn(),
-    {
-      id: "name",
-      accessor: "name",
-      Header: "权限组名称",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      width: 400
-    },
-    {
-      id: "isRoot",
-      accessor: "isRoot",
-      Header: "根管理权限",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value: isRoot }) => {
-        return (
-          <Box alignX="center">
-            {isRoot ? <Icon icon={faCheck} type="font-awesome" /> : ""}
-          </Box>
-        )
-      }
-    }
-  ]
-
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      disableSortBy: true,
-      accessor: (row) => row,
-      Header: "操作",
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, name, isRoot } = value
 
-        return (
-          <Box alignX="center">
-            <Set>
-              <EditButton id={id} onSubmitted={mutate} />
-              <CopyButton
-                id={id}
-                name={name}
-                onSubmitted={mutate}
-                disabled={isRoot}
-              />
-              <DeleteButton id={id} name={name} onSubmitted={mutate} />
-            </Set>
-          </Box>
-        )
+  return useMemo(() => {
+    let columns = [
+      sequenceColumn(),
+      {
+        id: "name",
+        accessor: "name",
+        Header: "权限组名称",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        width: 400
+      },
+      {
+        id: "isRoot",
+        accessor: "isRoot",
+        Header: "根管理权限",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value: isRoot }) => {
+          return (
+            <Box alignX="center">
+              {isRoot ? <Icon icon={faCheck} type="font-awesome" /> : ""}
+            </Box>
+          )
+        }
       }
-    })
-  }
+    ]
 
-  return useMemo(() => columns, [JSON.stringify(items)])
+    if (hasAnyMenu) {
+      columns.push({
+        disableSortBy: true,
+        accessor: (row) => row,
+        Header: "操作",
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, name, isRoot } = value
+
+          return (
+            <Box alignX="center">
+              <Set>
+                <EditButton id={id} onSubmitted={mutate} />
+                <CopyButton
+                  id={id}
+                  name={name}
+                  onSubmitted={mutate}
+                  disabled={isRoot}
+                />
+                <DeleteButton id={id} name={name} onSubmitted={mutate} />
+              </Set>
+            </Box>
+          )
+        }
+      })
+    }
+    return columns
+  }, [JSON.stringify(items)])
 }

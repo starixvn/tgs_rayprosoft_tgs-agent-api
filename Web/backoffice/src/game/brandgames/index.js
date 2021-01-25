@@ -233,248 +233,250 @@ const useColumns = ({
   setDisplayOrder
 }) => {
   let { register, getValues } = formMethods
-
-  let columns = [
-    {
-      id: "displayOrder",
-      accessor: (record) => record,
-      Header: <Trans zh="序" en="Order" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id } = value
-        let displayOrder = displayOrders[id] ?? value.displayOrder
-        return (
-          <Input
-            name={id}
-            inputRef={register({
-              valueAsNumber: true
-            })}
-            type="number"
-            size="small"
-            min="0"
-            minLength="1"
-            width="5em"
-            defaultValue={displayOrder}
-            onChange={(event) => {
-              let displayOrder = parseInt(event.target.value)
-              if (Number.isFinite(displayOrder)) {
-                setDisplayOrder(id, displayOrder)
-              }
-            }}
-          />
-        )
-      }
-    },
-    {
-      accessor: "gameId",
-      Header: <Trans zh="游戏ID" en="ID" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "gameProviderName",
-      Header: <Trans zh="厂商名称" en="Game Provider Name" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "gameName",
-      Header: <Trans zh="游戏名称" en="Game Name" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "gameType",
-      Header: <Trans zh="游戏类型" en="Game Type" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        return (
-          <Text.Block whiteSpace="nowrap">
-            <GameTypeLabel value={value} />
-          </Text.Block>
-        )
-      }
-    },
-    {
-      accessor: "platform",
-      Header: <Trans zh="支持设备" en="Platform" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        return (
-          <Text.Block whiteSpace="nowrap">
-            <GamePlatformLabel value={value} />
-          </Text.Block>
-        )
-      }
-    },
-    {
-      id: "isHot",
-      accessor: (record) => record,
-      Header: <Trans zh="热门游戏" en="Hot" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, isHot } = value
-        return (
-          <Text.Block whiteSpace="nowrap">
-            <GameTagSwitch
-              id={id}
-              tag={GameTag.Hot}
-              checked={isHot}
-              onSubmitted={mutate}
-            />
-          </Text.Block>
-        )
-      }
-    },
-    {
-      id: "isNew",
-      accessor: (record) => record,
-      Header: <Trans zh="最新游戏" en="New" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, isNew } = value
-        return (
-          <Text.Block whiteSpace="nowrap">
-            <GameTagSwitch
-              id={id}
-              tag={GameTag.New}
-              checked={isNew}
-              onSubmitted={mutate}
-            />
-          </Text.Block>
-        )
-      }
-    },
-    {
-      id: "isRecommend",
-      accessor: (record) => record,
-      Header: <Trans zh="推荐游戏" en="Recommend" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, isRecommend } = value
-        return (
-          <Text.Block whiteSpace="nowrap">
-            <GameTagSwitch
-              id={id}
-              tag={GameTag.Recommend}
-              checked={isRecommend}
-              onSubmitted={mutate}
-            />
-          </Text.Block>
-        )
-      }
-    },
-    {
-      id: "status",
-      accessor: (record) => record,
-      Header: <Trans zh="状态" en="Status" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, status } = value
-        return (
-          <Box alignX="center">
-            <GameStatusToggleSwitch
-              id={id}
-              value={status}
-              onSubmitted={mutate}
-            />
-          </Box>
-        )
-      }
-    }
-  ]
-
-  //TODO: auth
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      accessor: (row) => {
-        return row
-      },
-      Cell: ({ value }) => {
-        return (
-          <Set orientation="vertical" alignX="center">
-            <EditButton record={value} onSubmitted={mutate} />
-          </Set>
-        )
-      }
-    })
-  }
 
-  return useMemo(() => columns, [JSON.stringify(items)])
+  return useMemo(() => {
+    let columns = [
+      {
+        id: "displayOrder",
+        accessor: (record) => record,
+        Header: <Trans zh="序" en="Order" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id } = value
+          let displayOrder = displayOrders[id] ?? value.displayOrder
+          return (
+            <Input
+              name={id}
+              inputRef={register({
+                valueAsNumber: true
+              })}
+              type="number"
+              size="small"
+              min="0"
+              minLength="1"
+              width="5em"
+              defaultValue={displayOrder}
+              onChange={(event) => {
+                let displayOrder = parseInt(event.target.value)
+                if (Number.isFinite(displayOrder)) {
+                  setDisplayOrder(id, displayOrder)
+                }
+              }}
+            />
+          )
+        }
+      },
+      {
+        accessor: "gameId",
+        Header: <Trans zh="游戏ID" en="ID" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "gameProviderName",
+        Header: <Trans zh="厂商名称" en="Game Provider Name" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "gameName",
+        Header: <Trans zh="游戏名称" en="Game Name" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "gameType",
+        Header: <Trans zh="游戏类型" en="Game Type" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Text.Block whiteSpace="nowrap">
+              <GameTypeLabel value={value} />
+            </Text.Block>
+          )
+        }
+      },
+      {
+        accessor: "platform",
+        Header: <Trans zh="支持设备" en="Platform" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Text.Block whiteSpace="nowrap">
+              <GamePlatformLabel value={value} />
+            </Text.Block>
+          )
+        }
+      },
+      {
+        id: "isHot",
+        accessor: (record) => record,
+        Header: <Trans zh="热门游戏" en="Hot" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, isHot } = value
+          return (
+            <Text.Block whiteSpace="nowrap">
+              <GameTagSwitch
+                id={id}
+                tag={GameTag.Hot}
+                checked={isHot}
+                onSubmitted={mutate}
+              />
+            </Text.Block>
+          )
+        }
+      },
+      {
+        id: "isNew",
+        accessor: (record) => record,
+        Header: <Trans zh="最新游戏" en="New" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, isNew } = value
+          return (
+            <Text.Block whiteSpace="nowrap">
+              <GameTagSwitch
+                id={id}
+                tag={GameTag.New}
+                checked={isNew}
+                onSubmitted={mutate}
+              />
+            </Text.Block>
+          )
+        }
+      },
+      {
+        id: "isRecommend",
+        accessor: (record) => record,
+        Header: <Trans zh="推荐游戏" en="Recommend" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, isRecommend } = value
+          return (
+            <Text.Block whiteSpace="nowrap">
+              <GameTagSwitch
+                id={id}
+                tag={GameTag.Recommend}
+                checked={isRecommend}
+                onSubmitted={mutate}
+              />
+            </Text.Block>
+          )
+        }
+      },
+      {
+        id: "status",
+        accessor: (record) => record,
+        Header: <Trans zh="状态" en="Status" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, status } = value
+          return (
+            <Box alignX="center">
+              <GameStatusToggleSwitch
+                id={id}
+                value={status}
+                onSubmitted={mutate}
+              />
+            </Box>
+          )
+        }
+      }
+    ]
+
+    //TODO: auth
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        accessor: (row) => {
+          return row
+        },
+        Cell: ({ value }) => {
+          return (
+            <Set orientation="vertical" alignX="center">
+              <EditButton record={value} onSubmitted={mutate} />
+            </Set>
+          )
+        }
+      })
+    }
+
+    return columns
+  }, [JSON.stringify(items)])
 }

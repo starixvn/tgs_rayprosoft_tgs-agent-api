@@ -123,102 +123,101 @@ const SearchBar = ({ code = "", name = "", search, isLoading, ...props }) => {
 }
 
 const useColumns = ({ items = [], mutate }) => {
-  let columns = [
-    {
-      accessor: "code",
-      Header: <Trans zh="游戏商代码" en="Code" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "name",
-      Header: <Trans zh="游戏商名称" en="Name" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "description",
-      Header: <Trans zh="简介" en="Description" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      id: "status",
-      accessor: (row) => row,
-      Header: <Trans zh="状态" en="Status" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        return (
-          <Box alignX="center">
-            <GameProviderStatusMenu record={value} />
-          </Box>
-        )
-      }
-    },
-    dateTimeColumn({
-      accessor: "updatedOn",
-      Header: <Trans zh="最新更新" en="Updated On" />,
-      disableSortBy: true
-    }),
-    {
-      accessor: "updatedByUsername",
-      Header: <Trans zh="更改者" en="Updated By" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    }
-  ]
-
-  //TODO: auth
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      accessor: (row) => {
-        return row
-      },
-      Cell: ({ value }) => {
-        return (
-          <Set orientation="vertical" alignX="center">
-            <EditButton record={value} onSubmitted={mutate} />
-          </Set>
-        )
-      }
-    })
-  }
 
-  return useMemo(() => columns, [JSON.stringify(items)])
+  return useMemo(() => {
+    let columns = [
+      {
+        accessor: "code",
+        Header: <Trans zh="游戏商代码" en="Code" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "name",
+        Header: <Trans zh="游戏商名称" en="Name" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "description",
+        Header: <Trans zh="简介" en="Description" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        id: "status",
+        accessor: (row) => row,
+        Header: <Trans zh="状态" en="Status" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Box alignX="center">
+              <GameProviderStatusMenu record={value} />
+            </Box>
+          )
+        }
+      },
+      dateTimeColumn({
+        accessor: "updatedOn",
+        Header: <Trans zh="最新更新" en="Updated On" />,
+        disableSortBy: true
+      }),
+      {
+        accessor: "updatedByUsername",
+        Header: <Trans zh="更改者" en="Updated By" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      }
+    ]
+
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        accessor: (row) => row,
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Set orientation="vertical" alignX="center">
+              <EditButton record={value} onSubmitted={mutate} />
+            </Set>
+          )
+        }
+      })
+    }
+    return columns
+  }, [JSON.stringify(items)])
 }
