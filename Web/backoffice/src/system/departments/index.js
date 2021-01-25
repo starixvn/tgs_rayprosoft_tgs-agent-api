@@ -77,6 +77,7 @@ const useColumns = ({ mutate, items = [] }) => {
 
     if (hasAnyMenu) {
       columns.push({
+        id: "actions",
         disableSortBy: true,
         accessor: (row) => {
           return {
@@ -84,7 +85,7 @@ const useColumns = ({ mutate, items = [] }) => {
             name: row.name
           }
         },
-        Header: "操作",
+        Header: <Trans zh="操作" en="Actions" />,
         headCell: {
           textAlign: "center"
         },

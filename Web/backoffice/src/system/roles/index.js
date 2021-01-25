@@ -97,7 +97,6 @@ const SearchBar = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={useSearchInputPlaceHolder()}
-            autocomplete="off"
           />
           <SearchButton isLoading={isLoading} />
         </Set>
@@ -121,7 +120,7 @@ const useColumns = ({ mutate, items = [] }) => {
       {
         id: "name",
         accessor: "name",
-        Header: "权限组名称",
+        Header: <Trans zh="权限组名称" en="Name" />,
         disableSortBy: true,
         headCell: {
           textAlign: "center"
@@ -134,7 +133,7 @@ const useColumns = ({ mutate, items = [] }) => {
       {
         id: "isRoot",
         accessor: "isRoot",
-        Header: "根管理权限",
+        Header: <Trans zh="根管理权限" en="Root" />,
         disableSortBy: true,
         headCell: {
           textAlign: "center"
@@ -154,9 +153,10 @@ const useColumns = ({ mutate, items = [] }) => {
 
     if (hasAnyMenu) {
       columns.push({
+        id: "actions",
         disableSortBy: true,
         accessor: (row) => row,
-        Header: "操作",
+        Header: <Trans zh="操作" en="Actions" />,
         headCell: {
           textAlign: "center"
         },

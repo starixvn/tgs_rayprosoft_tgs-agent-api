@@ -436,6 +436,7 @@ const useColumns = ({
     if (hasViewAuth || hasEditAuth) {
       columns.push({
         id: "actions",
+        accessor: (row) => row,
         disableSortBy: true,
         Header: <Trans zh="操作" en="Actions" />,
         headCell: {
@@ -443,9 +444,6 @@ const useColumns = ({
         },
         cell: {
           textAlign: "center"
-        },
-        accessor: (row) => {
-          return row
         },
         Cell: ({ value }) => {
           return (

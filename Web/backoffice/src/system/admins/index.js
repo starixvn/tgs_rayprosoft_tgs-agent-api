@@ -96,7 +96,6 @@ const SearchBar = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={useSearchInputPlaceHolder()}
-            autocomplete="off"
           />
           <SearchButton isLoading={isLoading} />
         </Set>
