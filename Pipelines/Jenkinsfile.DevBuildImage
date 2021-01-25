@@ -9,7 +9,7 @@ pipeline {
 		stage('initial') {
 			steps {
 				script {
-					sh 'docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
+					sh 'sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
 				}
 			}
 		}
@@ -28,8 +28,8 @@ pipeline {
 						println arr[i]
 						def data = arr[i].split("::")
 						
-						sh "docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} . "
-						sh "docker push ${Registry}${data[1]}:${TAG}"
+						sh "sudo docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} . "
+						sh "sudo docker push ${Registry}${data[1]}:${TAG}"
 					}					
 				}
 			}
