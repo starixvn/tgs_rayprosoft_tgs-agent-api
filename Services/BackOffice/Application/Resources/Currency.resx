@@ -106,4 +106,10 @@
   <data name="CodeExisted" xml:space="preserve">
     <value>Code existed already.</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>Code is required.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
 </root>
