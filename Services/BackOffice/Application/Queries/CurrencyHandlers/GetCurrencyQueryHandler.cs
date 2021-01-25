@@ -5,7 +5,7 @@ using TGS.Services.BackOffice.Application.Models.Currency;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.BetLimitHandlers
+namespace TGS.Services.BackOffice.Application.Queries.CurrencyHandlers
 {
     public class GetCurrencyQueryHandler : Handler<GetCurrencyRequest,
         GetCurrencyResponse>
