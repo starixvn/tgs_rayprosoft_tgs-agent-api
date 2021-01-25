@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,37 +8,39 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PaymentMethod>.Configure(EntityTypeBuilder<PaymentMethod> builder)
         {
-            builder.ToTable("PaymentMethods", "dbo");
+            builder.ToTable("payment_methods");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.Id)
+                .HasName("pk_payment_methods");
 
             builder.Property(c => c.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
-
-            builder.HasMany(p => p.PaymentChannels)
-                .WithOne(p => p.PaymentMethod)
-                .HasForeignKey(p => p.PaymentMethodId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasMaxLength(128);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.HasOne(c => c.Payment)
+                .WithMany(c => c.PaymentMethods)
+                .HasForeignKey(c => c.PaymentId)
+                .HasConstraintName("fk_payment_methods_payments_payment_id");
+
+            builder.HasIndex(c => c.PaymentId)
+                .HasDatabaseName("ix_payment_methods_payment_id");
         }
     }
 }

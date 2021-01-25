@@ -9,6 +9,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
+using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -69,6 +70,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.Games = GenerateUpdateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
+            gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await UpdateEntityAsync(gameProvider);
 
@@ -88,7 +90,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var gameProvider = new GameProvider
             {
-                Id = Guid.NewGuid(),
                 Code = request.Code,
                 Name = request.Name,
                 Status = Status.Active,
@@ -108,6 +109,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.Games = GenerateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
             gameProvider.Languages = await GenerateLanguages(gameProvider, request);
+            gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await CreateEntityAsync(gameProvider);
         }
@@ -154,6 +156,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 return new Game
                 {
                     Id = id,
+                    GameProviderId = gameProvider.Id,
                     Code = x.Code,
                     Name = x.Name,
                     Status = x.Status,
@@ -203,6 +206,28 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     request.Languages.First(c => c.CultureCode == x.CultureCode).GameProviderCultureCode
             });
             return new HashSet<GameProviderLanguage>(gameProviderLanguages);
+        }
+
+        private static HashSet<GameProviderBetLimit> GenerateBetLimits(GameProvider gameProvider,
+            GameProviderRequest request)
+        {
+            GameProviderBetLimit Expression(GameProviderBetLimitModel x)
+            {
+                return new()
+                {
+                    Id = x.Id == Guid.Empty ? Guid.NewGuid() : x.Id,
+                    GameProviderId = gameProvider.Id,
+                    CurrencyCode = x.CurrencyCode,
+                    MinBet = x.MinBet,
+                    MaxBet = x.MaxBet,
+                    MaxBetPerMatch = x.MaxBetPerMatch,
+                    ExternalSetting = x.ExternalSetting
+                };
+            }
+
+            var betLimits = request.BetLimits.Select(Expression);
+
+            return new HashSet<GameProviderBetLimit>(betLimits.ToArray());
         }
     }
 }

@@ -45,7 +45,6 @@ scriptcs_packages
 *.tlh
 *.tmp
 *.tmp_proj
-*.log
 *.vspscc
 *.vssscc
 .builds
@@ -54,6 +53,7 @@ scriptcs_packages
 *.scc
 
 !Libs/*.pdb
+!DataServices.Log/
 
 
 # Visual C++ cache files

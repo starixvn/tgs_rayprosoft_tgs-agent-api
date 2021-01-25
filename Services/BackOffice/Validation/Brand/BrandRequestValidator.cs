@@ -28,20 +28,15 @@ namespace TGS.Services.BackOffice.Validation.Brand
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.GameProviderRequired);
 
-            RuleForEach(x => x.GameProviders)
-                .SetValidator(new BrandGameProviderModelValidator())
-                .NotEmpty()
-                .WithMessage(Application.Resources.Brand.GameProviderRequired);
-
             RuleFor(x => x.CurrencyCodes)
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.CurrencyRequired);
 
             RuleForEach(x => x.CurrencyCodes)
-                .Must((m, n) => m.BrandBetLimits.FirstOrDefault(x => x.CurrencyCode == n && x.IsDefault) != null)
+                .Must((m, n) => m.BetLimits.FirstOrDefault(x => x.CurrencyCode == n && x.IsDefault) != null)
                 .WithMessage(Application.Resources.Brand.BetLimitDefaultRequired);
 
-            RuleFor(x => x.BrandCultures)
+            RuleFor(x => x.Cultures)
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.CultureRequired);
         }

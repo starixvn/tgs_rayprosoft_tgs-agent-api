@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,16 +8,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Department>.Configure(EntityTypeBuilder<Department> builder)
         {
-            builder.ToTable("Departments", "dbo");
+            builder.ToTable("departments");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.Id)
+                .HasName("pk_departments");
 
             builder.Property(c => c.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.HasMany(p => p.Users)
@@ -26,20 +26,45 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasForeignKey(p => p.DepartmentId);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.HasOne(c => c.Brands)
+                .WithMany(c => c.Departments)
+                .HasForeignKey(c => c.BrandId)
+                .HasConstraintName("fk_departments_brands_brand_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => c.BrandId)
+                .HasDatabaseName("ix_departments_brand_id");
+
+            builder.HasOne(c => c.Licensees)
+                .WithMany(c => c.Departments)
+                .HasForeignKey(c => c.LicenseeId)
+                .HasConstraintName("fk_departments_licensees_licensee_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => c.LicenseeId)
+                .HasDatabaseName("ix_departments_licensee_id");
+
+            builder.HasOne(c => c.Reseller)
+                .WithMany(c => c.Departments)
+                .HasForeignKey(c => c.ResellerId)
+                .HasConstraintName("fk_departments_resellers_reseller_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(c => c.ResellerId)
+                .HasDatabaseName("ix_departments_reseller_id");
         }
     }
 }

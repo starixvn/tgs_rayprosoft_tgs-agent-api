@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
@@ -39,7 +38,7 @@ namespace TGS.Services.Operations
         Task<Guid> GetBrandIdByClientIdAsync(string clientId);
 
         Task<Guid> GetBrandIdByApiKeyAsync(string apiKey);
-        
+
         Task<Guid> GetBrandIdByCodeAsync(string brandCode);
 
         Task<string> GetBrandSecretKeyAsync(Guid brandId);
@@ -241,9 +240,9 @@ namespace TGS.Services.Operations
             }
 
             await _cacheManager.SafeCacheHashSetAsync(type, brandId, new HashEntry[]
-                {
-                    new(currencyCode, betLimitId.Value)
-                }, TimeSpan.FromHours(2));
+            {
+                new(currencyCode, betLimitId.Value)
+            }, TimeSpan.FromHours(2));
 
             return betLimitId.Value;
         }

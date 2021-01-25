@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Services.Data;
@@ -26,13 +25,12 @@ namespace TGS.Services.Operations.Queries
         async Task<LocalizedStringResult[]> ILocalizationStringQueries.GetLocalizationByGameProviderIdAsync(
             Guid gameProviderId)
         {
-            const string spName = "usp_Localization_GetLocalizationByGameProviderId";
-            var r = await _repository.SqlQueryMultipleAsync<LocalizedStringResult>(spName, parameters: new SqlParameter
-            {
-                ParameterName = "@gameProviderId",
-                Value = gameProviderId,
-                DbType = DbType.Guid
-            });
+            const string spName = "localization_get_localization_by_game_provider_id";
+            var r = await _repository.SqlQueryMultipleAsync<LocalizedStringResult>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {":game_provider_id", gameProviderId}
+                });
 
             return r.ToArray();
         }

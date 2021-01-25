@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -43,10 +44,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request)
         {
             return _userQueries.GetQueries()
-                .Where(ResellerId != null, r => r.Role.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Role.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.Role.BrandId == BrandId)
-                .Where(request.Username, p => p.Username.Contains(request.Username))
+                .Where(ResellerId, r => r.Role.ResellerId == ResellerId)
+                .Where(LicenseeId, l => l.Role.LicenseeId == LicenseeId)
+                .Where(BrandId, l => l.Role.BrandId == BrandId)
+                .Where(request.Username, p => EF.Functions.ILike(p.Username, $"%{request.Username}%"))
                 .Select(user => new UserModel
                 {
                     Id = user.Id,

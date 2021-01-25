@@ -129,4 +129,10 @@
   <data name="CultureCodeExisted" xml:space="preserve">
     <value>文化代码已存在</value>
   </data>
+  <data name="CultureCodeRequired" xml:space="preserve">
+    <value>文化代码必填</value>
+  </data>
+  <data name="LanguageCodeRequired" xml:space="preserve">
+    <value>语系代码必填</value>
+  </data>
 </root>

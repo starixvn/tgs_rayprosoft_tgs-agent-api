@@ -28,14 +28,14 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool HasTurnoverOnTieBet { get; set; }
 
-        public bool Html5 { get; set;}
+        public bool Html5 { get; set; }
 
         /// <summary>
-        /// Currencies that the game supports, recorded by csv format
-        /// Empty for all currencies that game provider has.
+        ///     Currencies that the game supports, recorded by csv format
+        ///     Empty for all currencies that game provider has.
         /// </summary>
         public string AvailableCurrencies { get; set; }
-        
+
         public virtual ICollection<BrandGame> Brands { get; set; }
     }
 }

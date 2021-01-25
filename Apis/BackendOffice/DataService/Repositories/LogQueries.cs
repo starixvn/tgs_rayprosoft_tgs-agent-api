@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Core.DataServices.Base.Extensions;
@@ -21,15 +19,10 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             _repository = repository;
         }
 
-        IQueryable<T> ILogQueries.GetQueries<T>()
-        {
-            return _repository.Set<T>().AsQueryable();
-        }
+        IQueryable<T> ILogQueries.GetQueries<T>() => _repository.Set<T>().AsQueryable();
 
-        Task<bool> ILogQueries.ExistsAsync<T>(Expression<Func<T, bool>> predicate)
-        {
-            return _repository.Set<T>().AnyAsync(predicate);
-        }
+        Task<bool> ILogQueries.ExistsAsync<T>(Expression<Func<T, bool>> predicate) =>
+            _repository.Set<T>().AnyAsync(predicate);
 
         Task<T> ILogQueries.GetSingleAsync<T>(Expression<Func<T, bool>> predicate,
             Func<IQueryable<T>, IQueryable<T>> preQuery)
@@ -38,143 +31,61 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             return preQuery(_repository.Set<T>()).FirstOrDefaultAsync(predicate);
         }
 
-        Task<(IEnumerable<AdminLogModel>, int)> ILogQueries.GetAdminLogsAsync(AdminLogRequest request)
+        async Task<(IEnumerable<AdminLogModel>, int)> ILogQueries.GetAdminLogsAsync(AdminLogRequest request)
         {
-            const string spName = "usp_AdminLogs_GetLogs";
-            return _repository.SqlQueryByPagingAsync<AdminLogModel>(spName, parameters: new[]
-            {
-                new SqlParameter
+            const string spName = "dbo.log_get_admin_logs";
+            var results = await _repository.SqlQueryMultipleAsync<AdminLogModel>(spName,
+                parameters: new Dictionary<string, object>
                 {
-                    ParameterName = "@from",
-                    Value = request.From,
-                    DbType = DbType.DateTimeOffset
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@to",
-                    Value = request.To,
-                    DbType = DbType.DateTimeOffset
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@trackingId",
-                    Value = request.TrackingId,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@ip",
-                    Value = request.Ip,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@path",
-                    Value = request.Path,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@method",
-                    Value = request.Method,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@pageSize",
-                    Value = request.ShowAll ? int.MaxValue : request.Rows,
-                    DbType = DbType.Int32
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@pageNumber",
-                    Value = request.ShowAll ? 1 : request.Page,
-                    DbType = DbType.Int32
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@sortBy",
-                    Value = request.SortBy,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@isDesc",
-                    Value = request.IsDesc,
-                    DbType = DbType.Boolean
-                }
-            });
+                    {"_from", request.From},
+                    {"_to", request.To},
+                    {"_tracking_id", request.TrackingId},
+                    {"_ip", request.Ip},
+                    {"_path", request.Path},
+                    {"_method", request.Method},
+                    {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
+                    {"_page_number", request.ShowAll ? 1 : request.Page},
+                    {"_sort_by", request.SortBy},
+                    {"_is_desc", request.IsDesc}
+                });
+            return (results, results.Any() ? results.First().TotalCount : 0);
         }
 
-        Task<(IEnumerable<ApiLogModel>, int)> ILogQueries.GetApiLogsAsync(ApiLogRequest request)
+        async Task<(IEnumerable<ApiLogModel>, int)> ILogQueries.GetApiLogsAsync(ApiLogRequest request)
         {
-            const string spName = "usp_ApiLogs_GetLogs";
-            return _repository.SqlQueryByPagingAsync<ApiLogModel>(spName, parameters: new[]
-            {
-                new SqlParameter
+            const string spName = "dbo.log_get_api_logs";
+            var results = await _repository.SqlQueryMultipleAsync<ApiLogModel>(spName,
+                parameters: new Dictionary<string, object>
                 {
-                    ParameterName = "@from",
-                    Value = request.From,
-                    DbType = DbType.DateTimeOffset
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@to",
-                    Value = request.To,
-                    DbType = DbType.DateTimeOffset
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@trackingId",
-                    Value = request.TrackingId,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@ip",
-                    Value = request.Ip,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@path",
-                    Value = request.Path,
-                    DbType = DbType.String
-                },
-                new SqlParameter
-                {
-                    ParameterName = "@method",
-                    Value = request.Method,
-                    DbType = DbType.String
-                }
-            });
+                    {"_from", request.From},
+                    {"_to", request.To},
+                    {"_tracking_id", request.TrackingId},
+                    {"_ip", request.Ip},
+                    {"_path", request.Path},
+                    {"_method", request.Method},
+                    {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
+                    {"_page_number", request.ShowAll ? 1 : request.Page},
+                    {"_sort_by", request.SortBy},
+                    {"_is_desc", request.IsDesc}
+                });
+            return (results, results.Any() ? results.First().TotalCount : 0);
         }
 
         Task<LogDetailModel> ILogQueries.GetAdminLogAsync(Guid trackingId)
         {
-            const string spName = "usp_AdminLogs_GetLog";
-            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new[]
+            const string spName = "dbo.log_get_admin_log";
+            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new Dictionary<string, object>
             {
-                new SqlParameter
-                {
-                    ParameterName = "@trackingId",
-                    Value = trackingId,
-                    DbType = DbType.Guid
-                }
+                {"_tracking_id", trackingId}
             });
         }
 
         Task<LogDetailModel> ILogQueries.GetApiLogAsync(Guid trackingId)
         {
-            const string spName = "usp_ApiLogs_GetLog";
-            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new[]
+            const string spName = "dbo.log_get_api_log";
+            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new Dictionary<string, object>
             {
-                new SqlParameter
-                {
-                    ParameterName = "@trackingId",
-                    Value = trackingId,
-                    DbType = DbType.Guid
-                }
+                {"_tracking_id", trackingId}
             });
         }
     }

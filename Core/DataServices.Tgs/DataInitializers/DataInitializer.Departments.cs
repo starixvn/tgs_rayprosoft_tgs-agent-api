@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private const string MarketDepartment = "市場";
         private const string ProductDepartment = "產品";
 
-        private static readonly Dictionary<string, Guid> Departments = new Dictionary<string, Guid>
+        private static readonly Dictionary<string, Guid> Departments = new()
         {
             {MarketDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB")},
             {ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA")}

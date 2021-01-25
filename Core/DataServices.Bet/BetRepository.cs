@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Hosting;
+using Npgsql.Bulk;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Bet.DataInitializers;
-using TGS.Core.DataServices.Bet.EntityTypeConfigurations;
 using TGS.Core.DataServices.Bet.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.Bet
 {
@@ -31,6 +29,13 @@ namespace TGS.Core.DataServices.Bet
 
     public class BetRepository : DbContext, IBetRepository
     {
+        private readonly NpgsqlBulkUploader _uploader;
+
+        public BetRepository(DbContextOptions<BetRepository> options) : base(options)
+        {
+            _uploader = new(this);
+        }
+
         DbSet<Round> IBetRepository.Rounds { get; set; }
         DbSet<RoundDetail> IBetRepository.RoundDetails { get; set; }
         DbSet<GameAction> IBetRepository.GameActions { get; set; }
@@ -39,12 +44,7 @@ namespace TGS.Core.DataServices.Bet
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
 
-        public BetRepository(DbContextOptions<BetRepository> options) : base(options)
-        {
-
-        }
-
-        Task<bool> IBaseRepository.CanConnectionAsync() => 
+        Task<bool> IBaseRepository.CanConnectionAsync() =>
             Database.CanConnectAsync();
 
         void IBaseRepository.SetTimeoutToSeconds(int seconds)
@@ -52,30 +52,20 @@ namespace TGS.Core.DataServices.Bet
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) => 
+        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);
 
-        IDbConnection IBaseRepository.GetDbConnection() => 
+        IDbConnection IBaseRepository.GetDbConnection() =>
             Database.GetDbConnection();
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasDefaultSchema("dbo");
-
-            modelBuilder.ApplyConfiguration(new RoundMap());
-            modelBuilder.ApplyConfiguration(new RoundDetailMap());
-            modelBuilder.ApplyConfiguration(new GameActionMap());
-            modelBuilder.ApplyConfiguration(new GameActionBatchMap());
-        }
-
-        Task IBaseRepository.SaveChangesAsync() => 
+        Task IBaseRepository.SaveChangesAsync() =>
             SaveChangesAsync();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
-            this.BulkInsertAsync(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
+            _uploader.InsertAsync(entities);
 
-        Task IBaseRepository.BulkInsertOrUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig, Action<decimal> progress) => 
-            this.BulkInsertOrUpdateAsync(entities, bulkConfig, progress);
+        Task IBaseRepository.BulkUpdateAsync<T>(IEnumerable<T> entities) =>
+            _uploader.UpdateAsync(entities);
 
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
@@ -94,10 +84,16 @@ namespace TGS.Core.DataServices.Bet
             }
         }
 
-        DbSet<T> IBaseRepository.Set<T>() => 
+        DbSet<T> IBaseRepository.Set<T>() =>
             Set<T>();
 
-        EntityEntry<T> IBaseRepository.Entry<T>(T entity) => 
+        EntityEntry<T> IBaseRepository.Entry<T>(T entity) =>
             base.Entry(entity);
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema(Consts.Db.Schema);
+            modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+        }
     }
 }

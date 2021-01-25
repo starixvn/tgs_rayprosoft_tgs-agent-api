@@ -9,64 +9,71 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<User>.Configure(EntityTypeBuilder<User> builder)
         {
-            builder.ToTable("Users", "dbo");
+            builder.ToTable("users");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.Id)
+                .HasName("pk_users");
 
             builder.Property(c => c.Username)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.RoleId)
                 .IsRequired();
 
-            builder.HasOne(p => p.Role)
-                .WithMany(p => p.Users)
-                .HasForeignKey(p => p.RoleId);
-
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(30))
+                .HasMaxLength(30)
                 .IsRequired();
 
             builder.Property(c => c.TimeZone)
-                .HasColumnType(ColumnTypes.Nvarchar(256))
+                .HasMaxLength(256)
                 .IsRequired(false);
 
             builder.Property(c => c.LastLoginIp)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .HasMaxLength(128)
                 .IsRequired(false);
 
             builder.Property(c => c.Password)
-                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.Salt)
-                .HasColumnType(ColumnTypes.Varbinary(128))
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
-            builder.Property(c => c.LastLoginTime)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
-                .IsRequired(false);
+            builder.Property(c => c.LastLoginTime);
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
+
+            builder.HasOne(p => p.Role)
+                .WithMany(p => p.Users)
+                .HasForeignKey(p => p.RoleId)
+                .HasConstraintName("fk_users_roles_role_id");
+
+            builder.HasIndex(e => e.RoleId)
+                .HasDatabaseName("ix_users_role_id");
+
+            builder.HasOne(p => p.Department)
+                .WithMany(p => p.Users)
+                .HasForeignKey(p => p.DepartmentId)
+                .HasConstraintName("fk_users_departments_department_id");
+
+            builder.HasIndex(e => e.DepartmentId)
+                .HasDatabaseName("ix_users_department_id");
         }
     }
 }

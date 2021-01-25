@@ -10,27 +10,23 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Reseller>.Configure(EntityTypeBuilder<Reseller> builder)
         {
-            builder.ToTable("Resellers", "dbo");
-            BaseConfigureProperties<Reseller, Guid>(builder);
+            builder.ToTable("resellers");
+
+            ConfigureBaseProperties<Reseller, Guid>(builder, "pk_resellers");
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
             builder.Property(c => c.OperationalEmail)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+                .HasMaxLength(128);
 
             builder.Property(e => e.BusinessType)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
-
-            builder.HasMany(c => c.Departments)
-                .WithOne(c => c.Reseller)
-                .HasForeignKey(c => c.ResellerId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

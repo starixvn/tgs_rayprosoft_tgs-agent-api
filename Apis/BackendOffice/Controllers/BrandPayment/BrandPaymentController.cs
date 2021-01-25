@@ -47,9 +47,9 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 .Include(p => p.VipLevels)
                 .Where(request.TransferType, p => p.TransferType == request.TransferType)
                 .Where(request.PaymentStatus, p => p.PaymentStatus == request.PaymentStatus)
-                .Where(request.Keyword, p => p.Payment.Name.Contains(request.Keyword) ||
-                                             p.PaymentMethod.Name.Contains(request.Keyword) ||
-                                             p.PaymentChannel.Name.Contains(request.Keyword))
+                .Where(request.Keyword, p => EF.Functions.ILike(p.Payment.Name, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(p.PaymentMethod.Name, $"%{request.Keyword}%") ||
+                                             EF.Functions.ILike(p.PaymentChannel.Name, $"%{request.Keyword}%"))
                 .Select(p => new BrandPaymentModel
                 {
                     Id = p.Id,

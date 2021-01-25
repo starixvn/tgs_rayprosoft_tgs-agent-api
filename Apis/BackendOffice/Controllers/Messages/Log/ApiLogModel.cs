@@ -14,5 +14,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public int ResponseCode { get; set; }
         public int ExecutionTimeMs { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
+        public int TotalCount { get; set; }
     }
 }

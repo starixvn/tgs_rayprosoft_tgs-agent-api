@@ -8,18 +8,25 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<ResellerCurrency>.Configure(EntityTypeBuilder<ResellerCurrency> builder)
         {
-            builder.ToTable("ResellerCurrencies", "dbo");
-            builder.HasKey(bc => new { bc.ResellerId, bc.CurrencyCode });
+            builder.ToTable("reseller_currencies");
+
+            builder.HasKey(e => new {e.ResellerId, e.CurrencyCode})
+                .HasName("pk_reseller_currencies");
 
             builder
-                .HasOne(bc => bc.Reseller)
-                .WithMany(c => c.Currencies)
-                .HasForeignKey(bc => bc.ResellerId);
+                .HasOne(e => e.Reseller)
+                .WithMany(e => e.Currencies)
+                .HasForeignKey(e => e.ResellerId)
+                .HasConstraintName("fk_reseller_currencies_resellers_reseller_id");
 
             builder
-                .HasOne(bc => bc.Currency)
-                .WithMany(c => c.ResellerCurrencies)
-                .HasForeignKey(bc => bc.CurrencyCode);
+                .HasOne(e => e.Currency)
+                .WithMany(e => e.ResellerCurrencies)
+                .HasForeignKey(e => e.CurrencyCode)
+                .HasConstraintName("fk_reseller_currencies_currencies_currency_code");
+
+            builder.HasIndex(e => e.CurrencyCode)
+                .HasDatabaseName("ix_reseller_currencies_currency_code");
         }
     }
 }

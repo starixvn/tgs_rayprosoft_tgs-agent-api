@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataServices.Bet\DataServices.Bet.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
     <ProjectReference Include="..\Tests.ApiClients\Tests.ApiClients.csproj" />
     <ProjectReference Include="..\TestsCommon\TestsCommon.csproj" />

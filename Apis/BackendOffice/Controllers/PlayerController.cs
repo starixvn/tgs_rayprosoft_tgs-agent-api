@@ -52,7 +52,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _queries.GetQueries()
                 .Where(request.Status, p => p.Status == request.Status)
                 .Where(request.VipId, p => p.VipId == request.VipId)
-                .Where(request.Username, p => p.Username.Contains(request.Username))
+                .Where(request.Username, p => EF.Functions.ILike(p.Username, $"%{request.Username}%"))
                 .Select(p => new PlayersModel
                 {
                     PlayerCode = p.PlayerCode,

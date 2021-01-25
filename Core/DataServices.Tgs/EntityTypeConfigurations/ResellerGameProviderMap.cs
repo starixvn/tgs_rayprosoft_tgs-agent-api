@@ -8,19 +8,25 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<ResellerGameProvider>.Configure(EntityTypeBuilder<ResellerGameProvider> builder)
         {
-            builder.ToTable("ResellerGameProviders", "dbo");
+            builder.ToTable("reseller_game_providers");
 
-            builder.HasKey(rgp => new { rgp.ResellerId, rgp.GameProviderId });
-
-            builder
-                .HasOne(rgp => rgp.GameProvider)
-                .WithMany(gp => gp.Resellers)
-                .HasForeignKey(bgp => bgp.GameProviderId);
+            builder.HasKey(e => new {e.ResellerId, e.GameProviderId})
+                .HasName("pk_reseller_game_providers");
 
             builder
-                .HasOne(rgp => rgp.Reseller)
-                .WithMany(r => r.GameProviders)
-                .HasForeignKey(rgp => rgp.ResellerId);
+                .HasOne(e => e.GameProvider)
+                .WithMany(e => e.Resellers)
+                .HasForeignKey(e => e.GameProviderId)
+                .HasConstraintName("fk_reseller_game_providers_game_providers_game_provider_id");
+
+            builder.HasIndex(e => e.GameProviderId)
+                .HasDatabaseName("ix_reseller_game_providers_game_provider_id");
+
+            builder
+                .HasOne(e => e.Reseller)
+                .WithMany(e => e.GameProviders)
+                .HasForeignKey(e => e.ResellerId)
+                .HasConstraintName("fk_reseller_game_providers_game_resellers_reseller_id");
         }
     }
 }

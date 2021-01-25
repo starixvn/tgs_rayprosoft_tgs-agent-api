@@ -9,49 +9,53 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Announcement>.Configure(EntityTypeBuilder<Announcement> builder)
         {
-            builder.ToTable("Announcements", "dbo");
-            builder.HasKey(c => c.Id);
+            builder.ToTable("announcements");
+
+            builder.HasKey(c => c.Id)
+                .HasName("pk_announcements");
 
             builder.Property(c => c.Subject)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
             builder.Property(c => c.Content)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
+                .HasMaxLength(4000);
 
             builder.Property(c => c.Remarks)
-                .HasColumnType(ColumnTypes.Nvarchar(512));
+                .HasMaxLength(512);
 
             builder.Property(c => c.DisplayOrder)
                 .HasColumnType(ColumnTypes.SmallInt);
 
             builder.Property(c => c.From)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.To)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.VerifiedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
-                .IsRequired(false);
+                .HasMaxLength(32);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
+            builder.HasOne(c => c.Brand)
+                .WithMany(c => c.Announcements)
+                .HasForeignKey(c => c.BrandId)
+                .HasConstraintName("fk_announcements_brands_brand_id");
+
+            builder.HasIndex(c => c.BrandId)
+                .HasDatabaseName("ix_announcements_brand_id");
         }
     }
 }

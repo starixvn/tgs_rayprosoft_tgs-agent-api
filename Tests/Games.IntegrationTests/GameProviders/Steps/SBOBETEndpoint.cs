@@ -13,8 +13,6 @@ using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
 using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
-using TGS.Core.DataServices.Bet;
-using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -38,8 +36,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "SBOBET")]
     public sealed class SBOBETEndpoint : BaseGameEndpoint
     {
-        private readonly ServiceProvider _serviceProvider;
         private const string GameProviderCode = Consts.GameProvider.SBOBET;
+        private readonly ServiceProvider _serviceProvider;
 
         public SBOBETEndpoint(ScenarioContext context)
             : base(context)
@@ -55,7 +53,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             services.AddSingleton<IConfiguration>(configuration);
 
             services.AddTgsRepository(configuration, "Tgs");
-            services.AddBetRepository(configuration, "Bet");
 
             services.AddJson()
                 .AddNats(configuration)
@@ -66,17 +63,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var apiUrlSection = configuration.GetSection("ApiUrls");
             services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
-                c.BaseAddress = new Uri(apiUrlSection.GetValue<string>("Operator")));
+                c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
 
             services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
-                c.BaseAddress = new Uri(apiUrlSection.GetValue<string>("Tgs-SBO")));
+                c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
 
             _serviceProvider = services.BuildServiceProvider();
         }
 
-        [Given(@"player ""(.*)"" of brand ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode);
+        [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
+        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode, 
+            string currencyCode, PlatformType platformType) =>
+            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
         public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
@@ -84,9 +82,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var playerCode = await
                 (from p in db.Players
-                    join b in db.Brands on p.BrandId equals b.Id
-                    where p.Username == username && b.Code == brandCode
-                    select p.PlayerCode).AsNoTracking().FirstAsync();
+                 join b in db.Brands on p.BrandId equals b.Id
+                 where p.Username == username && b.Code == brandCode
+                 select p.PlayerCode).AsNoTracking().FirstAsync();
 
             await DeauthorizePlayerAsync(_serviceProvider, playerCode);
 
@@ -114,11 +112,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             SetPlayerBalanceAsync(_serviceProvider, balance);
 
         [Given(@"game provider has status set to ""(.*)""")]
-        public Task GivenGameProviderHasStatusSetToAsync(Status status) => 
+        public Task GivenGameProviderHasStatusSetToAsync(Status status) =>
             ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
 
         [Given(@"game provider configuration has status set to ""(.*)""")]
-        public Task GivenGameProviderConfigurationHasStatusSetToAsync(Status status) => 
+        public Task GivenGameProviderConfigurationHasStatusSetToAsync(Status status) =>
             ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, status);
 
         [Given(@"game ""(.*)"" has status set to ""(.*)""")]
@@ -129,7 +127,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"brand has status set to ""(.*)""")]
-        public Task GivenBrandHasStatusSetToAsync(Status status) => 
+        public Task GivenBrandHasStatusSetToAsync(Status status) =>
             ChangeBrandStatusAsync(_serviceProvider, status);
 
         [Given(@"balance now being \$(.*)")]
@@ -144,7 +142,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
 
-            var response = await client.GetPlayerBalanceAsync(new GetBalanceRequest
+            var response = await client.GetPlayerBalanceAsync(new()
             {
                 CompanyKey = config.CompanyKey,
                 PlayerCode = playerCode,
@@ -191,12 +189,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I win bet for \$(.*)")]
         [When(@"I win bet for \$(.*)")]
-        public Task WhenIWinBetForAsync(decimal amount) => 
+        public Task WhenIWinBetForAsync(decimal amount) =>
             SettleBetAsync(GameActionType.WinBet, amount);
 
         [Given(@"I lose bet")]
         [When(@"I lose bet")]
-        public Task WhenILoseBetAsync() => 
+        public Task WhenILoseBetAsync() =>
             SettleBetAsync(GameActionType.LoseBet, 0);
 
         [Given(@"I tie bet for \$(.*)")]
@@ -222,7 +220,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I cancel all transactions")]
         [When(@"I cancel all transactions")]
-        public async Task  WhenICancelAllTransactionsAsync()
+        public async Task WhenICancelAllTransactionsAsync()
         {
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
@@ -238,7 +236,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var config = await GetSBOSetting();
-            
+
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
@@ -249,7 +247,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlayerCode = playerCode,
                 GameType = betRequest.GameType,
                 ProductType = betRequest.ProductType,
-                ExternalTransactionId = betRequest.ExternalTransactionId,
+                ExternalTransactionId = betRequest.ExternalTransactionId
             };
 
             var response = await client.RollbackAsync(request);
@@ -266,7 +264,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var config = await GetSBOSetting();
-            
+
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
@@ -277,7 +275,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlayerCode = playerCode,
                 GameType = betRequest.GameType,
                 ProductType = betRequest.ProductType,
-                ExternalTransactionId = betRequest.ExternalTransactionId,
+                ExternalTransactionId = betRequest.ExternalTransactionId
             };
 
             var response = await client.RollbackAsync(request);
@@ -338,7 +336,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var config = await GetSBOSetting();
-            
+
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
@@ -393,7 +391,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
-            var db = GetDb<IBetRepository>(_serviceProvider);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
             var ga = await (
                 from act in db.GameActions
                 join r in db.Rounds on act.RoundId equals r.Id
@@ -411,7 +409,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task ThenGamePlatformWillBeRecordedInTheDatabaseOfTypeAsync(PlatformType platformType)
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<IBetRepository>(_serviceProvider);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
             var platform = await db.Rounds
                 .Where(r => r.ExternalRoundId == externalRoundId)
                 .AsNoTracking()
@@ -425,7 +423,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task ThenTheLastSettleGameActionRecordedInTheDatabaseWillBeCanceledAsync()
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<IBetRepository>(_serviceProvider);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var gameActions = await (
                 from act in db.GameActions
@@ -444,10 +442,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"the cancellation of game action recorded in the database will be canceled")]
-        public async Task  ThenTheCancellationOfGameActionRecordedInTheDatabaseWillBeCanceledAsync()
+        public async Task ThenTheCancellationOfGameActionRecordedInTheDatabaseWillBeCanceledAsync()
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<IBetRepository>(_serviceProvider);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var gameActions = await (
                 from act in db.GameActions
@@ -456,7 +454,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 select act).AsNoTracking().ToArrayAsync();
 
             var last = gameActions.Last();
-            var isCanceled = gameActions.Any(ga => ga.Type == GameActionType.CancelTransaction && ga.Id == last.ReferencedGameActionId);
+            var isCanceled = gameActions.Any(ga =>
+                ga.Type == GameActionType.CancelTransaction && ga.Id == last.ReferencedGameActionId);
 
             isCanceled.Should().BeTrue();
         }
@@ -465,7 +464,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task ThenTheRoundHasNoValidBetsAsync()
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<IBetRepository>(_serviceProvider);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var gameActions = await (
                 from act in db.GameActions
@@ -475,7 +474,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
+                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -485,17 +484,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Then(@"I will receive bet response of error ""(.*)""")]
         public void ThenIWillReceiveBetResponseOfError(GameApiError error) =>
             VerifyResponseWithError<PlaceBetResponse>(error);
-        
+
         [Then(@"I will receive settle bet response of error ""(.*)""")]
         public void ThenIWillReceiveSettleBetResponseOfError(GameApiError error) =>
             VerifyResponseWithError<SettleBetResponse>(error);
 
         [Then(@"I will receive cancel bet response of error ""(.*)""")]
-        public void ThenIWillReceiveCancelBetResponseOfError(GameApiError error) => 
+        public void ThenIWillReceiveCancelBetResponseOfError(GameApiError error) =>
             VerifyResponseWithError<CancelBetResponse>(error);
 
         [Then(@"I will receive rollback response of error ""(.*)""")]
-        public void ThenIWillReceiveRollbackResponseOfError(GameApiError error) => 
+        public void ThenIWillReceiveRollbackResponseOfError(GameApiError error) =>
             VerifyResponseWithError<RollbackResponse>(error);
 
         [Then(@"I will receive bet response of no error")]
@@ -519,27 +518,28 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
 
         [Then(@"the round will be opened")]
-        public Task ThenTheRoundWillBeOpened() => 
+        public Task ThenTheRoundWillBeOpened() =>
             VerifyRoundStatus(_serviceProvider, RoundStatus.Open);
 
         #region After Scenario
 
         [After]
-        public Task AfterChangeGameProviderStatusScenarioAsync() => 
+        public Task AfterChangeGameProviderStatusScenarioAsync() =>
             ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active);
 
         [After]
-        public Task AfterChangeGameProviderConfigurationStatusScenarioAsync() => 
+        public Task AfterChangeGameProviderConfigurationStatusScenarioAsync() =>
             ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active);
-        
+
         [After]
-        public Task AfterChangeGameStatusScenarioAsync() => 
-            ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId), GameStatus.Active);
-        
+        public Task AfterChangeGameStatusScenarioAsync() =>
+            ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
+                GameStatus.Active);
+
         [After]
-        public Task AfterChangeBrandStatusScenarioAsync() => 
+        public Task AfterChangeBrandStatusScenarioAsync() =>
             ChangeBrandStatusAsync(_serviceProvider, Status.Active);
-        
+
         #endregion
 
         #region Private Methods

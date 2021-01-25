@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using Prometheus;
-using TGS.Core.DataServices.Bet.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
@@ -40,10 +39,9 @@ namespace TGS.Apis.TgsApi.Commons
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<Func<string>>(c => () => LogPrefix);
+            services.AddSingleton<Func<string>>(_ => () => LogPrefix);
 
-            services.AddTgsRepository(Configuration, "Tgs")
-                .AddBetRepository(Configuration, "Bet");
+            services.AddTgsRepository(Configuration, "Tgs");
 
             services.AddNats(Configuration)
                 .AddWebApiServices()
@@ -70,11 +68,10 @@ namespace TGS.Apis.TgsApi.Commons
             }).ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
 
             services.AddHealthChecks()
-                .AddSqlServer(Configuration, "Tgs", name: "tgs-db")
-                .AddSqlServer(Configuration, "Bet", name: "bet-db")
+                .AddPostgres(Configuration, "Tgs", name: "tgs-db")
                 .AddRedis(Configuration)
                 .AddNats()
-                .ForwardToPrometheus(); ;
+                .ForwardToPrometheus();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

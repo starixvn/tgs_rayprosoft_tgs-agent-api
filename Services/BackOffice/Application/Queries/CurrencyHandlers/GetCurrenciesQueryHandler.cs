@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Currency;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.LanguageHandlers
+namespace TGS.Services.BackOffice.Application.Queries.CurrencyHandlers
 {
     public class GetCurrenciesQueryHandler : Handler<GetCurrenciesRequest, PagedResponse<CurrencyModel>>
     {

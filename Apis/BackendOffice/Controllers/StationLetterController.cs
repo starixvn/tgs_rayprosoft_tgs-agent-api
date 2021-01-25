@@ -62,9 +62,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             return _queries.GetQueries()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.BrandId == BrandId)
+                .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId, l => l.BrandId == BrandId)
                 .Where(p => p.Status == request.Status)
                 .Select(a => new StationLetterModel
                 {

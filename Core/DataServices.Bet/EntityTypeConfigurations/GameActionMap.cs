@@ -10,21 +10,23 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<GameAction>.Configure(EntityTypeBuilder<GameAction> builder)
         {
-            builder.ToTable("GameActions", "dbo");
-            builder.HasKey(bc => bc.Id).IsClustered(false);
+            builder.ToTable("game_actions");
+
+            builder.HasKey(c => c.Id)
+                .HasName("pk_game_actions");
 
             builder.Property(c => c.ExternalBetId)
-                .HasColumnType(ColumnTypes.Nvarchar(64));
+                .IsRequired();
 
             builder.Property(c => c.IsClosingRound)
                 .IsRequired();
 
             builder.Property(c => c.ExternalTransactionId)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(c => c.Type)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.RoundId)
@@ -37,66 +39,79 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.RecordedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.SentOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired(false);
 
             // shadow property, no actual property in GameAction model
             builder.Property<DateTimeOffset>("StoredOn")
-                .HasColumnType(ColumnTypes.DatetimeOffset)
-                .HasDefaultValueSql("SYSDATETIMEOFFSET()")
+                .HasDefaultValueSql("now() at time zone 'utc'")
                 .IsRequired();
 
             builder.Property(c => c.Turnover)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.WinLoss)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.UnsettledBets)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.Amount)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.Balance)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
 
             builder.Property(c => c.PlayerCode)
-                .HasColumnType(ColumnTypes.Varchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.PlayerIp)
-                .HasColumnType(ColumnTypes.Varchar(128))
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(c => c.ExternalGameActionGroupId)
-                .HasColumnType(ColumnTypes.Nvarchar(128))
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(c => c.BetType)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+                .HasMaxLength(128);
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.NvarcharMax);
+                .HasColumnType(ColumnTypes.Text);
 
             builder.Property(c => c.GameProviderConfigurationId)
                 .IsRequired();
-            
+
             builder.HasOne(c => c.Round)
                 .WithMany(c => c.GameActions)
-                .HasForeignKey(c => c.RoundId);
+                .HasForeignKey(c => c.RoundId)
+                .HasConstraintName("fk_game_actions_rounds_round_id");
+
+            builder.HasIndex(c => c.RoundId)
+                .HasDatabaseName("ix_game_actions_round_id");
 
             builder.HasOne(c => c.ReferencedGameAction)
                 .WithMany(c => c.FollowUpGameActions)
-                .HasForeignKey(c => c.ReferencedGameActionId);
+                .HasForeignKey(c => c.ReferencedGameActionId)
+                .HasConstraintName("fk_game_actions_referenced_game_action_id");
+
+            builder.HasIndex(c => c.ReferencedGameActionId)
+                .HasDatabaseName("ix_game_actions_referenced_game_action_id");
+
+            builder.HasOne(c => c.GameActionBatch)
+                .WithMany(c => c.GameActions)
+                .HasForeignKey(c => c.GameActionBatchId)
+                .HasConstraintName("fk_game_actions_game_action_batches_game_action_batch_id");
+
+            builder.HasIndex(c => c.GameActionBatchId)
+                .HasDatabaseName("ix_game_actions_game_action_batch_id");
         }
     }
 }

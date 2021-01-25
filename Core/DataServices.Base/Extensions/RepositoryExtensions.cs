@@ -30,11 +30,16 @@ namespace TGS.Core.DataServices.Base.Extensions
                 var connectionString = configuration.GetConnectionString(connectionName);
 
                 option.UseLazyLoadingProxies();
-                option.UseSqlServer(connectionString, serverOption =>
+
+                option.UseNpgsql(connectionString, serverOption =>
                 {
+                    serverOption.SetPostgresVersion(12, 5);
                     serverOption.CommandTimeout(commandTimeout);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
+                    serverOption.UseTrigrams();
                 });
+
+                option.UseSnakeCaseNamingConvention();
             }, poolSize);
 
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());

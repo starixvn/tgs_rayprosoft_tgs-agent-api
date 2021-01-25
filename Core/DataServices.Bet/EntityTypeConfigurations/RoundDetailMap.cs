@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Bet.Models;
 
 namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
@@ -9,12 +8,19 @@ namespace TGS.Core.DataServices.Bet.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<RoundDetail>.Configure(EntityTypeBuilder<RoundDetail> builder)
         {
-            builder.ToTable("RoundDetails", "dbo");
-            builder.HasKey(bc => bc.RoundId).IsClustered(true);
+            builder.ToTable("round_details");
+
+            builder.HasKey(c => c.RoundId)
+                .HasName("pk_round_details");
 
             builder.Property(c => c.AdditionalData)
-                .HasColumnType(ColumnTypes.NvarcharMax)
                 .IsRequired();
+
+            builder.HasOne(c => c.Round)
+                .WithOne(c => c.RoundDetail)
+                .HasForeignKey<RoundDetail>(c => c.RoundId)
+                .HasPrincipalKey<Round>(c => c.Id)
+                .HasConstraintName("fk_round_details_rounds_round_id");
         }
     }
 }

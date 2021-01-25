@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,21 +8,29 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<LicenseeCurrency>.Configure(EntityTypeBuilder<LicenseeCurrency> builder)
         {
-            builder.ToTable("LicenseeCurrencies", "dbo");
-            builder.HasKey(bc => new {bc.LicenseeId, bc.CurrencyCode});
-            builder
-                .HasOne(bc => bc.Licensee)
-                .WithMany(c => c.Currencies)
-                .HasForeignKey(bc => bc.LicenseeId);
+            builder.ToTable("licensee_currencies");
 
-            builder
-                .HasOne(bc => bc.Currency)
-                .WithMany(c => c.LicenseeCurrencies)
-                .HasForeignKey(bc => bc.CurrencyCode);
+            builder.HasKey(e => new {e.LicenseeId, e.CurrencyCode})
+                .HasName("pk_licensee_currencies");
 
-            builder.Property(c => c.CurrencyCode)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+            builder.Property(e => e.CurrencyCode)
+                .HasMaxLength(16)
                 .IsRequired();
+
+            builder
+                .HasOne(e => e.Licensee)
+                .WithMany(e => e.Currencies)
+                .HasForeignKey(e => e.LicenseeId)
+                .HasConstraintName("fk_licensee_currencies_licensees_licensee_id");
+
+            builder
+                .HasOne(e => e.Currency)
+                .WithMany(e => e.LicenseeCurrencies)
+                .HasForeignKey(e => e.CurrencyCode)
+                .HasConstraintName("fk_licensee_currencies_currencies_currency_code");
+
+            builder.HasIndex(e => e.CurrencyCode)
+                .HasDatabaseName("ix_licensee_currencies_currency_code");
         }
     }
 }

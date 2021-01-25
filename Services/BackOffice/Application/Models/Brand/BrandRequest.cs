@@ -15,7 +15,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public string SecretKey { get; set; }
         public BrandGameProviderModel[] GameProviders { get; set; }
         public string[] CurrencyCodes { get; set; }
-        public BrandCultureModel[] BrandCultures { get; set; }
-        public BrandBetLimitModel[] BrandBetLimits { get; set; }
+        public BrandCultureModel[] Cultures { get; set; }
+        public BrandBetLimitModel[] BetLimits { get; set; }
     }
 }

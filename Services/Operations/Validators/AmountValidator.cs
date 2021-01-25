@@ -13,11 +13,10 @@ namespace TGS.Services.Operations.Validators
     {
         void IAmountValidator.IgnoreAmount(string name, decimal amount)
         {
-            
         }
 
         void IAmountValidator.ThrowIfAmountIsNegative(string name, decimal amount)
-        {            
+        {
             if (amount < 0)
             {
                 throw new InvalidAmountException($"The {name} must be zero or positive but is {amount}");

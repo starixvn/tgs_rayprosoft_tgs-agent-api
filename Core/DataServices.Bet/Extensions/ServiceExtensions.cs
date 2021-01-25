@@ -6,7 +6,8 @@ namespace TGS.Core.DataServices.Bet.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBetRepository(this IServiceCollection services, IConfiguration configuration, string connectionName)
+        public static IServiceCollection AddBetRepository(this IServiceCollection services,
+            IConfiguration configuration, string connectionName)
         {
             services.AddRepository<IBetRepository, BetRepository>(configuration, connectionName);
             return services;

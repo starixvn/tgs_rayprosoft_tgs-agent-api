@@ -8,25 +8,31 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<BrandGroupBetLimit>.Configure(EntityTypeBuilder<BrandGroupBetLimit> builder)
         {
-            builder.ToTable("BrandGroupBetLimits", "dbo");
+            builder.ToTable("brand_group_bet_limits");
 
             builder.HasKey(e => e.Id)
-                .IsClustered(false);
+                .HasName("pk_brand_group_bet_limits");
 
             builder.HasAlternateKey(e => new {e.BrandGroupId, e.BetLimitId})
-                .IsClustered();
+                .HasName("ak_brand_group_bet_limits_brand_group_id_bet_limit_id");
 
             builder
                 .HasOne(e => e.BrandGroup)
                 .WithMany(e => e.BrandGroupBetLimits)
                 .HasForeignKey(e => e.BrandGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasConstraintName("fk_brand_group_bet_limits_brand_groups_brand_group_id");
+
+            builder.HasIndex(e => e.BrandGroupId)
+                .HasDatabaseName("ix_brand_group_bet_limits_brand_group_id");
 
             builder
                 .HasOne(e => e.BetLimit)
                 .WithMany(e => e.BrandGroupBetLimits)
                 .HasForeignKey(e => e.BetLimitId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasConstraintName("fk_brand_group_bet_limits_bet_limits_bet_limit_id");
+
+            builder.HasIndex(e => e.BetLimitId)
+                .HasDatabaseName("ix_brand_group_bet_limits_bet_limit_id");
         }
     }
 }

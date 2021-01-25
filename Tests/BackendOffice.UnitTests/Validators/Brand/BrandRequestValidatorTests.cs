@@ -73,9 +73,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         [Test]
         public void Should_have_error_when__brand_cultures_is_null()
         {
-            var model = new BrandRequest {BrandCultures = null};
+            var model = new BrandRequest {Cultures = null};
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.BrandCultures)
+            result.ShouldHaveValidationErrorFor(request => request.Cultures)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.CultureRequired);
         }
 
@@ -85,7 +85,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
             var model = new BrandRequest
             {
                 CurrencyCodes = new[] {"CNY", "RMB"},
-                BrandBetLimits = new[] {new BrandBetLimitModel {Id = 1, CurrencyCode = "CNY", IsDefault = false}}
+                BetLimits = new[] {new BrandBetLimitModel {Id = 1, CurrencyCode = "CNY", IsDefault = false}}
             };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.CurrencyCodes)

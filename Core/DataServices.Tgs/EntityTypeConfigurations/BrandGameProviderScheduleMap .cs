@@ -5,24 +5,28 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class
-        BrandGameProviderScheduledMap : IEntityTypeConfiguration<
-            BrandGameProviderSchedule>
+    internal class BrandGameProviderScheduledMap :
+        IEntityTypeConfiguration<BrandGameProviderSchedule>
     {
         void IEntityTypeConfiguration<BrandGameProviderSchedule>.Configure(
             EntityTypeBuilder<BrandGameProviderSchedule> builder)
         {
-            builder.ToTable("BrandGameProviderSchedules", "dbo");
+            builder.ToTable("brand_game_provider_schedules");
 
-            builder.HasKey(s => s.Id);
+            builder.HasKey(e => e.Id)
+                .HasName("pk_brand_game_provider_schedule");
 
-            builder.Property(s => s.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+            builder.Property(e => e.Status)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
-            builder.HasOne(s => s.BrandGameProvider)
-                .WithMany(t => t.Schedules)
-                .HasForeignKey(t => t.BrandGameProviderId);
+            builder.HasOne(e => e.BrandGameProvider)
+                .WithMany(e => e.Schedules)
+                .HasForeignKey(e => e.BrandGameProviderId)
+                .HasConstraintName("fk_brand_game_provider_schedule_brand_game_providers_id");
+
+            builder.HasIndex(e => e.BrandGameProviderId)
+                .HasDatabaseName("ix_brand_game_provider_schedule_brand_game_provider_id");
         }
     }
 }

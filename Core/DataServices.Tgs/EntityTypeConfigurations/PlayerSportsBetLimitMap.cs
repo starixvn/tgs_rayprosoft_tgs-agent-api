@@ -8,10 +8,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PlayerSportsBetLimit>.Configure(EntityTypeBuilder<PlayerSportsBetLimit> builder)
         {
-            builder.ToTable("PlayerSportsBetLimits", "dbo");
+            builder.ToTable("player_sports_bet_limits");
 
             builder.HasKey(e => new {e.PlayerCode, e.SportMarketTypeId})
-                .IsClustered();
+                .HasName("pk_player_sports_bet_limits");
 
             builder.Property(e => e.MinBet)
                 .IsRequired();
@@ -25,12 +25,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasOne(e => e.Player)
                 .WithMany(e => e.SportsBetLimits)
                 .HasForeignKey(e => e.PlayerCode)
+                .HasConstraintName("fk_player_sports_bet_limits_players_player_code")
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(e => e.SportMarketType)
                 .WithMany(e => e.PlayerSportsBetLimits)
                 .HasForeignKey(e => e.SportMarketTypeId)
+                .HasConstraintName("fk_player_sports_bet_limits_sport_market_types_sport_market_type_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.SportMarketTypeId)
+                .HasDatabaseName("ix_player_sports_bet_limits_sport_market_id");
         }
     }
 }

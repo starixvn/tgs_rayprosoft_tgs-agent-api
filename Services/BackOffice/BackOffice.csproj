@@ -66,6 +66,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>GameProviderBetLimit.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\GameProviderConfiguration.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GameProviderConfiguration.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\Language.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -105,6 +110,10 @@
     <EmbeddedResource Update="Application\Resources\GameProviderBetLimit.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProviderBetLimit.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\GameProviderConfiguration.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>GameProviderConfiguration.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\Language.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

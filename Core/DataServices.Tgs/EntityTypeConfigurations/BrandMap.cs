@@ -10,64 +10,42 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Brand>.Configure(EntityTypeBuilder<Brand> builder)
         {
-            builder.ToTable("Brands", "dbo");
-            BaseConfigureProperties<Brand, Guid>(builder);
+            builder.ToTable("brands");
+
+            ConfigureBaseProperties<Brand, Guid>(builder, "pk_brands");
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
             builder.Property(c => c.OperationalEmail)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+                .HasMaxLength(128);
 
             builder.Property(c => c.ClientId)
-                .HasColumnType(ColumnTypes.Varchar(128))
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(c => c.SecretKey)
-                .HasColumnType(ColumnTypes.Varchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.ApiKey)
-                .HasColumnType(ColumnTypes.Varchar(64))
+                .HasMaxLength(64)
                 .IsRequired();
 
             builder.Property(c => c.TimeZoneId)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
-            builder.HasMany(c => c.GameProviders)
-                .WithOne(c => c.Brand)
-                .HasForeignKey(c => c.GameProviderId);
+            builder.HasOne(c => c.Licensee)
+                .WithMany(c => c.Brands)
+                .HasForeignKey(c => c.LicenseeId)
+                .HasConstraintName("fk_brands_licensees_licensee_id");
 
-            builder.HasMany(c => c.Players)
-                .WithOne(c => c.Brand)
-                .HasForeignKey(c => c.BrandId);
-
-            builder.HasOne(p => p.Licensee)
-                .WithMany(p => p.Brands)
-                .HasForeignKey(p => p.LicenseeId);
-
-            builder.HasMany(c => c.Announcements)
-                .WithOne(c => c.Brand)
-                .HasForeignKey(c => c.BrandId);
-
-            builder.HasMany(c => c.StationLetters)
-                .WithOne(c => c.Brand)
-                .HasForeignKey(c => c.BrandId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(c => c.VipLevels)
-                .WithOne(c => c.Brand)
-                .HasForeignKey(c => c.BrandId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(c => c.Departments)
-                .WithOne(c => c.Brands)
-                .HasForeignKey(c => c.BrandId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(c => c.LicenseeId)
+                .HasDatabaseName("ix_brands_licensee_id");
         }
     }
 }

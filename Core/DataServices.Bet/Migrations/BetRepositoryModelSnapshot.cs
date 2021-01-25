@@ -7,318 +7,412 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 namespace TGS.Core.DataServices.Bet.Migrations
 {
     [DbContext(typeof(BetRepository))]
-    partial class BetRepositoryModelSnapshot : ModelSnapshot
+    internal class BetRepositoryModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .UseIdentityColumns()
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.0");
+                .UseIdentityByDefaultColumns()
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.1");
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,6)");
+                b.Property<decimal>("Amount")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("amount");
 
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,6)");
+                b.Property<decimal>("Balance")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("balance");
 
-                    b.Property<string>("BetType")
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("BetType")
+                    .HasMaxLength(128)
+                    .HasColumnType("character varying(128)")
+                    .HasColumnName("bet_type");
 
-                    b.Property<bool?>("ClosingRoundExplicitRequest")
-                        .HasColumnType("bit");
+                b.Property<bool?>("ClosingRoundExplicitRequest")
+                    .HasColumnType("boolean")
+                    .HasColumnName("closing_round_explicit_request");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("text")
+                    .HasColumnName("description");
 
-                    b.Property<string>("ExternalBetId")
-                        .HasColumnType("nvarchar(64)");
+                b.Property<string>("ExternalBetId")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("external_bet_id");
 
-                    b.Property<string>("ExternalGameActionGroupId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("ExternalGameActionGroupId")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("character varying(128)")
+                    .HasColumnName("external_game_action_group_id");
 
-                    b.Property<string>("ExternalTransactionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("ExternalTransactionId")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("character varying(128)")
+                    .HasColumnName("external_transaction_id");
 
-                    b.Property<Guid?>("GameActionBatchId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("GameActionBatchId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("game_action_batch_id");
 
-                    b.Property<Guid>("GameProviderConfigurationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("GameProviderConfigurationId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("game_provider_configuration_id");
 
-                    b.Property<bool>("IsClosingRound")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsClosingRound")
+                    .HasColumnType("boolean")
+                    .HasColumnName("is_closing_round");
 
-                    b.Property<string>("PlayerCode")
-                        .IsRequired()
-                        .HasColumnType("varchar(16)");
+                b.Property<string>("PlayerCode")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("character varying(16)")
+                    .HasColumnName("player_code");
 
-                    b.Property<string>("PlayerIp")
-                        .IsRequired()
-                        .HasColumnType("varchar(128)");
+                b.Property<string>("PlayerIp")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("character varying(128)")
+                    .HasColumnName("player_ip");
 
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("datetimeoffset");
+                b.Property<DateTimeOffset>("RecordedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("recorded_on");
 
-                    b.Property<Guid?>("ReferencedGameActionId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("ReferencedGameActionId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("referenced_game_action_id");
 
-                    b.Property<Guid>("RoundId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("RoundId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("round_id");
 
-                    b.Property<DateTimeOffset?>("SentOn")
-                        .HasColumnType("datetimeoffset");
+                b.Property<DateTimeOffset?>("SentOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("sent_on");
 
-                    b.Property<DateTimeOffset>("StoredOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+                b.Property<DateTimeOffset>("StoredOn")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("stored_on")
+                    .HasDefaultValueSql("now() at time zone 'utc'");
 
-                    b.Property<decimal>("Turnover")
-                        .HasColumnType("decimal(18,6)");
+                b.Property<decimal>("Turnover")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("turnover");
 
-                    b.Property<byte>("Type")
-                        .HasColumnType("tinyint");
+                b.Property<short>("Type")
+                    .HasColumnType("smallint")
+                    .HasColumnName("type");
 
-                    b.Property<decimal>("UnsettledBets")
-                        .HasColumnType("decimal(18,6)");
+                b.Property<decimal>("UnsettledBets")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("unsettled_bets");
 
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("WalletId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("wallet_id");
 
-                    b.Property<decimal>("WinLoss")
-                        .HasColumnType("decimal(18,6)");
+                b.Property<decimal>("WinLoss")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("win_loss");
 
-                    b.HasKey("Id")
-                        .IsClustered(false);
+                b.HasKey("Id")
+                    .HasName("pk_game_actions");
 
-                    b.HasIndex("GameActionBatchId");
+                b.HasIndex("GameActionBatchId")
+                    .HasDatabaseName("ix_game_actions_game_action_batch_id");
 
-                    b.HasIndex("ReferencedGameActionId");
+                b.HasIndex("ReferencedGameActionId")
+                    .HasDatabaseName("ix_game_actions_referenced_game_action_id");
 
-                    b.HasIndex("RoundId");
+                b.HasIndex("RoundId")
+                    .HasDatabaseName("ix_game_actions_round_id");
 
-                    b.ToTable("GameActions", "dbo");
-                });
+                b.ToTable("game_actions");
+            });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameActionBatch", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
+                b.Property<DateTimeOffset>("CreatedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("created_on");
 
-                    b.Property<string>("ErrorDescription")
-                        .HasColumnType("nvarchar(1024)");
+                b.Property<string>("ErrorDescription")
+                    .HasMaxLength(1024)
+                    .HasColumnType("character varying(1024)")
+                    .HasColumnName("error_description");
 
-                    b.Property<short>("ErrorType")
-                        .HasColumnType("smallint");
+                b.Property<short>("ErrorType")
+                    .HasColumnType("smallint")
+                    .HasColumnName("error_type");
 
-                    b.Property<string>("ErrorsJson")
-                        .HasColumnType("nvarchar(4000)");
+                b.Property<string>("ErrorsJson")
+                    .HasMaxLength(4000)
+                    .HasColumnType("character varying(4000)")
+                    .HasColumnName("errors_json");
 
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(64)");
+                b.Property<string>("ExternalId")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("character varying(64)")
+                    .HasColumnName("external_id");
 
-                    b.Property<Guid>("GameProviderConfigurationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("GameProviderConfigurationId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("game_provider_configuration_id");
 
-                    b.Property<int>("TransactionsCount")
-                        .HasColumnType("int");
+                b.Property<int>("TransactionsCount")
+                    .HasColumnType("integer")
+                    .HasColumnName("transactions_count");
 
-                    b.HasKey("Id")
-                        .IsClustered(false);
+                b.HasKey("Id")
+                    .HasName("pk_game_action_batches");
 
-                    b.ToTable("GameActionBatches", "dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.Round", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("BetAmount")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("BrandCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<Guid?>("BrandId")
-                        .IsRequired()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("ClosedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<decimal?>("Commission")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CurrencyCode")
-                        .IsRequired()
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<DateTimeOffset?>("ExternalClosedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("ExternalCreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ExternalRoundId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("GameName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("GameProviderCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<Guid>("GameProviderConfigurationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("GameProviderName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<byte>("GameType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("LicenseeCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<short>("PlatformType")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("PlayerCode")
-                        .IsRequired()
-                        .HasColumnType("varchar(16)");
-
-                    b.Property<byte>("PlayerType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("ResellerCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<Guid>("ResellerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("Status")
-                        .HasColumnType("tinyint");
-
-                    b.Property<decimal?>("TieBetAdjustment")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("WinLoss")
-                        .HasColumnType("decimal(18,6)");
-
-                    b.HasKey("Id")
-                        .IsClustered(false);
-
-                    b.ToTable("Rounds", "dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
-                {
-                    b.Property<Guid>("RoundId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AdditionalData")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("RoundId")
-                        .IsClustered();
-
-                    b.ToTable("RoundDetails", "dbo");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Bet.Models.GameActionBatch", "GameActionBatch")
-                        .WithMany("GameActions")
-                        .HasForeignKey("GameActionBatchId");
-
-                    b.HasOne("TGS.Core.DataServices.Bet.Models.GameAction", "ReferencedGameAction")
-                        .WithMany("FollowUpGameActions")
-                        .HasForeignKey("ReferencedGameActionId");
-
-                    b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
-                        .WithMany("GameActions")
-                        .HasForeignKey("RoundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GameActionBatch");
-
-                    b.Navigation("ReferencedGameAction");
-
-                    b.Navigation("Round");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
-                        .WithOne("RoundDetail")
-                        .HasForeignKey("TGS.Core.DataServices.Bet.Models.RoundDetail", "RoundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Round");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
-                {
-                    b.Navigation("FollowUpGameActions");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameActionBatch", b =>
-                {
-                    b.Navigation("GameActions");
-                });
+                b.ToTable("game_action_batches");
+            });
 
             modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.Round", b =>
-                {
-                    b.Navigation("GameActions");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.Navigation("RoundDetail");
-                });
+                b.Property<decimal?>("BetAmount")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("bet_amount");
+
+                b.Property<string>("BrandCode")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("character varying(16)")
+                    .HasColumnName("brand_code");
+
+                b.Property<Guid?>("BrandId")
+                    .IsRequired()
+                    .HasColumnType("uuid")
+                    .HasColumnName("brand_id");
+
+                b.Property<DateTimeOffset?>("ClosedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("closed_on");
+
+                b.Property<decimal?>("Commission")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("commission");
+
+                b.Property<DateTimeOffset>("CreatedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("created_on");
+
+                b.Property<string>("CurrencyCode")
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasColumnType("character varying(10)")
+                    .HasColumnName("currency_code");
+
+                b.Property<DateTimeOffset?>("ExternalClosedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("external_closed_on");
+
+                b.Property<DateTimeOffset?>("ExternalCreatedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("external_created_on");
+
+                b.Property<string>("ExternalRoundId")
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)")
+                    .HasColumnName("external_round_id");
+
+                b.Property<int>("GameId")
+                    .HasColumnType("integer")
+                    .HasColumnName("game_id");
+
+                b.Property<string>("GameName")
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)")
+                    .HasColumnName("game_name");
+
+                b.Property<string>("GameProviderCode")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("character varying(16)")
+                    .HasColumnName("game_provider_code");
+
+                b.Property<Guid>("GameProviderConfigurationId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("game_provider_configuration_id");
+
+                b.Property<Guid>("GameProviderId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("game_provider_id");
+
+                b.Property<string>("GameProviderName")
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)")
+                    .HasColumnName("game_provider_name");
+
+                b.Property<short>("GameType")
+                    .HasColumnType("smallint")
+                    .HasColumnName("game_type");
+
+                b.Property<string>("LicenseeCode")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("character varying(16)")
+                    .HasColumnName("licensee_code");
+
+                b.Property<Guid>("LicenseeId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("licensee_id");
+
+                b.Property<short>("PlatformType")
+                    .HasColumnType("smallint")
+                    .HasColumnName("platform_type");
+
+                b.Property<string>("PlayerCode")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("character varying(16)")
+                    .HasColumnName("player_code");
+
+                b.Property<byte>("PlayerType")
+                    .HasColumnType("smallint")
+                    .HasColumnName("player_type");
+
+                b.Property<string>("ResellerCode")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("character varying(16)")
+                    .HasColumnName("reseller_code");
+
+                b.Property<Guid>("ResellerId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("reseller_id");
+
+                b.Property<short>("Status")
+                    .HasColumnType("smallint")
+                    .HasColumnName("status");
+
+                b.Property<decimal?>("TieBetAdjustment")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("tie_bet_adjustment");
+
+                b.Property<DateTimeOffset>("UpdatedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("updated_on");
+
+                b.Property<Guid>("WalletId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("wallet_id");
+
+                b.Property<decimal?>("WinLoss")
+                    .HasPrecision(18, 6)
+                    .HasColumnType("numeric(18,6)")
+                    .HasColumnName("win_loss");
+
+                b.HasKey("Id")
+                    .HasName("pk_rounds");
+
+                b.ToTable("rounds");
+            });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
+            {
+                b.Property<Guid>("RoundId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("round_id");
+
+                b.Property<string>("AdditionalData")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("additional_data");
+
+                b.HasKey("RoundId")
+                    .HasName("pk_round_details");
+
+                b.ToTable("round_details");
+            });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction", b =>
+            {
+                b.HasOne("TGS.Core.DataServices.Bet.Models.GameActionBatch", "GameActionBatch")
+                    .WithMany("GameActions")
+                    .HasForeignKey("GameActionBatchId")
+                    .HasConstraintName("fk_game_actions_game_action_batches_game_action_batch_id");
+
+                b.HasOne("TGS.Core.DataServices.Bet.Models.GameAction", "ReferencedGameAction")
+                    .WithMany("FollowUpGameActions")
+                    .HasForeignKey("ReferencedGameActionId")
+                    .HasConstraintName("fk_game_actions_referenced_game_action_id");
+
+                b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
+                    .WithMany("GameActions")
+                    .HasForeignKey("RoundId")
+                    .HasConstraintName("fk_game_actions_rounds_round_id")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("GameActionBatch");
+
+                b.Navigation("ReferencedGameAction");
+
+                b.Navigation("Round");
+            });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.RoundDetail", b =>
+            {
+                b.HasOne("TGS.Core.DataServices.Bet.Models.Round", "Round")
+                    .WithOne("RoundDetail")
+                    .HasForeignKey("TGS.Core.DataServices.Bet.Models.RoundDetail", "RoundId")
+                    .HasConstraintName("fk_round_details_rounds_round_id")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Round");
+            });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameAction",
+                b => { b.Navigation("FollowUpGameActions"); });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.GameActionBatch",
+                b => { b.Navigation("GameActions"); });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Bet.Models.Round", b =>
+            {
+                b.Navigation("GameActions");
+
+                b.Navigation("RoundDetail");
+            });
 #pragma warning restore 612, 618
         }
     }

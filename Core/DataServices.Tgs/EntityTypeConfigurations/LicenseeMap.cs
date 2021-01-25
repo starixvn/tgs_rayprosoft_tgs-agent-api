@@ -10,27 +10,27 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Licensee>.Configure(EntityTypeBuilder<Licensee> builder)
         {
-            builder.ToTable("Licensees", "dbo");
-            BaseConfigureProperties<Licensee, Guid>(builder);
+            builder.ToTable("licensees");
+
+            ConfigureBaseProperties<Licensee, Guid>(builder, "pk_licensees");
 
             builder.Property(c => c.Status)
-                .HasColumnType(ColumnTypes.TinyInt)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Description)
-                .HasColumnType(ColumnTypes.Nvarchar(256));
+                .HasMaxLength(256);
 
             builder.Property(c => c.OperationalEmail)
-                .HasColumnType(ColumnTypes.Nvarchar(128));
+                .HasMaxLength(128);
 
             builder.HasOne(p => p.Reseller)
                 .WithMany(p => p.Licensees)
-                .HasForeignKey(p => p.ResellerId);
+                .HasForeignKey(p => p.ResellerId)
+                .HasConstraintName("fk_licensees_resellers_reseller_id");
 
-            builder.HasMany(c => c.Departments)
-                .WithOne(c => c.Licensees)
-                .HasForeignKey(c => c.LicenseeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(e => e.ResellerId)
+                .HasDatabaseName("ix_licensees_reseller_id");
         }
     }
 }

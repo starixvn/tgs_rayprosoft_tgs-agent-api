@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -24,7 +24,9 @@ namespace TGS.Services.Operations.Commands
 
         Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data);
 
-        Task PlayerLogoutAsync(PlayerLogoutData data);
+        Task DeauthorizePlayerAsync(string playerCode, Guid loginRecordId);
+
+        Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType);
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -97,7 +99,7 @@ namespace TGS.Services.Operations.Commands
 
                     break;
                 }
-                catch (Exception e) when (e.InnerException?.InnerException is SqlException exception)
+                catch (Exception e) when (e.InnerException?.InnerException is NpgsqlException exception)
                 {
                     retries++;
                     var err =
@@ -110,7 +112,7 @@ namespace TGS.Services.Operations.Commands
                         throw new InvalidOperationException(err, e);
                     }
 
-                    if (exception.Number == 2601) // 2601 is "unique index"
+                    if (exception.ErrorCode == 2601) // 2601 is "unique index"
                     {
                         break;
                     }
@@ -182,52 +184,24 @@ namespace TGS.Services.Operations.Commands
             return loginRecord;
         }
 
-        Task IPlayerCommands.PlayerLogoutAsync(PlayerLogoutData data) =>
-            DeauthorizePlayerAsync(_repository, data.PlayerCode, data.LoginRecordId);
-
-        #region Private Methods
-
-        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode, Guid loginRecordId)
+        Task IPlayerCommands.DeauthorizePlayerAsync(string playerCode, Guid loginRecordId)
         {
-            const string sql = "usp_Player_DeauthorizeByLoginRecordId";
-            return repo.ExecuteSqlCommandAsync(sql, parameters: new SqlParameter[]
+            const string sql = "call dbo.player_deauthorize_by_login_record_id(:player_code, :login_record_id)";
+            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text, new Dictionary<string, object>
             {
-                new()
-                {
-                    ParameterName = "@playerCode",
-                    Value = playerCode,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@loginRecordId",
-                    Value = loginRecordId,
-                    DbType = DbType.Guid
-                }
+                {":player_code", playerCode},
+                {":login_record_id", loginRecordId}
             });
         }
 
-        private static Task<int> DeauthorizePlayerAsync(ITgsRepository repo, string playerCode,
-            PlatformType? platformType)
+        Task IPlayerCommands.DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
         {
-            const string sql = "usp_Player_DeauthorizeByPlatform";
-            return repo.ExecuteSqlCommandAsync(sql, parameters: new SqlParameter[]
+            const string sql = "call dbo.player_deauthorize_by_platform_type";
+            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text, new Dictionary<string, object>
             {
-                new()
-                {
-                    ParameterName = "@playerCode",
-                    Value = playerCode,
-                    DbType = DbType.String
-                },
-                new()
-                {
-                    ParameterName = "@platformType",
-                    Value = platformType,
-                    DbType = DbType.Int16
-                }
+                {":player_code", playerCode},
+                {":platform_type", platformType}
             });
         }
-
-        #endregion Private Methods
     }
 }

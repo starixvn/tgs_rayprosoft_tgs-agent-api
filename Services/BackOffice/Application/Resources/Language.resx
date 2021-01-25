@@ -109,4 +109,10 @@
   <data name="CultureCodeExisted" xml:space="preserve">
     <value>Culture code existed already.</value>
   </data>
+  <data name="CultureCodeRequired" xml:space="preserve">
+    <value>Culture code is required.</value>
+  </data>
+  <data name="LanguageCodeRequired" xml:space="preserve">
+    <value>Language code is required.</value>
+  </data>
 </root>

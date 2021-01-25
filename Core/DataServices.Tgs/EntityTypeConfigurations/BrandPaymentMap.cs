@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,57 +8,80 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<BrandPayment>.Configure(EntityTypeBuilder<BrandPayment> builder)
         {
-            builder.ToTable("BrandPayments", "dbo");
+            builder.ToTable("brand_payments");
 
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.Id)
+                .HasName("pk_brand_payments");
 
             builder.Property(c => c.ChannelName)
-                .HasColumnType(ColumnTypes.Nvarchar(50))
+                .HasMaxLength(50)
                 .IsRequired();
 
             builder.Property(c => c.Reason)
-                .HasColumnType(ColumnTypes.Nvarchar(4000));
+                .HasMaxLength(4000);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.TransferLimitFrom)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.TransferLimitTo)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.DepositedAmountMin)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.DepositedAmountMax)
-                .HasColumnType(ColumnTypes.Decimal(18, 6))
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.FeePercentage)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
 
             builder.Property(c => c.LowestFee)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
 
             builder.Property(c => c.HighestFee)
-                .HasColumnType(ColumnTypes.Decimal(18, 6));
+                .HasPrecision(18, 6);
+
+            builder.HasOne(c => c.PaymentChannel)
+                .WithMany()
+                .HasForeignKey(c => c.PaymentChannelId)
+                .HasConstraintName("fk_brand_payments_payment_channels_payment_channel_id");
+
+            builder.HasIndex(c => c.PaymentChannelId)
+                .HasDatabaseName("ix_brand_payments_payment_channel_id");
+
+            builder.HasOne(c => c.PaymentMethod)
+                .WithMany()
+                .HasForeignKey(c => c.PaymentMethodId)
+                .HasConstraintName("fk_brand_payments_payment_methods_payment_method_id");
+
+            builder.HasIndex(c => c.PaymentMethodId)
+                .HasDatabaseName("ix_brand_payments_payment_method_id");
+
+            builder.HasOne(c => c.Payment)
+                .WithMany()
+                .HasForeignKey(c => c.PaymentId)
+                .HasConstraintName("fk_brand_payments_payments_payment_id");
+
+            builder.HasIndex(c => c.PaymentId)
+                .HasDatabaseName("ix_brand_payments_payment_id");
         }
     }
 }

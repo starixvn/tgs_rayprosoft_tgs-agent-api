@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -9,37 +8,37 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<Currency>.Configure(EntityTypeBuilder<Currency> builder)
         {
-            builder.ToTable("Currencies", "dbo");
-            builder.HasKey(p => p.Code);
+            builder.ToTable("currencies");
+
+            builder.HasKey(p => p.Code)
+                .HasName("pk_currencies");
 
             builder.Property(c => c.Code)
-                .HasColumnType(ColumnTypes.Nvarchar(16))
+                .HasMaxLength(16)
                 .IsRequired();
 
             builder.Property(c => c.Name)
-                .HasColumnType(ColumnTypes.Nvarchar(64))
+                .HasMaxLength(64)
                 .IsRequired();
 
             builder.Property(c => c.NativeName)
-                .HasColumnType(ColumnTypes.Nvarchar(64));
+                .HasMaxLength(64);
 
             builder.Property(c => c.Symbol)
-                .HasColumnType(ColumnTypes.Nvarchar(16));
+                .HasMaxLength(6);
 
             builder.Property(c => c.CreatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedByUsername)
-                .HasColumnType(ColumnTypes.Nvarchar(32))
+                .HasMaxLength(32)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
 
             builder.Property(c => c.UpdatedOn)
-                .HasColumnType(ColumnTypes.DatetimeOffset)
                 .IsRequired();
         }
     }
