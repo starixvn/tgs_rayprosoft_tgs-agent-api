@@ -73,16 +73,16 @@ export const BrandLanguageCheckboxGroupTable = ({
                             { onChange, onBlur, value, name: fieldName, ref },
                             { invalid, isTouched, isDirty }
                           ) => {
-                            let brandLangCodeDialog = useModalState()
+                            let dialog = useModalState()
                             return (
                               <>
-                                <Disclosure {...brandLangCodeDialog}>
+                                <Disclosure {...dialog}>
                                   <Icon icon={faLanguage} type="font-awesome" />
                                 </Disclosure>
-                                {brandLangCodeDialog.visible && (
-                                  <LangCodeDialog
+                                {dialog.visible && (
+                                  <CodeDialog
                                     value={value}
-                                    dialog={brandLangCodeDialog}
+                                    dialog={dialog}
                                     onChange={(code) => {
                                       setValue(fieldName, code)
                                     }}
@@ -105,7 +105,7 @@ export const BrandLanguageCheckboxGroupTable = ({
   }, [JSON.stringify(selection), JSON.stringify(fields)])
 }
 
-const LangCodeDialog = ({ dialog, onChange }) => {
+const CodeDialog = ({ value, dialog, onChange }) => {
   let title = useTrans({
     zh: `品牌语言代码`,
     en: `Brand Culture Code`
@@ -124,7 +124,7 @@ const LangCodeDialog = ({ dialog, onChange }) => {
         hideBackdrop={true}
         minWidth="max-content"
       >
-        <Input name="code" />
+        <Input name="code" defaultValue={value} />
       </FormDialog>
     </Backdrop>
   )

@@ -329,7 +329,7 @@ const useResellerData = (id) => {
     ),
     currencies: mapCheckedByCode(
       reseller?.currencies ?? [],
-      currencyData?.items
+      currencyData?.items ?? []
     ),
     gameProviders: mapCheckedById(
       reseller?.gameProviders ?? [],

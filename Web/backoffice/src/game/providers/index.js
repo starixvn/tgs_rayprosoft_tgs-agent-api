@@ -16,6 +16,8 @@ import equals from "fast-deep-equal"
 import { FormProvider, useForm } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import { useGameProviderList } from "./client"
+import { EditButton } from "./edit"
+import { GameProviderStatusMenu } from "./status"
 
 export { Code }
 
@@ -25,6 +27,7 @@ export const Content = () => {
     return null
   }
 
+  return null
   return <Body />
 }
 
@@ -122,8 +125,8 @@ const SearchBar = ({ code = "", name = "", search, isLoading, ...props }) => {
 const useColumns = ({ items = [], mutate }) => {
   let columns = [
     {
-      accessor: "id",
-      Header: <Trans zh="ID" en="ID" />,
+      accessor: "code",
+      Header: <Trans zh="游戏商代码" en="Code" />,
       disableSortBy: true,
       headCell: {
         textAlign: "center"
@@ -134,7 +137,7 @@ const useColumns = ({ items = [], mutate }) => {
     },
     {
       accessor: "name",
-      Header: <Trans zh="厂商名称" en="Name" />,
+      Header: <Trans zh="游戏商名称" en="Name" />,
       disableSortBy: true,
       headCell: {
         textAlign: "center"
@@ -144,27 +147,19 @@ const useColumns = ({ items = [], mutate }) => {
       }
     },
     {
-      id: "maintenanceTime",
-      accessor: (record) => record,
-      Header: <Trans zh="定期维护时间" en="Periodic Maintenance Time" />,
+      accessor: "description",
+      Header: <Trans zh="简介" en="Description" />,
       disableSortBy: true,
       headCell: {
         textAlign: "center"
       },
       cell: {
         textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { day, start, end } = value
-        return (
-          <Text.Block whiteSpace="nowrap">
-            {`${useFormattedDay(day)} ${start} - ${end}`}
-          </Text.Block>
-        )
       }
     },
     {
-      accessor: "status",
+      id: "status",
+      accessor: (row) => row,
       Header: <Trans zh="状态" en="Status" />,
       disableSortBy: true,
       headCell: {
@@ -176,9 +171,25 @@ const useColumns = ({ items = [], mutate }) => {
       Cell: ({ value }) => {
         return (
           <Box alignX="center">
-            <StatusMenu value={value} />
+            <GameProviderStatusMenu record={value} />
           </Box>
         )
+      }
+    },
+    dateTimeColumn({
+      accessor: "updatedOn",
+      Header: <Trans zh="最新更新" en="Updated On" />,
+      disableSortBy: true
+    }),
+    {
+      accessor: "updatedByUsername",
+      Header: <Trans zh="更改者" en="Updated By" />,
+      disableSortBy: true,
+      headCell: {
+        textAlign: "center"
+      },
+      cell: {
+        textAlign: "center"
       }
     }
   ]
@@ -203,7 +214,6 @@ const useColumns = ({ items = [], mutate }) => {
         return (
           <Set orientation="vertical" alignX="center">
             <EditButton record={value} onSubmitted={mutate} />
-            <EditPresetButton />
           </Set>
         )
       }
