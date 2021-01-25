@@ -40,7 +40,7 @@ const Body = () => {
   let { pageIndex, pageSize, username = "" } = state
 
   let { data, isLoading, mutate } = useAdminList(toApiParams(state))
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items: data?.items })
 
   return (
     <PageContent
@@ -111,7 +111,7 @@ const useSearchInputPlaceHolder = () =>
     en: "Input admin user name"
   })
 
-const useColumns = ({ mutate }) => {
+const useColumns = ({ mutate, items = [] }) => {
   let columns = [
     sequenceColumn(),
     {
@@ -229,5 +229,5 @@ const useColumns = ({ mutate }) => {
     })
   }
 
-  return useMemo(() => columns)
+  return useMemo(() => columns, [JSON.stringify(items)])
 }

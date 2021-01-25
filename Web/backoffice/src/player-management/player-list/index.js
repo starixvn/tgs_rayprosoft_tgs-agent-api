@@ -45,7 +45,7 @@ const Body = () => {
     toApiParams(state)
   )
 
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items: data?.items })
 
   return (
     <PageContent
@@ -117,7 +117,7 @@ const SearchBar = ({ search, isLoading, ...props }) => {
 const useSearchInputPlaceHolder = () =>
   useTrans({ zh: "用户名输入框", en: "Input user name" })
 
-const useColumns = ({ mutate } = {}) => {
+const useColumns = ({ mutate, items = [] } = {}) => {
   let columns = [
     sequenceColumn(),
     {
@@ -184,5 +184,5 @@ const useColumns = ({ mutate } = {}) => {
     })
   }
 
-  return useMemo(() => columns)
+  return useMemo(() => columns, [JSON.stringify(items)])
 }

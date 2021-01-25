@@ -32,7 +32,7 @@ const Body = () => {
   let { pageIndex, pageSize } = state
 
   let { data, isLoading, mutate } = useDepartmentList(toApiParams(state))
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items: data?.items })
 
   return (
     <PageContent
@@ -56,7 +56,7 @@ const Body = () => {
   )
 }
 
-const useColumns = ({ mutate }) => {
+const useColumns = ({ mutate, items = [] }) => {
   let columns = [
     sequenceColumn(),
     {
@@ -104,5 +104,5 @@ const useColumns = ({ mutate }) => {
       }
     })
   }
-  return useMemo(() => columns)
+  return useMemo(() => columns, [JSON.stringify(items)])
 }

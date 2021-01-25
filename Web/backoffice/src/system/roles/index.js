@@ -44,7 +44,7 @@ const Body = () => {
   let userRoleId = useUserRoleId()
   let items = data?.items.filter(({ id }) => id != userRoleId)
 
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items })
   return (
     <PageContent
       title={<Trans zh="权限组管理" en="Roles" />}
@@ -112,7 +112,7 @@ const useSearchInputPlaceHolder = () =>
     en: "Input role name"
   })
 
-const useColumns = ({ mutate }) => {
+const useColumns = ({ mutate, items = [] }) => {
   let columns = [
     sequenceColumn(),
     {
@@ -163,6 +163,7 @@ const useColumns = ({ mutate }) => {
       },
       Cell: ({ value }) => {
         let { id, name, isRoot } = value
+
         return (
           <Box alignX="center">
             <Set>
@@ -181,5 +182,5 @@ const useColumns = ({ mutate }) => {
     })
   }
 
-  return useMemo(() => columns)
+  return useMemo(() => columns, [JSON.stringify(items)])
 }
