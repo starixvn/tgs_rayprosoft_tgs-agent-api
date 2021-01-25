@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Icon, Table as _Table, Pagination, Set, Spinner, Box } from "bumbag"
 import ReactTable, { useTable as _useTable } from "react-table"
@@ -147,6 +147,7 @@ export const Table = ({
     zh: "下一页",
     en: "Next page"
   })
+
   return (
     <>
       {isLoading && (
@@ -155,7 +156,7 @@ export const Table = ({
         </Box>
       )}
       {!isLoading && (
-        <Set orientation="vertical">
+        <Set orientation="vertical" position="relative">
           <_Table width="100%" overflow="auto" {...getTableProps()} {...props}>
             {head === true && <Head table={table} />}
             {body === true && <Body table={table} />}
