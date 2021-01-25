@@ -5,7 +5,7 @@ using TGS.Services.BackOffice.Application.Models.Language;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.BetLimitHandlers
+namespace TGS.Services.BackOffice.Application.Queries.LanguageHandlers
 {
     public class GetLanguageQueryHandler : Handler<GetLanguageRequest,
         GetLanguageResponse>

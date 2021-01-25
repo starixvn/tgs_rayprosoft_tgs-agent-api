@@ -126,4 +126,10 @@
   <data name="CodeExisted" xml:space="preserve">
     <value>代码已存在</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>代码必填</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>名称必填</value>
+  </data>
 </root>

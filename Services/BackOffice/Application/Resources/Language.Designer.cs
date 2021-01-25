@@ -70,11 +70,29 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Culture code is required..
+        /// </summary>
+        public static string CultureCodeRequired {
+            get {
+                return ResourceManager.GetString("CultureCodeRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Language code existed already..
         /// </summary>
         public static string LanguageCodeExisted {
             get {
                 return ResourceManager.GetString("LanguageCodeExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language code is required..
+        /// </summary>
+        public static string LanguageCodeRequired {
+            get {
+                return ResourceManager.GetString("LanguageCodeRequired", resourceCulture);
             }
         }
         

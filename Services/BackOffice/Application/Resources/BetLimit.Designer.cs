@@ -61,6 +61,42 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Code is required..
+        /// </summary>
+        public static string CodeRequired {
+            get {
+                return ResourceManager.GetString("CodeRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max bet must greater than min bet..
+        /// </summary>
+        public static string MaxbetGreaterThanMinbet {
+            get {
+                return ResourceManager.GetString("MaxbetGreaterThanMinbet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Min bet can&apos;t greater than 100..
+        /// </summary>
+        public static string MinBetGreaterThan100 {
+            get {
+                return ResourceManager.GetString("MinBetGreaterThan100", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Min bet must greater than 0..
+        /// </summary>
+        public static string MinbetGreaterThanZero {
+            get {
+                return ResourceManager.GetString("MinbetGreaterThanZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bet limit is not found..
         /// </summary>
         public static string NotFound {

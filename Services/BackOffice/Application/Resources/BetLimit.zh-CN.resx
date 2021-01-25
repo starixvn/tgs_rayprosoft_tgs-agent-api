@@ -120,4 +120,16 @@
   <data name="NotFound" xml:space="preserve">
     <value>找不到限红</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>代码必填</value>
+  </data>
+  <data name="MinBetGreaterThan100" xml:space="preserve">
+    <value>百分比不能超过100</value>
+  </data>
+  <data name="MaxbetGreaterThanMinbet" xml:space="preserve">
+    <value>限红必须大于限红起点</value>
+  </data>
+  <data name="MinbetGreaterThanZero" xml:space="preserve">
+    <value>限红起点必须大于0</value>
+  </data>
 </root>

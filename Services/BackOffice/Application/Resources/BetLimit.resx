@@ -100,4 +100,16 @@
   <data name="NotFound" xml:space="preserve">
     <value>Bet limit is not found.</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>Code is required.</value>
+  </data>
+  <data name="MinBetGreaterThan100" xml:space="preserve">
+    <value>Min bet can't greater than 100.</value>
+  </data>
+  <data name="MaxbetGreaterThanMinbet" xml:space="preserve">
+    <value>Max bet must greater than min bet.</value>
+  </data>
+  <data name="MinbetGreaterThanZero" xml:space="preserve">
+    <value>Min bet must greater than 0.</value>
+  </data>
 </root>
