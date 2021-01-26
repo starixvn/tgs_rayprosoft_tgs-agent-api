@@ -187,94 +187,96 @@ const ActionBar = ({ mutate, onBrandChange }) => {
 }
 
 const useColumns = ({ mutate, statusName }) => {
-  let columns = [
-    sequenceColumn(),
-    {
-      accessor: "subject",
-      Header: <Trans zh="主题" en="Subject" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "createdByUsername",
-      Header: <Trans zh="操作人" en="Operator" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    dateTimeColumn({
-      accessor: "createdOn",
-      Header: <Trans zh="创建时间" en="Created On" />,
-      disableSortBy: true
-    }),
-    {
-      id: "status",
-      accessor: (record) => record,
-      Header: <Trans zh="状态" en="Status" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { status } = value
-        return (
-          <Text.Block
-            css={css`
-              white-space: nowrap;
-            `}
-          >
-            <StatusLabel value={status} />
-          </Text.Block>
-        )
-      }
-    }
-  ]
-
   let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
-  let hasAnyMenu = statusName === InVerifyName ? hasVerifyAuth : hasViewAuth
 
-  if (hasAnyMenu) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
+  return useMemo(() => {
+    let columns = [
+      sequenceColumn(),
+      {
+        accessor: "subject",
+        Header: <Trans zh="主题" en="Subject" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
       },
-      cell: {
-        textAlign: "center"
+      {
+        accessor: "createdByUsername",
+        Header: <Trans zh="操作人" en="Operator" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
       },
-      accessor: (row) => {
-        return row
-      },
-      Cell: ({ value }) => {
-        return (
-          <Box alignX="center">
-            <Set>
-              {statusName === InVerifyName && (
-                <VerifyButton record={value} onSubmitted={mutate} />
-              )}
-              {(statusName === PublishedName ||
-                statusName === RejectedName) && <ViewButton record={value} />}
-            </Set>
-          </Box>
-        )
+      dateTimeColumn({
+        accessor: "createdOn",
+        Header: <Trans zh="创建时间" en="Created On" />,
+        disableSortBy: true
+      }),
+      {
+        id: "status",
+        accessor: (record) => record,
+        Header: <Trans zh="状态" en="Status" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { status } = value
+          return (
+            <Text.Block
+              css={css`
+                white-space: nowrap;
+              `}
+            >
+              <StatusLabel value={status} />
+            </Text.Block>
+          )
+        }
       }
-    })
-  }
+    ]
 
-  return useMemo(() => columns, [statusName])
+    let hasAnyMenu = statusName === InVerifyName ? hasVerifyAuth : hasViewAuth
+
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        accessor: (row) => {
+          return row
+        },
+        Cell: ({ value }) => {
+          return (
+            <Box alignX="center">
+              <Set>
+                {statusName === InVerifyName && (
+                  <VerifyButton record={value} onSubmitted={mutate} />
+                )}
+                {(statusName === PublishedName ||
+                  statusName === RejectedName) && <ViewButton record={value} />}
+              </Set>
+            </Box>
+          )
+        }
+      })
+    }
+    return columns
+  }, [statusName])
 }

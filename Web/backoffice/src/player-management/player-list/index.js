@@ -45,7 +45,7 @@ const Body = () => {
     toApiParams(state)
   )
 
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items: data?.items })
 
   return (
     <PageContent
@@ -117,72 +117,75 @@ const SearchBar = ({ search, isLoading, ...props }) => {
 const useSearchInputPlaceHolder = () =>
   useTrans({ zh: "用户名输入框", en: "Input user name" })
 
-const useColumns = ({ mutate } = {}) => {
-  let columns = [
-    sequenceColumn(),
-    {
-      Header: <Trans zh="用户名" en="User name" />,
-      accessor: "username",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      Header: <Trans zh="VIP 等级" en="VIP Level" />,
-      disableSortBy: true,
-      accessor: "vipLevel",
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      disableSortBy: true,
-      Header: <Trans zh="状态" en="Status" />,
-      accessor: "status",
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => <PlayerStatusLabel value={value} />
-    }
-  ]
-
+const useColumns = ({ mutate, items = [] } = {}) => {
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      accessor: (row) => {
-        return row
-      },
-      Cell: ({ value }) => {
-        return (
-          <Box alignX="center">
-            <Set>
-              <ViewButton player={value} />
-              <EditButton player={value} onSubmitted={mutate} />
-            </Set>
-          </Box>
-        )
-      }
-    })
-  }
 
-  return useMemo(() => columns)
+  return useMemo(() => {
+    let columns = [
+      sequenceColumn(),
+      {
+        Header: <Trans zh="用户名" en="User name" />,
+        accessor: "username",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        Header: <Trans zh="VIP 等级" en="VIP Level" />,
+        disableSortBy: true,
+        accessor: "vipLevel",
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        disableSortBy: true,
+        Header: <Trans zh="状态" en="Status" />,
+        accessor: "status",
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => <PlayerStatusLabel value={value} />
+      }
+    ]
+
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        accessor: (row) => {
+          return row
+        },
+        Cell: ({ value }) => {
+          return (
+            <Box alignX="center">
+              <Set>
+                <ViewButton player={value} />
+                <EditButton player={value} onSubmitted={mutate} />
+              </Set>
+            </Box>
+          )
+        }
+      })
+    }
+
+    return columns
+  }, [JSON.stringify(items)])
 }

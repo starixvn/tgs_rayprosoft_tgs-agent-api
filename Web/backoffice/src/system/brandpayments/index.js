@@ -270,193 +270,194 @@ const useColumns = ({
   items = []
 }) => {
   let hasUpdateAuth = useIsDisplayMenuByRoute([UpdateMenu])
-  let columns = [
-    {
-      id: "displayOrder",
-      accessor: (record) => record,
-      Header: <Trans zh="序" en="Order" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, number: displayOrder = "" } = value
-        return (
-          <Input
-            type="number"
-            size="small"
-            min="0"
-            minLength="1"
-            width="5em"
-            defaultValue={displayOrder}
-            onChange={(event) => {
-              let value = event.target.value
-              let number = parseInt(value)
-              if (Number.isFinite(number)) {
-                changeDisplayOrder({
-                  id,
-                  value: number
-                })
-              }
-            }}
-          />
-        )
-      }
-    },
-    {
-      accessor: "paymentName",
-      Header: <Trans zh="支付厂商" en="Payment Vendor" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "paymentMethodName",
-      Header: <Trans zh="支付方式" en="Payment Method" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      accessor: "paymentChannelName",
-      Header: <Trans zh="支付通道" en="Payment Channel" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "channelName",
-      Header: <Trans zh="通道名称" en="Channel Name" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      id: "target",
-      accessor: (record) => record,
-      Header: <Trans zh="开放对象" en="Target" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        return <ConditionDetail record={value} />
-      }
-    },
-    {
-      id: "designatedUsers",
-      accessor: (record) => record,
-      Header: <Trans zh="特定用户" en="Designated Users" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      Cell: ({ value }) => <DesignatedPlayersLink record={value} />
-    },
-    {
-      id: "limit",
-      accessor: (record) => record,
-      Header: <Trans zh="单笔限额" en="Limit" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      Cell: ({ value }) => {
-        //TODO: format number?
-        return (
-          <Text.Block whiteSpace="nowrap">
-            {value.transferLimitFrom} - {value.transferLimitTo}
-          </Text.Block>
-        )
-      }
-    },
-    {
-      id: "paymentStatus",
-      accessor: (record) => record,
-      Header: <Trans zh="状态" en="Status" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        return (
-          <StatusToggleButton
-            record={value}
-            disabled={!hasUpdateAuth}
-            onSubmitted={mutate}
-          />
-        )
-      }
-    }
-  ]
-
   let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
   let hasEditAuth = useIsDisplayMenuByRoute([UpdateMenu])
-  if (hasViewAuth || hasEditAuth) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
+
+  return useMemo(() => {
+    let columns = [
+      {
+        id: "displayOrder",
+        accessor: (record) => record,
+        Header: <Trans zh="序" en="Order" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, number: displayOrder = "" } = value
+          return (
+            <Input
+              type="number"
+              size="small"
+              min="0"
+              minLength="1"
+              width="5em"
+              defaultValue={displayOrder}
+              onChange={(event) => {
+                let value = event.target.value
+                let number = parseInt(value)
+                if (Number.isFinite(number)) {
+                  changeDisplayOrder({
+                    id,
+                    value: number
+                  })
+                }
+              }}
+            />
+          )
+        }
       },
-      cell: {
-        textAlign: "center"
+      {
+        accessor: "paymentName",
+        Header: <Trans zh="支付厂商" en="Payment Vendor" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
       },
-      accessor: (row) => {
-        return row
+      {
+        accessor: "paymentMethodName",
+        Header: <Trans zh="支付方式" en="Payment Method" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        }
       },
-      Cell: ({ value }) => {
-        return (
-          <Set alignX="center">
-            <EditButton record={value} onSubmitted={mutate} />
-            <FeeEditButton record={value} onSubmitted={mutate} />
-            <LogsButton record={value} />
-          </Set>
-        )
+      {
+        accessor: "paymentChannelName",
+        Header: <Trans zh="支付通道" en="Payment Channel" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "channelName",
+        Header: <Trans zh="通道名称" en="Channel Name" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        }
+      },
+      {
+        id: "target",
+        accessor: (record) => record,
+        Header: <Trans zh="开放对象" en="Target" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return <ConditionDetail record={value} />
+        }
+      },
+      {
+        id: "designatedUsers",
+        accessor: (record) => record,
+        Header: <Trans zh="特定用户" en="Designated Users" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        Cell: ({ value }) => <DesignatedPlayersLink record={value} />
+      },
+      {
+        id: "limit",
+        accessor: (record) => record,
+        Header: <Trans zh="单笔限额" en="Limit" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        Cell: ({ value }) => {
+          //TODO: format number?
+          return (
+            <Text.Block whiteSpace="nowrap">
+              {value.transferLimitFrom} - {value.transferLimitTo}
+            </Text.Block>
+          )
+        }
+      },
+      {
+        id: "paymentStatus",
+        accessor: (record) => record,
+        Header: <Trans zh="状态" en="Status" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <StatusToggleButton
+              record={value}
+              disabled={!hasUpdateAuth}
+              onSubmitted={mutate}
+            />
+          )
+        }
       }
-    })
-  }
-  return useMemo(() => columns, [transferType, JSON.stringify(items)])
+    ]
+
+    if (hasViewAuth || hasEditAuth) {
+      columns.push({
+        id: "actions",
+        accessor: (row) => row,
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Set alignX="center">
+              <EditButton record={value} onSubmitted={mutate} />
+              <FeeEditButton record={value} onSubmitted={mutate} />
+              <LogsButton record={value} />
+            </Set>
+          )
+        }
+      })
+    }
+    return columns
+  }, [transferType, JSON.stringify(items)])
 }
 
 const searchInputPlaceHolder = () =>

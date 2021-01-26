@@ -40,7 +40,7 @@ const Body = () => {
   let { pageIndex, pageSize, username = "" } = state
 
   let { data, isLoading, mutate } = useAdminList(toApiParams(state))
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items: data?.items })
 
   return (
     <PageContent
@@ -96,7 +96,6 @@ const SearchBar = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={useSearchInputPlaceHolder()}
-            autocomplete="off"
           />
           <SearchButton isLoading={isLoading} />
         </Set>
@@ -111,123 +110,123 @@ const useSearchInputPlaceHolder = () =>
     en: "Input admin user name"
   })
 
-const useColumns = ({ mutate }) => {
-  let columns = [
-    sequenceColumn(),
-    {
-      Header: <Trans zh="用户名" en="Username" />,
-      accessor: "username",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      Header: <Trans zh="姓名" en="Name" />,
-      accessor: "name",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      Header: <Trans zh="部门" en="Department" />,
-      accessor: "departmentName",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      Header: <Trans zh="权限组" en="Role" />,
-      accessor: "role",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      Header: <Trans zh="最近登入IP" en="Last Login IP" />,
-      accessor: "lastLoginIp",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    dateTimeColumn({
-      Header: <Trans zh="最近登入时间" en="Last Login Time" />,
-      accessor: "lastLoginTime",
-      disableSortBy: true
-    }),
-    dateTimeColumn({
-      Header: <Trans zh="创建时间" en="Created On" />,
-      accessor: "createdOn",
-      disableSortBy: true
-    }),
-    {
-      disableSortBy: true,
-      Header: <Trans zh="状态" en="Status" />,
-      accessor: "status",
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => (
-        <Text.Block
-          css={css`
-            white-space: nowrap;
-          `}
-        >
-          <AdminStatusLabel value={value} />
-        </Text.Block>
-      )
-    }
-  ]
-
+const useColumns = ({ mutate, items = [] }) => {
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
+
+  return useMemo(() => {
+    let columns = [
+      sequenceColumn(),
+      {
+        Header: <Trans zh="用户名" en="Username" />,
+        accessor: "username",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
       },
-      cell: {
-        textAlign: "center"
+      {
+        Header: <Trans zh="姓名" en="Name" />,
+        accessor: "name",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
       },
-      accessor: (row) => {
-        return row
+      {
+        Header: <Trans zh="部门" en="Department" />,
+        accessor: "departmentName",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        }
       },
-      Cell: ({ value }) => {
-        return (
-          <Set orientation="vertical" alignX="center">
-            <EditButton user={value} onSubmitted={mutate} />
-            <EditPasswordButton user={value} onSubmitted={mutate} />
-          </Set>
+      {
+        Header: <Trans zh="权限组" en="Role" />,
+        accessor: "role",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        }
+      },
+      {
+        Header: <Trans zh="最近登入IP" en="Last Login IP" />,
+        accessor: "lastLoginIp",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      dateTimeColumn({
+        Header: <Trans zh="最近登入时间" en="Last Login Time" />,
+        accessor: "lastLoginTime",
+        disableSortBy: true
+      }),
+      dateTimeColumn({
+        Header: <Trans zh="创建时间" en="Created On" />,
+        accessor: "createdOn",
+        disableSortBy: true
+      }),
+      {
+        disableSortBy: true,
+        Header: <Trans zh="状态" en="Status" />,
+        accessor: "status",
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => (
+          <Text.Block
+            css={css`
+              white-space: nowrap;
+            `}
+          >
+            <AdminStatusLabel value={value} />
+          </Text.Block>
         )
       }
-    })
-  }
+    ]
 
-  return useMemo(() => columns)
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        accessor: (row) => row,
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Set orientation="vertical" alignX="center">
+              <EditButton user={value} onSubmitted={mutate} />
+              <EditPasswordButton user={value} onSubmitted={mutate} />
+            </Set>
+          )
+        }
+      })
+    }
+    return columns
+  }, [JSON.stringify(items)])
 }

@@ -67,23 +67,29 @@ const FooterHeight = "0px" //"30px"
 
 const Layout = ({ children }) => {
   return (
-    <PageWithHeader sticky header={<Header />} headerHeight={HeaderHeight}>
+    <PageWithHeader
+      sticky
+      header={<Header />}
+      headerHeight={HeaderHeight}
+      overflow="hidden"
+    >
       <PageWithSidebar
         id="pageWithSidebar"
         sidebar={<Sidebar />}
         sidebarPlacement="left"
         sidebarWidth={`${sidebarWidth}px`}
+        minHeight={`calc(100vh - ${HeaderHeight})`}
+        maxHeight={`calc(100vh - ${HeaderHeight})`}
+        overflow="hidden"
         css={css`
           & .bb-PageWithSidebarSidebarExpandedWrapper {
             width: ${getSidebarWidth()}px;
           }
-
-          & .bb-PageWithSidebarContent {
-            height: 100%;
-          }
         `}
       >
-        <Box minHeight={`calc(100% - ${FooterHeight})`}>{children}</Box>
+        <Box maxHeight={`calc(100vh - ${HeaderHeight})`} overflow="auto">
+          {children}
+        </Box>
         {/* <Footer /> */}
       </PageWithSidebar>
     </PageWithHeader>

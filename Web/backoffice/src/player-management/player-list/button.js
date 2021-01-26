@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Box } from "bumbag"
+import { Box, Dialog } from "bumbag"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
@@ -48,7 +48,6 @@ export const ViewButton = ({ player, ...props }) => {
 
 export const EditButton = ({ player, onSubmitted, ...props }) => {
   let dialog = useModalState()
-  let disclosureRef = useRef()
 
   let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
   if (!isDisplay) {
@@ -57,7 +56,7 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
 
   return (
     <>
-      <Disclosure ref={disclosureRef} {...dialog}>
+      <Disclosure {...dialog}>
         <Trans zh="修改" en="Edit" />
       </Disclosure>
       {dialog.visible && (
@@ -66,20 +65,13 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
           playerCode={player.playerCode}
           onSubmitted={onSubmitted}
           dialog={dialog}
-          finalFocusRef={disclosureRef}
         />
       )}
     </>
   )
 }
 
-const TabsDialog = ({
-  playerCode,
-  edit = false,
-  dialog,
-  finalFocusRef,
-  ...props
-}) => {
+const TabsDialog = ({ playerCode, edit = false, dialog, ...props }) => {
   const readonly = !edit
   let tab = useTabState({
     selectedId: PlayerId
@@ -109,9 +101,10 @@ const TabsDialog = ({
       {isLoading && <LoadingBackdrop />}
       {isError && <AlertDialog {...error} onClickClose={onClickClose} />}
       {data && (
-        <Modal
+        <Dialog.Modal
           title={title}
-          finalFocusRef={finalFocusRef}
+          hideOnClickOutside={false}
+          showCloseButton={true}
           placement="top"
           {...dialog}
           css={css`
@@ -136,7 +129,7 @@ const TabsDialog = ({
               onClickClose={onClickClose}
             />
           )}
-        </Modal>
+        </Dialog.Modal>
       )}
     </>
   )

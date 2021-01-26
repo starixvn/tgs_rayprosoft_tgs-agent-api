@@ -246,7 +246,7 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
   })
 
   if (isLoadingBrand) {
-    return <LoadingBackdrop {...dialog} onClickClose={dialog.hide} />
+    return <LoadingBackdrop {...dialog} />
   }
 
   if (brandError) {
@@ -257,6 +257,7 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
 
   const onSubmit = (data) => {
     data = normalizeFormData(data)
+    //setSubmit(data)
     console.log("TODO: submit brand", data)
   }
 
@@ -331,12 +332,7 @@ const normalizeFormData = ({ brandCultures, brandGameProviders, ...data }) => {
     },
     []
   )
-  console.log(
-    "gameProviders",
-    gameProviders,
-    "data.gameProviders",
-    data?.gameProviders
-  )
+
   return {
     ...data,
     brandCultures,

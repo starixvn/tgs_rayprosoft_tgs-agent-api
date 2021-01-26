@@ -71,7 +71,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     }).ToArray(),
                     Currencies = gameProvider.Currencies.Select(x => new GameProviderCurrencyModel
                     {
-                        CurrencyCode = x.CurrencyCode,
+                        Code = x.CurrencyCode,
                         GameProviderCurrencyCode = x.GameProviderCurrencyCode
                     }).ToArray(),
                     Languages = gameProvider.Languages.Select(x => new GameProviderLanguageModel

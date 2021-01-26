@@ -359,161 +359,163 @@ const useColumns = ({
   items = []
 }) => {
   let hasUpdateAuth = useIsDisplayMenuByRoute([UpdateMenu])
-  let columns = [
-    tabStatusName != EffectiveName
-      ? sequenceColumn()
-      : {
-          id: "displayOrder",
-          accessor: (record) => record,
-          Header: <Trans zh="序" en="Order" />,
-          disableSortBy: true,
-          headCell: {
-            textAlign: "center"
+  let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
+  let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
+
+  return useMemo(() => {
+    let columns = [
+      tabStatusName != EffectiveName
+        ? sequenceColumn()
+        : {
+            id: "displayOrder",
+            accessor: (record) => record,
+            Header: <Trans zh="序" en="Order" />,
+            disableSortBy: true,
+            headCell: {
+              textAlign: "center"
+            },
+            cell: {
+              textAlign: "center"
+            },
+            Cell: ({ value }) => {
+              let { id, displayOrder = "" } = value
+              return (
+                <Input
+                  type="number"
+                  size="small"
+                  min="0"
+                  minLength="1"
+                  width="5em"
+                  defaultValue={displayOrder}
+                  onChange={(event) => {
+                    let value = event.target.value
+                    let number = parseInt(value)
+                    if (Number.isFinite(number)) {
+                      changeDisplayOrder({
+                        id,
+                        value: number
+                      })
+                    }
+                  }}
+                />
+              )
+            }
           },
-          cell: {
-            textAlign: "center"
-          },
-          Cell: ({ value }) => {
-            let { id, displayOrder = "" } = value
+      {
+        accessor: "subject",
+        Header: <Trans zh="主题" en="Subject" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      {
+        accessor: "createdByUsername",
+        Header: <Trans zh="操作人" en="Operator" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        }
+      },
+      dateTimeColumn({
+        accessor: "updatedOn",
+        Header: <Trans zh="最近更新时间" en="Last Update" />,
+        disableSortBy: true
+      }),
+      dateTimeColumn({
+        accessor: "from",
+        Header: <Trans zh="开始时间" en="Start" />,
+        disableSortBy: true
+      }),
+      dateTimeColumn({
+        accessor: "to",
+        Header: <Trans zh="结束时间" en="End" />,
+        disableSortBy: true
+      }),
+      {
+        id: "status",
+        accessor: (record) => record,
+        Header: <Trans zh="状态" en="Status" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { status } = value
+          if (tabStatusName === EffectiveName) {
             return (
-              <Input
-                type="number"
-                size="small"
-                min="0"
-                minLength="1"
-                width="5em"
-                defaultValue={displayOrder}
-                onChange={(event) => {
-                  let value = event.target.value
-                  let number = parseInt(value)
-                  if (Number.isFinite(number)) {
-                    changeDisplayOrder({
-                      id,
-                      value: number
-                    })
-                  }
+              <StatusToggleButton
+                record={value}
+                onSubmitted={() => {
+                  //clearCache()
+                  mutate(undefined)
                 }}
+                disabled={!hasUpdateAuth}
               />
             )
           }
-        },
-    {
-      accessor: "subject",
-      Header: <Trans zh="主题" en="Subject" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    {
-      accessor: "createdByUsername",
-      Header: <Trans zh="操作人" en="Operator" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    },
-    dateTimeColumn({
-      accessor: "updatedOn",
-      Header: <Trans zh="最近更新时间" en="Last Update" />,
-      disableSortBy: true
-    }),
-    dateTimeColumn({
-      accessor: "from",
-      Header: <Trans zh="开始时间" en="Start" />,
-      disableSortBy: true
-    }),
-    dateTimeColumn({
-      accessor: "to",
-      Header: <Trans zh="结束时间" en="End" />,
-      disableSortBy: true
-    }),
-    {
-      id: "status",
-      accessor: (record) => record,
-      Header: <Trans zh="状态" en="Status" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { status } = value
-        if (tabStatusName === EffectiveName) {
+
           return (
-            <StatusToggleButton
-              record={value}
-              onSubmitted={() => {
-                //clearCache()
-                mutate(undefined)
-              }}
-              disabled={!hasUpdateAuth}
-            />
+            <Text.Block
+              css={css`
+                white-space: nowrap;
+              `}
+            >
+              <StatusLabel value={status} />
+            </Text.Block>
           )
         }
-
-        return (
-          <Text.Block
-            css={css`
-              white-space: nowrap;
-            `}
-          >
-            <StatusLabel value={status} />
-          </Text.Block>
-        )
       }
+    ]
+
+    let hasAnyMenu = hasViewAuth
+    switch (tabStatusName) {
+      case InVerifyName:
+        hasAnyMenu = hasVerifyAuth
+        break
     }
-  ]
 
-  let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
-  let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
-  let hasAnyMenu = hasViewAuth
-  switch (tabStatusName) {
-    case InVerifyName:
-      hasAnyMenu = hasVerifyAuth
-      break
-  }
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        accessor: (row) => row,
+        disableSortBy: true,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          return (
+            <Set alignX="center">
+              {tabStatusName === InVerifyName && (
+                <VerifyButton record={value} onSubmitted={mutate} />
+              )}
+              {tabStatusName === EffectiveName && (
+                <EditButton record={value} onSubmitted={mutate} />
+              )}
+              {(tabStatusName === EffectiveName ||
+                tabStatusName === ExpiredName ||
+                tabStatusName === RejectedName) && (
+                <ViewButton record={value} />
+              )}
+            </Set>
+          )
+        }
+      })
+    }
 
-  if (hasAnyMenu) {
-    columns.push({
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      accessor: (row) => {
-        return row
-      },
-      Cell: ({ value }) => {
-        return (
-          <Set alignX="center">
-            {tabStatusName === InVerifyName && (
-              <VerifyButton record={value} onSubmitted={mutate} />
-            )}
-            {tabStatusName === EffectiveName && (
-              <EditButton record={value} onSubmitted={mutate} />
-            )}
-            {(tabStatusName === EffectiveName ||
-              tabStatusName === ExpiredName ||
-              tabStatusName === RejectedName) && <ViewButton record={value} />}
-          </Set>
-        )
-      }
-    })
-  }
-  return useMemo(() => {
     return columns
   }, [tabStatusName, JSON.stringify(items)])
 }

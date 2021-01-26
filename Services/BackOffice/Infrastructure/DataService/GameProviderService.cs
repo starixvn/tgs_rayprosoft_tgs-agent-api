@@ -181,14 +181,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private async Task<HashSet<GameProviderCurrency>> GenerateCurrencies(GameProvider gameProvider,
             GameProviderRequest request)
         {
-            var currencyCodes = request.Currencies.Select(x => x.CurrencyCode);
+            var currencyCodes = request.Currencies.Select(x => x.Code);
             var currencies = await _repository.Currencies.Where(x => currencyCodes.Contains(x.Code)).ToArrayAsync();
             var gameProviderCurrencies = currencies.Select(x => new GameProviderCurrency
             {
                 GameProviderId = gameProvider.Id,
                 CurrencyCode = x.Code,
                 GameProviderCurrencyCode =
-                    request.Currencies.First(c => c.CurrencyCode == x.Code).GameProviderCurrencyCode
+                    request.Currencies.First(c => c.Code == x.Code).GameProviderCurrencyCode
             });
             return new HashSet<GameProviderCurrency>(gameProviderCurrencies);
         }

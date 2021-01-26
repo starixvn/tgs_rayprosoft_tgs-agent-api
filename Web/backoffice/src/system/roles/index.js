@@ -44,7 +44,7 @@ const Body = () => {
   let userRoleId = useUserRoleId()
   let items = data?.items.filter(({ id }) => id != userRoleId)
 
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items })
   return (
     <PageContent
       title={<Trans zh="权限组管理" en="Roles" />}
@@ -97,7 +97,6 @@ const SearchBar = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={useSearchInputPlaceHolder()}
-            autocomplete="off"
           />
           <SearchButton isLoading={isLoading} />
         </Set>
@@ -112,74 +111,78 @@ const useSearchInputPlaceHolder = () =>
     en: "Input role name"
   })
 
-const useColumns = ({ mutate }) => {
-  let columns = [
-    sequenceColumn(),
-    {
-      id: "name",
-      accessor: "name",
-      Header: "权限组名称",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      width: 400
-    },
-    {
-      id: "isRoot",
-      accessor: "isRoot",
-      Header: "根管理权限",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value: isRoot }) => {
-        return (
-          <Box alignX="center">
-            {isRoot ? <Icon icon={faCheck} type="font-awesome" /> : ""}
-          </Box>
-        )
-      }
-    }
-  ]
-
+const useColumns = ({ mutate, items = [] }) => {
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      disableSortBy: true,
-      accessor: (row) => row,
-      Header: "操作",
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, name, isRoot } = value
-        return (
-          <Box alignX="center">
-            <Set>
-              <EditButton id={id} onSubmitted={mutate} />
-              <CopyButton
-                id={id}
-                name={name}
-                onSubmitted={mutate}
-                disabled={isRoot}
-              />
-              <DeleteButton id={id} name={name} onSubmitted={mutate} />
-            </Set>
-          </Box>
-        )
-      }
-    })
-  }
 
-  return useMemo(() => columns)
+  return useMemo(() => {
+    let columns = [
+      sequenceColumn(),
+      {
+        id: "name",
+        accessor: "name",
+        Header: <Trans zh="权限组名称" en="Name" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        width: 400
+      },
+      {
+        id: "isRoot",
+        accessor: "isRoot",
+        Header: <Trans zh="根管理权限" en="Root" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value: isRoot }) => {
+          return (
+            <Box alignX="center">
+              {isRoot ? <Icon icon={faCheck} type="font-awesome" /> : ""}
+            </Box>
+          )
+        }
+      }
+    ]
+
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        disableSortBy: true,
+        accessor: (row) => row,
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, name, isRoot } = value
+
+          return (
+            <Box alignX="center">
+              <Set>
+                <EditButton id={id} onSubmitted={mutate} />
+                <CopyButton
+                  id={id}
+                  name={name}
+                  onSubmitted={mutate}
+                  disabled={isRoot}
+                />
+                <DeleteButton id={id} name={name} onSubmitted={mutate} />
+              </Set>
+            </Box>
+          )
+        }
+      })
+    }
+    return columns
+  }, [JSON.stringify(items)])
 }

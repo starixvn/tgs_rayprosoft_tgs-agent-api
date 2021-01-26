@@ -5,7 +5,6 @@ import Checkbox from "../checkbox"
 import { useFormContext, useFieldArray } from "react-hook-form"
 import { Trans } from "../i18n"
 import { isAllChecked } from "../checkbox/isAllChecked"
-import { FieldArrayCheckboxGroup } from "../checkbox/FieldArrayCheckboxGroup"
 
 export const CurrencyCheckboxGroupTable = ({
   name = "currencyCodes",
@@ -30,30 +29,17 @@ export const CurrencyCheckboxGroupTable = ({
       <Set orientation="vertical" width={width}>
         <Table width={width}>
           <Table.Head>
-            <Table.Row>
-              <Table.HeadCell>
-                <Checkbox
-                  checked={allChecked}
-                  onChange={(event) => {
-                    let checked = event.target.checked
-                    fields.forEach((field, index) => {
-                      setValue(fieldName(name, field), checked)
-                    })
-                  }}
-                  disabled={disabled}
-                />
-              </Table.HeadCell>
-              <Table.HeadCell textAlign="center">
-                <Trans zh="代码" en="Code" />
-              </Table.HeadCell>
-              <Table.HeadCell textAlign="center">
-                <Trans zh="币种" en="Currency" />
-              </Table.HeadCell>
-            </Table.Row>
+            <CurrencyCheckboxGroupTableHeadRow
+              name={name}
+              fields={fields}
+              checkedFieldName={defaultCheckedFieldName}
+              allChecked={allChecked}
+              disabled={disabled}
+            />
           </Table.Head>
           <Table.Body>
             {fields.map((field) => (
-              <Row
+              <CurrencyCheckboxGroupTableRow
                 key={field._id}
                 name={name}
                 disabled={disabled}
@@ -67,7 +53,50 @@ export const CurrencyCheckboxGroupTable = ({
   }, [JSON.stringify(selection), JSON.stringify(fields)])
 }
 
-const Row = ({ name, disabled, field }) => {
+export const CurrencyCheckboxGroupTableHeadRow = ({
+  name,
+  fields,
+  checkedFieldName = defaultCheckedFieldName,
+  allChecked,
+  disabled,
+  addonAfter
+}) => {
+  let { control, setValue, watch, register } = useFormContext()
+
+  return useMemo(() => {
+    return (
+      <Table.Row>
+        <Table.HeadCell>
+          <Checkbox
+            checked={allChecked}
+            onChange={(event) => {
+              let checked = event.target.checked
+              fields.forEach((field, index) => {
+                setValue(checkedFieldName(name, field), checked)
+              })
+            }}
+            disabled={disabled}
+          />
+        </Table.HeadCell>
+        <Table.HeadCell textAlign="center">
+          <Trans zh="代码" en="Code" />
+        </Table.HeadCell>
+        <Table.HeadCell textAlign="center">
+          <Trans zh="币种" en="Currency" />
+        </Table.HeadCell>
+        {addonAfter}
+      </Table.Row>
+    )
+  }, [JSON.stringify(fields), allChecked])
+}
+
+export const CurrencyCheckboxGroupTableRow = ({
+  name,
+  disabled,
+  field,
+  checkedFieldName = defaultCheckedFieldName,
+  addonAfter
+}) => {
   let formContext = useFormContext()
 
   return useMemo(() => {
@@ -76,7 +105,7 @@ const Row = ({ name, disabled, field }) => {
         <Table.Cell textAlign="center">
           <Checkbox
             key={field._id}
-            name={fieldName(name, field)}
+            name={checkedFieldName(name, field)}
             checkboxRef={formContext?.register?.()}
             defaultChecked={field.checked}
             disabled={disabled}
@@ -84,9 +113,11 @@ const Row = ({ name, disabled, field }) => {
         </Table.Cell>
         <Table.Cell textAlign="center">{field.code}</Table.Cell>
         <Table.Cell textAlign="center">{field.name}</Table.Cell>
+        {addonAfter}
       </Table.Row>
     )
   }, [field])
 }
 
-const fieldName = (name, checkboxField) => `${name}.${checkboxField.code}`
+const defaultCheckedFieldName = (name, checkboxField) =>
+  `${name}.${checkboxField.code}`

@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Icon, Table as _Table, Pagination, Set } from "bumbag"
+import { Icon, Table as _Table, Pagination, Set, Spinner, Box } from "bumbag"
 import ReactTable, { useTable as _useTable } from "react-table"
 import { fromIsDescending, equalsDescending } from "./order"
-import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons"
+import {
+  faCaretUp,
+  faCaretDown,
+  faSlash,
+  faTimes,
+  faSearchMinus
+} from "@fortawesome/free-solid-svg-icons"
+import { Trans, useTrans } from "../i18n"
 
 const DefaultState = {
   pageIndex: 0,
@@ -131,32 +138,50 @@ export const Table = ({
   }, [JSON.stringify(tableState?.sortBy)])
 
   const getPage = () => pageIndex + 1
+
+  let previousText = useTrans({
+    zh: "前一页",
+    en: "Previous page"
+  })
+  let nextText = useTrans({
+    zh: "下一页",
+    en: "Next page"
+  })
+
   return (
     <>
-      <Set orientation="vertical">
-        <_Table width="100%" overflow="auto" {...getTableProps()} {...props}>
-          {head === true && <Head table={table} />}
-          {body === true && <Body table={table} />}
-          {children}
-          {foot === true && <Foot table={table} />}
-        </_Table>
-        {usePagination && pageCount > 0 && (
-          <Pagination
-            currentPage={getPage()}
-            onChangePage={(page) => {
-              let pageIndex = page - 1
-              setPageIndex(pageIndex)
+      {isLoading && (
+        <Box alignX="center">
+          <Spinner />
+        </Box>
+      )}
+      {!isLoading && (
+        <Set orientation="vertical" position="relative">
+          <_Table width="100%" overflow="auto" {...getTableProps()} {...props}>
+            {head === true && <Head table={table} />}
+            {body === true && <Body table={table} />}
+            {children}
+            {foot === true && <Foot table={table} />}
+          </_Table>
+          {usePagination && pageCount > 0 && (
+            <Pagination
+              previousText={previousText}
+              nextText={nextText}
+              currentPage={getPage()}
+              onChangePage={(page) => {
+                let pageIndex = page - 1
+                setPageIndex(pageIndex)
 
-              gotoPage(pageIndex)
-            }}
-            numberOfPages={pageCount}
-            css={css`
-              z-index: 0;
-            `}
-          />
-        )}
-      </Set>
-      {isLoading && <div>loading</div>}
+                gotoPage(pageIndex)
+              }}
+              numberOfPages={pageCount}
+              css={css`
+                z-index: 0;
+              `}
+            />
+          )}
+        </Set>
+      )}
     </>
   )
 }
@@ -213,7 +238,7 @@ const Foot = ({ table }) => {
 }
 
 const Body = ({ table }) => {
-  let { rows, getTableBodyProps, prepareRow } = table
+  let { rows, getTableBodyProps, prepareRow, columns } = table
 
   return (
     <_Table.Body {...getTableBodyProps()}>
@@ -228,6 +253,13 @@ const Body = ({ table }) => {
           </_Table.Row>
         )
       })}
+      {!rows.length && (
+        <_Table.Row>
+          <_Table.Cell textAlign="center" colSpan={columns.length}>
+            <Trans zh="查无资料" en="No Search Result" />
+          </_Table.Cell>
+        </_Table.Row>
+      )}
     </_Table.Body>
   )
 }

@@ -32,7 +32,7 @@ const Body = () => {
   let { pageIndex, pageSize } = state
 
   let { data, isLoading, mutate } = useDepartmentList(toApiParams(state))
-  let columns = useColumns({ mutate })
+  let columns = useColumns({ mutate, items: data?.items })
 
   return (
     <PageContent
@@ -56,53 +56,57 @@ const Body = () => {
   )
 }
 
-const useColumns = ({ mutate }) => {
-  let columns = [
-    sequenceColumn(),
-    {
-      Header: <Trans zh="部门名称" en="Name" />,
-      id: "name",
-      accessor: "name",
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      }
-    }
-  ]
+const useColumns = ({ mutate, items = [] }) => {
   let hasAnyMenu = useHasSubMenuByRoute()
-  if (hasAnyMenu) {
-    columns.push({
-      disableSortBy: true,
-      accessor: (row) => {
-        return {
-          id: row.id,
-          name: row.name
+  return useMemo(() => {
+    let columns = [
+      sequenceColumn(),
+      {
+        Header: <Trans zh="部门名称" en="Name" />,
+        id: "name",
+        accessor: "name",
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
         }
-      },
-      Header: "操作",
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      Cell: ({ value }) => {
-        let { id, name } = value
-        return (
-          <Box alignX="center">
-            {
-              <Set>
-                <EditButton id={id} name={name} onSubmitted={mutate} />
-                <DeleteButton id={id} name={name} onSubmitted={mutate} />
-              </Set>
-            }
-          </Box>
-        )
       }
-    })
-  }
-  return useMemo(() => columns)
+    ]
+
+    if (hasAnyMenu) {
+      columns.push({
+        id: "actions",
+        disableSortBy: true,
+        accessor: (row) => {
+          return {
+            id: row.id,
+            name: row.name
+          }
+        },
+        Header: <Trans zh="操作" en="Actions" />,
+        headCell: {
+          textAlign: "center"
+        },
+        cell: {
+          textAlign: "center"
+        },
+        Cell: ({ value }) => {
+          let { id, name } = value
+          return (
+            <Box alignX="center">
+              {
+                <Set>
+                  <EditButton id={id} name={name} onSubmitted={mutate} />
+                  <DeleteButton id={id} name={name} onSubmitted={mutate} />
+                </Set>
+              }
+            </Box>
+          )
+        }
+      })
+    }
+    return columns
+  }, [JSON.stringify(items)])
 }
