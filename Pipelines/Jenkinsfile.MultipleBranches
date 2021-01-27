@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+    stages {
+		stage('Build') {
+			steps {
+				sh "dotnet build tgs.sln"
+				echo "build solution"
+			}
+		}
+		
+		stage('Test') {
+			steps {
+				sh  "cd .."  
+				sh  "dotnet test tgs.sln --filter Unit /p:CollectCoverage=true"  
+				echo "test tgs.sln"
+			}
+		}
+    }
+}
