@@ -296,9 +296,6 @@ services:
       - ./localstack/bin:/docker-entrypoint-initaws.d
 
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfiles/Dockerfile
     image: postgres:12
     container_name: postgres
     environment:
@@ -326,7 +323,7 @@ services:
     networks:
       - tgs
     restart: unless-stopped
-    
+
   scheduler:
     build:
       context: .
