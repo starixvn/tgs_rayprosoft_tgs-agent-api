@@ -238,10 +238,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private async Task<HashSet<BrandGame>> GenerateWithUpdateGamesAsync(Brand brand,
             UpdateBrandRequest request)
         {
-            var gameIds = request.Games.Select(x => x.GameId);
-
+            var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId);
             var games = await _repository.Games
-                .Where(x => gameIds.Contains(x.Id)).ToArrayAsync();
+                .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var brandGames = games.Select(x =>
             {
@@ -254,15 +253,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     Game = x
                 };
 
-                if (originBrandGame != null)
+                if (originBrandGame == null)
                 {
-                    brandGame.Id = originBrandGame.Id;
-                    brandGame.Status = originBrandGame.Status;
-                    brandGame.Tag = originBrandGame.Tag;
-                    brandGame.DisplayOrder = originBrandGame.DisplayOrder;
-                    brandGame.Rebate = originBrandGame.Rebate;
-                    brandGame.EffectiveBettingPercentage = originBrandGame.EffectiveBettingPercentage;
+                    return brandGame;
                 }
+
+                brandGame.Id = originBrandGame.Id;
+                brandGame.Status = originBrandGame.Status;
+                brandGame.Tag = originBrandGame.Tag;
+                brandGame.DisplayOrder = originBrandGame.DisplayOrder;
+                brandGame.Rebate = originBrandGame.Rebate;
+                brandGame.EffectiveBettingPercentage = originBrandGame.EffectiveBettingPercentage;
 
                 return brandGame;
             });
@@ -277,9 +278,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
             {
                 BrandGroup = brandGroup,
-                //BrandGroupId = brandGroup.Id,
                 BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
-                //BrandGame = brand.Games.First(g => g.GameId == brandGameId)
             });
             return new HashSet<BrandGroupGame>(brandGroupGames);
         }

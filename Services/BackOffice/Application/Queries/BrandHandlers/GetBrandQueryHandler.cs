@@ -23,9 +23,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         {
             var brand = await _service.GetBrandAsync(x => x.Id == request.Id,
                 x => x
-                    .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
-                    .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                    .Where(BrandId != null, l => l.Id == BrandId));
+                    .Where(ResellerId, r => r.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId, l => l.LicenseeId == LicenseeId)
+                    .Where(BrandId, l => l.Id == BrandId));
 
             if (brand == null)
             {
@@ -39,6 +39,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                 {
                     Id = brand.Id,
                     LicenseeId = brand.LicenseeId,
+                    LicenseeName = brand.Licensee.Name,
                     Code = brand.Code,
                     Name = brand.Name,
                     Status = brand.Status,
