@@ -7,17 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SqlScripts\Indexes\brands.sql" />
-    <None Remove="SqlScripts\Indexes\gameProviders.sql" />
-    <None Remove="SqlScripts\Indexes\games.sql" />
-    <None Remove="SqlScripts\Indexes\licensees.sql" />
-    <None Remove="SqlScripts\Indexes\paymentChannels.sql" />
-    <None Remove="SqlScripts\Indexes\paymentMethods.sql" />
-    <None Remove="SqlScripts\Indexes\payments.sql" />
-    <None Remove="SqlScripts\Indexes\resellers.sql" />
-    <None Remove="SqlScripts\Indexes\roles.sql" />
-    <None Remove="SqlScripts\Indexes\trgm.sql" />
-    <None Remove="SqlScripts\Indexes\users.sql" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

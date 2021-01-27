@@ -846,4 +846,18 @@ Scenario: 10.d - Get bet status of cancel transaction
 		| stake   | 0     |
 		| winloss | 0     |
 
+Scenario:  11.a - Place bet with the same external round id in differnet game
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given set random external round id
+	Given I place bet with set round id of $10 for game "1_1"
+		And I win bet for $20
+		And player having balance of $110
+	When I place bet with set round id of $10 for game "5_201608"
+		And I lose bet
+	Then I will receive settle bet response of no error and balance of $100 
+		And the round with set round id belongs to games
+			| GameId   |
+			| 1_1      |
+			| 5_201608 |
 

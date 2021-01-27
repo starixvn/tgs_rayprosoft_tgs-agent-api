@@ -25,7 +25,7 @@ namespace TGS.Services.Operations.Queries
         async Task<LocalizedStringResult[]> ILocalizationStringQueries.GetLocalizationByGameProviderIdAsync(
             Guid gameProviderId)
         {
-            const string spName = "localization_get_localization_by_game_provider_id";
+            const string spName = "dbo.localization_get_localization_by_game_provider_id";
             var r = await _repository.SqlQueryMultipleAsync<LocalizedStringResult>(spName,
                 parameters: new Dictionary<string, object>
                 {

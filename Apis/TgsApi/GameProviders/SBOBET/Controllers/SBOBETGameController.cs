@@ -67,10 +67,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
 
-            var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, externalRoundId);
+            var playerCode = request.PlayerCode;
+            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+
+            var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
             var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(gameProviderId,
-                request.PlayerCode, externalRoundId,
-                actionTypes);
+                playerCode, externalRoundId, gameId, actionTypes);
 
             var betData = _map.Request(data, externalRoundId, request, roundStatus, gameActionExternalIds);
             var r = await _actions.SettleBetAsync(betData);
@@ -93,13 +95,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet, CancelTransaction};
 
             var data = await _services.GetGameProviderConfigurationDataAsync();
-
-            var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
 
+            var gameProviderId = data.GameProviderId;
+            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+
             var gameActionExternalIds =
-                await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode,
-                    externalRoundId, actionTypes);
+                await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
+                    gameId,
+                    actionTypes);
 
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);
@@ -110,8 +114,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         public async Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
-            var ga = await _services.GetValidGameActionsAsync(data.GameProviderId, request.PlayerCode,
-                request.ExternalRoundId);
+
+            var gameProviderId = data.GameProviderId;
+            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+
+            var ga = await _services.GetValidGameActionsAsync(gameProviderId, request.PlayerCode,
+                request.ExternalRoundId,
+                gameId);
 
             if (ga == null)
             {
@@ -138,10 +147,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         {
             var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalRoundId;
-            var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, externalRoundId);
+
+            var playerCode = request.PlayerCode;
+            var gameId = await _services.GetGameIdAsync(data.GameProviderId, request.ExternalGameId, data.PlatformType);
+
+            var roundStatus =
+                await _services.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
+
             var gameActionExternalIds =
-                await _services.GetValidGameActionExternalIdsAsync(gameProviderId, request.PlayerCode,
-                    request.ExternalRoundId);
+                await _services.GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId);
 
             if (roundStatus == RoundStatus.Closed && gameActionExternalIds.Length == 0)
             {

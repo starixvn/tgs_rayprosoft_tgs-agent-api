@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Log;

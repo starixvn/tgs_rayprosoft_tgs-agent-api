@@ -41,7 +41,7 @@ namespace TGS.Core.Infrastructures.Nats
         }
 
         ConnState INatsManager.GetConnectStatus() =>
-            _connectionFactory.Value.State;
+            _connectionFactory.Value?.State ?? ConnState.DISCONNECTED;
 
         Task INatsManager.PublishAsync<T>(string topic, T content) =>
             PublishAsync(topic, content);

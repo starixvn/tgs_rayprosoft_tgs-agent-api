@@ -1188,19 +1188,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_action_batch_id");
 
-                    b.Property<Guid>("GameProviderConfigurationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("game_provider_configuration_id");
-
                     b.Property<bool>("IsClosingRound")
                         .HasColumnType("boolean")
                         .HasColumnName("is_closing_round");
-
-                    b.Property<string>("PlayerCode")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code");
 
                     b.Property<string>("PlayerIp")
                         .IsRequired()
@@ -1244,10 +1234,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("unsettled_bets");
 
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("wallet_id");
-
                     b.Property<decimal>("WinLoss")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -1259,17 +1245,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("GameActionBatchId")
                         .HasDatabaseName("ix_game_actions_game_action_batch_id");
 
-                    b.HasIndex("GameProviderConfigurationId")
-                        .HasDatabaseName("ix_game_actions_game_provider_configuration_id");
-
                     b.HasIndex("ReferencedGameActionId")
                         .HasDatabaseName("ix_game_actions_referenced_game_action_id");
 
                     b.HasIndex("RoundId")
                         .HasDatabaseName("ix_game_actions_round_id");
-
-                    b.HasIndex("WalletId")
-                        .HasDatabaseName("ix_game_actions_wallet_id");
 
                     b.ToTable("game_actions", "bet");
                 });
@@ -2618,8 +2598,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
+                        .HasColumnType("text")
                         .HasColumnName("player_code");
 
                     b.Property<short>("Status")
@@ -2653,21 +2632,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("GameId")
                         .HasDatabaseName("ix_rounds_game_id");
 
-                    b.HasIndex("GameProviderConfigurationId")
-                        .HasDatabaseName("ix_rounds_game_provider_configuration_id");
-
                     b.HasIndex("GameProviderId")
                         .HasDatabaseName("ix_rounds_game_provider_id");
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_rounds_player_code");
 
-                    b.HasIndex("WalletId")
-                        .HasDatabaseName("ix_rounds_wallet_id");
-
-                    b.HasIndex("ExternalRoundId", "PlayerCode", "WalletId", "GameProviderConfigurationId")
+                    b.HasIndex("ExternalRoundId", "PlayerCode", "GameProviderId", "GameId")
                         .IsUnique()
-                        .HasDatabaseName("ux_rounds_external_round_id_composite");
+                        .HasDatabaseName("ux_rounds_external_round_id_composite")
+                        .IncludeProperties(new[] { "GameProviderConfigurationId", "WalletId" });
 
                     b.ToTable("rounds", "bet");
                 });
@@ -3526,13 +3500,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasForeignKey("GameActionBatchId")
                         .HasConstraintName("fk_game_actions_game_action_batches_game_action_batch_id");
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProviderConfiguration", "GameProviderConfiguration")
-                        .WithMany()
-                        .HasForeignKey("GameProviderConfigurationId")
-                        .HasConstraintName("fk_game_actions_game_provider_configurations_game_provider_configuration_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.GameAction", "ReferencedGameAction")
                         .WithMany("FollowUpGameActions")
                         .HasForeignKey("ReferencedGameActionId")
@@ -3545,22 +3512,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Wallet", "Wallet")
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .HasConstraintName("fk_game_actions_wallets_wallet_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("GameActionBatch");
-
-                    b.Navigation("GameProviderConfiguration");
 
                     b.Navigation("ReferencedGameAction");
 
                     b.Navigation("Round");
-
-                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameActionBatch", b =>
@@ -3972,63 +3928,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Language");
 
                     b.Navigation("Reseller");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Round", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId")
-                        .HasConstraintName("fk_rounds_brands_brand_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .HasConstraintName("fk_rounds_games_game_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProviderConfiguration", "GameProviderConfiguration")
-                        .WithMany()
-                        .HasForeignKey("GameProviderConfigurationId")
-                        .HasConstraintName("fk_rounds_game_providers_configurations_game_provider_configuration_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
-                        .WithMany()
-                        .HasForeignKey("GameProviderId")
-                        .HasConstraintName("fk_rounds_game_providers_game_provider_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_rounds_players_player_code")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Wallet", "Wallet")
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .HasConstraintName("fk_rounds_wallets_wallet_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Game");
-
-                    b.Navigation("GameProvider");
-
-                    b.Navigation("GameProviderConfiguration");
-
-                    b.Navigation("Player");
-
-                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundDetail", b =>

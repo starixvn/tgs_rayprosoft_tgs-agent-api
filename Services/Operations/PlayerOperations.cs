@@ -43,7 +43,7 @@ namespace TGS.Services.Operations
 
         Task<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
 
-        Task<Guid> GetMainWalletIdByPlayerCodeAsync(string playerCode);
+        Task<Guid> GetDefaultWalletIdByPlayerCodeAsync(string playerCode);
 
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
 
@@ -203,7 +203,7 @@ namespace TGS.Services.Operations
                 v => Guid.Parse(v),
                 cachedPlayer => cachedPlayer?.BrandId ?? Guid.Empty);
 
-        Task<Guid> IPlayerOperations.GetMainWalletIdByPlayerCodeAsync(string playerCode) =>
+        Task<Guid> IPlayerOperations.GetDefaultWalletIdByPlayerCodeAsync(string playerCode) =>
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.DefaultWalletId,
                 v => Guid.Parse(v),
                 cachedPlayer => cachedPlayer?.DefaultWalletId ?? Guid.Empty);

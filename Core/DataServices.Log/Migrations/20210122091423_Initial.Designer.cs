@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Log;
 namespace TGS.Core.DataServices.Log.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20210122025402_Initial")]
+    [Migration("20210122091423_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

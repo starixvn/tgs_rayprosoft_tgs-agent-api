@@ -76,7 +76,7 @@ namespace TGS.Services.GameOperations.Data
 
             var playerRelatedData = new PlayerRelatedData
             {
-                Wallet = new WalletData
+                Wallet = new()
                 {
                     Id = player.DefaultWalletId,
                     CurrencyCode = player.DefaultWalletCurrencyCode,

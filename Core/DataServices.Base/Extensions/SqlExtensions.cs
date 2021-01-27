@@ -3,6 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql;
 using TGS.Core.DataServices.Base.Interfaces;
 
 namespace TGS.Core.DataServices.Base.Extensions
@@ -25,18 +26,12 @@ namespace TGS.Core.DataServices.Base.Extensions
             var conn = repository.GetDbConnection();
             var transaction = repository.CurrentTransaction?.GetDbTransaction();
 
-            var multi = await conn.QueryMultipleAsync(sql, parameters, commandType: commandType,
-                transaction: transaction);
-            var entities = await multi.ReadAsync<TEntity>();
-            var count = await multi.ReadFirstOrDefaultAsync<int>();
-
-            return (entities, count);
-            //return (await multi.ReadAsync<TEntity>(), await multi.ReadFirstOrDefaultAsync<int>());
+            var multi = await conn.QueryMultipleAsync(sql, parameters, commandType: commandType, transaction: transaction);
+            return (await multi.ReadAsync<TEntity>(), await multi.ReadFirstOrDefaultAsync<int>());
         }
 
         public static Task<TEntity> SqlQuerySingleAsync<TEntity>(this IBaseRepository repository, string sql,
-            CommandType commandType = CommandType.StoredProcedure,
-            IEnumerable<KeyValuePair<string, object>> parameters = null)
+            CommandType commandType = CommandType.StoredProcedure, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             var conn = repository.GetDbConnection();
             var transaction = repository.CurrentTransaction?.GetDbTransaction();
@@ -46,8 +41,7 @@ namespace TGS.Core.DataServices.Base.Extensions
         }
 
         public static Task<int> ExecuteSqlCommandAsync(this IBaseRepository repository, string sql,
-            CommandType commandType = CommandType.StoredProcedure,
-            IEnumerable<KeyValuePair<string, object>> parameters = null)
+            CommandType commandType = CommandType.StoredProcedure, IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
             var conn = repository.GetDbConnection();
             var transaction = repository.CurrentTransaction?.GetDbTransaction();

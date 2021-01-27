@@ -918,9 +918,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             foreach (var gp in _gameProvidersCreated.Values.Take(3))
             {
                 var games = (from gm in gp.Games
-                            where !gm.Type.ToString().Contains("Lobby")
-                            group gm by gm.Type into g
-                            select g.Take(1)).SelectMany(g => g);
+                             where !gm.Type.ToString().Contains("Lobby")
+                             group gm by gm.Type
+                             into g
+                             select g.Take(1)).SelectMany(g => g);
 
                 foreach (var game in games)
                 {
@@ -934,7 +935,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
                     var externalGameActionGroupId = round.ExternalRoundId;
                     var betAmount = ((decimal) rand.Next(5, 20)).Negate();
-                    var placeBetAction = CreateGameAction(p, betAmount, gameProviderConfiguration.Id, round.Id,
+                    var placeBetAction = CreateGameAction(betAmount, round.Id,
                         PlaceBet, externalGameActionGroupId, createdOn, createdOn);
 
                     await _repository.GameActions.AddAsync(placeBetAction);
@@ -958,7 +959,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         round.WinLoss = winloss;
                     }
 
-                    var resultAction = CreateGameAction(p, resultAmount, gameProviderConfiguration.Id, round.Id,
+                    var resultAction = CreateGameAction(resultAmount, round.Id,
                         resultActionType, externalGameActionGroupId, closedOn, closedOn, turnover, winloss,
                         placeBetAction.Id);
 
@@ -980,11 +981,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 Id = roundId,
                 ExternalRoundId = "EXT_" + roundId,
-                GameId = game.Id,
+                PlayerCode = player.PlayerCode,
                 GameProviderId = gameProvider.Id,
+                GameId = game.Id,
                 GameProviderConfigurationId = configuration.Id,
                 WalletId = player.DefaultWalletId,
-                PlayerCode = player.PlayerCode,
                 CurrencyCode = player.DefaultWalletCurrencyCode,
                 PlatformType = game.PlatformType,
                 Status = RoundStatus.Closed,
@@ -996,10 +997,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
         }
 
-        private static GameAction CreateGameAction(Player player, decimal amount,
-            Guid gameProviderConfigurationId, Guid roundId, GameActionType gameActionType,
-            string externalGameActionGroupId, DateTimeOffset recordedOn, DateTimeOffset sentOn, decimal turnover = 0,
-            decimal winloss = 0, Guid? refTransactionId = null, Guid? batchId = null)
+        private static GameAction CreateGameAction(decimal amount,
+            Guid roundId, GameActionType gameActionType, string externalGameActionGroupId, DateTimeOffset recordedOn,
+            DateTimeOffset sentOn, decimal turnover = 0, decimal winloss = 0, Guid? refTransactionId = null,
+            Guid? batchId = null)
         {
             var transactionId = Guid.NewGuid();
             var unsettledBets = gameActionType == PlaceBet ? amount : 0;
@@ -1010,12 +1011,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ExternalTransactionId = $"EXT_{transactionId}",
                 Type = gameActionType,
                 RoundId = roundId,
-                PlayerCode = player.PlayerCode,
-                WalletId = player.DefaultWalletId,
                 Turnover = turnover,
                 WinLoss = winloss,
                 UnsettledBets = unsettledBets,
-                GameProviderConfigurationId = gameProviderConfigurationId,
                 GameActionBatchId = batchId,
                 RecordedOn = recordedOn,
                 SentOn = sentOn,

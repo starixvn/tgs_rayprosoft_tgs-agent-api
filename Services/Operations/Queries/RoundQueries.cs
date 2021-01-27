@@ -9,7 +9,8 @@ namespace TGS.Services.Operations.Queries
 {
     public interface IRoundQueries
     {
-        Task<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string externalRoundId);
+        Task<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId,
+            int gameId);
     }
 
     public sealed class RoundQueries : IRoundQueries
@@ -21,12 +22,13 @@ namespace TGS.Services.Operations.Queries
             _repository = repository;
         }
 
-        Task<RoundStatus?> IRoundQueries.GetRoundStatusAsync(Guid gameProviderId, string externalRoundId)
-        {
-            return _repository.Rounds
-                .Where(r => r.GameProviderId == gameProviderId && r.ExternalRoundId == externalRoundId)
+        Task<RoundStatus?> IRoundQueries.GetRoundStatusAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId,
+            int gameId) =>
+            _repository.Rounds
+                .Where(r => r.GameProviderId == gameProviderId && r.PlayerCode == playerCode &&
+                    r.ExternalRoundId == externalRoundId && r.GameId == gameId)
                 .Select(r => (RoundStatus?) r.Status)
                 .FirstOrDefaultAsync();
-        }
     }
 }

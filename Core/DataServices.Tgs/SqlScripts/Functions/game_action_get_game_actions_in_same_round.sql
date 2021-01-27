@@ -1,8 +1,8 @@
 CREATE OR REPLACE FUNCTION bet.game_action_get_game_actions_in_same_round(
-	game_provider_configuration_id uuid, 
+	game_provider_id uuid, 
 	player_code varchar,
-	wallet_id uuid,
-	external_round_id varchar)
+	external_round_id varchar,
+	game_id int)
 RETURNS TABLE(
 	"GameActionId" uuid,
 	"ReferenceGameActionId" uuid,
@@ -36,12 +36,13 @@ BEGIN
 			r.game_id,
 			r.status,
 			r.external_round_id,
+			r.wallet_id,
 			r.created_on 
 		from bet.rounds r
-		where r.external_round_id = $4
+		where r.external_round_id = $3
 		and r.player_code = $2
-		and r.wallet_id = $3
-		and r.game_provider_configuration_id = $1
+		and r.game_provider_id = $1
+		and r.game_id = $4
 		for update
 	)
 	select 
@@ -62,7 +63,7 @@ BEGIN
 		ga.recorded_on as "GameActionRecordedOn",
 		ga.sent_on as "GameActionSentOn",
 		ga.bet_type as "BetType",
-		ga.wallet_id as "WalletId"
+		r.wallet_id as "WalletId"
 	from round r 
 	join bet.game_actions ga on ga.round_id = r.id 
 	where ga.recorded_on >= (r.created_on - 5 * interval '1 minute')

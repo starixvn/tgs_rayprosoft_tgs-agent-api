@@ -7,10 +7,6 @@ namespace TGS.Core.DataServices.Tgs.Models
     public class GameAction
     {
         public Guid Id { get; set; }
-        public Guid GameProviderConfigurationId { get; set; }
-        public virtual GameProviderConfiguration GameProviderConfiguration { get; set; }
-        public Guid WalletId { get; set; }
-        public virtual Wallet Wallet { get; set; }
         public Guid RoundId { get; set; }
         public virtual Round Round { get; set; }
         public string ExternalTransactionId { get; set; }
@@ -31,7 +27,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset? SentOn { get; set; }
         public bool IsClosingRound { get; set; }
         public bool? ClosingRoundExplicitRequest { get; set; }
-        public string PlayerCode { get; set; }
         public string PlayerIp { get; set; }
         public string Description { get; set; }
         public virtual ICollection<GameAction> FollowUpGameActions { get; set; }

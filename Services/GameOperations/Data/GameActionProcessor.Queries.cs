@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Base.CustomQueryParameters;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.GameOperations.Models.Data;
@@ -13,12 +12,11 @@ namespace TGS.Services.GameOperations.Data
     internal sealed partial class GameActionProcessor
     {
         private static Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repository,
-            string playerCode, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
+            Guid gameProviderConfigurationId, Guid walletId, string externalRoundId, int gameId)
         {
             return repository.Rounds
                 .Where(r => r.GameProviderConfigurationId == gameProviderConfigurationId &&
-                    r.PlayerCode == playerCode &&
-                    r.WalletId == walletId &&
+                    r.WalletId == walletId && r.GameId == gameId &&
                     r.ExternalRoundId == externalRoundId)
                 .Select(r => new RoundIdAndStatusData
                 {
@@ -30,16 +28,16 @@ namespace TGS.Services.GameOperations.Data
         }
 
         private static async Task<SameRoundActionData[]> GetGameActionsInSameRoundAsync(ITgsRepository repository,
-            string playerCode, Guid gameProviderConfigurationId, Guid walletId, string externalRoundId)
+            Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
         {
             const string sql = "bet.game_action_get_game_actions_in_same_round";
             var data = await repository.SqlQueryMultipleAsync<SameRoundActionData>(sql,
                 parameters: new Dictionary<string, object>
                 {
-                    {":game_provider_configuration_id", gameProviderConfigurationId},
+                    {":game_provider_id", gameProviderId},
                     {":player_code", playerCode},
-                    {":wallet_id", walletId},
-                    {":external_round_id", externalRoundId}
+                    {":external_round_id", externalRoundId},
+                    {":game_id", gameId}
                 });
 
             return data.ToArray();

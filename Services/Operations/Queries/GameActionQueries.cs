@@ -13,14 +13,14 @@ namespace TGS.Services.Operations.Queries
 {
     public interface IGameActionQueries
     {
-        Task<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId, bool onlyPlacements);
+        Task<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, int gameId, bool onlyPlacements);
 
         Task<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId, GameActionType[] gameActionTypes);
+            string externalRoundId, int gameId, GameActionType[] gameActionTypes);
 
         Task<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId);
+            string externalRoundId, int gameId);
     }
 
     public sealed class GameActionQueries : IGameActionQueries
@@ -33,7 +33,7 @@ namespace TGS.Services.Operations.Queries
         }
 
         async Task<GameActionExternalIds[]> IGameActionQueries.GetValidGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, bool onlyPlacements)
+            string playerCode, string externalRoundId, int gameId, bool onlyPlacements)
         {
             const string spName = "bet.game_action_get_valid_game_action_external_ids";
             var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName,
@@ -42,6 +42,7 @@ namespace TGS.Services.Operations.Queries
                     {":game_provider_id", gameProviderId},
                     {":player_code", playerCode},
                     {":external_round_id", externalRoundId},
+                    {":game_id", gameId},
                     {":only_placements", onlyPlacements}
                 });
 
@@ -49,7 +50,7 @@ namespace TGS.Services.Operations.Queries
         }
 
         async Task<GameActionExternalIds[]> IGameActionQueries.GetGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, GameActionType[] gameActionTypes)
+            string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes)
         {
             const string spName = "bet.game_action_get_game_action_external_ids";
             var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName, parameters:
@@ -58,6 +59,7 @@ namespace TGS.Services.Operations.Queries
                     {":game_provider_id", gameProviderId},
                     {":player_code", playerCode},
                     {":external_round_id", externalRoundId},
+                    {":game_id", gameId},
                     {":game_action_types", new ArrayParameter<int>(gameActionTypes.Select(s => (int) s).ToArray())}
                 });
 
@@ -65,7 +67,7 @@ namespace TGS.Services.Operations.Queries
         }
 
         async Task<GameActionData> IGameActionQueries.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId)
+            string playerCode, string externalRoundId, int gameId)
         {
             const string spName = "bet.game_action_get_game_actions_by_external_round_id";
             var r = await _repository.SqlQueryMultipleAsync<GameActionResult>(spName, parameters:
@@ -73,7 +75,8 @@ namespace TGS.Services.Operations.Queries
                 {
                     {":game_provider_id", gameProviderId},
                     {":player_code", playerCode},
-                    {":external_round_id", externalRoundId}
+                    {":external_round_id", externalRoundId},
+                    {":game_id", gameId}
                 });
 
             if (!r.Any())

@@ -85,7 +85,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
-            _uploader = new NpgsqlBulkUploader(this);
+            _uploader = new(this);
         }
 
         DbSet<Reseller> ITgsRepository.Resellers { get; set; }
