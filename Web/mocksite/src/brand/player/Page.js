@@ -50,7 +50,7 @@ import {
 } from "../../client/brand/player"
 import { useForm } from "react-hook-form"
 import { ChangePasswordDialog } from "./ChangePasswordDialog"
-import { EditPlayerInfoDialog } from "./InfoDialog"
+import { EditPlayerInfoDialog, ViewPlayerInfoDialog } from "./InfoDialog"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
   return (
@@ -147,7 +147,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username }) => {
         </Button>
       </DropdownMenu>
       {viewInfoDialog.visible && (
-        <playerInfoDialog
+        <ViewPlayerInfoDialog
           brandCode={brandCode}
           currency={currency}
           username={username}
