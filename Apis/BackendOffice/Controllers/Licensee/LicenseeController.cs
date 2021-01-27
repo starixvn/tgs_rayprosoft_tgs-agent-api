@@ -26,13 +26,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
         [Description("Get licensees: 營運商列表")]
         public Task<PagedResponse<LicenseeModel>> GetLicenseesAsync([FromQuery] GetLicenseesRequest request)
         {
-            return _service.GetLicenseesAsync()
+            return _service.GetLicenseesAsync(request)
                 .Where(ResellerId, x => x.ResellerId == ResellerId)
                 .Where(LicenseeId, x => x.Id == LicenseeId)
-                .Where(request.Keyword, x => EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%"))
                 .Select(x => new LicenseeModel
                 {
                     Id = x.Id,

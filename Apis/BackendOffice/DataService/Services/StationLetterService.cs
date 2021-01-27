@@ -33,8 +33,10 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             var imageNames = GetImageNames(stationLetter.Content);
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
+            stationLetter.Players = stationLetterPlayers;
             await _repository.StationLetters.AddAsync(stationLetter);
-            await _repository.BulkInsertAsync(stationLetterPlayers);
+
             await _repository.SaveChangesAsync();
 
             var file = new ObjectFileEventModel

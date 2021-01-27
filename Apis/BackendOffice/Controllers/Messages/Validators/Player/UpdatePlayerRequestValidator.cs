@@ -8,7 +8,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
         public UpdatePlayerRequestValidator()
         {
             RuleFor(p => p.Password)
-                .Equal(p => p.ConfirmedPassword).When(p => p.Password != null)
+                .Equal(p => p.ConfirmedPassword).When(p => p.Password != null && p.ConfirmedPassword != null)
                 .WithMessage(Resources.User.PasswordNotMatched)
                 .NotEmpty().When(p => p.Password != null).WithMessage(Resources.User.PasswordRequired)
                 .MinimumLength(8).When(p => p.Password != null).WithMessage(Resources.User.PasswordLengthAtLeast)

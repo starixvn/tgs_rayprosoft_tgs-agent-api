@@ -16,7 +16,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task<Licensee> GetLicenseeAsync(Expression<Func<Licensee, bool>> predicate,
             Func<IQueryable<Licensee>, IQueryable<Licensee>> preQuery = null, bool tracking = false);
 
-        IQueryable<Licensee> GetLicenseesAsync(bool tracking = false);
+        IQueryable<Licensee> GetLicenseesAsync(GetLicenseesRequest request, bool tracking = false);
         Task CreateLicenseeAsync(CreateLicenseeRequest request, string username);
         Task UpdateLicenseeAsync(Licensee licensee, UpdateLicenseeRequest request, string username);
         Task ChangeStatusAsync(Licensee licensee, Status status, string username);
@@ -78,8 +78,15 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(licensee).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<Licensee> ILicenseeService.GetLicenseesAsync(bool tracking) =>
-            tracking ? _repository.Licensees : _repository.Licensees.AsNoTracking();
+        IQueryable<Licensee> ILicenseeService.GetLicenseesAsync(GetLicenseesRequest request, bool tracking)
+        {
+            var queryable = tracking ? _repository.Licensees : _repository.Licensees.AsNoTracking();
+            return queryable.Where(x =>
+                EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
+                EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
+                EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
+                EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%"));
+        }
 
         Task<bool> ILicenseeService.ExistsAsync(Expression<Func<Licensee, bool>> predicate) =>
             _repository.Licensees.AnyAsync(predicate);

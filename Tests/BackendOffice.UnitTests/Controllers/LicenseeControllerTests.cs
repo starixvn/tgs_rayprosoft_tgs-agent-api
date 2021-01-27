@@ -56,7 +56,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _licenseeServiceMock.Setup(x => x.GetLicenseesAsync(false))
+            _licenseeServiceMock.Setup(x => x.GetLicenseesAsync(It.IsAny<GetLicenseesRequest>(), false))
                 .Returns(list);
 
             var response = await _controller.GetLicenseesAsync(request);
@@ -68,7 +68,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].Name.Should().Be(expectedRoles[i].Name);
             }
 
-            _licenseeServiceMock.Verify(p => p.GetLicenseesAsync(false));
+            _licenseeServiceMock.Verify(p => p.GetLicenseesAsync(It.IsAny<GetLicenseesRequest>(), false));
         }
 
         [Test]

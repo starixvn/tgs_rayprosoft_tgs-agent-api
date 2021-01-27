@@ -356,7 +356,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Verify(p => p.GetQueries());
 
-            _commandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<Announcement[]>(d =>
+            _commandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Announcement[]>(d =>
                 d.Length == request.Orders.Length)));
         }
 
