@@ -30,12 +30,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.RoundId)
                 .IsRequired();
 
-            builder.Property(c => c.WalletId)
-                .IsRequired();
-
-            builder.Property(c => c.GameProviderConfigurationId)
-                .IsRequired();
-
             builder.Property(c => c.RecordedOn)
                 .IsRequired();
 
@@ -66,10 +60,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Balance)
                 .HasPrecision(18, 6);
 
-            builder.Property(c => c.PlayerCode)
-                .HasMaxLength(16)
-                .IsRequired();
-
             builder.Property(c => c.PlayerIp)
                 .HasMaxLength(128)
                 .IsRequired();
@@ -86,9 +76,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(128);
 
             builder.Property(c => c.Description);
-
-            builder.Property(c => c.GameProviderConfigurationId)
-                .IsRequired();
 
             builder.HasOne(c => c.Round)
                 .WithMany(c => c.GameActions)
@@ -113,24 +100,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(c => c.GameActionBatchId)
                 .HasDatabaseName("ix_game_actions_game_action_batch_id");
-
-            builder.HasOne(c => c.GameProviderConfiguration)
-                .WithMany()
-                .HasForeignKey(c => c.GameProviderConfigurationId)
-                .HasConstraintName(
-                    "fk_game_actions_game_provider_configurations_game_provider_configuration_id");
-
-            builder.HasIndex(c => c.GameProviderConfigurationId)
-                .HasDatabaseName("ix_game_actions_game_provider_configuration_id");
-
-            builder.HasOne(c => c.Wallet)
-                .WithMany()
-                .HasForeignKey(c => c.WalletId)
-                .HasConstraintName(
-                    "fk_game_actions_wallets_wallet_id");
-
-            builder.HasIndex(c => c.WalletId)
-                .HasDatabaseName("ix_game_actions_wallet_id");
         }
     }
 }

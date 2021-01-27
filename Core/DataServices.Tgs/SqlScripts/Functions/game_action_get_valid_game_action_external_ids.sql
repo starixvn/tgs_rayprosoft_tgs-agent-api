@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION bet.game_action_get_valid_game_action_external_ids(
 	game_provider_id uuid, 
 	player_code varchar,
 	external_round_id varchar,
+	game_id int,
 	only_placements bool)
 RETURNS TABLE(
 	"ExternalBetId" varchar,
@@ -29,11 +30,10 @@ BEGIN
 	from bet.vw_valid_game_actions ga 
 	join bet.rounds r on r.id = ga.round_id 
 	where r.external_round_id = $3
-	and r.game_provider_id = $1
 	and r.player_code = $2
-	and ga.game_provider_configuration_id = r.game_provider_configuration_id 
-	and ga.wallet_id = r.wallet_id 
-	and ($4 = false or ga."type" = 0);
+	and r.game_provider_id = $1
+	and r.game_id = $4
+	and ($5 = false or ga."type" = 0);
 	
 END;
 $$

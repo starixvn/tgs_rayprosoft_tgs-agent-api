@@ -38,8 +38,9 @@ namespace TGS.Core.DataServices.Base.Extensions
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                     serverOption.UseTrigrams();
                 });
-
+                
                 option.UseSnakeCaseNamingConvention();
+
             }, poolSize);
 
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());

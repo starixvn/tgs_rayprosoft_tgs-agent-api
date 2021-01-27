@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION bet.game_action_get_game_action_external_ids(
 	game_provider_id uuid, 
 	player_code varchar,
 	external_round_id varchar,
+	game_id int,
 	game_action_types int[])
 RETURNS TABLE(
 	"ExternalBetId" varchar,
@@ -31,9 +32,8 @@ BEGIN
 	where r.external_round_id = $3
 	and r.game_provider_id = $1
 	and r.player_code = $2
-	and ga.game_provider_configuration_id = r.game_provider_configuration_id 
-	and ga.wallet_id  = r.wallet_id 
-	and ga."type" = any($4);
+	and r.game_id = $4
+	and ga."type" = any($5);
 	
 END;
 $$

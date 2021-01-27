@@ -15,7 +15,6 @@ using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.GameOperations.Validators;
 using TGS.Services.Operations.Validators;
 using static TGS.Core.Models.Enums.GameActionType;
-using GameActionData = TGS.Services.GameOperations.Models.Data.GameActionData;
 
 namespace TGS.Services.GameOperations.Data
 {
@@ -108,8 +107,8 @@ namespace TGS.Services.GameOperations.Data
             ThrowIfHaveNoRequiredIds(s);
             ValidateAmounts(s);
 
-            s = await FillRoundDataAsync(s);
             s = GetGame(s);
+            s = await FillRoundDataAsync(s);
 
             var (st, r) = await GetAndValidatePreviousActionsAsync(s);
             if (r != null)
@@ -145,8 +144,8 @@ namespace TGS.Services.GameOperations.Data
 
         private static async Task<GameActionState> FillRoundDataAsync(GameActionState s)
         {
-            var roundData = await GetRoundByExternalRoundIdAsync(s.Repository, s.PlayerData.PlayerCode,
-                s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId);
+            var roundData = await GetRoundByExternalRoundIdAsync(s.Repository,
+                s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId, s.GameId);
 
             if (roundData == null)
             {
@@ -195,15 +194,12 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var repository = s.Repository;
-            var gameProviderConfigurationId = s.GameProviderConfigurationId;
-            var walletId = s.PlayerData.Wallet.Id;
             var externalRoundId = s.ExternalRoundId;
 
             // get all transactions belonging to this round
             var actionsData =
-                await GetGameActionsInSameRoundAsync(repository, s.PlayerData.PlayerCode, gameProviderConfigurationId,
-                    walletId,
-                    externalRoundId);
+                await GetGameActionsInSameRoundAsync(repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
+                    externalRoundId, s.GameId);
 
             if (actionsData.Length == 0 && s.HasExtRefTransactionId)
             {
@@ -477,14 +473,14 @@ namespace TGS.Services.GameOperations.Data
 
             repository.Rounds.Add(new()
             {
-                Id = roundId,
-                GameProviderConfigurationId = s.GameProviderConfigurationId,
+                Id = roundId, 
                 ExternalRoundId = s.ExternalRoundId,
-                GameId = s.GameId,
                 GameProviderId = s.GameProvider.Id,
                 PlayerCode = s.PlayerData.PlayerCode,
-                PlatformType = s.PlatformType,
+                GameProviderConfigurationId = s.GameProviderConfigurationId,
                 WalletId = s.PlayerData.Wallet.Id,
+                GameId = s.GameId,
+                PlatformType = s.PlatformType,
                 CurrencyCode = s.PlayerData.Wallet.CurrencyCode,
                 BrandId = s.PlayerData.BrandId,
                 CreatedOn = s.UtcNow,
@@ -571,16 +567,13 @@ namespace TGS.Services.GameOperations.Data
                 Id = current.Id,
                 ExternalBetId = s.ExternalBetId,
                 ExternalTransactionId = s.ExternalTransactionId,
-                GameProviderConfigurationId = s.GameProviderConfigurationId,
                 GameActionBatchId = s.BatchId,
                 ExternalGameActionGroupId = s.ExternalGameActionGroupId,
                 ReferencedGameActionId = s.ReferencedGameActionInternalId,
-                WalletId = player.Wallet.Id,
                 Type = s.GameActionType,
                 RoundId = s.InternalRoundId.Value,
                 RecordedOn = AdjustRecordedOnIfNeeded(s),
                 SentOn = s.Timestamp,
-                PlayerCode = player.PlayerCode,
                 PlayerIp = player.PlayerIp,
                 Turnover = current.Turnover,
                 WinLoss = current.WinLoss,

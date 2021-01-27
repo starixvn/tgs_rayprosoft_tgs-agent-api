@@ -72,7 +72,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode, 
+        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -153,38 +153,23 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
+        [Given(@"set random external round id")]
+        public void GivenSetRandomExternalRoundId()
+        {
+            Set(SR.ExternalRoundId, NewRoundId());
+        }
+
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public async Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
+            PlaceBetAsync(amount, externalGameId);
+
+        [Given(@"I place bet with set round id of \$(.*) for game ""(.*)""")]
+        [When(@"I place bet with set round id of \$(.*) for game ""(.*)""")]
+        public Task GivenIPlaceBetWithSetRoundIdOfForGame(decimal amount, string externalGameId)
         {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
-
-            var types = externalGameId.SplitByUnderscore().Select(int.Parse).ToArray();
-
-            var externalTransactionId = Guid.NewGuid().ToString();
-            var externalRoundId = externalTransactionId;
-            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
-
-            var request = new PlaceBetRequest
-            {
-                CompanyKey = config.CompanyKey,
-                PlayerCode = playerCode,
-                GameType = types[1],
-                ProductType = types[0],
-                ExternalTransactionId = externalTransactionId,
-                ExternalRoundId = externalTransactionId,
-                Amount = amount,
-                BetTime = DateTimeOffset.Now
-            };
-
-            var response = await client.PlaceBetAsync(request);
-
-            Set(SR.ExternalTransactionId, externalTransactionId);
-            Set(SR.ExternalRoundId, externalRoundId);
-            Set(SR.PlaceBetRequest, request);
-            Set(SR.Request, request);
-            Set(SR.Response, response);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            return PlaceBetAsync(amount, externalGameId, externalRoundId);
         }
 
         [Given(@"I win bet for \$(.*)")]
@@ -451,6 +436,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId
+                orderby act.RecordedOn
                 select act).AsNoTracking().ToArrayAsync();
 
             var last = gameActions.Last();
@@ -470,6 +456,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId
+                orderby act.RecordedOn
                 select act).ToArrayAsync();
 
             var canceledActionIds = gameActions
@@ -521,6 +508,26 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task ThenTheRoundWillBeOpened() =>
             VerifyRoundStatus(_serviceProvider, RoundStatus.Open);
 
+        [Then(@"the round with set round id belongs to games")]
+        public async Task ThenTheRoundWithSetRoundIdBelongsToGames(Table table)
+        {
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var games = table.Rows.Select(r => r[0]).ToArray();
+
+            var gameIds = await (from r in db.Rounds
+                                join g in db.Games
+                                    on r.GameId equals g.Id
+                                where r.ExternalRoundId == externalRoundId
+                                orderby r.CreatedOn
+                                select g.ExternalId).ToArrayAsync();
+
+            gameIds.Should().NotBeEmpty()
+                .And.HaveCount(games.Length)
+                .And.BeEquivalentTo(games);
+        }
+
         #region After Scenario
 
         [After]
@@ -544,8 +551,45 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Methods
 
+        private static string NewRoundId() =>
+            //DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            Guid.NewGuid().ToString();
+
         private Task<SBOConfiguration> GetSBOSetting() =>
             GetSettingAsync<SBOConfiguration>(_serviceProvider, SettingConsts.GameProviderConfigurations.SBOBET);
+
+        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var config = await GetSBOSetting();
+
+            var types = externalGameId.SplitByUnderscore().Select(int.Parse).ToArray();
+
+            externalRoundId ??= NewRoundId();
+            var externalTransactionId = externalRoundId;
+            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
+
+            var request = new PlaceBetRequest
+            {
+                CompanyKey = config.CompanyKey,
+                PlayerCode = playerCode,
+                GameType = types[1],
+                ProductType = types[0],
+                ExternalTransactionId = externalTransactionId,
+                ExternalRoundId = externalTransactionId,
+                Amount = amount,
+                BetTime = DateTimeOffset.Now
+            };
+
+            var response = await client.PlaceBetAsync(request);
+
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
 
         private void VerifyResponseWithoutError<T>(decimal expectedBalance) where T : BaseResponse
         {

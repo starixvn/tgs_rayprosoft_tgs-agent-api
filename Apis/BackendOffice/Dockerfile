@@ -10,12 +10,11 @@ WORKDIR /src
 COPY ["Apis/BackendOffice/BackendOffice.csproj", "Apis/BackendOffice/"]
 COPY ["Services/BackOffice/BackOffice.csproj", "Services/BackOffice/"]
 COPY ["Services/Hangfire/Hangfire.csproj", "Services/Hangfire/"]
-COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
 COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
 COPY ["Core/DataServices.Log/DataServices.Log.csproj", "Core/DataServices.Log/"]
-COPY ["Core/DataServices.Bet/DataServices.Bet.csproj", "Core/DataServices.Bet/"]
+COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
 RUN dotnet restore "Apis/BackendOffice/BackendOffice.csproj"
 COPY . .
 WORKDIR "/src/Apis/BackendOffice"

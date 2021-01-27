@@ -43,6 +43,8 @@ namespace TGS.Services.Operations
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
 
+        Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId, PlatformType platformType);
+
         Task<GameStatus?> GetGameStatusAsync(Guid gameProviderId, int gameId);
 
         Task<GameType?> GetGameTypeAsync(Guid gameProviderId, int gameId);
@@ -81,7 +83,7 @@ namespace TGS.Services.Operations
             }
 
             var r = await _gameProviderQueries.GetCachedGameProviderAsync(gameProviderId);
-            cachedGameProvider = new CachedGameProvider
+            cachedGameProvider = new()
             {
                 Id = gameProviderId,
                 Code = r.Code,
@@ -118,7 +120,7 @@ namespace TGS.Services.Operations
                     $"GameProviderConfiguration doesn't exist with gameProviderId: {gameProviderId} and gameProviderConfigurationId: {gameProviderConfigurationId}");
             }
 
-            gpc = new CachedGameProviderConfiguration
+            gpc = new()
             {
                 Status = r.Status,
                 GameProviderId = gameProviderId,
@@ -257,7 +259,8 @@ namespace TGS.Services.Operations
             return games;
         }
 
-        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType, GameType gameType)
+        async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId,
+            PlatformType platformType, GameType gameType)
         {
             var games = await _interface.GetCachedGamesAsync(gameProviderId, platformType);
             return games.Where(g => g.Type == gameType).ToArray();
@@ -296,6 +299,13 @@ namespace TGS.Services.Operations
 
             var games = await GetAndCacheGamesAsync(gameProviderId);
             return games.FirstOrDefault(g => g.Id == gameId);
+        }
+
+        async Task<CachedGame> IGameProviderOperations.GetCachedGameAsync(Guid gameProviderId, string externalGameId,
+            PlatformType platformType)
+        {
+            var games = await _interface.GetCachedGamesAsync(gameProviderId, externalGameId);
+            return games.FirstOrDefault(g => g.PlatformType == platformType);
         }
 
         async Task<GameStatus?> IGameProviderOperations.GetGameStatusAsync(Guid gameProviderId, int gameId)
@@ -364,7 +374,7 @@ namespace TGS.Services.Operations
 
             if (values.All(a => !a.IsNull))
             {
-                return new CachedGameProvider
+                return new()
                 {
                     Id = Guid.Parse(values[0]),
                     Code = values[1],
