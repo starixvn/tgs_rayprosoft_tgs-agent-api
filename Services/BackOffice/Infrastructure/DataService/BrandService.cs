@@ -66,7 +66,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedOn = DateTimeOffset.Now
             };
 
-
             brand.Languages = await GenerateBrandLanguages(brand, request);
             brand.Currencies = GenerateBrandCurrencies(brand, request);
             brand.GameProviders = await GenerateBrandGameProviders(brand, request);
@@ -148,16 +147,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         private async Task<HashSet<BrandBetLimit>> GenerateBetLimits(Brand brand, BrandRequest request)
         {
-            var brandBetLimits = await _repository.BetLimits
+            var betLimits = await _repository.BetLimits
                 .Where(x => request.BetLimits.Select(b => b.Id).Contains(x.Id)).ToArrayAsync();
-            var betLimits = brandBetLimits.Select(x =>
+            var brandBetLimits = betLimits.Select(x =>
                 new BrandBetLimit
                 {
                     BrandId = brand.Id,
                     BetLimitId = x.Id,
+                    BetLimit = x,
                     IsDefault = request.BetLimits.First(b => b.Id == x.Id).IsDefault
                 });
-            return new HashSet<BrandBetLimit>(betLimits);
+            return new HashSet<BrandBetLimit>(brandBetLimits);
         }
 
         private HashSet<BrandGroup> GenerateWithCreateGroups(Brand brand, BrandRequest request)
@@ -225,7 +225,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     CreatedOn = DateTimeOffset.Now,
                     UpdatedOn = DateTimeOffset.Now
                 };
-                brandGroup.BrandGames = GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGameIds);
+                brandGroup.BrandGames =
+                    GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGames.Select(g => g.GameId));
                 brandGroup.BrandGroupBetLimits =
                     GenerateWithUpdateBrandGroupBetLimits(brand, brandGroup, x.GameProviderBetLimits);
 

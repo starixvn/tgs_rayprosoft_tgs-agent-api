@@ -3,5 +3,6 @@
     public class BrandGameModel
     {
         public int GameId { get; set; }
+        public string GameName { get; set; }
     }
 }
