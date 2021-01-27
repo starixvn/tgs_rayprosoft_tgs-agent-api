@@ -234,7 +234,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeTrue();
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
-            _roleCommandsMock.Verify(p => p.BatchInsertOrUpdateAsync(It.Is<Role[]>(r =>
+            _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
                 r.Length == roles.Count())));
         }
 

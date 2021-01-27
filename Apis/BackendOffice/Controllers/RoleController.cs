@@ -171,7 +171,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var brandRoles = roles.Where(x => x.RoleType == RoleType.Brand).ToArray();
             UpdateRoles(brandRootRole, brandRoles);
 
-            await _roleCommands.BatchInsertOrUpdateAsync(roles);
+            await _roleCommands.BatchUpdateAsync(roles);
 
             return CreateValidResponse<MessageResponse>();
         }

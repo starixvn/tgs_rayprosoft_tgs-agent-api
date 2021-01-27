@@ -7,6 +7,6 @@ namespace TGS.Core.DataServices.Base.Interfaces
         Task CreateAsync(TEntity obj);
         Task UpdateAsync(TEntity obj);
         Task DeleteAsync(TEntity obj);
-        Task BatchInsertOrUpdateAsync(TEntity[] obj);
+        Task BatchUpdateAsync(TEntity[] obj);
     }
 }

@@ -16,7 +16,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task<Reseller> GetResellerAsync(Expression<Func<Reseller, bool>> predicate,
             Func<IQueryable<Reseller>, IQueryable<Reseller>> preQuery = null);
 
-        IQueryable<Reseller> GetResellersAsync(bool tracking = false);
+        IQueryable<Reseller> GetResellersAsync(GetResellersRequest request, bool tracking = false);
         Task CreateResellerAsync(CreateResellerRequest request, string username);
         Task UpdateResellerAsync(Reseller reseller, UpdateResellerRequest request, string username);
         Task ChangeStatusAsync(Reseller reseller, Status status, string username);
@@ -91,9 +91,6 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        IQueryable<Reseller> IResellerService.GetResellersAsync(bool tracking) =>
-            tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
-
         Task IResellerService.ChangeStatusAsync(Reseller reseller, Status status, string username)
         {
             reseller.Status = status;
@@ -107,6 +104,16 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         Task<bool> IResellerService.ExistsAsync(Expression<Func<Reseller, bool>> predicate) =>
             _repository.Resellers.AnyAsync(predicate);
+
+        IQueryable<Reseller> IResellerService.GetResellersAsync(GetResellersRequest request, bool tracking)
+        {
+            var queryable = tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
+            return queryable.Where(x =>
+                EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
+                EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
+                EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
+                EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%"));
+        }
 
         private HashSet<ResellerLanguage> GenerateResellerLanguages(Reseller reseller, ResellerRequest request)
         {

@@ -67,15 +67,16 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
         {
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
-            var q = _queries.GetQueries();
+            var now = DateTimeOffset.Now;
+
             return _queries.GetQueries()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.BrandId == BrandId)
-                .Where(hasExpiredStatus, p => DateTimeOffset.Now > p.To)
+                .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId, l => l.BrandId == BrandId)
+                .Where(hasExpiredStatus, p => now > p.To)
                 .Where(!hasExpiredStatus,
-                    p => request.Status.Contains(p.Status) && DateTimeOffset.Now < p.To)
+                    p => request.Status.Contains(p.Status) && now < p.To)
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
@@ -90,7 +91,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     To = a.To,
                     DisplayOrder = a.DisplayOrder,
                     UpdatedOn = a.UpdatedOn,
-                    Status = DateTimeOffset.Now > a.To ? AnnounceStatus.Expired.ToString() : a.Status.ToString()
+                    Status = now > a.To ? AnnounceStatus.Expired.ToString() : a.Status.ToString()
                 })
                 .CreatePagedResponseAsync(request);
         }
@@ -189,10 +190,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);
-            var payments = await _queries.GetQueries().Where(q => ids.Contains(q.Id)).ToListAsync();
-            payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
+            var announcements = await _queries.GetQueries().Where(q => ids.Contains(q.Id)).ToListAsync();
+            announcements.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
-            await _commands.BatchInsertOrUpdateAsync(payments.ToArray());
+            await _commands.BatchUpdateAsync(announcements.ToArray());
 
             return CreateValidResponse<MessageResponse>();
         }
