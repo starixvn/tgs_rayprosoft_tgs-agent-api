@@ -87,6 +87,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                         GameProviderBetLimits = x.BrandGroupBetLimits.SelectMany(bgb => bgb.GameProviderBetLimits)
                             .Select(b => new BrandGroupGameProviderBetLimitModel
                             {
+                                GameProviderId = b.GameProviderBetLimit.GameProviderId,
                                 BrandBetLimitId = b.BrandGroupBetLimit.BetLimitId,
                                 GameProviderBetLimitId = b.GameProviderBetLimitId
                             }).ToArray()
