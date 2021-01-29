@@ -38,7 +38,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new GetGameProviderBetLimitsRequest
             {
-                GameProviderId = Guid.NewGuid()
+                GameProviderIds = new[] {Guid.NewGuid()}
             };
 
             _mediatorMock

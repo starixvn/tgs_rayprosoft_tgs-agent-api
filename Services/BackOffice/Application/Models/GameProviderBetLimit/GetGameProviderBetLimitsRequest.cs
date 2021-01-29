@@ -5,6 +5,8 @@ namespace TGS.Services.BackOffice.Application.Models.GameProviderBetLimit
 {
     public class GetGameProviderBetLimitsRequest : IRequest<GetGameProviderBetLimitsResponse>
     {
-        public Guid GameProviderId { get; set; }
+        public Guid[] GameProviderIds { get; set; }
+        public int BetLimitId { get; set; }
+        public bool IsSports { get; set; }
     }
 }
