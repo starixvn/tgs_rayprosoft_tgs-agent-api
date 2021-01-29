@@ -23,9 +23,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         {
             var brand = await _service.GetBrandAsync(x => x.Id == request.Id,
                 x => x
-                    .Where(ResellerId != null, r => r.Licensee.ResellerId == ResellerId)
-                    .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                    .Where(BrandId != null, l => l.Id == BrandId));
+                    .Where(ResellerId, r => r.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId, l => l.LicenseeId == LicenseeId)
+                    .Where(BrandId, l => l.Id == BrandId));
 
             if (brand == null)
             {
@@ -39,6 +39,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                 {
                     Id = brand.Id,
                     LicenseeId = brand.LicenseeId,
+                    LicenseeName = brand.Licensee.Name,
                     Code = brand.Code,
                     Name = brand.Name,
                     Status = brand.Status,
@@ -63,7 +64,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                         }).ToArray(),
                     Games = brand.Games.Select(x => new BrandGameModel
                     {
-                        GameId = x.GameId
+                        GameId = x.GameId,
+                        GameName = x.Game.Name
                     }).ToArray(),
                     BetLimits = brand.BetLimits.Select(x => new BrandBetLimitModel
                     {
@@ -77,7 +79,11 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                         Code = x.Code,
                         Description = x.Description,
                         IsSports = x.IsSports,
-                        BrandGameIds = x.BrandGames.Select(g => g.BrandGame.GameId).ToArray(),
+                        BrandGames = x.BrandGames.Select(g => new BrandGameModel
+                        {
+                            GameId = g.BrandGame.GameId,
+                            GameName = g.BrandGame.Game.Name
+                        }).ToArray(),
                         GameProviderBetLimits = x.BrandGroupBetLimits.SelectMany(bgb => bgb.GameProviderBetLimits)
                             .Select(b => new BrandGroupGameProviderBetLimitModel
                             {
