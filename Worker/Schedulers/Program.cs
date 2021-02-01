@@ -8,7 +8,7 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Services.BackOffice.Application.Extensions;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Hangfire.Jobs;
+using TGS.Worker.Schedulers.Jobs;
 
 namespace TGS.Worker.Schedulers
 {
@@ -33,8 +33,8 @@ namespace TGS.Worker.Schedulers
 
             GlobalConfiguration.Configuration
                 .UseActivator(
-                    new BrandGameProviderScheduleActivator(serviceProvider.GetService<ITgsRepository>(),
-                        serviceProvider.GetService<IBrandGameProviderService>()))
+                    new BrandGameProviderScheduleActivator(serviceProvider.GetRequiredService<ITgsRepository>(),
+                        serviceProvider.GetRequiredService<IBrandGameProviderService>()))
                 .UseColouredConsoleLogProvider();
 
             RecurringJob.Jobs(serviceProvider);

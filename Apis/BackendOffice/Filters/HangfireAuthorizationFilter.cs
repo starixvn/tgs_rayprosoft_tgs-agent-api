@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Hangfire.Dashboard;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Filters
 {
@@ -12,7 +12,7 @@ namespace TGS.Apis.BackendOffice.Filters
         {
             var httpContext = context.GetHttpContext();
             var claims = httpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-            var roleType = claims.GetTypeByKey<RoleType>(Consts.UserInfo.RoleTypeKey);
+            var roleType = claims.GetTypeByKey<RoleType>(Consts.BackendOffice.UserInfo.RoleTypeKey);
 
             return roleType == RoleType.Admin;
         }

@@ -42,7 +42,7 @@ namespace TGS.Core.Models
         public static class TokenExpireSeconds
         {
             public const int PlayerLogin = 3600 * 12; // 12 hours
-            public const int Jwt = 60 * 60;           // 1 hours
+            public const int Jwt = 60 * 60; // 1 hours
         }
 
         public static class GameProvider
@@ -73,6 +73,22 @@ namespace TGS.Core.Models
             public const string GameProviderDescription = "GameProvider.Description";
             public const string GameName = "Game.Name";
             public const string GameDescription = "Game.Description";
+        }
+
+        public static class BackendOffice
+        {
+            public const string CsrfTokenName = "X-CSRF-TOKEN";
+
+            public static class UserInfo
+            {
+                public static string UsernameKey = "Username";
+                public static string RolenameKey = "Rolename";
+                public static string RoleTypeKey = "RoleType";
+                public static string ResellerKey = "Reseller";
+                public static string LicenseeKey = "Licensee";
+                public static string BrandKey = "Brand";
+                public static string PortalKey = "Portal";
+            }
         }
     }
 }

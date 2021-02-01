@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application
 {
@@ -23,13 +23,13 @@ namespace TGS.Services.BackOffice.Application
             }
         }
 
-        protected string Username => _userInfoMap[Consts.UserInfo.UsernameKey];
-        protected string RoleName => _userInfoMap[Consts.UserInfo.RolenameKey];
+        protected string Username => _userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
+        protected string RoleName => _userInfoMap[Consts.BackendOffice.UserInfo.RolenameKey];
 
-        protected Guid? ResellerId => GetIdByKey(Consts.UserInfo.ResellerKey);
+        protected Guid? ResellerId => GetIdByKey(Consts.BackendOffice.UserInfo.ResellerKey);
 
-        protected Guid? LicenseeId => GetIdByKey(Consts.UserInfo.LicenseeKey);
-        protected Guid? BrandId => GetIdByKey(Consts.UserInfo.BrandKey);
+        protected Guid? LicenseeId => GetIdByKey(Consts.BackendOffice.UserInfo.LicenseeKey);
+        protected Guid? BrandId => GetIdByKey(Consts.BackendOffice.UserInfo.BrandKey);
         public abstract Task<TOut> Handle(T request, CancellationToken cancellationToken);
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new() =>

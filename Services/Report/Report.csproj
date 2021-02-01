@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Services.Report</AssemblyName>
+    <RootNamespace>TGS.Services.Report</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Apis\GlobalApi\GlobalApi.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
+  </ItemGroup>
+
+</Project>

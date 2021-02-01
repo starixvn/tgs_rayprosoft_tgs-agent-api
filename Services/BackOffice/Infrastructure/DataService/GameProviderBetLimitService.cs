@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
@@ -28,7 +29,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<string[]> GetInUseBrandsAsync(Guid id);
     }
 
-    public class GameProviderBetLimitService : BaseService, IGameProviderBetLimitService
+    public class GameProviderBetLimitService : BaseRepositoryOperations<ITgsRepository>,
+        IGameProviderBetLimitService
     {
         private readonly ITgsRepository _repository;
 

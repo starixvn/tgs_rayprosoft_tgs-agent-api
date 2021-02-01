@@ -18,6 +18,8 @@ namespace TGS.Core.DataServices.Log.Migrations
                 string.Format(Consts.FunctionSqlFormat, "log_get_api_log"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "log_get_api_logs"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "log_get_log_records"));
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.IndexSqlFormat, "adminLogs"));

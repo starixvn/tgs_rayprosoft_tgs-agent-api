@@ -24,6 +24,7 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Log;
+using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -32,8 +33,9 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
-using TGS.Services.BackOffice.Domain;
+using TGS.Services.Report.Application.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -44,6 +46,7 @@ namespace TGS.Apis.BackendOffice.Extensions
         {
             services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
             services.AddTgsRepository(configuration, "Tgs");
+            services.AddReportRepository(configuration, "Report");
 
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
@@ -57,6 +60,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<IBrandPaymentService, BrandPaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
             services.AddBackOfficeApplicationServices();
+            services.AddReportServices();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -93,9 +97,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 });
 
             services.AddHealthChecks()
-                .AddPostgres(configuration, "Tgs", name: "tgs-db")
-                .AddPostgres(configuration, "Log", name: "log-db")
-
+                .AddPostgres(configuration, "Tgs", "tgs-db")
+                .AddPostgres(configuration, "Log", "log-db")
                 .AddMongoDb(configuration, "Hangfire", "hangfire-db")
                 .AddNats()
                 .ForwardToPrometheus();
@@ -103,7 +106,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
-                options.HeaderName = Consts.CsrfTokenName;
+                options.HeaderName = Consts.BackendOffice.CsrfTokenName;
             });
 
             services

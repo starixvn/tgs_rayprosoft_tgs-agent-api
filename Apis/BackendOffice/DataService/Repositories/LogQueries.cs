@@ -89,5 +89,24 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
                 {"_tracking_id", trackingId}
             });
         }
+
+        async Task<(IEnumerable<LogRecordModel>, int)> ILogQueries.GetLogRecordsAsync(LogRecordRequest request)
+        {
+            const string spName = "dbo.log_get_log_records";
+            var results = await _repository.SqlQueryMultipleAsync<LogRecordModel>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {"_from", request.From},
+                    {"_to", request.To},
+                    {"_tracking_id", request.TrackingId},
+                    {"_server_name", request.ServerName},
+                    {"_level", request.Level},
+                    {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
+                    {"_page_number", request.ShowAll ? 1 : request.Page},
+                    {"_sort_by", request.SortBy},
+                    {"_is_desc", request.IsDesc}
+                });
+            return (results, results.Any() ? results.First().TotalCount : 0);
+        }
     }
 }
