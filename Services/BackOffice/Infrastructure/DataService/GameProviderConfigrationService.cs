@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -28,7 +29,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<GameProviderConfiguration, bool>> predicate);
     }
 
-    public class GameProviderConfigurationService : BaseService,
+    public class GameProviderConfigurationService : BaseRepositoryOperations<ITgsRepository>,
         IGameProviderConfigurationService
     {
         public GameProviderConfigurationService(ITgsRepository tgsRepository) : base(tgsRepository)

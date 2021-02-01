@@ -19,5 +19,6 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         Task<LogDetailModel> GetAdminLogAsync(Guid trackingId);
         Task<(IEnumerable<ApiLogModel>, int)> GetApiLogsAsync(ApiLogRequest request);
         Task<LogDetailModel> GetApiLogAsync(Guid trackingId);
+        Task<(IEnumerable<LogRecordModel>, int)> GetLogRecordsAsync(LogRecordRequest request);
     }
 }

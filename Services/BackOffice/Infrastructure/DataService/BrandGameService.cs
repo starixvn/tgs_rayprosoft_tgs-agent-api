@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 
@@ -24,7 +25,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task UpdateBrandGamesAsync(IEnumerable<BrandGame> brandGames);
     }
 
-    public class BrandGameService : BaseService, IBrandGameService
+    public class BrandGameService : BaseRepositoryOperations<ITgsRepository>, IBrandGameService
     {
         public BrandGameService(ITgsRepository tgsRepository) : base(tgsRepository)
         {

@@ -59,5 +59,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 LogDetail = logDetail
             };
         }
+
+        [HttpGet("log")]
+        public async Task<PagedResponse<LogRecordModel>> GetLogRecordsAsync([FromQuery] LogRecordRequest request)
+        {
+            var (logs, totalCount) = await _logQueries.GetLogRecordsAsync(request);
+
+            return await logs.CreatePagedResponseAsync(totalCount);
+        }
     }
 }

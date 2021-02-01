@@ -9,7 +9,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.Hangfire.Jobs
+namespace TGS.Worker.Schedulers.Jobs
 {
     public class BrandGameProviderScheduleActivator : JobActivator
     {

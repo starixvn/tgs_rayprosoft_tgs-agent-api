@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -30,7 +31,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<GameProvider, bool>> predicate);
     }
 
-    public class GameProviderService : BaseService, IGameProviderService
+    public class GameProviderService : BaseRepositoryOperations<ITgsRepository>, IGameProviderService
     {
         private readonly ITgsRepository _repository;
 

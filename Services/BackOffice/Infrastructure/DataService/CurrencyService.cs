@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.Currency;
@@ -22,13 +23,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<Currency, bool>> predicate);
     }
 
-    public class CurrencyService : BaseService, ICurrencyService
+    public class CurrencyService : BaseRepositoryOperations<ITgsRepository>, ICurrencyService
     {
-        private readonly ITgsRepository _repository;
-
         public CurrencyService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
-            _repository = tgsRepository;
         }
 
         Task<Currency> ICurrencyService.GetCurrencyAsync(Expression<Func<Currency, bool>> predicate,

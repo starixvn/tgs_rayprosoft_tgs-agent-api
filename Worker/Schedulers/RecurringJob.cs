@@ -1,7 +1,7 @@
 ﻿using System;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Services.Hangfire.Jobs;
+using TGS.Worker.Schedulers.Jobs;
 
 namespace TGS.Worker.Schedulers
 {

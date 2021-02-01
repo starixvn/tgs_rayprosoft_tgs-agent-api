@@ -15,8 +15,8 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Models;
 using TGS.Core.Models.Services;
-using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -99,7 +99,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var tokens = _antiForgery.GetAndStoreTokens(HttpContext);
             HttpContext.Response.Cookies.Append(
-                Consts.CsrfTokenName,
+                Consts.BackendOffice.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
                 new CookieOptions
                 {
@@ -117,13 +117,13 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var claims = new List<Claim>
             {
-                new(Consts.UserInfo.UsernameKey, user.Username),
-                new(Consts.UserInfo.RolenameKey, user.Role.Name),
-                new(Consts.UserInfo.RoleTypeKey, user.Role.RoleType.ToString()),
-                new(Consts.UserInfo.ResellerKey, user.Role.ResellerId.ToString()),
-                new(Consts.UserInfo.LicenseeKey, user.Role.LicenseeId.ToString()),
-                new(Consts.UserInfo.BrandKey, user.Role.BrandId.ToString()),
-                new(Consts.UserInfo.PortalKey, user.Role.RoleType.ToString())
+                new(Consts.BackendOffice.UserInfo.UsernameKey, user.Username),
+                new(Consts.BackendOffice.UserInfo.RolenameKey, user.Role.Name),
+                new(Consts.BackendOffice.UserInfo.RoleTypeKey, user.Role.RoleType.ToString()),
+                new(Consts.BackendOffice.UserInfo.ResellerKey, user.Role.ResellerId.ToString()),
+                new(Consts.BackendOffice.UserInfo.LicenseeKey, user.Role.LicenseeId.ToString()),
+                new(Consts.BackendOffice.UserInfo.BrandKey, user.Role.BrandId.ToString()),
+                new(Consts.BackendOffice.UserInfo.PortalKey, user.Role.RoleType.ToString())
             };
 
             var authProperties = new AuthenticationProperties

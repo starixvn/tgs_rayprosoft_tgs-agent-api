@@ -2,9 +2,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Moq;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Domain;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -38,9 +38,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             {
                 new ClaimsIdentity(new[]
                 {
-                    new Claim(Consts.UserInfo.UsernameKey, username),
-                    new Claim(Consts.UserInfo.RolenameKey, rolename),
-                    new Claim(Consts.UserInfo.PortalKey, roleType.ToString())
+                    new Claim(Consts.BackendOffice.UserInfo.UsernameKey, username),
+                    new Claim(Consts.BackendOffice.UserInfo.RolenameKey, rolename),
+                    new Claim(Consts.BackendOffice.UserInfo.PortalKey, roleType.ToString())
                 })
             });
         }

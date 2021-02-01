@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.Language;
@@ -22,13 +23,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<Language, bool>> predicate);
     }
 
-    public class LanguageService : BaseService, ILanguageService
+    public class LanguageService : BaseRepositoryOperations<ITgsRepository>, ILanguageService
     {
-        private readonly ITgsRepository _repository;
-
         public LanguageService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
-            _repository = tgsRepository;
         }
 
         Task<Language> ILanguageService.GetLanguageAsync(Expression<Func<Language, bool>> predicate,

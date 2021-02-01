@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.BetLimit;
@@ -20,7 +21,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task UpdateBetLimitAsync(BetLimit betLimit, UpdateBetLimitRequest request);
     }
 
-    public class BetLimitService : BaseService, IBetLimitService
+    public class BetLimitService : BaseRepositoryOperations<ITgsRepository>, IBetLimitService
     {
         public BetLimitService(ITgsRepository tgsRepository) : base(tgsRepository)
         {
@@ -28,7 +29,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IBetLimitService.CreateBetLimitAsync(CreateBetLimitRequest request)
         {
-            var brand = new BetLimit
+            var betLimit = new BetLimit
             {
                 CurrencyCode = request.CurrencyCode,
                 MinBet = request.MinBet,
@@ -40,7 +41,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            await CreateEntityAsync(brand);
+            await CreateEntityAsync(betLimit);
         }
 
         Task<BetLimit> IBetLimitService.GetBetLimitAsync(Expression<Func<BetLimit, bool>> predicate,
