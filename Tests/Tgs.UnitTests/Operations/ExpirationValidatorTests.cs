@@ -64,7 +64,7 @@ namespace TGS.UnitTests.Operations
                 await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
 
             action.Should().Throw<PlayerLoginExpiredException>()
-                .WithMessage($"Player({playerCode}) login record is expired");
+                .WithMessage($"Player({playerCode}) login token is expired");
         }
 
         [TestCase(null)]
@@ -88,7 +88,7 @@ namespace TGS.UnitTests.Operations
                 await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
 
             action.Should().Throw<PlayerLoginExpiredException>()
-                .WithMessage($"Player({playerCode}) login record is expired");
+                .WithMessage($"Player({playerCode}) login token is expired");
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace TGS.UnitTests.Operations
                 await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
 
             action.Should().Throw<PlayerLoginExpiredException>()
-                .WithMessage($"Player({playerCode}) login record is expired");
+                .WithMessage($"Player({playerCode}) login token is expired");
         }
 
         [Test]
@@ -152,7 +152,7 @@ namespace TGS.UnitTests.Operations
                 await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
 
             action.Should().Throw<PlayerLoginExpiredException>()
-                .WithMessage($"Player({playerCode}) login record is expired");
+                .WithMessage($"Player({playerCode}) login token is expired");
         }
 
         [Test]
@@ -176,7 +176,7 @@ namespace TGS.UnitTests.Operations
                 await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
 
             action.Should().Throw<PlayerLoginExpiredException>()
-                .WithMessage($"Player({playerCode}) login record is expired");
+                .WithMessage($"Player({playerCode}) login token is expired");
         }
     }
 }
