@@ -91,7 +91,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                             Id = x.BetLimitId,
                             CurrencyCode = x.BetLimit.CurrencyCode,
                             MinBet = x.BetLimit.MinBet,
-                            MaxBet = x.BetLimit.MaxBet
+                            MaxBet = x.BetLimit.MaxBet,
+                            MaxBetPerMatch = x.BetLimit.MaxBetPerMatch
                         }).ToArray(),
 
                     Description = reseller.Description,
