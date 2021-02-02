@@ -35,24 +35,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         }
 
         [Test]
-        public void Should_have_error_when_api_key_is_null()
-        {
-            var model = new BrandRequest {ApiKey = null};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.ApiKey)
-                .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.ApiKeyRequired);
-        }
-
-        [Test]
-        public void Should_have_error_when__secret_key_is_null()
-        {
-            var model = new BrandRequest {SecretKey = null};
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.SecretKey)
-                .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.SecretKeyRequired);
-        }
-
-        [Test]
         public void Should_have_error_when__game_providers_is_null()
         {
             var model = new BrandRequest {GameProviders = null};
@@ -73,9 +55,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         [Test]
         public void Should_have_error_when__brand_cultures_is_null()
         {
-            var model = new BrandRequest {Cultures = null};
+            var model = new BrandRequest {Languages = null};
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.Cultures)
+            result.ShouldHaveValidationErrorFor(request => request.Languages)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.CultureRequired);
         }
 

@@ -119,7 +119,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         private async Task<HashSet<BrandLanguage>> GenerateBrandLanguages(Brand brand, BrandRequest request)
         {
-            var cultureCodes = request.Cultures.Select(c => c.CultureCode);
+            var cultureCodes = request.Languages.Select(c => c.CultureCode);
             var languages = await _repository.Languages
                 .Where(x => cultureCodes.Contains(x.CultureCode)).ToArrayAsync();
             var brandLanguages = languages.Select(x =>
@@ -127,7 +127,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 {
                     BrandId = brand.Id,
                     CultureCode = x.CultureCode,
-                    BrandCultureCode = request.Cultures.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
+                    BrandCultureCode = request.Languages.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
                         ?.BrandCultureCode
                 });
             return new HashSet<BrandLanguage>(brandLanguages);

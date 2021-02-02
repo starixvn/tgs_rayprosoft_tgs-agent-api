@@ -3,5 +3,6 @@
     public class BrandLanguageModel
     {
         public string CultureCode { get; set; }
+        public string BrandCultureCode { get; set; }
     }
 }

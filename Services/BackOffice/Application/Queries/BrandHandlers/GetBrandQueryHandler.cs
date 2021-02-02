@@ -52,7 +52,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     Languages = brand.Languages
                         .Select(x => new BrandLanguageModel
                         {
-                            CultureCode = x.CultureCode
+                            CultureCode = x.CultureCode,
+                            BrandCultureCode = x.BrandCultureCode
                         }).ToArray(),
                     GameProviders = brand.GameProviders
                         .Select(x => new BrandGameProviderModel

@@ -16,14 +16,6 @@ namespace TGS.Services.BackOffice.Validation.Brand
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.NameRequired);
 
-            RuleFor(x => x.ApiKey)
-                .NotEmpty()
-                .WithMessage(Application.Resources.Brand.ApiKeyRequired);
-
-            RuleFor(x => x.SecretKey)
-                .NotEmpty()
-                .WithMessage(Application.Resources.Brand.SecretKeyRequired);
-
             RuleFor(x => x.GameProviders)
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.GameProviderRequired);
@@ -36,7 +28,7 @@ namespace TGS.Services.BackOffice.Validation.Brand
                 .Must((m, n) => m.BetLimits.FirstOrDefault(x => x.CurrencyCode == n && x.IsDefault) != null)
                 .WithMessage(Application.Resources.Brand.BetLimitDefaultRequired);
 
-            RuleFor(x => x.Cultures)
+            RuleFor(x => x.Languages)
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.CultureRequired);
         }
