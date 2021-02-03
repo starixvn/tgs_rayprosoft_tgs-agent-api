@@ -26,6 +26,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<IUploadService, UploadService>();
             services.AddTransient<ICurrencyService, CurrencyService>();
             services.AddTransient<ILanguageService, LanguageService>();
+            services.AddTransient<ICredentialGenerator, CredentialGenerator>();
 
             return services;
         }

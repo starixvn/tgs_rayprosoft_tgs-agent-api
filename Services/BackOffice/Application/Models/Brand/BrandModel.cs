@@ -13,6 +13,9 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public Status Status { get; set; }
         public string Description { get; set; }
         public string OperationalEmail { get; set; }
+        public string ClientId { get; set; }
+        public string SecretKey { get; set; }
+        public string ApiKey { get; set; }
         public BrandGameProviderModel[] GameProviders { get; set; }
         public BrandCurrencyModel[] Currencies { get; set; }
         public BrandLanguageModel[] Languages { get; set; }
