@@ -473,7 +473,7 @@ namespace TGS.Services.GameOperations.Data
 
             repository.Rounds.Add(new()
             {
-                Id = roundId, 
+                Id = roundId,
                 ExternalRoundId = s.ExternalRoundId,
                 GameProviderId = s.GameProvider.Id,
                 PlayerCode = s.PlayerData.PlayerCode,
@@ -488,7 +488,8 @@ namespace TGS.Services.GameOperations.Data
                 ClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.UtcNow : default(DateTimeOffset?),
                 Status = s.NewRoundStatus == RoundStatus.Closed ? RoundStatus.Closed : RoundStatus.Open,
                 ExternalCreatedOn = s.Timestamp,
-                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?)
+                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),
+                BetAmount = s.BetValueResult.BetAmount
             });
 
             if (s.RoundDetail.IsNotNullOrEmpty())
@@ -510,13 +511,9 @@ namespace TGS.Services.GameOperations.Data
             var roundId = s.InternalRoundId.Value;
             var round = repository.Rounds.Find(roundId);
 
+            round.BetAmount = s.BetValueResult.BetAmount;
             round.Commission = s.Commission;
             round.UpdatedOn = s.UtcNow;
-
-            if (s.Commission.HasValue)
-            {
-                round.Commission = s.Commission;
-            }
 
             if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
             {
@@ -527,7 +524,6 @@ namespace TGS.Services.GameOperations.Data
                 round.Status = s.NewRoundStatus;
                 round.ClosedOn = s.UtcNow;
                 round.ExternalClosedOn = s.Timestamp;
-                round.BetAmount = s.BetValueResult.BetAmount;
                 round.WinLoss = s.BetValueResult.WinLoss;
                 round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
             }

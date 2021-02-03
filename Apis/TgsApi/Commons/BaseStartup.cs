@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,6 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Log.Middleware;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
@@ -35,12 +34,11 @@ namespace TGS.Apis.TgsApi.Commons
 
         protected IWebHostEnvironment Environment { get; }
         protected IConfiguration Configuration { get; }
+
         protected abstract string LogPrefix { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<Func<string>>(_ => () => LogPrefix);
-
             services.AddTgsRepository(Configuration, "Tgs");
 
             services.AddNats(Configuration)
@@ -55,7 +53,6 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddGameOperations();
 
             services.AddHttpContextAccessor();
-            services.AddScoped<ApiLoggerMiddleware>();
 
             AddCustomDependencyServices(services);
 
@@ -68,10 +65,12 @@ namespace TGS.Apis.TgsApi.Commons
             }).ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
 
             services.AddHealthChecks()
-                .AddPostgres(Configuration, "Tgs", name: "tgs-db")
+                .AddPostgres(Configuration, "Tgs", "tgs-db")
                 .AddRedis(Configuration)
                 .AddNats()
                 .ForwardToPrometheus();
+
+            services.AddMediatR(typeof(BaseStartup).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,7 +78,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger();
+            app.UseApiLogger(LogPrefix, new[] {"/health", "/favicon.ico"});
 
             UseCustomMiddlewares(app);
 

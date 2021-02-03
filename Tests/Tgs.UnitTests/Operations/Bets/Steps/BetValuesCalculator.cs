@@ -36,7 +36,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         {
             Set(SR.TurnoverOnTieBet, true);
         }
-
+        
         [When(@"I perform the following actions I will see the expected results")]
         public void WhenIPerformTheFollowingActionsIWillSeeTheExpectedResults(Table table)
         {
@@ -74,7 +74,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
             var previousInput = new List<BetActionData>();
             var previousOutput = new List<BetValuesResult>();
-            var calculator = (IBetValuesCalculator)new Services.GameOperations.Calculators.BetValuesCalculator();
+            var calculator = (IBetValuesCalculator) new Services.GameOperations.Calculators.BetValuesCalculator();
 
             foreach (var current in rows)
             {
@@ -114,7 +114,20 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
                 previousInput.Add(action);
             }
+
+            Set(SR.BetValuesResults, previousOutput);
         }
+
+        [Then(@"the final bet amount is (.*) and settle amount is (.*)")]
+        public void ThenTheFinalBetAmountIsAndSettleAmountIs(decimal betAmount, decimal settleAmount)
+        {
+            var results = Get<List<BetValuesResult>>(SR.BetValuesResults);
+            var last = results.Last();
+
+            last.BetAmount.Should().Be(betAmount);
+            last.SettleAmount.Should().Be(settleAmount);
+        }
+
 
         #region Private Methods and Properties
 

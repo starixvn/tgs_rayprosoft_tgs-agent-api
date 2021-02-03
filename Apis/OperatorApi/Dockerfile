@@ -20,11 +20,6 @@ WORKDIR "/src/Apis/OperatorApi"
 RUN dotnet publish "OperatorApi.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
-
-# captcha dependence
-RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
-
 WORKDIR /app
 COPY --from=publish /app/publish .
-
 ENTRYPOINT ["dotnet", "TGS.Apis.OperatorApi.dll"]

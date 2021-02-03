@@ -2601,6 +2601,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("player_code");
 
+                    b.Property<decimal?>("SettleAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("settle_amount");
+
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status");
@@ -2609,6 +2613,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("tie_bet_adjustment");
+
+                    b.Property<decimal?>("Turnover")
+                        .HasColumnType("numeric")
+                        .HasColumnName("turnover");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("timestamp with time zone")
