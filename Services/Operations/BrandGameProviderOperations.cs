@@ -30,25 +30,23 @@ namespace TGS.Services.Operations
         async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId,
             string cultureCode)
         {
-            var internalCode = cultureCode;
+            var gameProviderLanguages = await _gameProviderOperations.GetGameProviderLanguagesAsync(gameProviderId);
 
-            if (internalCode.IsNotNullOrEmpty())
-            {
-                var supported = await _gameProviderOperations.LanguageSupportedAsync(gameProviderId, cultureCode);
-                if (!supported)
-                {
-                    internalCode =
-                        await _brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId,
-                            gameProviderId);
-                }
-            }
+            var internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, cultureCode,
+                () => _brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId, gameProviderId));
 
-            if (internalCode.IsNullOrEmpty())
-            {
-                internalCode = Consts.DefaultCultureCode;
-            }
+            internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, internalCode,
+                () => Task.FromResult(Consts.DefaultCultureCode));
 
             return await _languageCodeMapper.InternalToExternalAsync(internalCode, gameProviderId);
+        }
+
+        private static async Task<string> GetSupportedLanguageAsync(string[] gameProviderLanguages,
+            string language, Func<Task<string>> getDefaultLanguage)
+        {
+            return language.IsNotNullOrEmpty() && gameProviderLanguages.IgnoreCaseContains(language)
+                ? language
+                : await getDefaultLanguage();
         }
     }
 }

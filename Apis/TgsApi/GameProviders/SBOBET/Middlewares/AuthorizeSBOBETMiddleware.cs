@@ -4,13 +4,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
+using TGS.Shared.Game.Models.SBOBET.Incoming;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares

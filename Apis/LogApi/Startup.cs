@@ -92,13 +92,13 @@ namespace TGS.Apis.LogApi
                 .ForwardToPrometheus(); ;
         }
 
-        protected void OnApplicationStarted(IServiceProvider serviceProvider)
+        private static void OnApplicationStarted(IServiceProvider serviceProvider)
         {
             var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StartReceiveMessages();
         }
 
-        protected void OnApplicationStopped(IServiceProvider serviceProvider)
+        private static void OnApplicationStopped(IServiceProvider serviceProvider)
         {
             var messageHandler = serviceProvider.GetRequiredService<IMessageHandler>();
             messageHandler.StopReceiveMessages();

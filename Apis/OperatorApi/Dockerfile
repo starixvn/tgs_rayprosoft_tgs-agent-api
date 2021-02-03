@@ -8,23 +8,18 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
 WORKDIR /src
 COPY ["Apis/OperatorApi/OperatorApi.csproj", "Apis/OperatorApi/"]
-COPY ["Services/Clients/Clients.csproj", "Services/Clients/"]
-COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
+COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
 COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
-COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
+COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
+COPY ["Services/PluggableServices/PluggableServices.csproj", "Services/PluggableServices/"]
 RUN dotnet restore "Apis/OperatorApi/OperatorApi.csproj"
 COPY . .
 WORKDIR "/src/Apis/OperatorApi"
 RUN dotnet publish "OperatorApi.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
-
-# captcha dependence
-RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
-
 WORKDIR /app
 COPY --from=publish /app/publish .
-
 ENTRYPOINT ["dotnet", "TGS.Apis.OperatorApi.dll"]

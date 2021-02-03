@@ -126,6 +126,9 @@
   <data name="AutoCloseRound" xml:space="preserve">
     <value>AutoCloseRound</value>
   </data>
+  <data name="BetValuesResults" xml:space="preserve">
+    <value>BetValuesResults</value>
+  </data>
   <data name="Brand" xml:space="preserve">
     <value>Brand</value>
   </data>

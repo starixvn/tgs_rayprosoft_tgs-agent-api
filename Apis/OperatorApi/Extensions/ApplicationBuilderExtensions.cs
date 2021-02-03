@@ -8,7 +8,7 @@ namespace TGS.Apis.OperatorApi.Extensions
     public static class ApplicationBuilderExtensions
     {
         private static readonly IList<string> BypassRouting = new[]
-            {"/health", "metrics", "/favicon.ico", "/swagger", "/api/auth"};
+            {"/health", "/metrics", "/favicon.ico", "/swagger", "/api/auth"};
 
         public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app)
         {

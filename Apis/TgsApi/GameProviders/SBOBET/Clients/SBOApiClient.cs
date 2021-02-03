@@ -4,10 +4,10 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Outgoing;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
+using TGS.Shared.Game.Models.SBOBET.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Clients
 {

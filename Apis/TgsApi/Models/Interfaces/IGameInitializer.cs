@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using TGS.Core.Models.Messages.Pluggables;
+using TGS.Services.PluggableServices.Models;
 
 namespace TGS.Apis.TgsApi.Models.Interfaces
 {

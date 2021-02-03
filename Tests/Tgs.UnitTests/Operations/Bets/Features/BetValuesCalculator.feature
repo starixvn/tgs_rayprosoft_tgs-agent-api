@@ -3,7 +3,7 @@
 Feature: Bet Values Calculator
 
 	Given a sequence of game action 
-	calculates BetAmount, Turnover, WinLoss, Unsettled Bets, TieBetAdjustment
+	calculates BetAmount, SettleAmount, Turnover, WinLoss, Unsettled Bets, TieBetAdjustment
 
 
 Scenario: 01 - Bet, then Lose, cancel the Loss, then Win.
@@ -15,6 +15,7 @@ Scenario: 01 - Bet, then Lose, cancel the Loss, then Win.
 	| 3  | 2      | CancelTransaction | 0      | 400          | -100     | -100    | 0                | 100            | No               |          |
 	| 4  | 1      | WinBet            | 200    | 600          | 100      | -100    | 0                | -100           | Yes              |          |
 	|    |        | Totals            | 100    | 600          | 100      | -100    | 0                | 0              |                  |          |         
+	Then the final bet amount is 100 and settle amount is 200
 
 Scenario: 02 - Lose the bet, Cancel the Loss, then Cancel Bet. (Void Round)
 	Given initial balance of $500
@@ -25,6 +26,7 @@ Scenario: 02 - Lose the bet, Cancel the Loss, then Cancel Bet. (Void Round)
 	| 3  | 2      | CancelTransaction | 0      | 400          | -100     | -100    | 0                | 100            | No               |          |
 	| 4  | 1      | CancelTransaction | 100    | 500          | 0        | 0       | 0                | -100           | Yes              |          |
 	|    |        | Totals            | 0      | 500          | 0        | 0       | 0                | 0              |                  |          |
+	Then the final bet amount is 0 and settle amount is 0
 
 Scenario: 03 - Bet, then Tie for Baccarat (does not count towards turnover).
 	Given initial balance of $500
@@ -34,6 +36,7 @@ Scenario: 03 - Bet, then Tie for Baccarat (does not count towards turnover).
 	| 1  |        | PlaceBet | -100   | 400          | 0        | 0       | 0                | 100            |                  |          |
 	| 2  | 1      | TieBet   | 100    | 500          | 0        | 0       | 100              | -100           | Yes              |          |
 	|    |        | Totals   | 0      | 500          | 0        | 0       | 100              | 0              |                  |          |
+	Then the final bet amount is 100 and settle amount is 100
 
 Scenario: 04 - Bet, then Tie for 3 Card Poker (counts towards turnover).
 	Given initial balance of $500
@@ -43,6 +46,7 @@ Scenario: 04 - Bet, then Tie for 3 Card Poker (counts towards turnover).
 	| 1  |        | PlaceBet | -100   | 400          | 0        | 0       | 0                | 100            |                  |          |
 	| 2  | 1      | TieBet   | 100    | 500          | 100      | 0       | 0                | -100           | Yes              |          |
 	|    |        | Totals   | 0      | 500          | 100      | 0       | 0                | 0              |                  |          |
+	Then the final bet amount is 100 and settle amount is 100
 
 Scenario: 05 - Bet, then Free Bet, then Win.
 	Given initial balance of $500
@@ -52,6 +56,7 @@ Scenario: 05 - Bet, then Free Bet, then Win.
 	| 2  | 1      | FreeBet  | 100    | 500          | 0        | 0       | 0                | 0              |                  |          |
 	| 3  | 1      | WinBet   | 200    | 700          | 100      | -200    | 0                | -100           | Yes              |          |
 	|    |        | Totals   | 200    | 700          | 100      | -200    | 0                | 0              |                  |          |
+	Then the final bet amount is 100 and settle amount is 300
 
 Scenario: 06 - Bet, then Win, then Free Bet. 
 	Given initial balance of $500
@@ -61,6 +66,7 @@ Scenario: 06 - Bet, then Win, then Free Bet.
 	| 2  | 1      | WinBet   | 200    | 600          | 0        | 0       | 0                | 0              |                  |          |
 	| 3  | 1      | FreeBet  | 100    | 700          | 100      | -200    | 0                | -100           | Yes              |          |
 	|    |        | Totals   | 200    | 700          | 100      | -200    | 0                | 0              |                  |          |
+	Then the final bet amount is 100 and settle amount is 300
 
 Scenario: 07 - Multiple Bets with multiple settlements, and NO tie turnover, then cancellation. 
 	Given initial balance of $500
@@ -75,6 +81,7 @@ Scenario: 07 - Multiple Bets with multiple settlements, and NO tie turnover, the
 	| 6  | 3      | TieBet            | 20     | 525          | 50       | -25     | 120              | -170           | Yes              |          |
 	| 7  | 5      | CancelTransaction | -75    | 450          | -50      | 25      | 0                | 170            | No               |          |
 	| 8  | 2      | LoseBet           | 0      | 450          | 50       | 50      | 120              | -170           | Yes              |          |
+	Then the final bet amount is 170 and settle amount is 120
 
 Scenario: 08 - Multiple Bets with multiple settlements, and tie turnover, then cancellation. 
 	Given initial balance of $500
@@ -89,6 +96,7 @@ Scenario: 08 - Multiple Bets with multiple settlements, and tie turnover, then c
 	| 6  | 3      | TieBet            | 20     | 525          | 170      | -25     | 0                | -170           | Yes              |          |
 	| 7  | 5      | CancelTransaction | -75    | 450          | -170     | 25      | 0                | 170            | No               |          |
 	| 8  | 2      | LoseBet           | 0      | 450          | 170      | 50      | 0                | -170           | Yes              |          |
+	Then the final bet amount is 170 and settle amount is 120
 
 Scenario: 09 - Multiple Bets with multiple settlements, and tie turnover. 
 	Given initial balance of $500
@@ -101,6 +109,7 @@ Scenario: 09 - Multiple Bets with multiple settlements, and tie turnover.
 	| 4  | 1      | TieBet   | 100    | 430          | 0        | 0       | 0                | 0              |                  |          |
 	| 5  | 2      | WinBet   | 75     | 505          | 0        | 0       | 0                | 0              |                  |          |
 	| 6  | 3      | TieBet   | 20     | 525          | 170      | -25     | 0                | -170           | Yes              |          |
+	Then the final bet amount is 170 and settle amount is 195
 
 Scenario: 10 - Multiple Bets with multiple settlements, and NO tie turnover. 		   
 	Given initial balance of $500
@@ -113,6 +122,7 @@ Scenario: 10 - Multiple Bets with multiple settlements, and NO tie turnover.
 	| 4  | 1      | TieBet   | 100    | 430          | 0        | 0       | 0                | 0              |                  |          |
 	| 5  | 2      | WinBet   | 75     | 505          | 0        | 0       | 0                | 0              |                  |          |
 	| 6  | 3      | TieBet   | 20     | 525          | 50       | -25     | 120              | -170           | Yes              |          |
+	Then the final bet amount is 170 and settle amount is 195
 
 Scenario: 11 - Bet, then Tie for Baccarat (does not count towards turnover), then cancel Tie.
 	Given initial balance of $500
@@ -124,3 +134,4 @@ Scenario: 11 - Bet, then Tie for Baccarat (does not count towards turnover), the
 	| 3  | 2      | CancelTransaction | -100   | 400          | 0        | 0       | 0                | 100            | No               |          |
 	| 4  | 1      | WinBet            | 75     | 475          | 100      | 25      | 0                | -100           | Yes              |          |
 	|    |        | Totals            | -25    | 475          | 100      | 25      | 100              | -0             |                  |          |
+	Then the final bet amount is 100 and settle amount is 75

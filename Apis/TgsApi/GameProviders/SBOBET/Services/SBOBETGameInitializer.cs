@@ -2,9 +2,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Outgoing;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
@@ -12,10 +10,11 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Messages.Pluggables;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
-using static TGS.Apis.TgsApi.GameModels.SBOBET.Enums.ServiceApiError;
+using TGS.Services.PluggableServices.Models;
+using TGS.Shared.Game.Models.SBOBET.Outgoing;
+using static TGS.Shared.Game.Models.SBOBET.Enums.ServiceApiError;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
@@ -26,14 +25,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         private readonly ISBOApiClient _client;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
-
-        private readonly IReadOnlyDictionary<GameType, string> _portofolios = new Dictionary<GameType, string>
-        {
-            {GameType.Sportsbook, "SportsBook"},
-            {GameType.VirtualSports, "VirtualSports"},
-            {GameType.VirtualSportsLobby, "VirtualSports"}
-        };
-
         private readonly ISettingOperations _settingOperations;
 
         public SBOBETGameInitializer(
@@ -90,16 +81,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 _ => default
             };
 
-            return new GetGameUrlResponse() {Url = url};
+            return new() {Url = url};
         }
 
         private async Task<BaseResponse> PlayerLoginAsync(Uri apiUrl, string companyKey, CachedPlayer player,
             GameType gameType)
         {
-            if (!_portofolios.TryGetValue(gameType, out var portfolio))
-            {
-                throw new InvalidOperationException($"No portfolio mapping is found: {gameType}");
-            }
+            var portfolio = Utility.GetPortfolio(gameType);
 
             var loginRequest = new LoginRequest
             {
@@ -115,7 +103,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             }
 
             var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
-                new RegisterPlayerRequest(player.BrandCode, player.DefaultWalletCurrencyCode)
+                new(player.BrandCode, player.DefaultWalletCurrencyCode)
                 {
                     CompanyKey = companyKey,
                     PlayerCode = player.PlayerCode

@@ -13,7 +13,7 @@ namespace TGS.Services.Operations.Extensions
     {
         /// <summary>
         ///     Dependency Injection of Operations, need to add the following dependencies beforehand:
-        ///     1. AddRepository of Tgs, Bet database
+        ///     1. AddRepository of Tgs database
         ///     2. AddRedis() in Infrastructures.Redis
         /// </summary>
         public static IServiceCollection AddOperations(this IServiceCollection services)
@@ -57,7 +57,6 @@ namespace TGS.Services.Operations.Extensions
             services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
             services.AddScoped<ISettingOperations, SettingOperations>();
             services.AddScoped<ILocalizationOperations, LocalizationOperations>();
-            services.AddScoped<IPluggableOperations, PluggableOperations>();
 
             #endregion
 

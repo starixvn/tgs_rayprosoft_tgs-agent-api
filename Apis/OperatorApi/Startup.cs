@@ -5,7 +5,6 @@ using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +25,8 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Services.Clients.Extensions;
 using TGS.Services.Operations.Extensions;
+using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
@@ -58,7 +57,7 @@ namespace TGS.Apis.OperatorApi
                 .AddOperations()
                 .AddErrorMappers()
                 .AddApiClient()
-                .AddPluggalbeGameProviderApiClient();
+                .AddPluggableServices();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
@@ -75,16 +74,15 @@ namespace TGS.Apis.OperatorApi
             services.AddMediatR(typeof(Startup).Assembly);
 
             services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", name: "tgs-db")
+                .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
-
                 .ForwardToPrometheus();
 
             if (!_env.IsProduction())
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo {Title = "TGS Operator API", Version = "v1"});
+                    c.SwaggerDoc("v1", new() {Title = "TGS Operator API", Version = "v1"});
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -94,7 +92,7 @@ namespace TGS.Apis.OperatorApi
                         Type = SecuritySchemeType.Http,
                         BearerFormat = "JWT",
                         Scheme = "bearer",
-                        Reference = new OpenApiReference
+                        Reference = new()
                         {
                             Id = JwtBearerDefaults.AuthenticationScheme,
                             Type = ReferenceType.SecurityScheme
@@ -119,9 +117,9 @@ namespace TGS.Apis.OperatorApi
                     builder =>
                     {
                         builder.WithOrigins(corsDomain.Urls)
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .SetIsOriginAllowed(_ => true);
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .SetIsOriginAllowed(_ => true);
                     });
             });
         }
@@ -129,6 +127,8 @@ namespace TGS.Apis.OperatorApi
         public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
+
+            app.UseApiLogger(bypassRouting: new[] {"/health", "/metrics", "/favicon.ico", "/swagger"});
 
             app.UseRouting();
 
@@ -141,7 +141,7 @@ namespace TGS.Apis.OperatorApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                endpoints.MapHealthChecks("/health", new()
                 {
                     ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
