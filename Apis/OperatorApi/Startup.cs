@@ -128,7 +128,7 @@ namespace TGS.Apis.OperatorApi
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(bypassRouting: new[] {"/health", "/favicon.ico", "/swagger"});
+            app.UseApiLogger(bypassRouting: new[] {"/health", "/metrics", "/favicon.ico", "/swagger"});
 
             app.UseRouting();
 
