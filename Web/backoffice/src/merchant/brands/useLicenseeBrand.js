@@ -45,13 +45,24 @@ export const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
       ...game,
       checked: true
     })) ?? []
+
+  let languages = mapMergeChecked(
+    (brandLang, licenseeLang) => {
+      return brandLang.cultureCode === licenseeLang.cultureCode
+    },
+    (brandLang = {}, licenseeLang = {}) => {
+      return {
+        ...brandLang
+      }
+    },
+    brand?.languages ?? [],
+    licensee?.languages ?? []
+  )
+
   return {
     licensee,
     brand,
-    languages: mapCheckedByCultureCode(
-      brand?.languages ?? [],
-      licensee?.languages ?? []
-    ),
+    languages,
     currencies: mapCheckedByCode(
       brand?.currencies ?? [],
       licensee?.currencies ?? []

@@ -13,28 +13,17 @@ import {
   ConfirmButtonFooter
 } from "../../form/ConfirmButtonFooter"
 import Input from "../../input/Input"
-import { GameProviderCheckboxGroup } from "../../game/providers/GameProviderCheckboxGroup"
-import {
-  mapChecked,
-  mapCheckedById,
-  mapCheckedByCultureCode,
-  mapCheckedByCode
-} from "../../checkbox/mapChecked"
-import { LanguageCheckboxGroupTable } from "../../language/LanguageCheckboxGroup"
 import { CurrencyCheckboxGroupTable } from "../../currency/CurrencyCheckboxGroup"
-import { BetLimitCheckboxGroup } from "../../betlimit/BetLimitCheckboxGroup"
 import { allCheckedKeys } from "../../checkbox/allCheckedKeys"
 import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import { useBrand, useUpdateBrand } from "./client"
-import { useLicensee } from "../licensees/client"
-import { useFormContext } from "react-hook-form"
+import { useFormContext, useFieldArray } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import Textarea from "../../textarea"
 import { BrandLanguageCheckboxGroupTable } from "./BrandLanguageCheckboxGroup"
 import { BrandGameProviderCheckboxGroupTable } from "./BrandGameProviderCheckboxGroup"
-import { BrandGamePoolDialog } from "./BrandGamePoolDialog"
 import { BrandBetLimitCheckboxGroupTable } from "./BrandBetLimitCheckboxGroup"
 import useLicenseeBrand from "./useLicenseeBrand"
 
@@ -222,7 +211,8 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
       ...brand,
       ...normalizeFormData(data)
     }
-    setSubmit(formData)
+    console.log("formData", formData)
+    // setSubmit(formData)
   }
 
   const reset = () => {
@@ -242,6 +232,7 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
     games,
     betLimits
   }
+
   return (
     <FormDialog
       defaultValues={record}
@@ -276,22 +267,13 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
 }
 
 const normalizeFormData = ({
-  brandCultures,
+  languages,
   currencyCodes,
   brandGameProviders,
   betLimits,
   ...data
 }) => {
-  brandCultures = Object.entries(brandCultures).reduce(
-    (list, [key, { checked, ...props }]) => {
-      if (checked) {
-        return [...list, { cultureCode: key, ...props }]
-      }
-
-      return list
-    },
-    []
-  )
+  languages = languages.filter(({ checked }) => checked)
 
   currencyCodes = allCheckedKeys(currencyCodes)
 
@@ -312,7 +294,7 @@ const normalizeFormData = ({
 
   return {
     ...data,
-    brandCultures,
+    languages,
     currencyCodes,
     gameProviders,
     betLimits
@@ -320,11 +302,12 @@ const normalizeFormData = ({
 }
 
 const EditBody = ({ record, readonly, isAdd = false }) => {
-  let { watch, getValues, register } = useFormContext()
+  let { watch, getValues, register, control } = useFormContext()
 
   let userLicenseeId = useUserLicenseeId()
+
   let licensee = watch("licensee")
-  let languages = watch("languages")
+
   let currencies = watch("currencies")
   let gameProviders = watch("gameProviders")
   let betLimits = watch("betLimits")
@@ -377,17 +360,23 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
           {readonly && <Text.Block>{record.operationalEmail}</Text.Block>}
         </Box>
 
-        {languages && (
+        {!isAdd && (
           <>
             <NormalLabel>
-              <Trans zh="语言" en="Language" />
+              <Trans zh="API密钥 " en="API Key" />
             </NormalLabel>
-            <BrandLanguageCheckboxGroupTable
-              disabled={readonly}
-              showBrandCultureCode
-            />
+            <Box alignY="center">
+              <Input
+                name="apiKey"
+                disabled
+                readonly
+                value={getValues("apiKey")}
+              />
+            </Box>
           </>
         )}
+
+        <LanguageFieldsBox readonly={readonly} />
 
         {currencies && (
           <>
@@ -422,5 +411,32 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
         )}
       </FieldValues>
     </Stack>
+  )
+}
+
+const LanguageFieldsBox = ({ readonly }) => {
+  let { watch, control } = useFormContext()
+
+  let fieldsName = "languages"
+  let fieldArrayContext = useFieldArray({
+    control,
+    name: fieldsName,
+    keyName: "_id"
+  })
+  let languages = watch(fieldsName)
+
+  return (
+    languages && (
+      <>
+        <NormalLabel>
+          <Trans zh="语言" en="Language" />
+        </NormalLabel>
+        <BrandLanguageCheckboxGroupTable
+          fieldArrayContext={fieldArrayContext}
+          disabled={readonly}
+          showBrandCultureCode
+        />
+      </>
+    )
   )
 }

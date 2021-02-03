@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useFormContext, useFieldArray, Controller } from "react-hook-form"
-import { Table, Set, Heading, Text, useModalState, Icon } from "bumbag"
+import { Table, Set, Heading, Text, useModalState, Icon, Box } from "bumbag"
 import { isAllPropChecked } from "../../checkbox/isAllChecked"
 import {
   LanguageCheckboxGroupTableHeadRow,
@@ -16,24 +16,18 @@ import { ConfirmText } from "../../button/ActionButtons"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 
 export const BrandLanguageCheckboxGroupTable = ({
-  name = "brandCultures",
-  fieldArrayName = "languages",
-  showBrandCultureCode = false,
+  name = "languages",
+  fieldArrayContext,
   width = "100%",
   disabled = false,
   ...props
 }) => {
-  let { control, setValue, watch, register } = useFormContext()
-  let languages = watch(fieldArrayName)
-  const { fields } = useFieldArray({
-    control,
-    name: fieldArrayName,
-    keyName: "_id"
-  })
+  let { control, setValue, watch } = useFormContext()
 
-  let selection = watch(name) ?? {}
+  let { fields } = fieldArrayContext
+
+  let selection = watch(name)
   let allChecked = isAllPropChecked(selection)
-
   return useMemo(() => {
     return (
       <Set orientation="vertical" width={width}>
@@ -46,58 +40,61 @@ export const BrandLanguageCheckboxGroupTable = ({
               allChecked={allChecked}
               disabled={disabled}
               addonAfter={
-                showBrandCultureCode && (
-                  <Table.HeadCell textAlign="center">
-                    <Trans zh="设定" en="Setting" />
-                  </Table.HeadCell>
-                )
+                <Table.HeadCell textAlign="center">
+                  <Trans zh="设定" en="Setting" />
+                </Table.HeadCell>
               }
             />
           </Table.Head>
           <Table.Body>
-            {fields.map((field) => (
-              <LanguageCheckboxGroupTableRow
-                key={field._id}
-                name={name}
-                disabled={disabled}
-                field={field}
-                checkedFieldName={checkedFieldName}
-                addonAfter={
-                  showBrandCultureCode && (
+            {fields.map((field, index) => {
+              return (
+                <LanguageCheckboxGroupTableRow
+                  key={field._id}
+                  name={name}
+                  disabled={disabled}
+                  field={field}
+                  index={index}
+                  checkedFieldName={checkedFieldName}
+                  addonAfter={
                     <Table.Cell textAlign="center">
-                      <Set orientation="horizontal" alignX="center">
-                        <Controller
-                          control={control}
-                          name={brandCultureCodeFieldName(name, field)}
-                          render={(
-                            { onChange, onBlur, value, name: fieldName, ref },
-                            { invalid, isTouched, isDirty }
-                          ) => {
-                            let dialog = useModalState()
-                            return (
-                              <>
-                                <Disclosure {...dialog}>
-                                  <Icon icon={faLanguage} type="font-awesome" />
-                                </Disclosure>
-                                {dialog.visible && (
-                                  <CodeDialog
-                                    value={value}
-                                    dialog={dialog}
-                                    onChange={(code) => {
-                                      setValue(fieldName, code)
-                                    }}
-                                  />
-                                )}
-                              </>
-                            )
-                          }}
-                        />
-                      </Set>
+                      <Controller
+                        control={control}
+                        name={brandCultureCodeFieldName(name, field, index)}
+                        defaultValue={field.brandCultureCode}
+                        render={(
+                          { onChange, onBlur, value, name: fieldName, ref },
+                          { invalid, isTouched, isDirty }
+                        ) => {
+                          let dialog = useModalState()
+                          return (
+                            <Box>
+                              <Input
+                                type="hidden"
+                                name={`${name}[${index}].cultureCode`}
+                                value={field.cultureCode}
+                              />
+                              <Disclosure {...dialog}>
+                                <Icon icon={faLanguage} type="font-awesome" />
+                              </Disclosure>
+                              {dialog.visible && (
+                                <CodeDialog
+                                  value={value}
+                                  dialog={dialog}
+                                  onChange={(code) => {
+                                    setValue(fieldName, code)
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          )
+                        }}
+                      />
                     </Table.Cell>
-                  )
-                }
-              />
-            ))}
+                  }
+                />
+              )
+            })}
           </Table.Body>
         </Table>
       </Set>
@@ -130,10 +127,9 @@ const CodeDialog = ({ value, dialog, onChange }) => {
   )
 }
 
-const checkedFieldName = (name, checkboxField) =>
-  `${name}.${checkboxField.cultureCode}.checked`
+const checkedFieldName = (name, field, index) => `${name}.[${index}].checked`
 
-const brandCultureCodeFieldName = (name, checkboxField) => {
-  let result = `${name}.${checkboxField.cultureCode}.brandCultureCode`
+const brandCultureCodeFieldName = (name, field, index) => {
+  let result = `${name}[${index}].brandCultureCode`
   return result
 }

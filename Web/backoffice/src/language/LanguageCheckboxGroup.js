@@ -85,7 +85,7 @@ export const LanguageCheckboxGroupTableHeadRow = ({
             onChange={(event) => {
               let checked = event.target.checked
               fields.forEach((field, index) => {
-                setValue(checkedFieldName(name, field), checked)
+                setValue(checkedFieldName(name, field, index), checked)
               })
             }}
             disabled={disabled}
@@ -107,18 +107,20 @@ export const LanguageCheckboxGroupTableRow = ({
   name,
   disabled,
   field,
+  index,
   checkedFieldName = defaultCheckedFieldName,
   addonAfter
 }) => {
   let formContext = useFormContext()
 
   return useMemo(() => {
+    let checkboxFieldName = checkedFieldName(name, field, index)
     return (
       <Table.Row>
         <Table.Cell textAlign="center">
           <Checkbox
             key={field._id}
-            name={checkedFieldName(name, field)}
+            name={checkboxFieldName}
             checkboxRef={formContext?.register?.()}
             defaultChecked={field.checked}
             disabled={disabled}
@@ -132,5 +134,5 @@ export const LanguageCheckboxGroupTableRow = ({
   }, [field])
 }
 
-const defaultCheckedFieldName = (name, checkboxField) =>
+const defaultCheckedFieldName = (name, checkboxField, index) =>
   `${name}.${checkboxField.cultureCode}`
