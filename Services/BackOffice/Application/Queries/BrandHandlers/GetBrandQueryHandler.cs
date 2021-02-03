@@ -43,6 +43,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     Code = brand.Code,
                     Name = brand.Name,
                     Status = brand.Status,
+                    ClientId = brand.ClientId,
+                    SecretKey = brand.SecretKey,
+                    ApiKey = brand.ApiKey,
                     Currencies = brand.Currencies
                         .Select(x => new BrandCurrencyModel
                         {
