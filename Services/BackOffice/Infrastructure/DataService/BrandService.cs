@@ -12,6 +12,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
+using TGS.Services.BackOffice.Infrastructure.Services;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -31,11 +32,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
     public class BrandService : BaseRepositoryOperations<ITgsRepository>, IBrandService
     {
+        private readonly ICredentialGenerator _credentialGenerator;
         private readonly ITgsRepository _repository;
 
-        public BrandService(ITgsRepository tgsRepository) : base(tgsRepository)
+        public BrandService(ITgsRepository tgsRepository, ICredentialGenerator credentialGenerator) : base(
+            tgsRepository)
         {
             _repository = tgsRepository;
+            _credentialGenerator = credentialGenerator;
         }
 
         Task IBrandService.ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request)
@@ -58,9 +62,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
-                ApiKey = request.ApiKey,
-                ClientId = request.ClientId,
-                SecretKey = request.SecretKey,
+                ApiKey = _credentialGenerator.GetApiKey(),
+                ClientId = request.Code,
+                SecretKey = _credentialGenerator.GetSecretKey(),
                 CreatedByUsername = request.Username,
                 UpdatedByUsername = request.Username,
                 CreatedOn = DateTimeOffset.Now,
@@ -89,9 +93,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.Name = request.Name;
             brand.Description = request.Description;
             brand.OperationalEmail = request.OperationalEmail;
-            brand.ApiKey = request.ApiKey;
-            brand.ClientId = request.ClientId;
-            brand.SecretKey = request.SecretKey;
             brand.UpdatedByUsername = request.Username;
             brand.UpdatedOn = DateTimeOffset.Now;
 

@@ -10,21 +10,24 @@ namespace TGS.Core.Infrastructures.Security
         (byte[], byte[]) GenerateCredential(string password);
 
         bool Verify(byte[] existedPassword, byte[] existedSalt, string password);
+        byte[] GenerateRandomSalt(ushort length);
     }
 
     public sealed class PasswordHandler : IPasswordHandler
     {
         private readonly IHashProvider _hashProvider;
-        private readonly RNGCryptoServiceProvider _randomGenerator = new RNGCryptoServiceProvider();
+        private readonly IPasswordHandler _interface;
+        private readonly RNGCryptoServiceProvider _randomGenerator = new();
 
         public PasswordHandler(IHashProvider hashProvider)
         {
             _hashProvider = hashProvider;
+            _interface = this;
         }
 
         (byte[], byte[]) IPasswordHandler.GenerateCredential(string password)
         {
-            var salt = GenerateRandomSalt(32);
+            var salt = _interface.GenerateRandomSalt(32);
             var hashedPassword = _hashProvider.Hash(
                 Encoding.UTF8.GetBytes(password),
                 _hashProvider.Hash(salt));
@@ -42,7 +45,7 @@ namespace TGS.Core.Infrastructures.Security
             return existedPassword.SequenceEqual(hashedPassword);
         }
 
-        private byte[] GenerateRandomSalt(ushort length)
+        byte[] IPasswordHandler.GenerateRandomSalt(ushort length)
         {
             if (length == 0)
             {
