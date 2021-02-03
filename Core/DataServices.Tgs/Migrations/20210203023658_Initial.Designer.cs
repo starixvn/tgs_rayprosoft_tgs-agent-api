@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210128072637_Initial")]
+    [Migration("20210203023658_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2031,6 +2031,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("email");
+
+                    b.Property<DateTimeOffset>("FirstDepositOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_deposit_on");
 
                     b.Property<bool>("HasAgent")
                         .HasColumnType("boolean")

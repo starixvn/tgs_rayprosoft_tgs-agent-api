@@ -42,7 +42,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string UpdatedByUsername { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
-        public DateTimeOffset FirstFundInOn { get; set; }
+        public DateTimeOffset FirstDepositOn { get; set; }
 
         public virtual ICollection<Wallet> Wallets { get; set; }
         public virtual ICollection<PlayerBank> Banks { get; set; }
