@@ -3,9 +3,9 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
+using TGS.Shared.Game.Models.SBOBET.Incoming;
 
 namespace TGS.Tests.ApiClients.GameProviders
 {

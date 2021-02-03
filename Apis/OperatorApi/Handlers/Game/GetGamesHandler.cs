@@ -17,6 +17,7 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using Localization = TGS.Core.Models.Consts.LocalizationContext;
 
 namespace TGS.Apis.OperatorApi.Handlers.Game
 {
@@ -125,9 +126,9 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                     return g with
                     {
                         Name = _localizationOperations.Parse(store, key,
-                            Core.Models.Consts.LocalizationContext.GameName, g.Name),
+                            Localization.GameName, g.Name),
                         Description = _localizationOperations.Parse(store, key,
-                            Core.Models.Consts.LocalizationContext.GameDescription, g.Description)
+                            Localization.GameDescription, g.Description)
                     };
                 }).ToArray();
 

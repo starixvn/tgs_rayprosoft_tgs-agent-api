@@ -167,6 +167,7 @@ services:
       tgs:
     ports:
       - 27017:27017
+    restart: unless-stopped
 
   operator-api:
     build:
@@ -268,6 +269,7 @@ services:
       - 4222:4222
     networks:
       tgs:
+    restart: unless-stopped
 
   redis:
     image: "redis:alpine"
@@ -276,6 +278,7 @@ services:
       - "6379:6379"
     networks:
       tgs:
+    restart: unless-stopped
 
   localstack:
     container_name: localstack

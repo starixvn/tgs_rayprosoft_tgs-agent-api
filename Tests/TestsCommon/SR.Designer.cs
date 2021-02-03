@@ -88,6 +88,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to BetValuesResults.
+        /// </summary>
+        public static string BetValuesResults {
+            get {
+                return ResourceManager.GetString("BetValuesResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Brand.
         /// </summary>
         public static string Brand {

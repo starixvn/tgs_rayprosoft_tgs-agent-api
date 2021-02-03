@@ -5,12 +5,12 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Commons.Middlewares;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
+using TGS.Shared.Game.Models.SBOBET.Enums;
+using TGS.Shared.Game.Models.SBOBET.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 {

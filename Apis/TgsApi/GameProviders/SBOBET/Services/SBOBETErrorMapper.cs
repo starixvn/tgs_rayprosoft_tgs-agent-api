@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
-using static TGS.Apis.TgsApi.GameModels.SBOBET.Enums.GameApiError;
+using TGS.Shared.Game.Models.SBOBET.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
+using static TGS.Shared.Game.Models.SBOBET.Enums.GameApiError;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {

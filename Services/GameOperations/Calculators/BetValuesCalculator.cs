@@ -10,23 +10,23 @@ namespace TGS.Services.GameOperations.Calculators
 {
     internal interface IBetValuesCalculator
     {
-        BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions);
+        BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current,
+            IList<BetActionData> previousActions);
     }
 
     internal sealed class BetValuesCalculator : IBetValuesCalculator
     {
-        BetValuesResult IBetValuesCalculator.Calculate(bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions)
+        BetValuesResult IBetValuesCalculator.Calculate(bool hasTurnoverOnTieBet, BetActionData current,
+            IList<BetActionData> previousActions)
         {
             if (current.Type.IsOneOf(LockAmount, UnlockAmount))
             {
                 return new();
             }
 
-            var betAmount = default(decimal);
-            var turnover = default(decimal);
-            var winloss = default(decimal);
-            var unsettledBets = default(decimal);
-            var tiebetAdjustment = default(decimal);
+            decimal betAmount = 0, settleAmount = 0;
+            decimal turnover = 0, winloss = 0;
+            decimal unsettledBets = 0, tiebetAdjustment = 0;
 
             previousActions ??= Array.Empty<BetActionData>();
             var previouslyClosed = FindPreviouslyClosed(previousActions);
@@ -35,31 +35,33 @@ namespace TGS.Services.GameOperations.Calculators
             // and re-opening round
             if (previouslyClosed != null && current.IsExplicitlyNotClosingRound)
             {
-                var (Turnover, WinLoss, UnsettleBets) = ReversePreviouslyClosedBetValues(previouslyClosed);
-                turnover = Turnover;
-                winloss = WinLoss;
-                unsettledBets = UnsettleBets;
+                (turnover, winloss, unsettledBets) = ReversePreviouslyClosedBetValues(previouslyClosed);
+                betAmount = CalculateBetAmount(current, previousActions);
             }
             // round is open and we are closing it now
             else if (current.IsClosingRound)
             {
-                var (BetAmount, TieBetAdjustment, Turnover, WinLoss, UnsettleBets) = CalculateClosingActionBetValues(hasTurnoverOnTieBet, current, previousActions);
-
-                betAmount = BetAmount;
-                turnover = Turnover;
-                winloss = WinLoss;
-                unsettledBets = UnsettleBets;
-                tiebetAdjustment = TieBetAdjustment;
+                (betAmount, settleAmount, tiebetAdjustment, turnover, winloss, unsettledBets) =
+                    CalculateClosingActionBetValues(hasTurnoverOnTieBet, current, previousActions);
             }
-            // round is open and we are placing bet and not closing it
-            else if (current.Type == PlaceBet)
+            else
             {
-                unsettledBets = current.Amount.Negate();
+                switch (current.Type)
+                {
+                    case PlaceBet:
+                        (betAmount, unsettledBets) = CalculatePlaceBetActionBetValues(current, previousActions);
+                        break;
+
+                    case CancelTransaction:
+                        betAmount = CalculateBetAmount(current, previousActions);
+                        break;
+                }
             }
 
-            return new BetValuesResult()
+            return new()
             {
                 BetAmount = betAmount,
+                SettleAmount = settleAmount,
                 Turnover = turnover,
                 WinLoss = winloss,
                 UnsettledBets = unsettledBets,
@@ -67,10 +69,12 @@ namespace TGS.Services.GameOperations.Calculators
             };
         }
 
-        private BetActionData FindPreviouslyClosed(IList<BetActionData> actions)
+        private static BetActionData FindPreviouslyClosed(IList<BetActionData> actions)
         {
             if (actions.Count == 0)
+            {
                 return null;
+            }
 
             BetActionData closingAction = null;
             foreach (var a in actions)
@@ -88,7 +92,8 @@ namespace TGS.Services.GameOperations.Calculators
             return closingAction;
         }
 
-        private static (decimal Turnover, decimal WinLoss, decimal UnsettleBets) ReversePreviouslyClosedBetValues(BetActionData previouslyClosed)
+        private static (decimal Turnover, decimal WinLoss, decimal UnsettleBets) ReversePreviouslyClosedBetValues(
+            BetActionData previouslyClosed)
         {
             var turnover = previouslyClosed.Turnover.Negate();
             var winloss = previouslyClosed.WinLoss.Negate();
@@ -97,19 +102,38 @@ namespace TGS.Services.GameOperations.Calculators
             return (turnover, winloss, unsettleBets);
         }
 
-        private static (decimal BetAmount, decimal TiebetAdjustment, decimal Turnover, decimal WinLoss, decimal UnsettleBets)
-            CalculateClosingActionBetValues(bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions)
+        private static (decimal BetAmount, decimal SettleAmount, decimal TiebetAdjustment, decimal Turnover,
+            decimal WinLoss, decimal UnsettleBets) CalculateClosingActionBetValues(bool hasTurnoverOnTieBet,
+                BetActionData current, IList<BetActionData> previousActions)
         {
-            var allActions = previousActions.Concat(new[] { current }).ToArray();
+            var allActions = GetAllActions(current, previousActions);
 
             var betAmount = CalculateBetAmount(allActions);
+            var settleAmount = CalculateSettleAmount(allActions);
             var tiebetAdjustment = CalculateTiebetAdjustment(hasTurnoverOnTieBet, allActions);
             var winloss = CalculateWinLoss(allActions);
             var unsettledBets = CalculateUnsettledBets(previousActions);
 
             var turnover = betAmount - tiebetAdjustment;
 
-            return (betAmount, tiebetAdjustment, turnover, winloss, unsettledBets);
+            return (betAmount, settleAmount, tiebetAdjustment, turnover, winloss, unsettledBets);
+        }
+
+        private static (decimal BetAmount, decimal UnsettleBets) CalculatePlaceBetActionBetValues(BetActionData current,
+            IList<BetActionData> previousActions)
+        {
+            var allActions = GetAllActions(current, previousActions);
+            var betAmount = CalculateBetAmount(allActions);
+
+            var unsettledBets = current.Amount.Negate();
+
+            return (betAmount, unsettledBets);
+        }
+
+        private static decimal CalculateBetAmount(BetActionData current, IList<BetActionData> previousActions)
+        {
+            var allActions = GetAllActions(current, previousActions);
+            return CalculateBetAmount(allActions);
         }
 
         private static decimal CalculateBetAmount(IList<BetActionData> allActions)
@@ -121,6 +145,14 @@ namespace TGS.Services.GameOperations.Calculators
                 .Negate();
         }
 
+        private static decimal CalculateSettleAmount(IList<BetActionData> allActions)
+        {
+            // sum all amounts of settle actions without cancelled, include free bets
+            return allActions
+                .Where(a => a.Type.IsSettleBet() && a.IsCancelled == false)
+                .Sum(a => a.Amount);
+        }
+
         private static decimal CalculateTiebetAdjustment(bool hasTurnoverOnTieBet, IList<BetActionData> allActions)
         {
             // if has turnover on tie bet do nothing
@@ -130,9 +162,9 @@ namespace TGS.Services.GameOperations.Calculators
                 ? 0m
                 : allActions
                     .Where(a => a.Type == TieBet &&
-                                a.Reference != null &&
-                                a.Reference.Type == PlaceBet &&
-                                a.IsCancelled == false)
+                        a.Reference != null &&
+                        a.Reference.Type == PlaceBet &&
+                        a.IsCancelled == false)
                     .Sum(a => a.Reference.Amount)
                     .Negate();
         }
@@ -149,5 +181,8 @@ namespace TGS.Services.GameOperations.Calculators
             // UnsettledBets = -1 * Sum(UnsettledBets)
             return previousActions.Sum(a => a.UnsettledBets).Negate();
         }
+
+        private static IList<BetActionData> GetAllActions(BetActionData current, IList<BetActionData> previousActions) =>
+            previousActions.Concat(new[] {current}).ToArray();
     }
 }

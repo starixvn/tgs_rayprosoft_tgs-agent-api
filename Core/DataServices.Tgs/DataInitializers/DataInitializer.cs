@@ -279,7 +279,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 addedPlayers.Add(p);
 
                 var brandId = p.BrandId;
-                var username = Generator.RandomString(12);
+                var username = p.PlayerCode;
                 var realName = Generator.RandomString(12);
                 var vipId = _vipLevels.First(x => x.BrandId == brandId).Id;
 

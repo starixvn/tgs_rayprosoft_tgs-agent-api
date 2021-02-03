@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -36,7 +37,8 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
-    <ProjectReference Include="..\TgsApi.GameModels\TgsApi.GameModels.csproj" />
+    <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
+    <ProjectReference Include="..\..\Shared\Game.Models\Game.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>

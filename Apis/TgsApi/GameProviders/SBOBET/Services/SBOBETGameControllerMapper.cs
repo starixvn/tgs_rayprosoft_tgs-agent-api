@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Enums;
-using TGS.Apis.TgsApi.GameModels.SBOBET.Incoming;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
+using TGS.Shared.Game.Models.SBOBET.Enums;
+using TGS.Shared.Game.Models.SBOBET.Incoming;
 using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
@@ -231,7 +231,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             var (stake, winloss) = GetStakeAndWinLoss(status, ga, externalRoundId, externalTransactionId);
 
-            return new GetBetStatusResponse
+            return new()
             {
                 ErrorCode = (int) GameApiError.Success,
                 ErrorMessage = GameApiError.Success.Description(),
@@ -328,7 +328,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         private static T Response<T>(string playerCode, decimal balance, GameApiError error = GameApiError.Success)
             where T : BaseResponse, new()
         {
-            return new T
+            return new()
             {
                 ErrorCode = (int) error,
                 ErrorMessage = error.Description(),

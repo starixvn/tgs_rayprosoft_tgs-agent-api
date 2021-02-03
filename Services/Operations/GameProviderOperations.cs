@@ -27,6 +27,8 @@ namespace TGS.Services.Operations
 
         Task<bool> GetGameProviderSupportTestPlayerAsync(Guid gameProviderId);
 
+        Task<string[]> GetGameProviderLanguagesAsync(Guid gameProviderId);
+
         Task<bool> LanguageSupportedAsync(Guid gameProviderId, string cultureCode);
 
         Task<bool> CurrencySupportedAsync(Guid gameProviderId, string currencyCode);
@@ -179,9 +181,8 @@ namespace TGS.Services.Operations
             return cachedGameProvider?.SupportTestPlayer ?? false;
         }
 
-        async Task<bool> IGameProviderOperations.LanguageSupportedAsync(Guid gameProviderId, string cultureCode)
-        {
-            var languages = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderLanguages,
+        Task<string[]> IGameProviderOperations.GetGameProviderLanguagesAsync(Guid gameProviderId) =>
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderLanguages,
                 gameProviderId, TimeSpan.FromHours(2),
                 async () =>
                 {
@@ -190,7 +191,10 @@ namespace TGS.Services.Operations
                     return dict.Keys.ToArray();
                 });
 
-            return languages.Contains(cultureCode, StringComparer.OrdinalIgnoreCase);
+        async Task<bool> IGameProviderOperations.LanguageSupportedAsync(Guid gameProviderId, string cultureCode)
+        {
+            var languages = await _interface.GetGameProviderLanguagesAsync(gameProviderId);
+            return languages.IgnoreCaseContains(cultureCode);
         }
 
         async Task<bool> IGameProviderOperations.CurrencySupportedAsync(Guid gameProviderId, string currencyCode)
@@ -204,7 +208,7 @@ namespace TGS.Services.Operations
                     return dict.Keys.ToArray();
                 });
 
-            return currencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase);
+            return currencies.IgnoreCaseContains(currencyCode);
         }
 
         //async Task<string> IGameProviderOperations.GetGameProviderBetLimitCodeAsync(Guid gameProviderId,
