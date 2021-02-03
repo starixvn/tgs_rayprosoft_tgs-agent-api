@@ -16,14 +16,13 @@ import { useFormContext, useFieldArray, Controller } from "react-hook-form"
 import { isAllPropChecked } from "../../checkbox/isAllChecked"
 import { Trans, useTrans } from "../../i18n"
 import Checkbox, { CheckboxField } from "../../checkbox"
-import Disclosure from "../../dialog/Disclosure"
+import Disclosure, { ConfigIconDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import Input, { InputField } from "../../input/Input"
 import Select, { SelectField } from "../../select/Select"
 import { Switch, SwitchField } from "../../switch/Switch"
 import Backdrop from "../../dialog/Backdrop"
 import {
-  faCog,
   faDesktop,
   faMobile,
   faLanguage
@@ -121,9 +120,7 @@ const Row = ({ name, disabled, field }) => {
             ) => {
               return (
                 <>
-                  <Disclosure {...configDialog}>
-                    <Icon icon={faCog} type="font-awesome" />
-                  </Disclosure>
+                  <ConfigIconDisclosure {...configDialog} />
                   {configDialog.visible && (
                     <ConfigDialog
                       gameProvider={field}
@@ -273,17 +270,15 @@ const ConfigDialog = ({ gameProvider, dialog, onChange }) => {
     zh: `游戏商配置`,
     en: `Game Provider Configuration`
   })
-  let [isLoading, setLoading] = useState()
+
   return (
     <Backdrop {...dialog}>
       <FormDialog
         stopPropagation={true}
         onSubmit={({ id, ...data }) => {
-          setLoading(true)
           onChange(id)
           dialog.hide()
         }}
-        isLoading={isLoading}
         submitText={<ConfirmText />}
         dialog={dialog}
         title={title}

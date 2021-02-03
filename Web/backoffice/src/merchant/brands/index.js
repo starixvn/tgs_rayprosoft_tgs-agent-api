@@ -15,9 +15,10 @@ import dateTimeColumn from "../../table/column/dateTime"
 import { AddButton, EditButton, ViewButton } from "./edit"
 import { SearchButton } from "../../button/SearchButton"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import Input from "../../input/Input"
+import { InputField } from "../../input/Input"
 import equals from "fast-deep-equal"
 import { MerchantStatusMenu } from "../status"
+import { EditBrandGameBetLimitButton } from "./BrandGameBetLimitDialog"
 
 export { Code }
 
@@ -36,7 +37,6 @@ export const Content = () => {
     return null
   }
 
-  return null
   return <Body />
 }
 
@@ -105,7 +105,7 @@ const SearchForm = ({ search, isLoading, ...props }) => {
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)}>
         <Set>
-          <Input
+          <InputField
             name="keyword"
             addonAfter={
               <Button onClick={() => formMethods.setValue("keyword", "")}>
@@ -113,7 +113,6 @@ const SearchForm = ({ search, isLoading, ...props }) => {
               </Button>
             }
             placeholder={searchPlaceHolder}
-            autocomplete="off"
           />
 
           <SearchButton isLoading={isLoading} />
@@ -129,6 +128,19 @@ const useColumns = ({ items = [], mutate }) => {
   return useMemo(() => {
     let columns = [
       sequenceColumn(),
+      {
+        accessor: "licenseeName",
+        Header: <Trans zh="所属公司" en="Licensee Name" />,
+        disableSortBy: true,
+        headCell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        },
+        cell: {
+          textAlign: "center",
+          whiteSpace: "nowrap"
+        }
+      },
       {
         accessor: "code",
         Header: <Trans zh="公司代码" en="Code" />,
@@ -229,10 +241,15 @@ const useColumns = ({ items = [], mutate }) => {
           return row
         },
         Cell: ({ value }) => {
+          return null
           return (
             <Set orientation="vertical" alignX="center">
               <ViewButton record={value} />
               <EditButton record={value} onSubmitted={mutate} />
+              <EditBrandGameBetLimitButton
+                record={value}
+                onSubmitted={mutate}
+              />
             </Set>
           )
         }

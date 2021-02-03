@@ -19,7 +19,8 @@ import {
   Group,
   Set,
   useClassName,
-  Textarea as _Textarea
+  Textarea as _Textarea,
+  TextareaField as _TextareaField
 } from "bumbag"
 
 export const Textarea = ({
@@ -27,12 +28,13 @@ export const Textarea = ({
   register,
   registerOptions = {},
   textareaRef,
+  resize = "none",
   ...props
 }) => {
   let formContext = useFormContext()
   register = register ?? formContext?.register
 
-  if (!textareaRef && register) {
+  if (name && !textareaRef && register) {
     textareaRef = register({
       required: props.required,
       min: props.min,
@@ -48,7 +50,76 @@ export const Textarea = ({
   let state = error && "danger"
 
   return (
-    <_Textarea name={name} textareaRef={textareaRef} state={state} {...props} />
+    <_Textarea
+      name={name}
+      textareaRef={textareaRef}
+      state={state}
+      {...props}
+      css={css`
+        & textarea {
+          resize: ${resize};
+        }
+      `}
+    />
+  )
+}
+
+export const TextareaField = ({
+  name,
+  register,
+  registerOptions = {},
+  textareaRef,
+  resize = "none",
+  validationText,
+  ...props
+}) => {
+  let formContext = useFormContext()
+  register = register ?? formContext?.register
+
+  if (name && !textareaRef && register) {
+    textareaRef = register({
+      required: {
+        value: props.required,
+        message: props.requiredMessage
+      },
+      min: {
+        value: props.min,
+        message: props.minMessage
+      },
+      max: {
+        value: props.max,
+        message: props.maxMessage
+      },
+      minLength: {
+        value: props.minLength,
+        message: props.minLengthMessage
+      },
+      maxLength: {
+        value: props.maxLength,
+        message: props.maxLengthMessage
+      },
+      validate: props.validate,
+      ...registerOptions
+    })
+  }
+
+  let error = formContext?.errors[name]
+  let state = error && "danger"
+  validationText = validationText ?? error?.message
+
+  return (
+    <_TextareaField
+      name={name}
+      textareaRef={textareaRef}
+      state={state}
+      validationText={validationText}
+      css={css`
+        & textarea {
+          resize: ${resize};
+        }
+      `}
+      {...props}
+    />
   )
 }
 

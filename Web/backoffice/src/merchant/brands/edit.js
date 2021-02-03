@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useModalState, Stack, Heading, Box, Text, FieldStack } from "bumbag"
 import { useIsDisplayMenuByRoute, useUserLicenseeId } from "../../user/context"
-import Disclosure from "../../dialog/Disclosure"
+import Disclosure, { AddDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
@@ -34,6 +34,9 @@ import { NormalLabel } from "../../form/Label"
 import Textarea from "../../textarea"
 import { BrandLanguageCheckboxGroupTable } from "./BrandLanguageCheckboxGroup"
 import { BrandGameProviderCheckboxGroupTable } from "./BrandGameProviderCheckboxGroup"
+import { BrandGamePoolDialog } from "./BrandGamePoolDialog"
+import { BrandBetLimitCheckboxGroupTable } from "./BrandBetLimitCheckboxGroup"
+import useLicenseeBrand from "./useLicenseeBrand"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -43,11 +46,10 @@ export const AddButton = ({ onSubmitted, ...props }) => {
     return null
   }
 
+  return null
   return (
     <>
-      <Disclosure {...dialog}>
-        <Trans zh="新增" en="Add" />
-      </Disclosure>
+      <AddDisclosure {...dialog} />
       {dialog.visible && (
         <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
       )}
@@ -92,49 +94,6 @@ export const ViewButton = ({ record, ...props }) => {
   )
 }
 
-const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
-  let {
-    data: brand,
-    isLoading: isLoadingBrand,
-    error: brandError,
-    mutate: mutateBrand,
-    deleteCache: deleteBrandCache
-  } = useBrand(id)
-
-  let {
-    data: licensee,
-    isLoading: isLoadingLicensee,
-    error: licenseeError,
-    mutate: mutateLicensee,
-    deleteCache: deleteLicenseeCache
-  } = useLicensee(licenseeId)
-
-  return {
-    licensee,
-    brand,
-    languages: mapCheckedByCultureCode(
-      brand?.languages ?? [],
-      licensee?.languages ?? []
-    ),
-    currencies: mapCheckedByCode(
-      brand?.currencies ?? [],
-      licensee?.currencies ?? []
-    ),
-    gameProviders: mapCheckedById(
-      brand?.gameProviders ?? [],
-      licensee?.gameProviders ?? []
-    ),
-    betLimits: mapCheckedById(
-      brand?.betLimits ?? [],
-      licensee?.betLimits ?? []
-    ),
-    isLoading: isLoadingBrand || isLoadingLicensee,
-    error: brandError || licenseeError,
-    mutateBrand,
-    deleteBrandCache
-  }
-}
-
 const ViewDialog = ({ id, licenseeId, dialog, ...props }) => {
   let {
     brand,
@@ -142,6 +101,7 @@ const ViewDialog = ({ id, licenseeId, dialog, ...props }) => {
     languages,
     currencies,
     gameProviders,
+    games,
     betLimits,
     isLoading,
     error,
@@ -173,6 +133,7 @@ const ViewDialog = ({ id, licenseeId, dialog, ...props }) => {
     languages,
     currencies,
     gameProviders,
+    games,
     betLimits
   }
   return (
@@ -230,6 +191,7 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
     languages,
     currencies,
     gameProviders,
+    games,
     betLimits,
     isLoading: isLoadingBrand,
     error: brandError,
@@ -256,9 +218,11 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
   }
 
   const onSubmit = (data) => {
-    data = normalizeFormData(data)
-    //setSubmit(data)
-    console.log("TODO: submit brand", data)
+    let formData = {
+      ...brand,
+      ...normalizeFormData(data)
+    }
+    setSubmit(formData)
   }
 
   const reset = () => {
@@ -275,6 +239,7 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
     languages,
     currencies,
     gameProviders,
+    games,
     betLimits
   }
   return (
@@ -310,7 +275,13 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
   )
 }
 
-const normalizeFormData = ({ brandCultures, brandGameProviders, ...data }) => {
+const normalizeFormData = ({
+  brandCultures,
+  currencyCodes,
+  brandGameProviders,
+  betLimits,
+  ...data
+}) => {
   brandCultures = Object.entries(brandCultures).reduce(
     (list, [key, { checked, ...props }]) => {
       if (checked) {
@@ -321,6 +292,8 @@ const normalizeFormData = ({ brandCultures, brandGameProviders, ...data }) => {
     },
     []
   )
+
+  currencyCodes = allCheckedKeys(currencyCodes)
 
   let gameProviders = Object.entries(brandGameProviders).reduce(
     (list, [key, { checked, ...props }]) => {
@@ -333,10 +306,16 @@ const normalizeFormData = ({ brandCultures, brandGameProviders, ...data }) => {
     []
   )
 
+  betLimits = betLimits
+    .filter((betLimit) => betLimit.checked)
+    .map(({ id, ...props }) => ({ id: parseInt(id), ...props }))
+
   return {
     ...data,
     brandCultures,
-    gameProviders
+    currencyCodes,
+    gameProviders,
+    betLimits
   }
 }
 
@@ -434,10 +413,10 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
         {betLimits && (
           <>
             <NormalLabel>
-              <Trans zh="游戏商限红" en="Game Provider Bet Limit" />
+              <Trans zh="品牌限红" en="Brand Bet Limit" />
             </NormalLabel>
             <FieldStack marginTop="major-1">
-              <BetLimitCheckboxGroup disabled={readonly} />
+              <BrandBetLimitCheckboxGroupTable disabled={readonly} />
             </FieldStack>
           </>
         )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, forwardRef } from "react"
-import { Button, Modal, css } from "bumbag"
+import { Button, Modal, css, Icon } from "bumbag"
 import { Trans } from "../i18n"
+import { faCog } from "@fortawesome/free-solid-svg-icons"
 
 export const Disclosure = forwardRef(
   ({ use = Button, children, ...props }, ref) => (
@@ -21,6 +22,18 @@ export const Disclosure = forwardRef(
 export const EditDisclosure = forwardRef((props, ref) => (
   <Disclosure ref={ref} {...props}>
     <Trans zh="编辑" en="Edit" />
+  </Disclosure>
+))
+
+export const AddDisclosure = forwardRef((props, ref) => (
+  <Disclosure ref={ref} {...props}>
+    <Trans zh="新增" en="Add" />
+  </Disclosure>
+))
+
+export const ConfigIconDisclosure = forwardRef((props, ref) => (
+  <Disclosure ref={ref} {...props}>
+    <Icon icon={faCog} type="font-awesome" />
   </Disclosure>
 ))
 

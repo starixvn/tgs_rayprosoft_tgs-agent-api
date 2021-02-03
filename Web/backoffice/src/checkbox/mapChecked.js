@@ -1,13 +1,24 @@
-export const mapChecked = (fn = byId, source = [], list = []) =>
+export const mapChecked = (fn, source = [], list = []) =>
   list.map((item) => {
-    let checked = !!source.find(fn(item))
+    let record = source.find((a) => fn(a, item))
+    let checked = !!record
     return {
       ...item,
       checked
     }
   })
 
-const byProp = (name) => (a = {}) => (b = {}) => a[name] === b[name]
+export const mapMergeChecked = (predicateFn, mergeFn, source = [], list = []) =>
+  list.map((item) => {
+    let record = source.find((a) => predicateFn(a, item))
+    let checked = !!record
+    return {
+      ...mergeFn(record, item),
+      checked
+    }
+  })
+
+const byProp = (name) => (a = {}, b = {}) => a[name] === b[name]
 export const mapCheckedByProp = (name, source = [], list = []) =>
   mapChecked(byProp(name), source, list)
 
