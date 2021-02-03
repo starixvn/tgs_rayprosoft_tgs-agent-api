@@ -1584,7 +1584,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     parent_invitation_code = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: true),
                     vip_id = table.Column<Guid>(type: "uuid", nullable: true),
                     updated_by_username = table.Column<string>(type: "text", nullable: true),
-                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

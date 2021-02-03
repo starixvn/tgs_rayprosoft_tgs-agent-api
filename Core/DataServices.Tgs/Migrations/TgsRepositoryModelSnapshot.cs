@@ -2030,6 +2030,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("email");
 
+                    b.Property<DateTimeOffset>("FirstDepositOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_deposit_on");
+
                     b.Property<bool>("HasAgent")
                         .HasColumnType("boolean")
                         .HasColumnName("has_agent");
