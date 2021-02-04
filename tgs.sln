@@ -11,15 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{8790B3DF-F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{2D13A664-6549-483A-9659-22362B2C1DE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructures", "Core\Infrastructures\Infrastructures.csproj", "{E96BD952-A5FD-40E2-8946-BF730BCC07B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructures", "src\Core\Infrastructures\Infrastructures.csproj", "{E96BD952-A5FD-40E2-8946-BF730BCC07B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Core\Models\Models.csproj", "{3763ECF4-01E1-416E-BAAC-887FBB939516}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "src\Core\Models\Models.csproj", "{3763ECF4-01E1-416E-BAAC-887FBB939516}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operations", "Services\Operations\Operations.csproj", "{087A84A8-9BB1-41FC-8134-3A6876BD34D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operations", "src\Services\Operations\Operations.csproj", "{087A84A8-9BB1-41FC-8134-3A6876BD34D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.IntegrationTests", "Tests\Redis.IntegrationTests\Redis.IntegrationTests.csproj", "{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.IntegrationTests", "src\Tests\Redis.IntegrationTests\Redis.IntegrationTests.csproj", "{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nats.IntegrationTests", "Tests\Nats.IntegrationTests\Nats.IntegrationTests.csproj", "{5C1CCE46-0C09-41B5-A6CE-44256B44492F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nats.IntegrationTests", "src\Tests\Nats.IntegrationTests\Nats.IntegrationTests.csproj", "{5C1CCE46-0C09-41B5-A6CE-44256B44492F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{897541B7-3AE6-4AEE-9D3E-51221088F2CC}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,17 +29,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		RunDockerPush.bat = RunDockerPush.bat
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Base", "Core\DataServices.Base\DataServices.Base.csproj", "{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Base", "src\Core\DataServices.Base\DataServices.Base.csproj", "{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestsCommon", "Tests\TestsCommon\TestsCommon.csproj", "{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestsCommon", "src\Tests\TestsCommon\TestsCommon.csproj", "{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.UnitTests", "Tests\Tgs.UnitTests\Tgs.UnitTests.csproj", "{B92347FB-E471-4185-9A87-1F608D74B52F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.UnitTests", "src\Tests\Tgs.UnitTests\Tgs.UnitTests.csproj", "{B92347FB-E471-4185-9A87-1F608D74B52F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice", "Apis\BackendOffice\BackendOffice.csproj", "{5BBAD8B6-C9CB-449C-8D21-6BAB46A0891A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice", "src\Apis\BackendOffice\BackendOffice.csproj", "{5BBAD8B6-C9CB-449C-8D21-6BAB46A0891A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TgsApi", "Apis\TgsApi\TgsApi.csproj", "{94BB3B92-E24B-4C66-AD2C-037185F13F77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TgsApi", "src\Apis\TgsApi\TgsApi.csproj", "{94BB3B92-E24B-4C66-AD2C-037185F13F77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice.UnitTests", "Tests\BackendOffice.UnitTests\BackendOffice.UnitTests.csproj", "{6D52C16E-873A-48C7-918E-443E440382B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendOffice.UnitTests", "src\Tests\BackendOffice.UnitTests\BackendOffice.UnitTests.csproj", "{6D52C16E-873A-48C7-918E-443E440382B8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}"
 	ProjectSection(SolutionItems) = preProject
@@ -53,19 +53,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessLogic", "BusinessLo
 		Readme\BusinessLogic\TurnoverGgrSqlQuery.md = Readme\BusinessLogic\TurnoverGgrSqlQuery.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameOperations", "Services\GameOperations\GameOperations.csproj", "{4BD4697C-ACE2-490B-9F90-E081341FEA57}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameOperations", "src\Services\GameOperations\GameOperations.csproj", "{4BD4697C-ACE2-490B-9F90-E081341FEA57}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogApi", "Apis\LogApi\LogApi.csproj", "{193468E0-E560-4E87-AE37-64A6BBD82365}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogApi", "src\Apis\LogApi\LogApi.csproj", "{193468E0-E560-4E87-AE37-64A6BBD82365}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperatorApi", "Apis\OperatorApi\OperatorApi.csproj", "{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperatorApi", "src\Apis\OperatorApi\OperatorApi.csproj", "{B0908BE6-46B5-4AEE-AF06-4C995822D0CA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Log", "Core\DataServices.Log\DataServices.Log.csproj", "{B8D51663-D569-433D-A400-FF55306E1EC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Log", "src\Core\DataServices.Log\DataServices.Log.csproj", "{B8D51663-D569-433D-A400-FF55306E1EC1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.ApiClients", "Tests\Tests.ApiClients\Tests.ApiClients.csproj", "{6C17C092-7A55-416A-A9A2-E8DA2B627FC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.ApiClients", "src\Tests\Tests.ApiClients\Tests.ApiClients.csproj", "{6C17C092-7A55-416A-A9A2-E8DA2B627FC6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Games.IntegrationTests", "Tests\Games.IntegrationTests\Games.IntegrationTests.csproj", "{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Games.IntegrationTests", "src\Tests\Games.IntegrationTests\Games.IntegrationTests.csproj", "{EAAEF4D4-C441-4F0C-89B7-2F269991BA97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService", "Apis\FileService\FileService.csproj", "{F9E4C249-D288-496F-8C20-048D5E81EA86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService", "src\Apis\FileService\FileService.csproj", "{F9E4C249-D288-496F-8C20-048D5E81EA86}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MongoDb", "MongoDb", "{C859BEF9-42E6-4C85-91F5-1BE4DAEBBF81}"
 	ProjectSection(SolutionItems) = preProject
@@ -78,29 +78,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Localstack", "Localstack", 
 		Readme\Localstack\docker-compose.yml = Readme\Localstack\docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.UnitTests", "Tests\FileService.UnitTests\FileService.UnitTests.csproj", "{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.UnitTests", "src\Tests\FileService.UnitTests\FileService.UnitTests.csproj", "{936BB5FD-CFA9-44B5-94D2-E64E75FF9BD0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackOffice", "Services\BackOffice\BackOffice.csproj", "{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackOffice", "src\Services\BackOffice\BackOffice.csproj", "{5BA1460D-C63B-4B1D-BB49-EC7640D2149F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GlobalApi", "Apis\GlobalApi\GlobalApi.csproj", "{C68C1F53-9FE7-4C8A-80CA-CF0C1810AA7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GlobalApi", "src\Apis\GlobalApi\GlobalApi.csproj", "{C68C1F53-9FE7-4C8A-80CA-CF0C1810AA7E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Tgs", "Core\DataServices.Tgs\DataServices.Tgs.csproj", "{22DA2970-A803-45CA-A397-C29C560074F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Tgs", "src\Core\DataServices.Tgs\DataServices.Tgs.csproj", "{22DA2970-A803-45CA-A397-C29C560074F0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workers", "Workers", "{73E8BEBB-93EC-413F-832A-C3B186F2DA0E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Report", "Services\Report\Report.csproj", "{80DFD397-8054-43DE-9127-2DA42154C5EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Report", "src\Services\Report\Report.csproj", "{80DFD397-8054-43DE-9127-2DA42154C5EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Report", "Core\DataServices.Report\DataServices.Report.csproj", "{CF185FB3-FA29-4D24-927B-0B9BC6260B20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Report", "src\Core\DataServices.Report\DataServices.Report.csproj", "{CF185FB3-FA29-4D24-927B-0B9BC6260B20}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportApi", "Apis\ReportApi\ReportApi.csproj", "{444D6644-4ACE-47A5-9C20-119C524141FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportApi", "src\Apis\ReportApi\ReportApi.csproj", "{444D6644-4ACE-47A5-9C20-119C524141FD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PluggableServices", "Services\PluggableServices\PluggableServices.csproj", "{B4A60A0A-FA67-49A6-9995-42F781774AED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PluggableServices", "src\Services\PluggableServices\PluggableServices.csproj", "{B4A60A0A-FA67-49A6-9995-42F781774AED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{F96D0122-6E6D-4C9F-9220-07C943105114}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game.Models", "Shared\Game.Models\Game.Models.csproj", "{96D64774-3BFC-4F6C-B848-6F406569FB34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game.Models", "src\Shared\Game.Models\Game.Models.csproj", "{96D64774-3BFC-4F6C-B848-6F406569FB34}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedulers", "Workers\Schedulers\Schedulers.csproj", "{08AD170C-9422-46C8-9388-94A5F6EDAD18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedulers", "src\Workers\Schedulers\Schedulers.csproj", "{08AD170C-9422-46C8-9388-94A5F6EDAD18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -79,7 +79,7 @@ services:
   mocksite:
     build:
       context: .
-      dockerfile: ./Web/mocksite/Dockerfile
+      dockerfile: ./src/Web/mocksite/Dockerfile
     image: mocksite
     container_name: mocksite
     labels:
@@ -95,7 +95,7 @@ services:
   backoffice-site:
     build:
       context: .
-      dockerfile: ./Web/backoffice/Dockerfile
+      dockerfile: ./src/Web/backoffice/Dockerfile
     image: backoffice-site
     container_name: backoffice-site
     labels:
@@ -111,7 +111,7 @@ services:
   backoffice-api:
     build:
       context: .
-      dockerfile: Apis/BackendOffice/Dockerfile
+      dockerfile: ./src/Apis/BackendOffice/Dockerfile
     image: backoffice-api
     container_name: backoffice-api
     labels:
@@ -137,7 +137,7 @@ services:
   fileservice:
     build:
       context: .
-      dockerfile: Apis/FileService/Dockerfile
+      dockerfile: ./src/Apis/FileService/Dockerfile
     image: fileservice
     container_name: fileservice
     labels:
@@ -172,7 +172,7 @@ services:
   operator-api:
     build:
       context: .
-      dockerfile: Apis/OperatorApi/Dockerfile
+      dockerfile: ./src/Apis/OperatorApi/Dockerfile
     image: operator-api
     container_name: operator-api
     labels:
@@ -194,7 +194,7 @@ services:
   game-sbo:
     build:
       context: .
-      dockerfile: Apis/TgsApi/Dockerfile
+      dockerfile: ./src/Apis/TgsApi/Dockerfile
     image: tgs-api
     container_name: game-sbo
     environment:
@@ -215,7 +215,7 @@ services:
   log-api:
     build:
       context: .
-      dockerfile: Apis/LogApi/Dockerfile
+      dockerfile: ./src/Apis/LogApi/Dockerfile
     image: log-api
     container_name: log-api
     environment:
@@ -236,7 +236,7 @@ services:
   global-api:
     build:
       context: .
-      dockerfile: Apis/GlobalApi/Dockerfile
+      dockerfile: ./src/Apis/GlobalApi/Dockerfile
     image: global-api
     container_name: global-api
     labels:
@@ -330,7 +330,7 @@ services:
   scheduler:
     build:
       context: .
-      dockerfile: Workers/Schedulers/Dockerfile
+      dockerfile: ./src/Workers/Schedulers/Dockerfile
     image: scheduler
     container_name: scheduler
     environment:
