@@ -97,13 +97,21 @@ const Row = ({ name, disabled, field, index }) => {
   return (
     <Table.Row>
       <Table.Cell textAlign="center">
-        <Checkbox
-          key={field._id}
-          name={checkedFieldName(name, field, index)}
-          checkboxRef={formContext?.register?.()}
-          defaultChecked={field.checked}
-          disabled={disabled}
-        />
+        <Box>
+          <Checkbox
+            key={field._id}
+            name={checkedFieldName(name, field, index)}
+            checkboxRef={formContext?.register?.()}
+            defaultChecked={field.checked}
+            disabled={disabled}
+          />
+          <Input type="hidden" name={`${name}[${index}].id`} value={field.id} />
+          <Input
+            type="hidden"
+            name={`${name}[${index}].gameProviderId`}
+            value={field.gameProviderId}
+          />
+        </Box>
       </Table.Cell>
       <Table.Cell textAlign="center">{field.name}</Table.Cell>
       <Table.Cell textAlign="center">
