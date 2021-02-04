@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="9.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Apis\GlobalApi\GlobalApi.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
   </ItemGroup>
 
 </Project>

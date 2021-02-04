@@ -13,6 +13,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
@@ -39,6 +40,7 @@ namespace TGS.Apis.GlobalApi
                 .AddRedis()
                 .AddSecurity()
                 .AddErrorMappers()
+                .AddTransactions()
                 .AddOperations();
 
             services.AddMediatR(typeof(Startup).Assembly);

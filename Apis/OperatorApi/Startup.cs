@@ -128,7 +128,7 @@ namespace TGS.Apis.OperatorApi
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(bypassRouting: new[] {"/health", "/metrics", "/favicon.ico", "/swagger"});
+            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
             app.UseRouting();
 
@@ -136,7 +136,7 @@ namespace TGS.Apis.OperatorApi
 
             app.UseCors();
 
-            app.UseVerifyJwtTokenMiddlewares();
+            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
 
             app.UseEndpoints(endpoints =>
             {

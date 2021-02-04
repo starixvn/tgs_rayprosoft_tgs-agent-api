@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.OperatorApi
 {
-    public class Consts
+    internal class Consts
     {
         public const string CsrfTokenName = "X-CSRF-TOKEN";
 
@@ -8,6 +8,8 @@
         public const string DefaultCurrency = "CNY";
 
         public const string Site = "operator-api";
+
+        public static readonly string[] DefaultBypassRouting = {"/health", "/metrics", "/favicon.ico", "/swagger"};
 
         public static class ClaimName
         {

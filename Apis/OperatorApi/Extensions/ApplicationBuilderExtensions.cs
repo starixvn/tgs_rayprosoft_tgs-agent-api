@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using TGS.Apis.OperatorApi.Middlewares;
 
@@ -7,12 +6,12 @@ namespace TGS.Apis.OperatorApi.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-        private static readonly IList<string> BypassRouting = new[]
-            {"/health", "/metrics", "/favicon.ico", "/swagger", "/api/auth"};
-
-        public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app)
+        public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app,
+            string[] bypassRouting)
         {
-            app.UseWhen(context => BypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)),
+            var bypass = bypassRouting.Concat(new[] {"/api/auth"}).Distinct().ToArray();
+
+            app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
                 builder => builder
                     .UseMiddleware<VerifyCredentialsMiddleware>()
                     .UseMiddleware<VerifyPlayerTokenMiddleware>());

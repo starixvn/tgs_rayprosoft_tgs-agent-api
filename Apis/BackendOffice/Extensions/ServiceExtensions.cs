@@ -69,7 +69,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddJson()
                 .AddSecurity()
                 .AddWebApiServices()
-                .AddScheduler(configuration)
                 .AddTgsLog();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -99,7 +98,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddHealthChecks()
                 .AddPostgres(configuration, "Tgs", "tgs-db")
                 .AddPostgres(configuration, "Log", "log-db")
-                .AddMongoDb(configuration, "Hangfire", "hangfire-db")
                 .AddNats()
                 .ForwardToPrometheus();
 
@@ -134,12 +132,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                     new CultureInfo(zhCNCulture)
                 };
 
-                options.DefaultRequestCulture = new RequestCulture(zhCNCulture, zhCNCulture);
+                options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 
-                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context =>
-                    await Task.FromResult(new ProviderCultureResult(zhCNCulture))));
+                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(_ =>
+                    Task.FromResult(new ProviderCultureResult(zhCNCulture))));
             });
 
             return services;

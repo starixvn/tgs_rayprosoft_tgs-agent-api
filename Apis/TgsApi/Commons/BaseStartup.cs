@@ -17,6 +17,7 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.TimeZone;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.GameOperations.Extensions;
@@ -47,6 +48,7 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddJson()
                 .AddRedis()
                 .AddSecurity()
+                .AddTransactions()
                 .AddOperations()
                 .AddTimeZone()
                 .AddApiClient()

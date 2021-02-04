@@ -8,16 +8,14 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
 WORKDIR /src
 COPY ["Apis/BackendOffice/BackendOffice.csproj", "Apis/BackendOffice/"]
-COPY ["Apis/GlobalApi/GlobalApi.csproj", "Apis/GlobalApi/"]
 COPY ["Services/BackOffice/BackOffice.csproj", "Services/BackOffice/"]
-COPY ["Services/Report/Report.csproj", "Services/Report/"]
-COPY ["Services/Operations/Operations.csproj", "Services/Operations/"]
+COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
 COPY ["Core/Models/Models.csproj", "Core/Models/"]
 COPY ["Core/Infrastructures/Infrastructures.csproj", "Core/Infrastructures/"]
 COPY ["Core/DataServices.Base/DataServices.Base.csproj", "Core/DataServices.Base/"]
-COPY ["Core/DataServices.Log/DataServices.Log.csproj", "Core/DataServices.Log/"]
-COPY ["Core/DataServices.Tgs/DataServices.Tgs.csproj", "Core/DataServices.Tgs/"]
+COPY ["Services/Report/Report.csproj", "Services/Report/"]
 COPY ["Core/DataServices.Report/DataServices.Report.csproj", "Core/DataServices.Report/"]
+COPY ["Core/DataServices.Log/DataServices.Log.csproj", "Core/DataServices.Log/"]
 RUN dotnet restore "Apis/BackendOffice/BackendOffice.csproj"
 COPY . .
 WORKDIR "/src/Apis/BackendOffice"
