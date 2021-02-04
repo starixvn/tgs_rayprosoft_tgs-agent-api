@@ -1,28 +1,25 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { Table, Set, Heading, Text } from "bumbag"
+import { Table, Set, Heading, Text, Box } from "bumbag"
 import Checkbox from "../checkbox"
 import { useFormContext, useFieldArray } from "react-hook-form"
 import { Trans } from "../i18n"
-import { isAllChecked } from "../checkbox/isAllChecked"
+import { isAllChecked, isAllPropChecked } from "../checkbox/isAllChecked"
+import Input from "../input/Input"
 
 export const CurrencyCheckboxGroupTable = ({
-  name = "currencyCodes",
-  fieldArrayName = "currencies",
+  name = "currencies",
+  fieldArrayContext,
   width = "100%",
   disabled = false,
   ...props
 }) => {
-  let { control, setValue, watch, register } = useFormContext()
-  let currencies = watch(fieldArrayName)
-  const { fields } = useFieldArray({
-    control,
-    name: fieldArrayName,
-    keyName: "_id"
-  })
+  let { control, setValue, watch } = useFormContext()
 
-  let selection = watch(name) ?? {}
-  let allChecked = isAllChecked(selection)
+  let { fields } = fieldArrayContext
+
+  let selection = watch(name)
+  let allChecked = isAllPropChecked(selection)
 
   return useMemo(() => {
     return (
@@ -38,12 +35,13 @@ export const CurrencyCheckboxGroupTable = ({
             />
           </Table.Head>
           <Table.Body>
-            {fields.map((field) => (
+            {fields.map((field, index) => (
               <CurrencyCheckboxGroupTableRow
                 key={field._id}
                 name={name}
                 disabled={disabled}
                 field={field}
+                index={index}
               />
             ))}
           </Table.Body>
@@ -61,7 +59,7 @@ export const CurrencyCheckboxGroupTableHeadRow = ({
   disabled,
   addonAfter
 }) => {
-  let { control, setValue, watch, register } = useFormContext()
+  let { control, setValue, watch } = useFormContext()
 
   return useMemo(() => {
     return (
@@ -72,7 +70,7 @@ export const CurrencyCheckboxGroupTableHeadRow = ({
             onChange={(event) => {
               let checked = event.target.checked
               fields.forEach((field, index) => {
-                setValue(checkedFieldName(name, field), checked)
+                setValue(checkedFieldName(name, field, index), checked)
               })
             }}
             disabled={disabled}
@@ -94,6 +92,7 @@ export const CurrencyCheckboxGroupTableRow = ({
   name,
   disabled,
   field,
+  index,
   checkedFieldName = defaultCheckedFieldName,
   addonAfter
 }) => {
@@ -103,13 +102,20 @@ export const CurrencyCheckboxGroupTableRow = ({
     return (
       <Table.Row>
         <Table.Cell textAlign="center">
-          <Checkbox
-            key={field._id}
-            name={checkedFieldName(name, field)}
-            checkboxRef={formContext?.register?.()}
-            defaultChecked={field.checked}
-            disabled={disabled}
-          />
+          <Box>
+            <Input
+              type="hidden"
+              name={`${name}[${index}].code`}
+              value={field.code}
+            />
+            <Checkbox
+              key={field._id}
+              name={checkedFieldName(name, field, index)}
+              checkboxRef={formContext?.register?.()}
+              defaultChecked={field.checked}
+              disabled={disabled}
+            />
+          </Box>
         </Table.Cell>
         <Table.Cell textAlign="center">{field.code}</Table.Cell>
         <Table.Cell textAlign="center">{field.name}</Table.Cell>
@@ -119,5 +125,5 @@ export const CurrencyCheckboxGroupTableRow = ({
   }, [field])
 }
 
-const defaultCheckedFieldName = (name, checkboxField) =>
-  `${name}.${checkboxField.code}`
+const defaultCheckedFieldName = (name, field, index) =>
+  `${name}[${index}].checked`

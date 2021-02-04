@@ -41,6 +41,7 @@ import { BetLimitCheckboxGroup } from "../../betlimit/BetLimitCheckboxGroup"
 import { allCheckedKeys } from "../../checkbox/allCheckedKeys"
 import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
+import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -298,13 +299,15 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
 
 const normalizeFormData = ({
   cultureCodes,
-  currencyCodes,
+  currencies,
   gameProviderIds,
   betLimitIds,
   ...data
 }) => {
   cultureCodes = allCheckedKeys(cultureCodes)
-  currencyCodes = allCheckedKeys(currencyCodes)
+
+  let currencyCodes = toCheckedCurrencyCodes(currencies)
+
   gameProviderIds = allCheckedKeys(gameProviderIds)
   betLimitIds = allCheckedKeys(betLimitIds)
   return {
@@ -413,7 +416,7 @@ const EditBody = ({
   let reseller = watch("reseller")
   let code = watch("code")
   let languages = watch("languages")
-  let currencies = watch("currencies")
+
   let gameProviders = watch("gameProviders")
   let betLimits = watch("betLimits")
 
@@ -481,14 +484,7 @@ const EditBody = ({
           </>
         )}
 
-        {currencies && (
-          <>
-            <NormalLabel>
-              <Trans zh="币种" en="Currency" />
-            </NormalLabel>
-            <CurrencyCheckboxGroupTable disabled={readonly} />
-          </>
-        )}
+        <CurrencyFieldsBox readonly={readonly} />
 
         {gameProviders && (
           <>

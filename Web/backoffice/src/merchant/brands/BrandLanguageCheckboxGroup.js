@@ -127,7 +127,7 @@ const CodeDialog = ({ value, dialog, onChange }) => {
   )
 }
 
-const checkedFieldName = (name, field, index) => `${name}.[${index}].checked`
+const checkedFieldName = (name, field, index) => `${name}[${index}].checked`
 
 const brandCultureCodeFieldName = (name, field, index) => {
   let result = `${name}[${index}].brandCultureCode`

@@ -42,6 +42,7 @@ import { CurrencyCheckboxGroupTable } from "../../currency/CurrencyCheckboxGroup
 import { LanguageCheckboxGroupTable } from "../../language/LanguageCheckboxGroup"
 import { useLanguageList } from "../../language/client"
 import { useCurrencyList } from "../../currency/client"
+import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -65,13 +66,15 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 
 const normalizeFormData = ({
   cultureCodes,
-  currencyCodes,
+  currencies,
   gameProviderIds,
   betLimitIds,
   ...data
 } = {}) => {
   cultureCodes = allCheckedKeys(cultureCodes)
-  currencyCodes = allCheckedKeys(currencyCodes)
+
+  let currencyCodes = toCheckedCurrencyCodes(currencies)
+
   gameProviderIds = allCheckedKeys(gameProviderIds)
   betLimitIds = allCheckedKeys(betLimitIds)
   return {
@@ -470,10 +473,7 @@ const EditBody = ({ record = {}, readonly = false, isAdd = false }) => {
         </NormalLabel>
         <LanguageCheckboxGroupTable marginTop="major-1" disabled={readonly} />
 
-        <NormalLabel>
-          <Trans zh="币种" en="Currency" />
-        </NormalLabel>
-        <CurrencyCheckboxGroupTable marginTop="major-1" disabled={readonly} />
+        <CurrencyFieldsBox readonly={readonly} />
 
         <NormalLabel>
           <Trans zh="游戏厂商" en="Game Provider" />

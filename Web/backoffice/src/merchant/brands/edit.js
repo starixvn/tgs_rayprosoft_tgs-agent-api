@@ -268,14 +268,16 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
 
 const normalizeFormData = ({
   languages,
-  currencyCodes,
+  currencies,
   brandGameProviders,
   betLimits,
   ...data
 }) => {
   languages = languages.filter(({ checked }) => checked)
 
-  currencyCodes = allCheckedKeys(currencyCodes)
+  let currencyCodes = currencies
+    .filter(({ checked }) => checked)
+    .map(({ code }) => code)
 
   let gameProviders = Object.entries(brandGameProviders).reduce(
     (list, [key, { checked, ...props }]) => {
@@ -378,14 +380,7 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
 
         <LanguageFieldsBox readonly={readonly} />
 
-        {currencies && (
-          <>
-            <NormalLabel>
-              <Trans zh="币种" en="Currency" />
-            </NormalLabel>
-            <CurrencyCheckboxGroupTable disabled={readonly} />
-          </>
-        )}
+        <CurrencyFieldsBox readonly={readonly} />
 
         {gameProviders && (
           <>
@@ -435,6 +430,32 @@ const LanguageFieldsBox = ({ readonly }) => {
           fieldArrayContext={fieldArrayContext}
           disabled={readonly}
           showBrandCultureCode
+        />
+      </>
+    )
+  )
+}
+
+const CurrencyFieldsBox = ({ readonly }) => {
+  let { watch, control } = useFormContext()
+
+  let fieldsName = "currencies"
+  let fieldArrayContext = useFieldArray({
+    control,
+    name: fieldsName,
+    keyName: "_id"
+  })
+  let currencies = watch(fieldsName)
+
+  return (
+    currencies && (
+      <>
+        <NormalLabel>
+          <Trans zh="币种" en="Currency" />
+        </NormalLabel>
+        <CurrencyCheckboxGroupTable
+          fieldArrayContext={fieldArrayContext}
+          disabled={readonly}
         />
       </>
     )
