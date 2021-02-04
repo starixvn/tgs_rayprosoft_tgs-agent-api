@@ -116,7 +116,7 @@ services:
     container_name: backoffice-api
     labels:
       - traefik.enable=true
-      - traefik.http.routers.backoffice-api.rule=Host(`backoffice.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/hangfire`))
+      - traefik.http.routers.backoffice-api.rule=Host(`backoffice.localhost`) && (PathPrefix(`/api`))
       - traefik.http.routers.backoffice-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
@@ -330,18 +330,23 @@ services:
   scheduler:
     build:
       context: .
-      dockerfile: Worker/Schedulers/Dockerfile
+      dockerfile: Workers/Schedulers/Dockerfile
     image: scheduler
     container_name: scheduler
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
+    ports:
+       - 32340:80
     networks:
       tgs:
         aliases:
           - scheduler
-    depends_on:
+    depends_on: 
+      - nats
       - postgres
       - mongodb
+      - redis
+      - game-sbo
 networks:
   tgs:
     driver: bridge

@@ -12,6 +12,7 @@ namespace TGS.Services.GameOperations.Extensions
         /// 1. AddTimeZone() in Infrastructures.TimeZone
         /// 2. AddTgsLog() in Infrastructures.Log
         /// 3. AddOperations() in Operations project
+        /// 4. AddTransactions() in Infrastructures.Transactions
         /// </summary>
         public static IServiceCollection AddGameOperations(this IServiceCollection services)
         {  

@@ -1,4 +1,3 @@
-using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -6,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
-using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -56,17 +54,13 @@ namespace TGS.Apis.BackendOffice
                     ResponseWriter = (httpContext, result) =>
                         HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
                 });
+
                 endpoints.MapMetrics();
             });
 
             var requestLocalizationOptions =
                 app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
-
-            app.UseHangfireDashboard("/api/hangfire", new DashboardOptions
-            {
-                Authorization = new[] {new HangfireAuthorizationFilter()}
-            });
         }
     }
 }

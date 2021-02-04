@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations.CodeMappers;
@@ -67,8 +68,6 @@ namespace TGS.Services.Operations.Extensions
 
             services.AddScoped<IStatusValidator, StatusValidator>();
             services.AddScoped<IExpirationValidator, ExpirationValidator>();
-
-            services.AddScoped<ITransactionManager, TransactionManager>();
 
             return services;
         }
