@@ -241,7 +241,6 @@ const useColumns = ({ items = [], mutate }) => {
           return row
         },
         Cell: ({ value }) => {
-          return null
           return (
             <Set orientation="vertical" alignX="center">
               <ViewButton record={value} />

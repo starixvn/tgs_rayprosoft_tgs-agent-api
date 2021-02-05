@@ -34,7 +34,8 @@ import {
   mapChecked,
   mapCheckedByCode,
   mapCheckedByCultureCode,
-  mapCheckedById
+  mapCheckedById,
+  mapMergeChecked
 } from "../../checkbox/mapChecked"
 import { useLanguageList } from "../../language/client"
 import { useCurrencyList } from "../../currency/client"
@@ -74,7 +75,10 @@ const normalizeFormData = ({
 
   let currencyCodes = toCheckedCurrencyCodes(currencies)
 
-  let gameProviderIds = toCheckedGameProviderIds(gameProviders)
+  let gameProviderIds = toCheckedGameProviderIds(
+    "gameProviderId",
+    gameProviders
+  )
 
   let betLimitIds = toCheckedBetLimitIds(betLimits)
 
@@ -322,6 +326,17 @@ const useResellerData = (id) => {
     deleteCache: deleteBetLimitCache
   } = useBetLimitList({ showAll: true })
 
+  let gameProviders = mapMergeChecked(
+    (resellerGameProvider, gameProvider) =>
+      resellerGameProvider.gameProviderId === gameProvider.id,
+    (resellerGameProvider, { id, ...gameProvider }) => ({
+      gameProviderId: id,
+      ...gameProvider
+    }),
+    reseller?.gameProviders ?? [],
+    gameProviderData?.items ?? []
+  )
+  console.log("gameProviders", gameProviders)
   return {
     reseller,
     languages: mapCheckedByCultureCode(
@@ -332,10 +347,7 @@ const useResellerData = (id) => {
       reseller?.currencies ?? [],
       currencyData?.items ?? []
     ),
-    gameProviders: mapCheckedById(
-      reseller?.gameProviders ?? [],
-      gameProviderData?.items ?? []
-    ),
+    gameProviders,
     betLimits: mapCheckedById(reseller?.betLimits ?? [], betLimitData?.items),
     isLoading:
       isLoadingReseller ||

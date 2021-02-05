@@ -12,17 +12,13 @@ import {
 
 export const BrandBetLimitCheckboxGroupTable = ({
   name = "betLimits",
-
+  fieldArrayContext,
   width = "100%",
   disabled = false,
   ...props
 }) => {
   let { control, setValue, watch, register, getValues } = useFormContext()
-  const { fields } = useFieldArray({
-    control,
-    name,
-    keyName: "_id"
-  })
+  const { fields } = fieldArrayContext
 
   let selection = watch(name)
   let allChecked = isAllPropChecked(selection)

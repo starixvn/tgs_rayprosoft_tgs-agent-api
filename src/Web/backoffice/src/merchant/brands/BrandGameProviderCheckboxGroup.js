@@ -15,17 +15,18 @@ import {
 import { useFormContext, useFieldArray, Controller } from "react-hook-form"
 import { isAllPropChecked } from "../../checkbox/isAllChecked"
 import { Trans, useTrans } from "../../i18n"
-import Checkbox, { CheckboxField } from "../../checkbox"
+import { Checkbox, CheckboxField } from "../../checkbox"
 import Disclosure, { ConfigIconDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
-import Input, { InputField } from "../../input/Input"
-import Select, { SelectField } from "../../select/Select"
+import { Input, InputField } from "../../input/Input"
+import { Select, SelectField } from "../../select/Select"
 import { Switch, SwitchField } from "../../switch/Switch"
 import Backdrop from "../../dialog/Backdrop"
 import {
   faDesktop,
   faMobile,
-  faLanguage
+  faLanguage,
+  faCog
 } from "@fortawesome/free-solid-svg-icons"
 import { ConfirmText } from "../../button/ActionButtons"
 import { GameProviderConfigSelect } from "../../game/providers/configs/GameProviderConfigSelect"
@@ -104,6 +105,12 @@ const Row = ({ name, disabled, field, index }) => {
             checkboxRef={formContext?.register?.()}
             defaultChecked={field.checked}
             disabled={disabled}
+            onChange={(event) => {
+              let checked = event.target.checked
+              if (checked) {
+                configDialog.show()
+              }
+            }}
           />
           <Input type="hidden" name={`${name}[${index}].id`} value={field.id} />
           <Input
@@ -120,6 +127,7 @@ const Row = ({ name, disabled, field, index }) => {
             control={control}
             name={configFieldName(name, field, index)}
             defaultValue={field.configurationId}
+            rules={{ required: true }}
             render={(
               { onChange, onBlur, value, name: configName, ref },
               { invalid, isTouched, isDirty }

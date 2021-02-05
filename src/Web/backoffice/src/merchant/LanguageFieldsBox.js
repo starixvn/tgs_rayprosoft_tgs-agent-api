@@ -17,18 +17,20 @@ export const LanguageFieldsBox = ({ readonly }) => {
   })
   let languages = watch(fieldsName)
 
+  if (languages.length == 0) {
+    return null
+  }
+
   return (
-    languages && (
-      <>
-        <NormalLabel>
-          <Trans zh="语言" en="Language" />
-        </NormalLabel>
-        <LanguageCheckboxGroupTable
-          fieldArrayContext={fieldArrayContext}
-          disabled={readonly}
-        />
-      </>
-    )
+    <>
+      <NormalLabel>
+        <Trans zh="语言" en="Language" />
+      </NormalLabel>
+      <LanguageCheckboxGroupTable
+        fieldArrayContext={fieldArrayContext}
+        disabled={readonly}
+      />
+    </>
   )
 }
 

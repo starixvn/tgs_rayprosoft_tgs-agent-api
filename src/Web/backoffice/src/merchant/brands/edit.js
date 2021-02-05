@@ -15,8 +15,8 @@ import {
 import { Input } from "../../input/Input"
 import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
-import { useBrand, useUpdateBrand } from "./client"
-import { useFormContext, useFieldArray } from "react-hook-form"
+import { useAddBrand, useBrand, useUpdateBrand } from "./client"
+import { useFormContext, useFieldArray, useForm } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import Textarea from "../../textarea"
@@ -25,6 +25,7 @@ import { BrandGameProviderCheckboxGroupTable } from "./BrandGameProviderCheckbox
 import { BrandBetLimitCheckboxGroupTable } from "./BrandBetLimitCheckboxGroup"
 import useLicenseeBrand from "./useLicenseeBrand"
 import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
+import useResellerLicensee from "../licensees/useResellerLicensee"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -34,7 +35,6 @@ export const AddButton = ({ onSubmitted, ...props }) => {
     return null
   }
 
-  return null
   return (
     <>
       <AddDisclosure {...dialog} />
@@ -46,13 +46,90 @@ export const AddButton = ({ onSubmitted, ...props }) => {
 }
 
 const AddDialog = ({ onSubmitted, dialog }) => {
+  let userLicenseeId = useUserLicenseeId()
+  let formMethods = useForm({
+    defaultValues: {
+      licenseeId: userLicenseeId
+    }
+  })
+  let { watch } = formMethods
+  let resellerId = watch("resellerId")
+  let licenseeId = watch("licenseeId")
+  let {
+    licensee,
+    languages,
+    currencies,
+    gameProviders,
+    betLimits,
+    isLoading: isLoadingLicensee,
+    error: licenseeError
+  } = useLicenseeBrand({ licenseeId })
+
+  useEffect(() => {
+    if (licensee) {
+      formMethods.reset({
+        resellerId,
+        licenseeId,
+        languages,
+        currencies,
+        gameProviders,
+        betLimits
+      })
+    }
+  }, [licensee])
+
+  let [formData, setSubmit] = useState()
+  let { result, isLoading, error, mutate } = useAddBrand(formData)
+
+  const onSubmit = (data) => {
+    let formData = normalizeFormData(data)
+    let gameProviders =
+      formData.gameProviders.map(
+        ({ checked, id, ...gameProvider }) => gameProvider
+      ) ?? []
+    setSubmit({
+      ...formData,
+      gameProviders
+    })
+  }
+
+  const reset = () => {
+    mutate(undefined, false)
+    setSubmit(undefined)
+  }
+
   let title = useTrans({
     zh: "新增品牌",
     en: "Add Brand"
   })
   return (
-    <FormDialog title={title} dialog={dialog}>
-      <EditBody />
+    <FormDialog
+      formMethods={formMethods}
+      onSubmit={onSubmit}
+      result={result}
+      isLoading={isLoading}
+      error={error}
+      onCloseErrorAlert={reset}
+      onSubmitted={() => {
+        reset()
+        onSubmitted?.()
+      }}
+      showActionButtons={false}
+      footer={
+        <ConfirmButtonFooter isLoading={isLoading} disabled={isLoading} />
+      }
+      title={title}
+      dialog={dialog}
+      placement="top"
+      minWidth="60vw"
+      maxWidth="unset"
+      css={css`
+        & .bb-DialogContent {
+          position: relative;
+        }
+      `}
+    >
+      <EditBody isAdd={true} />
     </FormDialog>
   )
 }
@@ -73,7 +150,7 @@ export const ViewButton = ({ record, ...props }) => {
       </Disclosure>
       {dialog.visible && (
         <ViewDialog
-          id={record?.id}
+          brandId={record?.id}
           licenseeId={record?.licenseeId}
           dialog={dialog}
         />
@@ -82,7 +159,7 @@ export const ViewButton = ({ record, ...props }) => {
   )
 }
 
-const ViewDialog = ({ id, licenseeId, dialog, ...props }) => {
+const ViewDialog = ({ brandId, licenseeId, dialog, ...props }) => {
   let {
     brand,
     licensee,
@@ -95,7 +172,7 @@ const ViewDialog = ({ id, licenseeId, dialog, ...props }) => {
     error,
     mutateBrand,
     deleteBrandCache
-  } = useLicenseeBrand({ id, licenseeId })
+  } = useLicenseeBrand({ brandId, licenseeId })
 
   let title = useTrans({
     zh: "查看品牌",
@@ -162,7 +239,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
       </Disclosure>
       {dialog.visible && (
         <EditDialog
-          id={record?.id}
+          brandId={record?.id}
           licenseeId={record?.licenseeId}
           onSubmitted={onSubmitted}
           dialog={dialog}
@@ -172,7 +249,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
   )
 }
 
-const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
+const EditDialog = ({ brandId, licenseeId, onSubmitted, dialog, ...props }) => {
   let {
     brand,
     licensee,
@@ -185,10 +262,10 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
     error: brandError,
     mutateBrand,
     deleteBrandCache
-  } = useLicenseeBrand({ id, licenseeId })
+  } = useLicenseeBrand({ brandId, licenseeId })
 
   let [formData, setSubmit] = useState()
-  let { result, isLoading, error, mutate } = useUpdateBrand(id, formData)
+  let { result, isLoading, error, mutate } = useUpdateBrand(brandId, formData)
 
   let title = useTrans({
     zh: "编辑品牌",
@@ -210,7 +287,6 @@ const EditDialog = ({ id, licenseeId, onSubmitted, dialog, ...props }) => {
       ...brand,
       ...normalizeFormData(data)
     }
-    console.log("formData", formData)
     setSubmit(formData)
   }
 
@@ -295,7 +371,6 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
   let userLicenseeId = useUserLicenseeId()
 
   let licensee = watch("licensee")
-
   let editable = !readonly
   return (
     <Stack orientation="vertical">
@@ -304,13 +379,17 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
       </Heading>
 
       <FieldValues>
-        <NormalLabel>
-          <Trans zh="所属公司" en="Licensee" />
-        </NormalLabel>
-        <Box alignY="center">
-          {isAdd && <MerchantIdSelect end={RoleTypes.Licensee} />}
-          {!isAdd && <Text.Block>{licensee?.name}</Text.Block>}
-        </Box>
+        {!userLicenseeId && (
+          <>
+            <NormalLabel>
+              <Trans zh="所属公司" en="Licensee" />
+            </NormalLabel>
+            <Box alignY="center">
+              {isAdd && <MerchantIdSelect end={RoleTypes.Licensee} />}
+              {!isAdd && <Text.Block>{licensee?.name}</Text.Block>}
+            </Box>
+          </>
+        )}
 
         <NormalLabel>
           <Trans zh="品牌代码" en="Code" />

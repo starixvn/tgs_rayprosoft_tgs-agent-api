@@ -32,7 +32,8 @@ import { useReseller } from "../resellers/client"
 import {
   mapCheckedById,
   mapCheckedByCultureCode,
-  mapCheckedByCode
+  mapCheckedByCode,
+  mapCheckedByProp
 } from "../../checkbox/mapChecked"
 import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
@@ -40,6 +41,7 @@ import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 import LanguageFieldsBox, { toCheckedCultureCodes } from "../LanguageFieldsBox"
 import BetLimitFieldsBox, { toCheckedBetLimitIds } from "../BetLimitFieldsBox"
 import GameProviderFieldsBox from "../GameProviderFieldsBox"
+import useResellerLicensee from "./useResellerLicensee"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -80,7 +82,12 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     if (reseller) {
       let languages = mapCheckedByCultureCode([], reseller.languages)
       let currencies = mapCheckedByCode([], reseller.currencies)
-      let gameProviders = mapCheckedById([], reseller.gameProviders)
+      let gameProviders = mapCheckedByProp(
+        "gameProviderId",
+        [],
+        reseller.gameProviders
+      )
+
       let betLimits = mapCheckedById([], reseller.betLimits)
       formMethods.reset({
         resellerId,
@@ -165,48 +172,6 @@ export const ViewButton = ({ record, ...props }) => {
       )}
     </>
   )
-}
-
-const useResellerLicensee = ({ id = "", resellerId = "" }) => {
-  let {
-    data: licensee,
-    isLoading: isLoadingLicensee,
-    error: licenseeError,
-    mutate: mutateLicensee,
-    deleteCache: deleteLicenseeCache
-  } = useLicensee(id)
-  let {
-    data: reseller,
-    isLoading: isLoadingReseller,
-    error: resellerError
-  } = useReseller(resellerId)
-
-  let languages = mapCheckedByCultureCode(
-    licensee?.languages ?? [],
-    reseller?.languages ?? []
-  )
-  let currencies = mapCheckedByCode(
-    licensee?.currencies ?? [],
-    reseller?.currencies ?? []
-  )
-  let gameProviders = mapCheckedById(
-    licensee?.gameProviders ?? [],
-    reseller?.gameProviders ?? []
-  )
-  let betLimits = mapCheckedById(licensee?.betLimits, reseller?.betLimits ?? [])
-
-  return {
-    reseller,
-    licensee,
-    languages,
-    currencies,
-    gameProviders,
-    betLimits,
-    isLoading: isLoadingLicensee || isLoadingReseller,
-    error: licenseeError || resellerError,
-    mutateLicensee,
-    deleteLicenseeCache
-  }
 }
 
 const ViewDialog = ({ id, resellerId, dialog, ...props }) => {
@@ -306,7 +271,10 @@ const normalizeFormData = ({
 
   let currencyCodes = toCheckedCurrencyCodes(currencies)
 
-  let gameProviderIds = toCheckedGameProviderIds(gameProviders)
+  let gameProviderIds = toCheckedGameProviderIds(
+    "gameProviderId",
+    gameProviders
+  )
 
   let betLimitIds = toCheckedBetLimitIds(betLimits)
   return {

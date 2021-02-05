@@ -15,18 +15,21 @@ export const CurrencyFieldsBox = ({ fieldsName = "currencies", readonly }) => {
     keyName: "_id"
   })
   let currencies = watch(fieldsName)
+
+  if (currencies.length == 0) {
+    return null
+  }
+
   return (
-    currencies && (
-      <>
-        <NormalLabel>
-          <Trans zh="币种" en="Currency" />
-        </NormalLabel>
-        <CurrencyCheckboxGroupTable
-          fieldArrayContext={fieldArrayContext}
-          disabled={readonly}
-        />
-      </>
-    )
+    <>
+      <NormalLabel>
+        <Trans zh="币种" en="Currency" />
+      </NormalLabel>
+      <CurrencyCheckboxGroupTable
+        fieldArrayContext={fieldArrayContext}
+        disabled={readonly}
+      />
+    </>
   )
 }
 

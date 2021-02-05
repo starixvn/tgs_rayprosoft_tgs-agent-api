@@ -57,7 +57,7 @@ export const EditBrandGameBetLimitButton = ({
       </Disclosure>
       {dialog.visible && (
         <EditDialog
-          id={record?.id}
+          brandId={record?.id}
           licenseeId={record?.licenseeId}
           onSubmitted={onSubmitted}
           dialog={dialog}
@@ -67,7 +67,7 @@ export const EditBrandGameBetLimitButton = ({
   )
 }
 
-const EditDialog = ({ id = "", licenseeId = "", onSubmitted, dialog }) => {
+const EditDialog = ({ brandId = "", licenseeId = "", onSubmitted, dialog }) => {
   let {
     brand,
     gameProviders,
@@ -76,10 +76,13 @@ const EditDialog = ({ id = "", licenseeId = "", onSubmitted, dialog }) => {
     error: brandError,
     mutateBrand,
     deleteBrandCache
-  } = useLicenseeBrand({ id, licenseeId })
+  } = useLicenseeBrand({ brandId, licenseeId })
+
+  gameProviders = gameProviders.filter(({ checked }) => checked)
+  betLimits = betLimits.filter(({ checked }) => checked)
 
   let [formData, setSubmit] = useState()
-  let { result, isLoading, error, mutate } = useUpdateBrand(id, formData)
+  let { result, isLoading, error, mutate } = useUpdateBrand(brandId, formData)
 
   let title = useTrans({
     zh: "限红组",
@@ -111,16 +114,17 @@ const EditDialog = ({ id = "", licenseeId = "", onSubmitted, dialog }) => {
 
   gameProviders = gameProviders.map((gameProvider) => {
     // all games inside game pool
-    let games = brand.games.filter(
-      (game) => game.gameProviderId === gameProvider.gameProviderId
-    )
+    let games =
+      brand?.games.filter(
+        (game) => game.gameProviderId === gameProvider.gameProviderId
+      ) ?? []
 
     return {
       ...gameProvider,
       games
     }
   })
-
+  console.log("brand?.brandGroups", brand?.brandGroups)
   return (
     <FormDialog
       defaultValues={{
@@ -166,7 +170,6 @@ const normalizeBrandGroups = (brandGroups = []) => {
     brandGroups.reduce((result, brandGroup, index) => {
       let { gameProviderBetLimits } = brandGroup
       let betLimitGameProviderPairs = groupByBetLimit(gameProviderBetLimits)
-
       result.push({
         ...brandGroup,
         betLimitGameProviderPairs
@@ -237,6 +240,7 @@ const EditBody = ({ brand = {}, betLimits = [], gameProviders = [] }) => {
     keyName: "_id"
   })
 
+  console.log("fields", fields)
   return (
     <Stack>
       {fields.map((field, index) => (
@@ -376,7 +380,10 @@ const BetLimitRow = ({
 }) => {
   let { control, getValues, watch, setValue } = useFormContext()
   let dialog = useModalState()
-  let gameProviderBetLimitPairs = getValues(name) //watch(name)
+  // let gameProviderBetLimitPairs = getValues(name) //watch(name)
+  let gameProviderBetLimitPairs =
+    group["betLimitGameProviderPairs"][betLimit.id]
+
   return (
     <Table.Row>
       <Table.Cell textAlign="center">{betLimit?.currencyCode}</Table.Cell>

@@ -10,14 +10,14 @@ import {
 import { useBrand } from "./client"
 import { useLicensee } from "../licensees/client"
 
-export const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
+export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
   let {
     data: brand,
     isLoading: isLoadingBrand,
     error: brandError,
     mutate: mutateBrand,
     deleteCache: deleteBrandCache
-  } = useBrand(id)
+  } = useBrand(brandId)
 
   let {
     data: licensee,
@@ -29,16 +29,42 @@ export const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
 
   let gameProviders = mapMergeChecked(
     (brandGameProvider, licenseeGameProvider) => {
-      return brandGameProvider.gameProviderId === licenseeGameProvider.id
+      return (
+        brandGameProvider.gameProviderId === licenseeGameProvider.gameProviderId
+      )
     },
-    (brandGameProvider = {}, licenseeGameProvider = {}) => {
+    (
+      brandGameProvider = {
+        configurationId: "",
+        defaultLanguageCode: "",
+        desktopQueryString: "",
+        mobileQueryString: ""
+      },
+      licenseeGameProvider = {}
+    ) => {
       return {
+        ...licenseeGameProvider,
         ...brandGameProvider
       }
     },
     brand?.gameProviders ?? [],
     licensee?.gameProviders ?? []
   )
+
+  let betLimits = mapMergeChecked(
+    (brandBetLimit, betLimit) => {
+      return brandBetLimit.id === betLimit.id
+    },
+    (brandBetLimit = { isDefault: false }, betLimit) => {
+      return {
+        ...betLimit,
+        ...brandBetLimit
+      }
+    },
+    brand?.betLimits ?? [],
+    licensee?.betLimits ?? []
+  )
+
   //TODO: rm games
   let games =
     brand?.games.map((game) => ({
@@ -50,8 +76,9 @@ export const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
     (brandLang, licenseeLang) => {
       return brandLang.cultureCode === licenseeLang.cultureCode
     },
-    (brandLang = {}, licenseeLang = {}) => {
+    (brandLang = { brandCultureCode: "" }, licenseeLang = {}) => {
       return {
+        ...licenseeLang,
         ...brandLang
       }
     },
@@ -69,10 +96,7 @@ export const useLicenseeBrand = ({ id = "", licenseeId = "" }) => {
     ),
     gameProviders,
     games,
-    betLimits: mapCheckedById(
-      brand?.betLimits ?? [],
-      licensee?.betLimits ?? []
-    ),
+    betLimits,
     isLoading: isLoadingBrand || isLoadingLicensee,
     error: brandError || licenseeError,
     mutateBrand,

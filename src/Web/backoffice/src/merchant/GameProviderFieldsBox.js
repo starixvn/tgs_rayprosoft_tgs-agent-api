@@ -17,18 +17,21 @@ export const GameProviderFieldsBox = ({ readonly }) => {
   })
   let gameProviders = watch(fieldsName)
 
+  if (gameProviders.length == 0) {
+    return null
+  }
+  console.log("gameProviders", gameProviders)
   return (
-    gameProviders && (
-      <>
-        <NormalLabel>
-          <Trans zh="游戏厂商" en="Game Provider" />
-        </NormalLabel>
-        <GameProviderCheckboxGroup
-          fieldArrayContext={fieldArrayContext}
-          disabled={readonly}
-        />
-      </>
-    )
+    <>
+      <NormalLabel>
+        <Trans zh="游戏厂商" en="Game Provider" />
+      </NormalLabel>
+      <GameProviderCheckboxGroup
+        fieldArrayContext={fieldArrayContext}
+        gameProviderIdFieldName="gameProviderId"
+        disabled={readonly}
+      />
+    </>
   )
 }
 

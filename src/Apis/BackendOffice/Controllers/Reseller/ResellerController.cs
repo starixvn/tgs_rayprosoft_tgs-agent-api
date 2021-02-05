@@ -82,7 +82,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
                     GameProviders = reseller.GameProviders
                         .Select(x => new ResellerGameProviderModel
                         {
-                            Id = x.GameProviderId,
+                            GameProviderId = x.GameProviderId,
                             Name = x.GameProvider.Name
                         }).ToArray(),
                     BetLimits = reseller.BetLimits

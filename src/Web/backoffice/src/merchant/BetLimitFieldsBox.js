@@ -17,6 +17,10 @@ export const BetLimitFieldsBox = ({ readonly }) => {
   })
   let betLimits = watch(fieldsName)
 
+  if (betLimits.length == 0) {
+    return null
+  }
+
   return (
     betLimits && (
       <>
