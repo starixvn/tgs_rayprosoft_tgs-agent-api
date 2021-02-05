@@ -101,6 +101,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await DeleteEntitiesAsync(brand.BetLimits);
             await DeleteEntitiesAsync(brand.Languages);
             await DeleteEntitiesAsync(brand.Currencies);
+            await DeleteEntitiesAsync(brand.BrandGroups);
 
             brand.Languages = await GenerateBrandLanguages(brand, request);
             brand.Currencies = GenerateBrandCurrencies(brand, request);
@@ -339,7 +340,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BetLimitId = x.BetLimitId
                 };
                 brandGroupBetLimit.GameProviderBetLimits =
-                    GenerateWithUpdateGameProviderBetLimits(brandGroupBetLimit, x.BetLimitId, models);
+                    GenerateWithUpdateGameProviderBetLimits(brandGroupBetLimit, models);
 
                 return brandGroupBetLimit;
             });
@@ -366,39 +367,38 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private static HashSet<BrandGroupGameProviderBetLimit> GenerateGameProviderBetLimits(Brand brand,
             Guid brandGroupBetLimitId, BetLimit betLimit, bool isSports)
         {
-            var brandGroupGameProviderBetLimits = brand.GameProviders.Select(x =>
-            {
-                var gameProviderBetLimits = x.GameProvider.BetLimits
-                    .Where(b =>
-                        b.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= b.MinBet &&
-                        betLimit.MaxBet >= b.MaxBet)
-                    .Where(isSports, b => betLimit.MaxBetPerMatch >= b.MaxBetPerMatch)
-                    .OrderBy(b => b.MinBet).ToArray();
-
-                if (!gameProviderBetLimits.Any())
+            var brandGroupGameProviderBetLimits = brand.GameProviders.Where(x => x.GameProvider.BetLimits
+                    .Any(gb =>
+                        gb.CurrencyCode == betLimit.CurrencyCode &&
+                        betLimit.MinBet <= gb.MinBet &&
+                        betLimit.MaxBet >= gb.MaxBet))
+                .Where(isSports, x => x.GameProvider.BetLimits
+                    .Any(b => betLimit.MaxBetPerMatch >= b.MaxBetPerMatch))
+                .Select(x =>
                 {
-                    throw new Exception($"{x.GameProvider.Code} bet limits not in bet limit range");
-                }
+                    var gameProviderBetLimits = x.GameProvider.BetLimits
+                        .OrderBy(b => b.MinBet).ToArray();
 
-                return new BrandGroupGameProviderBetLimit
-                {
-                    BrandGroupBetLimitId = brandGroupBetLimitId,
-                    GameProviderBetLimitId = gameProviderBetLimits.First().Id
-                };
-            });
+                    return new BrandGroupGameProviderBetLimit
+                    {
+                        BrandGroupBetLimitId = brandGroupBetLimitId,
+                        GameProviderBetLimitId = gameProviderBetLimits.First().Id
+                    };
+                });
 
             return new HashSet<BrandGroupGameProviderBetLimit>(brandGroupGameProviderBetLimits);
         }
 
         private static HashSet<BrandGroupGameProviderBetLimit> GenerateWithUpdateGameProviderBetLimits(
-            BrandGroupBetLimit brandGroupBetLimit, int betLimitId, BrandGroupGameProviderBetLimitModel[] models)
+            BrandGroupBetLimit brandGroupBetLimit, BrandGroupGameProviderBetLimitModel[] models)
         {
-            var brandGroupGameProviderBetLimits = models.Select(x =>
-                new BrandGroupGameProviderBetLimit
-                {
-                    BrandGroupBetLimit = brandGroupBetLimit,
-                    GameProviderBetLimitId = x.GameProviderBetLimitId
-                });
+            var brandGroupGameProviderBetLimits = models.Where(x => x.BrandBetLimitId == brandGroupBetLimit.BetLimitId)
+                .Select(x =>
+                    new BrandGroupGameProviderBetLimit
+                    {
+                        BrandGroupBetLimit = brandGroupBetLimit,
+                        GameProviderBetLimitId = x.GameProviderBetLimitId
+                    });
 
             return new HashSet<BrandGroupGameProviderBetLimit>(brandGroupGameProviderBetLimits);
         }
