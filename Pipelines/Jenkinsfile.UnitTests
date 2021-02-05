@@ -30,7 +30,7 @@ pipeline {
 		}
 		stage('Coder') {
 			steps {
-				sh  "dotcover()"  
+				dotcover()
 				echo "dotcover tgs.sln"
 			}
 		}
