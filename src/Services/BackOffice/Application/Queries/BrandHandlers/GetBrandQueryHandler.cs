@@ -75,6 +75,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     BetLimits = brand.BetLimits.Select(x => new BrandBetLimitModel
                     {
                         Id = x.BetLimitId,
+                        CurrencyCode = x.BetLimit.CurrencyCode,
                         IsDefault = x.IsDefault
                     }).ToArray(),
                     BrandGroups = brand.BrandGroups.Select(x => new BrandGroupModel
@@ -86,6 +87,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                         IsSports = x.IsSports,
                         BrandGames = x.BrandGames.Select(g => new BrandGameModel
                         {
+                            GameProviderId = g.BrandGame.Game.GameProviderId,
                             GameId = g.BrandGame.GameId,
                             GameName = g.BrandGame.Game.Name
                         }).ToArray(),
