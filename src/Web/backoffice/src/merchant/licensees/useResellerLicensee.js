@@ -36,7 +36,7 @@ export const useResellerLicensee = ({ id = "", resellerId = "" }) => {
     licensee?.gameProviders ?? [],
     reseller?.gameProviders ?? []
   )
-  console.log("gameProviders", gameProviders)
+
   let betLimits = mapCheckedById(licensee?.betLimits, reseller?.betLimits ?? [])
 
   return {

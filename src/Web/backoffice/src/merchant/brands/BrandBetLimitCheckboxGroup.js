@@ -9,6 +9,7 @@ import {
   BetLimitCheckboxGroupTableHeadRow,
   BetLimitCheckboxGroupTableRow
 } from "../../betlimit/BetLimitCheckboxGroup"
+import { set } from "date-fns"
 
 export const BrandBetLimitCheckboxGroupTable = ({
   name = "betLimits",
@@ -69,15 +70,40 @@ export const BrandBetLimitCheckboxGroupTable = ({
                   index={index}
                   checkedFieldName={checkedFieldName}
                   onCheckedChange={(checked) => {
-                    if (checked) {
-                      let foundDefault = !!findDefault(true, fieldIndexPairs, {
+                    let sameCurrencyFieldPairs = filterPairsByCurrency(
+                      field.currencyCode,
+                      fieldIndexPairs,
+                      {
                         excludedId: field.id
-                      })
-                      if (!foundDefault) {
+                      }
+                    )
+
+                    if (checked) {
+                      //auto set isDefault if there's no default
+                      let foundOtherDefault = findCheckedDefault(
+                        name,
+                        getValues,
+                        sameCurrencyFieldPairs
+                      )
+                      if (!foundOtherDefault) {
                         setValue(isDefaultFieldName, true)
                       }
                     } else if (!checked) {
                       setValue(isDefaultFieldName, false)
+
+                      let foundOtherDefault = findCheckedDefault(
+                        name,
+                        getValues,
+                        sameCurrencyFieldPairs
+                      )
+                      if (
+                        !foundOtherDefault &&
+                        sameCurrencyFieldPairs.length == 1
+                      ) {
+                        //only auto set default when "1" record found
+                        let [field, index] = sameCurrencyFieldPairs[0]
+                        setValue(defaultFieldName(name, field, index), true)
+                      }
                     }
                   }}
                   addonAfter={
@@ -140,17 +166,6 @@ const applyFirstCurrencyPairs = (fn, pairs = []) => {
   }, applied)
 }
 
-const findDefault = (value = true, pairs = [], options) => {
-  return pairs.find(([{ id, isDefault }]) => {
-    let excludedId = options?.excludedId
-    if (excludedId) {
-      return excludedId != id && isDefault === value
-    }
-
-    return isDefault === value
-  })
-}
-
 const filterPairsByCurrency = (code = "", pairs = [], options) => {
   return pairs.filter(([{ id, currencyCode }, index]) => {
     let excludedId = options?.excludedId
@@ -159,6 +174,14 @@ const filterPairsByCurrency = (code = "", pairs = [], options) => {
     }
 
     return currencyCode === code
+  })
+}
+
+const findCheckedDefault = (name, getValues, fieldIndexPairs = []) => {
+  return fieldIndexPairs.find(([field, index]) => {
+    let checked = getValues(checkedFieldName(name, field, index))
+    let isDefault = getValues(defaultFieldName(name, field, index))
+    return checked && isDefault
   })
 }
 

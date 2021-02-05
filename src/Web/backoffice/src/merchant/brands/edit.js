@@ -458,19 +458,21 @@ const LanguageFieldsBox = ({ readonly }) => {
   })
   let languages = watch(fieldsName)
 
+  if (languages.length == 0) {
+    return null
+  }
+
   return (
-    languages && (
-      <>
-        <NormalLabel>
-          <Trans zh="语言" en="Language" />
-        </NormalLabel>
-        <BrandLanguageCheckboxGroupTable
-          fieldArrayContext={fieldArrayContext}
-          disabled={readonly}
-          showBrandCultureCode
-        />
-      </>
-    )
+    <>
+      <NormalLabel>
+        <Trans zh="语言" en="Language" />
+      </NormalLabel>
+      <BrandLanguageCheckboxGroupTable
+        fieldArrayContext={fieldArrayContext}
+        disabled={readonly}
+        showBrandCultureCode
+      />
+    </>
   )
 }
 
@@ -485,19 +487,21 @@ const BrandGameProviderFieldsBox = ({ readonly }) => {
   })
   let gameProviders = watch(fieldsName)
 
+  if (gameProviders.length == 0) {
+    return null
+  }
+
   return (
-    gameProviders && (
-      <>
-        <NormalLabel>
-          <Trans zh="游戏厂商" en="Game Provider" />
-        </NormalLabel>
-        <BrandGameProviderCheckboxGroupTable
-          marginTop="major-1"
-          fieldArrayContext={fieldArrayContext}
-          disabled={readonly}
-        />
-      </>
-    )
+    <>
+      <NormalLabel>
+        <Trans zh="游戏厂商" en="Game Provider" />
+      </NormalLabel>
+      <BrandGameProviderCheckboxGroupTable
+        marginTop="major-1"
+        fieldArrayContext={fieldArrayContext}
+        disabled={readonly}
+      />
+    </>
   )
 }
 
@@ -512,19 +516,21 @@ const BrandBetLimitFieldsBox = ({ readonly }) => {
   })
   let betLimits = watch(fieldsName)
 
+  if (betLimits.length == 0) {
+    return null
+  }
+
   return (
-    betLimits && (
-      <>
-        <NormalLabel>
-          <Trans zh="品牌限红" en="Brand Bet Limit" />
-        </NormalLabel>
-        <FieldStack marginTop="major-1">
-          <BrandBetLimitCheckboxGroupTable
-            fieldArrayContext={fieldArrayContext}
-            disabled={readonly}
-          />
-        </FieldStack>
-      </>
-    )
+    <>
+      <NormalLabel>
+        <Trans zh="品牌限红" en="Brand Bet Limit" />
+      </NormalLabel>
+      <FieldStack marginTop="major-1">
+        <BrandBetLimitCheckboxGroupTable
+          fieldArrayContext={fieldArrayContext}
+          disabled={readonly}
+        />
+      </FieldStack>
+    </>
   )
 }

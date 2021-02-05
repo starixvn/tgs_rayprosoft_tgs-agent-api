@@ -336,7 +336,7 @@ const useResellerData = (id) => {
     reseller?.gameProviders ?? [],
     gameProviderData?.items ?? []
   )
-  console.log("gameProviders", gameProviders)
+
   return {
     reseller,
     languages: mapCheckedByCultureCode(

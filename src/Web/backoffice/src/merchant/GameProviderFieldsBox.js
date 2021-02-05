@@ -20,7 +20,7 @@ export const GameProviderFieldsBox = ({ readonly }) => {
   if (gameProviders.length == 0) {
     return null
   }
-  console.log("gameProviders", gameProviders)
+
   return (
     <>
       <NormalLabel>
