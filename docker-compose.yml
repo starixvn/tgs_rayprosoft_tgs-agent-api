@@ -169,6 +169,22 @@ services:
       - 27017:27017
     restart: unless-stopped
 
+  mongo-express:
+    image: mongo-express
+    container_name: "tgs-mongo-express"
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: "mongodb"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "1qaz2wsx!@"
+      ME_CONFIG_BASICAUTH_USERNAME: "root"
+      ME_CONFIG_BASICAUTH_PASSWORD: "1qaz2wsx!@"
+    ports:
+      - "8081:8081"
+
+    networks:
+      tgs:
+
   operator-api:
     build:
       context: .
