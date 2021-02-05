@@ -28,11 +28,11 @@ pipeline {
 				echo "test tgs.sln"
 			}
 		}
-		//stage('Coder') {
-		//	steps {
-		//		//sh  "dotcover()"  
-		//		echo "dotcover tgs.sln"
-		//	}
-		//}
+		stage('Coder') {
+			steps {
+				dotcover()
+				echo "dotcover tgs.sln"
+			}
+		}
     }
 }
