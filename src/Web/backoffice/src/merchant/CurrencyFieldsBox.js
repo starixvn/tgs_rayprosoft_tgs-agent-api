@@ -4,9 +4,18 @@ import { Box, Set, FieldStack } from "bumbag"
 import { Trans, useTrans } from "../i18n"
 import { NormalLabel } from "../form/Label"
 import { useFormContext, useFieldArray } from "react-hook-form"
-import { CurrencyCheckboxGroupTable } from "../currency/CurrencyCheckboxGroup"
+import {
+  CurrencyCheckboxGroupTable,
+  toCheckedFieldName
+} from "../currency/CurrencyCheckboxGroup"
 
-export const CurrencyFieldsBox = ({ fieldsName = "currencies", readonly }) => {
+const DefaultCurrencyFieldsName = "currencies"
+
+export const CurrencyFieldsBox = ({
+  fieldsName = DefaultCurrencyFieldsName,
+  checkedFieldName = toCheckedFieldName,
+  readonly
+}) => {
   let { watch, control } = useFormContext()
 
   let fieldArrayContext = useFieldArray({
@@ -35,6 +44,24 @@ export const CurrencyFieldsBox = ({ fieldsName = "currencies", readonly }) => {
 
 export const toCheckedCurrencyCodes = (currencies = []) => {
   return currencies.filter(({ checked }) => checked).map(({ code }) => code)
+}
+
+export const mapCheckedCurrencyCodes = (
+  name = DefaultCurrencyFieldsName,
+  checkedFieldName,
+  getValues,
+  currencyFields = []
+) => {
+  let checkedCurrencyCodes = []
+  return currencyFields.reduce((checkedCurrencyCodes, field, index) => {
+    let fieldName = checkedFieldName(name, field, index)
+    let checked = getValues(fieldName)
+    if (checked) {
+      checkedCurrencyCodes.push(field.code)
+    }
+
+    return checkedCurrencyCodes
+  }, checkedCurrencyCodes)
 }
 
 export default CurrencyFieldsBox

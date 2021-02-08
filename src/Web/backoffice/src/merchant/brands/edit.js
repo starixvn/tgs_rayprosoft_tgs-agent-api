@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { useModalState, Stack, Heading, Box, Text, FieldStack } from "bumbag"
+import {
+  useModalState,
+  Stack,
+  Heading,
+  Box,
+  Text,
+  FieldStack,
+  Button
+} from "bumbag"
 import { useIsDisplayMenuByRoute, useUserLicenseeId } from "../../user/context"
 import Disclosure, { AddDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
@@ -12,7 +20,7 @@ import {
   CloseButtonFooter,
   ConfirmButtonFooter
 } from "../../form/ConfirmButtonFooter"
-import { Input } from "../../input/Input"
+import { Input, InputField } from "../../input/Input"
 import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import { useAddBrand, useBrand, useUpdateBrand } from "./client"
@@ -24,8 +32,11 @@ import { BrandLanguageCheckboxGroupTable } from "./BrandLanguageCheckboxGroup"
 import { BrandGameProviderCheckboxGroupTable } from "./BrandGameProviderCheckboxGroup"
 import { BrandBetLimitCheckboxGroupTable } from "./BrandBetLimitCheckboxGroup"
 import useLicenseeBrand from "./useLicenseeBrand"
-import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
-import useResellerLicensee from "../licensees/useResellerLicensee"
+import CurrencyFieldsBox, {
+  mapCheckedCurrencyCodes,
+  toCheckedCurrencyCodes
+} from "../CurrencyFieldsBox"
+import { toCheckedFieldName } from "../../currency/CurrencyCheckboxGroup"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = useModalState()
@@ -372,6 +383,9 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
 
   let licensee = watch("licensee")
   let editable = !readonly
+
+  let apiKeyInputRef = useRef()
+  let currencyFieldArrayName = "currencies"
   return (
     <Stack orientation="vertical">
       <Heading use="h5" marginBottom="major-1">
@@ -430,7 +444,27 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
             </NormalLabel>
             <Box alignY="center">
               <Input type="hidden" name="apiKey" />
-              <Input disabled defaultValue={getValues("apiKey")} />
+              <InputField
+                readonly
+                inputRef={apiKeyInputRef}
+                defaultValue={getValues("apiKey")}
+                addonAfter={
+                  <Button
+                    onClick={() => {
+                      let target = apiKeyInputRef.current
+                      target.select()
+                      document.execCommand("copy")
+                    }}
+                  >
+                    <Trans zh="复制" en="Copy" />
+                  </Button>
+                }
+                css={css`
+                  & input {
+                    text-overflow: ellipsis;
+                  }
+                `}
+              />
             </Box>
           </>
         )}
@@ -439,9 +473,12 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
 
         <CurrencyFieldsBox readonly={readonly} />
 
-        <BrandGameProviderFieldsBox readonly={readonly} />
+        <BrandBetLimitFieldsBox
+          readonly={readonly}
+          currencyFieldArrayName={currencyFieldArrayName}
+        />
 
-        <BrandBetLimitFieldsBox readonly={readonly} />
+        <BrandGameProviderFieldsBox readonly={readonly} />
       </FieldValues>
     </Stack>
   )
@@ -505,8 +542,8 @@ const BrandGameProviderFieldsBox = ({ readonly }) => {
   )
 }
 
-const BrandBetLimitFieldsBox = ({ readonly }) => {
-  let { watch, control } = useFormContext()
+const BrandBetLimitFieldsBox = ({ currencyFieldArrayName, readonly }) => {
+  let { watch, control, getValues } = useFormContext()
 
   let fieldsName = "betLimits"
   let fieldArrayContext = useFieldArray({
@@ -514,11 +551,20 @@ const BrandBetLimitFieldsBox = ({ readonly }) => {
     name: fieldsName,
     keyName: "_id"
   })
+
+  let currencies = watch(currencyFieldArrayName)
   let betLimits = watch(fieldsName)
 
   if (betLimits.length == 0) {
     return null
   }
+
+  let requiredCurrencyCodes = mapCheckedCurrencyCodes(
+    currencyFieldArrayName,
+    toCheckedFieldName,
+    getValues,
+    currencies
+  )
 
   return (
     <>
@@ -529,6 +575,7 @@ const BrandBetLimitFieldsBox = ({ readonly }) => {
         <BrandBetLimitCheckboxGroupTable
           fieldArrayContext={fieldArrayContext}
           disabled={readonly}
+          requiredCurrencyCodes={requiredCurrencyCodes}
         />
       </FieldStack>
     </>

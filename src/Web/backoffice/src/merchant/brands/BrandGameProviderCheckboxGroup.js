@@ -28,7 +28,7 @@ import {
   faLanguage,
   faCog
 } from "@fortawesome/free-solid-svg-icons"
-import { ConfirmText } from "../../button/ActionButtons"
+import { CloseText, ConfirmText } from "../../button/ActionButtons"
 import { GameProviderConfigSelect } from "../../game/providers/configs/GameProviderConfigSelect"
 import { GameProviderLanguageSelect } from "../../game/providers/GameProviderLanguageSelect"
 
@@ -138,7 +138,9 @@ const Row = ({ name, disabled, field, index }) => {
                   {configDialog.visible && (
                     <ConfigDialog
                       gameProvider={field}
-                      configuration={value}
+                      configurationId={value}
+                      required
+                      disabled={disabled}
                       dialog={configDialog}
                       onChange={(configId) => {
                         setValue(configName, configId)
@@ -149,6 +151,8 @@ const Row = ({ name, disabled, field, index }) => {
               )
             }}
           />
+          {/* TODO: only show default lang select when B2B? */}
+          {/* 
           <Controller
             control={control}
             name={langFieldName(name, field, index)}
@@ -164,8 +168,9 @@ const Row = ({ name, disabled, field, index }) => {
                   </Disclosure>
                   {defaultLangDialog.visible && (
                     <DefaultLangDialog
-                      value={value}
+                      defaultLanguageCode={value}
                       gameProvider={field}
+                      disabled={disabled}
                       dialog={defaultLangDialog}
                       onChange={(code) => {
                         setValue(fieldName, code)
@@ -175,7 +180,7 @@ const Row = ({ name, disabled, field, index }) => {
                 </>
               )
             }}
-          />
+          /> */}
           <Controller
             control={control}
             name={queryStringFieldName(
@@ -198,6 +203,7 @@ const Row = ({ name, disabled, field, index }) => {
                     <QueryStringDialog
                       type={QueryStringType.Desktop}
                       value={value}
+                      disabled={disabled}
                       dialog={desktopQueryStringDialog}
                       onChange={(queryString) => {
                         setValue(fieldName, queryString)
@@ -230,6 +236,7 @@ const Row = ({ name, disabled, field, index }) => {
                     <QueryStringDialog
                       type={QueryStringType.Mobile}
                       value={value}
+                      disabled={disabled}
                       dialog={mobileQueryStringDialog}
                       onChange={(queryString) => {
                         setValue(fieldName, queryString)
@@ -270,7 +277,7 @@ const useQueryStringTitle = (type = QueryStringType.Desktop) => {
   }
 }
 
-const QueryStringDialog = ({ type, value, dialog, onChange }) => {
+const QueryStringDialog = ({ type, value, disabled, dialog, onChange }) => {
   let title = useQueryStringTitle(type)
   return (
     <Backdrop {...dialog}>
@@ -280,19 +287,31 @@ const QueryStringDialog = ({ type, value, dialog, onChange }) => {
           onChange(data.url)
           dialog.hide()
         }}
-        submitText={<ConfirmText />}
+        submitText={disabled ? <CloseText /> : <ConfirmText />}
         dialog={dialog}
         title={title}
         hideBackdrop={true}
         minWidth="500px"
       >
-        <InputField label="Query String" name="url" defaultValue={value} />
+        <InputField
+          label="Query String"
+          name="url"
+          defaultValue={value}
+          disabled={disabled}
+        />
       </FormDialog>
     </Backdrop>
   )
 }
 
-const ConfigDialog = ({ gameProvider, dialog, onChange }) => {
+const ConfigDialog = ({
+  gameProvider,
+  configurationId,
+  required,
+  disabled,
+  dialog,
+  onChange
+}) => {
   let title = useTrans({
     zh: `游戏商配置`,
     en: `Game Provider Configuration`
@@ -306,19 +325,31 @@ const ConfigDialog = ({ gameProvider, dialog, onChange }) => {
           onChange(id)
           dialog.hide()
         }}
-        submitText={<ConfirmText />}
+        submitText={disabled ? <CloseText /> : <ConfirmText />}
         dialog={dialog}
         title={title}
         hideBackdrop={true}
         minWidth="max-content"
       >
-        <GameProviderConfigSelect name="id" gameProviderId={gameProvider?.id} />
+        <GameProviderConfigSelect
+          name="id"
+          gameProviderId={gameProvider?.id}
+          defaultValue={configurationId}
+          required={required}
+          disabled={disabled}
+        />
       </FormDialog>
     </Backdrop>
   )
 }
 
-const DefaultLangDialog = ({ gameProvider, dialog, onChange }) => {
+const DefaultLangDialog = ({
+  gameProvider,
+  defaultLanguageCode,
+  disabled,
+  dialog,
+  onChange
+}) => {
   let title = useTrans({
     zh: `游戏商预设语言`,
     en: `Game Provider Default Language`
@@ -332,7 +363,7 @@ const DefaultLangDialog = ({ gameProvider, dialog, onChange }) => {
           onChange(code)
           dialog.hide()
         }}
-        submitText={<ConfirmText />}
+        submitText={disabled ? <CloseText /> : <ConfirmText />}
         dialog={dialog}
         title={title}
         hideBackdrop={true}
@@ -341,6 +372,8 @@ const DefaultLangDialog = ({ gameProvider, dialog, onChange }) => {
         <GameProviderLanguageSelect
           name="code"
           gameProviderId={gameProvider?.gameProviderId}
+          defaultValue={defaultLanguageCode}
+          disabled={disabled}
         />
       </FormDialog>
     </Backdrop>

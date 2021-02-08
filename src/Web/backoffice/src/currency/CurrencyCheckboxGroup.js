@@ -29,7 +29,7 @@ export const CurrencyCheckboxGroupTable = ({
             <CurrencyCheckboxGroupTableHeadRow
               name={name}
               fields={fields}
-              checkedFieldName={defaultCheckedFieldName}
+              checkedFieldName={toCheckedFieldName}
               allChecked={allChecked}
               disabled={disabled}
             />
@@ -54,7 +54,7 @@ export const CurrencyCheckboxGroupTable = ({
 export const CurrencyCheckboxGroupTableHeadRow = ({
   name,
   fields,
-  checkedFieldName = defaultCheckedFieldName,
+  checkedFieldName = toCheckedFieldName,
   allChecked,
   disabled,
   addonAfter
@@ -93,7 +93,7 @@ export const CurrencyCheckboxGroupTableRow = ({
   disabled,
   field,
   index,
-  checkedFieldName = defaultCheckedFieldName,
+  checkedFieldName = toCheckedFieldName,
   addonAfter
 }) => {
   let formContext = useFormContext()
@@ -125,5 +125,5 @@ export const CurrencyCheckboxGroupTableRow = ({
   }, [field])
 }
 
-const defaultCheckedFieldName = (name, field, index) =>
+export const toCheckedFieldName = (name, field, index) =>
   `${name}[${index}].checked`

@@ -2,9 +2,11 @@ import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/react"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import { Checkbox as _Checkbox, CheckboxField as _CheckboxField } from "bumbag"
+import get from "lodash-es/get"
 
 export const Checkbox = ({
   name,
+  state,
   checkboxRef,
   register,
   registerOptions = {},
@@ -25,11 +27,17 @@ export const Checkbox = ({
     })
   }
 
-  let error = formContext?.errors[name]
-  let state = error && "danger"
+  let error = get(formContext?.errors ?? {}, name) //formContext?.errors[name]
+  state = state ?? (error && "danger")
 
   return (
-    <_Checkbox name={name} checkboxRef={checkboxRef} state={state} {...props} />
+    <_Checkbox
+      name={name}
+      state={state}
+      checkboxRef={checkboxRef}
+      state={state}
+      {...props}
+    />
   )
 }
 

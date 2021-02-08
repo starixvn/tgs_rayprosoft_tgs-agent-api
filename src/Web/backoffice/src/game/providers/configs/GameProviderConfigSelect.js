@@ -4,18 +4,39 @@ import Select from "../../../select/Select"
 import { Locales, Trans, useTrans } from "../../../i18n"
 import { useGameProviderConfigurationList } from "./client"
 
-export const GameProviderConfigSelect = ({ gameProviderId, ...props }) => {
+export const GameProviderConfigSelect = ({
+  name,
+  gameProviderId,
+  defaultValue,
+  disabled,
+  ...props
+}) => {
   let { items = [], isLoading, error } = useGameProviderConfigurationList({
     gameProviderId,
     showAll: true
   })
 
-  let options = items?.map(({ name, id, ...item }) => ({
-    label: name,
-    value: id
-  }))
+  let options =
+    items?.map(({ name, id, ...item }) => ({
+      label: name,
+      value: id
+    })) ?? []
 
-  //TODO: need defaultValue = item.isDefault = true?
-  //TODO: placeholder?
-  return <Select options={options} isLoading={isLoading} {...props} />
+  let selectConfigLabel = useTrans({
+    zh: "选择游戏商配置",
+    en: "Select Game Provider Configuration"
+  })
+  let placeholder = disabled
+    ? options.find(({ value }) => defaultValue)?.label
+    : selectConfigLabel
+  return (
+    <Select
+      name={name}
+      options={options}
+      placeholder={placeholder ?? selectConfigLabel}
+      isLoading={isLoading}
+      disabled={disabled}
+      {...props}
+    />
+  )
 }

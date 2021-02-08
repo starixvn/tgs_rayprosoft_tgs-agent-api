@@ -109,6 +109,8 @@ export const BetLimitCheckboxGroupTableRow = ({
   index,
   checkedFieldName = defaultCheckedFieldName,
   onCheckedChange,
+  validateCheckbox,
+  checkboxState,
   addonAfter,
   ...props
 }) => {
@@ -132,7 +134,8 @@ export const BetLimitCheckboxGroupTableRow = ({
             <Checkbox
               key={field._id}
               name={checkboxName}
-              checkboxRef={formContext.register()}
+              state={checkboxState}
+              checkboxRef={formContext.register({ validate: validateCheckbox })}
               defaultChecked={field.checked}
               disabled={disabled}
               onChange={(event) => {
@@ -149,5 +152,5 @@ export const BetLimitCheckboxGroupTableRow = ({
         {addonAfter}
       </Table.Row>
     )
-  }, [field])
+  }, [field, validateCheckbox, checkboxState])
 }

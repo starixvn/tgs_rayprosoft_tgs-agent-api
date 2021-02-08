@@ -18,7 +18,7 @@ import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import equals from "fast-deep-equal"
 import { MerchantStatusMenu } from "../status"
-import { EditBrandGameBetLimitButton } from "./BrandGameBetLimitDialog"
+import { EditBrandBetLimitGameProviderBetLimit } from "./BrandBetLimitGameProviderBetLimitDialog"
 
 export { Code }
 
@@ -241,15 +241,14 @@ const useColumns = ({ items = [], mutate }) => {
           return row
         },
         Cell: ({ value }) => {
-          return null
           return (
             <Set orientation="vertical" alignX="center">
               <ViewButton record={value} />
               <EditButton record={value} onSubmitted={mutate} />
-              <EditBrandGameBetLimitButton
+              {/* <EditBrandBetLimitGameProviderBetLimit
                 record={value}
                 onSubmitted={mutate}
-              />
+              /> */}
             </Set>
           )
         }

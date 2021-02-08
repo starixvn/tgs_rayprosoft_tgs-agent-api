@@ -64,7 +64,10 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                             Id = x.Id,
                             GameProviderId = x.GameProviderId,
                             Name = x.GameProvider.Name,
-                            ConfigurationId = x.GameProviderConfigurationId
+                            ConfigurationId = x.GameProviderConfigurationId,
+                            DefaultLanguageCode = x.DefaultLanguageCode,
+                            DesktopQueryString = x.DesktopQueryString,
+                            MobileQueryString = x.MobileQueryString
                         }).ToArray(),
                     Games = brand.Games.Select(x => new BrandGameModel
                     {

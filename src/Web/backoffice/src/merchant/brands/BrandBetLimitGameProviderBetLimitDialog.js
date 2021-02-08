@@ -38,7 +38,7 @@ import { useGameProvider } from "../../game/providers/client"
 import { Checkbox } from "../../checkbox"
 import cloneDeep from "clone-deep"
 
-export const EditBrandGameBetLimitButton = ({
+export const EditBrandBetLimitGameProviderBetLimit = ({
   record,
   onSubmitted,
   ...props
@@ -124,7 +124,7 @@ const EditDialog = ({ brandId = "", licenseeId = "", onSubmitted, dialog }) => {
       games
     }
   })
-  console.log("brand?.brandGroups", brand?.brandGroups)
+
   return (
     <FormDialog
       defaultValues={{
@@ -240,7 +240,6 @@ const EditBody = ({ brand = {}, betLimits = [], gameProviders = [] }) => {
     keyName: "_id"
   })
 
-  console.log("fields", fields)
   return (
     <Stack>
       {fields.map((field, index) => (
@@ -380,10 +379,10 @@ const BetLimitRow = ({
 }) => {
   let { control, getValues, watch, setValue } = useFormContext()
   let dialog = useModalState()
-  // let gameProviderBetLimitPairs = getValues(name) //watch(name)
+
   let gameProviderBetLimitPairs =
     group["betLimitGameProviderPairs"][betLimit.id]
-
+  console.log("gameProviderBetLimitPairs", gameProviderBetLimitPairs)
   return (
     <Table.Row>
       <Table.Cell textAlign="center">{betLimit?.currencyCode}</Table.Cell>

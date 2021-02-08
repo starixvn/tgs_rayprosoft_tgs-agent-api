@@ -45,6 +45,7 @@
     "http-proxy": "^1.18.1",
     "husky": "^4.3.8",
     "jest": "^26.6.3",
+    "lodash-es": "^4.17.20",
     "npm-run-all": "^4.1.5",
     "numeral": "^2.0.6",
     "prettier": "^2.2.1",

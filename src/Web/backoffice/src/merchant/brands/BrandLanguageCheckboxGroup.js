@@ -12,7 +12,7 @@ import Input from "../../input/Input"
 import Backdrop from "../../dialog/Backdrop"
 import FormDialog from "../../form/FormDialog"
 import Disclosure from "../../dialog/Disclosure"
-import { ConfirmText } from "../../button/ActionButtons"
+import { CloseText, ConfirmText } from "../../button/ActionButtons"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 
 export const BrandLanguageCheckboxGroupTable = ({
@@ -80,6 +80,7 @@ export const BrandLanguageCheckboxGroupTable = ({
                               {dialog.visible && (
                                 <CodeDialog
                                   value={value}
+                                  disabled={disabled}
                                   dialog={dialog}
                                   onChange={(code) => {
                                     setValue(fieldName, code)
@@ -102,7 +103,7 @@ export const BrandLanguageCheckboxGroupTable = ({
   }, [JSON.stringify(selection), JSON.stringify(fields)])
 }
 
-const CodeDialog = ({ value, dialog, onChange }) => {
+const CodeDialog = ({ value, disabled, dialog, onChange }) => {
   let title = useTrans({
     zh: `品牌语言代码`,
     en: `Brand Culture Code`
@@ -115,13 +116,13 @@ const CodeDialog = ({ value, dialog, onChange }) => {
           onChange(code)
           dialog.hide()
         }}
-        submitText={<ConfirmText />}
+        submitText={disabled ? <CloseText /> : <ConfirmText />}
         dialog={dialog}
         title={title}
         hideBackdrop={true}
         minWidth="max-content"
       >
-        <Input name="code" defaultValue={value} />
+        <Input name="code" defaultValue={value} disabled={disabled} />
       </FormDialog>
     </Backdrop>
   )

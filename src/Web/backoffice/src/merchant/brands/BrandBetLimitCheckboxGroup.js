@@ -9,20 +9,40 @@ import {
   BetLimitCheckboxGroupTableHeadRow,
   BetLimitCheckboxGroupTableRow
 } from "../../betlimit/BetLimitCheckboxGroup"
-import { set } from "date-fns"
+import get from "lodash-es/get"
 
 export const BrandBetLimitCheckboxGroupTable = ({
   name = "betLimits",
   fieldArrayContext,
+  requiredCurrencyCodes,
   width = "100%",
   disabled = false,
   ...props
 }) => {
-  let { control, setValue, watch, register, getValues } = useFormContext()
+  let {
+    control,
+    setValue,
+    watch,
+    register,
+    getValues,
+    errors = {},
+    clearErrors
+  } = useFormContext()
   const { fields } = fieldArrayContext
 
   let selection = watch(name)
   let allChecked = isAllPropChecked(selection)
+  let checkedFieldErrors = mapCheckedFieldErrors(errors[name] ?? [])
+
+  useEffect(() => {
+    checkedFieldErrors.forEach((error) => {
+      let { message } = error
+      let { checkboxFieldName, currencyCode } = JSON.parse(message)
+      if (!requiredCurrencyCodes.includes(currencyCode)) {
+        clearErrors(checkboxFieldName)
+      }
+    })
+  }, [checkedFieldErrors])
 
   return useMemo(() => {
     let fieldIndexPairs = fields.map((field, index) => [field, index])
@@ -60,6 +80,10 @@ export const BrandBetLimitCheckboxGroupTable = ({
           </Table.Head>
           <Table.Body>
             {fields.map((field, index) => {
+              let checkboxFieldName = checkedFieldName(name, field, index)
+              let checkboxError = get(errors, checkboxFieldName)
+              let checkboxState = checkboxError && "warning"
+
               let isDefaultFieldName = defaultFieldName(name, field, index)
               return (
                 <BetLimitCheckboxGroupTableRow
@@ -69,6 +93,28 @@ export const BrandBetLimitCheckboxGroupTable = ({
                   field={field}
                   index={index}
                   checkedFieldName={checkedFieldName}
+                  checkboxState={checkboxState}
+                  validateCheckbox={(value) => {
+                    if (
+                      requiredCurrencyCodes?.length > 0 &&
+                      requiredCurrencyCodes.includes(field.currencyCode)
+                    ) {
+                      let checked = anyChecked(
+                        name,
+                        field.currencyCode,
+                        getValues,
+                        fieldIndexPairs
+                      )
+                      if (checked) {
+                        return true //pass
+                      }
+                      return JSON.stringify({
+                        checkboxFieldName,
+                        currencyCode: field.currencyCode
+                      })
+                    }
+                    return true //pass
+                  }}
                   onCheckedChange={(checked) => {
                     let sameCurrencyFieldPairs = filterPairsByCurrency(
                       field.currencyCode,
@@ -111,6 +157,7 @@ export const BrandBetLimitCheckboxGroupTable = ({
                       <Box>
                         <Switch
                           name={isDefaultFieldName}
+                          disabled={disabled}
                           switchRef={register()}
                           defaultChecked={field.isDefault}
                           justifyContent="center"
@@ -148,7 +195,23 @@ export const BrandBetLimitCheckboxGroupTable = ({
         </Table>
       </Set>
     )
-  }, [JSON.stringify(selection), JSON.stringify(fields)])
+  }, [
+    JSON.stringify(selection),
+    JSON.stringify(fields),
+    JSON.stringify(requiredCurrencyCodes ?? []),
+    JSON.stringify(checkedFieldErrors)
+  ])
+}
+
+const mapCheckedFieldErrors = (errors = []) => {
+  let fieldName = "checked"
+  return errors.map((error) => {
+    let { type, message, ...context } = error[fieldName]
+    return {
+      type,
+      message
+    }
+  })
 }
 
 const applyFirstCurrencyPairs = (fn, pairs = []) => {
@@ -175,6 +238,15 @@ const filterPairsByCurrency = (code = "", pairs = [], options) => {
 
     return currencyCode === code
   })
+}
+
+const anyChecked = (name, currencyCode, getValues, fieldIndexPairs = []) => {
+  return !!fieldIndexPairs
+    .filter(([field, index]) => field.currencyCode === currencyCode)
+    .find(([field, index]) => {
+      let checked = getValues(checkedFieldName(name, field, index))
+      return checked
+    })
 }
 
 const findCheckedDefault = (name, getValues, fieldIndexPairs = []) => {

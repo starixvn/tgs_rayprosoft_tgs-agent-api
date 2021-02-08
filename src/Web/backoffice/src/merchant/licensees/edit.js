@@ -442,9 +442,9 @@ const EditBody = ({
 
         <CurrencyFieldsBox readonly={readonly} />
 
-        <GameProviderFieldsBox readonly={readonly} />
-
         <BetLimitFieldsBox readonly={readonly} />
+
+        <GameProviderFieldsBox readonly={readonly} />
       </FieldValues>
     </Stack>
   )
