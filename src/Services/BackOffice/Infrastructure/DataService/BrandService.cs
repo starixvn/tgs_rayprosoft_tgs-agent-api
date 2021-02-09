@@ -367,16 +367,26 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private static HashSet<BrandGroupGameProviderBetLimit> GenerateGameProviderBetLimits(Brand brand,
             Guid brandGroupBetLimitId, BetLimit betLimit, bool isSports)
         {
+            bool BetLimitRangeFunc(GameProviderBetLimit gb)
+            {
+                return gb.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= gb.MinBet &&
+                       betLimit.MaxBet >= gb.MaxBet;
+            }
+
+            bool BetLimitIsSportsFunc(GameProviderBetLimit b)
+            {
+                return betLimit.MaxBetPerMatch >= b.MaxBetPerMatch;
+            }
+
             var brandGroupGameProviderBetLimits = brand.GameProviders.Where(x => x.GameProvider.BetLimits
-                    .Any(gb =>
-                        gb.CurrencyCode == betLimit.CurrencyCode &&
-                        betLimit.MinBet <= gb.MinBet &&
-                        betLimit.MaxBet >= gb.MaxBet))
+                    .Any(BetLimitRangeFunc))
                 .Where(isSports, x => x.GameProvider.BetLimits
-                    .Any(b => betLimit.MaxBetPerMatch >= b.MaxBetPerMatch))
+                    .Any(BetLimitIsSportsFunc))
                 .Select(x =>
                 {
                     var gameProviderBetLimits = x.GameProvider.BetLimits
+                        .Where(BetLimitRangeFunc)
+                        .Where(isSports, BetLimitIsSportsFunc)
                         .OrderBy(b => b.MinBet).ToArray();
 
                     return new BrandGroupGameProviderBetLimit

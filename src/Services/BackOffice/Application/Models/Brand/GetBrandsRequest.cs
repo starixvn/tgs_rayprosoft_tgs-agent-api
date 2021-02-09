@@ -8,5 +8,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
     {
         public string Keyword { get; set; }
         public Guid? BrandId { get; set; }
+        public Guid? LicenseeId { get; set; }
+        public Guid? ResellerId { get; set; }
     }
 }
