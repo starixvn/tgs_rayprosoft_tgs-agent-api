@@ -9,7 +9,10 @@ import {
   FieldStack,
   Card,
   Set,
-  Table
+  Table,
+  Button,
+  Group,
+  Flex
 } from "bumbag"
 import { useIsDisplayMenuByRoute, useUserLicenseeId } from "../../user/context"
 import { Disclosure, ConfigIconDisclosure } from "../../dialog/Disclosure"
@@ -37,6 +40,9 @@ import { Select } from "../../select/Select"
 import { useGameProvider } from "../../game/providers/client"
 import { Checkbox } from "../../checkbox"
 import cloneDeep from "clone-deep"
+import sortBy from "lodash-es/sortBy"
+import { SportsSwitch } from "./SportsSwitch"
+import { isSportGameType } from "../../game/GameType"
 
 export const EditBrandBetLimitGameProviderBetLimit = ({
   record,
@@ -184,18 +190,21 @@ const normalizeFormData = ({ brand = {}, brandGroups = [], ...data }) => {
   brandGroups = brandGroups.map(({ betLimitGameProviderPairs, ...group }) => {
     let gameProviderBetLimits = Object.entries(
       betLimitGameProviderPairs
-    ).reduce((gameProviderBetLimits, [brandBetLimitId, gameProviderPairs]) => {
-      let list = Object.entries(gameProviderPairs).map(
-        ([gameProviderId, gameProviderBetLimitId]) => {
-          return {
-            brandBetLimitId: parseInt(brandBetLimitId),
-            gameProviderBetLimitId
+    ).reduce(
+      (gameProviderBetLimits, [brandBetLimitId, gameProviderPairs = {}]) => {
+        let list = Object.entries(gameProviderPairs).map(
+          ([gameProviderId, gameProviderBetLimitId]) => {
+            return {
+              brandBetLimitId: parseInt(brandBetLimitId),
+              gameProviderBetLimitId
+            }
           }
-        }
-      )
+        )
 
-      return [...gameProviderBetLimits, ...list]
-    }, [])
+        return [...gameProviderBetLimits, ...list]
+      },
+      []
+    )
 
     return {
       ...group,
@@ -252,7 +261,35 @@ const EditBody = ({ brand = {}, betLimits = [], gameProviders = [] }) => {
           gameProviders={gameProviders}
         />
       ))}
+      <AddGroupCard appendGroup={append} />
     </Stack>
+  )
+}
+
+const AddGroupCard = ({ appendGroup, gameProviderBetLimits = [] }) => {
+  let [isSports, setSports] = useState(false)
+  return (
+    <Card variant="bordered" alignY="center">
+      <Set alignX="center">
+        <SportsSwitch
+          checked={isSports}
+          onChange={(event) => {
+            let checked = event.target.checked
+            setSports(checked)
+          }}
+        />
+        <Button
+          onClick={(event) => {
+            appendGroup({
+              isSports,
+              betLimitGameProviderPairs: []
+            })
+          }}
+        >
+          <Trans zh="新增" en="Add" />
+        </Button>
+      </Set>
+    </Card>
   )
 }
 
@@ -263,12 +300,10 @@ const GroupCard = ({
   betLimits = [],
   gameProviders = []
 }) => {
-  let { control, setValue } = useFormContext()
+  let { control, setValue, getValues } = useFormContext()
   let dialog = useModalState()
-  let sportLabel = useTrans({
-    zh: "体育",
-    en: "Sport"
-  })
+
+  let isSportsFieldName = `${name}[${groupIndex}].isSports`
   return (
     <Card variant="bordered">
       <Input
@@ -277,10 +312,10 @@ const GroupCard = ({
         type="hidden"
       />
       <Set alignX="right">
-        <Switch
-          name={`${name}[${groupIndex}].isSport`}
-          label={sportLabel}
-          defaultValue={groupField.isSport}
+        <SportsSwitch
+          name={isSportsFieldName}
+          defaultChecked={groupField.isSports}
+          disabled
         />
         <Controller
           control={control}
@@ -291,9 +326,13 @@ const GroupCard = ({
             { invalid, isTouched, isDirty }
           ) => (
             <>
-              <Disclosure {...dialog}>TODO: game list</Disclosure>
+              <Disclosure {...dialog}>
+                <Trans zh="游戏列表" en="Game List" />
+              </Disclosure>
               {dialog.visible && (
                 <GroupGameListDialog
+                  isSportsFieldName={isSportsFieldName}
+                  getValues={getValues}
                   gameProviders={gameProviders}
                   value={value}
                   dialog={dialog}
@@ -307,11 +346,18 @@ const GroupCard = ({
         />
       </Set>
       <FieldStack>
-        <InputField
-          name={`${name}[${groupIndex}].name`}
-          label={<Trans zh="名称" en="Name" />}
-          defaultValue={groupField.name}
-        />
+        <FieldStack orientation="horizontal">
+          <InputField
+            name={`${name}[${groupIndex}].name`}
+            label={<Trans zh="名称" en="Name" />}
+            defaultValue={groupField.name}
+          />
+          <InputField
+            name={`${name}[${groupIndex}].code`}
+            label={<Trans zh="代码" en="Code" />}
+            defaultValue={groupField.code}
+          />
+        </FieldStack>
         <TextareaField
           name={`${name}[${groupIndex}].description`}
           label={<Trans zh="说明" en="Description" />}
@@ -382,7 +428,7 @@ const BetLimitRow = ({
 
   let gameProviderBetLimitPairs =
     group["betLimitGameProviderPairs"][betLimit.id]
-  console.log("gameProviderBetLimitPairs", gameProviderBetLimitPairs)
+
   return (
     <Table.Row>
       <Table.Cell textAlign="center">{betLimit?.currencyCode}</Table.Cell>
@@ -423,10 +469,12 @@ const BetLimitRow = ({
 }
 
 const GroupGameListDialog = ({
-  dialog,
+  isSportsFieldName,
+  getValues,
   gameProviders = [],
   value: selectedGames = [],
   onChange,
+  dialog,
   ...props
 }) => {
   let title = useTrans({
@@ -434,21 +482,35 @@ const GroupGameListDialog = ({
     en: "Game List"
   })
 
-  gameProviders = gameProviders.map((gameProvider) => {
-    let games = gameProvider.games.map((gameProviderGame) => {
-      let checked = !!selectedGames.find((game) => {
-        return game.gameId === gameProviderGame.gameId
-      })
+  let groupOfSport = getValues(isSportsFieldName)
+
+  gameProviders = gameProviders
+    .map((gameProvider) => {
+      let games = gameProvider.games
+        .filter((game) => {
+          let isSport = isSportGameType(game.gameType)
+          if (groupOfSport) {
+            return isSport
+          }
+
+          return !isSport
+        })
+        .map((gameProviderGame) => {
+          let checked = !!selectedGames.find((game) => {
+            return game.gameId === gameProviderGame.gameId
+          })
+          return {
+            ...gameProviderGame,
+            checked
+          }
+        })
+
       return {
-        ...gameProviderGame,
-        checked
+        ...gameProvider,
+        games: sortBy(games, ["gameId"])
       }
     })
-    return {
-      ...gameProvider,
-      games
-    }
-  })
+    .filter(({ games = [], ...gameProvider }) => games.length > 0)
 
   return (
     <Backdrop {...dialog}>
@@ -466,15 +528,46 @@ const GroupGameListDialog = ({
           onChange?.(allCheckedGames)
           dialog.hide()
         }}
+        actionButtonsProps={{
+          submitProps: {
+            variant: "outlined"
+          },
+          addonButtons: (
+            <Button
+              palette="primary"
+              variant="outlined"
+              onClick={(event) => {
+                let allGames = gameProviders.reduce(
+                  (allGames, gameProvider) => {
+                    allGames.push(...(gameProvider.games ?? []))
+                    return allGames
+                  },
+                  []
+                )
+
+                onChange?.(allGames)
+                dialog.hide()
+              }}
+            >
+              <Trans zh="全选" en="Select All" />
+            </Button>
+          )
+        }}
         dialog={dialog}
         title={title}
+        css={css`
+          & .bb-DialogContent {
+            position: relative;
+          }
+        `}
       >
         <Table>
           <Table.Head>
             <Table.Row>
-              <Table.HeadCell></Table.HeadCell>
-              <Table.HeadCell>TODO: Name</Table.HeadCell>
-              <Table.HeadCell>TODO: Game List</Table.HeadCell>
+              <Table.HeadCell textAlign="center">
+                <Trans zh="游戏商" en="Game Provider Name" />
+              </Table.HeadCell>
+              <Table.HeadCell textAlign="center"></Table.HeadCell>
             </Table.Row>
           </Table.Head>
           <Table.Body>
@@ -496,8 +589,7 @@ const GameProviderRow = ({ gameProvider }) => {
   let dialog = useModalState()
   return (
     <Table.Row>
-      <Table.Cell>TODO: toogle game provider games</Table.Cell>
-      <Table.Cell>{gameProvider.name}</Table.Cell>
+      <Table.Cell textAlign="center">{gameProvider.name}</Table.Cell>
       <Table.Cell>
         <Controller
           name={`${gameProvider.gameProviderId}`}
@@ -509,7 +601,9 @@ const GameProviderRow = ({ gameProvider }) => {
           ) => {
             return (
               <>
-                <Disclosure {...dialog}>TODO: games</Disclosure>
+                <Disclosure {...dialog}>
+                  <Trans zh="游戏列表" en="Game List" />
+                </Disclosure>
                 {dialog.visible && (
                   <GameProviderGameListDialog
                     gameProviderId={gameProvider.gameProviderId}
@@ -535,7 +629,7 @@ const GameProviderGameListDialog = ({
   value: gameProviderGames = [],
   onChange
 }) => {
-  let { data, isLoading, error } = useGameProvider(gameProviderId)
+  let { data: gameProvider, isLoading, error } = useGameProvider(gameProviderId)
 
   if (isLoading) {
     return <LoadingBackdrop {...dialog} />
@@ -545,11 +639,12 @@ const GameProviderGameListDialog = ({
     return <AlertDialog {...error} dialog={dialog} />
   }
 
-  let games = gameProviderGames.map((game) => {
-    let record = data.games.find((item) => item.id === game.gameId)
+  let games = gameProviderGames.map((gameField) => {
+    let record =
+      gameProvider.games.find((game) => game.id === gameField.gameId) ?? {}
     return {
       ...record,
-      ...game
+      ...gameField
     }
   })
 
@@ -565,10 +660,39 @@ const GameProviderGameListDialog = ({
             ...game,
             checked: gameIdCheckedPairs[game.gameId]
           }))
+
           onChange(list)
           dialog.hide()
         }}
+        actionButtonsProps={{
+          submitProps: {
+            variant: "outlined"
+          },
+          addonButtons: (
+            <Button
+              palette="primary"
+              variant="outlined"
+              onClick={(event) => {
+                let list = gameProviderGames.map((game) => ({
+                  ...game,
+                  checked: true
+                }))
+
+                onChange(list)
+                dialog.hide()
+              }}
+            >
+              <Trans zh="全选" en="Select All" />
+            </Button>
+          )
+        }}
         dialog={dialog}
+        title={gameProvider.name}
+        css={css`
+          & .bb-DialogContent {
+            position: relative;
+          }
+        `}
       >
         <GameProviderGameListDialogBody />
       </FormDialog>
@@ -589,9 +713,15 @@ const GameProviderGameListDialogBody = ({}) => {
       <Table.Head>
         <Table.Row>
           <Table.HeadCell></Table.HeadCell>
-          <Table.HeadCell>TODO: Id</Table.HeadCell>
-          <Table.HeadCell>TODO: Name</Table.HeadCell>
-          <Table.HeadCell>TODO: Platform</Table.HeadCell>
+          <Table.HeadCell>
+            <Trans zh="游戏ID" en="Game ID" />
+          </Table.HeadCell>
+          <Table.HeadCell>
+            <Trans zh="游戏名称" en="Game Name" />
+          </Table.HeadCell>
+          <Table.HeadCell>
+            <Trans zh="支持设备" en="Platform" />
+          </Table.HeadCell>
         </Table.Row>
       </Table.Head>
       <Table.Body>
@@ -611,9 +741,12 @@ const GameProviderGameRow = ({ gameField, index }) => {
   return (
     <Table.Row>
       <Table.Cell>
-        <Checkbox name={`${gameField.id}`} defaultChecked={gameField.checked} />
+        <Checkbox
+          name={`${gameField.gameId}`}
+          defaultChecked={gameField.checked}
+        />
       </Table.Cell>
-      <Table.Cell>{gameField.id}</Table.Cell>
+      <Table.Cell>{gameField.gameId}</Table.Cell>
       <Table.Cell>{gameField.name}</Table.Cell>
       <Table.Cell>{gameField.platformType}</Table.Cell>
     </Table.Row>
@@ -689,15 +822,15 @@ const BetLimitDialog = ({
           </Table.Head>
           <Table.Body>
             {gameProviders.map((gameProvider) => {
+              let gameProviderBetLimits =
+                gameProviderBetLimitListPairs[gameProvider.gameProviderId]
               return (
                 <GameProviderBetLimitsRow
                   key={gameProvider.gameProviderId}
                   group={group}
                   betLimit={betLimit}
                   gameProvider={gameProvider}
-                  gameProviderBetLimits={
-                    gameProviderBetLimitListPairs[gameProvider.gameProviderId]
-                  }
+                  gameProviderBetLimits={gameProviderBetLimits}
                 />
               )
             })}
@@ -712,6 +845,7 @@ const GameProviderBetLimitsRow = ({
   gameProvider = {},
   gameProviderBetLimits = []
 }) => {
+  let { getValues, watch } = useFormContext()
   let locale = useLocale()
   let options = gameProviderBetLimits?.map((gameProviderBetLimit) => {
     return {
@@ -721,6 +855,7 @@ const GameProviderBetLimitsRow = ({
   })
 
   let name = `${gameProvider?.gameProviderId}`
+
   return (
     <Table.Row>
       <Table.Cell>{gameProvider?.name}</Table.Cell>

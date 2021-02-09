@@ -3,7 +3,7 @@ import { css, Global } from "@emotion/react"
 import { Locales, Trans, useTrans } from "../i18n"
 import { Select } from "../select/Select"
 
-const Sportsbook = "Sports"
+const Sportsbook = "Sportsbook"
 const SportsbookTrans = {
   zh: "体育竞赛",
   en: "Sportsbook"
@@ -117,6 +117,10 @@ export const GameType = {
   Slot,
   TableGame
 }
+
+export const SportGameTypes = [Sportsbook, VirtualSports, ESports]
+
+export const isSportGameType = (value = "") => SportGameTypes.includes(value)
 
 export const GameTypeLabel = ({ value }) => {
   switch (value) {

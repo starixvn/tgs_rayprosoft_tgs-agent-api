@@ -73,7 +73,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     {
                         GameProviderId = x.Game.GameProviderId,
                         GameId = x.GameId,
-                        GameName = x.Game.Name
+                        GameName = x.Game.Name,
+                        GameType = x.Game.Type
                     }).ToArray(),
                     BetLimits = brand.BetLimits.Select(x => new BrandBetLimitModel
                     {
@@ -92,7 +93,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                         {
                             GameProviderId = g.BrandGame.Game.GameProviderId,
                             GameId = g.BrandGame.GameId,
-                            GameName = g.BrandGame.Game.Name
+                            GameName = g.BrandGame.Game.Name,
+                            GameType = g.BrandGame.Game.Type
                         }).ToArray(),
                         GameProviderBetLimits = x.BrandGroupBetLimits.SelectMany(bgb => bgb.GameProviderBetLimits)
                             .Select(b => new BrandGroupGameProviderBetLimitModel
