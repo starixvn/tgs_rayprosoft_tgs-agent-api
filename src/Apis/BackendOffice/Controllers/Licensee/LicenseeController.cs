@@ -27,6 +27,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
         public Task<PagedResponse<LicenseeModel>> GetLicenseesAsync([FromQuery] GetLicenseesRequest request)
         {
             return _service.GetLicenseesAsync(request)
+                .Where(request.ResellerId, x => x.ResellerId == request.ResellerId)
                 .Where(ResellerId, x => x.ResellerId == ResellerId)
                 .Where(LicenseeId, x => x.Id == LicenseeId)
                 .Select(x => new LicenseeModel
