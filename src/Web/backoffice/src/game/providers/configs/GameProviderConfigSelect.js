@@ -26,13 +26,16 @@ export const GameProviderConfigSelect = ({
     zh: "选择游戏商配置",
     en: "Select Game Provider Configuration"
   })
+
   let placeholder = disabled
     ? options.find(({ value }) => defaultValue)?.label
     : selectConfigLabel
+
   return (
     <Select
       name={name}
       options={options}
+      defaultValue={defaultValue}
       placeholder={placeholder ?? selectConfigLabel}
       isLoading={isLoading}
       disabled={disabled}

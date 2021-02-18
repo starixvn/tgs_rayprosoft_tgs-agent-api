@@ -3,36 +3,28 @@ import { css, Global } from "@emotion/react"
 import {
   useModalState,
   Stack,
-  Heading,
-  Box,
-  Text,
   FieldStack,
   Card,
   Set,
   Table,
   Button,
-  Group,
-  Flex
+  DropdownMenu,
+  Icon
 } from "bumbag"
 import { useIsDisplayMenuByRoute, useUserLicenseeId } from "../../user/context"
 import { Disclosure, ConfigIconDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Update as UpdateMenu } from "./menu"
-import { useBrand, useUpdateBrand } from "./client"
+import { useUpdateBrand } from "./client"
 import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
-import ConfirmButtonFooter from "../../form/ConfirmButtonFooter"
-import {
-  useFormContext,
-  useFieldArray,
-  Controller,
-  useForm
-} from "react-hook-form"
+import ConfirmButtonFooter, {
+  CloseButtonFooter
+} from "../../form/ConfirmButtonFooter"
+import { useFormContext, useFieldArray, Controller } from "react-hook-form"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
-import { FieldValues } from "../../layout/Grid"
 import { Input, InputField } from "../../input/Input"
 import { TextareaField } from "../../textarea"
-import { Switch, SwitchField } from "../../switch/Switch"
 import useLicenseeBrand from "./useLicenseeBrand"
 import Backdrop from "../../dialog/Backdrop"
 import { useGameProviderBetLimitList } from "../../game/providers/betlimits/client"
@@ -40,9 +32,13 @@ import { Select } from "../../select/Select"
 import { useGameProvider } from "../../game/providers/client"
 import { Checkbox } from "../../checkbox"
 import cloneDeep from "clone-deep"
-import sortBy from "lodash-es/sortBy"
 import { SportsSwitch } from "./SportsSwitch"
 import { isSportGameType } from "../../game/GameType"
+import { faEllipsisV } from "@fortawesome/free-solid-svg-icons"
+import { filterBySameProp, filterChecked } from "../../list/filter"
+import { pluckCode } from "../../list/pluck"
+import { sortByNumberProp } from "../../list/sort"
+import { CloseText, ConfirmText } from "../../button/ActionButtons"
 
 export const EditBrandBetLimitGameProviderBetLimit = ({
   record,
@@ -51,21 +47,28 @@ export const EditBrandBetLimitGameProviderBetLimit = ({
 }) => {
   let dialog = useModalState()
 
-  let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
-  if (!isDisplay) {
-    return null
-  }
+  let editable = useIsDisplayMenuByRoute([UpdateMenu])
+  let readonly = !editable
 
   return (
     <>
       <Disclosure {...dialog}>
         <Trans zh="限红组" en="Bet Limit Group" />
       </Disclosure>
-      {dialog.visible && (
+      {editable && dialog.visible && (
         <EditDialog
           brandId={record?.id}
+          brandCode={record?.code}
           licenseeId={record?.licenseeId}
           onSubmitted={onSubmitted}
+          dialog={dialog}
+        />
+      )}
+      {readonly && dialog.visible && (
+        <ViewDialog
+          brandId={record?.id}
+          brandCode={record?.code}
+          licenseeId={record?.licenseeId}
           dialog={dialog}
         />
       )}
@@ -73,7 +76,18 @@ export const EditBrandBetLimitGameProviderBetLimit = ({
   )
 }
 
-const EditDialog = ({ brandId = "", licenseeId = "", onSubmitted, dialog }) => {
+const useDialogTitle = (brandCode = "") =>
+  useTrans({
+    zh: `${brandCode} 限红组`,
+    en: `${brandCode} Bet Limit Group`
+  })
+
+const ViewDialog = ({
+  brandId = "",
+  brandCode = "",
+  licenseeId = "",
+  dialog
+}) => {
   let {
     brand,
     gameProviders,
@@ -84,16 +98,80 @@ const EditDialog = ({ brandId = "", licenseeId = "", onSubmitted, dialog }) => {
     deleteBrandCache
   } = useLicenseeBrand({ brandId, licenseeId })
 
-  gameProviders = gameProviders.filter(({ checked }) => checked)
-  betLimits = betLimits.filter(({ checked }) => checked)
+  let title = useDialogTitle(brandCode)
+  if (isLoadingBrand) {
+    return <LoadingBackdrop {...dialog} />
+  }
+
+  if (brandError) {
+    return (
+      <AlertDialog {...brandError} {...dialog} onClickClose={dialog.hide} />
+    )
+  }
+
+  const reset = () => {
+    mutateBrand(undefined, false)
+    deleteBrandCache()
+  }
+
+  betLimits = filterChecked(betLimits)
+
+  gameProviders = groupGameProviderGames(
+    filterChecked(gameProviders),
+    brand?.games
+  )
+
+  return (
+    <FormDialog
+      defaultValues={{
+        ...brand,
+        brandGroups: toBrandGroupsFormData(brand?.brandGroups)
+      }}
+      onClickClose={reset}
+      title={title}
+      showActionButtons={false}
+      footer={<CloseButtonFooter dialog={dialog} onClickClose={reset} />}
+      dialog={dialog}
+      placement="top"
+      minWidth="60vw"
+      maxWidth="90vw"
+      css={css`
+        & .bb-DialogContent {
+          position: relative;
+        }
+      `}
+    >
+      <EditBody
+        brand={brand}
+        betLimits={betLimits}
+        gameProviders={gameProviders}
+        readonly={true}
+      />
+    </FormDialog>
+  )
+}
+
+const EditDialog = ({
+  brandId = "",
+  brandCode = "",
+  licenseeId = "",
+  onSubmitted,
+  dialog
+}) => {
+  let {
+    brand,
+    gameProviders,
+    betLimits,
+    isLoading: isLoadingBrand,
+    error: brandError,
+    mutateBrand,
+    deleteBrandCache
+  } = useLicenseeBrand({ brandId, licenseeId })
 
   let [formData, setSubmit] = useState()
   let { result, isLoading, error, mutate } = useUpdateBrand(brandId, formData)
 
-  let title = useTrans({
-    zh: "限红组",
-    en: "Bet Limit Group"
-  })
+  let title = useDialogTitle(brandCode)
 
   if (isLoadingBrand) {
     return <LoadingBackdrop {...dialog} />
@@ -118,24 +196,18 @@ const EditDialog = ({ brandId = "", licenseeId = "", onSubmitted, dialog }) => {
     mutate(undefined, false)
   }
 
-  gameProviders = gameProviders.map((gameProvider) => {
-    // all games inside game pool
-    let games =
-      brand?.games.filter(
-        (game) => game.gameProviderId === gameProvider.gameProviderId
-      ) ?? []
+  betLimits = filterChecked(betLimits)
 
-    return {
-      ...gameProvider,
-      games
-    }
-  })
+  gameProviders = groupGameProviderGames(
+    filterChecked(gameProviders),
+    brand?.games
+  )
 
   return (
     <FormDialog
       defaultValues={{
         ...brand,
-        brandGroups: normalizeBrandGroups(brand?.brandGroups)
+        brandGroups: toBrandGroupsFormData(brand?.brandGroups)
       }}
       onSubmit={onSubmit}
       result={result}
@@ -171,11 +243,26 @@ const EditDialog = ({ brandId = "", licenseeId = "", onSubmitted, dialog }) => {
   )
 }
 
-const normalizeBrandGroups = (brandGroups = []) => {
+const groupGameProviderGames = (gameProviders = [], gamePool = []) =>
+  gameProviders.map((gameProvider) => {
+    let games = filterBySameProp(
+      ["gameProviderId", gameProvider.gameProviderId],
+      gamePool
+    )
+
+    return {
+      ...gameProvider,
+      games
+    }
+  })
+
+const toBrandGroupsFormData = (brandGroups = []) => {
   return (
     brandGroups.reduce((result, brandGroup, index) => {
       let { gameProviderBetLimits } = brandGroup
-      let betLimitGameProviderPairs = groupByBetLimit(gameProviderBetLimits)
+      let betLimitGameProviderPairs = mapBetLimitGameProviderPair(
+        gameProviderBetLimits
+      )
       result.push({
         ...brandGroup,
         betLimitGameProviderPairs
@@ -185,62 +272,80 @@ const normalizeBrandGroups = (brandGroups = []) => {
   )
 }
 
-const normalizeFormData = ({ brand = {}, brandGroups = [], ...data }) => {
-  let currencyCodes = brand?.currencies.map(({ code }) => code)
-  brandGroups = brandGroups.map(({ betLimitGameProviderPairs, ...group }) => {
-    let gameProviderBetLimits = Object.entries(
-      betLimitGameProviderPairs
-    ).reduce(
-      (gameProviderBetLimits, [brandBetLimitId, gameProviderPairs = {}]) => {
-        let list = Object.entries(gameProviderPairs).map(
-          ([gameProviderId, gameProviderBetLimitId]) => {
-            return {
-              brandBetLimitId: parseInt(brandBetLimitId),
-              gameProviderBetLimitId
-            }
-          }
-        )
-
-        return [...gameProviderBetLimits, ...list]
-      },
-      []
-    )
-
-    return {
-      ...group,
-      gameProviderBetLimits
+const normalizeFormData = ({
+  brand: { createdOn, updatedOn, currencies, ...brand } = {},
+  brandGroups = [],
+  ...data
+}) => {
+  brandGroups = brandGroups.map(
+    ({ betLimitGameProviderPairs, brandGames = [], ...group }) => {
+      let gameProviderBetLimits = toGameProviderBetLimits(
+        betLimitGameProviderPairs
+      )
+      return {
+        ...group,
+        brandGames,
+        gameProviderBetLimits
+      }
     }
-  })
+  )
 
   return {
     ...brand,
-    currencyCodes,
+    currencyCodes: pluckCode(currencies),
     brandGroups
   }
 }
 
-// brandBetLimitId -> gameProviderId -> gameProviderBetLimitId
-const groupByBetLimit = (gameProviderBetLimits = []) => {
-  let result = gameProviderBetLimits.reduce((result, gameProviderBetLimit) => {
-    let {
+// { brandBetLimitId: { gameProviderId: gameProviderBetLimitId } } -> [ { brandBetLimitId, gameProviderBetLimitId } ]
+const toGameProviderBetLimits = (betLimitGameProviderPairs = {}) =>
+  Object.entries(betLimitGameProviderPairs).reduce(
+    (
+      gameProviderBetLimits,
+      [brandBetLimitIdString, gameProviderPairs = {}]
+    ) => [
+      ...gameProviderBetLimits,
+      ...toBetLimits(brandBetLimitIdString, gameProviderPairs)
+    ],
+    []
+  )
+
+// gameProviderPairs: { gameProviderId: gameProviderBetLimitId }
+const toBetLimits = (brandBetLimitIdString = "", gameProviderPairs = {}) => {
+  let brandBetLimitId = parseInt(brandBetLimitIdString)
+
+  return Object.entries(gameProviderPairs).map(
+    ([gameProviderId, gameProviderBetLimitId]) => ({
       brandBetLimitId,
-      gameProviderId,
       gameProviderBetLimitId
-    } = gameProviderBetLimit
+    })
+  )
+}
 
-    let gameProviderBetLimitPairs = result[brandBetLimitId]
-    if (!gameProviderBetLimitPairs) {
-      gameProviderBetLimitPairs = {}
-      result[brandBetLimitId] = gameProviderBetLimitPairs
-    }
+// brandBetLimitId -> gameProviderBetLimitPairs: { gameProviderId: gameProviderBetLimitId }
+const mapBetLimitGameProviderPair = (gameProviderBetLimits = []) => {
+  let result = gameProviderBetLimits.reduce(
+    (result, { brandBetLimitId, gameProviderId, gameProviderBetLimitId }) => {
+      let gameProviderBetLimitPairs = result[brandBetLimitId]
+      if (!gameProviderBetLimitPairs) {
+        gameProviderBetLimitPairs = {}
+        result[brandBetLimitId] = gameProviderBetLimitPairs
+      }
 
-    gameProviderBetLimitPairs[gameProviderId] = gameProviderBetLimitId
-    return result
-  }, {})
+      gameProviderBetLimitPairs[gameProviderId] = gameProviderBetLimitId
+      return result
+    },
+    {}
+  )
   return result
 }
 
-const EditBody = ({ brand = {}, betLimits = [], gameProviders = [] }) => {
+const EditBody = ({
+  brand = {},
+  betLimits = [],
+  gameProviders = [],
+  readonly = false
+}) => {
   let { control, setValue, getValues, watch, register } = useFormContext()
   let name = "brandGroups"
   const { fields, append, remove } = useFieldArray({
@@ -249,6 +354,8 @@ const EditBody = ({ brand = {}, betLimits = [], gameProviders = [] }) => {
     keyName: "_id"
   })
 
+  let isEmpty = fields.length === 0
+  let editable = !readonly
   return (
     <Stack>
       {fields.map((field, index) => (
@@ -259,9 +366,16 @@ const EditBody = ({ brand = {}, betLimits = [], gameProviders = [] }) => {
           groupIndex={index}
           betLimits={betLimits}
           gameProviders={gameProviders}
+          removeGroup={remove}
+          readonly={readonly}
         />
       ))}
-      <AddGroupCard appendGroup={append} />
+      {readonly && isEmpty && (
+        <Card variant="bordered" alignX="center">
+          <Trans zh="查无资料" en="No Result" />
+        </Card>
+      )}
+      {editable && <AddGroupCard appendGroup={append} />}
     </Stack>
   )
 }
@@ -298,19 +412,26 @@ const GroupCard = ({
   groupField = {},
   groupIndex,
   betLimits = [],
-  gameProviders = []
+  gameProviders = [],
+  removeGroup,
+  readonly = false
 }) => {
   let { control, setValue, getValues } = useFormContext()
   let dialog = useModalState()
 
+  let hasGroupId = !!groupField?.id
+
   let isSportsFieldName = `${name}[${groupIndex}].isSports`
+  let editable = !readonly
   return (
     <Card variant="bordered">
-      <Input
-        name={`${name}[${groupIndex}].id`}
-        value={groupField.id}
-        type="hidden"
-      />
+      {hasGroupId && (
+        <Input
+          name={`${name}[${groupIndex}].id`}
+          value={groupField.id}
+          type="hidden"
+        />
+      )}
       <Set alignX="right">
         <SportsSwitch
           name={isSportsFieldName}
@@ -335,15 +456,37 @@ const GroupCard = ({
                   getValues={getValues}
                   gameProviders={gameProviders}
                   value={value}
+                  readonly={readonly}
                   dialog={dialog}
                   onChange={(data) => {
-                    setValue(name, data)
+                    if (editable) {
+                      setValue(name, data)
+                    }
                   }}
                 />
               )}
             </>
           )}
         />
+        {editable && (
+          <DropdownMenu
+            menu={
+              <DropdownMenu.Item
+                iconBefore="solid-trash-alt"
+                color="danger"
+                onClick={() => {
+                  removeGroup?.(groupIndex)
+                }}
+              >
+                <Trans zh="删除" en="Delete" />
+              </DropdownMenu.Item>
+            }
+          >
+            <Button>
+              <Icon icon={faEllipsisV} type="font-awesome" />
+            </Button>
+          </DropdownMenu>
+        )}
       </Set>
       <FieldStack>
         <FieldStack orientation="horizontal">
@@ -351,17 +494,20 @@ const GroupCard = ({
             name={`${name}[${groupIndex}].name`}
             label={<Trans zh="名称" en="Name" />}
             defaultValue={groupField.name}
+            disabled={readonly}
           />
           <InputField
             name={`${name}[${groupIndex}].code`}
             label={<Trans zh="代码" en="Code" />}
             defaultValue={groupField.code}
+            disabled={readonly}
           />
         </FieldStack>
         <TextareaField
           name={`${name}[${groupIndex}].description`}
           label={<Trans zh="说明" en="Description" />}
           defaultValue={groupField.description}
+          disabled={readonly}
         />
         <BetLimitTable
           name={`${name}[${groupIndex}].betLimitGameProviderPairs`}
@@ -369,6 +515,7 @@ const GroupCard = ({
           groupIndex={groupIndex}
           betLimits={betLimits}
           gameProviders={gameProviders}
+          readonly={readonly}
         />
       </FieldStack>
     </Card>
@@ -379,7 +526,8 @@ const BetLimitTable = ({
   name,
   group = {},
   betLimits = [],
-  gameProviders = []
+  gameProviders = [],
+  readonly = false
 }) => {
   return (
     <Table>
@@ -410,6 +558,7 @@ const BetLimitTable = ({
             group={group}
             betLimit={betLimit}
             gameProviders={gameProviders}
+            readonly={readonly}
           />
         ))}
       </Table.Body>
@@ -421,14 +570,15 @@ const BetLimitRow = ({
   name,
   group = {},
   betLimit = {},
-  gameProviders = []
+  gameProviders = [],
+  readonly = false
 }) => {
   let { control, getValues, watch, setValue } = useFormContext()
   let dialog = useModalState()
 
   let gameProviderBetLimitPairs =
-    group["betLimitGameProviderPairs"][betLimit.id]
-
+    group["betLimitGameProviderPairs"][betLimit.id] ?? {}
+  let editable = !readonly
   return (
     <Table.Row>
       <Table.Cell textAlign="center">{betLimit?.currencyCode}</Table.Cell>
@@ -454,8 +604,11 @@ const BetLimitRow = ({
                     gameProviders={gameProviders}
                     dialog={dialog}
                     value={value}
+                    readonly={readonly}
                     onChange={(data) => {
-                      setValue(name, data)
+                      if (editable) {
+                        setValue(name, data)
+                      }
                     }}
                   />
                 )}
@@ -472,9 +625,10 @@ const GroupGameListDialog = ({
   isSportsFieldName,
   getValues,
   gameProviders = [],
-  value: selectedGames = [],
+  value: checkedGames = [],
   onChange,
   dialog,
+  readonly = false,
   ...props
 }) => {
   let title = useTrans({
@@ -482,66 +636,39 @@ const GroupGameListDialog = ({
     en: "Game List"
   })
 
-  let groupOfSport = getValues(isSportsFieldName)
+  let isSports = getValues(isSportsFieldName)
 
-  gameProviders = gameProviders
-    .map((gameProvider) => {
-      let games = gameProvider.games
-        .filter((game) => {
-          let isSport = isSportGameType(game.gameType)
-          if (groupOfSport) {
-            return isSport
-          }
+  gameProviders = mapGroupGameProviderGames(
+    isSports,
+    checkedGames,
+    gameProviders
+  )
 
-          return !isSport
-        })
-        .map((gameProviderGame) => {
-          let checked = !!selectedGames.find((game) => {
-            return game.gameId === gameProviderGame.gameId
-          })
-          return {
-            ...gameProviderGame,
-            checked
-          }
-        })
-
-      return {
-        ...gameProvider,
-        games: sortBy(games, ["gameId"])
-      }
-    })
-    .filter(({ games = [], ...gameProvider }) => games.length > 0)
-
+  let editable = !readonly
   return (
     <Backdrop {...dialog}>
       <FormDialog
         stopPropagation={true}
         defaultValues={{ gameProviders }}
-        onSubmit={(pairs) => {
-          let allCheckedGames = Object.entries(pairs).reduce(
-            (allCheckedGames, [gameProviderId, games]) => {
-              let checkedGames = games.filter(({ checked }) => checked)
-              return [...allCheckedGames, ...checkedGames]
-            },
-            []
-          )
-          onChange?.(allCheckedGames)
+        onSubmit={(gameProviderIdGamesPairs) => {
+          if (editable) {
+            let allCheckedGames = toCheckedGames(gameProviderIdGamesPairs)
+            onChange?.(allCheckedGames)
+          }
           dialog.hide()
         }}
+        submitText={readonly ? <CloseText /> : <ConfirmText />}
         actionButtonsProps={{
           submitProps: {
             variant: "outlined"
           },
-          addonButtons: (
+          addonButtons: editable && (
             <Button
               palette="primary"
               variant="outlined"
               onClick={(event) => {
                 let allGames = gameProviders.reduce(
-                  (allGames, gameProvider) => {
-                    allGames.push(...(gameProvider.games ?? []))
-                    return allGames
-                  },
+                  (allGames, { games = [] }) => [...allGames, ...games],
                   []
                 )
 
@@ -575,6 +702,7 @@ const GroupGameListDialog = ({
               <GameProviderRow
                 key={gameProvider.id}
                 gameProvider={gameProvider}
+                readonly={readonly}
               />
             ))}
           </Table.Body>
@@ -584,9 +712,60 @@ const GroupGameListDialog = ({
   )
 }
 
-const GameProviderRow = ({ gameProvider }) => {
+const toCheckedGames = (gameProviderIdGamesPairs = {}) => {
+  return Object.entries(gameProviderIdGamesPairs).reduce(
+    (allCheckedGames, [gameProviderId, games]) => [
+      ...allCheckedGames,
+      ...filterChecked(games)
+    ],
+    []
+  )
+}
+
+const mapGroupGameProviderGames = (
+  groupOfSport = false,
+  checkedGames = [],
+  gameProviders = []
+) => {
+  return gameProviders
+    .map(({ games = [], ...gameProvider }) => {
+      games = filterGameProviderGames(groupOfSport, games).map(
+        (gameProviderGame) => {
+          let checked = !!checkedGames.find((game) => {
+            return game.gameId === gameProviderGame.gameId
+          })
+          return {
+            ...gameProviderGame,
+            checked
+          }
+        }
+      )
+
+      return {
+        ...gameProvider,
+        games: sortByNumberProp("gameId", games)
+      }
+    })
+    .filter(({ games = [], ...gameProvider }) => games.length > 0)
+}
+
+const filterGameProviderGames = (
+  groupOfSport = false,
+  gameProviderGames = []
+) =>
+  gameProviderGames.filter(({ gameType }) => {
+    let isSport = isSportGameType(gameType)
+    if (groupOfSport) {
+      return isSport
+    }
+
+    return !isSport
+  })
+
+const GameProviderRow = ({ gameProvider, readonly = false }) => {
   let { control, setValue } = useFormContext()
   let dialog = useModalState()
+  let editable = !readonly
   return (
     <Table.Row>
       <Table.Cell textAlign="center">{gameProvider.name}</Table.Cell>
@@ -608,9 +787,12 @@ const GameProviderRow = ({ gameProvider }) => {
                   <GameProviderGameListDialog
                     gameProviderId={gameProvider.gameProviderId}
                     value={value}
+                    readonly={readonly}
                     dialog={dialog}
                     onChange={(data) => {
-                      setValue(name, data)
+                      if (editable) {
+                        setValue(name, data)
+                      }
                     }}
                   />
                 )}
@@ -627,6 +809,7 @@ const GameProviderGameListDialog = ({
   gameProviderId,
   dialog,
   value: gameProviderGames = [],
+  readonly = false,
   onChange
 }) => {
   let { data: gameProvider, isLoading, error } = useGameProvider(gameProviderId)
@@ -648,6 +831,7 @@ const GameProviderGameListDialog = ({
     }
   })
 
+  let editable = !readonly
   return (
     <Backdrop {...dialog}>
       <FormDialog
@@ -656,19 +840,22 @@ const GameProviderGameListDialog = ({
         }}
         stopPropagation={true}
         onSubmit={(gameIdCheckedPairs) => {
-          let list = gameProviderGames.map((game) => ({
-            ...game,
-            checked: gameIdCheckedPairs[game.gameId]
-          }))
+          if (editable) {
+            let list = gameProviderGames.map((game) => ({
+              ...game,
+              checked: gameIdCheckedPairs[game.gameId]
+            }))
 
-          onChange(list)
+            onChange(list)
+          }
           dialog.hide()
         }}
+        submitText={readonly ? <CloseText /> : <ConfirmText />}
         actionButtonsProps={{
           submitProps: {
             variant: "outlined"
           },
-          addonButtons: (
+          addonButtons: editable && (
             <Button
               palette="primary"
               variant="outlined"
@@ -694,13 +881,13 @@ const GameProviderGameListDialog = ({
           }
         `}
       >
-        <GameProviderGameListDialogBody />
+        <GameProviderGameListDialogBody readonly={readonly} />
       </FormDialog>
     </Backdrop>
   )
 }
 
-const GameProviderGameListDialogBody = ({}) => {
+const GameProviderGameListDialogBody = ({ readonly = false }) => {
   let { control } = useFormContext()
   let { fields: gameFields } = useFieldArray({
     control,
@@ -729,6 +916,7 @@ const GameProviderGameListDialogBody = ({}) => {
           <GameProviderGameRow
             key={gameField._id}
             gameField={gameField}
+            readonly={readonly}
             index={index}
           />
         ))}
@@ -737,13 +925,14 @@ const GameProviderGameListDialogBody = ({}) => {
   )
 }
 
-const GameProviderGameRow = ({ gameField, index }) => {
+const GameProviderGameRow = ({ gameField, index, readonly = false }) => {
   return (
     <Table.Row>
       <Table.Cell>
         <Checkbox
           name={`${gameField.gameId}`}
           defaultChecked={gameField.checked}
+          disabled={readonly}
         />
       </Table.Cell>
       <Table.Cell>{gameField.gameId}</Table.Cell>
@@ -759,7 +948,8 @@ const BetLimitDialog = ({
   gameProviders = [],
   value: gameProviderBetLimitPairs = {},
   onChange,
-  dialog
+  dialog,
+  readonly = false
 }) => {
   let gameProviderIds = gameProviders.map(
     ({ gameProviderId }) => gameProviderId
@@ -796,15 +986,19 @@ const BetLimitDialog = ({
     return pairs
   }, {})
 
+  let editable = !readonly
   return (
     <Backdrop {...dialog}>
       <FormDialog
         stopPropagation={true}
         defaultValues={gameProviderBetLimitPairs}
         onSubmit={(data) => {
-          onChange?.(data)
+          if (editable) {
+            onChange?.(filterGameProviderBetLimitId(data))
+          }
           dialog.hide()
         }}
+        submitText={readonly ? <CloseText /> : <ConfirmText />}
         hideBackdrop={true}
         dialog={dialog}
         title={title}
@@ -831,6 +1025,7 @@ const BetLimitDialog = ({
                   betLimit={betLimit}
                   gameProvider={gameProvider}
                   gameProviderBetLimits={gameProviderBetLimits}
+                  readonly={readonly}
                 />
               )
             })}
@@ -841,11 +1036,23 @@ const BetLimitDialog = ({
   )
 }
 
+const filterGameProviderBetLimitId = (gameProviderIdBetLimitIdPairs = {}) =>
+  Object.entries(gameProviderIdBetLimitIdPairs).reduce(
+    (record, [gameProviderId, gameProviderBetLimitId = ""]) => {
+      if (gameProviderBetLimitId) {
+        Reflect.set(record, gameProviderId, gameProviderBetLimitId)
+      }
+
+      return record
+    },
+    {}
+  )
+
 const GameProviderBetLimitsRow = ({
   gameProvider = {},
-  gameProviderBetLimits = []
+  gameProviderBetLimits = [],
+  readonly = false
 }) => {
-  let { getValues, watch } = useFormContext()
   let locale = useLocale()
   let options = gameProviderBetLimits?.map((gameProviderBetLimit) => {
     return {
@@ -855,12 +1062,22 @@ const GameProviderBetLimitsRow = ({
   })
 
   let name = `${gameProvider?.gameProviderId}`
-
+  let gameProviderBetLimitPlaceholder = useTrans({
+    zh: "选择游戏商限红",
+    en: "Select Game Provider Bet Limit"
+  })
   return (
     <Table.Row>
       <Table.Cell>{gameProvider?.name}</Table.Cell>
       <Table.Cell textAlign="center">
-        {options.length > 0 && <Select name={name} options={options} />}
+        {options.length > 0 && (
+          <Select
+            name={name}
+            options={options}
+            placeholder={gameProviderBetLimitPlaceholder}
+            disabled={readonly}
+          />
+        )}
         {options.length == 0 && `--`}
       </Table.Cell>
     </Table.Row>

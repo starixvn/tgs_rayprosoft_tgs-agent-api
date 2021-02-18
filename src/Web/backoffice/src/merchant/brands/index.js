@@ -245,10 +245,10 @@ const useColumns = ({ items = [], mutate }) => {
             <Set orientation="vertical" alignX="center">
               <ViewButton record={value} />
               <EditButton record={value} onSubmitted={mutate} />
-              {/* <EditBrandBetLimitGameProviderBetLimit
+              <EditBrandBetLimitGameProviderBetLimit
                 record={value}
                 onSubmitted={mutate}
-              /> */}
+              />
             </Set>
           )
         }

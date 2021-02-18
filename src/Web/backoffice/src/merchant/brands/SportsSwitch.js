@@ -39,14 +39,13 @@ export const SportsSwitch = ({ name = "", ...props }) => {
     en: "Not Sports"
   })
 
-  return useMemo(
-    () => (
+  return useMemo(() => {
+    return (
       <Switch
         name={name}
         label={isSports ? sportLabel : notSportLabel}
         {...props}
       />
-    ),
-    [isSports]
-  )
+    )
+  }, [name, isSports])
 }

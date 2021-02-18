@@ -139,7 +139,6 @@ const Row = ({ name, disabled, field, index }) => {
                     <ConfigDialog
                       gameProvider={field}
                       configurationId={value}
-                      required
                       disabled={disabled}
                       dialog={configDialog}
                       onChange={(configId) => {
@@ -307,7 +306,6 @@ const QueryStringDialog = ({ type, value, disabled, dialog, onChange }) => {
 const ConfigDialog = ({
   gameProvider,
   configurationId,
-  required,
   disabled,
   dialog,
   onChange
@@ -321,8 +319,13 @@ const ConfigDialog = ({
     <Backdrop {...dialog}>
       <FormDialog
         stopPropagation={true}
+        defaultValues={{
+          id: configurationId
+        }}
         onSubmit={({ id, ...data }) => {
-          onChange(id)
+          if (!disabled) {
+            onChange(id)
+          }
           dialog.hide()
         }}
         submitText={disabled ? <CloseText /> : <ConfirmText />}
@@ -333,9 +336,9 @@ const ConfigDialog = ({
       >
         <GameProviderConfigSelect
           name="id"
-          gameProviderId={gameProvider?.id}
+          gameProviderId={gameProvider?.gameProviderId}
           defaultValue={configurationId}
-          required={required}
+          required={!disabled}
           disabled={disabled}
         />
       </FormDialog>
