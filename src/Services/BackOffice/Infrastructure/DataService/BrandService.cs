@@ -174,7 +174,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 select new BrandGroup
                 {
                     Id = id,
-                    Code = code,
                     Name = code,
                     IsSports = type == BrandGroupType.Sports,
                     BrandId = brand.Id,
@@ -218,7 +217,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 var brandGroup = new BrandGroup
                 {
-                    Code = x.Code,
                     Name = x.Name,
                     BrandId = brand.Id,
                     Description = x.Description,

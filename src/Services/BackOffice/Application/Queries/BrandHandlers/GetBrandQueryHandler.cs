@@ -86,7 +86,6 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     {
                         Id = x.Id,
                         Name = x.Name,
-                        Code = x.Code,
                         Description = x.Description,
                         IsSports = x.IsSports,
                         BrandGames = x.BrandGames.Select(g => new BrandGameModel

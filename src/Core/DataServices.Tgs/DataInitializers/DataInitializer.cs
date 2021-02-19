@@ -764,7 +764,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         Id = brandGroupId,
                         BrandId = brand.Id,
-                        Code = name,
                         Name = name,
                         CreatedByUsername = AdminUsername,
                         UpdatedByUsername = AdminUsername,
