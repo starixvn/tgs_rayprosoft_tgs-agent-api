@@ -1209,11 +1209,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     is_sports = table.Column<bool>(type: "boolean", nullable: false),
-                    code = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),

@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Tgs.Models;
 
@@ -11,13 +10,28 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             builder.ToTable("brand_groups");
 
-            ConfigureBaseProperties<BrandGroup, Guid>(builder, "pk_brand_groups");
+            builder.HasKey(p => p.Id)
+                .HasName("pk_brand_groups");
 
             builder.Property(e => e.BrandId)
                 .IsRequired();
 
-            builder.Property(e => e.Code)
+            builder.Property(c => c.Name)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(c => c.CreatedByUsername)
                 .HasMaxLength(32)
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedByUsername)
+                .HasMaxLength(32)
+                .IsRequired();
+
+            builder.Property(c => c.CreatedOn)
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedOn)
                 .IsRequired();
 
             builder.HasOne(e => e.Brand)
