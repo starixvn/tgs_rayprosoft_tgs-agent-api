@@ -18,7 +18,7 @@ import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import FormDialog from "../../form/FormDialog"
 import Input from "../../input/Input"
 import { nextRoleType, RoleTypeSelect, useRoleTypeOptions } from "../roles/type"
-import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
   let dialog = Modal.useState()
@@ -89,7 +89,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
               <Trans zh="类型" en="Type" />
             </Label>
             <Box>
-              <MerchantIdSelect
+              <MerchantIdHookFormSelect
                 required={false}
                 start={nextRoleType(userRoleType)}
                 resellerId={userResellerId}

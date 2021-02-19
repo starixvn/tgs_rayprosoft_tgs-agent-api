@@ -40,9 +40,6 @@ const isActive = (merchant, start, end) => {
   )
 }
 
-// null or "" -> undefined
-const normalize = (data) => (!data ? undefined : data)
-
 const useResellerPlaceholder = () =>
   useTrans({
     zh: "选择总公司",
@@ -62,6 +59,32 @@ const useBrandPlaceholder = () =>
   })
 
 export const MerchantIdSelect = ({
+  start = Reseller,
+  end = Brand,
+
+  resellerIdName = "resellerId",
+  defaultResellerId = "",
+  resellerId = "",
+  onResellerIdChange,
+
+  licenseeIdName = "licenseeId",
+  defaultLicenseeId = "",
+  licenseeId = "",
+  onLicenseeIdChange,
+
+  brandIdName = "brandId",
+  defaultBrandId = "",
+  brandId = "",
+  onBrandIdChange,
+
+  required = true,
+  ...props
+}) => {
+  let formMethods = useFormContext()
+  //TODO
+}
+
+export const MerchantIdHookFormSelect = ({
   start = Reseller,
   end = Brand,
 

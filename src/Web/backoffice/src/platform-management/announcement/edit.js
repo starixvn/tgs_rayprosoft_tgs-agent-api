@@ -29,7 +29,7 @@ import FormDialog from "../../form/FormDialog"
 import Input from "../../input/Input"
 import DateTimeInput from "../../date/DateTimeInput"
 import { useForm, useFormContext } from "react-hook-form"
-import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
@@ -243,7 +243,7 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
         </Label>
       )}
       {isAdd && !brandId && (
-        <MerchantIdSelect
+        <MerchantIdHookFormSelect
           start={nextRoleType(userRoleType)}
           resellerId={resellerId}
           licenseeId={licenseeId}

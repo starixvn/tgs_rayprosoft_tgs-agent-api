@@ -21,7 +21,7 @@ import {
   ConfirmButtonFooter
 } from "../../form/ConfirmButtonFooter"
 import { Input, InputField } from "../../input/Input"
-import { MerchantIdSelect } from "../MerchantSelect"
+import { MerchantIdHookFormSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import { useAddBrand, useBrand, useUpdateBrand } from "./client"
 import { useFormContext, useFieldArray, useForm } from "react-hook-form"
@@ -399,7 +399,7 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
               <Trans zh="所属公司" en="Licensee" />
             </NormalLabel>
             <Box alignY="center">
-              {isAdd && <MerchantIdSelect end={RoleTypes.Licensee} />}
+              {isAdd && <MerchantIdHookFormSelect end={RoleTypes.Licensee} />}
               {!isAdd && <Text.Block>{licensee?.name}</Text.Block>}
             </Box>
           </>

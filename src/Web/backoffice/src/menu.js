@@ -28,6 +28,12 @@ import {
   nameMessages as GameManagementNameMessages,
   codeLabelPair as gameManagementLabelPair
 } from "./game/menu"
+import { codeMenuContentPair as reportManagementPair } from "./report"
+import {
+  Code as ReportManagementCode,
+  nameMessages as ReportManagementNameMessages,
+  codeLabelPair as reportManagementLabelPair
+} from "./report/menu"
 import { codeMenuContentPair as merchantPair } from "./merchant"
 import {
   Code as MerchantCode,
@@ -94,6 +100,7 @@ export const allMenuContentPairs = () => [
   platformPair,
   playerManagementPair,
   gameManagementPair,
+  reportManagementPair,
   merchantPair,
   systemPair
 ]
@@ -114,6 +121,7 @@ export const useLabel = ({ codes = [] }) => {
     playerManagementLabelPair,
     systemLabelPair,
     gameManagementLabelPair,
+    reportManagementLabelPair,
     merchantLabelPair,
     platformLabelPair
   ]
@@ -147,6 +155,8 @@ const moduleLabel = ({ code = "", locale }) => {
       return getTrans(PlayerManagementNameMessages, locale)
     case GameManagementCode:
       return getTrans(GameManagementNameMessages, locale)
+    case ReportManagementCode:
+      return getTrans(ReportManagementNameMessages, locale)
     case MerchantCode:
       return getTrans(MerchantName, locale)
     case SystemCode:

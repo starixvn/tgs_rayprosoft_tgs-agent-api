@@ -35,7 +35,7 @@ import {
   mapCheckedByCode,
   mapCheckedByProp
 } from "../../checkbox/mapChecked"
-import { MerchantIdSelect } from "../MerchantSelect"
+import { MerchantIdHookFormSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 import LanguageFieldsBox, { toCheckedCultureCodes } from "../LanguageFieldsBox"
@@ -396,7 +396,7 @@ const EditBody = ({
               <Trans zh="所属总公司" en="Licensee" />
             </NormalLabel>
             <Box alignY="center">
-              {isAdd && <MerchantIdSelect end={RoleTypes.Reseller} />}
+              {isAdd && <MerchantIdHookFormSelect end={RoleTypes.Reseller} />}
               {!isAdd && <Text.Block>{reseller.name}</Text.Block>}
             </Box>
           </>

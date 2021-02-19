@@ -52,7 +52,7 @@ import {
   findParentRoleType,
   isSameOrAfterRoleType
 } from "./type"
-import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 import { FormDialog } from "../../form/FormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
@@ -221,7 +221,7 @@ const AddDialog = ({ dialog, onSubmitted }) => {
                   selectRef={register({ required: true })}
                 />
                 {roleType != RoleTypes.Admin && (
-                  <MerchantIdSelect
+                  <MerchantIdHookFormSelect
                     start={adminOrNextRoleType(userRoleType)}
                     end={roleType}
                     resellerId={userResellerId}

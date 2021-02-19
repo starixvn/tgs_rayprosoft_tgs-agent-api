@@ -47,7 +47,7 @@ import {
 import AlertDialog from "../../dialog/Alert"
 import { ToggleButton as StatusToggleButton } from "./status"
 import { useFormContext, useForm, FormProvider } from "react-hook-form"
-import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
 
 export { Code }

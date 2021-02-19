@@ -43,7 +43,7 @@ import Alert from "../../dialog/Alert"
 import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
-import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
@@ -220,7 +220,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
       </Label>
       <Set>
         {isAdd && !brandId && (
-          <MerchantIdSelect
+          <MerchantIdHookFormSelect
             start={nextRoleType(userRoleType)}
             resellerId={resellerId}
             licenseeId={licenseeId}

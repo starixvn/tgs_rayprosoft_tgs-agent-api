@@ -28,7 +28,7 @@ import {
 import { AddButton, VerifyButton, ViewButton } from "./edit"
 import { Verify as VerifyMenu, View as ViewMenu } from "./menu"
 import { useFormContext, useForm, FormProvider } from "react-hook-form"
-import { MerchantIdSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
 
 export { Code }
@@ -172,7 +172,7 @@ const ActionBar = ({ mutate, onBrandChange }) => {
       <Box>
         {/* {!brandId && (
           <FormProvider {...formMethods}>
-            <MerchantIdSelect
+            <MerchantIdHookFormSelect
               start={nextRoleType(roleType)}
               onBrandChange={onBrandChange}
             />

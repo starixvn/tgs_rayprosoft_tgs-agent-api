@@ -158,26 +158,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
-                new MenuSetting("Report")
-                {
-                    SubMenus = new[]
-                    {
-                        new MenuSetting("OverReport")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("GameProviderReport")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        }
-                    }
-                },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
@@ -201,6 +181,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Report")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("MarketReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("OrderReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
                             }
                         }
                     }

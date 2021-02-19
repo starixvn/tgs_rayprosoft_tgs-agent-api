@@ -496,12 +496,6 @@ const GroupCard = ({
             defaultValue={groupField.name}
             disabled={readonly}
           />
-          <InputField
-            name={`${name}[${groupIndex}].code`}
-            label={<Trans zh="代码" en="Code" />}
-            defaultValue={groupField.code}
-            disabled={readonly}
-          />
         </FieldStack>
         <TextareaField
           name={`${name}[${groupIndex}].description`}
