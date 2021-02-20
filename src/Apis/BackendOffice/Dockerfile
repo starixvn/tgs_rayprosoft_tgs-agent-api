@@ -14,6 +14,8 @@ COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
 COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
+COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
+COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
 COPY ["src/Core/DataServices.Log/DataServices.Log.csproj", "src/Core/DataServices.Log/"]
 RUN dotnet restore "src/Apis/BackendOffice/BackendOffice.csproj"
