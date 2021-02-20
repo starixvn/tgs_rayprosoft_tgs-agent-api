@@ -1,5 +1,5 @@
 def token = "e67339132a7d6490b54ebeac33aa2a6956ebbcaf"
-def sonar_url = "http://sonarqube.default:9000"
+def sonar_url = "http://sonarqube.ci:9000"
 def sonar_login = "admin"
 def sonar_pwd = "1q2w3e4r"
 

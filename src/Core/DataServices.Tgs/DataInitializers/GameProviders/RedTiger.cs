@@ -31,7 +31,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game) g with { EndpointPath = $"{EndpointPath}{QueryString}" };
+                        return (Game) g with {EndpointPath = $"{EndpointPath}{QueryString}"};
                     })
                     .ToArray();
 
@@ -88,7 +88,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new RedTigerConfiguration
             {
-                ServiceEndpointUrl = new("https://localhost:62331")
+                ServiceEndpointUrl = new Uri("https://localhost:62330")
             };
         }
 

@@ -5,6 +5,7 @@ namespace TGS.Services.Report.Application.Models.Market
     public class MarketRequest
     {
         public Guid BrandId { get; set; }
+        public int Hour { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public int RegisteredCount { get; set; }
         public int FirstFundInCount { get; set; }
@@ -16,5 +17,6 @@ namespace TGS.Services.Report.Application.Models.Market
         public decimal ValidBetAmount { get; set; }
         public decimal WinLossAmount { get; set; }
         public decimal NetProfit { get; set; }
+        public string ReportDateString { get; set; }
     }
 }

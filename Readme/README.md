@@ -6,6 +6,9 @@ add-migration <MigrationName> -c TgsRepository -p DataServices.Tgs -s TgsApi
 #Log
 add-migration <MigrationName> -c LogRepository -p DataServices.Log -s LogApi
 
+#Report
+add-migration <MigrationName> -c ReportRepository -p DataServices.Report -s ReportApi
+
 
 ## Install Redis using Docker
 

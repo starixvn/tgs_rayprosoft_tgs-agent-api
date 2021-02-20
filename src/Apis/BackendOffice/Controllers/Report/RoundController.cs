@@ -1,8 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
+using TGS.Services.PluggableServices.Models;
 using TGS.Services.Report.Application.Models.Round;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
@@ -22,5 +24,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         [Description("Get rounds")]
         public Task<PagedResponse<RoundModel>> GetRoundsAsync([FromQuery] GetRoundsRequest request) =>
             _mediator.Send(request);
+
+        [HttpGet("{roundId}")]
+        [Description("Get a round")]
+        public Task<GetRoundHistoryResponse> GetRoundsAsync(Guid roundId, GetRoundHistoryRequest request)
+        {
+            request.RoundId = roundId;
+            return _mediator.Send(request);
+        }
     }
 }

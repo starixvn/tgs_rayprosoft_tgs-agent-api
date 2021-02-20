@@ -27,21 +27,23 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
             return _service.GetMarketsAsync()
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
-                .GroupBy(x => new {x.Id, x.BrandId, x.CreateOnDateString}, (market, markets) => new MarketModel
-                {
-                    Id = market.Id,
-                    BrandId = market.BrandId,
-                    DateString = market.CreateOnDateString,
-                    RegisteredCount = markets.Sum(m => m.RegisteredCount),
-                    FirstFundInCount = markets.Sum(m => m.FirstFundInCount),
-                    DepositAmount = markets.Sum(m => m.DepositAmount),
-                    WithdrawalAmount = markets.Sum(m => m.WithdrawalAmount),
-                    AdjustmentAmount = markets.Sum(m => m.AdjustmentAmount),
-                    BonusAmount = markets.Sum(m => m.BonusAmount),
-                    ValidBetAmount = markets.Sum(m => m.ValidBetAmount),
-                    WinLossAmount = markets.Sum(m => m.WinLossAmount),
-                    NetProfit = markets.Sum(m => m.NetProfit)
-                }).CreatePagedResponseAsync(request);
+                .GroupBy(x => new {x.Id, x.BrandId, CreateOnDateString = x.ReportDateString}, (market, markets) =>
+                    new MarketModel
+                    {
+                        Id = market.Id,
+                        BrandId = market.BrandId,
+                        DateString = market.CreateOnDateString,
+                        RegisteredCount = markets.Sum(m => m.RegisteredCount),
+                        FirstFundInCount = markets.Sum(m => m.FirstFundInCount),
+                        DepositAmount = markets.Sum(m => m.DepositAmount),
+                        WithdrawalAmount = markets.Sum(m => m.WithdrawalAmount),
+                        AdjustmentAmount = markets.Sum(m => m.AdjustmentAmount),
+                        BonusAmount = markets.Sum(m => m.BonusAmount),
+                        BetAmount = markets.Sum(m => m.BetAmount),
+                        ValidBetAmount = markets.Sum(m => m.ValidBetAmount),
+                        WinLossAmount = markets.Sum(m => m.WinLossAmount),
+                        NetProfit = markets.Sum(m => m.NetProfit)
+                    }).CreatePagedResponseAsync(request);
         }
     }
 }

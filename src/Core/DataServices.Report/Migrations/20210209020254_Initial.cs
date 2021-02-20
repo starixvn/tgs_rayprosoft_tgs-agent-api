@@ -19,18 +19,19 @@ namespace TGS.Core.DataServices.Report.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    hour = table.Column<int>(type: "integer", nullable: false),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    create_on_date_string = table.Column<string>(type: "text", nullable: true),
+                    report_date_string = table.Column<string>(type: "text", nullable: true),
                     registered_count = table.Column<int>(type: "integer", nullable: false),
                     first_fund_in_count = table.Column<int>(type: "integer", nullable: false),
-                    deposit_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    withdrawal_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    adjustment_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    bonus_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    bet_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    valid_bet_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    win_loss_amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    net_profit = table.Column<decimal>(type: "numeric", nullable: false)
+                    deposit_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    withdrawal_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    adjustment_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    bonus_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    bet_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    valid_bet_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    win_loss_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    net_profit = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false)
                 },
                 constraints: table =>
                 {

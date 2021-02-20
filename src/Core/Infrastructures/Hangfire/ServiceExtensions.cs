@@ -1,5 +1,7 @@
 ﻿using System;
 using Hangfire;
+using Hangfire.Console;
+using Hangfire.Dashboard.Management;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
@@ -15,7 +17,8 @@ namespace TGS.Core.Infrastructures.Hangfire
     public static class ServiceExtensions
     {
         public static IServiceCollection AddHangfireScheduler(this IServiceCollection services,
-            IConfiguration configuration, string configSectionName = "Hangfire", BaseJobProvider jobProvider = null)
+            IConfiguration configuration, string configSectionName = "Hangfire", BaseJobProvider jobProvider = null,
+            Type[] types = null)
         {
             services.Configure<HangfireSettings>(configuration.GetSection(configSectionName));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<HangfireSettings>>().Value);
@@ -29,6 +32,7 @@ namespace TGS.Core.Infrastructures.Hangfire
                 option.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                     .UseSimpleAssemblyNameTypeSerializer()
                     .UseColouredConsoleLogProvider()
+                    .UseConsole()
                     .UseRecommendedSerializerSettings(s =>
                     {
                         s.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -36,9 +40,9 @@ namespace TGS.Core.Infrastructures.Hangfire
                         s.NullValueHandling = NullValueHandling.Include;
                         s.DefaultValueHandling = DefaultValueHandling.Include;
                     })
-                    .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new()
+                    .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new MongoStorageOptions
                     {
-                        MigrationOptions = new()
+                        MigrationOptions = new MongoMigrationOptions
                         {
                             MigrationStrategy = new DropMongoMigrationStrategy(),
                             BackupStrategy = new CollectionMongoBackupStrategy()
@@ -46,6 +50,11 @@ namespace TGS.Core.Infrastructures.Hangfire
                         Prefix = settings.Prefix,
                         CheckConnection = false
                     });
+
+                if (types != null)
+                {
+                    option.UseManagementPages(p => p.AddJobs(types));
+                }
             });
 
             if (jobProvider == null)
@@ -54,12 +63,9 @@ namespace TGS.Core.Infrastructures.Hangfire
             }
 
             services.AddSingleton<IJobProvider>(jobProvider);
-           
+
             var jobs = ((IJobProvider) jobProvider).GetJobDescriptions();
-            foreach (var job in jobs)
-            {
-                services.AddTransient(job.Worker);
-            }
+            foreach (var job in jobs) services.AddTransient(job.Worker);
 
             return services;
         }

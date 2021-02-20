@@ -2,7 +2,8 @@
 {
     public enum TransactionType
     {
-        FundIn = 1,
-        FundOut = 2
+        Deposit = 0,
+        Withdrawal = 1,
+        Adjust = 2
     }
 }

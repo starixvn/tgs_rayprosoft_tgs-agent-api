@@ -8,7 +8,14 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
     [Queue(Consts.Queue.Schedule)]
     public sealed class MarketReportWorker : BaseWork<TgsResponse>
     {
-        protected override Task<TgsResponse> ExecuteAsync(object context) => 
-            Task.FromResult(new TgsResponse());
+        private readonly IMarketReportService _worker;
+
+        public MarketReportWorker(
+            IMarketReportService worker)
+        {
+            _worker = worker;
+        }
+
+        protected override Task<TgsResponse> ExecuteAsync(object context) => _worker.ExecutionAsync();
     }
 }

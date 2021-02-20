@@ -77,6 +77,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<RoundDetail> RoundDetails { get; set; }
         DbSet<GameAction> GameActions { get; set; }
         DbSet<GameActionBatch> GameActionBatches { get; set; }
+        DbSet<Transaction> Transactions { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -85,7 +86,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
-            _uploader = new(this);
+            _uploader = new NpgsqlBulkUploader(this);
         }
 
         DbSet<Reseller> ITgsRepository.Resellers { get; set; }
@@ -147,6 +148,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<RoundDetail> ITgsRepository.RoundDetails { get; set; }
         DbSet<GameAction> ITgsRepository.GameActions { get; set; }
         DbSet<GameActionBatch> ITgsRepository.GameActionBatches { get; set; }
+        DbSet<Transaction> ITgsRepository.Transactions { get; set; }
 
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;

@@ -1584,7 +1584,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     vip_id = table.Column<Guid>(type: "uuid", nullable: true),
                     updated_by_username = table.Column<string>(type: "text", nullable: true),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1819,6 +1819,42 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalTable: "players",
                         principalColumn: "player_code",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "transactions",
+                schema: "dbo",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    wallet_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    external_transaction_id = table.Column<string>(type: "text", nullable: true),
+                    amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    balance = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    description = table.Column<string>(type: "text", nullable: true),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    recorded_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    sent_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    confirmed_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_transactions", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_transactions_brands_brand_id",
+                        column: x => x.brand_id,
+                        principalSchema: "dbo",
+                        principalTable: "brands",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_transactions_wallets_wallet_id",
+                        column: x => x.wallet_id,
+                        principalSchema: "dbo",
+                        principalTable: "wallets",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -2223,6 +2259,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "brand_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_transactions_brand_id",
+                schema: "dbo",
+                table: "transactions",
+                column: "brand_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_transactions_wallet_id",
+                schema: "dbo",
+                table: "transactions",
+                column: "wallet_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_users_department_id",
                 schema: "dbo",
                 table: "users",
@@ -2392,11 +2440,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "users",
+                name: "transactions",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "wallets",
+                name: "users",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -2440,15 +2488,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "wallets",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "departments",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "roles",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "players",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -2480,11 +2528,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "bet_limits",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "vip_levels",
+                name: "players",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -2496,15 +2540,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "bet_limits",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "vip_levels",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "payments",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "currencies",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "brands",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "payments",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

@@ -7,9 +7,9 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public Guid Id { get; set; }
         public Guid WalletId { get; set; }
-        public Wallet Wallet { get; set; }
+        public virtual Wallet Wallet { get; set; }
         public Guid BrandId { get; set; }
-        public Brand Brand { get; set; }
+        public virtual Brand Brand { get; set; }
         public string ExternalTransactionId { get; set; }
         public decimal Amount { get; set; }
         public decimal Balance { get; set; }
@@ -17,5 +17,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public TransactionType Type { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
         public DateTimeOffset SentOn { get; set; }
+        public DateTimeOffset ConfirmedOn { get; set; }
     }
 }
