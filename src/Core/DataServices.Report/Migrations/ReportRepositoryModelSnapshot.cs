@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                 .HasDefaultSchema("dbo")
                 .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("TGS.Core.DataServices.Report.Models.Market", b =>
                 {
@@ -29,55 +29,67 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .UseIdentityByDefaultColumn();
 
                     b.Property<decimal>("AdjustmentAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("adjustment_amount");
 
                     b.Property<decimal>("BetAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("bet_amount");
 
                     b.Property<decimal>("BonusAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("bonus_amount");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<string>("CreateOnDateString")
-                        .HasColumnType("text")
-                        .HasColumnName("create_on_date_string");
-
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<decimal>("DepositAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
                     b.Property<int>("FirstFundInCount")
                         .HasColumnType("integer")
                         .HasColumnName("first_fund_in_count");
 
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
                     b.Property<decimal>("NetProfit")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
                     b.Property<int>("RegisteredCount")
                         .HasColumnType("integer")
                         .HasColumnName("registered_count");
 
+                    b.Property<string>("ReportDateString")
+                        .HasColumnType("text")
+                        .HasColumnName("report_date_string");
+
                     b.Property<decimal>("ValidBetAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("valid_bet_amount");
 
                     b.Property<decimal>("WinLossAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("win_loss_amount");
 
                     b.Property<decimal>("WithdrawalAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("withdrawal_amount");
 
                     b.HasKey("Id")

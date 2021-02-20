@@ -26,15 +26,18 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Log;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
-using TGS.Core.Infrastructures.Hangfire;
+using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
+using TGS.Services.Operations.Extensions;
+using TGS.Services.PluggableServices.Extensions;
 using TGS.Services.Report.Application.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
@@ -69,7 +72,11 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddJson()
                 .AddSecurity()
                 .AddWebApiServices()
-                .AddTgsLog();
+                .AddTgsLog()
+                .AddRedis()
+                .AddOperations()
+                .AddApiClient()
+                .AddPluggableServices();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -132,7 +139,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                     new CultureInfo(zhCNCulture)
                 };
 
-                options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
+                options.DefaultRequestCulture = new RequestCulture(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 

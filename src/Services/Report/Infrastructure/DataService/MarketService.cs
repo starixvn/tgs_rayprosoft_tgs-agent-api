@@ -17,7 +17,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
         IQueryable<Market> GetMarketsAsync(Func<IQueryable<Market>, IQueryable<Market>> preQuery = null,
             bool tracking = false);
 
-        Task CreateMarketAsync(CreateMarketRequest request);
+        Task CreateMarketsAsync(CreateMarketRequest[] request);
+        Task DeleteMarketsAsync(Market[] markets);
+        Task<bool> ExistsAsync(Expression<Func<Market, bool>> predicate);
     }
 
     public class MarketService : BaseRepositoryOperations<IReportRepository>, IMarketService
@@ -26,26 +28,30 @@ namespace TGS.Services.Report.Infrastructure.DataService
         {
         }
 
-        async Task IMarketService.CreateMarketAsync(CreateMarketRequest request)
+        async Task IMarketService.CreateMarketsAsync(CreateMarketRequest[] request)
         {
-            var market = new Market
+            await CreateEntitiesAsync(request.Select(createMarketRequest => new Market
             {
-                BrandId = request.BrandId,
-                CreatedOn = request.CreatedOn,
-                RegisteredCount = request.RegisteredCount,
-                FirstFundInCount = request.FirstFundInCount,
-                DepositAmount = request.DepositAmount,
-                WithdrawalAmount = request.WithdrawalAmount,
-                AdjustmentAmount = request.AdjustmentAmount,
-                BonusAmount = request.BonusAmount,
-                BetAmount = request.BetAmount,
-                ValidBetAmount = request.ValidBetAmount,
-                WinLossAmount = request.WinLossAmount,
-                NetProfit = request.NetProfit
-            };
-
-            await CreateEntityAsync(market);
+                BrandId = createMarketRequest.BrandId,
+                Hour = createMarketRequest.Hour,
+                ReportDateString = createMarketRequest.ReportDateString,
+                CreatedOn = createMarketRequest.CreatedOn,
+                RegisteredCount = createMarketRequest.RegisteredCount,
+                FirstFundInCount = createMarketRequest.FirstFundInCount,
+                DepositAmount = createMarketRequest.DepositAmount,
+                WithdrawalAmount = createMarketRequest.WithdrawalAmount,
+                AdjustmentAmount = createMarketRequest.AdjustmentAmount,
+                BonusAmount = createMarketRequest.BonusAmount,
+                BetAmount = createMarketRequest.BetAmount,
+                ValidBetAmount = createMarketRequest.ValidBetAmount,
+                WinLossAmount = createMarketRequest.WinLossAmount,
+                NetProfit = createMarketRequest.NetProfit
+            }).ToArray());
         }
+
+        Task IMarketService.DeleteMarketsAsync(Market[] markets) => DeleteEntitiesAsync(markets);
+
+        Task<bool> IMarketService.ExistsAsync(Expression<Func<Market, bool>> predicate) => ExistsAsync(predicate);
 
         Task<Market> IMarketService.GetMarketAsync(Expression<Func<Market, bool>> predicate,
             Func<IQueryable<Market>, IQueryable<Market>> preQuery) =>

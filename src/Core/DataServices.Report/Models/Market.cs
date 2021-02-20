@@ -6,8 +6,9 @@ namespace TGS.Core.DataServices.Report.Models
     {
         public int Id { get; set; }
         public Guid BrandId { get; set; }
+        public int Hour { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
-        public string CreateOnDateString { get; set; }
+        public string ReportDateString { get; set; }
         public int RegisteredCount { get; set; }
         public int FirstFundInCount { get; set; }
         public decimal DepositAmount { get; set; }

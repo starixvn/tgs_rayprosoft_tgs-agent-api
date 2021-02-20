@@ -29,28 +29,45 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                 .Where(x => x.ExternalClosedOn >= request.From && x.ExternalClosedOn <= request.To)
                 .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
                 .Where(request.Status, x => request.Status == x.Status)
-                .Join(_service.Repository.Players.Where(request.PlayerName, x => request.PlayerName == x.PlayerCode),
-                    round => round.PlayerCode, player => player.PlayerCode, (round, player) => new {round, player})
-                .Join(_service.Repository.Games, combine => combine.round.GameId, game => game.Id,
+                .GroupJoin(
+                    _service.Repository.Players.Where(request.PlayerName, x => request.PlayerName == x.PlayerCode),
+                    round => round.PlayerCode, player => player.PlayerCode,
+                    (round, player) => new {round, player})
+                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new {x.round, player})
+                .GroupJoin(_service.Repository.Games, combine => combine.round.GameId, game => game.Id,
                     (combine, game) => new {combine.round, combine.player, game})
-                .Join(_service.Repository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
+                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new {x.round, x.player, game})
+                .GroupJoin(_service.Repository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
                     (combine, detail) => new {combine.round, combine.player, combine.game, detail})
-                .Join(_service.Repository.GameProviders, combine => combine.round.GameProviderId,
-                    gameProvider => gameProvider.Id, (combine, gameProvider) => new RoundModel
-                    {
-                        Id = combine.round.Id,
-                        PlayerName = combine.player.RealName,
-                        GameProviderId = combine.round.GameProviderId,
-                        GameProviderName = gameProvider.Name,
-                        ExternalRoundId = combine.round.ExternalRoundId,
-                        CreatedOn = combine.round.CreatedOn,
-                        ClosedOn = combine.round.ClosedOn,
-                        CurrencyCode = combine.round.CurrencyCode,
-                        BetAmount = combine.round.BetAmount,
-                        ValidBetAmount = combine.round.BetAmount,
-                        WinLoss = combine.round.WinLoss,
-                        AdditionalData = combine.detail.AdditionalData
-                    })
+                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new {x.round, x.player, x.game, detail})
+                .GroupJoin(_service.Repository.GameProviders, combine => combine.round.GameProviderId,
+                    gameProvider => gameProvider.Id,
+                    (combine, gameProvider) => new
+                        {combine.round, combine.player, combine.game, combine.detail, gameProvider})
+                .SelectMany(x => x.gameProvider.DefaultIfEmpty(),
+                    (x, gameProvider) => new {x.round, x.player, x.game, x.detail, gameProvider})
+                .Select(combine => new RoundModel
+                {
+                    Id = combine.round.Id,
+                    PlayerCode = combine.player.PlayerCode,
+                    ExternalPlayerCode = combine.player.PlayerCode,
+                    PlayerName = combine.player.RealName,
+                    GameProviderId = combine.round.GameProviderId,
+                    GameProviderCode = combine.game.GameProvider.Code,
+                    GameProviderName = combine.gameProvider.Name,
+                    GameName = combine.game.Name,
+                    ExternalRoundId = combine.round.ExternalRoundId,
+                    ExternalCreatedOn = combine.round.ExternalCreatedOn,
+                    ExternalClosedOn = combine.round.ExternalClosedOn,
+                    CreatedOn = combine.round.CreatedOn,
+                    ClosedOn = combine.round.ClosedOn,
+                    CurrencyCode = combine.round.CurrencyCode,
+                    BetAmount = combine.round.BetAmount,
+                    ValidBetAmount = combine.round.Turnover,
+                    SettleAmount = combine.round.SettleAmount,
+                    WinLoss = combine.round.WinLoss,
+                    AdditionalData = combine.detail.AdditionalData
+                })
                 .CreatePagedResponseAsync(request);
         }
     }

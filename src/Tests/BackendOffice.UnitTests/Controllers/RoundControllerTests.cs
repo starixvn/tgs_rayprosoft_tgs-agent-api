@@ -63,7 +63,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             for (var i = 0; i < response.Items.Length; i++)
             {
                 response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].BrandId.Should().Be(expectedRoles[i].BrandId);
+                response.Items[i].ExternalRoundId.Should().Be(expectedRoles[i].ExternalRoundId);
             }
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<GetRoundsRequest>(), It.IsAny<CancellationToken>()));

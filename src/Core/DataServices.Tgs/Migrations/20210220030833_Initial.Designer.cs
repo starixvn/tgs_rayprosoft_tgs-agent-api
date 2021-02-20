@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210219012829_Initial")]
+    [Migration("20210220030833_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2026,7 +2026,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("email");
 
-                    b.Property<DateTimeOffset>("FirstDepositOn")
+                    b.Property<DateTimeOffset?>("FirstDepositOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_deposit_on");
 
@@ -2870,6 +2870,67 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_station_letter_players_player_code");
 
                     b.ToTable("station_letter_players");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Transaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("ConfirmedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_on");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ExternalTransactionId")
+                        .HasColumnType("text")
+                        .HasColumnName("external_transaction_id");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
+
+                    b.Property<DateTimeOffset>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_transactions");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_transactions_brand_id");
+
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_transactions_wallet_id");
+
+                    b.ToTable("transactions");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.User", b =>
@@ -4014,6 +4075,27 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Player");
 
                     b.Navigation("StationLetter");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Transaction", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_transactions_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .HasConstraintName("fk_transactions_wallets_wallet_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.User", b =>

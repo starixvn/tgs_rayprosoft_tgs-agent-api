@@ -1,18 +1,21 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using MediatR;
-using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Report.Application.Models.Round
 {
-    public class GetRoundDetailRequest : IRequest<PagedResponse<RoundModel>>
+    public class GetRoundDetailRequest : IRequest<RoundDetailModel>
     {
-        public Guid BrandId { get; set; }
-        public string PlayerName { get; set; }
-        public Guid? RoundId { get; set; }
-        public Guid? GameProviderId { get; set; }
-        public RoundStatus? Status { get; set; }
-        public DateTimeOffset From { get; set; }
-        public DateTimeOffset To { get; set; }
+        [JsonPropertyName("gpcode")] public string GameProviderCode { get; init; }
+
+        [JsonPropertyName("playercode")] public string PlayerCode { get; init; }
+
+        [JsonPropertyName("roundid")] public Guid RoundId { get; init; }
+
+        /// <summary>
+        ///     player's culture code
+        /// </summary>
+        [JsonPropertyName("language")]
+        public string Language { get; init; }
     }
 }

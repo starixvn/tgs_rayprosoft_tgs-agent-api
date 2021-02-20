@@ -30,7 +30,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game) g with { EndpointPath = string.Empty };
+                        return (Game) g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -95,9 +95,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SBOConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new("http://game-sbo") : new Uri("https://localhost:62331"),
+                        _env.IsDocker() ? new Uri("http://game-sbo") : new Uri("https://localhost:62330"),
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
-                    ApiUrl = new("https://ex-api-demo-yy.568win.com")
+                    ApiUrl = new Uri("https://ex-api-demo-yy.568win.com")
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new()

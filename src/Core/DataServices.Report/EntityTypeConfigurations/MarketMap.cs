@@ -23,27 +23,35 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(b => b.DepositAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.WithdrawalAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.AdjustmentAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.BonusAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.BetAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.ValidBetAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.WinLossAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.NetProfit)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(b => b.CreatedOn)
