@@ -38,6 +38,7 @@
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
+    <ProjectReference Include="..\..\Shared\Game.ApiClients\Game.ApiClients.csproj" />
     <ProjectReference Include="..\..\Shared\Game.Models\Game.Models.csproj" />
   </ItemGroup>
 

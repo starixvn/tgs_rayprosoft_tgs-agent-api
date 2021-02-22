@@ -113,6 +113,7 @@ namespace TGS.Services.GameOperations.Data
             var (st, r) = await GetAndValidatePreviousActionsAsync(s);
             if (r != null)
             {
+                s.PlayerData.Wallet.Balance = await GetBalanceAsync(s.Repository, s.PlayerData.Wallet.Id);
                 return r;
             }
 
@@ -225,6 +226,7 @@ namespace TGS.Services.GameOperations.Data
                     ExternalId = act.ExternalTransactionId,
                     ReferenceId = act.ReferenceGameActionId,
                     ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = act.ExternalGameActionGroupId,
                     Amount = act.Amount,
                     UnsettledBets = act.UnsettledBets,
                     Turnover = act.Turnover,
@@ -255,6 +257,10 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var r = ValidateReferenceAction(s);
+            if (r != null)
+            {
+                return (s, r);
+            }
 
             s.ValidPreviousActions = GetValidPreviousActions(actions);
 
@@ -349,8 +355,8 @@ namespace TGS.Services.GameOperations.Data
             s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
             !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
-        private static GameActionResult
-            GetDuplicateTransactionResult(Guid gameActionId, string externalTransactionId) =>
+        private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
+            string externalTransactionId) =>
             new()
             {
                 TransactionResult = new()
@@ -558,13 +564,17 @@ namespace TGS.Services.GameOperations.Data
         {
             var player = s.PlayerData;
 
+            var externalGameActionGroupId = s.ReferencedGameAction != null && !s.HasExternalGameActionGroupId
+                ? s.ReferencedGameAction.ExternalGameActionGroupId
+                : s.ExternalGameActionGroupId ?? s.ExternalRoundId;
+
             var ga = new GameAction
             {
                 Id = current.Id,
                 ExternalBetId = s.ExternalBetId,
                 ExternalTransactionId = s.ExternalTransactionId,
                 GameActionBatchId = s.BatchId,
-                ExternalGameActionGroupId = s.ExternalGameActionGroupId,
+                ExternalGameActionGroupId = externalGameActionGroupId,
                 ReferencedGameActionId = s.ReferencedGameActionInternalId,
                 Type = s.GameActionType,
                 RoundId = s.InternalRoundId.Value,

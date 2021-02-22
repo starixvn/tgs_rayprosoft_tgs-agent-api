@@ -284,6 +284,32 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "game_action_batches",
+                schema: "bet",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    external_id = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    error = table.Column<short>(type: "smallint", nullable: false),
+                    error_message = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    transactions_count = table.Column<int>(type: "integer", nullable: false),
+                    errors_json = table.Column<string>(type: "jsonb", nullable: true),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    game_provider_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_game_action_batches", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_game_action_batches_game_provider_configurations_game_provider_id",
+                        column: x => x.game_provider_id,
+                        principalSchema: "dbo",
+                        principalTable: "game_providers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "game_provider_bet_limits",
                 schema: "dbo",
                 columns: table => new
@@ -694,27 +720,54 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "game_action_batches",
+                name: "game_actions",
                 schema: "bet",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    external_id = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    error_type = table.Column<short>(type: "smallint", nullable: false),
-                    error_description = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
-                    transactions_count = table.Column<int>(type: "integer", nullable: false),
-                    errors_json = table.Column<string>(type: "jsonb", nullable: true),
-                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    game_provider_configuration_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    round_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    external_transaction_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    type = table.Column<short>(type: "smallint", nullable: false),
+                    amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    turnover = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    win_loss = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    unsettled_bets = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    balance = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    bet_type = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    external_bet_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    external_game_action_group_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    referenced_game_action_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    game_action_batch_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    recorded_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    sent_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    is_closing_round = table.Column<bool>(type: "boolean", nullable: false),
+                    closing_round_explicit_request = table.Column<bool>(type: "boolean", nullable: true),
+                    player_ip = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    description = table.Column<string>(type: "text", nullable: true),
+                    stored_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now() at time zone 'utc'")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_game_action_batches", x => x.id);
+                    table.PrimaryKey("pk_game_actions", x => x.id);
                     table.ForeignKey(
-                        name: "fk_game_action_batches_game_provider_configurations_game_provider_configuration_id",
-                        column: x => x.game_provider_configuration_id,
-                        principalSchema: "dbo",
-                        principalTable: "game_provider_configurations",
+                        name: "fk_game_actions_game_action_batches_game_action_batch_id",
+                        column: x => x.game_action_batch_id,
+                        principalSchema: "bet",
+                        principalTable: "game_action_batches",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_game_actions_referenced_game_action_id",
+                        column: x => x.referenced_game_action_id,
+                        principalSchema: "bet",
+                        principalTable: "game_actions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_game_actions_rounds_round_id",
+                        column: x => x.round_id,
+                        principalSchema: "bet",
+                        principalTable: "rounds",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -920,59 +973,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         column: x => x.licensee_id,
                         principalSchema: "dbo",
                         principalTable: "licensees",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "game_actions",
-                schema: "bet",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    round_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    external_transaction_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    type = table.Column<short>(type: "smallint", nullable: false),
-                    amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    turnover = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    win_loss = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    unsettled_bets = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    balance = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    bet_type = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    external_bet_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    external_game_action_group_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    referenced_game_action_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    game_action_batch_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    recorded_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    sent_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    is_closing_round = table.Column<bool>(type: "boolean", nullable: false),
-                    closing_round_explicit_request = table.Column<bool>(type: "boolean", nullable: true),
-                    player_ip = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    description = table.Column<string>(type: "text", nullable: true),
-                    stored_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now() at time zone 'utc'")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_game_actions", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_game_actions_game_action_batches_game_action_batch_id",
-                        column: x => x.game_action_batch_id,
-                        principalSchema: "bet",
-                        principalTable: "game_action_batches",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_game_actions_referenced_game_action_id",
-                        column: x => x.referenced_game_action_id,
-                        principalSchema: "bet",
-                        principalTable: "game_actions",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_game_actions_rounds_round_id",
-                        column: x => x.round_id,
-                        principalSchema: "bet",
-                        principalTable: "rounds",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -2016,10 +2016,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "reseller_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_game_action_batches_game_provider_configuration_id",
+                name: "ix_game_action_batches_game_provider_id",
                 schema: "bet",
                 table: "game_action_batches",
-                column: "game_provider_configuration_id");
+                column: "game_provider_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_game_actions_game_action_batch_id",
@@ -2500,6 +2500,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "game_provider_configurations",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "languages",
                 schema: "dbo");
 
@@ -2513,10 +2517,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.DropTable(
                 name: "payment_channels",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "game_provider_configurations",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

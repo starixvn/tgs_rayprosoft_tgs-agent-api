@@ -30,7 +30,7 @@ namespace TGS.Core.DataServices.Log
         bool HasDatabaseConnection();
     }
 
-    public class LogRepository : DbContext, ILogRepository
+    public sealed class LogRepository : DbContext, ILogRepository
     {
         private readonly NpgsqlBulkUploader _uploader;
         private readonly IBaseRepository _repository;
@@ -52,6 +52,8 @@ namespace TGS.Core.DataServices.Log
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);
+
+        ChangeTracker IBaseRepository.ChangeTracker => ChangeTracker;
 
         Task<bool> IBaseRepository.CanConnectionAsync() =>
             Database.CanConnectAsync();

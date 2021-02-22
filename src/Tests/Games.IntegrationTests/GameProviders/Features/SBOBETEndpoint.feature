@@ -846,7 +846,7 @@ Scenario: 10.d - Get bet status of cancel transaction
 		| stake   | 0     |
 		| winloss | 0     |
 
-Scenario:  11.a - Place bet with the same external round id in differnet game
+Scenario:  11 - Place bet with the same external round id in differnet game
 	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given set random external round id
@@ -861,3 +861,13 @@ Scenario:  11.a - Place bet with the same external round id in differnet game
 			| 1_1      |
 			| 5_201608 |
 
+Scenario: 12 - Cancel place bets with batch
+	Given players place bets:
+		| Username | Brand | Currency | Platform | Balance | GameId   | BetAmount |
+		| TP01_cny | TGS   | CNY      | Mobile   | 100     | 1_1      | 10        |
+		| RP01_cny | TGS   | CNY      | Desktop  | 100     | 5_201608 | 5         |
+	When I submit the batch of bets to be canceled
+	Then I will receive successful response
+		And there will be 2 transactions in the response
+		And there will be 0 errors in the response
+		And all cancel bet related database records will be created and the balance of each user will be matched as original

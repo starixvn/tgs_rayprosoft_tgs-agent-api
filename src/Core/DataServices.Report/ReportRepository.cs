@@ -25,13 +25,15 @@ namespace TGS.Core.DataServices.Report
 
         public ReportRepository(DbContextOptions<ReportRepository> options) : base(options)
         {
-            _uploader = new NpgsqlBulkUploader(this);
+            _uploader = new(this);
         }
 
         DbSet<Market> IReportRepository.Markets { get; set; }
 
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
+
+        ChangeTracker IBaseRepository.ChangeTracker => ChangeTracker;
 
         Task<bool> IBaseRepository.CanConnectionAsync() => Database.CanConnectAsync();
 

@@ -59,6 +59,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             _roundQueries = roundQueries;
         }
 
+        /// <summary>
+        /// Get game provider configuration data from http context
+        /// </summary>
         async Task<GameProviderConfigurationData> ISBOBETServices.GetGameProviderConfigurationDataAsync()
         {
             var items = _httpContext?.Items;
@@ -71,13 +74,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             var gameProviderConfigurationId = items.Get(ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(ContextItems.PlatformType, PlatformType.Desktop);
 
-            var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
+            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId);
 
             return new()
             {
                 GameProviderId = gameProviderId,
                 GameProviderConfigurationId = gameProviderConfigurationId,
-                AutoCloseRound = cachedGameProvider.AutoCloseRound,
+                AutoCloseRound = autoCloseRound,
                 PlatformType = platformType
             };
         }

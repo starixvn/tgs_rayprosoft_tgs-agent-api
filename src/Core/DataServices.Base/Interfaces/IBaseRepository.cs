@@ -13,6 +13,8 @@ namespace TGS.Core.DataServices.Base.Interfaces
     {
         IDbContextTransaction CurrentTransaction { get; }
 
+        ChangeTracker ChangeTracker { get; }
+
         Task<bool> CanConnectionAsync();
 
         void SetTimeoutToSeconds(int seconds);

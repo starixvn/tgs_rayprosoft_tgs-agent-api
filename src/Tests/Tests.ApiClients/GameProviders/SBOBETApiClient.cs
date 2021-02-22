@@ -17,6 +17,7 @@ namespace TGS.Tests.ApiClients.GameProviders
         Task<CancelBetResponse> CancelBetAsync(CancelBetRequest request);
         Task<RollbackResponse> RollbackAsync(RollbackRequest request);
         Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request);
+        Task<BatchResponse> CancelTransactionsAsync(BatchRequest request);
     }
 
     public sealed class SBOBETApiClient : BaseApiClient, ISBOBETApiClient
@@ -29,22 +30,31 @@ namespace TGS.Tests.ApiClients.GameProviders
         }
 
         Task<GetBalanceResponse> ISBOBETApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
-            ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, $"{RoutePrefix}/GetBalance", request);
+            ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, $"{RoutePrefix}/GetBalance",
+                request);
 
         Task<PlaceBetResponse> ISBOBETApiClient.PlaceBetAsync(PlaceBetRequest request) =>
-            ExecuteJsonRequestAsync<PlaceBetRequest, PlaceBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Deduct", request);
+            ExecuteJsonRequestAsync<PlaceBetRequest, PlaceBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Deduct",
+                request);
 
         Task<SettleBetResponse> ISBOBETApiClient.SettleBetAsync(SettleBetRequest request) =>
-            ExecuteJsonRequestAsync<SettleBetRequest, SettleBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Settle", request);
+            ExecuteJsonRequestAsync<SettleBetRequest, SettleBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Settle",
+                request);
 
         Task<CancelBetResponse> ISBOBETApiClient.CancelBetAsync(CancelBetRequest request) =>
-            ExecuteJsonRequestAsync<CancelBetRequest, CancelBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Cancel", request);
+            ExecuteJsonRequestAsync<CancelBetRequest, CancelBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Cancel",
+                request);
 
         Task<RollbackResponse> ISBOBETApiClient.RollbackAsync(RollbackRequest request) =>
-            ExecuteJsonRequestAsync<RollbackRequest, RollbackResponse>(HttpMethod.Post, $"{RoutePrefix}/Rollback", request);
+            ExecuteJsonRequestAsync<RollbackRequest, RollbackResponse>(HttpMethod.Post, $"{RoutePrefix}/Rollback",
+                request);
 
         Task<GetBetStatusResponse> ISBOBETApiClient.GetBetStatusAsync(GetBetStatusRequest request) =>
-            ExecuteJsonRequestAsync<GetBetStatusRequest, GetBetStatusResponse>(HttpMethod.Post, $"{RoutePrefix}/GetBetStatus",
+            ExecuteJsonRequestAsync<GetBetStatusRequest, GetBetStatusResponse>(HttpMethod.Post,
+                $"{RoutePrefix}/GetBetStatus", request);
+
+        Task<BatchResponse> ISBOBETApiClient.CancelTransactionsAsync(BatchRequest request) =>
+            ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, "api/batch/transactions/cancel",
                 request);
     }
 }

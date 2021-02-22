@@ -19,6 +19,8 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\BackOffice\BackOffice.csproj" />
     <ProjectReference Include="..\..\Services\Report\Report.csproj" />
+    <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\..\Shared\Game.ApiClients\Game.ApiClients.csproj" />
   </ItemGroup>
 
 </Project>

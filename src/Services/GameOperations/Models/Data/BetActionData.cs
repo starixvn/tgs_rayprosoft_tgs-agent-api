@@ -9,6 +9,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public Guid? ReferenceId { get; init; }
         public string ExternalId { get; init; }
         public string ExternalRoundId { get; init; }
+        public string ExternalGameActionGroupId { get;init; }
         public BetActionData Reference { get; set; }
         public decimal Amount { get; init; }
         public decimal UnsettledBets { get; set; }

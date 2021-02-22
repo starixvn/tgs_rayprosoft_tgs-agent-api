@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
-using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -30,13 +29,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
         {
             services.AddErrorMappers(
                 new[] {typeof(SBOBETErrorMapper)},
-                (provider, key) =>
+                (provider, key) => key switch
                 {
-                    return key switch
-                    {
-                        GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
-                        _                   => provider.GetRequiredService<TgsErrorMapper>()
-                    };
+                    GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
+                    _                   => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
             services.AddScoped<AuthorizeSBOBETMiddleware>();
@@ -44,8 +40,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 
             services.AddScoped<ISBOBETServices, SBOBETServices>();
             services.AddSingleton<ISBOBETGameControllerMapper, SBOBETGameControllerMapper>();
-
-            services.AddHttpClient<ISBOApiClient, SBOApiClient>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SBOBETGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<SBOBETGameInitializer>());

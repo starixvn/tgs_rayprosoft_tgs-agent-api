@@ -102,6 +102,8 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool HasExtRoundId => ExternalRoundId.IsNotNullOrEmpty();
         public bool HasExtRefTransactionId => ExternalTransactionReferenceId.IsNotNullOrEmpty();
         public bool HasExtGameId => ExternalGameId.IsNotNullOrEmpty();
+        public bool HasExtBetId => ExternalBetId.IsNotNullOrEmpty();
+        public bool HasExternalGameActionGroupId => ExternalGameActionGroupId.IsNotNullOrEmpty();
 
         public bool ForceGetPreviousActions { get; init; }
         public bool FreeBetAsSingleRound { get; init; }

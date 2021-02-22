@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(bc => bc.Id)
                 .HasName("pk_game_action_batches");
 
-            builder.Property(c => c.ErrorType)
+            builder.Property(c => c.Error)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -29,23 +29,23 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(64)
                 .IsRequired();
 
-            builder.Property(c => c.ErrorDescription)
+            builder.Property(c => c.ErrorMessage)
                 .HasMaxLength(1024);
 
-            builder.Property(c => c.GameProviderConfigurationId)
+            builder.Property(c => c.GameProviderId)
                 .IsRequired();
 
             builder.Property(c => c.ErrorsJson)
                 .HasColumnType(ColumnTypes.Jsonb);
 
-            builder.HasOne(c => c.GameProviderConfiguration)
+            builder.HasOne(c => c.GameProvider)
                 .WithMany()
-                .HasForeignKey(c => c.GameProviderConfigurationId)
+                .HasForeignKey(c => c.GameProviderId)
                 .HasConstraintName(
-                    "fk_game_action_batches_game_provider_configurations_game_provider_configuration_id");
+                    "fk_game_action_batches_game_provider_configurations_game_provider_id");
 
-            builder.HasIndex(c => c.GameProviderConfigurationId)
-                .HasDatabaseName("ix_game_action_batches_game_provider_configuration_id");
+            builder.HasIndex(c => c.GameProviderId)
+                .HasDatabaseName("ix_game_action_batches_game_provider_id");
         }
     }
 }

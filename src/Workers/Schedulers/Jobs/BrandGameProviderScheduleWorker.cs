@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,6 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Workers.Schedulers.Jobs
 {
-    //[DisplayName(nameof(BrandGameProviderScheduleWorker))]
     [Queue(Consts.Queue.Schedule)]
     public sealed class BrandGameProviderScheduleWorker : BaseWork<TgsResponse>
     {

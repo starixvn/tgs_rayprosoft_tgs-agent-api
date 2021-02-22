@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210220030833_Initial")]
+    [Migration("20210222025709_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1261,14 +1261,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<string>("ErrorDescription")
+                    b.Property<short>("Error")
+                        .HasColumnType("smallint")
+                        .HasColumnName("error");
+
+                    b.Property<string>("ErrorMessage")
                         .HasMaxLength(1024)
                         .HasColumnType("character varying(1024)")
-                        .HasColumnName("error_description");
-
-                    b.Property<short>("ErrorType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("error_type");
+                        .HasColumnName("error_message");
 
                     b.Property<string>("ErrorsJson")
                         .HasColumnType("jsonb")
@@ -1280,9 +1280,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("external_id");
 
-                    b.Property<Guid>("GameProviderConfigurationId")
+                    b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
-                        .HasColumnName("game_provider_configuration_id");
+                        .HasColumnName("game_provider_id");
 
                     b.Property<int>("TransactionsCount")
                         .HasColumnType("integer")
@@ -1291,8 +1291,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_game_action_batches");
 
-                    b.HasIndex("GameProviderConfigurationId")
-                        .HasDatabaseName("ix_game_action_batches_game_provider_configuration_id");
+                    b.HasIndex("GameProviderId")
+                        .HasDatabaseName("ix_game_action_batches_game_provider_id");
 
                     b.ToTable("game_action_batches", "bet");
                 });
@@ -3590,14 +3590,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameActionBatch", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProviderConfiguration", "GameProviderConfiguration")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
                         .WithMany()
-                        .HasForeignKey("GameProviderConfigurationId")
-                        .HasConstraintName("fk_game_action_batches_game_provider_configurations_game_provider_configuration_id")
+                        .HasForeignKey("GameProviderId")
+                        .HasConstraintName("fk_game_action_batches_game_provider_configurations_game_provider_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GameProviderConfiguration");
+                    b.Navigation("GameProvider");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderBetLimit", b =>

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.TgsApi.Models.Interfaces;
-using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 
 namespace TGS.Apis.TgsApi.Commons.Controllers

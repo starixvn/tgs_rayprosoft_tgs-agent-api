@@ -8,13 +8,13 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public Guid Id { get; set; }
         public string ExternalId { get; set; }
-        public TgsApiError ErrorType { get; set; }
-        public string ErrorDescription { get; set; }
+        public TgsApiError Error { get; set; }
+        public string ErrorMessage { get; set; }
         public int TransactionsCount { get; set; }
         public string ErrorsJson { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
-        public Guid GameProviderConfigurationId { get; set; }
-        public virtual GameProviderConfiguration GameProviderConfiguration { get; set; }
+        public Guid GameProviderId { get; set; }
+        public virtual GameProvider GameProvider { get; set; }
         public virtual ICollection<GameAction> GameActions { get; set; }
     }
 }

@@ -7,7 +7,6 @@ namespace TGS.Core.Models.Services.Games
     {
         public decimal Amount { get; init; }
         public decimal? Commission { get; init; }
-        public string CurrencyCode { get; init; }
         public string ExternalBetId { get; init; }
         public string ExternalGameId { get; init; }
         public string ExternalRoundId { get; init; }

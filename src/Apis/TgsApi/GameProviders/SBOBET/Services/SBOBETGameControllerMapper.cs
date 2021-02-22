@@ -31,6 +31,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         BetData Request(GameProviderConfigurationData data, RollbackRequest request,
             GameActionExternalIds[] gameActionExternalIds);
 
+        BatchBetData Request(Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound,
+            BatchRequest request);
+
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
 
         PlaceBetResponse Response(PlaceBetRequest request, BetResult r);
@@ -44,6 +47,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         GetBetStatusResponse Response(GetBetStatusRequest request, GameActionData ga);
 
         T Response<T>(string playerCode, GameApiError errorCode) where T : BaseResponse, new();
+
+        BatchResponse Response(BatchBetResult r);
     }
 
     public sealed class SBOBETGameControllerMapper : ISBOBETGameControllerMapper
@@ -243,15 +248,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
-        T ISBOBETGameControllerMapper.Response<T>(string playerCode, GameApiError errorCode) => 
+        T ISBOBETGameControllerMapper.Response<T>(string playerCode, GameApiError errorCode) =>
             Response<T>(playerCode, 0, errorCode);
 
         #region Private Methods
 
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
-            TransactionData[] transactions)
-        {
-            return new()
+            TransactionData[] transactions) =>
+            new()
             {
                 PlayerCode = playerCode,
                 PlatformType = data.PlatformType,
@@ -263,7 +267,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 AllowCancelCancelTransaction = true,
                 Transactions = transactions
             };
-        }
 
         private static GameActionType GetGameActionType(ResultType result)
         {
@@ -275,12 +278,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
-        private static BetStatus GetBetStatus(RoundRecord roundData)
-        {
-            return roundData.Status == RoundStatus.Closed
+        private static BetStatus GetBetStatus(RoundRecord roundData) =>
+            roundData.Status == RoundStatus.Closed
                 ? roundData.BetAmount == 0 && roundData.WinLoss == 0 ? BetStatus.Void : BetStatus.Settled
                 : BetStatus.Running;
-        }
 
         private static (decimal stake, decimal winloss) GetStakeAndWinLoss(BetStatus status, GameActionData ga,
             string externalRoundId, string externalTransactionId)
@@ -320,22 +321,73 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 .Select(ga => Math.Abs(ga.Amount)).FirstOrDefault();
         }
 
-        private static decimal GetWinLoss(HashSet<GameActionRecord> validActions) => 
+        private static decimal GetWinLoss(HashSet<GameActionRecord> validActions) =>
             validActions
                 .Where(ga => ga.Type != PlaceBet)
                 .Sum(ga => ga.Amount);
 
         private static T Response<T>(string playerCode, decimal balance, GameApiError error = GameApiError.Success)
-            where T : BaseResponse, new()
-        {
-            return new()
+            where T : BaseResponse, new() =>
+            new()
             {
                 ErrorCode = (int) error,
                 ErrorMessage = error.Description(),
                 PlayerCode = playerCode,
                 Balance = error != GameApiError.Success ? null : balance
             };
-        }
+
+        BatchBetData ISBOBETGameControllerMapper.Request(Guid gameProviderId,
+            Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound, BatchRequest request) =>
+            new()
+            {
+                ExternalBatchId = request.ExternalBatchId,
+                GameProviderId = gameProviderId,
+                GameProviderCode = GameProviderCode,
+                AutoCloseRound = autoCloseRound,
+                Transactions = request.Transactions.Select(t =>
+                {
+                    playerConfigurationIds.TryGetValue(t.PlayerCode, out var gameProviderConfigurationid);
+
+                    return new BatchTransactionData
+                    {
+                        PlayerCode = t.PlayerCode,
+                        PlatformType = (PlatformType) t.PlatformType,
+                        GameProviderConfigurationId = gameProviderConfigurationid,
+                        Amount = t.Amount,
+                        ExternalRoundId = t.ExternalRoundId,
+                        ExternalBetId = t.ExternalBetId,
+                        ExternalGameId = t.ExternalGameId,
+                        ExternalTransactionId = t.ExternalTransactionId,
+                        ExternalTransactionReferenceId = t.ExternalTransactionReferenceId,
+                        GameActionType = CancelTransaction,
+                        CurrencyCode = t.CurrencyCode,
+                        Timestamp = request.Timestamp,
+                        Description = t.Description,
+                        RoundClosed = t.RoundClosed
+                    };
+                }).ToArray()
+            };
+
+        BatchResponse ISBOBETGameControllerMapper.Response(BatchBetResult r) =>
+            new()
+            {
+                ErrorCode = (int) r.Error,
+                ErrorMessage = r.ErrorMessage,
+                BatchTime = r.BatchTime,
+                ExternalBatchId = r.ExternalBatchId,
+                IsDuplicate = r.IsDuplicate,
+                TransactionsCount = r.TransactionsCount,
+                PlayerBalances = r.PlayerBalances,
+                Errors = r.Errors?.Select(t => new BatchResponseTransaction
+                {
+                    PlayerCode = t.PlayerCode,
+                    ExternalTransactionId = t.ExternalTransactionId,
+                    InternalTransactionId = t.InternalTransactionId,
+                    IsDuplicate = t.IsDuplicate,
+                    Error = t.Error,
+                    ErrorMessage = t.ErrorMessage
+                }).ToArray()
+            };
 
         #endregion Private Methods
     }

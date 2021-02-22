@@ -8,6 +8,7 @@ namespace TGS.Services.GameOperations.Models.Data
         internal Guid GameActionId { get; init; }
         internal Guid? ReferenceGameActionId { get; init; }
         internal string ExternalTransactionId { get; init; }
+        internal string ExternalGameActionGroupId { get; init; }
         internal decimal Turnover { get; init; }
         internal decimal WinLoss { get; init; }
         internal decimal UnsettledBets { get; init; }
