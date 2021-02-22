@@ -24,4 +24,4 @@ RUN dotnet publish "Schedulers.csproj" -c Release -o /app/publish --no-restore
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TGS.Workers.Schedulers.dll"]
+COPY wait-for-it.sh .

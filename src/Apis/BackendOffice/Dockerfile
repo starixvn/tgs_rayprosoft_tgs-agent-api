@@ -26,4 +26,4 @@ RUN dotnet publish "BackendOffice.csproj" -c Release -o /app/publish --no-restor
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TGS.Apis.BackendOffice.dll"]
+COPY wait-for-it.sh .

@@ -23,4 +23,4 @@ RUN dotnet publish "TgsApi.csproj" -c Release -o /app/publish --no-restore
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TGS.Apis.TgsApi.dll"]
+COPY wait-for-it.sh .
