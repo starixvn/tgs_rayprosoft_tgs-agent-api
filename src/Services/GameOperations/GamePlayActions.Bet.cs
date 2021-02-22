@@ -20,7 +20,7 @@ namespace TGS.Services.GameOperations
 
         Task<BetResult> CancelTransactionAsync(BetData data);
 
-        // TODO: Lock / Unlock / Batch Settle / Batch Cancel
+        // TODO: Lock / Unlock
     }
 
     public sealed partial class GamePlayActions : IGamePlayActions
@@ -34,7 +34,7 @@ namespace TGS.Services.GameOperations
 
             var balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-            return new GetBalanceResult
+            return new()
             {
                 Balance = balance,
                 CurrencyCode = cur
@@ -128,20 +128,12 @@ namespace TGS.Services.GameOperations
                 return data;
             }
 
-            foreach (var t in data.Transactions)
+            var internalCurrency =
+                await _currencyMapper.ExternalToInternalAsync(data.CurrencyCode, data.GameProviderId);
+
+            if (internalCurrency.IgnoreCaseNotEquals(playerCurrencyCode))
             {
-                if (t.GameActionType != GameActionType.PlaceBet)
-                {
-                    continue;
-                }
-
-                var internalCurrency =
-                    await _currencyMapper.ExternalToInternalAsync(t.CurrencyCode, data.GameProviderId);
-
-                if (internalCurrency.IgnoreCaseNotEquals(playerCurrencyCode))
-                {
-                    throw new CurrencyNotMatchingException(playerCurrencyCode, internalCurrency);
-                }
+                throw new CurrencyNotMatchingException(playerCurrencyCode, internalCurrency);
             }
 
             return data;

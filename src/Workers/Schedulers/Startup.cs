@@ -1,13 +1,13 @@
 using System;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
+using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -18,7 +18,9 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.Operations.Extensions;
 using TGS.Services.Report.Infrastructure.DataService;
+using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Reports;
 using TGS.Workers.Schedulers.Services;
@@ -47,7 +49,11 @@ namespace TGS.Workers.Schedulers
                 .AddJson()
                 .AddRedis()
                 .AddTransactions()
-                .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(), types: GetModuleTypes());
+                .AddApiClient()
+                .AddGameApiClients()
+                .AddOperations()
+                .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(),
+                    typesToUseManagementPage: GetModuleTypes());
 
             services.AddControllers();
 
@@ -67,7 +73,7 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule});
+            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
 
             app.UseRouting();
 
@@ -75,7 +81,7 @@ namespace TGS.Workers.Schedulers
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                endpoints.MapHealthChecks("/health", new()
                 {
                     ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
@@ -84,16 +90,14 @@ namespace TGS.Workers.Schedulers
 
                 endpoints.MapMetrics();
 
-                endpoints.MapHangfireDashboard("/hangfire", new DashboardOptions
+                endpoints.MapHangfireDashboard("/hangfire", new()
                 {
                     Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}
                 });
             });
         }
 
-        private static Type[] GetModuleTypes()
-        {
-            return new[] {typeof(JobManagement)};
-        }
+        private static Type[] GetModuleTypes() =>
+            new[] {typeof(JobManagement)};
     }
 }

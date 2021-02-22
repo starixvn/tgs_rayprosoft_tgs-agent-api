@@ -18,7 +18,7 @@ namespace TGS.Core.Infrastructures.Hangfire
     {
         public static IServiceCollection AddHangfireScheduler(this IServiceCollection services,
             IConfiguration configuration, string configSectionName = "Hangfire", BaseJobProvider jobProvider = null,
-            Type[] types = null)
+            Type[] typesToUseManagementPage = null)
         {
             services.Configure<HangfireSettings>(configuration.GetSection(configSectionName));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<HangfireSettings>>().Value);
@@ -40,9 +40,9 @@ namespace TGS.Core.Infrastructures.Hangfire
                         s.NullValueHandling = NullValueHandling.Include;
                         s.DefaultValueHandling = DefaultValueHandling.Include;
                     })
-                    .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new MongoStorageOptions
+                    .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new()
                     {
-                        MigrationOptions = new MongoMigrationOptions
+                        MigrationOptions = new()
                         {
                             MigrationStrategy = new DropMongoMigrationStrategy(),
                             BackupStrategy = new CollectionMongoBackupStrategy()
@@ -51,9 +51,9 @@ namespace TGS.Core.Infrastructures.Hangfire
                         CheckConnection = false
                     });
 
-                if (types != null)
+                if (typesToUseManagementPage?.Length > 0)
                 {
-                    option.UseManagementPages(p => p.AddJobs(types));
+                    option.UseManagementPages(p => p.AddJobs(typesToUseManagementPage));
                 }
             });
 

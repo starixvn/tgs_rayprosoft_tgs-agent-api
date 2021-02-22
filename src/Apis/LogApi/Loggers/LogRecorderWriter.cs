@@ -13,17 +13,17 @@ namespace TGS.Apis.LogApi.Loggers
 {
     public sealed class LogRecordWriter : ILoggerWriter
     {
-        private readonly ILogRepository _logRepository;
+        private readonly Func<ILogRepository> _repoFactory;
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
         public LogRecordWriter(
             Func<ILogRepository> repoFactory,
             IOptions<LoggerServiceConfig> loggerServiceConfig)
         {
-            _logRepository = repoFactory();
+            _repoFactory = repoFactory;
             _loggerServiceConfig = loggerServiceConfig;
         }
 
-        Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
+        async Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
         {
             var config = _loggerServiceConfig.Value;
 
@@ -33,13 +33,15 @@ namespace TGS.Apis.LogApi.Loggers
                             config.UnrestrictedLoggers.Contains(r.Logger))
                 .ToArray();
 
-            return _logRepository.AddLogRecordsAsync(logs);
+            await using var repo = _repoFactory();
+            await repo.AddLogRecordsAsync(logs);
         }
 
-        Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
+        async Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
-            return _logRepository.AddLogRecordAsync(log);
+            await using var repo = _repoFactory();
+            await repo.AddLogRecordAsync(log);
         }
 
         private static LogRecord Convert(LogBusEvent ent) => (LogRecord)ent;

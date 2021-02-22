@@ -11,26 +11,29 @@ namespace TGS.Apis.LogApi.Loggers
 {
     public sealed class ApiLogWriter : ILoggerWriter
     {
-        private readonly ILogRepository _logRepository;
+        private readonly Func<ILogRepository> _repoFactory;
 
         public ApiLogWriter(Func<ILogRepository> repoFactory)
         {
-            _logRepository = repoFactory();
+            _repoFactory = repoFactory;
         }
 
-        Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
+        async Task ILoggerWriter.SaveLogsAsync(IList<LogBusEvent> events)
         {
             var logs = events
                 .Select(Convert)
                 .ToArray();
 
-            return _logRepository.AddApiLogsAsync(logs);
+            await using var repo = _repoFactory();
+            await repo.AddApiLogsAsync(logs);
         }
 
-        Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
+        async Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
-            return _logRepository.AddApiLogAsync(log);
+
+            await using var repo = _repoFactory();
+            await repo.AddApiLogAsync(log);
         }
 
         private static ApiLog Convert(LogBusEvent ent) => (ApiLog)ent;

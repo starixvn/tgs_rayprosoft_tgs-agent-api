@@ -5,6 +5,8 @@
         public static class Queue
         {
             public const string Schedule = "schedule";
+            public const string GameProvider = "gameprovider";
+            public const string Report = "report";
         }
     }
 }

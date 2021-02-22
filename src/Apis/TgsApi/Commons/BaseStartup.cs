@@ -22,6 +22,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.GameOperations.Extensions;
 using TGS.Services.Operations.Extensions;
+using TGS.Shared.Game.ApiClients.Extensions;
 
 namespace TGS.Apis.TgsApi.Commons
 {
@@ -52,6 +53,7 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddOperations()
                 .AddTimeZone()
                 .AddApiClient()
+                .AddGameApiClients()
                 .AddGameOperations();
 
             services.AddHttpContextAccessor();

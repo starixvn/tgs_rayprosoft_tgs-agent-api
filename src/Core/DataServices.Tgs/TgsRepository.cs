@@ -153,6 +153,8 @@ namespace TGS.Core.DataServices.Tgs
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
 
+        ChangeTracker IBaseRepository.ChangeTracker => ChangeTracker;
+
         Task<bool> IBaseRepository.CanConnectionAsync() => Database.CanConnectAsync();
 
         void IBaseRepository.SetTimeoutToSeconds(int seconds)

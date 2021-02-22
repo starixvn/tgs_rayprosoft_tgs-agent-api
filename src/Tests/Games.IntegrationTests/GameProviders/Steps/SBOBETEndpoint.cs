@@ -2,6 +2,7 @@
 // ReSharper disable IdentifierTypo
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,7 @@ using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
 using TGS.Tests.ApiClients.Operators;
 using TGS.Tests.TestsCommon;
+using TGS.Tests.TestsCommon.Extensions;
 
 namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 {
@@ -170,6 +172,26 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             return PlaceBetAsync(amount, externalGameId, externalRoundId);
+        }
+
+        [Given(@"players place bets:")]
+        public async Task GivenPlayersPlaceBets(Table table)
+        {
+            var players = table.CreateList<PlayerData>();
+            var betRequests = new List<PlaceBetRequest>();
+
+            foreach (var p in players)
+            {
+                await GivenPlayerOfBrandLoginViaAsync(p.Username, p.Brand, p.CurrencyCode, p.Platform);
+                await GivenPlayerHavingBalanceOfAsync(p.Balance);
+                await WhenIPlaceBetOfForGameAsync(p.BetAmount, p.GameId);
+
+                var request = Get<PlaceBetRequest>(SR.PlaceBetRequest);
+                betRequests.Add(request);
+            }
+
+            Set(SR.Requests, betRequests);
+            Set(SR.Players, players.ToDictionary(p => p.Username, p => p.Balance));
         }
 
         [Given(@"I win bet for \$(.*)")]
@@ -342,6 +364,73 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
+        [When(@"I submit the batch of bets to be canceled")]
+        public async Task WhenISubmitTheBatchOfBetsToBeCanceled()
+        {
+            var betRequests = Get<List<PlaceBetRequest>>(SR.Requests);
+            var externalRoundIds = betRequests.Select(r => r.ExternalRoundId).ToArray();
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var roundData = await (from r in db.Rounds
+                                   where externalRoundIds.Contains(r.ExternalRoundId)
+                                   from g in db.Games
+                                   where r.GameId == g.Id
+                                   select new
+                                   {
+                                       r.PlayerCode,
+                                       r.PlatformType,
+                                       r.CurrencyCode,
+                                       ExternalGameId = g.ExternalId,
+                                       r.ExternalRoundId,
+                                       GameActions = r.GameActions.Select(ga => new
+                                       {
+                                           ga.Amount,
+                                           ga.ExternalTransactionId,
+                                           ga.ExternalBetId,
+                                           ga.ExternalGameActionGroupId
+                                       }).ToArray()
+                                   }).ToArrayAsync();
+
+            var currencies = await db.GameProviderCurrencies.Where(c => c.GameProvider.Code == GameProviderCode)
+                .Select(c => c).ToDictionaryAsync(c => c.CurrencyCode, c => c.GameProviderCurrencyCode);
+
+            var request = new BatchRequest
+            {
+                ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
+                Timestamp = DateTimeOffset.Now,
+                Transactions = roundData.GroupBy(r => new
+                        {r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId})
+                    .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
+                    {
+                        if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
+                        {
+                            curr = g.Key.CurrencyCode;
+                        }
+
+                        return new BatchRequestTransaction
+                        {
+                            PlayerCode = g.Key.PlayerCode,
+                            PlatformType = (int) g.Key.PlatformType,
+                            CurrencyCode = curr,
+                            Amount = ga.Amount.Negate(),
+                            ExternalGameId = g.Key.ExternalGameId,
+                            ExternalTransactionId = $"{ga.ExternalTransactionId}_cancel",
+                            ExternalTransactionReferenceId = ga.ExternalTransactionId,
+                            ExternalBetId = ga.ExternalBetId,
+                            ExternalRoundId = g.Key.ExternalRoundId,
+                            RoundClosed = true
+                        };
+                    }))).ToArray()
+            };
+
+            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
+            var response = await client.CancelTransactionsAsync(request);
+
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+
         [Then(@"I will receive bet response of no error and balance of \$(.*)")]
         public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance) =>
             VerifyResponseWithoutError<PlaceBetResponse>(expectedBalance);
@@ -500,6 +589,54 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.WinLoss.Should().Be(winloss);
         }
 
+        [Then(@"I will receive successful response")]
+        public void ThenIWillReceiveSuccessfulResponse()
+        {
+            var response = Get<BatchResponse>(SR.Response);
+            response.ErrorCode.Should().Be((int) TgsApiError.None);
+            response.ErrorMessage.Should().BeNullOrEmpty();
+        }
+
+        [Then(@"there will be (.*) transactions in the response")]
+        public void ThenThereWillBeTransactionsInTheResponse(int transactionsCount)
+        {
+            var response = Get<BatchResponse>(SR.Response);
+            response.TransactionsCount.Should().Be(transactionsCount);
+        }
+
+        [Then(@"there will be (.*) errors in the response")]
+        public void ThenThereWillBeErrorsInTheResponse(int errorsCount)
+        {
+            var response = Get<BatchResponse>(SR.Response);
+            response.Errors.Length.Should().Be(errorsCount);
+        }
+
+        [Then(@"all cancel bet related database records will be created and the balance of each user will be matched as original")]
+        public async Task ThenAllCancelBetRelatedDatabaseRecordsWillBeCreatedAndTheBalanceOfEachUserWillBeMatchedAsOriginal()
+        {
+            var request = Get<BatchRequest>(SR.Request);
+            var txids = request.Transactions.Select(t => t.ExternalTransactionId).ToArray();
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var gameActions = await db.GameActions
+                .Where(ga => txids.Contains(ga.ExternalTransactionId))
+                .Select(ga => new { ga.Round.PlayerCode, ga.Id }).ToArrayAsync();
+
+            gameActions.Length.Should().Be(txids.Length);
+
+            var players = Get<Dictionary<string, decimal>>(SR.Players);
+            foreach (var ga in gameActions)
+            {
+                var data = await db.Wallets.Where(w => w.PlayerCode == ga.PlayerCode)
+                    .Select(w => new { w.Player.Username, w.Balance}).FirstOrDefaultAsync();
+
+                var expectdBalance = players[data.Username];
+                data.Balance.Should().Be(expectdBalance);
+            }
+        }
+
+
+
         [Then(@"the round will be closed")]
         public Task ThenTheRoundWillBeClosedAsync() =>
             VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
@@ -517,16 +654,31 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var games = table.Rows.Select(r => r[0]).ToArray();
 
             var gameIds = await (from r in db.Rounds
-                                join g in db.Games
-                                    on r.GameId equals g.Id
-                                where r.ExternalRoundId == externalRoundId
-                                orderby r.CreatedOn
-                                select g.ExternalId).ToArrayAsync();
+                                 join g in db.Games
+                                     on r.GameId equals g.Id
+                                 where r.ExternalRoundId == externalRoundId
+                                 orderby r.CreatedOn
+                                 select g.ExternalId).ToArrayAsync();
 
             gameIds.Should().NotBeEmpty()
                 .And.HaveCount(games.Length)
                 .And.BeEquivalentTo(games);
         }
+
+        #region Private Classes
+
+        private record PlayerData
+        {
+            public string Username { get; init; }
+            public string Brand { get; init; }
+            public string CurrencyCode { get; init; }
+            public PlatformType Platform { get; init; }
+            public decimal Balance { get; init; }
+            public string GameId { get; init; }
+            public decimal BetAmount { get; init; }
+        }
+
+        #endregion
 
         #region After Scenario
 
@@ -552,7 +704,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         #region Private Methods
 
         private static string NewRoundId() =>
-            //DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             Guid.NewGuid().ToString();
 
         private Task<SBOConfiguration> GetSBOSetting() =>

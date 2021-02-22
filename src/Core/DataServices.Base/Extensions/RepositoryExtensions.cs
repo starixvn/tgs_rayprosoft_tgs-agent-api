@@ -15,19 +15,11 @@ namespace TGS.Core.DataServices.Base.Extensions
             where TRepository : DbContext, TInterface
         {
             const int poolSize = 64;
+            var connectionString = configuration.GetConnectionString(connectionName);
 
             services.AddDbContextPool<TRepository>(option =>
             {
-#if DEBUG
-                option.UseLoggerFactory(LoggerFactory.Create(builder =>
-                {
-                    builder.AddConsole();
-                    builder.SetMinimumLevel(LogLevel.Information);
-                }));
-                option.EnableSensitiveDataLogging();
-#endif
-
-                var connectionString = configuration.GetConnectionString(connectionName);
+                AddLogger(option);
 
                 option.UseLazyLoadingProxies();
 
@@ -38,15 +30,42 @@ namespace TGS.Core.DataServices.Base.Extensions
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                     serverOption.UseTrigrams();
                 });
-                
-                option.UseSnakeCaseNamingConvention();
 
+                option.UseSnakeCaseNamingConvention();
             }, poolSize);
 
+
+            services.AddDbContextFactory<TRepository>(option =>
+            {
+                AddLogger(option);
+
+                option.UseNpgsql(connectionString, serverOption =>
+                {
+                    serverOption.SetPostgresVersion(12, 5);
+                    serverOption.CommandTimeout(commandTimeout);
+                });
+            }, ServiceLifetime.Transient);
+
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
-            services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
+            services.AddTransient<Func<TInterface>>(c => () =>
+            {
+                var factory = c.GetRequiredService<IDbContextFactory<TRepository>>();
+                return factory.CreateDbContext();
+            });
 
             return services;
+        }
+
+        private static void AddLogger(DbContextOptionsBuilder option)
+        {
+#if DEBUG
+            option.UseLoggerFactory(LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Information);
+            }));
+            option.EnableSensitiveDataLogging();
+#endif
         }
     }
 }

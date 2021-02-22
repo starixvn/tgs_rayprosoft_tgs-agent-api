@@ -1,69 +1,42 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace TGS.Core.Infrastructures.Extensions
 {
     public static class EnumerableExtensions
     {
-        private static readonly IDictionary<Type, PropertyInformation> EntityProperties = new ConcurrentDictionary<Type, PropertyInformation>();
-
-        /// <summary>
-        /// Creates data table from source data.
-        /// </summary>
-        public static DataTable ToDataTable<T>(this IEnumerable<T> source)
-        {
-            var table = new DataTable();
-
-            var properties = GetPropertyInfo(typeof(T));
-
-            foreach (var property in properties.Properties)
-            {
-                table.Columns.Add(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
-            }
-
-            var values = new object[properties.Properties.Length];
-
-            foreach (var item in source)
-            {
-                for (var i = 0; i < properties.Properties.Length; i++)
-                {
-                    var cellValueGetter = properties.ValueGetterByName[properties.Properties[i].Name];
-                    values[i] = cellValueGetter(item) ?? DBNull.Value;
-                }
-
-                table.Rows.Add(values);
-            }
-
-            return table;
-        }
-
         public static Task<T[]> WhenAll<T>(this IEnumerable<Task<T>> source) =>
             Task.WhenAll(source);
 
-        private static PropertyInformation GetPropertyInfo(Type type)
+        public static IList<T[]> ToArraySegments<T>(this IEnumerable<T> source, int limit)
         {
-            if (EntityProperties.TryGetValue(type, out _))
+            if (limit < 1)
             {
-                return EntityProperties[type];
+                throw new ArgumentException($"limit for {nameof(ToArraySegments)} cannot be less than 1");
             }
 
-            var properties = type.GetProperties();
+            var arrays = new List<T[]>();
+            var current = new List<T>(limit);
 
-            var propertyGetter = properties.ToDictionary(
-                property => property.Name,
-                property => property.CreateGetter());
+            foreach (var e in source)
+            {
+                current.Add(e);
+                if (current.Count != limit)
+                {
+                    continue;
+                }
 
-            var propertySetter = properties.ToDictionary(
-                property => property.Name,
-                property => property.CreateSetter());
+                arrays.Add(current.ToArray());
+                current = new(limit);
+            }
 
-            EntityProperties[type] = new(properties, propertyGetter, propertySetter);
+            if (current.Count > 0)
+            {
+                arrays.Add(current.ToArray());
+            }
 
-            return EntityProperties[type];
+            return arrays;
         }
     }
 }

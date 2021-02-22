@@ -5,7 +5,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Workers.Schedulers.Jobs.Reports
 {
-    [Queue(Consts.Queue.Schedule)]
+    [Queue(Consts.Queue.Report)]
     public sealed class MarketReportWorker : BaseWork<TgsResponse>
     {
         private readonly IMarketReportService _worker;

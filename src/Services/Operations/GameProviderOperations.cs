@@ -56,6 +56,8 @@ namespace TGS.Services.Operations
         Task<IdMap<int>[]> GetSubGameIdsAsync(Guid gameProviderId, PlatformType platformType);
 
         Task<bool> GetAllowKickPlayerAsync(Guid gameProviderId);
+
+        Task<bool> GetAutoCloseRoundAsync(Guid gameProviderId);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -155,31 +157,13 @@ namespace TGS.Services.Operations
                 TimeSpan.FromHours(2),
                 () => _gameProviderQueries.GetGameProviderIdByCodeAsync(gameProviderCode));
 
-        async Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId)
-        {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
-                CachedGameProviderFields.Status);
-            if (value.HasValue)
-            {
-                return (Status) (int) value;
-            }
+        Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId) =>
+            GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.Status,
+                v => (Status) (int) v, gp => gp?.Status);
 
-            var cachedGameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
-            return cachedGameProvider?.Status;
-        }
-
-        async Task<bool> IGameProviderOperations.GetGameProviderSupportTestPlayerAsync(Guid gameProviderId)
-        {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
-                CachedGameProviderFields.SupportTestPlayer);
-            if (value.HasValue)
-            {
-                return (bool) value;
-            }
-
-            var cachedGameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
-            return cachedGameProvider?.SupportTestPlayer ?? false;
-        }
+        Task<bool> IGameProviderOperations.GetGameProviderSupportTestPlayerAsync(Guid gameProviderId) =>
+            GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.SupportTestPlayer,
+                v => (bool) v, gp => gp?.SupportTestPlayer ?? false);
 
         Task<string[]> IGameProviderOperations.GetGameProviderLanguagesAsync(Guid gameProviderId) =>
             _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderLanguages,
@@ -344,18 +328,13 @@ namespace TGS.Services.Operations
             return await GetAndCachedSubGameIdMapsAsync(gameProviderId, platformType);
         }
 
-        async Task<bool> IGameProviderOperations.GetAllowKickPlayerAsync(Guid gameProviderId)
-        {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
-                CachedGameProviderFields.AllowKickPlayer);
-            if (value.HasValue)
-            {
-                return (bool) value;
-            }
+        Task<bool> IGameProviderOperations.GetAllowKickPlayerAsync(Guid gameProviderId) =>
+            GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.AllowKickPlayer,
+                v => (bool) v, gp => gp?.AllowKickPlayer ?? false);
 
-            var cachedGameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
-            return cachedGameProvider?.AllowKickPlayer ?? false;
-        }
+        Task<bool> IGameProviderOperations.GetAutoCloseRoundAsync(Guid gameProviderId) => 
+            GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.AutoCloseRound,
+                v => (bool) v, gp => gp?.AutoCloseRound ?? true);
 
         #region Private Methods
 
@@ -414,6 +393,19 @@ namespace TGS.Services.Operations
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProvider, gameProviderId, fields,
                 TimeSpan.FromHours(2), true);
+        }
+
+        private async Task<T> GetCachedGameProviderValueAsync<T>(Guid gameProviderId, string field,
+            Func<RedisValue, T> cached, Func<CachedGameProvider, T> noCache)
+        {
+            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId, field);
+            if (value.HasValue)
+            {
+                return cached(value);
+            }
+
+            var gameProvider = await _interface.GetCachedGameProviderAsync(gameProviderId);
+            return noCache(gameProvider);
         }
 
         private async Task<CachedGameProviderConfiguration> GetCachedGameProviderConfigurationOrNullAsync(

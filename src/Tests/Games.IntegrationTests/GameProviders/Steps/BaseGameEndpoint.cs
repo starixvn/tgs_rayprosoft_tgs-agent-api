@@ -123,11 +123,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             });
         }
 
-        protected Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
+        protected async Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
         {
-            var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
+            await using var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
             var playerCode = Get<string>(SR.PlayerCode);
-            return db.Wallets.FirstAsync(w => w.PlayerCode == playerCode);
+            return await db.Wallets.FirstAsync(w => w.PlayerCode == playerCode);
         }
 
         protected static async Task<T> GetSettingAsync<T>(ServiceProvider serviceProvider, string key)

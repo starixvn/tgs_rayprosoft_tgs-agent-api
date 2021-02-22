@@ -17,7 +17,8 @@ namespace TGS.Core.Infrastructures.Transactions
             string externalTransactionId,
             Func<TContext, Task<TResult>> execute,
             Func<TContext, TResult, Task> onPostCommit = null,
-            Func<TContext, TResult, Exception, Task> onPostRollback = null)
+            Func<TContext, TResult, Exception, Task> onPostRollback = null,
+            bool autoDetectChangesEnabled = true)
             where TContext : IBaseRepository;
     }
 
@@ -36,12 +37,18 @@ namespace TGS.Core.Infrastructures.Transactions
             string externalTransactionId,
             Func<TContext, Task<TResult>> execute,
             Func<TContext, TResult, Task> onPostCommit,
-            Func<TContext, TResult, Exception, Task> onPostRollback)
+            Func<TContext, TResult, Exception, Task> onPostRollback,
+            bool autoDetectChangesEnabled)
         {
             await using var context = contextFactory();
             await using var transaction = await context.BeginTransactionAsync(level);
             ExceptionDispatchInfo errorInfo;
             TResult result = default;
+
+            if (!autoDetectChangesEnabled)
+            {
+                context.ChangeTracker.AutoDetectChangesEnabled = false;
+            }
 
             try
             {
@@ -91,6 +98,11 @@ namespace TGS.Core.Infrastructures.Transactions
             if (onPostRollback != null)
             {
                 await onPostRollback(context, result, errorInfo.SourceException);
+            }
+
+            if (!autoDetectChangesEnabled)
+            {
+                context.ChangeTracker.AutoDetectChangesEnabled = true;
             }
 
             errorInfo.Throw();

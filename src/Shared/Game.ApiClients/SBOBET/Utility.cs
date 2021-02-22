@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
+namespace TGS.Shared.Game.ApiClients.SBOBET
 {
     public static class Utility
     {

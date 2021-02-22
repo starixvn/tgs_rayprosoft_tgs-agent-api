@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.CodeMapper;
 using TGS.Core.Infrastructures.Json;
@@ -15,6 +16,7 @@ namespace TGS.Services.Operations.CodeMappers
 
     public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProviderCurrencyCodeMapper
     {
+        private const int CacheForMinutes = 30;
         private readonly IGameProviderQueries _gameProviderQueries;
 
         public GameProviderCurrencyCodeMapper(
@@ -33,7 +35,7 @@ namespace TGS.Services.Operations.CodeMappers
                 RedisCacheType.Currencies,
                 Consts.CachePrefix.GameProviderToTgsMap,
                 "currency",
-                30,
+                CacheForMinutes,
                 id => _gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
 
             if (!found)
@@ -44,7 +46,7 @@ namespace TGS.Services.Operations.CodeMappers
 
             return code;
         }
-
+        
         async Task<string> ICodeMapper.InternalToExternalAsync(string internalCode, Guid gameProviderId)
         {
             var (found, code) = await GetMappedCodeAsync(
@@ -53,7 +55,7 @@ namespace TGS.Services.Operations.CodeMappers
                 RedisCacheType.Currencies,
                 Consts.CachePrefix.TgsToGameProviderMap,
                 "currency",
-                30,
+                CacheForMinutes,
                 id => _gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
 
             if (!found)
@@ -64,5 +66,21 @@ namespace TGS.Services.Operations.CodeMappers
 
             return code;
         }
+        
+        Task<Dictionary<string, string>> ICodeMapper.GetMapByExternalCodeAsync(Guid gameProviderId) =>
+            GetMappedCodesAsync(
+                gameProviderId,
+                RedisCacheType.Currencies,
+                Consts.CachePrefix.GameProviderToTgsMap,
+                CacheForMinutes,
+                id => _gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
+
+        Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid gameProviderId) =>
+            GetMappedCodesAsync(
+                gameProviderId,
+                RedisCacheType.Currencies,
+                Consts.CachePrefix.TgsToGameProviderMap,
+                CacheForMinutes,
+                id => _gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
     }
 }

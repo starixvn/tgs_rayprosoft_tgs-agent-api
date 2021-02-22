@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Data;
 
 namespace TGS.Services.Operations.Queries
 {
@@ -13,7 +14,12 @@ namespace TGS.Services.Operations.Queries
         Task<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId,
             int gameId);
 
-        Task<Round> GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions = false, bool includeRoundDetail = false);
+        Task<Round> GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions = false,
+            bool includeRoundDetail = false);
+
+        Task<RoundWithGameActionExternalIds[]> GetRoundWithGameActionExternalIdsAsync(Guid gameProviderId,
+            DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus = RoundStatus.Closed,
+            GameType? gameType = null);
     }
 
     public sealed class RoundQueries : IRoundQueries
@@ -49,6 +55,46 @@ namespace TGS.Services.Operations.Queries
             }
 
             return query.FirstOrDefaultAsync(c => c.Id == roundId);
+        }
+
+        Task<RoundWithGameActionExternalIds[]> IRoundQueries.GetRoundWithGameActionExternalIdsAsync(
+            Guid gameProviderId, DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus, GameType? gameType)
+        {
+            var query = _repository.Rounds
+                .Where(r => r.GameProviderId == gameProviderId &&
+                    r.CreatedOn >= start && r.CreatedOn <= end &&
+                    r.Status == roundStatus)
+                .Include(r => r.GameActions)
+                .Join(_repository.Games, r => r.GameId, g => g.Id, (r, g) => new {Round = r, Game = g});
+
+            if (gameType.HasValue)
+            {
+                query = query.Where(a => a.Game.Type == gameType);
+            }
+
+            return query.Select(a => new RoundWithGameActionExternalIds
+            {
+                Id = a.Round.Id,
+                PlayerCode = a.Round.PlayerCode,
+                PlatformType = a.Round.PlatformType,
+                CurrencyCode = a.Round.CurrencyCode,
+                ExternalRoundId = a.Round.ExternalRoundId,
+                GameId = a.Game.Id,
+                ExternalGameId = a.Game.ExternalId,
+                Status = a.Round.Status,
+                ExternalCreatedOn = a.Round.ExternalCreatedOn ?? a.Round.CreatedOn,
+                GameActionExternalIds = a.Round.GameActions.Select(ga => new GameActionExternalIds
+                {
+                    ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
+                    ExternalBetId = ga.ExternalBetId,
+                    ExternalTransactionId = ga.ExternalTransactionId,
+                    ExternalReferencedTransactionId = a.Round.GameActions.Where(act => act.Id == ga.ReferencedGameActionId).Select(act => act.ExternalTransactionId).FirstOrDefault(),
+                    ExternalRoundId = a.Round.ExternalRoundId,
+                    Amount = ga.Amount,
+                    GameActionType = ga.Type,
+                    RecordedOn = ga.RecordedOn
+                }).ToArray()
+            }).ToArrayAsync();
         }
     }
 }

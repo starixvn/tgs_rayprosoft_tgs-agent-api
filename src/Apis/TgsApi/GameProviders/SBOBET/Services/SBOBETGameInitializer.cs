@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading.Tasks;
-using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -13,6 +12,7 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
+using TGS.Shared.Game.ApiClients.SBOBET;
 using TGS.Shared.Game.Models.SBOBET.Outgoing;
 using static TGS.Shared.Game.Models.SBOBET.Enums.ServiceApiError;
 

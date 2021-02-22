@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.CodeMapper;
 using TGS.Core.Infrastructures.Json;
@@ -15,6 +16,7 @@ namespace TGS.Services.Operations.CodeMappers
 
     public sealed class GameProviderLanguageCodeMapper : BaseCodeMapper, IGameProviderLanguageCodeMapper
     {
+        private const int CacheForMinutes = 30;
         private readonly IGameProviderQueries _gameProviderQueries;
 
         public GameProviderLanguageCodeMapper(
@@ -33,7 +35,7 @@ namespace TGS.Services.Operations.CodeMappers
                 RedisCacheType.Languages,
                 Consts.CachePrefix.GameProviderToTgsMap,
                 "language",
-                30,
+                CacheForMinutes,
                 id => _gameProviderQueries.GetGameProviderLanguagesByExternalCodeAsync(id));
 
             if (!found)
@@ -53,7 +55,7 @@ namespace TGS.Services.Operations.CodeMappers
                 RedisCacheType.Languages,
                 Consts.CachePrefix.TgsToGameProviderMap,
                 "language",
-                30,
+                CacheForMinutes,
                 id => _gameProviderQueries.GetGameProviderLanguagesByInternalCodeAsync(id));
 
             if (!found)
@@ -64,5 +66,21 @@ namespace TGS.Services.Operations.CodeMappers
 
             return code;
         }
+        
+        Task<Dictionary<string, string>> ICodeMapper.GetMapByExternalCodeAsync(Guid gameProviderId) =>
+            GetMappedCodesAsync(
+                gameProviderId,
+                RedisCacheType.Languages,
+                Consts.CachePrefix.GameProviderToTgsMap,
+                CacheForMinutes,
+                id => _gameProviderQueries.GetGameProviderLanguagesByExternalCodeAsync(id));
+
+        Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid gameProviderId) =>
+            GetMappedCodesAsync(
+                gameProviderId,
+                RedisCacheType.Languages,
+                Consts.CachePrefix.TgsToGameProviderMap,
+                CacheForMinutes,
+                id => _gameProviderQueries.GetGameProviderLanguagesByInternalCodeAsync(id));
     }
 }

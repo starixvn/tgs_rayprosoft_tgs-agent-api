@@ -168,8 +168,14 @@
   <data name="PlayerCode" xml:space="preserve">
     <value>PlayerCode</value>
   </data>
+  <data name="Players" xml:space="preserve">
+    <value>Players</value>
+  </data>
   <data name="Request" xml:space="preserve">
     <value>Request</value>
+  </data>
+  <data name="Requests" xml:space="preserve">
+    <value>Requests</value>
   </data>
   <data name="Response" xml:space="preserve">
     <value>Response</value>

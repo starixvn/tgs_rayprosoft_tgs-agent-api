@@ -21,7 +21,7 @@ namespace TGS.Core.Infrastructures.Log
             services.AddSingleton<LogBusEvent>(sp => new AdminLogEvent());
             services.AddScoped(c => CreateLoggerPublisher(c.GetRequiredService<INatsManager>()));    
     
-            services.AddTransient<ITgsLog, TgsLog>();    
+            services.AddTransient<ITgsLog, TgsLog>();
 
             services.AddLogging();
 

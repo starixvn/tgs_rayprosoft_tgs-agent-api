@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
-using TGS.Apis.TgsApi.GameProviders.SBOBET.Clients;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -15,6 +14,7 @@ using TGS.Core.Models.Services.BetHistories;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
+using TGS.Shared.Game.ApiClients.SBOBET;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
@@ -73,7 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             var gameResults = response.Results;
 
-            if (gameResults.Length == 0)
+            if (gameResults == null || gameResults.Length == 0)
             {
                 return new();
             }
