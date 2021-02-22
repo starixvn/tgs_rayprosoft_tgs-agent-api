@@ -73,6 +73,11 @@ aws --endpoint-url=http://localhost:4566 s3 mb s3://dev-files
 4.visit the Web UI
 http://localhost:8080/
 
+## StartUp docker compose
+
+stop to convert to windows style when git pull branch
+1. git config --global core.autocrlf false
+#reference https://docs.github.com/en/github/using-git/configuring-git-to-handle-line-endings#global-settings-for-line-endings
 
 
 
