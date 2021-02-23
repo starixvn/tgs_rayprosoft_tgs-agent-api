@@ -23,6 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nats.IntegrationTests", "sr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{897541B7-3AE6-4AEE-9D3E-51221088F2CC}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitlab-ci.yml = .gitlab-ci.yml
 		docker-compose.yml = docker-compose.yml
 		DockerImageBuild.bat = DockerImageBuild.bat
@@ -102,7 +103,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game.Models", "src\Shared\G
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedulers", "src\Workers\Schedulers\Schedulers.csproj", "{08AD170C-9422-46C8-9388-94A5F6EDAD18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.ApiClients", "src\Shared\Game.ApiClients\Game.ApiClients.csproj", "{FA3CEFE5-5F19-48E9-9EC0-6E9D4FC77E7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game.ApiClients", "src\Shared\Game.ApiClients\Game.ApiClients.csproj", "{FA3CEFE5-5F19-48E9-9EC0-6E9D4FC77E7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

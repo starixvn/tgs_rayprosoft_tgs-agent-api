@@ -1,0 +1,26 @@
+﻿using System.Threading.Tasks;
+using CliWrap;
+using NUnit.Framework;
+
+namespace TGS.Tests.Redis.IntegrationTests
+{
+    [SetUpFixture]
+    public class TestsSetup
+    {
+        [OneTimeSetUp]
+        public async Task TestFixtureSetUpAsync()
+        {
+            await Cli.Wrap("docker")
+                .WithArguments("run -d --rm --name redistest -p 6379:6379 redis")
+                .ExecuteAsync();
+        }
+
+        [OneTimeTearDown]
+        public Task FinalTearDownAsync()
+        {
+            return Cli.Wrap("docker")
+                .WithArguments("stop redistest")
+                .ExecuteAsync();
+        }
+    }
+}
