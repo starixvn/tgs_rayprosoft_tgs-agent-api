@@ -133,11 +133,6 @@ services:
       - log-api
       - game-sbo
       - redis 
-    command: >
-      bash -c "./wait-for-it.sh postgres:5432 &&
-        ./wait-for-it.sh log-api:80 &&
-        ./wait-for-it.sh game-sbo:80 &&
-        ./wait-for-it.sh redis:6379 -- dotnet TGS.Apis.BackendOffice.dll --urls http://+:80"
 
   fileservice:
     build:
@@ -157,9 +152,6 @@ services:
       tgs:
     depends_on:
       - mongodb
-    command: >
-      bash -c "./wait-for-it.sh nats:4222 && 
-        ./wait-for-it.sh mongodb:27017 -- dotnet TGS.Apis.FileService.dll --urls http://+:80"
 
   mongodb:
     image: mongo:4.2.0
@@ -214,9 +206,6 @@ services:
     depends_on:
       - postgres
       - game-sbo
-    command:
-      bash -c "./wait-for-it.sh postgres:5432 && 
-        ./wait-for-it.sh game-sbo:80 -- dotnet TGS.Apis.OperatorApi.dll --urls http://+:80"
 
   game-sbo:
     build:
@@ -238,11 +227,6 @@ services:
       - nats
       - redis
       - log-api
-    command: >
-      bash -c "./wait-for-it.sh postgres:5432 &&
-        ./wait-for-it.sh nats:4222 &&
-        ./wait-for-it.sh log-api:80 &&
-        ./wait-for-it.sh redis:6379 -- dotnet TGS.Apis.TgsApi.dll --urls http://+:80"
 
   log-api:
     build:
@@ -264,10 +248,6 @@ services:
       - postgres
       - nats
       - redis
-    command: >
-      bash -c "./wait-for-it.sh postgres:5432 &&
-        ./wait-for-it.sh nats:4222 &&
-        ./wait-for-it.sh redis:6379 -- dotnet TGS.Apis.LogApi.dll --urls http://+:80"
 
   global-api:
     build:
@@ -292,9 +272,6 @@ services:
     depends_on:
       - postgres
       - operator-api
-    command: >
-      bash -c "./wait-for-it.sh postgres:5432 &&
-        ./wait-for-it.sh operator-api:80 -- dotnet TGS.Apis.GlobalApi.dll --urls http://+:80"
 
   nats:
     image: nats
@@ -386,12 +363,6 @@ services:
       - mongodb
       - redis
       - game-sbo
-    command: >
-      bash -c "./wait-for-it.sh postgres:5432 &&
-        ./wait-for-it.sh nats:4222 &&
-        ./wait-for-it.sh game-sbo:80 &&
-        ./wait-for-it.sh mongodb:27017 &&
-        ./wait-for-it.sh redis:6379 -- dotnet TGS.Workers.Schedulers.dll --urls http://+:80"
 
 networks:
   tgs:
