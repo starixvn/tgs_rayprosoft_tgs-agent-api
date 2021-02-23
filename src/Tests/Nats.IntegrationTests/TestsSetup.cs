@@ -8,9 +8,9 @@ namespace TGS.Tests.Nats.IntegrationTests
     public class TestsSetup
     {
         [OneTimeSetUp]
-        public async Task TestFixtureSetUpAsync()
+        public Task TestFixtureSetUpAsync()
         {
-            await Cli.Wrap("docker")
+            return Cli.Wrap("docker")
                 .WithArguments("run -d --rm --name natstest -p 4222:4222 nats")
                 .ExecuteAsync();
         }

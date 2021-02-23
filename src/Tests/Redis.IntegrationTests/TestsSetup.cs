@@ -8,9 +8,9 @@ namespace TGS.Tests.Redis.IntegrationTests
     public class TestsSetup
     {
         [OneTimeSetUp]
-        public async Task TestFixtureSetUpAsync()
+        public Task TestFixtureSetUpAsync()
         {
-            await Cli.Wrap("docker")
+            return Cli.Wrap("docker")
                 .WithArguments("run -d --rm --name redistest -p 6379:6379 redis")
                 .ExecuteAsync();
         }
