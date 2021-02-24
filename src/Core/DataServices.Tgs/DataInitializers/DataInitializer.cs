@@ -78,7 +78,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             _gameProviders = new IGameProvider[]
             {
-                new SBOGameProvider(env)
+                new SBOGameProvider(env),
+                new HabaneroGameProvider(env)
             };
         }
 

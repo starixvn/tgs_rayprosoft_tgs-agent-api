@@ -95,7 +95,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SBOConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new Uri("http://game-sbo") : new Uri("https://localhost:62330"),
+                        _env.IsDocker() ? new Uri("http://game-sbo") : new Uri("http://localhost:62330"),
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
                     ApiUrl = new Uri("https://ex-api-demo-yy.568win.com")
                 };

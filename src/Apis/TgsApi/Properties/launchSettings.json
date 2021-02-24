@@ -21,12 +21,33 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-Habanero": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "HABA",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "GameProviderCode": "SBO",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    },
+    "Docker-Habanero": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "GameProviderCode": "HABA",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,

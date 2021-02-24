@@ -17,7 +17,8 @@ namespace TGS.Apis.TgsApi
 
         private static readonly IReadOnlyDictionary<string, string> ConfigFileMap = new Dictionary<string, string>
         {
-            {Consts.GameProvider.SBOBET, "SBOBET/sbobet.json"}
+            {Consts.GameProvider.SBOBET, "SBOBET/sbobet.json"},
+            {Consts.GameProvider.Habanero, "Habanero/habanero.json"}
             //{ Consts.GameProvider.RedTiger, "RedTiger/redtiger.json" }
         };
     }

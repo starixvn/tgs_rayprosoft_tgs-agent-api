@@ -48,5 +48,9 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GameProviders\Habanero\Services\" />
+  </ItemGroup>
+
 
 </Project>

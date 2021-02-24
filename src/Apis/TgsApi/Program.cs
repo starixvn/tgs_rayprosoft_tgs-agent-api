@@ -24,7 +24,6 @@ namespace TGS.Apis.TgsApi
         {
             var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ??
                          string.Empty;
-            var env = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.Environment) ?? string.Empty;
 
             return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(config =>

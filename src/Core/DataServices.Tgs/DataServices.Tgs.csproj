@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataInitializers\Games\SBO.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -16,6 +20,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_round_id.sql" />
