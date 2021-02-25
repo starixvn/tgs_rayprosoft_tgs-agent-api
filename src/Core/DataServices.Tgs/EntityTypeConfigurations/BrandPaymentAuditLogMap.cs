@@ -16,13 +16,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(p => p.BrandPaymentId);
 
-            //builder.Property(c => c.BeforeChannelName)
-            //    .HasMaxLength(50);
-
-            //builder.Property(c => c.AfterChannelName)
-            //    .HasMaxLength(50)
-            //    .IsRequired();
-
             builder.Property(c => c.Reason)
                 .HasMaxLength(4000);
 
@@ -36,38 +29,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Operation)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
-
-            //builder.Property(c => c.BeforeTransferLimitFrom)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.BeforeTransferLimitTo)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.BeforeDepositedAmountMin)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.BeforeDepositedAmountMax)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.AfterTransferLimitFrom)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.AfterTransferLimitTo)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.AfterDepositedAmountMin)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
-
-            //builder.Property(c => c.AfterDepositedAmountMax)
-            //    .HasPrecision(18, 6)
-            //    .IsRequired();
 
             builder.Property(c => c.Before)
                 .HasColumnType(ColumnTypes.Jsonb)
