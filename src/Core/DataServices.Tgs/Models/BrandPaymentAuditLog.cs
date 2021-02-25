@@ -32,9 +32,9 @@ namespace TGS.Core.DataServices.Tgs.Models
         //public decimal BeforeDepositedAmountMax { get; set; }
         //public decimal AfterDepositedAmountMax { get; set; }
 
-        public object Before { get; set; }
+        public string Before { get; set; }
 
-        public object After { get; set; }
+        public string After { get; set; }
 
         public string Reason { get; set; }
 

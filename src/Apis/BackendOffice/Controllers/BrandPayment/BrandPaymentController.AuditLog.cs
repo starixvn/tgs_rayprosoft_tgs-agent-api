@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
-using BrandPaymentEntitiy = TGS.Core.DataServices.Tgs.Models.BrandPayment;
-
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -22,8 +22,8 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 			{
 				Valid = true,
 				AuditLogs = (from log in auditLogs
-							 let before = (BrandPaymentEntitiy)log.Before
-							 let after = (BrandPaymentEntitiy)log.After
+							 let before = JsonSerializer.Deserialize<BrandPaymentAuditData>(log.Before)
+							 let after = JsonSerializer.Deserialize<BrandPaymentAuditData>(log.After)
 							 select new PaymentAuditLogModel
 							 {
 								 Id = log.Id,
