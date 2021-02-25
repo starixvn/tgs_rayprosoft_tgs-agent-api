@@ -129,10 +129,7 @@ services:
         aliases:
           - backoffice.api
     depends_on:
-      - postgres
-      - log-api
-      - game-sbo
-      - redis 
+      - operator-api
 
   fileservice:
     build:
@@ -205,7 +202,7 @@ services:
       tgs:
     depends_on:
       - postgres
-      - game-sbo
+      - redis
 
   game-sbo:
     build:
@@ -227,6 +224,7 @@ services:
       - nats
       - redis
       - log-api
+      - operator-api
 
   log-api:
     build:
@@ -352,12 +350,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
     ports:
-       - 32340:80
+      - 32340:80
     networks:
       tgs:
         aliases:
           - scheduler
-    depends_on: 
+    depends_on:
       - nats
       - postgres
       - mongodb
