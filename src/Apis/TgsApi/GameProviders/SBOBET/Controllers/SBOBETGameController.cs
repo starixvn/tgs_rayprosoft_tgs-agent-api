@@ -27,26 +27,32 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             _mediator = mediator;
         }
 
+        [HttpPost]
         [Route("GetBalance")]
         public Task<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request) =>
             _mediator.Send(request);
 
+        [HttpPost]
         [Route("Deduct")]
         public Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request) =>
             _mediator.Send(request);
 
+        [HttpPost]
         [Route("Settle")]
         public Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request) =>
             _mediator.Send(request);
 
+        [HttpPost]
         [Route("Cancel")]
         public Task<CancelBetResponse> CancelBetAsync(CancelBetRequest request) =>
             _mediator.Send(request);
 
+        [HttpPost]
         [Route("Rollback")]
         public Task<RollbackResponse> RollbackAsync(RollbackRequest request) =>
             _mediator.Send(request);
 
+        [HttpPost]
         [Route("GetBetStatus")]
         public Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request) =>
             _mediator.Send(request);
