@@ -31,7 +31,7 @@ namespace TGS.Core.Infrastructures.Redis
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
             var existingKey = await db.KeyExistsAsync(cacheKey);
-            var serializedValues = data.Select(d => (RedisValue) _serializationProvider.SerializeToString(d)).ToArray();
+            var serializedValues = data.Select(d => (RedisValue)_serializationProvider.SerializeToString(d)).ToArray();
             await db.ListRightPushAsync(cacheKey, serializedValues);
 
             if (existingKey == false)
@@ -42,7 +42,7 @@ namespace TGS.Core.Infrastructures.Redis
 
         Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
         {
-            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> {data});
+            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
         }
 
         async Task<List<T>> IRedisCacheManager.GetListAsync<T>(object cacheType, object key,
@@ -72,7 +72,7 @@ namespace TGS.Core.Infrastructures.Redis
                 return 0;
             }
 
-            var cacheKeys = keys.Select(k => (RedisKey) FormCacheKey(k)).ToArray();
+            var cacheKeys = keys.Select(k => (RedisKey)FormCacheKey(k)).ToArray();
             var db = _repository.GetDb();
             var flags = GetCommandFlags(fireAndForget);
 
@@ -95,7 +95,21 @@ namespace TGS.Core.Infrastructures.Redis
             var keys = server.Keys(pattern: keyPattern, database: db.Database).ToArray();
             var flags = GetCommandFlags(fireAndForget);
 
-            await db.KeyDeleteAsync(keys.ToArray(), flags);
+            var totalPage = Math.DivRem(keys.Length, 10000, out var rem);
+            if (rem > 0)
+                totalPage += 1;
+            var index = 0;
+
+            var deleteTasks = new List<Task>();
+            while (index < totalPage)
+            {
+                var shard = keys.Skip(index * 10000).Take(10000).ToArray();
+                deleteTasks.Add(db.KeyDeleteAsync(shard, flags));
+
+                index++;
+            }
+
+            await Task.WhenAll(deleteTasks).ConfigureAwait(false);
 
             return keys.Length;
         }
