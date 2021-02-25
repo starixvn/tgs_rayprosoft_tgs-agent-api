@@ -7,7 +7,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
     {
         public string Username { get; set; }
         public string RealName { get; set; }
-        public Guid VipId { get; set; }
         public string VipLevel { get; set; }
         public string ParentUsername { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }

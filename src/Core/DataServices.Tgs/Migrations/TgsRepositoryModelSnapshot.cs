@@ -371,6 +371,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
 
+                    b.Property<bool>("IsManualChangeStatus")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_manual_change_status");
+
                     b.Property<string>("MobileQueryString")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

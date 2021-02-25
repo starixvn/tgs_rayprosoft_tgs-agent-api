@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 using TGS.Services.BackOffice.Application.Resources;
@@ -30,6 +31,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderHandlers
             }
 
             brandGameProvider.Status = request.Status;
+            brandGameProvider.IsManualChangeStatus = request.Status == Status.Maintenance;
 
             await _service.UpdateBrandGameProviderAsync(brandGameProvider);
 

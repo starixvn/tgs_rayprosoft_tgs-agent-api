@@ -28,6 +28,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string DesktopQueryString { get; set; }
 
         public string MobileQueryString { get; set; }
+        public bool IsManualChangeStatus { get; set; }
 
         public virtual ICollection<BrandGameProviderSchedule> Schedules { get; set; }
     }
