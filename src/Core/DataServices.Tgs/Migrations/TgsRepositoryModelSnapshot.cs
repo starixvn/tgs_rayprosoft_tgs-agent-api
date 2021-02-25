@@ -371,6 +371,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
 
+                    b.Property<bool>("IsManualChangeStatus")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_manual_change_status");
+
                     b.Property<string>("MobileQueryString")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -731,15 +735,104 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<object>("After")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("after");
+                    b.Property<bool>("AfterAllPlayers")
+                        .HasColumnType("boolean")
+                        .HasColumnName("after_all_players");
 
-                    b.Property<object>("Before")
+                    b.Property<string>("AfterChannelName")
                         .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("before");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("after_channel_name");
+
+                    b.Property<decimal>("AfterDepositedAmountMax")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("after_deposited_amount_max");
+
+                    b.Property<decimal>("AfterDepositedAmountMin")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("after_deposited_amount_min");
+
+                    b.Property<bool>("AfterDepositedAmountUnlimited")
+                        .HasColumnType("boolean")
+                        .HasColumnName("after_deposited_amount_unlimited");
+
+                    b.Property<bool>("AfterIdentityAuthentication")
+                        .HasColumnType("boolean")
+                        .HasColumnName("after_identity_authentication");
+
+                    b.Property<int>("AfterPaymentStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("after_payment_status");
+
+                    b.Property<bool>("AfterPhoneAuthentication")
+                        .HasColumnType("boolean")
+                        .HasColumnName("after_phone_authentication");
+
+                    b.Property<int>("AfterPlayerListCondition")
+                        .HasColumnType("integer")
+                        .HasColumnName("after_player_list_condition");
+
+                    b.Property<decimal>("AfterTransferLimitFrom")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("after_transfer_limit_from");
+
+                    b.Property<decimal>("AfterTransferLimitTo")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("after_transfer_limit_to");
+
+                    b.Property<bool>("BeforeAllPlayers")
+                        .HasColumnType("boolean")
+                        .HasColumnName("before_all_players");
+
+                    b.Property<string>("BeforeChannelName")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("before_channel_name");
+
+                    b.Property<decimal>("BeforeDepositedAmountMax")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("before_deposited_amount_max");
+
+                    b.Property<decimal>("BeforeDepositedAmountMin")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("before_deposited_amount_min");
+
+                    b.Property<bool>("BeforeDepositedAmountUnlimited")
+                        .HasColumnType("boolean")
+                        .HasColumnName("before_deposited_amount_unlimited");
+
+                    b.Property<bool>("BeforeIdentityAuthentication")
+                        .HasColumnType("boolean")
+                        .HasColumnName("before_identity_authentication");
+
+                    b.Property<int>("BeforePaymentStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("before_payment_status");
+
+                    b.Property<bool>("BeforePhoneAuthentication")
+                        .HasColumnType("boolean")
+                        .HasColumnName("before_phone_authentication");
+
+                    b.Property<int>("BeforePlayerListCondition")
+                        .HasColumnType("integer")
+                        .HasColumnName("before_player_list_condition");
+
+                    b.Property<decimal>("BeforeTransferLimitFrom")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("before_transfer_limit_from");
+
+                    b.Property<decimal>("BeforeTransferLimitTo")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("before_transfer_limit_to");
 
                     b.Property<Guid>("BrandPaymentId")
                         .HasColumnType("uuid")

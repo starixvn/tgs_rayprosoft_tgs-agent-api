@@ -27,12 +27,11 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
             return _service.GetMarketsAsync()
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
-                .GroupBy(x => new {x.Id, x.BrandId, CreateOnDateString = x.ReportDateString}, (market, markets) =>
+                .GroupBy(x => new {x.BrandId, x.ReportDate}, (market, markets) =>
                     new MarketModel
                     {
-                        Id = market.Id,
                         BrandId = market.BrandId,
-                        DateString = market.CreateOnDateString,
+                        ReportDate = market.ReportDate,
                         RegisteredCount = markets.Sum(m => m.RegisteredCount),
                         FirstFundInCount = markets.Sum(m => m.FirstFundInCount),
                         DepositAmount = markets.Sum(m => m.DepositAmount),
@@ -43,7 +42,8 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
                         ValidBetAmount = markets.Sum(m => m.ValidBetAmount),
                         WinLossAmount = markets.Sum(m => m.WinLossAmount),
                         NetProfit = markets.Sum(m => m.NetProfit)
-                    }).CreatePagedResponseAsync(request);
+                    })
+                .CreatePagedResponseAsync(request);
         }
     }
 }
