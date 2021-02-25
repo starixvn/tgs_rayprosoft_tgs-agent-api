@@ -10,6 +10,12 @@ pipeline {
     }
 	
     stages {
+		stage('Clear') {
+			steps {
+				 cleanWs()
+			}
+		}
+		
 		stage('Build') {
 			steps {
 				sh "dotnet build tgs.sln"
