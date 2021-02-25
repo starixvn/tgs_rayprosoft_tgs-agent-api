@@ -131,6 +131,19 @@ services:
     depends_on:
       - operator-api
 
+  report-api:
+    build:
+      context: .
+      dockerfile: ./src/Apis/ReportApi/Dockerfile
+    image: report-api
+    container_name: report-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    networks:
+      tgs:
+    depends_on:
+      - postgres
+
   fileservice:
     build:
       context: .
