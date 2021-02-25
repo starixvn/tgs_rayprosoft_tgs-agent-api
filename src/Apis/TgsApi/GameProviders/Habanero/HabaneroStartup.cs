@@ -1,10 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares;
+using TGS.Apis.TgsApi.GameProviders.Habanero.Services;
+using TGS.Core.Infrastructures.ErrorMappers;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Habanero
 {
@@ -16,5 +19,30 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
         }
 
         protected override string LogPrefix => "habanero";
+
+        protected override void AddCustomDependencyServices(IServiceCollection services)
+        {
+            services.AddErrorMappers(
+                new[] {typeof(HabaneroErrorMapper)},
+                (provider, key) => key switch
+                {
+                    GameProvider.Habanero => provider.GetRequiredService<HabaneroErrorMapper>(),
+                    _                     => provider.GetRequiredService<TgsErrorMapper>()
+                }
+            );
+
+            services.AddScoped<HandleHabaneroExceptionMiddleware>();
+        }
+
+        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        {
+            const string Route = "/api/provider";
+
+            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<HandleHabaneroExceptionMiddleware>();
+                });
+        }
     }
 }

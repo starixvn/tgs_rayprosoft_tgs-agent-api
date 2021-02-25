@@ -6,24 +6,28 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
     public record AuthorizePlayerResponse
     {
         [JsonPropertyName("playerdetailresponse")]
-        public AuthorizeResult Result { get; set; }
+        public AuthorizeResult Result { get; init; }
     }
 
     public record AuthorizeResult
     {
         [JsonPropertyName("status")]
-        public Status Status { get; set; }
+        public Status Status { get; init; }
 
         [JsonPropertyName("accountid")]
-        public Guid PlayerId { get; set; }
+        [JsonIgnore(Condition =  JsonIgnoreCondition.WhenWritingDefault)]
+        public string PlayerCode { get; init; }
 
         [JsonPropertyName("accountname")]
-        public string PlayerUsername { get; set; }
+        [JsonIgnore(Condition =  JsonIgnoreCondition.WhenWritingDefault)]
+        public string PlayerUsername { get; init; }
 
         [JsonPropertyName("balance")]
-        public decimal Balance { get; set; }
+        [JsonIgnore(Condition =  JsonIgnoreCondition.WhenWritingNull)]
+        public decimal? Balance { get; init; }
 
         [JsonPropertyName("currencycode")]
-        public string CurrencyCode { get; set; }
+        [JsonIgnore(Condition =  JsonIgnoreCondition.WhenWritingDefault)]
+        public string CurrencyCode { get; init; }
     }
 }

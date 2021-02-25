@@ -2,7 +2,8 @@
 {
     public record GetBalanceResult
     {
+        public string Username { get; init; }
         public decimal Balance { get; init; }
-        public string CurrencyCode { get; init; }
+        public string GameProviderCurrency { get; init; }
     }
 }

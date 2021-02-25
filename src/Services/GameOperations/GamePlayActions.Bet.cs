@@ -31,13 +31,13 @@ namespace TGS.Services.GameOperations
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
-
             var balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
             return new()
             {
+                Username = player.Username,
                 Balance = balance,
-                CurrencyCode = cur
+                GameProviderCurrency = cur
             };
         }
 

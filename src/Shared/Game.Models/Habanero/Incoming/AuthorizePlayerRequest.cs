@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Shared.Game.Models.Habanero.Incoming
 {
-    public record AuthorizePlayerRequest : BaseRequest
+    public record AuthorizePlayerRequest : BaseRequest, IRequest<AuthorizePlayerResponse>
     {
         [JsonPropertyName("playerdetailrequest")]
         public PlayerDetail Detail { get; init; }

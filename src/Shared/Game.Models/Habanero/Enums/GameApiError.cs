@@ -2,10 +2,11 @@
 {
     public enum GameApiError
     {
+        Success,
         Uncategorized,
         AuthorizationFailed,
         InsufficientFunds,
         DuplicateTransaction,
-        TransactionToCancelNotFound
+        TransactionNotExist
     }
 }
