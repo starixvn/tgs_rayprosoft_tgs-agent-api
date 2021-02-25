@@ -12,6 +12,7 @@ namespace TGS.Tests.Redis.IntegrationTests
         {
             return Cli.Wrap("docker")
                 .WithArguments("run -d --rm --name redistest -p 6379:6379 redis")
+                .WithValidation(CommandResultValidation.None)
                 .ExecuteAsync();
         }
 
@@ -20,6 +21,7 @@ namespace TGS.Tests.Redis.IntegrationTests
         {
             return Cli.Wrap("docker")
                 .WithArguments("stop redistest")
+                .WithValidation(CommandResultValidation.None)
                 .ExecuteAsync();
         }
     }

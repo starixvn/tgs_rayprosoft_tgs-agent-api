@@ -12,6 +12,7 @@ namespace TGS.Tests.Nats.IntegrationTests
         {
             return Cli.Wrap("docker")
                 .WithArguments("run -d --rm --name natstest -p 4222:4222 nats")
+                .WithValidation(CommandResultValidation.None)
                 .ExecuteAsync();
         }
 
@@ -20,6 +21,7 @@ namespace TGS.Tests.Nats.IntegrationTests
         {
             return Cli.Wrap("docker")
                 .WithArguments("stop natstest")
+                .WithValidation(CommandResultValidation.None)
                 .ExecuteAsync();
         }
     }
