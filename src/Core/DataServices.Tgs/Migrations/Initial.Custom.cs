@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-	public partial class Initial: Migration
+	public partial class Initial
 	{
 		private static void InitAfterRun(MigrationBuilder migrationBuilder)
 		{

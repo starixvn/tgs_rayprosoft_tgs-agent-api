@@ -240,8 +240,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 			{
 				Id = Guid.NewGuid(),
 				BrandPaymentId = payment.Id,
-				Before = JsonSerializer.Serialize(ExchangeBrandPaymentData(payment)),
-				After = JsonSerializer.Serialize(ExchangeBrandPaymentData(beforePayment)),
+				Before = JsonSerializer.Serialize(ExchangeBrandPaymentData(beforePayment)),
+				After = JsonSerializer.Serialize(ExchangeBrandPaymentData(payment)),
 				Reason = payment.Reason,
 				CreatedOn = payment.UpdatedOn,
 				CreatedByUsername = payment.UpdatedByUsername,

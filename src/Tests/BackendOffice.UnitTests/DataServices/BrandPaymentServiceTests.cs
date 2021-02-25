@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ExpectedObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
@@ -86,7 +87,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 				source.PhoneAuthentication,
 				source.DepositedAmountMin,
 				source.DepositedAmountMax,
-				source.DepositedAmountUnlimited);
+				source.DepositedAmountUnlimited).ToExpectedObject();
+
 			var afterExpected = new BrandPaymentAuditData(
 				request.ChannelName,
 				request.PaymentStatus,
@@ -98,7 +100,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 				request.PhoneAuthentication,
 				request.DepositedAmountMin,
 				request.DepositedAmountMax,
-				request.DepositedAmountUnlimited);
+				request.DepositedAmountUnlimited).ToExpectedObject();
 
 			await sut.UpdatePaymentAsync(source, request, "tester");
 
@@ -110,8 +112,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 			var beforeActual = JsonSerializer.Deserialize<BrandPaymentAuditData>(auditLog.Before);
 			var afterActual = JsonSerializer.Deserialize<BrandPaymentAuditData>(auditLog.After);
 
-			Assert.AreSame(beforeExpected, beforeActual);
-			Assert.AreSame(afterExpected, afterActual);
+			beforeExpected.ShouldMatch(beforeActual);
+			afterExpected.ShouldMatch(afterActual);
 		}
 	}
 }

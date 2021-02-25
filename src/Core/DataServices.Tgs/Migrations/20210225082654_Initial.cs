@@ -24,28 +24,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     brand_payment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    before_channel_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    after_channel_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    before_payment_status = table.Column<int>(type: "integer", nullable: false),
-                    after_payment_status = table.Column<int>(type: "integer", nullable: false),
-                    before_transfer_limit_from = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    after_transfer_limit_from = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    before_transfer_limit_to = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    after_transfer_limit_to = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    before_player_list_condition = table.Column<int>(type: "integer", nullable: false),
-                    after_player_list_condition = table.Column<int>(type: "integer", nullable: false),
-                    before_all_players = table.Column<bool>(type: "boolean", nullable: false),
-                    after_all_players = table.Column<bool>(type: "boolean", nullable: false),
-                    before_identity_authentication = table.Column<bool>(type: "boolean", nullable: false),
-                    after_identity_authentication = table.Column<bool>(type: "boolean", nullable: false),
-                    before_phone_authentication = table.Column<bool>(type: "boolean", nullable: false),
-                    after_phone_authentication = table.Column<bool>(type: "boolean", nullable: false),
-                    before_deposited_amount_unlimited = table.Column<bool>(type: "boolean", nullable: false),
-                    after_deposited_amount_unlimited = table.Column<bool>(type: "boolean", nullable: false),
-                    before_deposited_amount_min = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    after_deposited_amount_min = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    before_deposited_amount_max = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    after_deposited_amount_max = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    before = table.Column<string>(type: "jsonb", nullable: false),
+                    after = table.Column<string>(type: "jsonb", nullable: false),
                     reason = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -2318,8 +2298,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "whitelists",
                 column: "reseller_id");
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
