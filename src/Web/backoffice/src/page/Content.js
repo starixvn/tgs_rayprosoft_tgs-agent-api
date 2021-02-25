@@ -15,7 +15,7 @@ import {
 
 export default ({ title, actionBar, children, ...props }) => {
   return (
-    <PageContent maxWidth="unset">
+    <PageContent maxWidth="unset" {...props}>
       <Stack orientation="vertical" spacing="major-2">
         {title && (
           <Box marginBottom="major-3">

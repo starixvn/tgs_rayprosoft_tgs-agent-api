@@ -5,7 +5,6 @@ import { useTable, Table, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useOperations } from "./client"
 import { Trans } from "../../i18n"
-import format from "../../date/format"
 import { pastWeek } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import SearchButton from "../../button/SearchButton"
@@ -36,8 +35,8 @@ export const Panel = ({ playerCode, ...props }) => {
     rows: pageSize,
     sortby,
     orderby,
-    from: format(from),
-    to: format(to)
+    from,
+    to
   })
   let columns = useColumns()
 

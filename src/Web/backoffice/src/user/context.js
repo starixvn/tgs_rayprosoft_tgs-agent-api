@@ -107,17 +107,17 @@ export const useUserRoleId = () => {
 
 export const useUserResellerId = () => {
   let { state = {} } = useContext(Store)
-  return state?.userInfo?.resellerId ?? ""
+  return state?.userInfo?.resellerId
 }
 
 export const useUserLicenseeId = () => {
   let { state = {} } = useContext(Store)
-  return state?.userInfo?.licenseeId ?? ""
+  return state?.userInfo?.licenseeId
 }
 
 export const useUserBrandId = () => {
   let { state = {} } = useContext(Store)
-  return state?.userInfo?.brandId ?? ""
+  return state?.userInfo?.brandId
 }
 
 export const useMenuByRoute = (extCodes = []) => {

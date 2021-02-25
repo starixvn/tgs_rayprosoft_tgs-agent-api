@@ -10,19 +10,23 @@ export const urlWith = (searchParams = {}, url) => {
 
       if (Array.isArray(value) && value.length > 0) {
         let result = value.reduce((result, item) => {
-          return result ? `${result}&${key}=${item}` : `${key}=${item}`
+          return result
+            ? `${result}&${key}=${stringOf(item)}`
+            : `${key}=${stringOf(item)}`
         }, "")
         return searchParams ? `${searchParams}&${result}` : result
       }
 
       return searchParams
-        ? `${searchParams}&${key}=${value}`
-        : `${key}=${value}`
+        ? `${searchParams}&${key}=${stringOf(value)}`
+        : `${key}=${stringOf(value)}`
     },
     ""
   )
   return urlSearchParams ? `${url}?${urlSearchParams}` : url
 }
+
+const stringOf = (value) => value?.toISOString?.() ?? value
 
 export const get = (url = "", { searchParams = {}, ...options } = {}) => {
   url = urlWith(searchParams, url)

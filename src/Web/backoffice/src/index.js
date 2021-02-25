@@ -3,7 +3,7 @@ import ReactDOM from "react-dom"
 import App from "./App"
 import "./reset.css"
 import "./index.css"
-import { Provider as BumbagProvider } from "bumbag"
+import { Provider as BumbagProvider, ToastManager } from "bumbag"
 import { Provider as UserProvider } from "./user/context"
 import { BrowserRouter as Router } from "react-router-dom"
 import { Provider as I18nProvider } from "./i18n"
@@ -41,6 +41,7 @@ ReactDOM.render(
             <App />
           </I18nProvider>
         </UserProvider>
+        <ToastManager />
       </BumbagProvider>
     </Router>
   </React.StrictMode>,

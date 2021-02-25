@@ -1,15 +1,14 @@
 import React, { createContext, useContext, useState } from "react"
 import { Text } from "bumbag"
-//TODO: use date-fns instead
-import dayjs from "dayjs"
 import numeral from "numeral"
 import { registerLocale, setDefaultLocale } from "react-datepicker"
 import en from "date-fns/locale/en-US"
 import zh from "date-fns/locale/zh-CN"
+import { formatDateTime } from "./date/format"
 registerLocale("en", en)
 registerLocale("zh", zh)
 
-const DefaultDateFormat = "YYYY/MM/DD"
+const DefaultDateFormat = "yyyy/MM/dd"
 const DefaultTimeFormat = "HH:mm:ss"
 
 export const Locales = {
@@ -71,14 +70,8 @@ export const FormattedDateTime = ({
   timeFormat = DefaultTimeFormat,
   value
 }) => {
-  let date = dayjs(value)
-  if (!date.isValid()) {
-    //empty
-    return ""
-  }
-
-  let formatted = `${date.format(dateFormat)} ${date.format(timeFormat)}`
-  return <Text>{formatted}</Text>
+  let format = `${dateFormat} ${timeFormat}`
+  return <Text>{formatDateTime(format, value)}</Text>
 }
 
 export const FormattedNumber = ({ value, format = "0,0" }) => {

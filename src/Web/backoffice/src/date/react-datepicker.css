@@ -1,0 +1,13 @@
+div.react-datepicker-time__input-container,
+.react-datepicker__input-time-container
+  .react-datepicker-time__input-container
+  div.react-datepicker-time__input {
+  margin-left: 0;
+}
+
+.react-datepicker__input-time-container
+  .react-datepicker-time__input-container
+  input.react-datepicker-time__input {
+  margin-left: 0;
+  border-radius: 0px;
+}

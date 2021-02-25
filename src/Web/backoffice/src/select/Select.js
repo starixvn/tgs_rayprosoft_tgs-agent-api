@@ -8,6 +8,7 @@ export const Select = ({
   register,
   registerOptions = {},
   selectRef,
+  state,
   ...props
 }) => {
   let formContext = useFormContext()
@@ -24,8 +25,7 @@ export const Select = ({
     })
   }
 
-  let error = formContext?.errors[name]
-  let state = error && "danger"
+  state = state ?? (formContext?.errors?.[name] && "danger")
 
   return <_Select name={name} selectRef={selectRef} state={state} {...props} />
 }

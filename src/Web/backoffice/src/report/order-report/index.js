@@ -13,7 +13,8 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import { Code } from "./menu"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
+import BrandBar from "../BrandBar"
+import { yesterday } from "../../date/range"
 
 export { Code }
 
@@ -29,13 +30,31 @@ export const Content = () => {
 export const CodeContentPair = [Code, Content]
 
 export const Body = () => {
+  let [brandId, setBrandId] = useState()
+
   return (
     <Set orientation="vertical">
-      <PageContent
-        title={<Trans zh="订单查询" en="Order Tracking" />}
-      ></PageContent>
+      <BrandBar
+        onBrandChange={(value) => {
+          setBrandId(value)
+        }}
+      />
+      {brandId && <ReportContent brandId={brandId} />}
     </Set>
   )
 }
 
-const MerchantBar = () => {}
+const ReportContent = ({ brandId }) => {
+  let dateRange = yesterday()
+  let { state, setState, setPageIndex, setSortOrder } = useTable({
+    brandId,
+    from: dateRange.start,
+    to: dateRange.end
+  })
+
+  return (
+    <PageContent
+      title={<Trans zh="订单查询" en="Order Tracking" />}
+    ></PageContent>
+  )
+}
