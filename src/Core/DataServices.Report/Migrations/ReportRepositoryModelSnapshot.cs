@@ -73,9 +73,9 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("registered_count");
 
-                    b.Property<string>("ReportDateString")
-                        .HasColumnType("text")
-                        .HasColumnName("report_date_string");
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
 
                     b.Property<decimal>("ValidBetAmount")
                         .HasPrecision(18, 6)

@@ -34,7 +34,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             {
                 BrandId = createMarketRequest.BrandId,
                 Hour = createMarketRequest.Hour,
-                ReportDateString = createMarketRequest.ReportDateString,
+                ReportDate = createMarketRequest.ReportDate,
                 CreatedOn = createMarketRequest.CreatedOn,
                 RegisteredCount = createMarketRequest.RegisteredCount,
                 FirstFundInCount = createMarketRequest.FirstFundInCount,
