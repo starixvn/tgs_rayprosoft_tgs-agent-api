@@ -13,7 +13,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
 {
     public sealed class HabaneroStartup : BaseStartup
     {
-        public HabaneroStartup(IConfiguration configuration, IWebHostEnvironment env) 
+        public HabaneroStartup(IConfiguration configuration, IWebHostEnvironment env)
             : base(configuration, env)
         {
         }
@@ -31,7 +31,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
                 }
             );
 
+            services.AddScoped<AuthorizeHabaneroMiddleware>();
             services.AddScoped<HandleHabaneroExceptionMiddleware>();
+
+            services.AddSingleton<IHabaneroGameControllerMapper, HabaneroGameControllerMapper>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
@@ -42,6 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
                 builder =>
                 {
                     builder.UseMiddleware<HandleHabaneroExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeHabaneroMiddleware>();
                 });
         }
     }

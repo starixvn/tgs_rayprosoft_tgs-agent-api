@@ -35,6 +35,8 @@ namespace TGS.Services.Operations.Queries
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
         Task<IdMap<int>[]> GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType);
+
+        Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -192,6 +194,27 @@ namespace TGS.Services.Operations.Queries
                 });
 
             return r.ToArray();
+        }
+
+        Task<IdAndCodeAndConfigurationId> IGameProviderQueries.GetGameProviderIdsByCredentialsAsync(string clientId,
+            string secretKey)
+        {
+            var statuses = new[] {Status.Active, Status.Maintenance};
+
+            return (from gp in _repository.GameProviders
+                    where statuses.Contains(gp.Status)
+                    join gpc in _repository.GameProviderConfigurations
+                        on gp.Id equals gpc.GameProviderId
+                    where gpc.ClientId == clientId &&
+                        gpc.SecretKey == secretKey &&
+                        statuses.Contains(gpc.Status)
+                    select new IdAndCodeAndConfigurationId
+                    {
+                        Id = gp.Id,
+                        Code = gp.Code,
+                        ConfigurationId = gpc.Id
+                    })
+                .FirstOrDefaultAsync();
         }
     }
 }

@@ -28,6 +28,7 @@
         Localization,
         BrandDefaultBetLimit,
         BrandApiKeys,
-        Announcements
+        Announcements,
+        GameProviderIdAndConfigurationIdByCredentials
     }
 }

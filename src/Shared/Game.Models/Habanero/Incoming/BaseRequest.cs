@@ -16,7 +16,7 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public Authorization Authorization { get; init; }
 
         [JsonPropertyName("basegame")]
-        public Game Game { get; init;}
+        public Game Game { get; init; }
     }
 
     public record Authorization
@@ -25,13 +25,13 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public string ClientId { get; init; }
 
         [JsonPropertyName("passkey")]
-        public string ClientSecret { get; init; }
+        public string SecretKey { get; init; }
 
         [JsonPropertyName("machinename")]
         public string MachineName { get; init; }
 
         [JsonPropertyName("brandid")]
-        public string BrandId { get; init; }
+        public string HabaneroBrandId { get; init; }
 
         [JsonPropertyName("locale")]
         public string Culture { get; init; }
