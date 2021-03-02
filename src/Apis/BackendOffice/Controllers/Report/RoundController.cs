@@ -27,7 +27,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
-        public Task<GetRoundHistoryResponse> GetRoundsAsync(Guid roundId, GetRoundHistoryRequest request)
+        public Task<GetRoundHistoryResponse> GetRoundAsync(Guid roundId, GetRoundHistoryRequest request)
         {
             request.RoundId = roundId;
             return _mediator.Send(request);
