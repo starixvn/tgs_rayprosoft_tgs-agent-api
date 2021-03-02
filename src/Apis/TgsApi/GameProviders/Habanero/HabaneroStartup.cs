@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.Habanero.Handlers;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -34,7 +35,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
             services.AddScoped<AuthorizeHabaneroMiddleware>();
             services.AddScoped<HandleHabaneroExceptionMiddleware>();
 
-            services.AddSingleton<IHabaneroGameControllerMapper, HabaneroGameControllerMapper>();
+            //services.AddSingleton<IHabaneroGameControllerMapper, HabaneroGameControllerMapper>();
+            services.AddTransient<IHabaneroGameControllerMapper, HabaneroGameControllerMapper>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
@@ -48,5 +50,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
                     builder.UseMiddleware<AuthorizeHabaneroMiddleware>();
                 });
         }
+
+        protected override Type[] AddCustomMediatrHandlers() => new[]
+        {
+            typeof(AuthorizePlayerHandler)
+        };
     }
 }

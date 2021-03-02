@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using MediatR;
 
 namespace TGS.Services.PluggableServices.Models
 {
-    public record GetRoundHistoryRequest : IRequest<GetRoundHistoryResponse>
+    public record GetRoundHistoryRequest
     {
-        [JsonPropertyName("gpcode")] public string GameProviderCode { get; init; }
+        [JsonPropertyName("gpcode")]
+        public string GameProviderCode { get; init; }
 
-        [JsonPropertyName("playercode")] public string PlayerCode { get; init; }
+        [JsonPropertyName("playercode")]
+        public string PlayerCode { get; init; }
 
-        [JsonPropertyName("roundid")] public Guid RoundId { get; set; }
+        [JsonPropertyName("roundid")]
+        public Guid RoundId { get; set; }
 
         /// <summary>
         ///     player's culture code
