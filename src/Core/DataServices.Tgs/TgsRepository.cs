@@ -86,7 +86,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
-            _uploader = new NpgsqlBulkUploader(this);
+            _uploader = new(this);
         }
 
         DbSet<Reseller> ITgsRepository.Resellers { get; set; }
@@ -179,7 +179,7 @@ namespace TGS.Core.DataServices.Tgs
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
-                            (await Database.GetPendingMigrationsAsync()).Any();
+                (await Database.GetPendingMigrationsAsync()).Any();
 
             if (isMigrate)
             {
