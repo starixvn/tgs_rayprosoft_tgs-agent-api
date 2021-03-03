@@ -6,35 +6,35 @@ import { useGameProviderList } from "./client"
 import AlertDialog from "../../dialog/Alert"
 
 export const GameProviderSelect = ({
-  placeholder,
-  valueField = "id",
-  required,
-  ...props
+    placeholder,
+    valueField = "id",
+    required,
+    ...props
 }) => {
-  let defaultPlaceholder = useTrans({
-    zh: "游戏厂商",
-    en: "Game Provider"
-  })
-  placeholder = placeholder ?? defaultPlaceholder
+    let defaultPlaceholder = useTrans({
+        zh: "游戏厂商",
+        en: "Game Provider"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
 
-  let { data, isLoading, error } = useGameProviderList()
-  let options =
-    data?.items.map((item) => ({
-      label: item.name,
-      value: item[valueField]
-    })) ?? []
+    let { data, isLoading, error } = useGameProviderList({ showAll: true })
+    let options =
+        data?.items.map((item) => ({
+            label: item.name,
+            value: item[valueField]
+        })) ?? []
 
-  return (
-    <>
-      {/* {error && <AlertDialog {...error} />} */}
-      <Select
-        isLoading={isLoading}
-        placeholder={placeholder}
-        options={options}
-        {...props}
-      />
-    </>
-  )
+    return (
+        <>
+            {/* {error && <AlertDialog {...error} />} */}
+            <Select
+                isLoading={isLoading}
+                placeholder={placeholder}
+                options={options}
+                {...props}
+            />
+        </>
+    )
 }
 
 export default GameProviderSelect

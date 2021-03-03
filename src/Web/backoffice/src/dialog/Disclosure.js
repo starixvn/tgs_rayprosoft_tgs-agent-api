@@ -4,37 +4,43 @@ import { Trans } from "../i18n"
 import { faCog } from "@fortawesome/free-solid-svg-icons"
 
 export const Disclosure = forwardRef(
-  ({ use = Button, children, ...props }, ref) => (
-    <Modal.Disclosure
-      ref={ref}
-      use={use}
-      flex="unset"
-      css={css`
-        white-space: nowrap;
-      `}
-      {...props}
-    >
-      {children}
-    </Modal.Disclosure>
-  )
+    ({ use = Button, children, ...props }, ref) => (
+        <Modal.Disclosure
+            ref={ref}
+            use={use}
+            flex="unset"
+            css={css`
+                white-space: nowrap;
+            `}
+            {...props}
+        >
+            {children}
+        </Modal.Disclosure>
+    )
 )
 
+export const ViewDisclosure = forwardRef((props, ref) => (
+    <Disclosure ref={ref} {...props}>
+        <Trans zh="查看" en="View" />
+    </Disclosure>
+))
+
 export const EditDisclosure = forwardRef((props, ref) => (
-  <Disclosure ref={ref} {...props}>
-    <Trans zh="编辑" en="Edit" />
-  </Disclosure>
+    <Disclosure ref={ref} {...props}>
+        <Trans zh="编辑" en="Edit" />
+    </Disclosure>
 ))
 
 export const AddDisclosure = forwardRef((props, ref) => (
-  <Disclosure ref={ref} {...props}>
-    <Trans zh="新增" en="Add" />
-  </Disclosure>
+    <Disclosure ref={ref} {...props}>
+        <Trans zh="新增" en="Add" />
+    </Disclosure>
 ))
 
 export const ConfigIconDisclosure = forwardRef((props, ref) => (
-  <Disclosure ref={ref} {...props}>
-    <Icon icon={faCog} type="font-awesome" />
-  </Disclosure>
+    <Disclosure ref={ref} {...props}>
+        <Icon icon={faCog} type="font-awesome" />
+    </Disclosure>
 ))
 
 export default Disclosure

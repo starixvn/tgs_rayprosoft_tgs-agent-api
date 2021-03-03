@@ -1,13 +1,17 @@
+div.react-datepicker-popper {
+    z-index: 2;
+}
+
 div.react-datepicker-time__input-container,
 .react-datepicker__input-time-container
-  .react-datepicker-time__input-container
-  div.react-datepicker-time__input {
-  margin-left: 0;
+    .react-datepicker-time__input-container
+    div.react-datepicker-time__input {
+    margin-left: 0;
 }
 
 .react-datepicker__input-time-container
-  .react-datepicker-time__input-container
-  input.react-datepicker-time__input {
-  margin-left: 0;
-  border-radius: 0px;
+    .react-datepicker-time__input-container
+    input.react-datepicker-time__input {
+    margin-left: 0;
+    border-radius: 0px;
 }

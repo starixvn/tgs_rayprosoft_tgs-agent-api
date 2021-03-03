@@ -22,7 +22,7 @@ root * /usr/share/caddy
 }
 
 # https://ashton.codes/set-cache-control-max-age-1-year/#:~:text=It's%20standard%20practice%20to%20set,seconds%2C%20which%20is%20one%20year.
-header @static +Cache-Control "public, max-age=31536000, must-revalidate"
+header @static +Cache-Control "no-cache"
 
 @try_files {
     not path /api/* /fs/* /healthcheck

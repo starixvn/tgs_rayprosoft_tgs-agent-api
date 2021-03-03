@@ -55,7 +55,7 @@
     "react-intersection-observer": "^8.31.0",
     "react-router-dom": "^5.2.0",
     "react-table": "^7.6.3",
-    "snowpack": "^3.0.11",
+    "snowpack": "^3.0.13",
     "super-expressive": "^1.4.0",
     "swr": "^0.4.2",
     "tinymce": "^5.5.1"
