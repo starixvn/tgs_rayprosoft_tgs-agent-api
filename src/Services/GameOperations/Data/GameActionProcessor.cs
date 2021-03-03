@@ -97,7 +97,7 @@ namespace TGS.Services.GameOperations.Data
                 Balance = player.Wallet.Balance,
                 CurrencyCode = player.Wallet.CurrencyCode,
                 Transactions = transactionResults.ToArray(),
-                PlatformType = (int) betData.PlatformType,
+                PlatformType = (int)betData.PlatformType,
                 Error = TgsApiError.None
             };
         }
@@ -532,6 +532,8 @@ namespace TGS.Services.GameOperations.Data
                 round.ExternalClosedOn = s.Timestamp;
                 round.WinLoss = s.BetValueResult.WinLoss;
                 round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
+                round.SettleAmount = s.BetValueResult.SettleAmount;
+                round.Turnover = s.BetValueResult.Turnover;
             }
 
             repository.Rounds.Update(round);
@@ -587,7 +589,7 @@ namespace TGS.Services.GameOperations.Data
                 IsClosingRound = current.IsClosingRound,
                 ClosingRoundExplicitRequest =
                     current.IsExplicitlyClosingRound    ? true :
-                    current.IsExplicitlyNotClosingRound ? false : (bool?) null,
+                    current.IsExplicitlyNotClosingRound ? false : (bool?)null,
                 Amount = s.Amount,
                 Balance = player.Wallet.Balance,
                 BetType = s.BetType,

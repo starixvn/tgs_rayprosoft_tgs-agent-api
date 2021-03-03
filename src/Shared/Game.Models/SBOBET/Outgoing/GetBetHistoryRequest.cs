@@ -6,9 +6,6 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
 {
     public record GetBetHistoryRequest : BaseRequest
     {
-        [JsonPropertyName("RefNos")]
-        public string ExternalRoundId { get; init; }
-
         [JsonPropertyName("Portfolio")]
         public string Portfolio { get; init; }
 
