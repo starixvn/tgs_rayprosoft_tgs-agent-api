@@ -94,7 +94,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new("http://game-sbo") : new Uri("http://localhost:62330"),
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
-                    EnableCancelFailedTransactionsJob = true
+                    EnableCancelFailedTransactionsJob = true,
+                    DelaySecondsForDeduct = 0
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new()
@@ -108,7 +109,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             Dictionary<string, string> IGameProvider.MarketTypes => new()
             {
-                {"ALL", "0"}, {"Handicap", "1"}, {"Odd_Even", "2"}, {"Over_Under", "3"}
+                {"ALL", "0"},
+                {"Handicap", "1"},
+                {"Odd_Even", "2"},
+                {"Over_Under", "3"}
             };
         }
 
