@@ -1,12 +1,8 @@
 ﻿// ReSharper disable IdentifierTypo
 
-using System.Text.Json.Serialization;
-
 namespace TGS.Shared.Game.Models.SBOBET.Outgoing
 {
-    public record GetRoundHistoryResponse : BaseResponse
+    public record GetRoundHistoryResponse : GetBetHistoryResponse
     {
-        [JsonPropertyName("Result")]
-        public GameResult[] Results { get; init; }
     }
 }

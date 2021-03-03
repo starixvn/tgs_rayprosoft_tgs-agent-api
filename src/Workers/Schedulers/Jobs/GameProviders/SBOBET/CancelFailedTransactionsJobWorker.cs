@@ -28,9 +28,9 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
         private readonly ISBOApiClient _client;
         private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly ITgsLog _log;
         private readonly IRoundQueries _roundQueries;
         private readonly ISettingOperations _settingOperations;
-        private readonly ITgsLog _log;
 
         public CancelFailedTransactionsJobWorker(
             IGameProviderOperations gameProviderOperations,
@@ -52,11 +52,24 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
         {
             try
             {
+                var configuration =
+                    await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
+                        .GameProviderConfigurations.SBOBET);
+
+                if (!configuration.EnableCancelFailedTransactionsJob)
+                {
+                    return new()
+                    {
+                        Error = (int)TgsApiError.None,
+                        ErrorMessage = "Job has been switched off"
+                    };
+                }
+
                 var gameProviderId =
                     await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderConst.SBOBET);
 
-                var start = DateTimeOffset.Now.AddMinutes(-20);
-                var end = DateTimeOffset.Now.AddMinutes(-1);
+                var start = DateTimeOffset.Now.AddMinutes(-35);
+                var end = DateTimeOffset.Now.AddMinutes(-5);
 
                 var roundExternalIds =
                     await _roundQueries.GetRoundWithGameActionExternalIdsAsync(gameProviderId, start, end,
@@ -67,21 +80,18 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
                     return new();
                 }
 
-                var configuration =
-                    await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
-                        .GameProviderConfigurations.SBOBET);
-
                 var histories = await Task.WhenAll(GameTypes.Select(t =>
                 {
                     var portfolio = Utility.GetPortfolio(t);
-                    return _client.GetBetHistoryAsync(configuration.ApiUrl, new()
-                    {
-                        CompanyKey = configuration.CompanyKey,
-                        ServerId = "scheduler-sbo",
-                        Portfolio = portfolio,
-                        StartDate = start.ToOffset(Offset).ToString(TimeFormat),
-                        EndDate = end.ToOffset(Offset).ToString(TimeFormat)
-                    });
+                    return _client.GetBetHistoryAsync(configuration.ApiUrl,
+                        new()
+                        {
+                            CompanyKey = configuration.CompanyKey,
+                            ServerId = "scheduler-sbo",
+                            Portfolio = portfolio,
+                            StartDate = start.ToOffset(Offset).ToString(TimeFormat),
+                            EndDate = end.AddMinutes(5).ToOffset(Offset).ToString(TimeFormat)
+                        });
                 }));
 
                 var historyExternalRoundIds = histories.Where(c => c.Results != null)
@@ -97,7 +107,11 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
                 {
                     ExternalBatchId = $"scheduler_sbo_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
                     Timestamp = DateTimeOffset.UtcNow,
-                    Transactions = failedRoundExternalIds.GroupBy(t => new {t.PlayerCode, t.PlatformType})
+                    Transactions = failedRoundExternalIds.GroupBy(t => new
+                        {
+                            t.PlayerCode,
+                            t.PlatformType
+                        })
                         .SelectMany(g => g.SelectMany(r => r.GameActionExternalIds.Select(ga =>
                         {
                             if (!currencyMap.TryGetValue(r.CurrencyCode, out var curr))
@@ -108,8 +122,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
                             return new BatchRequestTransaction
                             {
                                 PlayerCode = g.Key.PlayerCode,
-                                PlatformType = (int) g.Key.PlatformType,
-                                CurrencyCode = curr, 
+                                PlatformType = (int)g.Key.PlatformType,
+                                CurrencyCode = curr,
                                 Amount = ga.Amount.Negate(),
                                 ExternalGameId = r.ExternalGameId,
                                 ExternalTransactionId = $"{ga.ExternalTransactionId}_cancel",
@@ -127,7 +141,11 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
             {
                 _log.LogError("Execute job with error:", e);
 
-                return new() {Error = (int) TgsApiError.SystemError, ErrorMessage = e.Message};
+                return new()
+                {
+                    Error = (int)TgsApiError.SystemError,
+                    ErrorMessage = e.Message
+                };
             }
 
             return new();
