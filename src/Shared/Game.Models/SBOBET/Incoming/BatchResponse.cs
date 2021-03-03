@@ -7,27 +7,27 @@ namespace TGS.Shared.Game.Models.SBOBET.Incoming
     public record BatchResponse
     {
         [JsonPropertyName("error")]
-        public int ErrorCode { get; set; }
+        public int ErrorCode { get; init; }
 
         [JsonPropertyName("errormsg")]
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; init; }
 
         [JsonPropertyName("batchid")]
-        public string ExternalBatchId { get; set; }
+        public string ExternalBatchId { get; init; }
 
         [JsonPropertyName("dup")]
-        public bool IsDuplicate { get; set; }
+        public bool IsDuplicate { get; init; }
 
         [JsonPropertyName("batchtime")]
-        public DateTimeOffset BatchTime { get; set; }
+        public DateTimeOffset BatchTime { get; init; }
 
         [JsonPropertyName("transactionscount")]
-        public int TransactionsCount { get; set; }
+        public int TransactionsCount { get; init; }
 
         [JsonPropertyName("playerbalances")]
-        public IDictionary<string, decimal> PlayerBalances { get; set; }
+        public IDictionary<string, decimal> PlayerBalances { get; init; }
 
         [JsonPropertyName("errors")]
-        public BatchResponseTransaction[] Errors { get; set; }
+        public BatchResponseTransaction[] Errors { get; init; }
     }
 }

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
-using TGS.Apis.TgsApi.GameProviders.SBOBET.Handlers;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -63,13 +62,5 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
                     builder.UseMiddleware<AuthorizeSBOBETMiddleware>();
                 });
         }
-
-        protected override Type[] AddCustomMediatrHandlers() => new[]
-        {
-            typeof(GetBalanceHandler), typeof(PlaceBetHandler),
-            typeof(SettleBetHandler), typeof(CancelBetHandler),
-            typeof(RollbackHandler), typeof(GetBetStatusHandler),
-            typeof(BatchCancelHandler)
-        };
     }
 }

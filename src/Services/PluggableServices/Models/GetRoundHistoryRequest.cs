@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using MediatR;
 
 namespace TGS.Services.PluggableServices.Models
 {
-    public record GetRoundHistoryRequest
+    public record GetRoundHistoryRequest : IRequest<GetRoundHistoryResponse>
     {
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }
