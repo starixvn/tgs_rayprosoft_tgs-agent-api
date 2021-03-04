@@ -29,14 +29,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         private readonly IGamePlayActions _action;
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ISBOBETGameControllerMapper _map;
+        private readonly ISBOBETActionModelMapper _map;
         private readonly IPlayerOperations _playerOperations;
 
         public SBOBETBatchActionController(
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations, IGameProviderOperations gameProviderOperations,
             IGamePlayActions action,
-            ISBOBETGameControllerMapper map)
+            ISBOBETActionModelMapper map)
         {
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;

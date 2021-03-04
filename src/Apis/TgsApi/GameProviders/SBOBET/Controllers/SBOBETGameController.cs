@@ -31,13 +31,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
     public sealed class SBOBETGameController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
-        private readonly ISBOBETGameControllerMapper _map;
+        private readonly ISBOBETActionModelMapper _map;
         private readonly ISBOBETServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public SBOBETGameController(
             IGamePlayActions actions,
-            ISBOBETGameControllerMapper map,
+            ISBOBETActionModelMapper map,
             ISBOBETServices services,
             ISettingOperations settingOperations)
         {
