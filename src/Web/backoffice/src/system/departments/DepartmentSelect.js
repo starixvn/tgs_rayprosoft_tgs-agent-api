@@ -9,7 +9,6 @@ import {
   useUserResellerId
 } from "../../user/context"
 
-//TODO: admin need Department?
 export const DepartmentSelect = ({ ...props }) => {
   let resellerId = useUserResellerId()
   let licenseeId = useUserLicenseeId()

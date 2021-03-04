@@ -45,7 +45,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 ShowAll = showAll
             };
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.DateString);
+            var orderedRoles = list.OrderByDescending(p => p.ReportDate);
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
@@ -62,8 +62,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             for (var i = 0; i < response.Items.Length; i++)
             {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
                 response.Items[i].BrandId.Should().Be(expectedRoles[i].BrandId);
+                response.Items[i].ReportDate.Should().Be(expectedRoles[i].ReportDate);
             }
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<GetMarketsRequest>(), It.IsAny<CancellationToken>()));

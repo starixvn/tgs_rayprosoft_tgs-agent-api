@@ -1,29 +1,35 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
-import { Group, Input, Box, Icon, Button, css, FieldWrapper } from "bumbag"
+import { css, Global } from "@emotion/react"
+import { Group, Input, Box, Icon, Button, FieldWrapper } from "bumbag"
 import DatePicker from "react-datepicker"
 import { useLocale } from "../i18n"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import format, { DateTimeFormat } from "./format"
+import "./react-datepicker.css"
 
 export const DateTimeInput = ({
   name,
   required,
   value,
+  dateFormat = DateTimeFormat,
+  showTimeInput = true,
   disabled,
   minDate,
   maxDate,
+  validate,
   ...props
 }) => {
   let locale = useLocale()
-  let { register, control, errors, ...formMethods } = useFormContext()
+  let formMethods = useFormContext()
+  let { control, errors } = formMethods
 
   return (
     <Controller
       control={control}
       name={name}
-      rules={{ required }}
+      rules={{ required, validate }}
       render={(
-        { onChange, onBlur, value, ref, ...props },
+        { onChange, onBlur, value, ref },
         { invalid, isTouched, isDirty }
       ) => {
         if (disabled) {
@@ -35,31 +41,16 @@ export const DateTimeInput = ({
         return (
           <DatePicker
             selected={value}
-            dateFormat={DateTimeFormat}
+            dateFormat={dateFormat}
             onChange={onChange}
             onBlur={onBlur}
             minDate={minDate}
             maxDate={maxDate}
             locale={locale}
             customInput={<Input name={name} inputRef={ref} state={state} />}
-            showTimeInput
+            showTimeInput={showTimeInput}
             timeInputLabel=""
-            css={css`
-              .react-datepicker__input-time-container
-                .react-datepicker-time__input-container
-                .react-datepicker-time__input {
-                margin-left: 0;
-              }
-
-              .react-datepicker-time__input-container
-                .react-datepicker-time__input
-                input {
-                width: 100px;
-                margin-left: 0;
-                border-radius: 0px;
-                border: 1px solid var(--bb-palette-white900, #000000);
-              }
-            `}
+            {...props}
           />
         )
       }}

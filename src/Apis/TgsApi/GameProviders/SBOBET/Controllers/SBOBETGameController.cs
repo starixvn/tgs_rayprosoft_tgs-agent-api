@@ -8,10 +8,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
@@ -30,15 +33,18 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         private readonly IGamePlayActions _actions;
         private readonly ISBOBETGameControllerMapper _map;
         private readonly ISBOBETServices _services;
+        private readonly ISettingOperations _settingOperations;
 
         public SBOBETGameController(
             IGamePlayActions actions,
             ISBOBETGameControllerMapper map,
-            ISBOBETServices services)
+            ISBOBETServices services,
+            ISettingOperations settingOperations)
         {
             _actions = actions;
             _map = map;
             _services = services;
+            _settingOperations = settingOperations;
         }
 
         [HttpPost]
@@ -53,6 +59,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         [Route("Deduct")]
         public async Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
         {
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
+                    .GameProviderConfigurations.SBOBET);
+
+            if (configuration.DelaySecondsForDeduct > 0)
+            {
+                await Task.Delay(configuration.DelaySecondsForDeduct * 1000);
+            }
+
             var data = await _services.GetGameProviderConfigurationDataAsync();
 
             var betData = _map.Request(data, request);

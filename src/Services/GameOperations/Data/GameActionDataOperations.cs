@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -105,14 +104,15 @@ namespace TGS.Services.GameOperations.Data
 
             var brand = await _brandOperations.GetCachedBrandAsync(player.BrandId);
 
-            var playerRelatedData = new PlayerRelatedData
+            PlayerRelatedData playerRelatedData = new()
             {
-                Wallet = new()
-                {
-                    Id = player.DefaultWalletId,
-                    CurrencyCode = player.DefaultWalletCurrencyCode,
-                    ExternalCurrencyCode = player.ExternalCurrencyCode
-                },
+                Wallet =
+                    new()
+                    {
+                        Id = player.DefaultWalletId,
+                        CurrencyCode = player.DefaultWalletCurrencyCode,
+                        ExternalCurrencyCode = player.ExternalCurrencyCode
+                    },
                 PlayerCode = data.PlayerCode,
                 ResellerId = brand.ResellerId,
                 ResellerCode = brand.ResellerCode,
@@ -129,7 +129,8 @@ namespace TGS.Services.GameOperations.Data
                 PlayerIp = string.Empty
             };
 
-            var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
+            var gameProvider =
+                await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
             var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId);
 
             var externalTransactionIds =
@@ -173,8 +174,8 @@ namespace TGS.Services.GameOperations.Data
             AssignIndexPerPlayer(data.Transactions);
 
             var degreeOfParallelism = Environment.ProcessorCount;
-            var states = new List<BatchBetPartitionState>();
-            
+            List<BatchBetPartitionState> states = new();
+
             // group transactions by index per player in order to avoid transaction lock conflict
             // so first we execute all transaction with index 0 for all players,
             // then index 1 for all players with more than 1 transaction
@@ -193,7 +194,7 @@ namespace TGS.Services.GameOperations.Data
                         async (t, state, _) =>
                         {
                             var errorMapper = _errorMapperFactory(data.ErrorMapperKey);
-                            
+
                             await ExecuteSegmentTransactionsAsync(gameProviderId, gameProviderCode,
                                 data.AutoCloseRound, data.HasCurrencyFromGameProvider, t,
                                 state, execute, errorMapper);
@@ -204,8 +205,12 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var errors = states.SelectMany(s => s.Errors).ToArray();
-            var playerBalances = states.SelectMany(s => s.PlayerBalances)
-                .ToDictionary(p => p.Key, p => p.Value);
+
+            Dictionary<string, decimal> playerBalances = new();
+            foreach (var (playerCode, balance) in states.SelectMany(s => s.PlayerBalances))
+            {
+                playerBalances[playerCode] = balance;
+            }
 
             var result = new BatchBetResult
             {
@@ -233,7 +238,7 @@ namespace TGS.Services.GameOperations.Data
         {
             try
             {
-                var betData = MapBetData(state.BatchId, gameProviderId, gameProviderCode,autoCloseRound,
+                var betData = MapBetData(state.BatchId, gameProviderId, gameProviderCode, autoCloseRound,
                     hasCurrencyFromGameProvider, transaction);
 
                 var betResult = await execute(betData);
@@ -249,7 +254,7 @@ namespace TGS.Services.GameOperations.Data
 
                     state.Errors.Add(new()
                     {
-                        Error = (int) betResult.Error,
+                        Error = (int)betResult.Error,
                         ErrorMessage = betResult.Error.ToString(),
                         PlayerCode = transaction.PlayerCode,
                         ExternalTransactionId = transaction.ExternalTransactionId,
@@ -316,7 +321,7 @@ namespace TGS.Services.GameOperations.Data
          */
         private static void AssignIndexPerPlayer(BatchTransactionData[] transactions)
         {
-            var dict = new Dictionary<string, int>();
+            Dictionary<string, int> dict = new();
             foreach (var btd in transactions)
             {
                 var playerCode = btd.PlayerCode;
@@ -332,7 +337,8 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private static BetData MapBetData(Guid batchId, Guid gameProviderId, string gameProviderCode,bool autoCloseRound, bool hasCurrencyFromGameProvider, BatchTransactionData transaction) =>
+        private static BetData MapBetData(Guid batchId, Guid gameProviderId, string gameProviderCode,
+            bool autoCloseRound, bool hasCurrencyFromGameProvider, BatchTransactionData transaction) =>
             new()
             {
                 PlayerCode = transaction.PlayerCode,

@@ -1,48 +1,33 @@
 import React from "react"
 import { css, Global } from "@emotion/react"
-import { Table, Set, Text } from "bumbag"
-import dayjs from "dayjs"
+import { Text } from "bumbag"
 
-const DefaultDateFormat = "YYYY/MM/DD"
+import { formatDateTime } from "../../date/format"
+import textColumn from "./textColumn"
+
+const DefaultDateFormat = "yyyy/MM/dd"
 const DefaultTimeFormat = "HH:mm:ss"
 
-export default ({
-  Header,
-  accessor,
-  dateFormat = DefaultDateFormat,
-  timeFormat = DefaultTimeFormat,
-  ...props
-}) => {
-  return {
-    Header,
-    accessor,
-    headCell: {
-      textAlign: "center"
-    },
-    cell: {
-      textAlign: "center"
-    },
-    Cell: ({ value = "" } = {}) => {
-      //TODO: use fn date instead
-      let date = dayjs(value)
-      if (!date.isValid()) {
-        //empty
-        return ""
-      }
-
-      let dateString = dateFormat ? date.format(dateFormat) : ""
-      let timeString = timeFormat ? date.format(timeFormat) : ""
-
-      return (
-        <Text.Block
-          css={css`
-            white-space: nowrap;
-          `}
-        >
-          {dateString} {timeString}
-        </Text.Block>
-      )
-    },
+export const dateTimeColumn = ({
+    dateFormat = DefaultDateFormat,
+    timeFormat = DefaultTimeFormat,
     ...props
-  }
-}
+}) =>
+    textColumn({
+        Cell: ({ value = "" } = {}) => {
+            return (
+                <Text.Block
+                    css={css`
+                        white-space: nowrap;
+                    `}
+                >
+                    {`${dateFormat ? formatDateTime(dateFormat, value) : ""} ${
+                        timeFormat ? formatDateTime(timeFormat, value) : ""
+                    }`}
+                </Text.Block>
+            )
+        },
+        ...props
+    })
+
+export default dateTimeColumn

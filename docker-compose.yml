@@ -129,10 +129,20 @@ services:
         aliases:
           - backoffice.api
     depends_on:
+      - operator-api
+
+  report-api:
+    build:
+      context: .
+      dockerfile: ./src/Apis/ReportApi/Dockerfile
+    image: report-api
+    container_name: report-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+    networks:
+      tgs:
+    depends_on:
       - postgres
-      - log-api
-      - game-sbo
-      - redis 
 
   fileservice:
     build:
@@ -205,7 +215,7 @@ services:
       tgs:
     depends_on:
       - postgres
-      - game-sbo
+      - redis
 
   game-sbo:
     build:
@@ -219,7 +229,7 @@ services:
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
-      - 32669:80
+      - 62330:80
     networks:
       tgs:
     depends_on:
@@ -227,6 +237,7 @@ services:
       - nats
       - redis
       - log-api
+      - operator-api
 
   log-api:
     build:
@@ -352,12 +363,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
     ports:
-       - 32340:80
+      - 32340:80
     networks:
       tgs:
         aliases:
           - scheduler
-    depends_on: 
+    depends_on:
       - nats
       - postgres
       - mongodb

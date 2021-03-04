@@ -30,7 +30,7 @@ namespace TGS.Tests.Redis.IntegrationTests
                 .AddConfiguration()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis() 
+                .AddRedis()
                 .BuildServiceProvider();
 
             _redisRepository = provider.GetService<IRedisRepository>();
@@ -44,10 +44,10 @@ namespace TGS.Tests.Redis.IntegrationTests
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            var amount = AsyncHelper.RunSync(() =>
-                _cacheManager.ClearCacheByPatternAsync(CacheType, "*"));
+            var amount = await _cacheManager.ClearCacheByPatternAsync(CacheType, "*");
+
             Console.WriteLine($"TearDown removed {amount} keys");
         }
 
@@ -186,7 +186,7 @@ namespace TGS.Tests.Redis.IntegrationTests
             await _cacheManager.CacheAsync(CacheType, key12, null, NewData);
             await _cacheManager.CacheAsync(CacheType, key21, null, NewData);
             await _cacheManager.CacheAsync(CacheType, key22, null, NewData);
-            
+
             var cacheKeys = new CacheKey[]
             {
                 new() {CacheType = CacheType, Key =key11},
@@ -221,7 +221,7 @@ namespace TGS.Tests.Redis.IntegrationTests
             await _cacheManager.CacheAsync(CacheType, key12, null, NewData);
             await _cacheManager.CacheAsync(CacheType, key21, null, NewData);
             await _cacheManager.CacheAsync(CacheType, key22, null, NewData);
-            
+
             var cacheKeys = new CacheKey[]
             {
                 new() {CacheType = CacheType, Key =key11},

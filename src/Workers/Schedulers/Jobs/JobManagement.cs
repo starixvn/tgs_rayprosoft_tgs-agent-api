@@ -51,7 +51,7 @@ namespace TGS.Workers.Schedulers.Jobs
 
             if (DateTimeOffset.TryParse($"{dateTime} +8:00", out _))
             {
-                return await _worker.ExecutionAsync(dateTime, hour, new TimeSpan(8, 0, 0));
+                return await _worker.ExecutionAsync(dateTime, hour);
             }
 
             return new TgsResponse

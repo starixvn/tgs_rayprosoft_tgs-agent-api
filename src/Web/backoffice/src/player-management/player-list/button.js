@@ -194,6 +194,7 @@ const EditTabs = ({
       <PasswordPanel
         playerCode={playerCode}
         onSubmitted={onSubmitted}
+        onClickClose={onClickClose}
         {...tab}
       />
     </Tabs>
