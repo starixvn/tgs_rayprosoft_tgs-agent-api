@@ -1,10 +1,9 @@
 import parseISO from "date-fns/parseISO"
 import format from "date-fns/format"
 import isValid from "date-fns/isValid"
-import { enUS, zhCN } from "date-fns/locale"
 import { useLocale, Locales } from "../i18n"
 
-export const Format = {
+const Format = {
   Date: "yyyy/MM/dd",
   Time: "HH:mm:ss"
 }
@@ -16,7 +15,21 @@ export const useFormattedTimeString = (value) => {
   return isValid(date) ? format(date, `HH:mm`) : ""
 }
 
-export default (date) => {
-  date = typeof date == "string" ? parseISO(date) : date
-  return isValid(date) ? format(date, `${Format.Date} ${Format.Time}`) : ""
+const DefaultDateTimeFormat = `${Format.Date} ${Format.Time}`
+export const formatDateTime = (dateFormat = DefaultDateTimeFormat, value) => {
+  if (!value) {
+    return ""
+  }
+
+  let date = typeof value == "string" ? parseISO(value) : value
+  return isValid(date) ? format(date, dateFormat) : ""
 }
+
+export const defaultFormatDateTime = (value) =>
+  formatDateTime(DefaultDateTimeFormat, value)
+
+export const defaultFormatDate = (value) => formatDateTime(Format.Date, value)
+
+export const formatDayMonthYear = (value) => formatDateTime("dd/MM/yyyy", value)
+
+export default defaultFormatDateTime

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,14 +20,20 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
             _service = service;
         }
 
-        //TODO: calculate every column amount
         public override Task<PagedResponse<MarketModel>> Handle(
             GetMarketsRequest request,
             CancellationToken cancellationToken)
         {
+            DateTimeOffset requestFrom = request.From.ToOffset(new(8, 0, 0));
+            DateTimeOffset requestTo = request.To.AddDays(1).ToOffset(new(8, 0, 0));
+            DateTimeOffset from = new(requestFrom.Year, requestFrom.Month, requestFrom.Day, 0, 0, 0,
+                requestFrom.Offset);
+            DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,
+                requestTo.Offset);
+
             return _service.GetMarketsAsync()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
+                .Where(x => x.ReportDate >= from && x.ReportDate < to)
                 .GroupBy(x => new {x.BrandId, x.ReportDate}, (market, markets) =>
                     new MarketModel
                     {

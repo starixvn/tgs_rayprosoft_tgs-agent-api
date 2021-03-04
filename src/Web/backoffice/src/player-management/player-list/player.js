@@ -95,7 +95,10 @@ export const EditPanel = ({
           <EditForm
             player={player}
             isLoading={isLoading}
-            onClickClose={reset}
+            onClickClose={() => {
+              reset()
+              onClickClose?.()
+            }}
           />
         </form>
       </FormProvider>

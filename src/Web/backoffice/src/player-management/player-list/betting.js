@@ -17,6 +17,7 @@ import dateTimeColumn from "../../table/column/dateTime"
 import BettingDetail from "./BettingDetailButton"
 import { Tab as _Tab, TabPanel } from "../../tab"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
+import { sumColumn } from "../../table/sumColumn"
 
 export const Key = "betting"
 
@@ -48,6 +49,7 @@ export const Panel = ({ playerCode, ...props }) => {
     from,
     to
   } = state
+  //TODO: use toApiParams instead
   let { data = {}, isLoading, mutate } = useBettings(playerCode, {
     page: pageIndex + 1,
     rows: pageSize,
@@ -208,7 +210,7 @@ const useColumns = () =>
         textAlign: "center"
       },
       Footer: (table) => (
-        <FormattedNumber value={total("betAmount", table.rows)} />
+        <FormattedNumber value={sumColumn("betAmount", table.rows)} />
       ),
       footerCellProps: {
         textAlign: "center"
@@ -223,7 +225,7 @@ const useColumns = () =>
       accessor: "validBetAmount",
       Header: <Trans zh="有效投注金额" en="Valid Bet Amount" />,
       Footer: (table) => (
-        <FormattedNumber value={total("validBetAmount", table.rows)} />
+        <FormattedNumber value={sumColumn("validBetAmount", table.rows)} />
       ),
       footerCellProps: {
         textAlign: "center"
@@ -241,7 +243,7 @@ const useColumns = () =>
       accessor: "payout",
       Header: <Trans zh="派彩" en="Payout" />,
       Footer: (table) => (
-        <FormattedNumber value={total("payout", table.rows)} />
+        <FormattedNumber value={sumColumn("payout", table.rows)} />
       ),
       footerCellProps: {
         textAlign: "center"
@@ -259,7 +261,7 @@ const useColumns = () =>
       accessor: "winLoss",
       Header: <Trans zh="输赢金额" en="Win Loss" />,
       Footer: (table) => (
-        <FormattedNumber value={total("winLoss", table.rows)} />
+        <FormattedNumber value={sumColumn("winLoss", table.rows)} />
       ),
       footerCellProps: {
         textAlign: "center"
@@ -326,12 +328,3 @@ const useColumns = () =>
       }
     }
   ])
-
-const total = (field = "", rows = []) =>
-  rows.reduce((total, row) => {
-    let value = Reflect.get(row.values, field)
-    if (Number.isFinite(value)) {
-      return total + value
-    }
-    return total
-  }, 0)

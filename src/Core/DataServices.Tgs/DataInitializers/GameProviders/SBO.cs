@@ -30,7 +30,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game) g with {EndpointPath = string.Empty};
+                        return (Game)g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -50,19 +50,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"),
-                new VND1000Currency("VND"), new IDR1000Currency("IDR"),
-                new JPYCurrency("JPY"), new KRWCurrency("KRW"),
-                new MYRCurrency("MYR"), new THBCurrency("THB"),
-                new GBPCurrency("GBP")
+                new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND"),
+                new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
+                new THBCurrency("THB"), new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-cn"),
-                new IDLanguage("id-id"), new JPLanguage("ja-jp"),
-                new KRLanguage("ko-kr"), new THLanguage("th-th"),
-                new VNLanguage("vi-vn"), new TWLanguage("zh-tw")
+                new USLanguage("en"), new CNLanguage("zh-cn"), new IDLanguage("id-id"), new JPLanguage("ja-jp"),
+                new KRLanguage("ko-kr"), new THLanguage("th-th"), new VNLanguage("vi-vn"), new TWLanguage("zh-tw")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -95,9 +91,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SBOConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new Uri("http://game-sbo") : new Uri("https://localhost:62330"),
+                        _env.IsDocker() ? new("http://game-sbo") : new Uri("http://localhost:62330"),
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
-                    ApiUrl = new Uri("https://ex-api-demo-yy.568win.com")
+                    ApiUrl = new("https://ex-api-demo-yy.568win.com"),
+                    EnableCancelFailedTransactionsJob = true,
+                    DelaySecondsForDeduct = 0
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new()

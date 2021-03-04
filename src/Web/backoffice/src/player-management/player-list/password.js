@@ -96,7 +96,7 @@ const Body = ({ isLoading, onClickClose, ...props }) => {
         </Box>
       </FieldValues>
       <Box alignX="right">
-        <SubmitCancel isLoading={isLoading} />
+        <SubmitCancel isLoading={isLoading} onClickCancel={onClickClose} />
       </Box>
     </Stack>
   )

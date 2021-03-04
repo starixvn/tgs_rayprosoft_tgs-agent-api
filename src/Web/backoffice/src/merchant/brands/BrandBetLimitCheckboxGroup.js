@@ -142,12 +142,18 @@ export const BrandBetLimitCheckboxGroupTable = ({
                         getValues,
                         sameCurrencyFieldPairs
                       )
+
+                      let checkedNotDefaultFields = filterCheckedNotDefault(
+                        name,
+                        getValues,
+                        sameCurrencyFieldPairs
+                      )
                       if (
                         !foundOtherDefault &&
-                        sameCurrencyFieldPairs.length == 1
+                        checkedNotDefaultFields.length == 1
                       ) {
                         //only auto set default when "1" record found
-                        let [field, index] = sameCurrencyFieldPairs[0]
+                        let [field, index] = checkedNotDefaultFields[0]
                         setValue(defaultFieldName(name, field, index), true)
                       }
                     }
@@ -247,6 +253,14 @@ const anyChecked = (name, currencyCode, getValues, fieldIndexPairs = []) => {
       let checked = getValues(checkedFieldName(name, field, index))
       return checked
     })
+}
+
+const filterCheckedNotDefault = (name, getValues, fieldIndexPairs = []) => {
+  return fieldIndexPairs.filter(([field, index]) => {
+    let checked = getValues(checkedFieldName(name, field, index))
+    let isDefault = getValues(defaultFieldName(name, field, index))
+    return checked && !isDefault
+  })
 }
 
 const findCheckedDefault = (name, getValues, fieldIndexPairs = []) => {

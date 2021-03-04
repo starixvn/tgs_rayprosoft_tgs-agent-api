@@ -229,7 +229,7 @@ services:
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
-      - 32669:80
+      - 62330:80
     networks:
       tgs:
     depends_on:

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,9 @@ using TGS.Tests.TestsCommon;
 namespace TGS.Tests.Redis.IntegrationTests
 {
     [TestFixture, Parallelizable]
+#if IGNORE
+    [Ignore("Too slow")]
+#endif
     [Category(Named.Manual)]
     [Explicit(reason: Named.NotToBeContinuouslyTested)]
     public class ManualTests
@@ -34,6 +38,7 @@ namespace TGS.Tests.Redis.IntegrationTests
             _cacheManager = provider.GetService<IRedisCacheManager>();
         }
 
+
         [TearDown]
         public void TearDown()
         {
@@ -53,12 +58,17 @@ namespace TGS.Tests.Redis.IntegrationTests
 
             Console.WriteLine("Starting to create keys");
             var stopwatch = new Stopwatch();
+
             stopwatch.Start();
+
+            var cacheTasks = new List<Task>();
             for (var i = 0; i < amount; i++)
             {
                 var key = $"{i:D10}:{i % divider}:{i % 200000}";
-                await _cacheManager.CacheAsync(CacheType, key, null, i);
+                cacheTasks.Add(_cacheManager.CacheAsync(CacheType, key, null, i));
             }
+            await Task.WhenAll(cacheTasks).ConfigureAwait(false);
+
             stopwatch.Stop();
             Console.WriteLine($"Created {amount} keys in {stopwatch.Elapsed}");
 

@@ -27,6 +27,9 @@ import { useLicenseeList } from "./licensees/client"
 import { useBrandList } from "./brands/client"
 import { useTrans } from "../i18n"
 import { useFormContext } from "react-hook-form"
+import { ResellerIdSelect } from "./resellers/ResellerIdSelect"
+import { LicenseeIdSelect } from "./licensees/LicenseeIdSelect"
+import { BrandIdSelect } from "./brands/BrandIdSelect"
 
 const isActive = (merchant, start, end) => {
   const order = [Reseller, Licensee, Brand]
@@ -58,30 +61,105 @@ const useBrandPlaceholder = () =>
     en: "Select Brand"
   })
 
+const ResellerIdName = "resellerId"
+const DefaultResellerProps = {
+  name: ResellerIdName
+}
+
+const LicenseeIdName = "licenseeId"
+const DefaultLicenseeProps = {
+  name: LicenseeIdName
+}
+
+const BrandIdName = "brandId"
+const DefaultBrandProps = {
+  name: BrandIdName
+}
+
 export const MerchantIdSelect = ({
   start = Reseller,
   end = Brand,
 
-  resellerIdName = "resellerId",
-  defaultResellerId = "",
-  resellerId = "",
-  onResellerIdChange,
+  resellerProps: {
+    name: resellerIdName = ResellerIdName,
+    onChange: onResellerChange,
+    ...resellerProps
+  } = DefaultResellerProps,
 
-  licenseeIdName = "licenseeId",
-  defaultLicenseeId = "",
-  licenseeId = "",
-  onLicenseeIdChange,
+  licenseeProps: {
+    name: licenseeIdName = LicenseeIdName,
+    onChange: onLicenseeChange,
+    ...licenseeProps
+  } = DefaultLicenseeProps,
 
-  brandIdName = "brandId",
-  defaultBrandId = "",
-  brandId = "",
-  onBrandIdChange,
+  brandProps: {
+    name: brandIdName = BrandIdName,
+    onChange: onBrandChange,
+    ...brandProps
+  } = DefaultBrandProps,
 
   required = true,
   ...props
 }) => {
   let formMethods = useFormContext()
-  //TODO
+
+  let [resellerId, setResellerId] = useState(
+    resellerProps?.value ?? resellerProps?.defaultValue
+  )
+  let isResellerActive = isActive(Reseller, start, end)
+
+  let [licenseeId, setLicenseeId] = useState(
+    licenseeProps?.value ?? licenseeProps?.defaultValue
+  )
+  let isLicenseeActive = isActive(Licensee, start, end)
+
+  let isBrandActive = isActive(Brand, start, end)
+  return (
+    <Group {...props}>
+      {isResellerActive && (
+        <ResellerIdSelect
+          name={resellerIdName}
+          required={required}
+          {...resellerProps}
+          onChange={(event) => {
+            formMethods?.setValue(licenseeIdName, undefined)
+            formMethods?.setValue(brandIdName, undefined)
+
+            let resellerId = event.target.value
+            setResellerId(resellerId)
+            onResellerChange?.(resellerId)
+          }}
+        />
+      )}
+      {isLicenseeActive && (
+        <LicenseeIdSelect
+          name={licenseeIdName}
+          required={required}
+          resellerId={resellerId}
+          {...licenseeProps}
+          onChange={(event) => {
+            formMethods?.setValue(brandIdName, undefined)
+
+            let licenseeId = event.target.value
+            setLicenseeId(licenseeId)
+            onLicenseeChange?.(licenseeId)
+          }}
+        />
+      )}
+      {isBrandActive && (
+        <BrandIdSelect
+          name={brandIdName}
+          required={required}
+          licenseeId={licenseeId}
+          {...brandProps}
+          onChange={(event) => {
+            let value = event.target.value
+            onBrandChange?.(value)
+          }}
+        />
+      )}
+    </Group>
+  )
 }
 
 export const MerchantIdHookFormSelect = ({
