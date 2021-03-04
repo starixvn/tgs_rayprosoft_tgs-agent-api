@@ -41,7 +41,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
         {
             var value = await context.Request.ReadAsStringAsync();
             var request = _json.DeserializeFromString<BaseRequest>(value);
-            var requestType = request.Type;
 
             var clientId = request.Authorization?.ClientId;
             var secretKey = request.Authorization?.SecretKey;
@@ -69,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             }
 
             var token = string.Empty;
-            HabaneroConsts.RequestTypeMapper.TryGetValue(requestType, out var type);
+            HabaneroConsts.RequestTypeMapper.TryGetValue(request.Type, out var type);
 
             if (type == typeof(AuthorizePlayerRequest))
             {
@@ -106,7 +105,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
                 throw new InvalidCredentialsException("invalid username and passkey for brand configuration");
             }
 
-            context.Items.Add(Consts.ContextItems.RequestType, requestType);
+            context.Items.Add(Consts.ContextItems.RequestType, type);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
             context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, gameProviderConfigurationId);
             context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);

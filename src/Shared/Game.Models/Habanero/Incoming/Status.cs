@@ -8,7 +8,8 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public bool Success { get; init; } = true;
 
         [JsonPropertyName("autherror")]
-        public bool HasAuthenticationError { get; init; } = false;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? HasAuthenticationError { get; init; }
 
         [JsonPropertyName("message")]
         public string Message { get; init; } = string.Empty;

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using TGS.Shared.Game.Models.Habanero.Enums;
 
 namespace TGS.Shared.Game.Models.Habanero.Incoming
 {
     public record BaseRequest
     {
         [JsonPropertyName("type")]
-        public RequestType Type { get; init; }
+        public string Type { get; init; }
 
         [JsonPropertyName("dtsent")]
         public DateTimeOffset SentOn { get; init; }

@@ -22,11 +22,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
     {
         private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
         private readonly IGamePlayActions _actions;
-        private readonly IHabaneroGameControllerMapper _map;
+        private readonly IHabaneroActionModelMapper _map;
 
         public HabaneroGameController(
             IGamePlayActions actions,
-            IHabaneroGameControllerMapper map)
+            IHabaneroActionModelMapper map)
         {
             _actions = actions;
             _map = map;

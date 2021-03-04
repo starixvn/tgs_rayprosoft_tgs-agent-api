@@ -1,23 +1,24 @@
-﻿using System;
-using TGS.Core.Models;
+﻿using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
+using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
 {
-    public interface IHabaneroGameControllerMapper
+    public interface IHabaneroActionModelMapper
     {
         PlayerValidationData Request(string playerCode, PlatformType platformType);
         AuthorizePlayerResponse Response(string playerCode, PlayerValidationResult r);
         AuthorizePlayerResponse Response(string playerCode, GetBalanceResult r);
+        AuthorizePlayerResponse Response(GameApiError error, string message);
     }
 
-    public sealed class HabaneroGameControllerMapper : IHabaneroGameControllerMapper
+    public sealed class HabaneroActionModelMapper : IHabaneroActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
 
-        PlayerValidationData IHabaneroGameControllerMapper.Request(string playerCode, PlatformType platformType) =>
+        PlayerValidationData IHabaneroActionModelMapper.Request(string playerCode, PlatformType platformType) =>
             new()
             {
                 GameProviderCode = GameProviderCode,
@@ -25,12 +26,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 PlatformType = platformType
             };
 
-        AuthorizePlayerResponse IHabaneroGameControllerMapper.Response(string playerCode, PlayerValidationResult r) =>
+        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, PlayerValidationResult r) =>
             new()
             {
                 Result = new()
                 {
-                    Status = new(),
+                    Status = new() {HasAuthenticationError = false},
                     PlayerCode = playerCode,
                     PlayerUsername = r.Username,
                     Balance = r.Balance,
@@ -38,16 +39,29 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 }
             };
 
-        AuthorizePlayerResponse IHabaneroGameControllerMapper.Response(string playerCode, GetBalanceResult r) =>
+        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
             new()
             {
                 Result = new()
                 {
-                    Status = new(),
+                    Status = new() {HasAuthenticationError = false},
                     PlayerCode = playerCode,
                     PlayerUsername = r.Username,
                     Balance = r.Balance,
                     CurrencyCode = r.GameProviderCurrency
+                }
+            };
+
+        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(GameApiError error, string message) =>
+            new()
+            {
+                Result = new()
+                {
+                    Status = new()
+                    {
+                        Success = false,
+                        Message = $"code: {(int)error}, message: {message}"
+                    }
                 }
             };
     }

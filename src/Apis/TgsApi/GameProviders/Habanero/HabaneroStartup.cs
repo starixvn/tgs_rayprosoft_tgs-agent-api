@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
             services.AddScoped<AuthorizeHabaneroMiddleware>();
             services.AddScoped<HandleHabaneroExceptionMiddleware>();
 
-            services.AddSingleton<IHabaneroGameControllerMapper, HabaneroGameControllerMapper>();
+            services.AddSingleton<IHabaneroActionModelMapper, HabaneroActionModelMapper>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
