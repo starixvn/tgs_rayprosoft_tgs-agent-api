@@ -20,13 +20,13 @@
     "react-dom": "^16.14.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.12.17",
+    "@babel/preset-env": "^7.13.9",
     "@babel/preset-react": "^7.12.13",
     "@emotion/babel-preset-css-prop": "^11.2.0",
     "@emotion/react": "^11.1.5",
     "@fortawesome/free-regular-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
-    "@monaco-editor/react": "^4.0.10",
+    "@monaco-editor/react": "^4.0.11",
     "@snowpack/plugin-babel": "^2.1.6",
     "@snowpack/plugin-dotenv": "^2.0.5",
     "@snowpack/plugin-react-refresh": "^2.4.0",
@@ -58,6 +58,7 @@
     "snowpack": "^3.0.13",
     "super-expressive": "^1.4.0",
     "swr": "^0.4.2",
-    "tinymce": "^5.5.1"
+    "tinymce": "^5.5.1",
+    "xml-formatter": "^2.4.0"
   }
 }

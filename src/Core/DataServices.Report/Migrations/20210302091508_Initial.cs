@@ -37,6 +37,13 @@ namespace TGS.Core.DataServices.Report.Migrations
                 {
                     table.PrimaryKey("pk_markets", x => x.id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_markets_brand_id_hour_report_date",
+                schema: "dbo",
+                table: "markets",
+                columns: new[] { "brand_id", "hour", "report_date" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

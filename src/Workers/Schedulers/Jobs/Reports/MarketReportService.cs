@@ -9,7 +9,6 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.Market;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Workers.Schedulers.Jobs.Reports
@@ -23,6 +22,7 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
     {
         private readonly ITgsLog _log;
         private readonly ITgsRepository _repository;
+        private readonly IRoundService _roundService;
         private readonly IMarketService _service;
         private readonly ITransactionManager _transactionManager;
 
@@ -30,9 +30,11 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
             ITgsRepository repository,
             ITransactionManager transactionManager,
             IMarketService service,
+            IRoundService roundService,
             ITgsLog log)
         {
             _service = service;
+            _roundService = roundService;
             _transactionManager = transactionManager;
             _repository = repository;
             _log = log.SetLogger(nameof(MarketReportWorker));
@@ -44,7 +46,8 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
             {
                 var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
                 var canDelete = false;
-                var src = DateTimeOffset.Now.ToOffset(new TimeSpan(8, 0, 0)).AddHours(-1);
+                var src = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddHours(-1);
+                DateTimeOffset theDay = new(src.Year, src.Month, src.Day, 0, 0, 0, src.Offset);
                 if (date.IsNotNullOrEmpty() &&
                     DateTimeOffset.TryParse($"{date} {hour}:00 +08:00", out var result))
                 {
@@ -55,17 +58,17 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
                 var hourArray = Enumerable.Range(0, src.Hour);
 
                 var marketsOfDay = await _service.GetMarketsAsync()
-                    .Where(x => x.ReportDate == src)
+                    .Where(x => x.ReportDate == theDay)
                     .Select(x => x.Hour).ToArrayAsync();
 
                 var doHours = hourArray.Except(marketsOfDay).ToArray();
 
                 foreach (var doHour in doHours)
                 {
-                    var start = new DateTimeOffset(src.Year, src.Month, src.Day, doHour,
+                    DateTimeOffset start = new(src.Year, src.Month, src.Day, doHour,
                         0, 0, src.Offset);
                     var end = new DateTimeOffset(src.Year, src.Month, src.Day, doHour,
-                        59, 59, src.Offset);
+                        0, 0, src.Offset).AddHours(1);
 
                     await _transactionManager.ExecuteTransactionAsync(() => _repository,
                         IsolationLevel.ReadCommitted, id,
@@ -77,57 +80,16 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
                                     .Where(x => x.ReportDate == DateTimeOffset.Parse(date) && x.Hour == hour)
                                     .ToArrayAsync();
                                 await _service.DeleteMarketsAsync(markets);
+                                canDelete = false;
                             }
 
                             if (await _service.ExistsAsync(x =>
                                 x.ReportDate == src && x.Hour == start.Hour))
                             {
-                                return new TgsResponse();
+                                return new();
                             }
 
-                            var brandIds = await _repository.Brands.Select(x => x.Id).ToArrayAsync();
-                            var request = brandIds.GroupJoin(_repository.Players, guid => guid, p => p.BrandId,
-                                    (guid, p) =>
-                                        new
-                                        {
-                                            brandId = guid,
-                                            players = p.Select(x => new {x.RegisteredOn, x.FirstDepositOn})
-                                        })
-                                .GroupJoin(_repository.Transactions.Where(x =>
-                                        x.ConfirmedOn >= start && x.ConfirmedOn <= end), c => c.brandId,
-                                    t => t.BrandId, (c, t) => new
-                                    {
-                                        c.brandId,
-                                        c.players,
-                                        transaction = t.Select(x => new {x.Type, x.Amount})
-                                    })
-                                .GroupJoin(
-                                    _repository.Rounds.Where(x =>
-                                        x.ClosedOn >= start && x.ClosedOn <= end), c => c.brandId,
-                                    r => r.BrandId, (c, r) => new CreateMarketRequest
-                                    {
-                                        BrandId = c.brandId,
-                                        Hour = start.Hour,
-                                        ReportDate = new DateTimeOffset(src.Year, src.Month, src.Day, 0, 0, 0,
-                                            src.Offset),
-                                        RegisteredCount = c.players.Count(x =>
-                                            x.RegisteredOn >= start && x.RegisteredOn <= end),
-                                        FirstFundInCount = c.players.Count(x =>
-                                            x.FirstDepositOn >= start && x.FirstDepositOn <= end),
-                                        DepositAmount = c.transaction.Where(x => x.Type == TransactionType.Deposit)
-                                            .Sum(x => x.Amount),
-                                        WithdrawalAmount = c.transaction
-                                            .Where(x => x.Type == TransactionType.Withdrawal)
-                                            .Sum(x => x.Amount),
-                                        AdjustmentAmount = c.transaction.Where(x => x.Type == TransactionType.Adjust)
-                                            .Sum(x => x.Amount),
-                                        BonusAmount = 0,
-                                        BetAmount = r.Sum(x => x.BetAmount) ?? 0,
-                                        ValidBetAmount = r.Sum(x => x.Turnover) ?? 0,
-                                        WinLossAmount = r.Sum(x => x.WinLoss) ?? 0,
-                                        NetProfit = r.Sum(x => x.WinLoss) - r.Sum(x => x.Turnover) ?? 0,
-                                        CreatedOn = DateTimeOffset.Now
-                                    }).ToArray();
+                            var request = await _roundService.GetRoundsAsync(start, end);
 
                             await _service.CreateMarketsAsync(request);
 
@@ -135,17 +97,13 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
                         });
                 }
 
-                return new TgsResponse();
+                return new();
             }
             catch (Exception ex)
             {
                 _log.LogError("Fail to insert market report", ex);
 
-                return new TgsResponse
-                {
-                    Error = (int) TgsApiError.SystemError,
-                    ErrorMessage = ex.Message
-                };
+                return new() {Error = (int)TgsApiError.SystemError, ErrorMessage = ex.Message};
             }
         }
     }

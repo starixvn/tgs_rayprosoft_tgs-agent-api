@@ -26,7 +26,7 @@ namespace TGS.Workers.Schedulers.Jobs
             _log = log.SetLogger(nameof(BrandGameProviderScheduleWorker));
         }
 
-        protected override async Task<TgsResponse> ExecuteAsync(object context)
+        public override async Task<TgsResponse> ExecuteAsync(object context)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
@@ -50,10 +50,10 @@ namespace TGS.Workers.Schedulers.Jobs
             try
             {
                 var brandGameProvidersToBeMaintenance =
-                    await UpdateBrandGameProviderStatus(Status.Active, Status.Maintenance, Predicate);
+                    await GetBrandGameProviders(Status.Active, Status.Maintenance, Predicate);
 
                 var brandGameProvidersToBeActivated =
-                    await UpdateBrandGameProviderStatus(Status.Maintenance, Status.Active, Predicate);
+                    await GetBrandGameProviders(Status.Maintenance, Status.Active, Predicate);
 
                 await _service.UpdateBrandGameProvidersAsync(brandGameProvidersToBeMaintenance
                     .Union(brandGameProvidersToBeActivated).ToArray());
@@ -72,16 +72,16 @@ namespace TGS.Workers.Schedulers.Jobs
             }
         }
 
-        private async Task<BrandGameProvider[]> UpdateBrandGameProviderStatus(Status sourceStatus, Status targetStatus,
-            Func<BrandGameProviderSchedule, bool> Predicate)
+        private async Task<BrandGameProvider[]> GetBrandGameProviders(Status sourceStatus, Status targetStatus,
+            Func<BrandGameProviderSchedule, bool> predicate)
         {
             var sourceBrandGameProviders = await _service.GetBrandGameProvidersAsync(tracking: true)
                 .Where(x => x.Status == sourceStatus && !x.IsManualChangeStatus)
                 .ToArrayAsync();
 
             var brandGameProvidersToUpdate = sourceBrandGameProviders
-                .Where(x => !x.Schedules.Any(Predicate) && targetStatus == Status.Active ||
-                            x.Schedules.Any(Predicate) && targetStatus == Status.Maintenance).ToArray();
+                .Where(x => !x.Schedules.Any(predicate) && targetStatus == Status.Active ||
+                            x.Schedules.Any(predicate) && targetStatus == Status.Maintenance).ToArray();
 
             foreach (var brandGameProvider in brandGameProvidersToUpdate)
                 brandGameProvider.Status = targetStatus;

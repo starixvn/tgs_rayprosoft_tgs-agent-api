@@ -10,7 +10,9 @@ import {
     Dialog,
     Columns,
     Set,
-    Card
+    Card,
+    Link,
+    Table
 } from "bumbag"
 import { useTrans, Trans, FormattedNumber, useLangCode } from "../../i18n"
 import { useGameRound } from "./client"
@@ -21,6 +23,9 @@ import { NormalLabel } from "../../form/Label"
 import defaultFormatDateTime from "../../date/format"
 import { GameRoundStatusLabel } from "./GameRoundStatus"
 import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
+import MonacoEditor from "@monaco-editor/react"
+import Textarea from "../../textarea"
+import formatXml from "xml-formatter"
 
 export const GameRoundDialog = ({ record = {}, dialog, ...props }) => {
     let { id } = record
@@ -238,17 +243,142 @@ const GameRoundDataCard = ({ value: items = [], ...props }) => {
             variant="bordered"
             spacing="major-1"
         >
-            <TwoColumns>
-                {items.map((item) => (
-                    <GameRoundDataContent value={item} />
+            <Set orientation="vertical" isFilled>
+                {items.map((item, index) => (
+                    <GameRoundDataContent key={index} value={item} />
                 ))}
-            </TwoColumns>
+            </Set>
         </Card>
     )
 }
 
-const GameRoundDataContent = ({ value = {} }) => {
-    console.warn("TODO: GameRoundDataContent")
+//TODO: sync with backend
+const ContentType = {
+    Url: "Url", //1,
+    Table: "Table", //2,
+    Text: "Text", //3,
+    Json: "Json", //4,
+    Xml: "Xml" //5
+}
+const GameRoundDataContent = ({
+    value: { type = "", ...record } = {},
+    ...props
+}) => {
+    console.warn("TODO: GameRoundDataContent type:", type, "record: ", record)
+    switch (type) {
+        case ContentType.Url:
+            return <UrlContent {...record} />
+
+        case ContentType.Json:
+            return <JsonContent {...record} />
+
+        case ContentType.Table:
+            return <TableContent {...record} />
+
+        case ContentType.Text:
+            return <Textarea value={record?.value ?? ""} />
+
+        case ContentType.Xml:
+            return <XmlContent {...record} />
+    }
+}
+
+const UrlContent = ({ url = "" }) => {
+    return (
+        <Link.Block href={url} target="_blank">
+            {url}
+        </Link.Block>
+    )
+}
+
+const JsonContent = ({ value = "" }) => {
+    if (!value) {
+        return null
+    }
+
+    let record = typeof value === "string" ? JSON.parse(value) : value
+    let formattedValue = JSON.stringify(record, null, 4)
+
+    return (
+        <MonacoEditor
+            defaultLanguage="JSON"
+            height="25vh"
+            value={formattedValue}
+            options={{
+                readOnly: true,
+                scrollBeyondLastLine: false,
+                minimap: { enabled: false },
+                contextmenu: false,
+                hideCursorInOverviewRuler: true
+            }}
+            css={css`
+                border: 1px solid var(--bb-palette-white900, #000000);
+                border-radius: 6px;
+            `}
+        />
+    )
+}
+
+const XmlContent = ({ value = "", ...props }) => {
+    let formattedValue = formatXml(value)
+    return (
+        <MonacoEditor
+            defaultLanguage="XML"
+            height="25vh"
+            value={formattedValue}
+            options={{
+                readOnly: true,
+                scrollBeyondLastLine: false,
+                minimap: { enabled: false },
+                contextmenu: false,
+                hideCursorInOverviewRuler: true
+            }}
+            css={css`
+                border: 1px solid var(--bb-palette-white900, #000000);
+                border-radius: 6px;
+            `}
+        />
+    )
+}
+
+const TableContent = ({ headers = [], rows = [], ...props }) => {
+    if (rows.length === 0) {
+        return null
+    }
+
+    return (
+        <Table>
+            {headers.length && (
+                <Table.Head>
+                    <Table.Row>
+                        {headers.map((header) => (
+                            <ContentHeader value={header} />
+                        ))}
+                    </Table.Row>
+                </Table.Head>
+            )}
+            <Table.Body>
+                {rows.map((row) => (
+                    <ContentRow headers={headers} value={row} />
+                ))}
+            </Table.Body>
+        </Table>
+    )
+}
+
+const ContentHeader = ({ value = "" }) => (
+    <Table.HeadCell>{value}</Table.HeadCell>
+)
+
+const ContentRow = ({ value: record, headers = [] }) => {
+    return (
+        <Table.Row>
+            {headers.map((header) => {
+                let value = Reflect.get(record, header)
+                return <Table.Cell>{value}</Table.Cell>
+            })}
+        </Table.Row>
+    )
 }
 
 export default GameRoundDialog
