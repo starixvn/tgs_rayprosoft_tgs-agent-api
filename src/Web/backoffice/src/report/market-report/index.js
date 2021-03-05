@@ -22,7 +22,7 @@ import dateTimeColumn from "../../table/column/dateTime"
 import subDays from "date-fns/subDays"
 import { startOfNextDay } from "../../date/startOfNextDay"
 import numberColumn from "../../table/column/numberColumn"
-import startOfTomorrow from "date-fns/startOfTomorrow"
+import startOfToday from "date-fns/startOfToday"
 
 export { Code }
 
@@ -38,7 +38,8 @@ export const Content = () => {
 export const CodeContentPair = [Code, Content]
 
 export const Body = () => {
-    let [brandId, setBrandId] = useState()
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandId] = useState(userBrandId)
 
     return (
         <Set orientation="horizontal">
@@ -74,7 +75,8 @@ const ReportContent = ({ brandId }) => {
     let minDate = subDays(dateRange.start, DataRetentionDays)
 
     let columns = useColumns({ items: data?.items })
-    let maxDate = startOfTomorrow()
+    let maxDate = startOfToday()
+
     return (
         <PageContent
             actionBar={

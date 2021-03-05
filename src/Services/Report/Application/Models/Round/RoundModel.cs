@@ -7,6 +7,7 @@ namespace TGS.Services.Report.Application.Models.Round
     {
         public Guid Id { get; set; }
         public string ExternalRoundId { get; set; }
+        public int GameId { get; set; }
         public string GameName { get; set; }
         public Guid GameProviderId { get; set; }
         public string GameProviderCode { get; set; }

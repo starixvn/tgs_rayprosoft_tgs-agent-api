@@ -5,7 +5,8 @@ import { Heading, Stack, Box, Button, Set, useModalState } from "bumbag"
 import PageContent from "../../page/Content"
 import {
     useIsDisplayMenuByRoute,
-    useHasSubMenuByRoute
+    useHasSubMenuByRoute,
+    useUserBrandId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
@@ -44,7 +45,8 @@ export const Content = () => {
 export const CodeContentPair = [Code, Content]
 
 export const Body = () => {
-    let [brandId, setBrandId] = useState()
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandId] = useState(userBrandId)
 
     return (
         <Set orientation="vertical" isFilled>
@@ -65,7 +67,7 @@ const ReportContent = ({ brandId }) => {
         brandId,
         from: dateRange.start,
         to: dateRange.end,
-        playerName: "",
+        username: "",
         roundId: "",
         status: "",
         gameProviderId: ""
@@ -76,7 +78,7 @@ const ReportContent = ({ brandId }) => {
         pageSize,
         from,
         to,
-        playerName,
+        username,
         roundId,
         status,
         gameProviderId
@@ -100,7 +102,7 @@ const ReportContent = ({ brandId }) => {
                 <SearchBar
                     start={from}
                     end={to}
-                    playerName={playerName}
+                    username={username}
                     roundId={roundId}
                     status={status}
                     gameProviderId={gameProviderId}
@@ -113,7 +115,7 @@ const ReportContent = ({ brandId }) => {
                             pageIndex: 0,
                             from: start,
                             to: end,
-                            playerName: formData.playerName,
+                            username: formData.username,
                             roundId: formData.roundId,
                             status: formData.status,
                             gameProviderId: formData.gameProviderId
@@ -124,7 +126,7 @@ const ReportContent = ({ brandId }) => {
                                 pageIndex,
                                 from: state?.from,
                                 to: state?.to,
-                                playerName,
+                                username,
                                 roundId,
                                 status,
                                 gameProviderId
@@ -154,7 +156,7 @@ const ReportContent = ({ brandId }) => {
 const SearchBar = ({
     start,
     end,
-    playerName,
+    username,
     roundId,
     status,
     gameProviderId,
@@ -169,7 +171,7 @@ const SearchBar = ({
         defaultValues: {
             start,
             end,
-            playerName,
+            username,
             roundId,
             status,
             gameProviderId
@@ -198,7 +200,7 @@ const SearchBar = ({
                         required
                     />
                     <InputField
-                        name="playerName"
+                        name="username"
                         showEmptyFieldValueAddonAfter
                         placeholder={playerNamePlaceholder}
                         showEmptyFieldValueAddonAfter

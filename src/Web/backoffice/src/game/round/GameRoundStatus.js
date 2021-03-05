@@ -9,10 +9,10 @@ const WinTrans = {
     en: "Win"
 }
 
-const Lose = "Lose"
+const Lose = "Loss"
 const LoseTrans = {
     zh: "输",
-    en: "Lose"
+    en: "Loss"
 }
 
 const Draw = "Draw"

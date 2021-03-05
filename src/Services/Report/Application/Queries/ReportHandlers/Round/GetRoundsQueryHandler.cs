@@ -72,6 +72,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                     GameProviderId = combine.round.GameProviderId,
                     GameProviderCode = combine.game.GameProvider.Code,
                     GameProviderName = combine.gameProvider.Name,
+                    GameId = combine.game.Id,
                     GameName = combine.game.Name,
                     ExternalRoundId = combine.round.ExternalRoundId,
                     ExternalCreatedOn = combine.round.ExternalCreatedOn,
