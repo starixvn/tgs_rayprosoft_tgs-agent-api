@@ -48,7 +48,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
             _log = log.SetLogger(nameof(CancelFailedTransactionsJobWorker));
         }
 
-        protected override async Task<TgsResponse> ExecuteAsync(object context)
+        public override async Task<TgsResponse> ExecuteAsync(object context)
         {
             try
             {

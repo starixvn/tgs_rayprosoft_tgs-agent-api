@@ -9,6 +9,6 @@ namespace TGS.Core.Infrastructures.Hangfire.Services
         public Task<object> ExecuteWorkerAsync(string name, object context) =>
             ExecuteAsync(context).ContinueWith(a => (object) a.Result);
 
-        protected abstract Task<T> ExecuteAsync(object context);
+        public abstract Task<T> ExecuteAsync(object context);
     }
 }

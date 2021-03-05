@@ -10,10 +10,10 @@ namespace TGS.Core.Models.Services.BetHistories
             Type = type;
         }
 
-        [JsonPropertyName("type")]
-        public BetHistoryDataType Type { get; }
-
         [JsonPropertyName("value")]
         public string Value { get; init; }
+
+        [JsonPropertyName("type")]
+        public BetHistoryDataType Type { get; init; }
     }
 }

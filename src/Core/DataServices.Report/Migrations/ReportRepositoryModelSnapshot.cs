@@ -95,6 +95,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.HasKey("Id")
                         .HasName("pk_markets");
 
+                    b.HasIndex("BrandId", "Hour", "ReportDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_markets_brand_id_hour_report_date");
+
                     b.ToTable("markets");
                 });
 #pragma warning restore 612, 618
