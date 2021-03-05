@@ -16,6 +16,6 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
             _worker = worker;
         }
 
-        protected override Task<TgsResponse> ExecuteAsync(object context) => _worker.ExecutionAsync();
+        public override Task<TgsResponse> ExecuteAsync(object context) => _worker.ExecutionAsync();
     }
 }

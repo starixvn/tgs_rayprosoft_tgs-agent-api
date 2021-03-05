@@ -1,6 +1,7 @@
 using System;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,6 +67,7 @@ namespace TGS.Workers.Schedulers
             // add custom services for workers
             services.AddTransient<IBrandGameProviderService, BrandGameProviderService>();
             services.AddTransient<IMarketService, MarketService>();
+            services.AddTransient<IRoundService, RoundService>();
             services.AddTransient<IMarketReportService, MarketReportService>();
         }
 
@@ -81,7 +83,7 @@ namespace TGS.Workers.Schedulers
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health", new()
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions()
                 {
                     ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
@@ -90,7 +92,7 @@ namespace TGS.Workers.Schedulers
 
                 endpoints.MapMetrics();
 
-                endpoints.MapHangfireDashboard("/hangfire", new()
+                endpoints.MapHangfireDashboard("/hangfire", new DashboardOptions()
                 {
                     Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}
                 });

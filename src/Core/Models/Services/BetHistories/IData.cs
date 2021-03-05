@@ -7,6 +7,6 @@ namespace TGS.Core.Models.Services.BetHistories
     [InterfaceJsonConverter(typeof(DataConverter))]
     public interface IData
     {
-        public BetHistoryDataType Type { get; }
+        public BetHistoryDataType Type { get; init; }
     }
 }

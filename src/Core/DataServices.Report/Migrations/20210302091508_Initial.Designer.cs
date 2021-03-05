@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Report;
 namespace TGS.Core.DataServices.Report.Migrations
 {
     [DbContext(typeof(ReportRepository))]
-    [Migration("20210225031905_Initial")]
+    [Migration("20210302091508_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,6 +96,10 @@ namespace TGS.Core.DataServices.Report.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_markets");
+
+                    b.HasIndex("BrandId", "Hour", "ReportDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_markets_brand_id_hour_report_date");
 
                     b.ToTable("markets");
                 });

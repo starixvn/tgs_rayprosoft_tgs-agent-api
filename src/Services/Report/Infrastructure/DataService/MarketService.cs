@@ -17,7 +17,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
         IQueryable<Market> GetMarketsAsync(Func<IQueryable<Market>, IQueryable<Market>> preQuery = null,
             bool tracking = false);
 
-        Task CreateMarketsAsync(CreateMarketRequest[] request);
+        Task CreateMarketsAsync(MarketRequest[] request);
         Task DeleteMarketsAsync(Market[] markets);
         Task<bool> ExistsAsync(Expression<Func<Market, bool>> predicate);
     }
@@ -28,7 +28,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
         {
         }
 
-        async Task IMarketService.CreateMarketsAsync(CreateMarketRequest[] request)
+        async Task IMarketService.CreateMarketsAsync(MarketRequest[] request)
         {
             await CreateEntitiesAsync(request.Select(createMarketRequest => new Market
             {

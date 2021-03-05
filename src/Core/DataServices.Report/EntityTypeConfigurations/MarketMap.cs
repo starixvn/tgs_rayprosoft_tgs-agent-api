@@ -13,6 +13,9 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
             builder.HasKey(b => b.Id)
                 .HasName("pk_markets");
 
+            builder.HasIndex(b => new {b.BrandId, b.Hour, b.ReportDate})
+                .IsUnique();
+
             builder.Property(b => b.Id)
                 .ValueGeneratedOnAdd();
 
