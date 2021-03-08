@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using Valhalla.Services;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -25,9 +27,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 
-        public Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
+        public async Task ForgotPasswordAsync(
+            [FromServices] ICommandService<ForgotPasswordCommand> forgotPasswordService,
+            [FromBody] ForgotPasswordRequest request)
         {
-            return Task.CompletedTask;
+            await forgotPasswordService
+                .ExecuteAsync(new ForgotPasswordCommand(request.Phone))
+                .ConfigureAwait(false);
         }
     }
 }
