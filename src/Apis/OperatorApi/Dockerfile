@@ -8,12 +8,14 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
 WORKDIR /dest
 COPY ["src/Apis/OperatorApi/OperatorApi.csproj", "src/Apis/OperatorApi/"]
+COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
+COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
+COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]
 COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
-COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
-COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
+COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
 RUN dotnet restore "src/Apis/OperatorApi/OperatorApi.csproj"
 COPY . .
 WORKDIR "/dest/src/Apis/OperatorApi"
