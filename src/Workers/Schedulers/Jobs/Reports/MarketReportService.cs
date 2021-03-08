@@ -50,17 +50,18 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
                 var theDay = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, 0, 0, 0,
                     previousHour.Offset);
 
-                var marketsOfDay = await _service.GetMarketsAsync()
-                    .Where(x => x.ReportDate == theDay)
-                    .Select(x => x.Hour).Distinct().ToArrayAsync();
-
                 if (date.IsNotNullOrEmpty() &&
                     DateTimeOffset.TryParse($"{date} {hour}:00 +08:00", out var result))
                 {
+                    theDay = new(result.Year, result.Month, result.Day, 0, 0, 0,
+                        result.Offset);
                     previousHour = result;
                     canDelete = true;
-                    marketsOfDay = marketsOfDay.Where(x => x != hour).ToArray();
                 }
+
+                var marketsOfDay = await _service.GetMarketsAsync()
+                    .Where(x => x.ReportDate == theDay)
+                    .Select(x => x.Hour).Distinct().ToArrayAsync();
 
                 var hourArray = Enumerable.Range(0, previousHour.Hour + 1);
 
