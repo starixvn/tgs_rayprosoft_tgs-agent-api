@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Spinner, Stack, Text, Box, Button, Set, Tabs as _Tabs } from "bumbag"
-import { Trans, FormattedNumber } from "../../i18n"
+import { Trans, FormattedNumber, useTrans } from "../../i18n"
 import format from "../../date/format"
-import { useTable, Table, pageCount } from "../../table"
+import { useTable, Table, pageCount, toApiParams } from "../../table"
 //TODO: use BrandGameType instead?
 import { GameTypeSelect } from "../../game/GameType"
 //TODO: use BrandGameProviderSelect instead?
 import GameProviderSelect from "../../game/providers/GameProviderSelect"
-import { pastWeek } from "../../date/range"
+import { pastWeek, today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import SearchButton from "../../button/SearchButton"
 import { useBettings } from "./client"
@@ -18,313 +18,240 @@ import BettingDetail from "./BettingDetailButton"
 import { Tab as _Tab, TabPanel } from "../../tab"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { sumColumn } from "../../table/sumColumn"
+import { startOfNextDay } from "../../date/startOfNextDay"
+import { subDays } from "date-fns"
+import { useGameRoundList } from "../../game/round/client"
+import numberColumn from "../../table/column/numberColumn"
 
 export const Key = "betting"
 
 export const Tab = ({ ...props }) => {
-  return (
-    <_Tab tabId={Key} {...props}>
-      <Trans zh="投注记录" en="Betting records" />
-    </_Tab>
-  )
+    return (
+        <_Tab tabId={Key} {...props}>
+            <Trans zh="投注记录" en="Betting records" />
+        </_Tab>
+    )
 }
 
-export const Panel = ({ playerCode, ...props }) => {
-  let { selectedId } = props
-  let isActive = selectedId === Key
-  let dateRange = pastWeek()
-  let { state, setState, setPageIndex, setSortOrder } = useTable({
-    gameType: "",
-    gameProvider: "",
-    from: dateRange.start,
-    to: dateRange.end
-  })
-  let {
-    pageIndex,
-    pageSize,
-    sortby,
-    orderby,
-    gameType,
-    gameProvider,
-    from,
-    to
-  } = state
-  //TODO: use toApiParams instead
-  let { data = {}, isLoading, mutate } = useBettings(playerCode, {
-    page: pageIndex + 1,
-    rows: pageSize,
-    sortby,
-    orderby,
-    gameType,
-    gameProvider,
-    from: format(from),
-    to: format(to)
-  })
+export const Panel = ({ playerCode, brandId, player, ...props }) => {
+    let { selectedId } = props
+    let isActive = selectedId === Key
+    let dateRange = today()
+    let { state, setState, setPageIndex, setSortOrder } = useTable({
+        gameType: "",
+        gameProviderId: "",
+        from: dateRange.start,
+        to: dateRange.end
+    })
 
-  let columns = useColumns()
+    let { pageIndex, pageSize, from, to, gameType, gameProviderId } = state
 
-  //TODO:
-  return <TabPanel tabId={Key} {...props}></TabPanel>
+    let { data = {}, isLoading, mutate } = useGameRoundList({
+        ...toApiParams(state),
+        sortby: "createdOn",
+        orderby: "descending",
+        brandId,
+        userName: player.userName
+    })
 
-  return (
-    <TabPanel tabId={Key} {...props}>
-      <Stack spacing="major-2">
-        {isActive && (
-          <SearchBar
-            gameType={gameType}
-            gameProvider={gameProvider}
-            start={from}
-            end={to}
-            search={({ start, end, ...data }) => {
-              if (
-                equals(
-                  {
-                    from: start,
-                    to: end,
-                    gameType: data.gameType,
-                    gameProvider: data.gameProvider
-                  },
-                  { gameType, gameProvider, from, to }
-                )
-              ) {
-                mutate()
-              }
-              setState({
-                from: start,
-                to: end,
-                ...data
-              })
-            }}
-            isLoading={isLoading}
-          />
-        )}
-        <Table
-          columns={columns}
-          data={data?.items}
-          pageCount={pageCount(pageSize, data?.totalCount)}
-          setPageIndex={setPageIndex}
-          setSortOrder={setSortOrder}
-          initialState={state}
-          isLoading={isLoading}
-          foot
-        />
-      </Stack>
-    </TabPanel>
-  )
+    let columns = useColumns({ items: data?.items })
+
+    let QueryMaxRangeDays = 30
+    let DataRetentionDays = 180
+    let minDate = subDays(dateRange.start, DataRetentionDays)
+
+    return (
+        <TabPanel tabId={Key} {...props}>
+            <Stack spacing="major-2">
+                {isActive && (
+                    <SearchBar
+                        gameType={gameType}
+                        gameProviderId={gameProviderId}
+                        start={from}
+                        end={to}
+                        minDate={minDate}
+                        maxDate={dateRange.end}
+                        maxRangeDays={QueryMaxRangeDays}
+                        search={({ start, end, ...formData }) => {
+                            let newState = {
+                                pageIndex: 0,
+                                from: start,
+                                to: end,
+                                gameType: formData.gameType,
+                                gameProviderId: formData.gameProviderId
+                            }
+
+                            if (
+                                equals(newState, {
+                                    pageIndex,
+                                    from: state?.from,
+                                    to: state?.to,
+                                    gameType,
+                                    gameProviderId
+                                })
+                            ) {
+                                mutate()
+                            }
+                            setState({
+                                from: start,
+                                to: end,
+                                ...formData
+                            })
+                        }}
+                        isLoading={isLoading}
+                    />
+                )}
+                <Table
+                    columns={columns}
+                    data={data?.items}
+                    pageCount={pageCount(pageSize, data?.totalCount)}
+                    setPageIndex={setPageIndex}
+                    setSortOrder={setSortOrder}
+                    initialState={state}
+                    isLoading={isLoading}
+                    foot={data?.items?.length > 0}
+                />
+            </Stack>
+        </TabPanel>
+    )
 }
 
 const SearchBar = ({
-  gameType,
-  gameProvider,
-  start,
-  end,
-  /*
-  gameType,
-  gameProvider,
-  start: startDate,
-  end: endDate,
-  */
-  search,
-  isLoading,
-  ...props
+    gameType,
+    gameProviderId,
+    start,
+    end,
+    minDate,
+    maxDate,
+    maxRangeDays,
+    search,
+    isLoading,
+    ...props
 }) => {
-  let formMethods = useForm()
-
-  const onSubmit = (data) => search(data)
-
-  return (
-    <FormProvider {...formMethods}>
-      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
-        <Set>
-          <GameTypeSelect name="gameType" />
-          <GameProviderSelect name="gameProvider" />
-          <DateTimeRangeInput startName="start" endName="end" />
-          <SearchButton isLoading={isLoading} disabled={isLoading} />
-        </Set>
-      </form>
-    </FormProvider>
-  )
-
-  /*
-  let [gameTypeState, setGameType] = useState(gameType)
-  let [gameProviderState, setGameProvider] = useState(gameProvider)
-  let [start, setStart] = useState(startDate)
-  let [end, setEnd] = useState(endDate)
-
-  return (
-    <Set>
-      <GameTypeSelect
-        value={gameTypeState}
-        onChange={(event) => {
-          setGameType(event.target.value)
-        }}
-      />
-      <GameProviderSelect
-        value={gameProviderState}
-        onChange={(event) => {
-          setGameProvider(event.target.value)
-        }}
-      />
-      <DateTimeRangeInput
-        start={start}
-        end={end}
-        validate
-        onChangeStart={(date) => {
-          setStart(date)
-        }}
-        onChangeEnd={(date) => {
-          setEnd(date)
-        }}
-      />
-      <SearchButton
-        isLoading={isLoading}
-        onClick={() => {
-          search({
-            gameType: gameTypeState,
-            gameProvider: gameProviderState,
+    let formMethods = useForm({
+        defaultValues: {
             start,
             end
-          })
-        }}
-      />
-    </Set>
-  )
-  */
+        }
+    })
+
+    const onSubmit = (data) => search(data)
+
+    return (
+        <FormProvider {...formMethods}>
+            <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+                <Set>
+                    <GameTypeSelect name="gameType" />
+                    <GameProviderSelect name="gameProviderId" />
+                    <DateTimeRangeInput
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        maxRangeDays={maxRangeDays}
+                        required
+                    />
+                    <SearchButton isLoading={isLoading} disabled={isLoading} />
+                </Set>
+            </form>
+        </FormProvider>
+    )
 }
 
-const useColumns = () =>
-  useMemo(() => [
-    dateTimeColumn({
-      accessor: "betTime",
-      disableSortBy: true,
-      Header: <Trans zh="投注时间" en="Betting Time" />,
-      Footer: <Trans zh="总和" en="Total" />,
-      footerCellProps: {
-        textAlign: "center"
-      }
-    }),
-    {
-      accessor: "betAmount",
-      Header: <Trans zh="投注金额" en="Betting Amount" />,
-      headCell: {
-        textAlign: "center"
-      },
-      Footer: (table) => (
-        <FormattedNumber value={sumColumn("betAmount", table.rows)} />
-      ),
-      footerCellProps: {
-        textAlign: "center"
-      },
-      disableSortBy: true,
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      accessor: "validBetAmount",
-      Header: <Trans zh="有效投注金额" en="Valid Bet Amount" />,
-      Footer: (table) => (
-        <FormattedNumber value={sumColumn("validBetAmount", table.rows)} />
-      ),
-      footerCellProps: {
-        textAlign: "center"
-      },
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      accessor: "payout",
-      Header: <Trans zh="派彩" en="Payout" />,
-      Footer: (table) => (
-        <FormattedNumber value={sumColumn("payout", table.rows)} />
-      ),
-      footerCellProps: {
-        textAlign: "center"
-      },
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      }
-    },
-    {
-      accessor: "winLoss",
-      Header: <Trans zh="输赢金额" en="Win Loss" />,
-      Footer: (table) => (
-        <FormattedNumber value={sumColumn("winLoss", table.rows)} />
-      ),
-      footerCellProps: {
-        textAlign: "center"
-      },
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      Cell: ({ value }) => {
-        let win = value >= 0
-        return (
-          <Text color={win ? "success" : "danger"}>
-            <FormattedNumber value={value} format="+0,0" />
-          </Text>
-        )
-      }
-    },
-    {
-      id: "detail",
-      accessor: (row) => {
-        return row
-      },
-      Header: <Trans zh="游戏详情" en="Game Detail" />,
-      disableSortBy: true,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center",
-        whiteSpace: "nowrap"
-      },
-      Cell: ({ value }) => {
-        let { betId, betResult } = value
-        return (
-          <Text>
-            {betId} {betResult}
-          </Text>
-        )
-      }
-    },
-    {
-      id: "actions",
-      disableSortBy: true,
-      Header: <Trans zh="操作" en="Actions" />,
-      headCell: {
-        textAlign: "center"
-      },
-      cell: {
-        textAlign: "center"
-      },
-      accessor: (row) => {
-        return row
-      },
-      Cell: ({ value }) => {
-        return (
-          <BettingDetail record={value}>
-            <Trans zh="详情" en="Detail" />
-          </BettingDetail>
-        )
-      }
-    }
-  ])
+const useColumns = ({ items = [] }) => {
+    let roundIdTitle = useTrans({
+        zh: "订单ID",
+        en: "ID"
+    })
+    let gameIdTitle = useTrans({
+        zh: "游戏ID",
+        en: "Game ID"
+    })
+    return useMemo(
+        () => [
+            dateTimeColumn({
+                accessor: "createdOn",
+                Header: <Trans zh="投注时间" en="Created On" />,
+                disableSortBy: true,
+                Footer: () => <Trans zh="总和" en="Total" />,
+                footerCellProps: {
+                    textAlign: "center"
+                }
+            }),
+            numberColumn({
+                accessor: "betAmount",
+                sumColumn: "betAmount",
+                Header: <Trans zh="投注金额" en="Bet Amount" />,
+                disableSortBy: true
+            }),
+            numberColumn({
+                accessor: "validBetAmount",
+                sumColumn: "validBetAmount",
+                Header: <Trans zh="有效投注金额" en="Valid Bet Amount" />,
+                disableSortBy: true
+            }),
+            numberColumn({
+                accessor: "settleAmount",
+                sumColumn: "settleAmount",
+                Header: <Trans zh="派彩" en="Settle Amount" />,
+                disableSortBy: true
+            }),
+            numberColumn({
+                accessor: "winLoss",
+                Header: <Trans zh="输赢金额" en="Win Loss" />,
+                sumColumn: "winLoss",
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    let win = value >= 0
+                    return (
+                        <Text color={win ? "success" : "danger"}>
+                            <FormattedNumber value={value} format="+0,0" />
+                        </Text>
+                    )
+                }
+            }),
+            {
+                id: "detail",
+                accessor: (row) => row,
+                Header: <Trans zh="游戏详情" en="Game Detail" />,
+                disableSortBy: true,
+                headCell: {
+                    textAlign: "center"
+                },
+                cell: {
+                    textAlign: "center",
+                    whiteSpace: "nowrap"
+                },
+                Cell: ({ value }) => {
+                    let { id, gameId = "" } = value
+                    return (
+                        <Text>
+                            <span title={roundIdTitle}>{id}</span> |
+                            <span title={gameIdTitle}>{gameId}</span>
+                        </Text>
+                    )
+                }
+            },
+            {
+                id: "actions",
+                disableSortBy: true,
+                Header: <Trans zh="操作" en="Actions" />,
+                headCell: {
+                    textAlign: "center"
+                },
+                cell: {
+                    textAlign: "center"
+                },
+                accessor: (row) => {
+                    return row
+                },
+                Cell: ({ value }) => {
+                    return (
+                        <BettingDetail record={value}>
+                            <Trans zh="详情" en="Detail" />
+                        </BettingDetail>
+                    )
+                }
+            }
+        ],
+        [JSON.stringify(items)]
+    )
+}

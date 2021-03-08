@@ -9,10 +9,10 @@ const WinTrans = {
     en: "Win"
 }
 
-const Lose = "Lose"
-const LoseTrans = {
+const Loss = "Loss"
+const LossTrans = {
     zh: "输",
-    en: "Lose"
+    en: "Loss"
 }
 
 const Draw = "Draw"
@@ -29,7 +29,7 @@ const OpenTrans = {
 
 export const GameRoundStatus = {
     Win,
-    Lose,
+    Loss,
     Draw,
     Open
 }
@@ -39,8 +39,8 @@ export const GameRoundStatusLabel = ({ value }) => {
         case Win:
             return <Trans {...WinTrans} />
 
-        case Lose:
-            return <Trans {...LoseTrans} />
+        case Loss:
+            return <Trans {...LossTrans} />
 
         case Draw:
             return <Trans {...DrawTrans} />
@@ -60,8 +60,8 @@ export const GameRoundStatusSelect = ({ placeholder, ...props }) => {
             label: useTrans(WinTrans)
         },
         {
-            value: Lose,
-            label: useTrans(LoseTrans)
+            value: Loss,
+            label: useTrans(LossTrans)
         },
         {
             value: Draw,

@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.BetHistories
 {
-    public sealed record UrlData : IData
+    public sealed record UrlData : BaseData
     {
         [JsonPropertyName("url")]
         public string Url { get; init; }

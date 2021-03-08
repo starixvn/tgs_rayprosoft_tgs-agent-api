@@ -27,6 +27,6 @@ namespace TGS.Services.PluggableServices.Models
         public string GameResult { get; init; }
 
         [JsonPropertyName("data")]
-        public IData[] Data { get; init; }
+        public BaseData[] Data { get; init; }
     }
 }
