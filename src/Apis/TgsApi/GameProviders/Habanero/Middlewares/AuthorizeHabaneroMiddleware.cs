@@ -78,7 +78,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             else if (type == typeof(FundTransferRequest))
             {
                 var r = _json.DeserializeFromString<FundTransferRequest>(value);
-                //token = r.Detail.Token;
+                token = r.Detail.Token;
             }
             else if (type == typeof(QueryRequest))
             {

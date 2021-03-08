@@ -1,4 +1,6 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +9,9 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Services;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
@@ -21,20 +25,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
     public sealed class HabaneroGameController : ControllerBase
     {
         private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
-        private readonly IGamePlayActions _actions;
-        private readonly IHabaneroActionModelMapper _map;
-
-        public HabaneroGameController(
-            IGamePlayActions actions,
-            IHabaneroActionModelMapper map)
-        {
-            _actions = actions;
-            _map = map;
-        }
 
         [HttpPost]
         [Route("authorize")]
-        public async Task<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request)
+        public async Task<AuthorizePlayerResponse> AuthorizePlayerAsync(
+            [FromServices] IGamePlayActions actions,
+            [FromServices] IHabaneroActionModelMapper map,
+            AuthorizePlayerRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
@@ -43,12 +40,33 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
             {
                 var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-                var validationResult = await _actions.ValidatePlayerAsync(_map.Request(playerCode, platformType));
-                return _map.Response(playerCode, validationResult);
+                var validationResult = await actions.ValidatePlayerAsync(map.Request(playerCode, platformType));
+                return map.Response(playerCode, validationResult);
             }
 
-            var balanceResult = await _actions.GetBalanceAsync(GameProviderCode, playerCode);
-            return _map.Response(playerCode, balanceResult);
+            var balanceResult = await actions.GetBalanceAsync(GameProviderCode, playerCode);
+            return map.Response(playerCode, balanceResult);
+        }
+
+        [HttpPost]
+        [Route("transfer")]
+        public async Task<FundTransferResponse> TransferFundsAsync(
+            [FromServices] IGamePlayActions actions,
+            [FromServices] IHabaneroActionModelMapper map,
+            FundTransferRequest request)
+        {
+            var actionType = request.Detail.ActionType;
+            Request.Path = new($"{Request.Path}/{actionType.ToString().ToLower()}");
+
+            var actionMapper = new Dictionary<ActionType, Func<BetData, Task<BetResult>>>
+            {
+                {ActionType.PlaceBet, actions.PlaceBetAsync},
+                {ActionType.SettleBet, actions.SettleBetAsync},
+                {ActionType.FreeBet, actions.SettleBetAsync},
+                {ActionType.CancelTransaction, actions.CancelTransactionAsync},
+                //{ActionType.PlaceAndSettleBet, actions.PlaceAndSettleBetAsync},
+                {ActionType.RetrySettlement, actions.SettleBetAsync}
+            };
         }
     }
 }

@@ -71,7 +71,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         public string GameId { get; init; }
 
         /// <summary>
-        /// Virtual Sports only
+        ///     Virtual Sports only
         /// </summary>
         [JsonPropertyName("productType")]
         public string ProductType { get; init; }
