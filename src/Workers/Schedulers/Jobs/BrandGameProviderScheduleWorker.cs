@@ -28,14 +28,13 @@ namespace TGS.Workers.Schedulers.Jobs
 
         public override async Task<TgsResponse> ExecuteAsync(object context)
         {
-            var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
-
-            var dayOfWeek = DateTimeOffset.Now.ToOffset(new TimeSpan(8, 0, 0)).DayOfWeek;
-            var utcNow = DateTimeOffset.Now.ToOffset(new TimeSpan(8, 0, 0)).DateTime;
+            var offset = new TimeSpan(8, 0, 0);
+            var dayOfWeek = DateTimeOffset.Now.ToOffset(offset).DayOfWeek;
+            var utcNow = DateTimeOffset.Now.ToOffset(offset).DateTime;
 
             bool Predicate(BrandGameProviderSchedule s)
             {
-                var src = DateTimeOffset.Now.ToOffset(new TimeSpan(8, 0, 0)).DateTime;
+                var src = DateTimeOffset.Now.ToOffset(offset).DateTime;
                 var fromHM = new DateTime(src.Year, src.Month, src.Day, s.From.Hour,
                     s.From.Minute, 0);
                 var toHM = new DateTime(src.Year, src.Month, src.Day, s.To.Hour, s.To.Minute,
@@ -58,17 +57,13 @@ namespace TGS.Workers.Schedulers.Jobs
                 await _service.UpdateBrandGameProvidersAsync(brandGameProvidersToBeMaintenance
                     .Union(brandGameProvidersToBeActivated).ToArray());
 
-                return new TgsResponse();
+                return new();
             }
             catch (Exception ex)
             {
                 _log.LogError("Fail to update brand game provider status", ex);
 
-                return new TgsResponse
-                {
-                    Error = (int) TgsApiError.SystemError,
-                    ErrorMessage = ex.Message
-                };
+                return new() {Error = (int)TgsApiError.SystemError, ErrorMessage = ex.Message};
             }
         }
 
@@ -81,10 +76,12 @@ namespace TGS.Workers.Schedulers.Jobs
 
             var brandGameProvidersToUpdate = sourceBrandGameProviders
                 .Where(x => !x.Schedules.Any(predicate) && targetStatus == Status.Active ||
-                            x.Schedules.Any(predicate) && targetStatus == Status.Maintenance).ToArray();
+                    x.Schedules.Any(predicate) && targetStatus == Status.Maintenance).ToArray();
 
             foreach (var brandGameProvider in brandGameProvidersToUpdate)
+            {
                 brandGameProvider.Status = targetStatus;
+            }
 
             return brandGameProvidersToUpdate;
         }
