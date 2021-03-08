@@ -1,11 +1,12 @@
 ﻿using System.Linq;
+using TGS.Services.ValidateCode.Configuration;
 using Valhalla.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddValidateCode(this IServiceCollection services)
+        public static ValidateCodeConfiguration AddValidateCode(this IServiceCollection services)
         {
             var allTypes = typeof(ServiceCollectionExtensions).Assembly.GetTypes();
 
@@ -42,7 +43,9 @@ namespace Microsoft.Extensions.DependencyInjection
             foreach (var t in queryServiceTypeQuery)
                 services.AddTransient(t.ServiceType, t.ImplementationType);
 
-            return services;
+            var configuration = new ValidateCodeConfiguration(services);
+
+            return configuration;
         }
     }
 }
