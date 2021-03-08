@@ -19,9 +19,12 @@ pipeline {
 			    print 'DropDb:' + params['DropDb']
 				
 				script {
-					def arr = params['DropDb'].split(",") 
-					for (i = 0;i < arr.length; i++) {
-						sh "../dropdb.sh ${arr[i]}"
+				    
+					if (!params['DropDb'].isEmpty()) {
+						def arr = params['DropDb'].split(",") 
+						for (i = 0;i < arr.length; i++) {
+							sh "../dropdb.sh ${arr[i]}"
+						}
 					}
 				}
 			}
