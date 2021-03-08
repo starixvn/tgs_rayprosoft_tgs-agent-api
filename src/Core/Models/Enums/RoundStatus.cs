@@ -4,9 +4,6 @@
     {
         New = 0,
         Open = 1,
-        Closed = 2,
-        Win = 3,
-        Loss = 4,
-        Draw = 5
+        Closed = 2
     }
 }
