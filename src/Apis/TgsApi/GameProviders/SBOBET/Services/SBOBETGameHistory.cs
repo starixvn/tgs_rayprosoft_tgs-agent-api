@@ -93,12 +93,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 BetAmount = item.BetAmount,
                 Turnover = item.Turnover,
                 Winloss = item.Winloss,
-                Data = new IData[]
+                Data = new BaseData[]
                 {
-                    new JsonData
-                    {
-                        Value = _json.SerializeToString(gameResults, new() {WriteIndented = false})
-                    }
+                    new JsonData {Value = _json.SerializeToString(gameResults, new() {WriteIndented = false})}
                 }
             };
         }
