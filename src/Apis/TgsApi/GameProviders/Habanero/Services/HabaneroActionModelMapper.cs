@@ -1,4 +1,5 @@
-﻿using TGS.Core.Models;
+﻿using System;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.Habanero.Enums;
@@ -9,8 +10,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
     public interface IHabaneroActionModelMapper
     {
         PlayerValidationData Request(string playerCode, PlatformType platformType);
+
+        BetData Request(GameProviderConfigurationData data, FundTransferRequest request);
+
         AuthorizePlayerResponse Response(string playerCode, PlayerValidationResult r);
+
         AuthorizePlayerResponse Response(string playerCode, GetBalanceResult r);
+
         AuthorizePlayerResponse Response(GameApiError error, string message);
     }
 
@@ -38,6 +44,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                     CurrencyCode = r.GameProviderCurrency
                 }
             };
+
+        BetData IHabaneroActionModelMapper.Request(GameProviderConfigurationData data, FundTransferRequest request) =>
+            throw new NotImplementedException();
 
         AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
             new()

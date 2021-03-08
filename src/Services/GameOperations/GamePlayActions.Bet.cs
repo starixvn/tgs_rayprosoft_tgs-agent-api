@@ -20,6 +20,8 @@ namespace TGS.Services.GameOperations
 
         Task<BetResult> CancelTransactionAsync(BetData data);
 
+        Task<BetResult> PlaceAndSettleBetAsync(BetData data);
+
         // TODO: Lock / Unlock
     }
 
@@ -56,6 +58,15 @@ namespace TGS.Services.GameOperations
         Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.CancelTransactionAsync);
 
+        Task<BetResult> IGamePlayActions.PlaceAndSettleBetAsync(BetData data) =>
+            ExecuteGamePlayActionAsync(data, _operations.PlaceAndSettleBetAsync, async player =>
+            {
+                await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
+                    data.PlatformType);
+
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+            });
+
         private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, BetData data,
             GameActionType type = GameActionType.PlaceBet)
         {
@@ -81,7 +92,11 @@ namespace TGS.Services.GameOperations
             var subGames = await _gameProviderOperations.GetSubGameIdsAsync(gameProviderId, platformType);
 
             var games = brandGames
-                .Select(g => new IdMap<int> { Id = g.GameId, ExternalId = g.ExternalGameId })
+                .Select(g => new IdMap<int>
+                {
+                    Id = g.GameId,
+                    ExternalId = g.ExternalGameId
+                })
                 .Concat(subGames).Distinct()
                 .ToArray();
 
@@ -142,7 +157,7 @@ namespace TGS.Services.GameOperations
         private async Task<BetResult> EnsureMappingsAsync(Guid gameProviderId, BetResult r)
         {
             var currencyCode = await _currencyMapper.InternalToExternalAsync(r.CurrencyCode, gameProviderId);
-            return r with { CurrencyCode = currencyCode };
+            return r with {CurrencyCode = currencyCode};
         }
 
         private async Task<BetResult> ExecuteGamePlayActionAsync(BetData data, Func<BetData, Task<BetResult>> execute,

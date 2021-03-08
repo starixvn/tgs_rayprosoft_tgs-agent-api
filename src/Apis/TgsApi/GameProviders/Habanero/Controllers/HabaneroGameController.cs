@@ -52,6 +52,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
         [Route("transfer")]
         public async Task<FundTransferResponse> TransferFundsAsync(
             [FromServices] IGamePlayActions actions,
+            [FromServices] IHabaneroServices services,
             [FromServices] IHabaneroActionModelMapper map,
             FundTransferRequest request)
         {
@@ -64,9 +65,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
                 {ActionType.SettleBet, actions.SettleBetAsync},
                 {ActionType.FreeBet, actions.SettleBetAsync},
                 {ActionType.CancelTransaction, actions.CancelTransactionAsync},
-                //{ActionType.PlaceAndSettleBet, actions.PlaceAndSettleBetAsync},
+                {ActionType.PlaceAndSettleBet, actions.PlaceAndSettleBetAsync},
                 {ActionType.RetrySettlement, actions.SettleBetAsync}
             };
+
+            var data = await services.GetGameProviderConfigurationDataAsync();
+
+            var betData = map.Request(data, request);
+            var execute = actionMapper[actionType];
+
+            var r = await execute(betData);
         }
     }
 }

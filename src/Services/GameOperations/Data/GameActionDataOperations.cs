@@ -30,6 +30,8 @@ namespace TGS.Services.GameOperations.Data
 
         Task<BetResult> CancelTransactionAsync(BetData data);
 
+        Task<BetResult> PlaceAndSettleBetAsync(BetData data);
+
         Task<BatchBetResult> SettleBatchAsync(BatchBetData data);
 
         Task<BatchBetResult> CancelBatchAsync(BatchBetData data);
@@ -82,6 +84,9 @@ namespace TGS.Services.GameOperations.Data
             ExecuteGameActionAsync(data);
 
         Task<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data) =>
+            ExecuteGameActionAsync(data);
+
+        Task<BetResult> IGameActionDataOperations.PlaceAndSettleBetAsync(BetData data) =>
             ExecuteGameActionAsync(data);
 
         Task<BatchBetResult> IGameActionDataOperations.SettleBatchAsync(BatchBetData data) =>

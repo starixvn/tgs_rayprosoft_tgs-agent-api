@@ -18,22 +18,20 @@ namespace TGS.Services.GameOperations
 
     public sealed partial class GamePlayActions
     {
-        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IBrandOperations _brandOperations;
-        private readonly IGameActionDataOperations _operations;
-        private readonly IStatusValidator _statusValidator;
+        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
         private readonly IExpirationValidator _expirationValidator;
-        private readonly IValidStatus<Status> _validStatus;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IGameActionDataOperations _operations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IStatusValidator _statusValidator;
         private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IValidStatus<Status> _validStatus;
 
         public GamePlayActions(
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
-            IBrandGameProviderOperations brandGameProviderOperations,
             IGameActionDataOperations operations,
             IGameProviderCurrencyCodeMapper currencyMapper,
             IStatusValidator statusValidator,
@@ -44,7 +42,6 @@ namespace TGS.Services.GameOperations
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
-            _brandGameProviderOperations = brandGameProviderOperations;
             _currencyMapper = currencyMapper;
             _statusValidator = statusValidator;
             _expirationValidator = expirationValidator;
@@ -54,19 +51,20 @@ namespace TGS.Services.GameOperations
         }
 
         /// <summary>
-        /// Validate player for single game api
+        ///     Validate player for single game api
         /// </summary>
         async Task<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
             var brandId = player.BrandId;
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
-            var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
+            var gameProviderConfigurationId =
+                await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
 
             await ValidatePlayerAsync(player, gameProviderId, gameProviderConfigurationId, data.PlatformType);
 
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
-            
+
             var brand = await _brandOperations.GetCachedBrandAsync(brandId);
 
             return new()
@@ -82,9 +80,10 @@ namespace TGS.Services.GameOperations
         }
 
         /// <summary>
-        /// Validate player on betting if needed.
+        ///     Validate player on betting if needed.
         /// </summary>
-        private async Task ValidatePlayerAsync(CachedPlayer player, Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType? platform, bool ignoreExpired = false)
+        private async Task ValidatePlayerAsync(CachedPlayer player, Guid gameProviderId,
+            Guid gameProviderConfigurationId, PlatformType? platform, bool ignoreExpired = false)
         {
             if (!ignoreExpired)
             {
@@ -94,7 +93,8 @@ namespace TGS.Services.GameOperations
             var brandId = player.BrandId;
             var status = _validStatus.GetStatus(player.Type);
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
-            await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gameProviderId, gameProviderConfigurationId, status);
+            await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gameProviderId,
+                gameProviderConfigurationId, status);
             await ValidatePlayerStatusAsync(player, gameProviderId);
         }
 
@@ -107,10 +107,11 @@ namespace TGS.Services.GameOperations
                 return;
             }
 
-            var gameProviderSupportTestPlayer = await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId);
+            var gameProviderSupportTestPlayer =
+                await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId);
             if (!gameProviderSupportTestPlayer)
             {
-                throw new InvalidOperationException("Test player not supported.");
+                throw new InvalidOperationException("Test player is not supported.");
             }
         }
     }
