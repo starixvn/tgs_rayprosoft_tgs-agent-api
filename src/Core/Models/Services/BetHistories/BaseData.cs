@@ -7,6 +7,12 @@ namespace TGS.Core.Models.Services.BetHistories
     [JsonConverter(typeof(DataConverter))]
     public abstract record BaseData
     {
-        public BetHistoryDataType Type { get; init; }
+        protected BaseData(BetHistoryDataType type)
+        {
+            Type = type;
+        }
+
+        [JsonPropertyName("type")]
+        public BetHistoryDataType Type { get; }
     }
 }
