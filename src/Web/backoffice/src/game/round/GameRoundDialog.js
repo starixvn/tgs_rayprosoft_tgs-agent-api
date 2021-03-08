@@ -27,7 +27,12 @@ import MonacoEditor from "@monaco-editor/react"
 import Textarea from "../../textarea"
 import formatXml from "xml-formatter"
 
-export const GameRoundDialog = ({ record = {}, dialog, ...props }) => {
+export const GameRoundDialog = ({
+    record = {},
+    dialog,
+    hideBackdrop,
+    ...props
+}) => {
     let { id } = record
     let language = useLangCode()
     let { data = {}, isLoading, error } = useGameRound(id, {
@@ -58,6 +63,7 @@ export const GameRoundDialog = ({ record = {}, dialog, ...props }) => {
             maxWidth="100vw"
             minWidth="80vw"
             placement="top"
+            hideBackdrop={hideBackdrop}
             footer={<CloseButtonFooter dialog={dialog} />}
             {...dialog}
         >

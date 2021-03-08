@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Console;
@@ -22,14 +21,6 @@ namespace TGS.Workers.Schedulers.Jobs
             _worker = worker;
         }
 
-        [Job]
-        [DisplayName("Test")]
-        public void Action(PerformContext context = null, IJobCancellationToken cancellationToken = null)
-        {
-            context.WriteLine($"測試用，Now:{DateTime.Now}");
-            Thread.Sleep(30000);
-        }
-
         [Queue(Consts.Queue.Schedule)]
         [Job]
         [DisplayName("create or update market report")]
@@ -43,7 +34,7 @@ namespace TGS.Workers.Schedulers.Jobs
             string dateTime = "",
             [DisplayData("指定小時",
                 "",
-                "0~23")]
+                "0~23, 13 = 13~14")]
             int hour = 0,
             PerformContext context = null)
         {
@@ -54,10 +45,7 @@ namespace TGS.Workers.Schedulers.Jobs
                 return await _worker.ExecutionAsync(dateTime, hour);
             }
 
-            return new TgsResponse
-            {
-                ErrorMessage = "DateTime invalided"
-            };
+            return new() {ErrorMessage = "DateTime invalided"};
         }
     }
 }

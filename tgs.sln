@@ -105,7 +105,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedulers", "src\Workers\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game.ApiClients", "src\Shared\Game.ApiClients\Game.ApiClients.csproj", "{FA3CEFE5-5F19-48E9-9EC0-6E9D4FC77E7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedulers.UnitTests", "Schedulers.UnitTests\Schedulers.UnitTests.csproj", "{B67B69B1-D646-403A-ABF7-3C3AEC11F01E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedulers.UnitTests", "src\Tests\Schedulers.UnitTests\Schedulers.UnitTests.csproj", "{B67B69B1-D646-403A-ABF7-3C3AEC11F01E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

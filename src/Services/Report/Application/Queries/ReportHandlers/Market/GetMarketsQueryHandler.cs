@@ -24,8 +24,9 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
             GetMarketsRequest request,
             CancellationToken cancellationToken)
         {
-            DateTimeOffset requestFrom = request.From.ToOffset(new(8, 0, 0));
-            DateTimeOffset requestTo = request.To.AddDays(1).ToOffset(new(8, 0, 0));
+            var offset = new TimeSpan(8, 0, 0);
+            var requestFrom = request.From.ToOffset(offset);
+            var requestTo = request.To.ToOffset(offset);
             DateTimeOffset from = new(requestFrom.Year, requestFrom.Month, requestFrom.Day, 0, 0, 0,
                 requestFrom.Offset);
             DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,

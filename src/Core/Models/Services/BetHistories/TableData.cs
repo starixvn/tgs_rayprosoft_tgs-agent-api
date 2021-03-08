@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.BetHistories
 {
-    public record TableData : IData
+    public record TableData : BaseData
     {
         [JsonPropertyName("headers")]
         public string[] Headers { get; init; }

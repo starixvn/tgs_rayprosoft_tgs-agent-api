@@ -11,7 +11,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
-    public class PlayerController : ControllerBase
+    public partial class PlayerController : ControllerBase
     {
         private readonly IMediator _mediator;
 

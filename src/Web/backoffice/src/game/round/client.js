@@ -15,20 +15,13 @@ export const useGameRoundList = (searchParams) => {
     return useGet(url)
 }
 
-export const useGameRound = (
-    id,
-    { gameProviderCode, playerCode, language = "en-US" }
-) => {
+export const useGameRound = (id, searchParams) => {
     let url =
-        id && gameProviderCode && playerCode
-            ? urlWith(
-                  {
-                      gameProviderCode: gameProviderCode,
-                      playercode: playerCode,
-                      language
-                  },
-                  `${API}/${id}`
-              )
+        id &&
+        searchParams?.gameProviderCode &&
+        searchParams?.playerCode &&
+        searchParams?.language
+            ? urlWith(searchParams, `${API}/${id}`)
             : ""
 
     return useGet(url)

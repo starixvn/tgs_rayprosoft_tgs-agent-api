@@ -11,7 +11,8 @@ using TGS.Tests.TestsCommon.Extensions;
 
 namespace TGS.UnitTests.Operations.Bets.Steps
 {
-    [Binding, Scope(Tag = "BetValuesCalculator")]
+    [Binding]
+    [Scope(Tag = "BetValuesCalculator")]
     public sealed class BetValuesCalculator : SpecFlowBase
     {
         public BetValuesCalculator(ScenarioContext context)
@@ -20,23 +21,14 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         }
 
         [Given(@"initial balance of \$(.*)")]
-        public void GivenInitialBalanceOf(decimal amount)
-        {
-            Set(SR.UserBalance, amount);
-        }
+        public void GivenInitialBalanceOf(decimal amount) => Set(SR.UserBalance, amount);
 
         [Given(@"game with no turnover on tie bet")]
-        public void GivenGameWithNoTurnoverOnTieBet()
-        {
-            Set(SR.TurnoverOnTieBet, false);
-        }
+        public void GivenGameWithNoTurnoverOnTieBet() => Set(SR.TurnoverOnTieBet, false);
 
         [Given(@"game with turnover on tie bet")]
-        public void GivenGameWithTurnoverOnTieBet()
-        {
-            Set(SR.TurnoverOnTieBet, true);
-        }
-        
+        public void GivenGameWithTurnoverOnTieBet() => Set(SR.TurnoverOnTieBet, true);
+
         [When(@"I perform the following actions I will see the expected results")]
         public void WhenIPerformTheFollowingActionsIWillSeeTheExpectedResults(Table table)
         {
@@ -44,7 +36,8 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var dupRowId = rows.GroupBy(r => r.Id).FirstOrDefault(g => g.Count() > 1);
             if (dupRowId != null)
             {
-                throw new ArgumentException("Test definition error: Duplicate row ID=" + dupRowId.Key.ToString().TrimStart(new[] { '0', '-' }));
+                throw new ArgumentException("Test definition error: Duplicate row ID=" +
+                    dupRowId.Key.ToString().TrimStart('0', '-'));
             }
 
             var hasTurnoverOnTieBet = Get(SR.TurnoverOnTieBet, true);
@@ -74,7 +67,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
             var previousInput = new List<BetActionData>();
             var previousOutput = new List<BetValuesResult>();
-            var calculator = (IBetValuesCalculator) new Services.GameOperations.Calculators.BetValuesCalculator();
+            var calculator = (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
 
             foreach (var current in rows)
             {
@@ -131,9 +124,8 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
         #region Private Methods and Properties
 
-        private static BetValuesCalculatorRow CreateBetValuesCalculatorRowInstance(TableRow row)
-        {
-            return new BetValuesCalculatorRow
+        private static BetValuesCalculatorRow CreateBetValuesCalculatorRowInstance(TableRow row) =>
+            new()
             {
                 Id = ParseGuid(row, "Id") ?? Guid.Empty,
                 RefId = ParseGuid(row, "Ref Id"),
@@ -147,22 +139,15 @@ namespace TGS.UnitTests.Operations.Bets.Steps
                 RoundClosed = ParseNullableBool(row, "Is Closing Round"),
                 BetType = row["Bet Type"]
             };
-        }
 
-        private static Guid? ParseGuid(TableRow row, string name)
-        {
-            return Guid.TryParse((row[name] ?? string.Empty).PadLeft(32, '0'), out var id) ? id : (Guid?)null;
-        }
+        private static Guid? ParseGuid(TableRow row, string name) =>
+            Guid.TryParse((row[name] ?? string.Empty).PadLeft(32, '0'), out var id) ? id : (Guid?)null;
 
-        private static decimal ParseDecimal(TableRow row, string name)
-        {
-            return decimal.Parse(row[name].Replace("$", string.Empty));
-        }
+        private static decimal ParseDecimal(TableRow row, string name) =>
+            decimal.Parse(row[name].Replace("$", string.Empty));
 
-        private static BetValuesCalculatorRowName ParseRowName(TableRow row, string name)
-        {
-            return (BetValuesCalculatorRowName)Enum.Parse(typeof(BetValuesCalculatorRowName), row[name], true);
-        }
+        private static BetValuesCalculatorRowName ParseRowName(TableRow row, string name) =>
+            (BetValuesCalculatorRowName)Enum.Parse(typeof(BetValuesCalculatorRowName), row[name], true);
 
         private static bool? ParseNullableBool(TableRow row, string name)
         {
@@ -177,43 +162,46 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             };
         }
 
-        private static void ValidateTotals(IList<BetActionData> previousInput, IList<BetValuesResult> previousOutput, BetValuesCalculatorRow current)
+        private static void ValidateTotals(IList<BetActionData> previousInput, IList<BetValuesResult> previousOutput,
+            BetValuesCalculatorRow current)
         {
             var amount = previousInput.Sum(e => e.Amount);
 
             amount.Should()
-                .Be(current.Amount, because: "Amount");
+                .Be(current.Amount, "Amount");
 
             previousOutput
                 .Sum(e => e.Turnover)
                 .Should()
-                .Be(current.Turnover, because: "Turnover");
+                .Be(current.Turnover, "Turnover");
 
             previousOutput
                 .Sum(e => e.WinLoss)
                 .Should()
-                .Be(current.WinLoss, because: "WinLoss");
+                .Be(current.WinLoss, "WinLoss");
 
             var tieBetAdjustment = previousOutput
                 .Sum(e => e.TieBetAdjustment);
 
             tieBetAdjustment.Should()
-                .Be(current.TieBetAdjustment, because: "TieBetAdjustment");
+                .Be(current.TieBetAdjustment, "TieBetAdjustment");
 
             previousOutput
                 .Sum(e => e.UnsettledBets)
                 .Should()
-                .Be(current.UnsettledBets, because: "Unsettled Bets");
+                .Be(current.UnsettledBets, "Unsettled Bets");
         }
 
         private static void ValidateBetResult(BetValuesCalculatorRow current, BetValuesResult result)
         {
             var idAsInt = current.Id.ToString("N").TrimStart('0');
 
-            result.Turnover.Should().Be(current.Turnover, because: $" that is Turnover [for row:{current.Type} ID={idAsInt}]");
-            result.WinLoss.Should().Be(current.WinLoss, because: $" that is WinLoss [for row:{ current.Type } ID={idAsInt}]");
-            result.UnsettledBets.Should().Be(current.UnsettledBets, because: $" that is Unsettled Bets [for row:{current.Type} ID={idAsInt}]");
-            result.TieBetAdjustment.Should().Be(current.TieBetAdjustment, because: $" that is TieBetAdjustment Bets [for row:{current.Type} ID={idAsInt}]");
+            result.Turnover.Should().Be(current.Turnover, $" that is Turnover [for row:{current.Type} ID={idAsInt}]");
+            result.WinLoss.Should().Be(current.WinLoss, $" that is WinLoss [for row:{current.Type} ID={idAsInt}]");
+            result.UnsettledBets.Should().Be(current.UnsettledBets,
+                $" that is Unsettled Bets [for row:{current.Type} ID={idAsInt}]");
+            result.TieBetAdjustment.Should().Be(current.TieBetAdjustment,
+                $" that is TieBetAdjustment Bets [for row:{current.Type} ID={idAsInt}]");
         }
 
         #endregion Private Methods and Properties
@@ -227,7 +215,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         LoseBet = GameActionType.LoseBet,
         FreeBet = GameActionType.FreeBet,
         TieBet = GameActionType.TieBet,
-        Totals = short.MaxValue,
+        Totals = short.MaxValue
     }
 
     internal class BetValuesCalculatorRow
