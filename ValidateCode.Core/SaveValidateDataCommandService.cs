@@ -13,9 +13,11 @@ namespace TGS.Services.ValidateCode
             _validateCodeStore = validateCodeStore ?? throw new ArgumentNullException(nameof(validateCodeStore));
         }
 
-        public ValueTask ExecuteAsync(SaveValidateDataCommand command)
+        public async ValueTask ExecuteAsync(SaveValidateDataCommand command)
         {
-            return _validateCodeStore.SaveDataAsync(command.ValidateCode, command.Content);
+            await _validateCodeStore
+                .SaveDataAsync(command.ValidateCode, command.Content)
+                .ConfigureAwait(false);
         }
     }
 }

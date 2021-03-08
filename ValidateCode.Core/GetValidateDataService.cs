@@ -4,7 +4,7 @@ using Valhalla.Services;
 
 namespace TGS.Services.ValidateCode
 {
-    internal class GetValidateDataService : IGetService<GetValidateDataQuery, string>
+    internal class GetValidateDataService : IGetService<GetValidateDataQuery, string?>
     {
         private readonly IValidateCodeStore _validateCodeStore;
 
@@ -13,7 +13,7 @@ namespace TGS.Services.ValidateCode
             _validateCodeStore = validateCodeStore ?? throw new ArgumentNullException(nameof(validateCodeStore));
         }
 
-        public ValueTask<string> GetAsync(GetValidateDataQuery query)
+        public ValueTask<string?> GetAsync(GetValidateDataQuery query)
         {
             return _validateCodeStore.GetDataAsync(query.ValidateCode);
         }
