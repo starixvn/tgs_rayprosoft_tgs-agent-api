@@ -81,16 +81,5 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) =>
             _mediator.Send(request);
-
-        /// <summary>
-        ///     Player changes password, player login is needed when use this
-        /// </summary>
-        [HttpPut]
-        [Route("changePassword")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request) =>
-            _mediator.Send(request);
     }
 }

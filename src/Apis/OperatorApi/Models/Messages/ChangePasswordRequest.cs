@@ -9,13 +9,13 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [Required]
         [JsonPropertyName("oldpwd")]
         public string OldPassword { get; set; }
-        
+
         [Required]
         [JsonPropertyName("newpwd")]
         public string NewPassword { get; set; }
-        
-        [Required]
-        [JsonPropertyName("confirmpwd")]
-        public string ConfirmPassword { get; set; }
+
+        //[Required]
+        //[JsonPropertyName("confirmpwd")]
+        //public string ConfirmPassword { get; set; }
     }
 }
