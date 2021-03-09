@@ -34,6 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
             services.AddScoped<AuthorizeHabaneroMiddleware>();
             services.AddScoped<HandleHabaneroExceptionMiddleware>();
 
+            services.AddScoped<IHabaneroServices, HabaneroServices>();
             services.AddSingleton<IHabaneroActionModelMapper, HabaneroActionModelMapper>();
         }
 

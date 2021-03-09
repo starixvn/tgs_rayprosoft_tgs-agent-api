@@ -108,7 +108,7 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public string Timestamp { get; init; }
 
         [JsonPropertyName("initialdebittransferid")]
-        public string ReferencedTransactionId { get; init; }
+        public string TransactionReferenceId { get; init; }
 
         [JsonPropertyName("gameinfeature")]
         public bool IsFreeSpin { get; init; }
@@ -123,7 +123,7 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public GameState GameState { get; init; }
 
         [JsonPropertyName("originaltransferid")]
-        public string ReferencedTransactionId { get; init; }
+        public string TransactionReferenceId { get; init; }
 
         [JsonPropertyName("transferid")]
         public string TransactionId { get; init; }

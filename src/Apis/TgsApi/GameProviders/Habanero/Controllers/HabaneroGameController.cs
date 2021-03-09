@@ -69,12 +69,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
                 {ActionType.RetrySettlement, actions.SettleBetAsync}
             };
 
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await services.GetGameProviderConfigurationDataAsync();
 
-            var betData = map.Request(data, request);
+            var betData = map.Request(playerCode, data, request);
             var execute = actionMapper[actionType];
 
             var r = await execute(betData);
+
+            return map.Response(request, r);
         }
     }
 }

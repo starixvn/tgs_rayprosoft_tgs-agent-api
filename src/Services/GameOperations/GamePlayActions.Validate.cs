@@ -70,7 +70,7 @@ namespace TGS.Services.GameOperations
             return new()
             {
                 Balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false),
-                GameProviderCurrency = cur,
+                GameProviderCurrencyCode = cur,
                 Username = player.Username,
                 IsTestPlayer = player.IsTestPlayer,
                 BrandCode = brand.Code,

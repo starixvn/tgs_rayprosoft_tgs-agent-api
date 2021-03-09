@@ -39,7 +39,7 @@ namespace TGS.Services.GameOperations
             {
                 Username = player.Username,
                 Balance = balance,
-                GameProviderCurrency = cur
+                GameProviderCurrencyCode = cur
             };
         }
 
@@ -157,7 +157,7 @@ namespace TGS.Services.GameOperations
         private async Task<BetResult> EnsureMappingsAsync(Guid gameProviderId, BetResult r)
         {
             var currencyCode = await _currencyMapper.InternalToExternalAsync(r.CurrencyCode, gameProviderId);
-            return r with {CurrencyCode = currencyCode};
+            return r with {GameProviderCurrencyCode = currencyCode};
         }
 
         private async Task<BetResult> ExecuteGamePlayActionAsync(BetData data, Func<BetData, Task<BetResult>> execute,
