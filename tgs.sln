@@ -119,7 +119,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValidateCode.UnitTests", "V
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repositories", "Repositories", "{EB085F08-425F-442D-8076-D72FFBD65171}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidateCodeRepository", "ValidateCodeRepository\ValidateCodeRepository.csproj", "{EDD731BD-84D7-40DA-ABE3-376103D6946A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValidateCodeRepository", "ValidateCodeRepository\ValidateCodeRepository.csproj", "{EDD731BD-84D7-40DA-ABE3-376103D6946A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -318,6 +318,8 @@ Global
 		{EDD731BD-84D7-40DA-ABE3-376103D6946A} = {EB085F08-425F-442D-8076-D72FFBD65171}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		RESX_TaskErrorCategory = Message
+		RESX_Rules = {"EnabledRules":["StringFormat","WhiteSpaceLead","WhiteSpaceTail","PunctuationLead","PunctuationTail"]}
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal

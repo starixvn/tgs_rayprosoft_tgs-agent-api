@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -57,7 +58,8 @@ namespace TGS.Apis.OperatorApi
                 .AddOperations()
                 .AddErrorMappers()
                 .AddApiClient()
-                .AddPluggableServices();
+                .AddPluggableServices()
+                .AddOperatorApiCore();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
@@ -127,6 +129,12 @@ namespace TGS.Apis.OperatorApi
         public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 

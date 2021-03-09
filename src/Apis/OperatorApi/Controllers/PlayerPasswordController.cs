@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System.Globalization;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromBody] ForgotPasswordRequest request)
         {
             await forgotPasswordService
-                .ExecuteAsync(new ForgotPasswordCommand(request.Phone))
+                .ExecuteAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone))
                 .ConfigureAwait(false);
         }
     }

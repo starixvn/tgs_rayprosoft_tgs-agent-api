@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.Operator
+﻿using System.Globalization;
+
+namespace TGS.Services.Operator
 {
-    public record ForgotPasswordCommand(string Phone);
+    public record ForgotPasswordCommand(CultureInfo CultureInfo, string Phone);
 }

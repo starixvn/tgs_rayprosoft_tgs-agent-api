@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,7 @@ namespace TGS.Core.DataServices.Base.Interfaces
 
         Task BulkUpdateAsync<T>(IEnumerable<T> entities) where T : class;
 
-        Task SaveChangesAsync();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
         Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env);
 
