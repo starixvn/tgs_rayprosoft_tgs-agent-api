@@ -63,6 +63,10 @@ const ReportContent = ({ brandId }) => {
         to: dateRange.end
     })
 
+    useEffect(() => {
+        setState({ brandId })
+    }, [brandId])
+
     let { pageIndex, pageSize, from, to } = state
     let { data = {}, isLoading, mutate } = useMarketReportList({
         ...toApiParams(state),

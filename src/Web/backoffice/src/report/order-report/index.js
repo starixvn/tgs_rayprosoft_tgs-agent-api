@@ -73,6 +73,10 @@ const ReportContent = ({ brandId }) => {
         gameProviderId: ""
     })
 
+    useEffect(() => {
+        setState({ brandId })
+    }, [brandId])
+
     let {
         pageIndex,
         pageSize,

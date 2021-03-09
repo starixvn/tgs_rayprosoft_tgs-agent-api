@@ -58,6 +58,11 @@ const BodyContent = ({ brandId = "" }) => {
         vipId: "",
         username: ""
     })
+
+    useEffect(() => {
+        setState({ brandId })
+    }, [brandId])
+
     let { pageIndex, pageSize, status, vipId, username = "" } = state
     let { data = {}, isLoading, isValidating, mutate } = usePlayerList({
         ...toApiParams(state),
