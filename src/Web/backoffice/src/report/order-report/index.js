@@ -19,7 +19,9 @@ import { today, yesterday } from "../../date/range"
 import { startOfNextDay } from "../../date/startOfNextDay"
 import { textColumn } from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
-import numberColumn from "../../table/column/numberColumn"
+import numberColumn, {
+    numberDecimalColumn
+} from "../../table/column/numberColumn"
 import subDays from "date-fns/subDays"
 import { DateInputRange } from "../../date/DateTimeRangeInput"
 import {
@@ -281,22 +283,22 @@ const useColumns = ({ items = [] }) => {
                 Header: <Trans zh="币种" en="Currency" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "betAmount",
                 Header: <Trans zh="投注金额" en="Bet Amount" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "validBetAmount",
                 Header: <Trans zh="有效投注" en="Valid Bet Amount" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "settleAmount",
                 Header: <Trans zh="派彩" en="Settle Amount" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "winLoss",
                 Header: <Trans zh="输赢金额" en="Win Loss" />,
                 disableSortBy: true

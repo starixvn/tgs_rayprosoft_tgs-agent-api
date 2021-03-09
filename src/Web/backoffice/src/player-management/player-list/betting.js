@@ -51,7 +51,7 @@ export const Panel = ({ playerCode, brandId, player, ...props }) => {
         sortby: "createdOn",
         orderby: "descending",
         brandId,
-        userName: player.userName
+        username: player.username
     })
 
     let columns = useColumns({ items: data?.items })
