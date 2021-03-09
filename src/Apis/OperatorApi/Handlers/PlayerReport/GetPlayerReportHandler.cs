@@ -55,6 +55,7 @@ namespace TGS.Apis.OperatorApi.Handlers.PlayerReport
                 {
                     Id = x.Id,
                     CreatedOn = x.CreatedOn,
+                    GameProviderName = x.GameProviderName,
                     BetAmount = x.BetAmount,
                     ValidBetAmount = x.ValidBetAmount,
                     WinLoss = x.WinLoss
