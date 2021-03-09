@@ -47,9 +47,9 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Route("")]
         [HttpGet]
         [Description("Get player list")]
-        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
-        {
-            return _queries.GetQueries()
+        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request) =>
+            _queries.GetQueries()
+                .Where(request.BrandId, p => p.BrandId == request.BrandId)
                 .Where(request.Status, p => p.Status == request.Status)
                 .Where(request.VipId, p => p.VipId == request.VipId)
                 .Where(request.Username, p => EF.Functions.ILike(p.Username, $"%{request.Username}%"))
@@ -61,7 +61,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Status = p.Status.ToString(),
                     HasAgent = p.HasAgent
                 }).CreatePagedResponseAsync(request);
-        }
 
         [Route("{playerCode}")]
         [HttpGet]
@@ -96,35 +95,24 @@ namespace TGS.Apis.BackendOffice.Controllers
                 WeChat = player.Wechat,
                 Banks = player.Banks.Select(p => new PlayerModel.BankModel
                 {
-                    Id = p.Id,
-                    RealName = p.RealName,
-                    BankName = p.BankName,
-                    BankAccount = p.BankAccount
+                    Id = p.Id, RealName = p.RealName, BankName = p.BankName, BankAccount = p.BankAccount
                 }).ToArray()
             };
 
-            return new GetPlayerResponse
-            {
-                Valid = true,
-                Player = playerModel
-            };
+            return new() {Valid = true, Player = playerModel};
         }
 
         [Route("{playerCode}/operations")]
         [HttpGet]
         [Description("Get player operation")]
         public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode,
-            [FromQuery] GetPlayerOperationRequest request)
-        {
-            return _auditLogQueries.GetQueries()
+            [FromQuery] GetPlayerOperationRequest request) =>
+            _auditLogQueries.GetQueries()
                 .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == playerCode)
                 .Select(p => new PlayerOperationModel
                 {
-                    CreatedOn = p.CreatedOn,
-                    CreatedByUsername = p.CreatedByUsername,
-                    Operation = p.Operation
+                    CreatedOn = p.CreatedOn, CreatedByUsername = p.CreatedByUsername, Operation = p.Operation
                 }).CreatePagedResponseAsync(request);
-        }
 
         [Route("{playerCode}/{type}")]
         [HttpPut]

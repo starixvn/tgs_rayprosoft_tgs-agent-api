@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
@@ -61,6 +62,7 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
 
                 var marketsOfDay = await _service.GetMarketsAsync()
                     .Where(x => x.ReportDate == theDay)
+                    .Where(canDelete, x => x.Hour != hour)
                     .Select(x => x.Hour).Distinct().ToArrayAsync();
 
                 var hourArray = Enumerable.Range(0, previousHour.Hour + 1);
@@ -102,6 +104,10 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
                             }
 
                             var request = await _roundService.GetRoundsAsync(start, end);
+                            foreach (var marketRequest in request)
+                            {
+                                marketRequest.NetProfit = marketRequest.WinLossAmount - marketRequest.ValidBetAmount;
+                            }
 
                             await _service.CreateMarketsAsync(request);
 
