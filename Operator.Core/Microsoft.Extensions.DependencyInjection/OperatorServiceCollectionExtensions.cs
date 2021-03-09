@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using TGS.Services.Operator;
 using Valhalla.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -41,6 +43,24 @@ namespace Microsoft.Extensions.DependencyInjection
 
             foreach (var t in queryServiceTypeQuery)
                 services.AddTransient(t.ServiceType, t.ImplementationType);
+
+            services
+                .AddHttpClient<SmsServiceClient>()
+                .ConfigureHttpClient(httpClient =>
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:5002");
+                })
+                .Services
+                .AddHttpClient<ValidateCodeServiceClient>()
+                .ConfigureHttpClient(httpClient =>
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:5001");
+                })
+                .Services
+                .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
+                .AddTransient<ISmsServiceClient>(sp => sp.GetRequiredService<SmsServiceClient>())
+                .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
+                .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>();
 
             return services;
         }

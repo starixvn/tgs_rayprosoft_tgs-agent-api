@@ -47,7 +47,7 @@ namespace TGS.Services.Operator
                 validateCode);
 
             await _validateCodeOperator
-                .SendMessageAsync(player.Phone, shortMessage)
+                .SendMessageAsync(player.Phone, shortMessage, player.DefaultWalletCurrencyCode, player.BrandId)
                 .ConfigureAwait(false);
         }
     }

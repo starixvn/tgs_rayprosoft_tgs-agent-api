@@ -118,7 +118,8 @@ namespace OperatorApi.UnitTests
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
                 Phone = playerPhone,
-                PhoneAuthentication = true
+                PhoneAuthentication = true,
+                DefaultWalletCurrencyCode = "CNY"
             };
 
             await fakeTgsRepository.Players.AddAsync(player);
@@ -143,7 +144,13 @@ namespace OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakeValidateCodeOperator.Received(1).SendMessageAsync(Arg.Is(playerPhone), Arg.Is(expected));
+            _ = fakeValidateCodeOperator
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is(playerPhone),
+                    Arg.Is(expected),
+                    Arg.Is(player.DefaultWalletCurrencyCode),
+                    Arg.Is(player.BrandId));
         }
     }
 }

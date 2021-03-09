@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace TGS.Services.Operator
 {
@@ -6,6 +7,6 @@ namespace TGS.Services.Operator
     {
         ValueTask SaveValidateDataAsync(string validateCode, ValidateCodeData data);
 
-        Task SendMessageAsync(string phone, string shortMessage);
+        ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId);
     }
 }

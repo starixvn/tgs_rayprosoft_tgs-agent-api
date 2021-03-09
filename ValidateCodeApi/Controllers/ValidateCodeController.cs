@@ -38,7 +38,7 @@ namespace ValidateCodeApi.Controllers
         /// <param name="getValidateDataService">The get validate data service.</param>
         /// <param name="validateCode">The validate code.</param>
         /// <returns></returns>
-        [HttpGet("validateCode")]
+        [HttpGet("{validateCode}")]
         public async Task<JObject> GetValidateCodeDataAsync(
             [FromServices] IGetService<GetValidateDataQuery, string> getValidateDataService,
             string validateCode) =>
