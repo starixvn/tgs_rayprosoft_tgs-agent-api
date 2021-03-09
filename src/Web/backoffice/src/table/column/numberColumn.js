@@ -27,7 +27,10 @@ export const numberColumn = ({
         basic = {
             ...basic,
             Footer: (table) => (
-                <FormattedNumber value={sumColumn(sumColumnName, table.rows)} />
+                <FormattedNumber
+                    value={sumColumn(sumColumnName, table.rows)}
+                    format={format}
+                />
             ),
             footerCellProps: {
                 textAlign: "center"
