@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Services.BetHistories.JsonConverter
+namespace TGS.Core.Models.Services.BetHistories.JsonConverters
 {
     public class DataConverter : JsonConverter<BaseData>
     {
