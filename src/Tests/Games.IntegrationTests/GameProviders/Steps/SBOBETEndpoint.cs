@@ -138,13 +138,21 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var apiUrlSection = configuration.GetSection("ApiUrls");
 
-            services.AddTransient<IPlayerApiClient>(sp => ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
-            services.AddTransient<ISBOBETApiClient>(sp => ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
-            //services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
-            //    c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
+            var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
-            //services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
-            //    c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
+            if (isDev)
+            {
+                services.AddTransient<IPlayerApiClient>(sp => ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                services.AddTransient<ISBOBETApiClient>(sp => ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+            }
+            else
+            {
+                services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
+                    c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
+
+                services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
+                    c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
+            }
 
             _serviceProvider = services.BuildServiceProvider();
         }
