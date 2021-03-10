@@ -2406,8 +2406,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasColumnType("jsonb")
                         .HasColumnName("menu_setting");
 
                     b.Property<string>("Name")
