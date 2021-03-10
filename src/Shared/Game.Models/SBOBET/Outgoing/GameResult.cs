@@ -27,7 +27,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         public DateTime ModifyDate { get; init; }
 
         [JsonPropertyName("odds")]
-        public decimal Odds { get; init; }
+        public string Odds { get; init; }
 
         [JsonPropertyName("oddsStyle")]
         public string OddsStyle { get; init; }
