@@ -735,104 +735,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<bool>("AfterAllPlayers")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_all_players");
-
-                    b.Property<string>("AfterChannelName")
+                    b.Property<string>("After")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("after_channel_name");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("after");
 
-                    b.Property<decimal>("AfterDepositedAmountMax")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_deposited_amount_max");
-
-                    b.Property<decimal>("AfterDepositedAmountMin")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_deposited_amount_min");
-
-                    b.Property<bool>("AfterDepositedAmountUnlimited")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_deposited_amount_unlimited");
-
-                    b.Property<bool>("AfterIdentityAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_identity_authentication");
-
-                    b.Property<int>("AfterPaymentStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("after_payment_status");
-
-                    b.Property<bool>("AfterPhoneAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_phone_authentication");
-
-                    b.Property<int>("AfterPlayerListCondition")
-                        .HasColumnType("integer")
-                        .HasColumnName("after_player_list_condition");
-
-                    b.Property<decimal>("AfterTransferLimitFrom")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_transfer_limit_from");
-
-                    b.Property<decimal>("AfterTransferLimitTo")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_transfer_limit_to");
-
-                    b.Property<bool>("BeforeAllPlayers")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_all_players");
-
-                    b.Property<string>("BeforeChannelName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("before_channel_name");
-
-                    b.Property<decimal>("BeforeDepositedAmountMax")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_deposited_amount_max");
-
-                    b.Property<decimal>("BeforeDepositedAmountMin")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_deposited_amount_min");
-
-                    b.Property<bool>("BeforeDepositedAmountUnlimited")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_deposited_amount_unlimited");
-
-                    b.Property<bool>("BeforeIdentityAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_identity_authentication");
-
-                    b.Property<int>("BeforePaymentStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("before_payment_status");
-
-                    b.Property<bool>("BeforePhoneAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_phone_authentication");
-
-                    b.Property<int>("BeforePlayerListCondition")
-                        .HasColumnType("integer")
-                        .HasColumnName("before_player_list_condition");
-
-                    b.Property<decimal>("BeforeTransferLimitFrom")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_transfer_limit_from");
-
-                    b.Property<decimal>("BeforeTransferLimitTo")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_transfer_limit_to");
+                    b.Property<string>("Before")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("before");
 
                     b.Property<Guid>("BrandPaymentId")
                         .HasColumnType("uuid")
@@ -2036,6 +1947,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("has_agent");
 
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id_number");
+
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");
@@ -2495,8 +2411,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasColumnType("jsonb")
                         .HasColumnName("menu_setting");
 
                     b.Property<string>("Name")

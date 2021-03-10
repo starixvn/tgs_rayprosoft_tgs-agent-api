@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
@@ -46,29 +47,39 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
             {
                 var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
                 var canDelete = false;
-                var src = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddHours(-1);
-                DateTimeOffset theDay = new(src.Year, src.Month, src.Day, 0, 0, 0, src.Offset);
+                var previousHour = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddHours(-1);
+                var theDay = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, 0, 0, 0,
+                    previousHour.Offset);
+
                 if (date.IsNotNullOrEmpty() &&
                     DateTimeOffset.TryParse($"{date} {hour}:00 +08:00", out var result))
                 {
-                    src = result;
+                    theDay = new(result.Year, result.Month, result.Day, 0, 0, 0,
+                        result.Offset);
+                    previousHour = result;
                     canDelete = true;
                 }
 
-                var hourArray = Enumerable.Range(0, src.Hour);
-
                 var marketsOfDay = await _service.GetMarketsAsync()
                     .Where(x => x.ReportDate == theDay)
-                    .Select(x => x.Hour).ToArrayAsync();
+                    .Where(canDelete, x => x.Hour != hour)
+                    .Select(x => x.Hour).Distinct().ToArrayAsync();
+
+                var hourArray = Enumerable.Range(0, previousHour.Hour + 1);
 
                 var doHours = hourArray.Except(marketsOfDay).ToArray();
 
+                if (doHours.Length == 0)
+                {
+                    return new() {ErrorMessage = "Not any hours to generate market report."};
+                }
+
                 foreach (var doHour in doHours)
                 {
-                    DateTimeOffset start = new(src.Year, src.Month, src.Day, doHour,
-                        0, 0, src.Offset);
-                    var end = new DateTimeOffset(src.Year, src.Month, src.Day, doHour,
-                        0, 0, src.Offset).AddHours(1);
+                    var start = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, doHour,
+                        0, 0, previousHour.Offset);
+                    var end = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, doHour,
+                        0, 0, previousHour.Offset).AddHours(1);
 
                     await _transactionManager.ExecuteTransactionAsync(() => _repository,
                         IsolationLevel.ReadCommitted, id,
@@ -84,16 +95,23 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
                             }
 
                             if (await _service.ExistsAsync(x =>
-                                x.ReportDate == src && x.Hour == start.Hour))
+                                x.ReportDate == previousHour && x.Hour == start.Hour))
                             {
-                                return new();
+                                return new TgsResponse
+                                {
+                                    ErrorMessage = $"{theDay.Date} {start.Hour} is already existed."
+                                };
                             }
 
                             var request = await _roundService.GetRoundsAsync(start, end);
+                            foreach (var marketRequest in request)
+                            {
+                                marketRequest.NetProfit = marketRequest.WinLossAmount - marketRequest.ValidBetAmount;
+                            }
 
                             await _service.CreateMarketsAsync(request);
 
-                            return new TgsResponse();
+                            return new();
                         });
                 }
 

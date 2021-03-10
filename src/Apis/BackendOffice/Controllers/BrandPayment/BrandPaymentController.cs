@@ -219,7 +219,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
             }
 
-
             await _brandPaymentService.UpdatePaymentAsync(brandPayment, request, Username);
 
             return CreateValidResponse<CreateUpdateBrandPaymentResponse>();

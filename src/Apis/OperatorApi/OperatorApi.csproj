@@ -37,6 +37,7 @@
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
+    <ProjectReference Include="..\..\Services\Report\Report.csproj" />
   </ItemGroup>
 
   <ItemGroup>

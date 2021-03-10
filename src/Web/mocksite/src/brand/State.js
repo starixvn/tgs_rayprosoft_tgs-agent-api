@@ -10,62 +10,52 @@ import { PlayerType } from "./player/PlayerType"
 const Store = createContext({})
 
 export const State = ({ value, children }) => {
-  let [state, set] = useState({
-    platform: Desktop,
-    currency: CNY,
-    lang: zhCN,
-    playerType: PlayerType.Test,
-    ...value
-  })
+    let [state, set] = useState({
+        platform: Desktop,
+        currency: CNY,
+        lang: zhCN,
+        playerType: PlayerType.Test,
+        ...value
+    })
 
-  return (
-    <Store.Provider
-      value={{
-        ...state,
-        set
-      }}
-    >
-      {children}
-    </Store.Provider>
-  )
-}
-
-export const usePlatform = () => {
-  let { platform } = useContext(Store)
-  return platform
-}
-
-export const useSetPlatform = () => {
-  let { set } = useContext(Store)
-  return (platform) => set((prevState) => ({ ...prevState, platform }))
+    return (
+        <Store.Provider
+            value={{
+                ...state,
+                set
+            }}
+        >
+            {children}
+        </Store.Provider>
+    )
 }
 
 export const useCurrency = () => {
-  let { currency } = useContext(Store)
-  return currency
+    let { currency } = useContext(Store)
+    return currency
 }
 
 export const useSetCurrency = () => {
-  let { set } = useContext(Store)
-  return (currency) => set((prevState) => ({ ...prevState, currency }))
+    let { set } = useContext(Store)
+    return (currency) => set((prevState) => ({ ...prevState, currency }))
 }
 
 export const usePlayerType = () => {
-  let { playerType } = useContext(Store)
-  return playerType
+    let { playerType } = useContext(Store)
+    return playerType
 }
 
 export const useSetPlayerType = () => {
-  let { set } = useContext(Store)
-  return (playerType) => set((prevState) => ({ ...prevState, playerType }))
+    let { set } = useContext(Store)
+    return (playerType) => set((prevState) => ({ ...prevState, playerType }))
 }
 
 export const useLang = () => {
-  let { lang } = useContext(Store)
-  return lang
+    let { lang } = useContext(Store)
+    return lang
 }
 
 export const useSetLang = () => {
-  let { set } = useContext(Store)
-  return (lang) => set((prevState) => ({ ...prevState, lang }))
+    let { set } = useContext(Store)
+    return (lang) => set((prevState) => ({ ...prevState, lang }))
 }

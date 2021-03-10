@@ -7,11 +7,17 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NSubstitute;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -21,6 +27,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
@@ -44,11 +51,77 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public SBOBETEndpoint(ScenarioContext context)
             : base(context)
         {
-            var services = (IServiceCollection) new ServiceCollection();
+            Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
+
+            var opApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration((hostCtx, builder) =>
+                {
+                    builder.SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../../../../../Apis/OperatorApi")));
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseStartup<Apis.OperatorApi.Startup>()
+                        .UseTestServer()
+                        .ConfigureTestServices(services =>
+                        {
+                            services.AddTransient<IRequestAnalyzer>(sp =>
+                            {
+                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
+
+                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
+
+                                return fakeAnalyzer;
+                            });
+                        });
+                })
+                .Build();
+
+            opApiHost.StartAsync();
+            var opApiClient = opApiHost.GetTestClient();
+
+            var tgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration((hostCtx, builder) =>
+                {
+                    builder
+                        .SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../../../../../Apis/TgsApi")))
+                        .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseStartup<SBOBETStartup>()
+                        .UseKestrel(options => options.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(services =>
+                        {
+                            services.AddTransient<IRequestAnalyzer>(sp =>
+                            {
+                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
+
+                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
+
+                                return fakeAnalyzer;
+                            });
+                        });
+                })
+                .Build();
+
+            tgsApiHost.StartAsync();
+            var tgsApiClient = tgsApiHost
+                .GetTestClient();
+
+            var services = (IServiceCollection)new ServiceCollection();
+
+            var jsonFile = "appsettings.json";
+
+#if !DEBUG
+            jsonFile = "appsettings.IntTest.json";
+#endif
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile(jsonFile, true, true)
                 .AddEnvironmentVariables()
                 .Build();
 

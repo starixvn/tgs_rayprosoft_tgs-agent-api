@@ -21,7 +21,9 @@ import { sumColumn } from "../../table/sumColumn"
 import { startOfNextDay } from "../../date/startOfNextDay"
 import { subDays } from "date-fns"
 import { useGameRoundList } from "../../game/round/client"
-import numberColumn from "../../table/column/numberColumn"
+import numberColumn, {
+    numberDecimalColumn
+} from "../../table/column/numberColumn"
 
 export const Key = "betting"
 
@@ -51,7 +53,7 @@ export const Panel = ({ playerCode, brandId, player, ...props }) => {
         sortby: "createdOn",
         orderby: "descending",
         brandId,
-        userName: player.userName
+        username: player.username
     })
 
     let columns = useColumns({ items: data?.items })
@@ -176,25 +178,25 @@ const useColumns = ({ items = [] }) => {
                     textAlign: "center"
                 }
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "betAmount",
                 sumColumn: "betAmount",
                 Header: <Trans zh="投注金额" en="Bet Amount" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "validBetAmount",
                 sumColumn: "validBetAmount",
                 Header: <Trans zh="有效投注金额" en="Valid Bet Amount" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "settleAmount",
                 sumColumn: "settleAmount",
                 Header: <Trans zh="派彩" en="Settle Amount" />,
                 disableSortBy: true
             }),
-            numberColumn({
+            numberDecimalColumn({
                 accessor: "winLoss",
                 Header: <Trans zh="输赢金额" en="Win Loss" />,
                 sumColumn: "winLoss",
@@ -203,7 +205,7 @@ const useColumns = ({ items = [] }) => {
                     let win = value >= 0
                     return (
                         <Text color={win ? "success" : "danger"}>
-                            <FormattedNumber value={value} format="+0,0" />
+                            <FormattedNumber value={value} format="+0,0.00" />
                         </Text>
                     )
                 }

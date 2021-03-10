@@ -14,7 +14,13 @@ import {
     Link,
     Table
 } from "bumbag"
-import { useTrans, Trans, FormattedNumber, useLangCode } from "../../i18n"
+import {
+    useTrans,
+    Trans,
+    FormattedNumber,
+    useLangCode,
+    FormattedNumberDecimal
+} from "../../i18n"
 import { useGameRound } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
@@ -172,14 +178,18 @@ export const GameRoundDialog = ({
                                 <Trans zh="投注金额" en="Bet Amount" />
                             </NormalLabel>
                             <Text.Block alignY="center" whiteSpace="nowrap">
-                                <FormattedNumber value={record.betAmount} />
+                                <FormattedNumberDecimal
+                                    value={record.betAmount}
+                                />
                             </Text.Block>
 
                             <NormalLabel>
                                 <Trans zh="输赢金额" en="Win Loss" />
                             </NormalLabel>
                             <Text.Block alignY="center" whiteSpace="nowrap">
-                                <FormattedNumber value={record.winLoss} />
+                                <FormattedNumberDecimal
+                                    value={record.winLoss}
+                                />
                             </Text.Block>
 
                             <NormalLabel>
@@ -213,7 +223,7 @@ export const GameRoundDialog = ({
                                 <Trans zh="有效投注" en="Valid Bet Amount" />
                             </NormalLabel>
                             <Text.Block alignY="center" whiteSpace="nowrap">
-                                <FormattedNumber
+                                <FormattedNumberDecimal
                                     value={record.validBetAmount}
                                 />
                             </Text.Block>

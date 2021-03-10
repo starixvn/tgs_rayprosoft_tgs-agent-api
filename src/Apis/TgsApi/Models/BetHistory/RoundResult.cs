@@ -9,6 +9,6 @@ namespace TGS.Apis.TgsApi.Models.BetHistory
         public decimal Turnover { get; init; }
         public decimal Winloss { get; init; }
         public string GameResult { get; init; }
-        public IData[] Data { get; init; } = Array.Empty<IData>();
+        public BaseData[] Data { get; init; } = Array.Empty<BaseData>();
     }
 }

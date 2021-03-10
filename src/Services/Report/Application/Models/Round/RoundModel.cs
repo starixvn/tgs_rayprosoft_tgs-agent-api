@@ -1,5 +1,6 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
+using TGS.Services.Report.Domain.Enums;
 
 namespace TGS.Services.Report.Application.Models.Round
 {
@@ -17,7 +18,7 @@ namespace TGS.Services.Report.Application.Models.Round
         public string ExternalPlayerCode { get; set; }
         public string CurrencyCode { get; set; }
         public PlatformType PlatformType { get; set; }
-        public RoundStatus Status { get; set; }
+        public ReportRoundStatus Status { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset? ClosedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }

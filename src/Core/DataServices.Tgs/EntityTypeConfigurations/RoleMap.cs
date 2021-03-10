@@ -27,7 +27,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired(false);
 
             builder.Property(c => c.MenuSetting)
-                .HasMaxLength(4000)
+                .HasColumnType("jsonb")
                 .IsRequired();
 
             builder.Property(c => c.RoleType)
