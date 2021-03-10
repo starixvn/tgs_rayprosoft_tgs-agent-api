@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ValidateCode.Core\ValidateCode.Core.csproj" />
-    <ProjectReference Include="..\ValidateCodeRepository\ValidateCodeRepository.csproj" />
+    <ProjectReference Include="..\..\Repositories\ValidateCodeRepository\ValidateCodeRepository.csproj" />
+    <ProjectReference Include="..\..\Services\ValidateCode.Core\ValidateCode.Core.csproj" />
   </ItemGroup>
 
 </Project>

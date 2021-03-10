@@ -32,10 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
   </ItemGroup>
 

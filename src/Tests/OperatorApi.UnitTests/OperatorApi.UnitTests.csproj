@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Apis\OperatorApi\OperatorApi.csproj" />
+    <ProjectReference Include="..\..\Apis\OperatorApi\OperatorApi.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Core\Infrastructures\Infrastructures.csproj" />
-    <ProjectReference Include="..\ValidateCode.Core\ValidateCode.Core.csproj" />
+    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+    <ProjectReference Include="..\..\Services\ValidateCode.Core\ValidateCode.Core.csproj" />
   </ItemGroup>
 
 </Project>
