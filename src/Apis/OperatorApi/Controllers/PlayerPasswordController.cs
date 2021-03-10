@@ -37,5 +37,16 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<VarifyForgotPasswordCodeCommand, bool> varifyService,
             [FromBody] VarifyForgotPasswordCodeRequest request)
             => varifyService.GetAsync(new VarifyForgotPasswordCodeCommand(request.Token, request.ValidateCode));
+
+        [HttpPost("reset")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+        public ValueTask ResetPasswordAsync(
+            [FromServices] ICommandService<ResetPasswordCommand> resetService,
+            [FromBody] ResetPasswordRequest request)
+        {
+            var playerCode = "4ucmqplwxqlv";
+
+            return resetService.ExecuteAsync(new ResetPasswordCommand(playerCode, request.NewPassword));
+        }
     }
 }
