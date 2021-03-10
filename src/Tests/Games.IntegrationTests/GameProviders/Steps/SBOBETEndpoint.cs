@@ -113,9 +113,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var services = (IServiceCollection)new ServiceCollection();
 
+            var jsonFile = "appsettings.json";
+
+#if !DEBUG
+            jsonFile = "appsettings.IntTest.json";
+#endif
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile(jsonFile, true, true)
                 .AddEnvironmentVariables()
                 .Build();
 
@@ -130,19 +136,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddApiClient()
                 .AddRedis();
 
-            services.AddTransient<IPlayerApiClient>(sp =>
-            {
-                var httpClient = opApiClient;
+            var apiUrlSection = configuration.GetSection("ApiUrls");
+            services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
+                c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
 
-                return ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, httpClient);
-            });
-
-            services.AddTransient<ISBOBETApiClient>(sp =>
-            {
-                var httpClient = tgsApiClient;
-
-                return ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, httpClient);
-            });
+            services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
+                c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
 
             _serviceProvider = services.BuildServiceProvider();
         }
@@ -473,7 +472,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
-                { r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId })
+                        {r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId})
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
                         if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
@@ -484,7 +483,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         return new BatchRequestTransaction
                         {
                             PlayerCode = g.Key.PlayerCode,
-                            PlatformType = (int)g.Key.PlatformType,
+                            PlatformType = (int) g.Key.PlatformType,
                             CurrencyCode = curr,
                             Amount = ga.Amount.Negate(),
                             ExternalGameId = g.Key.ExternalGameId,
@@ -503,6 +502,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
+
 
         [Then(@"I will receive bet response of no error and balance of \$(.*)")]
         public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance) =>
@@ -623,7 +623,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
+                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -654,7 +654,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
             var response = Get<GetBetStatusResponse>(SR.Response);
 
-            response.ErrorCode.Should().Be((int)GameApiError.Success);
+            response.ErrorCode.Should().Be((int) GameApiError.Success);
             response.ExternalTransactionId.Should().Be(betRequest.ExternalTransactionId);
             response.ExternalRoundId.Should().Be(betRequest.ExternalRoundId);
             response.Status.Should().Be(status);
@@ -666,7 +666,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public void ThenIWillReceiveSuccessfulResponse()
         {
             var response = Get<BatchResponse>(SR.Response);
-            response.ErrorCode.Should().Be((int)TgsApiError.None);
+            response.ErrorCode.Should().Be((int) TgsApiError.None);
             response.ErrorMessage.Should().BeNullOrEmpty();
         }
 
@@ -701,12 +701,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             foreach (var ga in gameActions)
             {
                 var data = await db.Wallets.Where(w => w.PlayerCode == ga.PlayerCode)
-                    .Select(w => new { w.Player.Username, w.Balance }).FirstOrDefaultAsync();
+                    .Select(w => new { w.Player.Username, w.Balance}).FirstOrDefaultAsync();
 
                 var expectdBalance = players[data.Username];
                 data.Balance.Should().Be(expectdBalance);
             }
         }
+
+
 
         [Then(@"the round will be closed")]
         public Task ThenTheRoundWillBeClosedAsync() =>
@@ -749,7 +751,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             public decimal BetAmount { get; init; }
         }
 
-        #endregion Private Classes
+        #endregion
 
         #region After Scenario
 
@@ -770,7 +772,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task AfterChangeBrandStatusScenarioAsync() =>
             ChangeBrandStatusAsync(_serviceProvider, Status.Active);
 
-        #endregion After Scenario
+        #endregion
 
         #region Private Methods
 
@@ -826,7 +828,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var response = Get<T>(SR.Response);
 
             response.Should().NotBeNull();
-            response.ErrorCode.Should().Be((int)error);
+            response.ErrorCode.Should().Be((int) error);
             response.Balance.Should().BeNull();
         }
 
@@ -907,6 +909,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        #endregion Private Methods
+        #endregion
     }
 }

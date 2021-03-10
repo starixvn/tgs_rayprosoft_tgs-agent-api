@@ -44,8 +44,8 @@ namespace TGS.Apis.LogApi
             var sp = scope.ServiceProvider;
             var env = sp.GetRequiredService<IWebHostEnvironment>();
 
-            await using var tgsRepo = sp.GetRequiredService<ILogRepository>();
-            await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
+            await using var logRepo = sp.GetRequiredService<ILogRepository>();
+            await logRepo.ExecuteMigrationAndSeedingAsync(env);
         }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -19,8 +21,21 @@ namespace TGS.Tests.Nats.IntegrationTests
         [SetUp]
         public void Init()
         {
-            var serviceCollection = new ServiceCollection()
-                .AddConfiguration();
+            var serviceCollection = new ServiceCollection();
+
+#if DEBUG
+            serviceCollection.AddConfiguration();
+            
+#else
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.IntTest.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
+#endif
+
             _serviceProvider = serviceCollection.BuildServiceProvider();
             _serviceProvider = serviceCollection.AddNats(_serviceProvider.GetService<IConfiguration>())
                 .BuildServiceProvider();
