@@ -8,7 +8,7 @@ using Valhalla.Services;
 
 namespace TGS.Services.Operator
 {
-    internal class ForgotPasswordCommandService : ICommandService<ForgotPasswordCommand>
+    internal class ForgotPasswordCommandService : IGetService<ForgotPasswordCommand, string>
     {
         private readonly ITgsRepository _tgsRepository;
         private readonly IValidateCodeGenerator _codeGenerator;
@@ -24,7 +24,7 @@ namespace TGS.Services.Operator
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask ExecuteAsync(ForgotPasswordCommand command)
+        public async ValueTask<string> GetAsync(ForgotPasswordCommand command)
         {
             var player = _tgsRepository.Players
                 .Where(player => player.PhoneAuthentication == true && player.Phone == command.Phone)
@@ -49,6 +49,8 @@ namespace TGS.Services.Operator
             await _validateCodeOperator
                 .SendMessageAsync(player.Phone, shortMessage, player.DefaultWalletCurrencyCode, player.BrandId)
                 .ConfigureAwait(false);
+
+            return token;
         }
     }
 }

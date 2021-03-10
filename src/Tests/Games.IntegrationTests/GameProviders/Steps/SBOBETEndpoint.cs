@@ -137,11 +137,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddRedis();
 
             var apiUrlSection = configuration.GetSection("ApiUrls");
-            services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
-                c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
 
-            services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
-                c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
+            services.AddTransient<IPlayerApiClient>(sp => ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+            services.AddTransient<ISBOBETApiClient>(sp => ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+            //services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
+            //    c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
+
+            //services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
+            //    c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
 
             _serviceProvider = services.BuildServiceProvider();
         }
@@ -472,7 +475,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
-                        {r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId})
+                { r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId })
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
                         if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
@@ -483,7 +486,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         return new BatchRequestTransaction
                         {
                             PlayerCode = g.Key.PlayerCode,
-                            PlatformType = (int) g.Key.PlatformType,
+                            PlatformType = (int)g.Key.PlatformType,
                             CurrencyCode = curr,
                             Amount = ga.Amount.Negate(),
                             ExternalGameId = g.Key.ExternalGameId,
@@ -623,7 +626,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
+                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -654,7 +657,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
             var response = Get<GetBetStatusResponse>(SR.Response);
 
-            response.ErrorCode.Should().Be((int) GameApiError.Success);
+            response.ErrorCode.Should().Be((int)GameApiError.Success);
             response.ExternalTransactionId.Should().Be(betRequest.ExternalTransactionId);
             response.ExternalRoundId.Should().Be(betRequest.ExternalRoundId);
             response.Status.Should().Be(status);
@@ -666,7 +669,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public void ThenIWillReceiveSuccessfulResponse()
         {
             var response = Get<BatchResponse>(SR.Response);
-            response.ErrorCode.Should().Be((int) TgsApiError.None);
+            response.ErrorCode.Should().Be((int)TgsApiError.None);
             response.ErrorMessage.Should().BeNullOrEmpty();
         }
 
@@ -701,7 +704,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             foreach (var ga in gameActions)
             {
                 var data = await db.Wallets.Where(w => w.PlayerCode == ga.PlayerCode)
-                    .Select(w => new { w.Player.Username, w.Balance}).FirstOrDefaultAsync();
+                    .Select(w => new { w.Player.Username, w.Balance }).FirstOrDefaultAsync();
 
                 var expectdBalance = players[data.Username];
                 data.Balance.Should().Be(expectdBalance);
@@ -828,7 +831,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var response = Get<T>(SR.Response);
 
             response.Should().NotBeNull();
-            response.ErrorCode.Should().Be((int) error);
+            response.ErrorCode.Should().Be((int)error);
             response.Balance.Should().BeNull();
         }
 

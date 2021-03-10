@@ -28,12 +28,12 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 
-        public async Task ForgotPasswordAsync(
-            [FromServices] ICommandService<ForgotPasswordCommand> forgotPasswordService,
+        public async Task<string> ForgotPasswordAsync(
+            [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
         {
-            await forgotPasswordService
-                .ExecuteAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone))
+            return await forgotPasswordService
+                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone))
                 .ConfigureAwait(false);
         }
     }

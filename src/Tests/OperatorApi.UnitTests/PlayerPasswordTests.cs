@@ -97,7 +97,7 @@ namespace OperatorApi.UnitTests
 
             var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), "0911123456");
 
-            Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.ExecuteAsync(command));
+            Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.GetAsync(command));
         }
 
         [Test]
@@ -142,7 +142,7 @@ namespace OperatorApi.UnitTests
 
             var expected = $"Your ID verification code is : {validateCode}";
 
-            await sut.ExecuteAsync(command);
+            await sut.GetAsync(command);
 
             _ = fakeValidateCodeOperator
                 .Received(1)
