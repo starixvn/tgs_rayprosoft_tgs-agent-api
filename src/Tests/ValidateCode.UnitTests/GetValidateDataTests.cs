@@ -21,11 +21,12 @@ namespace TGS.Tests.ValidateCode.UnitTests
             var sut = new GetValidateDataService(fakeValidateCodeStore);
 
             var validateCode = "123456";
-            var query = new GetValidateDataQuery(validateCode);
+            var token = "98FBCC27-C3F1-4479-AE0D-D68493853623";
+            var query = new GetValidateDataQuery(validateCode, token);
 
             var expected = "jsonContent";
 
-            fakeValidateCodeStore.GetDataAsync(Arg.Is(validateCode)).Returns("jsonContent");
+            fakeValidateCodeStore.GetDataAsync(Arg.Is(validateCode), Arg.Is(token)).Returns("jsonContent");
 
             var actual = await sut.GetAsync(query);
 
@@ -40,11 +41,12 @@ namespace TGS.Tests.ValidateCode.UnitTests
             var sut = new GetValidateDataService(fakeValidateCodeStore);
 
             var validateCode = "123456";
-            var query = new GetValidateDataQuery(validateCode);
+            var token = "98FBCC27-C3F1-4479-AE0D-D68493853623";
+            var query = new GetValidateDataQuery(validateCode, token);
 
             var expected = (string)null;
 
-            fakeValidateCodeStore.GetDataAsync(Arg.Is(validateCode)).Returns((string)null);
+            fakeValidateCodeStore.GetDataAsync(Arg.Is(validateCode), Arg.Is(token)).Returns((string)null);
 
             var actual = await sut.GetAsync(query);
 

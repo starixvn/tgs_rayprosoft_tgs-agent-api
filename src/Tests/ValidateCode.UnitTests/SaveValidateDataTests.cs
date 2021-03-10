@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Services.ValidateCode;
@@ -21,14 +16,15 @@ namespace TGS.Tests.ValidateCode.UnitTests
             var sut = new SaveValidateDataCommandService(fakeValidateCodeStore);
 
             var validateCode = "123456";
+            var token = "98FBCC27-C3F1-4479-AE0D-D68493853623";
             var content = "jsonContent";
-            var command = new SaveValidateDataCommand(validateCode, content);
+            var command = new SaveValidateDataCommand(validateCode, token, content);
 
             await sut.ExecuteAsync(command);
 
             _ = fakeValidateCodeStore
                 .Received(1)
-                .SaveDataAsync(Arg.Is(validateCode), Arg.Is(content));
+                .SaveDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Is(content));
         }
     }
 }

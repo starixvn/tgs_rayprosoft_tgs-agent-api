@@ -15,7 +15,7 @@ namespace TGS.Services.ValidateCode
 
         public ValueTask<string?> GetAsync(GetValidateDataQuery query)
         {
-            return _validateCodeStore.GetDataAsync(query.ValidateCode);
+            return _validateCodeStore.GetDataAsync(query.ValidateCode, query.Token);
         }
     }
 }

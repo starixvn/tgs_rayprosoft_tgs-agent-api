@@ -1,4 +1,4 @@
 ﻿namespace TGS.Services.ValidateCode
 {
-    public record GetValidateDataQuery(string ValidateCode);
+    public record GetValidateDataQuery(string ValidateCode, string Token);
 }

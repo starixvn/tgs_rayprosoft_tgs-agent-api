@@ -21,19 +21,19 @@ namespace TGS.Repositories.ValidateCode
             _redisRepository = redisRepository ?? throw new ArgumentNullException(nameof(redisRepository));
             _redisDatabase = _redisRepository.GetDb();
         }
-        public async ValueTask<string?> GetDataAsync(string validateCode)
+        public async ValueTask<string?> GetDataAsync(string validateCode, string token)
         {
             var value = await _redisDatabase
-                .StringGetAsync($"{_KeyPrefix}:{validateCode}")
+                .StringGetAsync($"{_KeyPrefix}:{token}:{validateCode}")
                 .ConfigureAwait(false);
 
             return (string?)value;
         }
 
-        public async ValueTask<bool> SaveDataAsync(string validateCode, string content)
+        public async ValueTask<bool> SaveDataAsync(string validateCode, string token, string content)
         {
             return await _redisDatabase.StringSetAsync(
-                $"{_KeyPrefix}:{validateCode}",
+                $"{_KeyPrefix}:{token}:{validateCode}",
                 content,
                 _Expire,
                 when: When.NotExists).ConfigureAwait(false);

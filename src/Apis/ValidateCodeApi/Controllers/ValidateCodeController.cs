@@ -19,16 +19,17 @@ namespace ValidateCodeApi.Controllers
         /// </summary>
         /// <param name="saveValidateDataService">The save validate data service.</param>
         /// <param name="validateCode">The validate code.</param>
+        /// <param name="token">The token.</param>
         /// <param name="content">The content.</param>
-        /// <returns></returns>
-        [HttpPost("{validateCode}")]
+        [HttpPost("{validateCode}/{token}")]
         public async Task SetValidateCodeAsync(
             [FromServices] ICommandService<SaveValidateDataCommand> saveValidateDataService,
             string validateCode,
+            string token,
             [FromBody] JObject content)
         {
             await saveValidateDataService
-                .ExecuteAsync(new SaveValidateDataCommand(validateCode, content.ToString()))
+                .ExecuteAsync(new SaveValidateDataCommand(validateCode, token, content.ToString()))
                 .ConfigureAwait(false);
         }
 
@@ -37,14 +38,16 @@ namespace ValidateCodeApi.Controllers
         /// </summary>
         /// <param name="getValidateDataService">The get validate data service.</param>
         /// <param name="validateCode">The validate code.</param>
+        /// <param name="token">The token.</param>
         /// <returns></returns>
         [HttpGet("{validateCode}")]
         public async Task<JObject> GetValidateCodeDataAsync(
             [FromServices] IGetService<GetValidateDataQuery, string> getValidateDataService,
-            string validateCode) =>
+            string validateCode,
+            string token) =>
             JObject.Parse(
                 await getValidateDataService
-                    .GetAsync(new GetValidateDataQuery(validateCode))
+                    .GetAsync(new GetValidateDataQuery(validateCode, token))
                     .ConfigureAwait(false));
     }
 }
