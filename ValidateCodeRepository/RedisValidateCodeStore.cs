@@ -12,6 +12,7 @@ namespace TGS.Repositories.ValidateCode
     class RedisValidateCodeStore : IValidateCodeStore
     {
         private static readonly string _KeyPrefix = "TGS:ValidateCodes";
+        private static readonly TimeSpan _Expire = TimeSpan.FromMinutes(3);
         private readonly IRedisRepository _redisRepository;
         private readonly IDatabase _redisDatabase;
 
@@ -34,6 +35,7 @@ namespace TGS.Repositories.ValidateCode
             return await _redisDatabase.StringSetAsync(
                 $"{_KeyPrefix}:{validateCode}",
                 content,
+                _Expire,
                 when: When.NotExists).ConfigureAwait(false);
         }
     }
