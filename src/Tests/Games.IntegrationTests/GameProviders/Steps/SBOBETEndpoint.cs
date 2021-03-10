@@ -114,9 +114,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var services = (IServiceCollection)new ServiceCollection();
 
+#if DEBUG
+            var jsonFile = "appsettings.json";
+#else
+            var jsonFile = "appsettings.IntTest.json";
+#endif
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile(jsonFile, true, true)
                 .AddEnvironmentVariables()
                 .Build();
 
