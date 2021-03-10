@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210225082654_Initial")]
+    [Migration("20210310011830_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2408,8 +2408,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasColumnType("jsonb")
                         .HasColumnName("menu_setting");
 
                     b.Property<string>("Name")

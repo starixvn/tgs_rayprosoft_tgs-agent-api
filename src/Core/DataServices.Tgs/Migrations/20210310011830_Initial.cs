@@ -171,7 +171,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     is_root = table.Column<bool>(type: "boolean", nullable: false),
                     name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     display_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    menu_setting = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false),
+                    menu_setting = table.Column<string>(type: "jsonb", nullable: false),
                     description = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     status = table.Column<short>(type: "smallint", nullable: false),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
