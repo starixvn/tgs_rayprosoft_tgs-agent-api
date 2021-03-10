@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using TGS.Apis.OperatorApi;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -54,23 +55,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
 
             var opApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration((hostCtx, builder) =>
+                .ConfigureAppConfiguration((_, builder) =>
                 {
-                    builder.SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../../../../../Apis/OperatorApi")));
+                    builder.SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                        "../../../../../Apis/OperatorApi")));
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseStartup<Apis.OperatorApi.Startup>()
+                        .UseStartup<Startup>()
                         .UseTestServer()
-                        .ConfigureTestServices(services =>
+                        .ConfigureTestServices(srv =>
                         {
-                            services.AddTransient<IRequestAnalyzer>(sp =>
+                            srv.AddTransient(sp =>
                             {
                                 var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
-
                                 fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
-
                                 return fakeAnalyzer;
                             });
                         });
@@ -81,10 +81,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var opApiClient = opApiHost.GetTestClient();
 
             var tgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration((hostCtx, builder) =>
+                .ConfigureAppConfiguration((_, builder) =>
                 {
                     builder
-                        .SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../../../../../Apis/TgsApi")))
+                        .SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                            "../../../../../Apis/TgsApi")))
                         .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -93,9 +94,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         .UseStartup<SBOBETStartup>()
                         .UseKestrel(options => options.AddServerHeader = false)
                         .UseTestServer()
-                        .ConfigureTestServices(services =>
+                        .ConfigureTestServices(srv =>
                         {
-                            services.AddTransient<IRequestAnalyzer>(sp =>
+                            srv.AddTransient(sp =>
                             {
                                 var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
 
@@ -131,18 +132,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddRedis();
 
             services.AddTransient<IPlayerApiClient>(sp =>
-            {
-                var httpClient = opApiClient;
-
-                return ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, httpClient);
-            });
+                ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
 
             services.AddTransient<ISBOBETApiClient>(sp =>
-            {
-                var httpClient = tgsApiClient;
-
-                return ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, httpClient);
-            });
+                ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
 
             _serviceProvider = services.BuildServiceProvider();
         }
@@ -230,10 +223,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"set random external round id")]
-        public void GivenSetRandomExternalRoundId()
-        {
-            Set(SR.ExternalRoundId, NewRoundId());
-        }
+        public void GivenSetRandomExternalRoundId() => Set(SR.ExternalRoundId, NewRoundId());
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
@@ -473,7 +463,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
-                { r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId })
+                    {
+                        r.PlayerCode,
+                        r.CurrencyCode,
+                        r.PlatformType,
+                        r.ExternalRoundId,
+                        r.ExternalGameId
+                    })
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
                         if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
@@ -623,7 +619,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
+                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -684,8 +680,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Errors.Length.Should().Be(errorsCount);
         }
 
-        [Then(@"all cancel bet related database records will be created and the balance of each user will be matched as original")]
-        public async Task ThenAllCancelBetRelatedDatabaseRecordsWillBeCreatedAndTheBalanceOfEachUserWillBeMatchedAsOriginal()
+        [Then(
+            @"all cancel bet related database records will be created and the balance of each user will be matched as original")]
+        public async Task
+            ThenAllCancelBetRelatedDatabaseRecordsWillBeCreatedAndTheBalanceOfEachUserWillBeMatchedAsOriginal()
         {
             var request = Get<BatchRequest>(SR.Request);
             var txids = request.Transactions.Select(t => t.ExternalTransactionId).ToArray();
@@ -693,7 +691,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameActions = await db.GameActions
                 .Where(ga => txids.Contains(ga.ExternalTransactionId))
-                .Select(ga => new { ga.Round.PlayerCode, ga.Id }).ToArrayAsync();
+                .Select(ga => new
+                {
+                    ga.Round.PlayerCode,
+                    ga.Id
+                }).ToArrayAsync();
 
             gameActions.Length.Should().Be(txids.Length);
 
@@ -701,7 +703,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             foreach (var ga in gameActions)
             {
                 var data = await db.Wallets.Where(w => w.PlayerCode == ga.PlayerCode)
-                    .Select(w => new { w.Player.Username, w.Balance }).FirstOrDefaultAsync();
+                    .Select(w => new
+                    {
+                        w.Player.Username,
+                        w.Balance
+                    }).FirstOrDefaultAsync();
 
                 var expectdBalance = players[data.Username];
                 data.Balance.Should().Be(expectdBalance);
