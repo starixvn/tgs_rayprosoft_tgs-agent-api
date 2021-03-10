@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210310085429_Initial")]
+    [Migration("20210310102027_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1947,6 +1947,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("has_agent");
 
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id_number");
+
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");
@@ -2406,8 +2411,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasColumnType("jsonb")
                         .HasColumnName("menu_setting");
 
                     b.Property<string>("Name")

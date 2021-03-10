@@ -175,7 +175,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     is_root = table.Column<bool>("boolean", nullable: false),
                     name = table.Column<string>("character varying(50)", maxLength: 50, nullable: false),
                     display_name = table.Column<string>("character varying(50)", maxLength: 50, nullable: true),
-                    menu_setting = table.Column<string>("character varying(4000)", maxLength: 4000, nullable: false),
+                    menu_setting = table.Column<string>("jsonb", nullable: false),
                     description = table.Column<string>("character varying(128)", maxLength: 128, nullable: true),
                     status = table.Column<short>("smallint", nullable: false),
                     created_on = table.Column<DateTimeOffset>("timestamp with time zone", nullable: false),
@@ -1654,6 +1654,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: table => new
                 {
                     player_code = table.Column<string>("character varying(16)", maxLength: 16, nullable: false),
+                    id_number = table.Column<string>("character varying(50)", maxLength: 50, nullable: true),
                     username = table.Column<string>("character varying(32)", maxLength: 32, nullable: false),
                     real_name = table.Column<string>("character varying(32)", maxLength: 32, nullable: true),
                     invitation_code = table.Column<string>("character varying(6)", maxLength: 6, nullable: false),

@@ -131,11 +131,23 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddApiClient()
                 .AddRedis();
 
-            services.AddTransient<IPlayerApiClient>(sp =>
-                ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+            var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
-            services.AddTransient<ISBOBETApiClient>(sp =>
-                ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+            if (isDev)
+            {
+                services.AddTransient<IPlayerApiClient>(sp =>
+                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                services.AddTransient<ISBOBETApiClient>(sp =>
+                    ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+            }
+            else
+            {
+                services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
+                    c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+
+                services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
+                    c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-SBO")));
+            }
 
             _serviceProvider = services.BuildServiceProvider();
         }

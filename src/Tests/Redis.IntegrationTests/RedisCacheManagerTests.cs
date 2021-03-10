@@ -4,9 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Tests.TestsCommon;
 
 namespace TGS.Tests.Redis.IntegrationTests
@@ -14,7 +12,7 @@ namespace TGS.Tests.Redis.IntegrationTests
     [TestFixture]
     [Parallelizable]
     [Category(Named.Integration)]
-    public partial class RedisCacheManagerTests
+    public partial class RedisCacheManagerTests : BaseRedisTest
     {
         private const string CacheType = "DataByGuid";
         private Guid _cacheKey;
@@ -26,13 +24,7 @@ namespace TGS.Tests.Redis.IntegrationTests
         [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
-            var provider = new ServiceCollection()
-                .AddConfiguration()
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddRedis()
-                .BuildServiceProvider();
-
+            var provider = GetServiceProvider();
             _redisRepository = provider.GetService<IRedisRepository>();
             _cacheManager = provider.GetService<IRedisCacheManager>();
         }

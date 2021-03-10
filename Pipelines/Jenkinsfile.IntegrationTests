@@ -1,0 +1,80 @@
+pipeline {
+	agent any
+	
+	environment {
+		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
+	}
+	
+	parameters {
+		gitParameter branchFilter: 'origin/(.*)', defaultValue: 'develop', name: 'BRANCH', type: 'PT_BRANCH'
+	}
+
+	stages {
+		stage('Clone') {
+			steps {
+				git branch: "${params.BRANCH}", url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git' , credentialsId: 'gitlab-user-pwd'
+			}
+		}
+		
+		stage('Clear') {
+			steps {
+				script {
+					try {
+						sh "../dropintdb.sh tgs"
+						sh "../dropintdb.sh log"
+						
+						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+							sh "kubectl delete -f ../int-test/update/"
+						}
+					} catch (err) {
+						echo err.getMessage()
+					}
+				}
+				echo currentBuild.result
+			}
+		}
+		
+		stage('Docker image build') {
+			steps {
+				script {
+					try {
+						sh "sudo docker build -f src/Apis/LogApi/Dockerfile -t ${Registry}log-api:int-test ."
+						sh "sudo docker build -f src/Apis/TgsApi/Dockerfile -t ${Registry}tgs-api:int-test ."
+						sh "sudo docker build -f src/Apis/OperatorApi/Dockerfile -t ${Registry}operator-api:int-test ."
+						
+						sh "sudo docker push ${Registry}log-api:int-test"
+						sh "sudo docker push ${Registry}tgs-api:int-test"
+						sh "sudo docker push ${Registry}operator-api:int-test"
+						sh "exit 0"
+					} catch (err) {
+						echo err.getMessage()
+					}
+				}
+				echo currentBuild.result
+			}
+		}
+		
+		stage('Prepare Env') {
+			steps {
+				script {
+					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+						sh "kubectl apply -f ../int-test/update/"
+						sleep(time:15,unit:"SECONDS")
+					}
+				}
+			}
+		}
+		
+		stage('Build') {
+			steps {
+				sh "dotnet build tgs.sln"
+			}
+		}
+		
+		stage('Test') {
+			steps {
+				sh  "dotnet test tgs.sln --filter Integration -c Release /p:DefineConstants="  
+			}
+		}
+	}
+}
