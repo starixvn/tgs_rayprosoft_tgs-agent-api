@@ -15,11 +15,11 @@ namespace TGS.Services.Operator
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
-        public async ValueTask SaveValidateCodeDataAsync(string validateCode, string content)
+        public async ValueTask SaveValidateCodeDataAsync(string validateCode, string token, string content)
         {
             var body = new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json);
             var response = await _httpClient
-                .PostAsync($"/validate-code/{validateCode}", body)
+                .PostAsync($"/validate-code/{validateCode}/{token}", body)
                 .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();

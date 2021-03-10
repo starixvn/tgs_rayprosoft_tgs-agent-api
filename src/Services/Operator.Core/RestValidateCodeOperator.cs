@@ -18,7 +18,7 @@ namespace TGS.Services.Operator
         public ValueTask SaveValidateDataAsync(string validateCode, ValidateCodeData data)
         {
             return _validateCodeServiceClient
-                .SaveValidateCodeDataAsync(validateCode, JsonSerializer.Serialize(data));
+                .SaveValidateCodeDataAsync(validateCode, data.Token, JsonSerializer.Serialize(data));
         }
 
         public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)
