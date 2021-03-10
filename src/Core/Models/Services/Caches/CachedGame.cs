@@ -11,6 +11,7 @@ namespace TGS.Core.Models.Services.Caches
         public GameStatus Status { get; init; }
         public string ExternalId { get; init; }
         public bool SubGame { get; init; }
+        public bool AvailableToBrand { get; init; }
         public string RuleUrl { get; init; }
         public string EndpointPath { get; init; }
         public GameType Type { get; init; }

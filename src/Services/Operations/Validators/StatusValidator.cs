@@ -104,8 +104,10 @@ namespace TGS.Services.Operations.Validators
 
             var brandGameProviderStatus =
                 await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId);
-            var brandGameStatus = await _brandOperations.GetBrandGameStatusAsync(brandId, gameProviderId, gameId);
-            brandGameStatus ??= cachedGame.SubGame ? cachedGame.Status : null;
+
+            var brandGameStatus = cachedGame.SubGame && !cachedGame.AvailableToBrand
+                ? cachedGame.Status
+                : await _brandOperations.GetBrandGameStatusAsync(brandId, gameProviderId, gameId);
 
             if (brandGameProviderStatus == null || brandGameStatus == null)
             {

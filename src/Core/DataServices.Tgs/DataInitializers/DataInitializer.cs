@@ -560,30 +560,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     IsDefault = idx == 0
                 }).ToHashSet();
 
-            gp.Games = gameProvider.Games.OrderBy(g => g.Code).ThenBy(g => g.PlatformType)
-                .Select((g, idx) => new Models.Game
-                {
-                    Id = int.Parse($"{gp.UniqueId}{idx + 1:00000}"),
-                    Name = g.Name,
-                    ExternalId = g.ExternalId,
-                    Code = g.Code,
-                    EndpointPath = g.EndpointPath,
-                    RuleUrl = g.GameRuleUrl,
-                    Type = g.GameTypeCode,
-                    Description = g.Description,
-                    Status = GameStatus.Active,
-                    GameProvider = gp,
-                    GameProviderId = gp.Id,
-                    PlatformType = g.PlatformType,
-                    HasTurnoverOnTieBet = g.HasTurnoverOnTieBet,
-                    SubGame = g.SubGame,
-                    Html5 = g.Html5,
-                    CreatedOn = Now,
-                    UpdatedOn = Now,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
-                    AvailableCurrencies = g.AvailableCurrencies
-                }).ToHashSet();
+            gp.Games = gameProvider.Games.Select((g, idx) => new Models.Game
+            {
+                Id = int.Parse($"{gp.UniqueId}{idx + 1:00000}"),
+                Name = g.Name,
+                ExternalId = g.ExternalId,
+                Code = g.Code,
+                EndpointPath = g.EndpointPath,
+                RuleUrl = g.GameRuleUrl,
+                Type = g.GameTypeCode,
+                Description = g.Description,
+                Status = GameStatus.Active,
+                GameProvider = gp,
+                GameProviderId = gp.Id,
+                PlatformType = g.PlatformType,
+                HasTurnoverOnTieBet = g.HasTurnoverOnTieBet,
+                SubGame = g.SubGame,
+                AvailableToBrand = g.AvailableToBrand,
+                Html5 = g.Html5,
+                CreatedOn = Now,
+                UpdatedOn = Now,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername,
+                AvailableCurrencies = g.AvailableCurrencies
+            }).ToHashSet();
 
             gp.BetLimits = gameProvider.BetLimits.Select(b => new Models.GameProviderBetLimit
             {
@@ -720,14 +720,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 };
             }).ToArray();
 
-            var games = gameProviders.SelectMany(gp => gp.Games).Where(g => !g.SubGame).Select((g, idx) => new BrandGame
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                BrandId = brand.Id,
-                GameId = g.Id,
-                Status = GameStatus.Active,
-                Tag = GetGameTag(idx)
-            }).ToHashSet();
+            var games = gameProviders.SelectMany(gp => gp.Games)
+                .Where(g => g.AvailableToBrand).Select((g, idx) => new BrandGame
+                {
+                    Id = GuidExtensions.NewSequentialGuid(),
+                    BrandId = brand.Id,
+                    GameId = g.Id,
+                    Status = GameStatus.Active,
+                    Tag = GetGameTag(idx)
+                }).ToHashSet();
 
             var betLimits = _betLimits.Select(bl => new BrandBetLimit
             {

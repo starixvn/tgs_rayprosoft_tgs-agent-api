@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210225082654_Initial")]
+    [Migration("20210310085429_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -950,6 +950,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("available_currencies");
 
+                    b.Property<bool>("AvailableToBrand")
+                        .HasColumnType("boolean")
+                        .HasColumnName("available_to_brand");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -987,15 +991,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("game_provider_id");
 
                     b.Property<bool>("HasTurnoverOnTieBet")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("has_turnover_on_tie_bet");
 
                     b.Property<bool>("Html5")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("html5");
 
                     b.Property<string>("Name")
@@ -1018,9 +1018,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("status");
 
                     b.Property<bool>("SubGame")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("sub_game");
 
                     b.Property<short>("Type")

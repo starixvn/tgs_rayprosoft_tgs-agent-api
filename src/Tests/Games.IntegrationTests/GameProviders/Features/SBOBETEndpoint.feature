@@ -849,7 +849,7 @@ Scenario: 10.d - Get bet status of cancel transaction
 Scenario: 11.a - Place desktop bet of sub game
 	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
 		And player having balance of $100
-	When I place bet of $10 for game "5_201608"
+	When I place bet of $10 for game "5_201600"
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
@@ -858,7 +858,7 @@ Scenario: 11.a - Place desktop bet of sub game
 Scenario: 11.b - Win bet of sub game
 	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
 		And player having balance of $100
-	Given I place bet of $10 for game "5_201608"
+	Given I place bet of $10 for game "5_201600"
 		And balance now being $90
 	When I win bet for $15
 	Then I will receive settle bet response of no error and balance of $105

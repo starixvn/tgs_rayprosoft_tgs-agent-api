@@ -86,6 +86,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             PlatformType PlatformType { get; init; }
             bool HasTurnoverOnTieBet { get; init; }
             bool SubGame { get; init; }
+            bool AvailableToBrand { get; init; }
             bool Html5 { get; init; }
             string AvailableCurrencies { get; init; }
         }
@@ -101,7 +102,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             private readonly string _code;
             private readonly string _externalCode;
 
-            public BaseCodeMapper(string code, string externalCode)
+            protected BaseCodeMapper(string code, string externalCode)
             {
                 _code = code;
                 _externalCode = externalCode.IsNullOrEmpty() ? code : externalCode;
@@ -154,6 +155,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             [Name("SubGame")]
             public bool SubGame { get; init; }
+
+            [Name("AvailableToBrand")]
+            public bool AvailableToBrand { get; init; }
 
             [Name("Html5")]
             public bool Html5 { get; init; }
