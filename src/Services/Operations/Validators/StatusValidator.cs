@@ -92,19 +92,20 @@ namespace TGS.Services.Operations.Validators
             EnsureStatus(gameStatuses);
 
             var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId);
-            var gameStatus = await _gameProviderOperations.GetGameStatusAsync(gameProviderId, gameId);
+            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameId);
 
-            if (gameProviderStatus == null || gameStatus == null)
+            if (gameProviderStatus == null || cachedGame == null)
             {
                 throw new InvalidStatusException("GameProvider or Game doesn't exist");
             }
 
             ValidateGameProviderAndGameStatus(gameId, idToThrow, statuses, gameStatuses, gameProviderStatus.Value,
-                gameStatus.Value);
+                cachedGame.Status);
 
             var brandGameProviderStatus =
                 await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId);
             var brandGameStatus = await _brandOperations.GetBrandGameStatusAsync(brandId, gameProviderId, gameId);
+            brandGameStatus ??= cachedGame.SubGame ? cachedGame.Status : null;
 
             if (brandGameProviderStatus == null || brandGameStatus == null)
             {
@@ -117,7 +118,6 @@ namespace TGS.Services.Operations.Validators
 
         void IStatusValidator.ThrowIfPlayerDisabled(PlayerStatus status) =>
             EnsurePlayerStatus(status, PlayerStatus.Disabled);
-
 
         void IStatusValidator.ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status) =>
             EnsurePlayerStatus(status, PlayerStatus.InBlacklist);
