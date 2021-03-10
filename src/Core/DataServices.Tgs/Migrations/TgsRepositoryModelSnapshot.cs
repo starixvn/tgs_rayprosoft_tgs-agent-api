@@ -1947,6 +1947,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("has_agent");
 
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id_number");
+
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");

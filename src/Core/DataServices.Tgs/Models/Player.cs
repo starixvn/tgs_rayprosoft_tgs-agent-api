@@ -6,6 +6,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 {
     public class Player
     {
+        public string IdNumber { get; set; }
         public string PlayerCode { get; set; }
         public string Username { get; set; }
         public string RealName { get; set; }

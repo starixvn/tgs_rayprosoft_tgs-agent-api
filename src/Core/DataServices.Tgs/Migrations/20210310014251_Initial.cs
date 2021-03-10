@@ -1537,6 +1537,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: table => new
                 {
                     player_code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
+                    id_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     real_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     invitation_code = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: false),

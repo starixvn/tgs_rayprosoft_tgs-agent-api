@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
@@ -19,6 +20,7 @@ namespace TGS.Services.Operations.Commands
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
         Task UpdatePlayerAsync(UpdatePlayerData data);
+        Task UpdatePlayerIdNumberAsync(Player player);
 
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
 
@@ -150,10 +152,7 @@ namespace TGS.Services.Operations.Commands
         {
             var player = new Player
             {
-                PlayerCode = data.PlayerCode,
-                Salt = data.Salt,
-                Password = data.Password,
-                UpdatedOn = data.UpdatedOn
+                PlayerCode = data.PlayerCode, Salt = data.Salt, Password = data.Password, UpdatedOn = data.UpdatedOn
             };
 
             _repository.Players.Attach(player);
@@ -187,21 +186,21 @@ namespace TGS.Services.Operations.Commands
         Task IPlayerCommands.DeauthorizePlayerAsync(string playerCode, Guid loginRecordId)
         {
             const string sql = "call dbo.player_deauthorize_by_login_record_id(:player_code, :login_record_id)";
-            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text, new Dictionary<string, object>
-            {
-                {":player_code", playerCode},
-                {":login_record_id", loginRecordId}
-            });
+            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
+                new Dictionary<string, object> {{":player_code", playerCode}, {":login_record_id", loginRecordId}});
         }
 
         Task IPlayerCommands.DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
         {
             const string sql = "call dbo.player_deauthorize_by_platform_type";
-            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text, new Dictionary<string, object>
-            {
-                {":player_code", playerCode},
-                {":platform_type", platformType}
-            });
+            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
+                new Dictionary<string, object> {{":player_code", playerCode}, {":platform_type", platformType}});
+        }
+
+        Task IPlayerCommands.UpdatePlayerIdNumberAsync(Player player)
+        {
+            _repository.Entry(player).State = EntityState.Modified;
+            return _repository.SaveChangesAsync();
         }
     }
 }

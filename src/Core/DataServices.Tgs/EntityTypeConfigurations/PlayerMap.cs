@@ -14,6 +14,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(bc => bc.PlayerCode)
                 .HasName("pk_player_code");
 
+            builder.Property(c => c.IdNumber)
+                .HasMaxLength(50);
+
             builder.Property(c => c.PlayerCode)
                 .HasMaxLength(16)
                 .IsRequired();
