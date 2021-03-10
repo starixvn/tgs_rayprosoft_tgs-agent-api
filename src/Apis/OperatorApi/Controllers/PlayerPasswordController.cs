@@ -24,17 +24,18 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IMediator mediator,
             [FromBody] ChangePasswordRequest request) => mediator.Send(request);
 
-
         [HttpPost("forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-
-        public async Task<string> ForgotPasswordAsync(
+        public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
-            [FromBody] ForgotPasswordRequest request)
-        {
-            return await forgotPasswordService
-                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone))
-                .ConfigureAwait(false);
-        }
+            [FromBody] ForgotPasswordRequest request) => forgotPasswordService
+                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone));
+
+        [HttpPost("forgot/varify")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+        public ValueTask<bool> ValidateForgotPasswordCode(
+            [FromServices] IGetService<VarifyForgotPasswordCodeCommand, bool> varifyService,
+            [FromBody] VarifyForgotPasswordCodeRequest request)
+            => varifyService.GetAsync(new VarifyForgotPasswordCodeCommand(request.Token, request.ValidateCode));
     }
 }

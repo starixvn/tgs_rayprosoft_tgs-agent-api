@@ -15,7 +15,7 @@ namespace TGS.Services.Operator
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
         }
 
-        public ValueTask SaveValidateDataAsync(string validateCode, ValidateCodeData data)
+        public ValueTask<bool> SaveValidateDataAsync(string validateCode, ValidateCodeData data)
         {
             return _validateCodeServiceClient
                 .SaveValidateCodeDataAsync(validateCode, data.Token, JsonSerializer.Serialize(data));

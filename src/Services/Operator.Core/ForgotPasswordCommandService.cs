@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Polly;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.Properties;
 using Valhalla.Services;
@@ -33,24 +34,35 @@ namespace TGS.Services.Operator
             if (player == null)
                 throw new PlayerNotFoundException(command.Phone);
 
-            var validateCode = _codeGenerator.GenerateCode();
-            var token = _codeGenerator.GenerateToken();
+            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
+                .RetryAsync(5)
+                .ExecuteAsync(async () =>
+                {
+                    var validateCode = _codeGenerator.GenerateCode();
+                    var token = _codeGenerator.GenerateToken();
 
-            var data = new ValidateCodeData(player.PlayerCode, token);
+                    var data = new ValidateCodeData(player.PlayerCode, token);
 
-            await _validateCodeOperator
-                .SaveValidateDataAsync(validateCode, data)
+                    var result = await _validateCodeOperator
+                        .SaveValidateDataAsync(validateCode, data)
+                        .ConfigureAwait(false);
+
+                    return (result, validateCode, token);
+                })
                 .ConfigureAwait(false);
 
+            if (!saveResult.Result)
+                throw new GenerateValidateCodeFailException();
+
             var shortMessage = string.Format(
-                Resources.ResourceManager.GetString(nameof(Resources.ForgotPasswordMessage), command.CultureInfo),
-                validateCode);
+                Resources.ResourceManager.GetString(nameof(Resources.ForgotPasswordMessage), command.CultureInfo)!,
+                saveResult.ValidateCode);
 
             await _validateCodeOperator
                 .SendMessageAsync(player.Phone, shortMessage, player.DefaultWalletCurrencyCode, player.BrandId)
                 .ConfigureAwait(false);
 
-            return token;
+            return saveResult.Token;
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Net.Mime;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using TGS.Services.ValidateCode;
@@ -21,16 +24,34 @@ namespace ValidateCodeApi.Controllers
         /// <param name="validateCode">The validate code.</param>
         /// <param name="token">The token.</param>
         /// <param name="content">The content.</param>
+        /// <response code="201">Save data success.</response>
+        /// <response code="409">The validate data already set.</response>
         [HttpPost("{validateCode}/{token}")]
-        public async Task SetValidateCodeAsync(
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesErrorResponseType(typeof(void))]
+        public async Task<IActionResult> SetValidateCodeAsync(
             [FromServices] ICommandService<SaveValidateDataCommand> saveValidateDataService,
             string validateCode,
             string token,
             [FromBody] JObject content)
         {
-            await saveValidateDataService
-                .ExecuteAsync(new SaveValidateDataCommand(validateCode, token, content.ToString()))
-                .ConfigureAwait(false);
+            try
+            {
+                await saveValidateDataService
+                    .ExecuteAsync(new SaveValidateDataCommand(validateCode, token, content.ToString()))
+                    .ConfigureAwait(false);
+
+                return StatusCode(StatusCodes.Status201Created);
+            }
+            catch (ValidateCodeConflictException)
+            {
+                return StatusCode(StatusCodes.Status409Conflict, null);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -39,15 +60,24 @@ namespace ValidateCodeApi.Controllers
         /// <param name="getValidateDataService">The get validate data service.</param>
         /// <param name="validateCode">The validate code.</param>
         /// <param name="token">The token.</param>
-        /// <returns></returns>
-        [HttpGet("{validateCode}")]
+        /// <response code="204">Can't find data.</response>
+        [HttpGet("{validateCode}/{token}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JObject))]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(void))]
+        [Produces(MediaTypeNames.Application.Json)]
         public async Task<JObject> GetValidateCodeDataAsync(
             [FromServices] IGetService<GetValidateDataQuery, string> getValidateDataService,
             string validateCode,
-            string token) =>
-            JObject.Parse(
-                await getValidateDataService
-                    .GetAsync(new GetValidateDataQuery(validateCode, token))
-                    .ConfigureAwait(false));
+            string token)
+        {
+            var content = await getValidateDataService
+                .GetAsync(new GetValidateDataQuery(validateCode, token))
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(content))
+                return null;
+            else
+                return JObject.Parse(content);
+        }
     }
 }

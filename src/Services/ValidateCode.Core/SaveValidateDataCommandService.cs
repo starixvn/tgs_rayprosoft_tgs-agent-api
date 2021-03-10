@@ -15,9 +15,12 @@ namespace TGS.Services.ValidateCode
 
         public async ValueTask ExecuteAsync(SaveValidateDataCommand command)
         {
-            await _validateCodeStore
+            var result = await _validateCodeStore
                 .SaveDataAsync(command.ValidateCode, command.Token, command.Content)
                 .ConfigureAwait(false);
+
+            if (!result)
+                throw new ValidateCodeConflictException();
         }
     }
 }

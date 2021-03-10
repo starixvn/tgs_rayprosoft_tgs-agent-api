@@ -140,6 +140,10 @@ namespace OperatorApi.UnitTests
             fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
             fakeValidateCodeGenerator.GenerateToken().Returns(token);
 
+            fakeValidateCodeOperator
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Any<ValidateCodeData>())
+                .Returns(true);
+
             var expected = $"Your ID verification code is : {validateCode}";
 
             await sut.GetAsync(command);
@@ -151,6 +155,27 @@ namespace OperatorApi.UnitTests
                     Arg.Is(expected),
                     Arg.Is(player.DefaultWalletCurrencyCode),
                     Arg.Is(player.BrandId));
+        }
+
+        [Test]
+        public async Task Varify_Forgot_Password_ValidateCode()
+        {
+            var token = "9F590F80-9AEE-45D8-9009-D34C4C49F8D7";
+            var validateCode = "123456";
+
+            var fakeValidateCodeServiceClient = Substitute.For<IValidateCodeServiceClient>();
+
+            var sut = new VarifyForgotPasswordCodeService(fakeValidateCodeServiceClient);
+
+            var command = new VarifyForgotPasswordCodeCommand(token, validateCode);
+
+            fakeValidateCodeServiceClient
+                .GetValidateCodeDataAsync(Arg.Is(validateCode), Arg.Is(token))
+                .Returns("true");
+
+            var actual = await sut.GetAsync(command);
+
+            Assert.IsTrue(actual);
         }
     }
 }
