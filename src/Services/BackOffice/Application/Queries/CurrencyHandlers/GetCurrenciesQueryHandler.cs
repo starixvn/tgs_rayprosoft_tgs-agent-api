@@ -20,16 +20,14 @@ namespace TGS.Services.BackOffice.Application.Queries.CurrencyHandlers
         }
 
         public override Task<PagedResponse<CurrencyModel>> Handle(GetCurrenciesRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetCurrenciesAsync()
-                .Where(ResellerId != null,
-                    r => r.ResellerCurrencies.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId != null,
-                    l => l.LicenseeCurrencies.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId != null, b => b.BrandCurrencies.Select(x => x.BrandId).Contains(BrandId.Value))
-                .Where(request.Code, g => g.Code == request.Code)
-                .Where(request.Name, g => g.Name == request.Name)
+            CancellationToken cancellationToken) =>
+            _service.GetCurrencieQueries(q => q.Where(ResellerId != null,
+                        r => r.ResellerCurrencies.Select(x => x.ResellerId).Contains(ResellerId.Value))
+                    .Where(LicenseeId != null,
+                        l => l.LicenseeCurrencies.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
+                    .Where(BrandId != null, b => b.BrandCurrencies.Select(x => x.BrandId).Contains(BrandId.Value))
+                    .Where(request.Code, g => g.Code == request.Code)
+                    .Where(request.Name, g => g.Name == request.Name))
                 .Select(x => new CurrencyModel
                 {
                     Code = x.Code,
@@ -41,6 +39,5 @@ namespace TGS.Services.BackOffice.Application.Queries.CurrencyHandlers
                     UpdatedOn = x.UpdatedOn,
                     UpdatedByUsername = x.UpdatedByUsername
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

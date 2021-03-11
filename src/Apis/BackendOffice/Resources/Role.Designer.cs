@@ -70,6 +70,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Brand root role is not exists..
+        /// </summary>
+        public static string BrandRootRoleNotExists {
+            get {
+                return ResourceManager.GetString("BrandRootRoleNotExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not copy root role..
         /// </summary>
         public static string CannotCopyRootRole {

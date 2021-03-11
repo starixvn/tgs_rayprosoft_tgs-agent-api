@@ -25,27 +25,19 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
             GetDefaultTimesRequest request,
             CancellationToken cancellationToken)
         {
-            var defaultTimes = await _service.GetBrandGameProviderSchedulesAsync()
-                .Where(ResellerId != null, r => r.BrandGameProvider.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.BrandGameProvider.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, b => b.BrandGameProvider.BrandId == BrandId)
-                .Where(x => x.BrandGameProviderId == request.BrandGameProviderId)
-                .Where(x => !x.IsDefault)
-                .Where(ResellerId != null, r => r.BrandGameProvider.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.BrandGameProvider.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.Id == BrandId)
-                .Select(x => new DefaultTimeModel
-                {
-                    From = x.From,
-                    To = x.To,
-                    ScheduleStatus = x.Status
-                }).ToArrayAsync(cancellationToken);
+            var defaultTimes = await _service.GetBrandGameProviderScheduleQueries(q => q
+                    .Where(ResellerId != null, r => r.BrandGameProvider.Brand.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, l => l.BrandGameProvider.Brand.LicenseeId == LicenseeId)
+                    .Where(BrandId != null, b => b.BrandGameProvider.BrandId == BrandId)
+                    .Where(x => x.BrandGameProviderId == request.BrandGameProviderId)
+                    .Where(x => !x.IsDefault)
+                    .Where(ResellerId != null, r => r.BrandGameProvider.Brand.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, l => l.BrandGameProvider.Brand.LicenseeId == LicenseeId)
+                    .Where(BrandId != null, l => l.Id == BrandId))
+                .Select(x => new DefaultTimeModel {From = x.From, To = x.To, ScheduleStatus = x.Status})
+                .ToArrayAsync(cancellationToken);
 
-            return new GetDefaultTimesResponse
-            {
-                Valid = true,
-                DefaultTimes = defaultTimes
-            };
+            return new() {Valid = true, DefaultTimes = defaultTimes};
         }
     }
 }

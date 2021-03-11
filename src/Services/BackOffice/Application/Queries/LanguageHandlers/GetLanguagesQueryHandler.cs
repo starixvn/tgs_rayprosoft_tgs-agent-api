@@ -20,16 +20,14 @@ namespace TGS.Services.BackOffice.Application.Queries.LanguageHandlers
         }
 
         public override Task<PagedResponse<LanguageModel>> Handle(GetLanguagesRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetLanguagesAsync()
-                .Where(ResellerId != null,
-                    r => r.ResellerLanguages.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId != null,
-                    l => l.LicenseeLanguages.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId != null, b => b.BrandLanguages.Select(x => x.BrandId).Contains(BrandId.Value))
-                .Where(request.CultureCode, g => g.CultureCode == request.CultureCode)
-                .Where(request.LanguageCode, g => g.LanguageCode == request.LanguageCode)
+            CancellationToken cancellationToken) =>
+            _service.GetLanguageQueries(q => q.Where(ResellerId != null,
+                        r => r.ResellerLanguages.Select(x => x.ResellerId).Contains(ResellerId.Value))
+                    .Where(LicenseeId != null,
+                        l => l.LicenseeLanguages.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
+                    .Where(BrandId != null, b => b.BrandLanguages.Select(x => x.BrandId).Contains(BrandId.Value))
+                    .Where(request.CultureCode, g => g.CultureCode == request.CultureCode)
+                    .Where(request.LanguageCode, g => g.LanguageCode == request.LanguageCode))
                 .Select(x => new LanguageModel
                 {
                     CultureCode = x.CultureCode,
@@ -39,6 +37,5 @@ namespace TGS.Services.BackOffice.Application.Queries.LanguageHandlers
                     UpdatedByUsername = x.UpdatedByUsername,
                     UpdatedOn = x.UpdatedOn
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

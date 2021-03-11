@@ -29,7 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new RoleController(
+            _controller = new(
                 _roleQueriesMock.Object,
                 _settingQueriesMock.Object,
                 _roleCommandsMock.Object,
@@ -182,13 +182,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .CreateMany<Role>(105)
                 .AsQueryable()
                 .BuildMock().Object;
-            var count = roles.Count(x => x.MenuSetting == null);
             var firstId = roles.First().Id;
             var index = 0;
-
-            var random = new Random(DateTime.Now.Millisecond);
-            var roleNumber = random.Next(0, 105);
             var role = new Role();
+
             await roles.ForEachAsync(x =>
             {
                 if (firstId == x.Id)
@@ -197,7 +194,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     x.RoleType = RoleType.Brand;
                 }
 
-                if (roleNumber == index)
+                if (2 == index)
                 {
                     x.IsRoot = true;
                     x.RoleType = RoleType.Admin;
@@ -458,10 +455,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             role.Users = new List<User> {new()};
 
-            var request = new GetMenuRequest
-            {
-                RoleType = RoleType.Admin
-            };
+            var request = new GetMenuRequest {RoleType = RoleType.Admin};
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
@@ -496,10 +490,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            var request = new GetMenuRequest
-            {
-                RoleType = RoleType.Admin
-            };
+            var request = new GetMenuRequest {RoleType = RoleType.Admin};
 
             role.Users = new List<User> {new()};
 
@@ -517,10 +508,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            var request = new GetMenuRequest
-            {
-                RoleType = RoleType.Licensee
-            };
+            var request = new GetMenuRequest {RoleType = RoleType.Licensee};
 
             role.Users = new List<User> {new()};
 
