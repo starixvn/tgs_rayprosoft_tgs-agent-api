@@ -214,7 +214,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     commission = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     turnover = table.Column<decimal>("numeric", nullable: true),
                     win_loss = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true),
-                    tie_bet_adjustment = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true)
+                    tie_bet_adjustment =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true),
+                    client_status = table.Column<short>("smallint", nullable: false)
                 },
                 constraints: table =>
                 {
