@@ -4,7 +4,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using Valhalla.Services;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator.PlayerPassword
 {
     internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
     {

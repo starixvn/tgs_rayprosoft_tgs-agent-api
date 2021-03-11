@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Polly;
@@ -7,7 +6,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.Properties;
 using Valhalla.Services;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator.PlayerPassword
 {
     internal class ForgotPasswordCommandService : IGetService<ForgotPasswordCommand, string>
     {
