@@ -141,6 +141,9 @@
   <data name="BrandTokenExpireTime" xml:space="preserve">
     <value>BrandTokenExpireTime</value>
   </data>
+  <data name="ClientRoundStatus" xml:space="preserve">
+    <value>ClientRoundStatus</value>
+  </data>
   <data name="ErrorResponse" xml:space="preserve">
     <value>ErrorResponse</value>
   </data>

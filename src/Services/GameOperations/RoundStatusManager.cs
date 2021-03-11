@@ -42,7 +42,17 @@ namespace TGS.Services.GameOperations
                 return ClientRoundStatus.Draw;
             }
 
-            return roundHasFreeBet ? ClientRoundStatus.Loss : ClientRoundStatus.Void;
+            // for free bet in a single round
+            if (roundHasFreeBet)
+            {
+                return playerWinLoss switch
+                {
+                    > 0 => ClientRoundStatus.Win,
+                    _   => ClientRoundStatus.Loss
+                };
+            }
+
+            return ClientRoundStatus.Void;
         }
 
         RoundStatus IRoundStatusManager.GetStatus(RoundStatusData data)
