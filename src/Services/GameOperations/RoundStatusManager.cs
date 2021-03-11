@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.GameOperations.Models.Data;
@@ -8,10 +9,42 @@ namespace TGS.Services.GameOperations
     internal interface IRoundStatusManager
     {
         RoundStatus GetStatus(RoundStatusData data);
+
+        ClientRoundStatus GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult,
+            bool roundHasFreeBet);
     }
 
     internal sealed class RoundStatusManager : IRoundStatusManager
     {
+        ClientRoundStatus IRoundStatusManager.
+            GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult, bool roundHasFreeBet)
+        {
+            if (status == RoundStatus.New || status == RoundStatus.Open || betValuesResult == null)
+            {
+                return ClientRoundStatus.Open;
+            }
+
+            var turnover = betValuesResult.Turnover;
+            var playerWinLoss = betValuesResult.WinLoss.Negate();
+
+            if (turnover > 0)
+            {
+                return playerWinLoss switch
+                {
+                    > 0 => ClientRoundStatus.Win,
+                    < 0 => ClientRoundStatus.Loss,
+                    0   => ClientRoundStatus.Draw
+                };
+            }
+
+            if (betValuesResult.TieBetAdjustment > 0)
+            {
+                return ClientRoundStatus.Draw;
+            }
+
+            return roundHasFreeBet ? ClientRoundStatus.Loss : ClientRoundStatus.Void;
+        }
+
         RoundStatus IRoundStatusManager.GetStatus(RoundStatusData data)
         {
             var requestToCloseRound = data.RequestToCloseRound;
@@ -46,31 +79,29 @@ namespace TGS.Services.GameOperations
                 return requestToCloseRound.Value ? RoundStatus.Closed : oldStatus;
             }
 
-            // AutoCloseRound=true and if all bets are settled, then close the round
-
-            if (gameActionType.IsOneOf(GameActionType.WinBet, GameActionType.LoseBet, GameActionType.TieBet, GameActionType.CancelTransaction))
+            if (gameActionType.IsNotAllOf(GameActionType.WinBet, GameActionType.LoseBet, GameActionType.TieBet,
+                GameActionType.CancelTransaction))
             {
-                var allBetIdsInTheRound = data.ValidPreviousActions
-                    .Where(r => r.Reference?.Type == GameActionType.PlaceBet)
-                    .Select(r => r.Reference.Id).ToHashSet();
-
-                var unsettledBetIds = data.PreviousActions
-                    .Where(b => b.Reference == null &&
-                                b.Type.IsNotAllOf(GameActionType.FreeBet) &&
-                                !allBetIdsInTheRound.Contains(b.Id))
-                    .Select(r => r.Id);
-
-                // filter out current reference bet as well
-                unsettledBetIds = unsettledBetIds.Except(new[] { data.ReferencedGameAction.Id });
-
-                // can close the round if no bets left
-                if (!unsettledBetIds.Any())
-                {
-                    return RoundStatus.Closed;
-                }
+                return oldStatus;
             }
 
-            return oldStatus;
+            // AutoCloseRound=true and if all bets are settled, then close the round
+
+            var allBetIdsInTheRound = data.ValidPreviousActions
+                .Where(r => r.Reference?.Type == GameActionType.PlaceBet)
+                .Select(r => r.Reference.Id).ToHashSet();
+
+            var unsettledBetIds = data.PreviousActions
+                .Where(b => b.Reference == null &&
+                    b.Type.IsNotAllOf(GameActionType.FreeBet) &&
+                    !allBetIdsInTheRound.Contains(b.Id))
+                .Select(r => r.Id);
+
+            // filter out current reference bet as well
+            unsettledBetIds = unsettledBetIds.Except(new[] {data.ReferencedGameAction.Id});
+
+            // can close the round if no bets left
+            return !unsettledBetIds.Any() ? RoundStatus.Closed : oldStatus;
         }
     }
 }
