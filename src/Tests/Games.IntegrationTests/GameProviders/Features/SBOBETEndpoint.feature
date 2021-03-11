@@ -846,7 +846,28 @@ Scenario: 10.d - Get bet status of cancel transaction
 		| stake   | 0     |
 		| winloss | 0     |
 
-Scenario:  11 - Place bet with the same external round id in differnet game
+Scenario: 11.a - Place desktop bet of sub game
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+		And player having balance of $100
+	When I place bet of $10 for game "5_201600"
+	Then I will receive bet response of no error and balance of $90
+		And player wallet database record will be for $90
+		And game action will be recorded in the database of type "PlaceBet" for $-10
+		And game platform will be recorded in the database of type "Desktop"
+
+Scenario: 11.b - Win bet of sub game
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "5_201600"
+		And balance now being $90
+	When I win bet for $15
+	Then I will receive settle bet response of no error and balance of $105
+		And player wallet database record will be for $105
+		And game action will be recorded in the database of type "WinBet" for $15
+		And game platform will be recorded in the database of type "Desktop"
+		And the round will be closed
+
+Scenario:  12 - Place bet with the same external round id in differnet game
 	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given set random external round id
@@ -861,7 +882,7 @@ Scenario:  11 - Place bet with the same external round id in differnet game
 			| 1_1      |
 			| 5_201608 |
 
-Scenario: 12 - Cancel place bets with batch
+Scenario: 13 - Cancel place bets with batch
 	Given players place bets:
 		| Username | Brand | Currency | Platform | Balance | GameId   | BetAmount |
 		| TP01_cny | TGS   | CNY      | Mobile   | 100     | 1_1      | 10        |

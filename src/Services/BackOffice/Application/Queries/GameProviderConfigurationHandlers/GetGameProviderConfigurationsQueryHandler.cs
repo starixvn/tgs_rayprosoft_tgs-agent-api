@@ -23,15 +23,13 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderConfigurationH
 
         public override Task<PagedResponse<GameProviderConfigurationModel>> Handle(
             GetGameProviderConfigurationsRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetGameProviderConfigurationsAsync()
-                .Where(x => x.GameProviderId == request.GameProviderId)
-                .Where(ResellerId,
-                    r => r.GameProvider.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId,
-                    l => l.GameProvider.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId, b => b.GameProvider.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
+            CancellationToken cancellationToken) =>
+            _service.GetGameProviderConfigurationQueries(q => q.Where(x => x.GameProviderId == request.GameProviderId)
+                    .Where(ResellerId,
+                        r => r.GameProvider.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
+                    .Where(LicenseeId,
+                        l => l.GameProvider.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
+                    .Where(BrandId, b => b.GameProvider.Brands.Select(x => x.BrandId).Contains(BrandId.Value)))
                 .Select(x => new GameProviderConfigurationModel
                 {
                     Id = x.Id,
@@ -48,6 +46,5 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderConfigurationH
                     UpdatedByUsername = x.UpdatedByUsername,
                     UpdatedOn = x.UpdatedOn
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

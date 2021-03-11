@@ -54,10 +54,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_game_provider_for_cache";
             return _repository.SqlQuerySingleAsync<GetCachedGameProviderResult>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
         }
 
         Task<GetCachedGameProviderConfigurationResult> IGameProviderQueries.GetCachedGameProviderConfigurationAsync(
@@ -76,10 +73,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_currencies_by_external_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -89,10 +83,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_currencies_by_internal_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -102,10 +93,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_languages_by_external_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -115,10 +103,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_languages_by_internal_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -155,10 +140,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_games_for_cache";
             var r = await _repository.SqlQueryMultipleAsync<GetCachedGameResult>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
 
             return r.Select(g => new CachedGame
             {
@@ -169,6 +151,7 @@ namespace TGS.Services.Operations.Queries
                 Status = g.Status,
                 ExternalId = g.ExternalId,
                 SubGame = g.SubGame,
+                AvailableToBrand = g.AvailableToBrand,
                 RuleUrl = g.RuleUrl,
                 EndpointPath = g.EndpointPath,
                 Type = g.Type,
@@ -188,7 +171,7 @@ namespace TGS.Services.Operations.Queries
                 parameters: new Dictionary<string, object>
                 {
                     {":game_provider_id", gameProviderId},
-                    {":platform_type", (short) platformType}
+                    {":platform_type", (short)platformType}
                 });
 
             return r.ToArray();

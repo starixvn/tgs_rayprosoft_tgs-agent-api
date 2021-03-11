@@ -18,12 +18,10 @@ namespace TGS.Tests.Schedulers.UnitTests
     public class BrandGameProviderScheduleWorkerTests
     {
         [SetUp]
-        public void Setup()
-        {
-            _service = new BrandGameProviderScheduleWorker(
+        public void Setup() =>
+            _service = new(
                 _serviceMock.Object,
                 _logMock.Object);
-        }
 
         private BrandGameProviderScheduleWorker _service;
         private readonly Mock<IBrandGameProviderService> _serviceMock = new();
@@ -39,7 +37,7 @@ namespace TGS.Tests.Schedulers.UnitTests
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var now = DateTimeOffset.Now.ToOffset(new TimeSpan(8, 0, 0));
+            var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
 
             foreach (var brandGameProvider in brandGameProviders)
             {
@@ -57,7 +55,7 @@ namespace TGS.Tests.Schedulers.UnitTests
                 };
             }
 
-            _serviceMock.Setup(s => s.GetBrandGameProvidersAsync(null, true))
+            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, true))
                 .Returns(brandGameProviders);
 
             await _service.ExecuteAsync(It.IsAny<object>());

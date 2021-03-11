@@ -46,16 +46,16 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(e => e.SubGame)
-                .IsRequired()
-                .HasDefaultValue(false);
+                .IsRequired();
+
+            builder.Property(e => e.AvailableToBrand)
+                .IsRequired();
 
             builder.Property(e => e.HasTurnoverOnTieBet)
-                .IsRequired()
-                .HasDefaultValue(false);
+                .IsRequired();
 
             builder.Property(e => e.Html5)
-                .IsRequired()
-                .HasDefaultValue(false);
+                .IsRequired();
 
             builder.Property(e => e.AvailableCurrencies)
                 .HasMaxLength(1024)

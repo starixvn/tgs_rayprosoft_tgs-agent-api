@@ -22,8 +22,8 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderHandlers
         public override async Task<MessageResponse> Handle(UpdateDefaultTimesRequest request,
             CancellationToken cancellationToken)
         {
-            var schedules = await _service.GetBrandGameProviderSchedulesAsync()
-                .Where(x => x.BrandGameProviderId == request.BrandGameProviderId && !x.IsDefault)
+            var schedules = await _service.GetBrandGameProviderScheduleQueries(q =>
+                    q.Where(x => x.BrandGameProviderId == request.BrandGameProviderId && !x.IsDefault))
                 .ToArrayAsync(cancellationToken);
 
             await _service.UpdateBrandGameProviderDefaultTimesAsync(schedules, request);

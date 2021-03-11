@@ -948,6 +948,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("available_currencies");
 
+                    b.Property<bool>("AvailableToBrand")
+                        .HasColumnType("boolean")
+                        .HasColumnName("available_to_brand");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -985,15 +989,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("game_provider_id");
 
                     b.Property<bool>("HasTurnoverOnTieBet")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("has_turnover_on_tie_bet");
 
                     b.Property<bool>("Html5")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("html5");
 
                     b.Property<string>("Name")
@@ -1016,9 +1016,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("status");
 
                     b.Property<bool>("SubGame")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("sub_game");
 
                     b.Property<short>("Type")
@@ -2944,15 +2942,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal>("BirthReward")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("birth_reward");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("code");
+                    b.Property<decimal>("CardGameRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_rebate");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
@@ -2964,15 +2966,64 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<bool>("IsDefault")
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<decimal>("LevelKeepAccumulateBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_keep_accumulate_bet_amount");
+
+                    b.Property<decimal>("LevelKeepAccumulateDeposit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_keep_accumulate_deposit");
+
+                    b.Property<bool>("LevelKeepCondition")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_default");
+                        .HasColumnName("level_keep_condition");
+
+                    b.Property<decimal>("LevelUpAccumulateBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_up_accumulate_bet_amount");
+
+                    b.Property<decimal>("LevelUpAccumulateDeposit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_up_accumulate_deposit");
+
+                    b.Property<decimal>("LiveDealerRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_rebate");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("name");
+
+                    b.Property<decimal>("PromotionReward")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_reward");
+
+                    b.Property<decimal>("QuarterlyReward")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("quarterly_reward");
+
+                    b.Property<decimal>("SlotRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_rebate");
+
+                    b.Property<decimal>("SportsRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_rebate");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -2984,11 +3035,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on");
 
+                    b.Property<decimal>("VirtualSportsRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_rebate");
+
                     b.HasKey("Id")
                         .HasName("pk_vip_levels");
-
-                    b.HasAlternateKey("BrandId", "Code")
-                        .HasName("ak_vip_levels_brand_id_code");
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_vip_levels_brand_id");

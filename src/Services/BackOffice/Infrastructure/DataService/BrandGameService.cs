@@ -16,7 +16,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery =
                 null);
 
-        IQueryable<BrandGame> GetBrandGamesAsync(
+        IQueryable<BrandGame> GetBrandGameQueries(
             Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery = null,
             bool tracking = false);
 
@@ -31,16 +31,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
         }
 
-        async Task IBrandGameService.UpdateBrandGamesAsync(IEnumerable<BrandGame> brandGames)
-        {
+        async Task IBrandGameService.UpdateBrandGamesAsync(IEnumerable<BrandGame> brandGames) =>
             await UpdateEntitiesAsync(brandGames);
-        }
 
         Task<BrandGame> IBrandGameService.GetBrandGameAsync(Expression<Func<BrandGame, bool>> predicate,
             Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<BrandGame> IBrandGameService.GetBrandGamesAsync(
+        IQueryable<BrandGame> IBrandGameService.GetBrandGameQueries(
             Func<IQueryable<BrandGame>, IQueryable<BrandGame>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 

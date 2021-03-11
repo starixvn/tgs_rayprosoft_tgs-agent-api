@@ -26,6 +26,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool SubGame { get; set; }
 
+        public bool AvailableToBrand { get; set; }
+
         public bool HasTurnoverOnTieBet { get; set; }
 
         public bool Html5 { get; set; }
