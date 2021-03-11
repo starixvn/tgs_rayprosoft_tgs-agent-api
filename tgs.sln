@@ -27,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitlab-ci.yml = .gitlab-ci.yml
 		docker-compose.yml = docker-compose.yml
 		DockerImageBuild.bat = DockerImageBuild.bat
+		nuget.config = nuget.config
 		RunDockerPush.bat = RunDockerPush.bat
 	EndProjectSection
 EndProject
@@ -324,7 +325,7 @@ Global
 		{0C959833-AC55-4860-9CDC-0D93732700D4} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 		RESX_TaskErrorCategory = Message
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal

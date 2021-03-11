@@ -140,8 +140,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var apiUrlSection = configuration.GetSection("ApiUrls");
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
-            var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
-
             if (isDev)
             {
                 services.AddTransient<IPlayerApiClient>(sp => ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
