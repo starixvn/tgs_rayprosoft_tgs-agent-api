@@ -23,7 +23,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Enums
         InsufficientFunds = 5,
 
         [Description("Bet not exists")]
-        BetNotExists = 6,
+        BetNotExist = 6,
 
         [Description("Internal Error")]
         SystemError = 7,
@@ -53,5 +53,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Enums
 
         [Description("Bet Already Exists")]
         BetAlreadyExists = 2013,
+
+        GameNotExist = 2014
     }
 }

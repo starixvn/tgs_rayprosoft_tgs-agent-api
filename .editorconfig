@@ -1,5 +1,5 @@
-# 如果要從更高的目錄繼承 .editorconfig 設定，請移除以下行
 root = true
+# 如果要從更高的目錄繼承 .editorconfig 設定，請移除以下行
 
 [*.proto]
 indent_style = tab
@@ -258,6 +258,7 @@ resharper_local_function_body = expression_body
 resharper_method_or_operator_body = expression_body
 resharper_object_creation_when_type_not_evident = target_typed
 resharper_place_accessorholder_attribute_on_same_line = false
+resharper_place_field_attribute_on_same_line = false
 resharper_qualified_using_at_nested_scope = true
 
 # ReSharper inspection severities
