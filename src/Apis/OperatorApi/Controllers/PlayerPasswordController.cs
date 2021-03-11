@@ -2,6 +2,7 @@
 using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -24,29 +25,50 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IMediator mediator,
             [FromBody] ChangePasswordRequest request) => mediator.Send(request);
 
+        /// <summary>
+        /// Start forgot password flow.
+        /// </summary>
+        /// <param name="forgotPasswordService">The forgot password service.</param>
+        /// <param name="request">The request.</param>
+        /// <response code="200">Return the token, when reset password, must input to verify.</response>
         [HttpPost("forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
-            [FromBody] ForgotPasswordRequest request) => forgotPasswordService
+            [FromBody] ForgotPasswordRequest request)
+        {
+            return forgotPasswordService
                 .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone));
+        }
 
-        [HttpPost("forgot/varify")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public ValueTask<bool> ValidateForgotPasswordCode(
-            [FromServices] IGetService<VarifyForgotPasswordCodeCommand, bool> varifyService,
-            [FromBody] VarifyForgotPasswordCodeRequest request)
-            => varifyService.GetAsync(new VarifyForgotPasswordCodeCommand(request.Token, request.ValidateCode));
-
+        /// <summary>
+        /// Resets the password.
+        /// </summary>
+        /// <param name="resetService">The reset service.</param>
+        /// <param name="request">The request.</param>
+        /// <response code="406">Reset password not accept, maybe validate code not match.</response>
         [HttpPost("reset")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public ValueTask ResetPasswordAsync(
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
+        [ProducesErrorResponseType(typeof(void))]
+        public async ValueTask<IActionResult> ResetPasswordAsync(
             [FromServices] ICommandService<ResetPasswordCommand> resetService,
             [FromBody] ResetPasswordRequest request)
         {
-            var playerCode = "4ucmqplwxqlv";
+            try
+            {
+                await resetService
+                    .ExecuteAsync(new ResetPasswordCommand(request.Token, request.ValidateCode, request.NewPassword))
+                    .ConfigureAwait(false);
 
-            return resetService.ExecuteAsync(new ResetPasswordCommand(playerCode, request.NewPassword));
+                return Ok();
+            }
+            catch (ValidateCodeNotVerifyException)
+            {
+                return StatusCode(StatusCodes.Status406NotAcceptable, null);
+            }
         }
     }
 }

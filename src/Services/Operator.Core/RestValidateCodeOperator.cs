@@ -18,12 +18,28 @@ namespace TGS.Services.Operator
         public ValueTask<bool> SaveValidateDataAsync(string validateCode, ValidateCodeData data)
         {
             return _validateCodeServiceClient
-                .SaveValidateCodeDataAsync(validateCode, data.Token, JsonSerializer.Serialize(data));
+                .SaveValidateCodeDataAsync(validateCode, data.Token, SerializeValidateCodeData(data));
         }
 
         public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)
         {
             return _smsServiceClient.SendShortMessageAsync(phone, shortMessage, currency, brandId);
         }
+
+        public async ValueTask<ValidateCodeData?> GetValidateCodeDataAsync(string validateCode, string token)
+        {
+            var result = await _validateCodeServiceClient
+                .GetValidateCodeDataAsync(validateCode, token)
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(result))
+                return null;
+
+            return DeserializeValidateCodeData(result);
+        }
+
+        private ValidateCodeData? DeserializeValidateCodeData(string json) => JsonSerializer.Deserialize<ValidateCodeData>(json);
+
+        private string SerializeValidateCodeData(ValidateCodeData data) => JsonSerializer.Serialize(data);
     }
 }

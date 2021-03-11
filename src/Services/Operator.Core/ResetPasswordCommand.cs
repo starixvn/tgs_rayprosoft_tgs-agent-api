@@ -1,4 +1,4 @@
 ﻿namespace TGS.Services.Operator
 {
-    public record ResetPasswordCommand(string PlayerCode, string NewPassword);
+    public record ResetPasswordCommand(string Token, string ValidateCode, string NewPassword);
 }

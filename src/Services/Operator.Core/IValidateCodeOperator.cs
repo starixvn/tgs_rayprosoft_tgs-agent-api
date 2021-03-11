@@ -8,5 +8,7 @@ namespace TGS.Services.Operator
         ValueTask<bool> SaveValidateDataAsync(string validateCode, ValidateCodeData data);
 
         ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId);
+
+        ValueTask<ValidateCodeData?> GetValidateCodeDataAsync(string validateCode, string token);
     }
 }

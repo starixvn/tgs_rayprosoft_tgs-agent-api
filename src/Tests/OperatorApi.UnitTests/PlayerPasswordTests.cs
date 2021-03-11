@@ -158,24 +158,49 @@ namespace OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Varify_Forgot_Password_ValidateCode()
+        public async Task Reset_Password_Should_Success()
         {
-            var token = "9F590F80-9AEE-45D8-9009-D34C4C49F8D7";
-            var validateCode = "123456";
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-            var fakeValidateCodeServiceClient = Substitute.For<IValidateCodeServiceClient>();
+            var sut = new ResetPasswordCommandService(
+                fakePlayerOperations,
+                Substitute.For<IPasswordHandler>(),
+                fakeValidateCodeOperator);
 
-            var sut = new VarifyForgotPasswordCodeService(fakeValidateCodeServiceClient);
+            var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "123456", "newPassword");
 
-            var command = new VarifyForgotPasswordCodeCommand(token, validateCode);
+            fakeValidateCodeOperator.GetValidateCodeDataAsync(Arg.Any<string>(), Arg.Any<string>())
+                .Returns(callInfo =>
+                {
+                    var token = callInfo.ArgAt<string>(0);
 
-            fakeValidateCodeServiceClient
-                .GetValidateCodeDataAsync(Arg.Is(validateCode), Arg.Is(token))
-                .Returns("true");
+                    return new ValidateCodeData("testPlayerCode", token);
+                });
 
-            var actual = await sut.GetAsync(command);
+            await sut.ExecuteAsync(command);
 
-            Assert.IsTrue(actual);
+            _ = fakePlayerOperations.Received(1)
+                .ChangePlayerPasswordAsync(Arg.Any<ChangePlayerPasswordData>());
+        }
+
+        [Test]
+        public void Reset_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+
+            var sut = new ResetPasswordCommandService(
+                fakePlayerOperations,
+                Substitute.For<IPasswordHandler>(),
+                fakeValidateCodeOperator);
+
+            var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
+
+            fakeValidateCodeOperator.GetValidateCodeDataAsync(Arg.Any<string>(), Arg.Any<string>())
+                .Returns((ValidateCodeData)null);
+
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
         }
     }
 }
