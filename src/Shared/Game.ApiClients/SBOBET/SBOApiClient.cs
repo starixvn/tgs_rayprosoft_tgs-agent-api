@@ -3,9 +3,11 @@
 
 using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Json.JsonConverters;
 using TGS.Core.Models;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Shared.Game.Models.SBOBET.Outgoing;
@@ -14,6 +16,12 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
 {
     public interface ISBOApiClient
     {
+        #region Internal Api
+
+        Task<BatchResponse> CancelTransactionsAsync(Uri apiUrl, BatchRequest request);
+
+        #endregion
+
         #region Game Provider Client Api
 
         Task<LoginResponse> LoginAsync(Uri apiUrl, LoginRequest request);
@@ -30,12 +38,6 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
             UpdatePlayerBetLimitsAsync(Uri apiUrl, UpdatePlayerBetLimitsRequest request);
 
         #endregion
-
-        #region Internal Api
-
-        Task<BatchResponse> CancelTransactionsAsync(Uri apiUrl, BatchRequest request);
-
-        #endregion
     }
 
     public sealed class SBOApiClient : BaseApiClient, ISBOApiClient
@@ -44,6 +46,17 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
             : base(client, logger, json)
         {
         }
+
+        #region Internal Api
+
+        Task<BatchResponse> ISBOApiClient.CancelTransactionsAsync(Uri apiUrl, BatchRequest request)
+        {
+            var prefix = $"{Consts.GameProvider.SBOBET}.BatchCancellation";
+            return ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, apiUrl,
+                "/api/batch/transactions/cancel", request, logPrefix: prefix);
+        }
+
+        #endregion
 
         #region Game Provider Client Api
 
@@ -72,18 +85,22 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
 
         Task<GetRoundHistoryResponse> ISBOApiClient.GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request)
         {
+            var options = new JsonSerializerOptions {Converters = {new NumberToStringConverter()}};
+
             var prefix = $"{Consts.GameProvider.SBOBET}.RoundHistory";
             return ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(
                 HttpMethod.Post, apiUrl, "/web-root/restricted/report/get-bet-list-by-refnos.aspx",
-                request, logPrefix: prefix);
+                request, logPrefix: prefix, options: options);
         }
-        
+
         Task<GetBetHistoryResponse> ISBOApiClient.GetBetHistoryAsync(Uri apiUrl, GetBetHistoryRequest request)
         {
+            var options = new JsonSerializerOptions {Converters = {new NumberToStringConverter()}};
+
             var prefix = $"{Consts.GameProvider.SBOBET}.BetHistory";
             return ExecuteJsonRequestAsync<GetBetHistoryRequest, GetBetHistoryResponse>(
                 HttpMethod.Post, apiUrl, "/web-root/restricted/report/v2/get-bet-list-by-modify-date.aspx",
-                request, logPrefix: prefix);
+                request, logPrefix: prefix, options: options);
         }
 
         Task<UpdatePlayerBetLimitsResponse> ISBOApiClient.UpdatePlayerBetLimitsAsync(Uri apiUrl,
@@ -94,17 +111,6 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
                 HttpMethod.Post, apiUrl,
                 "/web-root/restricted/player/update-player-bet-setting-by-sportid-and-markettype.aspx",
                 request, logPrefix: prefix);
-        }
-
-        #endregion
-
-        #region Internal Api
-
-        Task<BatchResponse> ISBOApiClient.CancelTransactionsAsync(Uri apiUrl, BatchRequest request)
-        {
-            var prefix = $"{Consts.GameProvider.SBOBET}.BatchCancellation";
-            return ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, apiUrl,
-                "/api/batch/transactions/cancel", request, logPrefix: prefix);
         }
 
         #endregion

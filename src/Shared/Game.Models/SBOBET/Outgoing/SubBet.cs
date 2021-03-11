@@ -15,10 +15,10 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         public string MarketType { get; init; }
 
         [JsonPropertyName("hdp")]
-        public decimal HandicapPoint { get; init; }
+        public string HandicapPoint { get; init; }
 
         [JsonPropertyName("odds")]
-        public decimal Odds { get; init; }
+        public string Odds { get; init; }
 
         [JsonPropertyName("league")]
         public string League { get; init; }
