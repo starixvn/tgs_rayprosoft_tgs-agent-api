@@ -20,19 +20,17 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         }
 
         public override Task<PagedResponse<BrandModel>> Handle(GetBrandsRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetBrandsAsync()
-                .Where(request.ResellerId, x => x.Licensee.ResellerId == request.ResellerId)
-                .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
-                .Where(request.BrandId, x => x.Id == request.BrandId)
-                .Where(ResellerId, r => r.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId, l => l.LicenseeId == LicenseeId)
-                .Where(BrandId, l => l.Id == BrandId)
-                .Where(request.Keyword, x => EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%"))
+            CancellationToken cancellationToken) =>
+            _service.GetBrandQueries(q => q.Where(request.ResellerId, x => x.Licensee.ResellerId == request.ResellerId)
+                    .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
+                    .Where(request.BrandId, x => x.Id == request.BrandId)
+                    .Where(ResellerId, r => r.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId, l => l.LicenseeId == LicenseeId)
+                    .Where(BrandId, l => l.Id == BrandId)
+                    .Where(request.Keyword, x => EF.Functions.ILike(x.Code, $"%{request.Keyword}%") ||
+                        EF.Functions.ILike(x.Name, $"%{request.Keyword}%") ||
+                        EF.Functions.ILike(x.Description, $"%{request.Keyword}%") ||
+                        EF.Functions.ILike(x.OperationalEmail, $"%{request.Keyword}%")))
                 .Select(x => new BrandModel
                 {
                     Id = x.Id,
@@ -45,6 +43,5 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

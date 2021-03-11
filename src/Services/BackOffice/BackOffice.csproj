@@ -75,9 +75,14 @@
       <DependentUpon>GameProviderConfiguration.resx</DependentUpon>
     </Compile>
     <Compile Update="Application\Resources\Language.Designer.cs">
+      <DependentUpon>Language.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Language.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\VipLevel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VipLevel.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -117,6 +122,10 @@
     <EmbeddedResource Update="Application\Resources\GameProviderConfiguration.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProviderConfiguration.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\VipLevel.resx">
+      <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\Language.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
