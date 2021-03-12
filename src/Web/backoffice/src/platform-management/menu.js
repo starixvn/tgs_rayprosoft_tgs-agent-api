@@ -62,7 +62,6 @@ const labelOf = ({ locale, code }) => {
                 },
                 locale
             )
-        /*
         case VipLevelCode:
             return getTrans(
                 {
@@ -71,7 +70,6 @@ const labelOf = ({ locale, code }) => {
                 },
                 locale
             )
-            */
         default:
             return ""
     }
