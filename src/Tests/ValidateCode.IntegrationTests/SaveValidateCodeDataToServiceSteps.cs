@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
+using TGS.Apis.ValidateCodeApi;
 using TGS.Services.Operator;
 using TGS.Services.ValidateCode;
 
@@ -35,7 +36,7 @@ namespace TGS.ValidateCode.IntegrationTests
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseStartup<ValidateCodeApi.Startup>()
+                        .UseStartup<Startup>()
                         .UseTestServer()
                         .ConfigureTestServices(services =>
                         {
@@ -66,7 +67,7 @@ namespace TGS.ValidateCode.IntegrationTests
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseStartup<ValidateCodeApi.Startup>()
+                        .UseStartup<Startup>()
                         .UseTestServer()
                         .ConfigureTestServices(services =>
                         {

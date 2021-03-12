@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Services.ValidateCode;
 
-namespace ValidateCodeApi
+namespace TGS.Apis.ValidateCodeApi
 {
     public class Startup
     {
