@@ -133,6 +133,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ClientRoundStatus.
+        /// </summary>
+        public static string ClientRoundStatus {
+            get {
+                return ResourceManager.GetString("ClientRoundStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ErrorResponse.
         /// </summary>
         public static string ErrorResponse {
@@ -174,6 +183,15 @@ namespace TGS.Tests.TestsCommon {
         public static string GameAction {
             get {
                 return ResourceManager.GetString("GameAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to HasTurnoverOnTieBet.
+        /// </summary>
+        public static string HasTurnoverOnTieBet {
+            get {
+                return ResourceManager.GetString("HasTurnoverOnTieBet", resourceCulture);
             }
         }
         

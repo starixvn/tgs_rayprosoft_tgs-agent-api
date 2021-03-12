@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210311034521_Initial")]
+    [Migration("20210312021708_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2463,6 +2463,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<short>("ClientStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("client_status");
 
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("timestamp with time zone")

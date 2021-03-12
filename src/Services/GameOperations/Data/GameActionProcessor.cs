@@ -121,7 +121,7 @@ namespace TGS.Services.GameOperations.Data
 
             ThrowIfReferenceGameActionOrRoundIsNotFound(s);
 
-            s = FillEmptyData(s);
+            s = GetNewRoundStatus(s);
 
             await ThrowIfStatusesIsInvalidAsync(s);
 
@@ -384,7 +384,7 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private GameActionState FillEmptyData(GameActionState s)
+        private GameActionState GetNewRoundStatus(GameActionState s)
         {
             s.NewRoundStatus = _roundStatusManager.GetStatus(new()
             {
@@ -436,7 +436,7 @@ namespace TGS.Services.GameOperations.Data
             current.UnsettledBets = betValues.UnsettledBets;
 
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s);
-            s.InternalRoundId = CreateOrUpdateRound(s);
+            s.InternalRoundId = CreateOrUpdateRound(s, current);
 
             var ga = CreateGameAction(s, current);
 
@@ -469,15 +469,15 @@ namespace TGS.Services.GameOperations.Data
             return balance;
         }
 
-        private static Guid CreateOrUpdateRound(GameActionState s) =>
-            s.InternalRoundId == null ? CreateNewRoundAndGetId(s) : UpdatedRound(s);
+        private Guid CreateOrUpdateRound(GameActionState s, BetActionData current) =>
+            s.InternalRoundId == null ? CreateNewRoundAndGetId(s, current) : UpdatedRound(s, current);
 
-        private static Guid CreateNewRoundAndGetId(GameActionState s)
+        private Guid CreateNewRoundAndGetId(GameActionState s, BetActionData current)
         {
             var repository = s.Repository;
             var roundId = GuidExtensions.NewSequentialGuid();
 
-            repository.Rounds.Add(new()
+            var round = new Round
             {
                 Id = roundId,
                 ExternalRoundId = s.ExternalRoundId,
@@ -491,12 +491,18 @@ namespace TGS.Services.GameOperations.Data
                 BrandId = s.PlayerData.BrandId,
                 CreatedOn = s.UtcNow,
                 UpdatedOn = s.UtcNow,
-                ClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.UtcNow : default(DateTimeOffset?),
-                Status = s.NewRoundStatus == RoundStatus.Closed ? RoundStatus.Closed : RoundStatus.Open,
+                Status = RoundStatus.Open,
+                ClientStatus = ClientRoundStatus.Open,
                 ExternalCreatedOn = s.Timestamp,
-                ExternalClosedOn = s.NewRoundStatus == RoundStatus.Closed ? s.Timestamp : default(DateTimeOffset?),
                 BetAmount = s.BetValueResult.BetAmount
-            });
+            };
+
+            if (s.NewRoundStatus == RoundStatus.Closed)
+            {
+                FillClosedRoundBetValues(s, current, round);
+            }
+
+            repository.Rounds.Add(round);
 
             if (s.RoundDetail.IsNotNullOrEmpty())
             {
@@ -510,7 +516,7 @@ namespace TGS.Services.GameOperations.Data
             return roundId;
         }
 
-        private static Guid UpdatedRound(GameActionState s)
+        private Guid UpdatedRound(GameActionState s, BetActionData current)
         {
             var repository = s.Repository;
 
@@ -524,16 +530,11 @@ namespace TGS.Services.GameOperations.Data
             if (s.OldRoundStatus == RoundStatus.Closed && s.NewRoundStatus == RoundStatus.Open)
             {
                 round.Status = s.NewRoundStatus;
+                round.ClientStatus = ClientRoundStatus.Open;
             }
             else if (s.NewRoundStatus == RoundStatus.Closed)
             {
-                round.Status = s.NewRoundStatus;
-                round.ClosedOn = s.UtcNow;
-                round.ExternalClosedOn = s.Timestamp;
-                round.WinLoss = s.BetValueResult.WinLoss;
-                round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
-                round.SettleAmount = s.BetValueResult.SettleAmount;
-                round.Turnover = s.BetValueResult.Turnover;
+                FillClosedRoundBetValues(s, current, round);
             }
 
             repository.Rounds.Update(round);
@@ -618,6 +619,23 @@ namespace TGS.Services.GameOperations.Data
             // due to multiple servers, if current server time is earlier than the latest timestamp,
             // take the lasted timestamp and add 50 milliseconds as current timestamp.
             return now > previousRecordedOn ? now : previousRecordedOn.AddMilliseconds(50);
+        }
+
+        private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
+        {
+            var hasFreeBet = current.Type == FreeBet ||
+                s.PreviousActions.Any(act => act.Type == FreeBet);
+
+            var clientStatus = _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, hasFreeBet);
+
+            round.Status = s.NewRoundStatus;
+            round.ClientStatus = clientStatus;
+            round.ClosedOn = s.UtcNow;
+            round.ExternalClosedOn = s.Timestamp;
+            round.WinLoss = s.BetValueResult.WinLoss;
+            round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
+            round.SettleAmount = s.BetValueResult.SettleAmount;
+            round.Turnover = s.BetValueResult.Turnover;
         }
     }
 }

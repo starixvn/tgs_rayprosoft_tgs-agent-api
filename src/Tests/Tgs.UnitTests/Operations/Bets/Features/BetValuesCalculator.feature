@@ -26,7 +26,7 @@ Scenario: 02 - Lose the bet, Cancel the Loss, then Cancel Bet. (Void Round)
 	| 3  | 2      | CancelTransaction | 0      | 400          | -100     | -100    | 0                | 100            | No               |          |
 	| 4  | 1      | CancelTransaction | 100    | 500          | 0        | 0       | 0                | -100           | Yes              |          |
 	|    |        | Totals            | 0      | 500          | 0        | 0       | 0                | 0              |                  |          |
-	Then the final bet amount is 0 and settle amount is 0
+	Then the final bet amount is 100 and settle amount is 0
 
 Scenario: 03 - Bet, then Tie for Baccarat (does not count towards turnover).
 	Given initial balance of $500
