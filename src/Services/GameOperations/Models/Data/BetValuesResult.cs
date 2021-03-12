@@ -3,6 +3,7 @@
     public record BetValuesResult
     {
         public decimal BetAmount { get; init; }
+        public decimal ValidBetAmount { get; init; }
         public decimal SettleAmount { get; init; }
         public decimal TieBetAdjustment { get; init; }
         public decimal Turnover { get; init; }

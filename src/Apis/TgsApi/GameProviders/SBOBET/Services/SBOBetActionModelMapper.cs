@@ -272,7 +272,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         private static BetStatus GetBetStatus(RoundRecord roundData) =>
             roundData.Status == RoundStatus.Closed
-                ? roundData.BetAmount == 0 && roundData.WinLoss == 0 ? BetStatus.Void : BetStatus.Settled
+                ? roundData.ValidBetAmount == 0 && roundData.WinLoss == 0 ? BetStatus.Void : BetStatus.Settled
                 : BetStatus.Running;
 
         private static (decimal stake, decimal winloss) GetStakeAndWinLoss(BetStatus status, GameActionData ga,

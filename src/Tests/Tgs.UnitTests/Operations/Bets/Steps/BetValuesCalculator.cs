@@ -111,13 +111,15 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             Set(SR.BetValuesResults, previousOutput);
         }
 
-        [Then(@"the final bet amount is (.*) and settle amount is (.*)")]
-        public void ThenTheFinalBetAmountIsAndSettleAmountIs(decimal betAmount, decimal settleAmount)
+        [Then(@"the final bet amount is (.*) and valid bet amount is (.*) and settle amount is (.*)")]
+        public void ThenTheFinalBetAmountIsAndValidBetAmountIsAndSettleAmountIs(decimal betAmount,
+            decimal validBetAmount, decimal settleAmount)
         {
             var results = Get<List<BetValuesResult>>(SR.BetValuesResults);
             var last = results.Last();
 
             last.BetAmount.Should().Be(betAmount);
+            last.ValidBetAmount.Should().Be(validBetAmount);
             last.SettleAmount.Should().Be(settleAmount);
         }
 
