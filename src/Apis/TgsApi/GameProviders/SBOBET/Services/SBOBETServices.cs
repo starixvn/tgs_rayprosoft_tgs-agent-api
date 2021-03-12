@@ -2,7 +2,6 @@
 // ReSharper disable IdentifierTypo
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Extensions;
@@ -32,8 +31,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         Task<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId,
             int gameId);
 
-        Task<Guid> GetPlayerDefaultWalletIdAsync(string playerCode);
-
         Task<int> GetGameIdAsync(Guid gameProviderId, string externalGameId, PlatformType platformType);
     }
 
@@ -60,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         }
 
         /// <summary>
-        /// Get game provider configuration data from http context
+        ///     Get game provider configuration data from http context
         /// </summary>
         async Task<GameProviderConfigurationData> ISBOBETServices.GetGameProviderConfigurationDataAsync()
         {
@@ -100,14 +97,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             int gameId) =>
             _roundQueries.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
 
-        Task<Guid> ISBOBETServices.GetPlayerDefaultWalletIdAsync(string playerCode) =>
-            _playerOperations.GetDefaultWalletIdByPlayerCodeAsync(playerCode);
-
         async Task<int> ISBOBETServices.GetGameIdAsync(Guid gameProviderId, string externalGameId,
             PlatformType platformType)
         {
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, externalGameId, platformType);
-            
+
             if (game == null)
             {
                 throw new InvalidGameActionException(

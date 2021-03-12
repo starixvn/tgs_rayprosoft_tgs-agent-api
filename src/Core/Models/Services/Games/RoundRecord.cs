@@ -13,6 +13,8 @@ namespace TGS.Core.Models.Services.Games
 
         public decimal? BetAmount { get; init; }
 
+        public decimal? ValidBetAmount { get; init; }
+
         public decimal? WinLoss { get; init; }
 
         public decimal? Commission { get; init; }

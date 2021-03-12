@@ -210,6 +210,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     external_created_on = table.Column<DateTimeOffset>("timestamp with time zone", nullable: true),
                     external_closed_on = table.Column<DateTimeOffset>("timestamp with time zone", nullable: true),
                     bet_amount = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true),
+                    valid_bet_amount = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     settle_amount = table.Column<decimal>("numeric", nullable: true),
                     commission = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     turnover = table.Column<decimal>("numeric", nullable: true),

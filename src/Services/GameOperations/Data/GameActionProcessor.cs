@@ -494,7 +494,8 @@ namespace TGS.Services.GameOperations.Data
                 Status = RoundStatus.Open,
                 ClientStatus = ClientRoundStatus.Open,
                 ExternalCreatedOn = s.Timestamp,
-                BetAmount = s.BetValueResult.BetAmount
+                BetAmount = s.BetValueResult.BetAmount,
+                ValidBetAmount = s.BetValueResult.ValidBetAmount
             };
 
             if (s.NewRoundStatus == RoundStatus.Closed)
@@ -524,6 +525,7 @@ namespace TGS.Services.GameOperations.Data
             var round = repository.Rounds.Find(roundId);
 
             round.BetAmount = s.BetValueResult.BetAmount;
+            round.ValidBetAmount = s.BetValueResult.ValidBetAmount;
             round.Commission = s.Commission;
             round.UpdatedOn = s.UtcNow;
 

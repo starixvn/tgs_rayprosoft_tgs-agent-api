@@ -64,6 +64,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.BetAmount)
                 .HasPrecision(18, 6);
 
+            builder.Property(c => c.ValidBetAmount)
+                .HasPrecision(18, 6);
+
             builder.Property(c => c.WinLoss)
                 .HasPrecision(18, 6);
 
