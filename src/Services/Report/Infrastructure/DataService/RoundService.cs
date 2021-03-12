@@ -14,7 +14,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
     {
         ITgsRepository Repository { get; }
 
-        IQueryable<Round> GetRoundsAsync(Func<IQueryable<Round>, IQueryable<Round>> preQuery = null,
+        IQueryable<Round> GetRoundQueries(Func<IQueryable<Round>, IQueryable<Round>> preQuery = null,
             bool tracking = false);
 
         Task<MarketRequest[]> GetRoundsAsync(DateTimeOffset start, DateTimeOffset end);
@@ -31,7 +31,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         ITgsRepository IRoundService.Repository => _repository;
 
-        IQueryable<Round> IRoundService.GetRoundsAsync(
+        IQueryable<Round> IRoundService.GetRoundQueries(
             Func<IQueryable<Round>, IQueryable<Round>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);

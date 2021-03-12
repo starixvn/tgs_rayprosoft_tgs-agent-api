@@ -33,10 +33,10 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                 return CreateInvalidResponse<GetGameProviderResponse>(GameProvider.NotFound);
             }
 
-            return new GetGameProviderResponse
+            return new()
             {
                 Valid = true,
-                GameProvider = new GameProviderModel
+                GameProvider = new()
                 {
                     Id = gameProvider.Id,
                     Name = gameProvider.Name,
@@ -48,37 +48,39 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     AllowKickPlayer = gameProvider.AllowKickPlayer,
                     PlaceBetTimeout = gameProvider.PlaceBetTimeout,
                     SettleBetTimeout = gameProvider.SettleBetTimeout,
-                    Games = gameProvider.Games.Select(x => new GameProviderGameModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name,
-                        Code = x.Code,
-                        Status = x.Status,
-                        Description = x.Description,
-                        ExternalId = x.ExternalId,
-                        EndpointPath = x.EndpointPath,
-                        RuleUrl = x.RuleUrl,
-                        Type = x.Type,
-                        PlatformType = x.PlatformType,
-                        SubGame = x.SubGame,
-                        HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
-                        Html5 = x.Html5,
-                        AvailableCurrencies = x.AvailableCurrencies,
-                        CreatedByUsername = x.CreatedByUsername,
-                        UpdatedByUsername = x.UpdatedByUsername,
-                        CreatedOn = x.CreatedOn,
-                        UpdatedOn = x.UpdatedOn
-                    }).ToArray(),
-                    Currencies = gameProvider.Currencies.Select(x => new GameProviderCurrencyModel
-                    {
-                        Code = x.CurrencyCode,
-                        GameProviderCurrencyCode = x.GameProviderCurrencyCode
-                    }).ToArray(),
-                    Languages = gameProvider.Languages.Select(x => new GameProviderLanguageModel
-                    {
-                        CultureCode = x.CultureCode,
-                        GameProviderCultureCode = x.GameProviderCultureCode
-                    }).ToArray(),
+                    Games =
+                        gameProvider.Games.Where(!request.IncludeAllGames, x => x.AvailableToBrand).Select(x =>
+                            new GameProviderGameModel
+                            {
+                                Id = x.Id,
+                                Name = x.Name,
+                                Code = x.Code,
+                                Status = x.Status,
+                                Description = x.Description,
+                                ExternalId = x.ExternalId,
+                                EndpointPath = x.EndpointPath,
+                                RuleUrl = x.RuleUrl,
+                                Type = x.Type,
+                                PlatformType = x.PlatformType,
+                                SubGame = x.SubGame,
+                                HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
+                                Html5 = x.Html5,
+                                AvailableCurrencies = x.AvailableCurrencies,
+                                CreatedByUsername = x.CreatedByUsername,
+                                UpdatedByUsername = x.UpdatedByUsername,
+                                CreatedOn = x.CreatedOn,
+                                UpdatedOn = x.UpdatedOn
+                            }).ToArray(),
+                    Currencies =
+                        gameProvider.Currencies.Select(x => new GameProviderCurrencyModel
+                        {
+                            Code = x.CurrencyCode, GameProviderCurrencyCode = x.GameProviderCurrencyCode
+                        }).ToArray(),
+                    Languages =
+                        gameProvider.Languages.Select(x => new GameProviderLanguageModel
+                        {
+                            CultureCode = x.CultureCode, GameProviderCultureCode = x.GameProviderCultureCode
+                        }).ToArray(),
                     BetLimits = gameProvider.BetLimits.Select(x => new GameProviderBetLimitModel
                     {
                         Id = x.Id,
