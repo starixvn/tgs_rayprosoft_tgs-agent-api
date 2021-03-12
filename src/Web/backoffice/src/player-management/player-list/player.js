@@ -2,18 +2,18 @@ import React, { useState, useEffect, useMemo, useRef, useContext } from "react"
 import { css, Global } from "@emotion/react"
 import { useEditPlayerInfo } from "./client"
 import {
-  Spinner,
-  Stack,
-  Flex,
-  Box,
-  Card,
-  Set,
-  Button,
-  Text,
-  Dialog,
-  Modal,
-  Table,
-  useClassName
+    Spinner,
+    Stack,
+    Flex,
+    Box,
+    Card,
+    Set,
+    Button,
+    Text,
+    Dialog,
+    Modal,
+    Table,
+    useClassName
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
@@ -29,194 +29,198 @@ import Input from "../../input/Input"
 export const Key = "player"
 
 export const Tab = ({ ...props }) => {
-  return (
-    <_Tab tabId={Key} {...props}>
-      <Trans zh="玩家信息" en="Player" />
-    </_Tab>
-  )
+    return (
+        <_Tab tabId={Key} {...props}>
+            <Trans zh="玩家信息" en="Player" />
+        </_Tab>
+    )
 }
 
 export const EditPanel = ({
-  playerCode = "",
-  player = {},
-  onSubmitted,
-  onClickClose,
-  ...props
+    playerCode = "",
+    player = {},
+    onSubmitted,
+    onClickClose,
+    ...props
 }) => {
-  let {
-    realName = "",
-    vipId = "",
-    parentUsername = "",
-    status = "",
-    hasAgent
-  } = player
+    let {
+        realName = "",
+        vipId = "",
+        parentUsername = "",
+        status = "",
+        hasAgent
+    } = player
 
-  let formMethods = useForm({
-    defaultValues: {
-      realName: realName ?? "",
-      vipId,
-      parentUsername: parentUsername ?? "",
-      status,
-      hasAgent: hasAgent.toString()
-    }
-  })
-
-  let [submitData, setSubmit] = useState()
-  let { result, error, mutate, isLoading } = useEditPlayerInfo(
-    playerCode,
-    submitData
-  )
-
-  const reset = () => {
-    mutate(undefined, false)
-    setSubmit(undefined)
-  }
-
-  useEffect(() => {
-    if (result && !error) {
-      reset()
-      onSubmitted?.()
-    }
-  }, [result])
-
-  const onSubmit = (data = {}) => {
-    let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
-    setSubmit({
-      ...data,
-      hasAgent
+    let formMethods = useForm({
+        defaultValues: {
+            realName: realName ?? "",
+            vipId,
+            parentUsername: parentUsername ?? "",
+            status,
+            hasAgent: hasAgent.toString()
+        }
     })
-  }
 
-  return (
-    <TabPanel tabId={Key} {...props}>
-      {error && <AlertDialog {...error} onClickClose={reset} />}
-      <FormProvider {...formMethods}>
-        <form onSubmit={formMethods.handleSubmit(onSubmit)}>
-          <EditForm
-            player={player}
-            isLoading={isLoading}
-            onClickClose={() => {
-              reset()
-              onClickClose?.()
-            }}
-          />
-        </form>
-      </FormProvider>
-    </TabPanel>
-  )
+    let [submitData, setSubmit] = useState()
+    let { result, error, mutate, isLoading } = useEditPlayerInfo(
+        playerCode,
+        submitData
+    )
+
+    const reset = () => {
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
+
+    useEffect(() => {
+        if (result && !error) {
+            reset()
+            onSubmitted?.()
+        }
+    }, [result])
+
+    const onSubmit = (data = {}) => {
+        let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
+        setSubmit({
+            ...data,
+            hasAgent
+        })
+    }
+
+    return (
+        <TabPanel tabId={Key} {...props}>
+            {error && <AlertDialog {...error} onClickClose={reset} />}
+            <FormProvider {...formMethods}>
+                <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+                    <EditForm
+                        player={player}
+                        isLoading={isLoading}
+                        onClickClose={() => {
+                            reset()
+                            onClickClose?.()
+                        }}
+                    />
+                </form>
+            </FormProvider>
+        </TabPanel>
+    )
 }
 
 const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
-  let { username = "", registeredOn, balance } = player
+    let { username = "", registeredOn, balance } = player
 
-  return (
-    <Stack spacing="major-1" margin="major-1">
-      <FieldValues>
-        <UserNameLabel />
-        <Text>{username}</Text>
+    return (
+        <Stack spacing="major-1" margin="major-1">
+            <FieldValues>
+                <UserNameLabel />
+                <Text>{username}</Text>
 
-        <RealNameLabel />
-        <Box>
-          <Input name="realName" required />
-        </Box>
+                <RealNameLabel />
+                <Box>
+                    <Input name="realName" required />
+                </Box>
 
-        <VIPLevelLabel />
-        <Box>
-          <VipLevelSelect name="vipId" required placeholder={false} />
-        </Box>
+                <VIPLevelLabel />
+                <Box>
+                    <VipLevelSelect name="vipId" required placeholder={false} />
+                </Box>
 
-        <ParentUsernameLabel />
-        <Box>
-          <Input name="parentUsername" />
-        </Box>
+                <ParentUsernameLabel />
+                <Box>
+                    <Input name="parentUsername" />
+                </Box>
 
-        <RegistrationLabel />
-        <Box>
-          <FormattedDateTime value={registeredOn} />
-        </Box>
+                <RegistrationLabel />
+                <Box>
+                    <FormattedDateTime value={registeredOn} />
+                </Box>
 
-        <BalanceLabel />
-        <Box>
-          <FormattedNumber value={balance} />
-        </Box>
+                <BalanceLabel />
+                <Box>
+                    <FormattedNumber value={balance} />
+                </Box>
 
-        <StatusLabel />
-        <Box>
-          <PlayerStatusSelect name="status" required placeholder={false} />
-        </Box>
+                <StatusLabel />
+                <Box>
+                    <PlayerStatusSelect
+                        name="status"
+                        required
+                        placeholder={false}
+                    />
+                </Box>
 
-        <AgentLabel />
-        <Box>
-          <PlayerAgentSelect name="hasAgent" required />
-        </Box>
-      </FieldValues>
-      <Box alignX="right">
-        <SubmitCancel onClickCancel={onClickClose} />
-      </Box>
-    </Stack>
-  )
+                <AgentLabel />
+                <Box>
+                    <PlayerAgentSelect name="hasAgent" required />
+                </Box>
+            </FieldValues>
+            <Box alignX="right">
+                <SubmitCancel onClickCancel={onClickClose} />
+            </Box>
+        </Stack>
+    )
 }
 
 export const Panel = ({ player = {}, onSubmitted, ...props }) => {
-  let {
-    username = "",
-    realName = "",
-    vipLevel = "",
-    parentUsername = "",
-    registeredOn,
-    balance,
-    status,
-    hasAgent
-  } = player
+    let {
+        username = "",
+        realName = "",
+        vipLevel = "",
+        parentUsername = "",
+        registeredOn,
+        balance,
+        status,
+        hasAgent
+    } = player
 
-  let turnOnLabel = useTurnOnLabel()
-  let turnOffLabel = useTurnOffLabel()
-  return (
-    <TabPanel tabId={Key} {...props}>
-      <FieldValues spacing="major-2">
-        <UserNameLabel />
-        <Text>{username}</Text>
+    let turnOnLabel = useTurnOnLabel()
+    let turnOffLabel = useTurnOffLabel()
+    return (
+        <TabPanel tabId={Key} {...props}>
+            <FieldValues spacing="major-2">
+                <UserNameLabel />
+                <Text>{username}</Text>
 
-        <RealNameLabel />
-        <Box>
-          <Text>{realName}</Text>
-        </Box>
+                <RealNameLabel />
+                <Box>
+                    <Text>{realName}</Text>
+                </Box>
 
-        <VIPLevelLabel />
-        <Box>
-          <Text>{vipLevel}</Text>
-        </Box>
+                <VIPLevelLabel />
+                <Box>
+                    <Text>{`VIP ${vipLevel}`}</Text>
+                </Box>
 
-        <ParentUsernameLabel />
-        <Box>
-          <Text>{parentUsername}</Text>
-        </Box>
+                <ParentUsernameLabel />
+                <Box>
+                    <Text>{parentUsername}</Text>
+                </Box>
 
-        <RegistrationLabel />
-        <Box>
-          <FormattedDateTime value={registeredOn} />
-        </Box>
+                <RegistrationLabel />
+                <Box>
+                    <FormattedDateTime value={registeredOn} />
+                </Box>
 
-        <BalanceLabel />
-        <Box>
-          <FormattedNumber value={balance} />
-        </Box>
+                <BalanceLabel />
+                <Box>
+                    <FormattedNumber value={balance} />
+                </Box>
 
-        <StatusLabel />
-        <Box>
-          <PlayerStatusLabel value={status} />
-        </Box>
+                <StatusLabel />
+                <Box>
+                    <PlayerStatusLabel value={status} />
+                </Box>
 
-        <AgentLabel />
-        <Box>
-          <Text>
-            {hasAgent && turnOnLabel}
-            {!hasAgent && turnOffLabel}
-          </Text>
-        </Box>
-      </FieldValues>
-    </TabPanel>
-  )
+                <AgentLabel />
+                <Box>
+                    <Text>
+                        {hasAgent && turnOnLabel}
+                        {!hasAgent && turnOffLabel}
+                    </Text>
+                </Box>
+            </FieldValues>
+        </TabPanel>
+    )
 }
 
 const UserNameLabel = () => <Trans zh="用户名" en="User name" />
@@ -236,13 +240,13 @@ const StatusLabel = () => <Trans zh="状态" en="Status" />
 const AgentLabel = () => <Trans zh="代理功能" en="Agent" />
 
 const useTurnOnLabel = () =>
-  useTrans({
-    zh: "开启",
-    en: "Turn on"
-  })
+    useTrans({
+        zh: "开启",
+        en: "Turn on"
+    })
 
 const useTurnOffLabel = () =>
-  useTrans({
-    zh: "关闭",
-    en: "Turn off"
-  })
+    useTrans({
+        zh: "关闭",
+        en: "Turn off"
+    })

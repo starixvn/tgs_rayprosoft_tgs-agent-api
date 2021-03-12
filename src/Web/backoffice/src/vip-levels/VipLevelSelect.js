@@ -16,8 +16,8 @@ export const VipLevelSelect = ({ placeholder, ...props }) => {
     let { data, isLoading, error } = useVipLevelList()
 
     let options =
-        data?.items?.map(({ id, name }) => ({
-            label: name,
+        data?.items?.map(({ id, level }) => ({
+            label: `VIP ${level}`,
             value: id
         })) ?? []
 

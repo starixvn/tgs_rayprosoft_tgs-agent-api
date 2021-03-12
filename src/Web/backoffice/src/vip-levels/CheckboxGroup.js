@@ -12,8 +12,8 @@ export const VipLevelCheckboxGroup = ({
     let { data, isLoading, error } = useVipLevelList()
 
     let options =
-        data?.items?.map(({ id, name, ...item }) => ({
-            label: name,
+        data?.items?.map(({ id, level, ...item }) => ({
+            label: `VIP ${level}`,
             value: id
         })) ?? []
 

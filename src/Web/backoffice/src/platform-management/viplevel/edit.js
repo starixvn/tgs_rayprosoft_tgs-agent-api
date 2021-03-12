@@ -193,7 +193,6 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
             {isAdd && !brandId && (
                 <MerchantIdHookFormSelect start={nextRoleType(userRoleType)} />
             )}
-            <Input type="hidden" name="name" value={`VIP`} />
             <Level width="100%">
                 <Set orientation="vertical" isFilled flex="1">
                     <Heading use="h5">
