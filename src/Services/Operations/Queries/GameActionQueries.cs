@@ -60,7 +60,7 @@ namespace TGS.Services.Operations.Queries
                     {":player_code", playerCode},
                     {":external_round_id", externalRoundId},
                     {":game_id", gameId},
-                    {":game_action_types", new ArrayParameter<int>(gameActionTypes.Select(s => (int) s).ToArray())}
+                    {":game_action_types", new ArrayParameter<int>(gameActionTypes.Select(s => (int)s).ToArray())}
                 });
 
             return r.ToArray();
@@ -90,6 +90,7 @@ namespace TGS.Services.Operations.Queries
                     o.ExternalRoundId,
                     Status = o.RoundStatus,
                     BetAmount = o.RoundBetAmount,
+                    ValidBetAmount = o.RoundValidBetAmount,
                     WinLoss = o.RoundWinLoss,
                     o.Commission,
                     o.TieBetAdjustment,
@@ -104,6 +105,7 @@ namespace TGS.Services.Operations.Queries
                         ExternalRoundId = g.Key.ExternalRoundId,
                         Status = g.Key.Status,
                         BetAmount = g.Key.BetAmount,
+                        ValidBetAmount = g.Key.ValidBetAmount,
                         WinLoss = g.Key.WinLoss,
                         Commission = g.Key.Commission,
                         TieBetAdjustment = g.Key.TieBetAdjustment,

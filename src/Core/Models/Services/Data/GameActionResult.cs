@@ -17,7 +17,7 @@ namespace TGS.Core.Models.Services.Data
 
         public string ExternalGameActionGroupId { get; init; }
 
-        public Guid? ReferencedGameActionId {  get; init; }
+        public Guid? ReferencedGameActionId { get; init; }
 
         public DateTimeOffset RecordedOn { get; init; }
 
@@ -28,6 +28,8 @@ namespace TGS.Core.Models.Services.Data
         public PlatformType PlatformType { get; init; }
 
         public decimal? RoundBetAmount { get; init; }
+
+        public decimal? RoundValidBetAmount { get; init; }
 
         public decimal? RoundWinLoss { get; init; }
 
