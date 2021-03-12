@@ -13,9 +13,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [Required]
         [JsonPropertyName("newpwd")]
         public string NewPassword { get; set; }
-
-        //[Required]
-        //[JsonPropertyName("confirmpwd")]
-        //public string ConfirmPassword { get; set; }
     }
 }
