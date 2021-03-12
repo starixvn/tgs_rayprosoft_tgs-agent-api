@@ -30,7 +30,6 @@ namespace TGS.Services.BackOffice.Application.Queries.VipLevelHandlers
                 .Select(x => new VipLevelModel
                 {
                     Id = x.Id,
-                    Name = x.Name,
                     Level = x.Level,
                     BrandId = x.BrandId,
                     LevelKeepAccumulateBetAmount = x.LevelKeepAccumulateBetAmount,
