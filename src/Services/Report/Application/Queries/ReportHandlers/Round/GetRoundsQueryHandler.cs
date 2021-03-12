@@ -23,12 +23,12 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
         public override Task<PagedResponse<RoundModel>> Handle(
             GetRoundsRequest request,
             CancellationToken cancellationToken) =>
-            _service.GetRoundsAsync()
-                .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
-                .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
-                .Where(request.Status, x => request.Status == x.Status)
-                .Where(request.RoundId, x => x.Id == request.RoundId)
+            _service.GetRoundQueries(q => q.Where(x => x.BrandId == request.BrandId)
+                    .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
+                    .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
+                    .Where(request.Status, x => request.Status == x.ClientStatus)
+                    .Where(request.RoundId, x => x.Id == request.RoundId)
+                )
                 .GroupJoin(
                     _service.Repository.Players,
                     round => round.PlayerCode, player => player.PlayerCode,
