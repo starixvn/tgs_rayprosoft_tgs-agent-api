@@ -53,7 +53,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
             }
 
             var ids = request.Games.Where(g => g.Status != GameStatus.Active).Select(g => g.Id).ToArray();
-            if (await _brandGameService.GetBrandGamesAsync()
+            if (await _brandGameService.GetBrandGameQueries()
                 .AnyAsync(
                     x =>
                         ids.Contains(x.GameId),

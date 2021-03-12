@@ -4,30 +4,39 @@ import Select from "../../select/Select"
 import { useResellerList } from "./client"
 import { useTrans } from "../../i18n"
 
-export const ResellerIdSelect = ({ ...props }) => {
-  let { data, isLoading } = useResellerList({ showAll: true })
+export const ResellerIdSelect = ({ placeholderDisabled = false, ...props }) => {
+    let { data, isLoading } = useResellerList({ showAll: true })
 
-  let options =
-    data?.items.map((reseller) => ({
-      label: reseller.code,
-      value: reseller.id
-    })) ?? []
+    let placeholder = useResellerPlaceholder()
+    let placeholderOption = {
+        label: placeholder,
+        value: "",
+        disabled: placeholderDisabled
+    }
 
-  let placeholder = useResellerPlaceholder()
-  return (
-    <Select
-      isLoading={isLoading}
-      options={options}
-      placeholder={placeholder}
-      {...props}
-    />
-  )
+    if (isLoading) {
+        return (
+            <Select
+                isLoading={isLoading}
+                options={[placeholderOption]}
+                {...props}
+            />
+        )
+    }
+
+    let options =
+        data?.items.map((reseller) => ({
+            label: reseller.code,
+            value: reseller.id
+        })) ?? []
+
+    return <Select options={[placeholderOption, ...options]} {...props} />
 }
 
 const useResellerPlaceholder = () =>
-  useTrans({
-    zh: "选择总公司",
-    en: "Select Reseller"
-  })
+    useTrans({
+        zh: "选择总公司",
+        en: "Select Reseller"
+    })
 
 export default ResellerIdSelect

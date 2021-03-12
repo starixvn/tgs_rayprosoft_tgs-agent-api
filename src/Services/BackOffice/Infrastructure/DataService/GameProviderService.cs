@@ -21,7 +21,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<GameProvider>, IQueryable<GameProvider>> preQuery =
                 null);
 
-        IQueryable<GameProvider> GetGameProvidersAsync(
+        IQueryable<GameProvider> GetGameProviderQueries(
             Func<IQueryable<GameProvider>, IQueryable<GameProvider>> preQuery = null,
             bool tracking = false);
 
@@ -45,7 +45,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<GameProvider>, IQueryable<GameProvider>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<GameProvider> IGameProviderService.GetGameProvidersAsync(
+        IQueryable<GameProvider> IGameProviderService.GetGameProviderQueries(
             Func<IQueryable<GameProvider>, IQueryable<GameProvider>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
@@ -142,7 +142,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             });
-            return new HashSet<Game>(games);
+            return new(games);
         }
 
         private static HashSet<Game> GenerateUpdateGames(GameProvider gameProvider,
@@ -176,7 +176,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 };
             });
 
-            return new HashSet<Game>(games);
+            return new(games);
         }
 
         private async Task<HashSet<GameProviderCurrency>> GenerateCurrencies(GameProvider gameProvider,
@@ -191,7 +191,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 GameProviderCurrencyCode =
                     request.Currencies.First(c => c.Code == x.Code).GameProviderCurrencyCode
             });
-            return new HashSet<GameProviderCurrency>(gameProviderCurrencies);
+            return new(gameProviderCurrencies);
         }
 
         private async Task<HashSet<GameProviderLanguage>> GenerateLanguages(GameProvider gameProvider,
@@ -206,15 +206,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 GameProviderCultureCode =
                     request.Languages.First(c => c.CultureCode == x.CultureCode).GameProviderCultureCode
             });
-            return new HashSet<GameProviderLanguage>(gameProviderLanguages);
+            return new(gameProviderLanguages);
         }
 
         private static HashSet<GameProviderBetLimit> GenerateBetLimits(GameProvider gameProvider,
             GameProviderRequest request)
         {
-            GameProviderBetLimit Expression(GameProviderBetLimitModel x)
-            {
-                return new()
+            GameProviderBetLimit Expression(GameProviderBetLimitModel x) =>
+                new()
                 {
                     Id = x.Id == Guid.Empty ? Guid.NewGuid() : x.Id,
                     GameProviderId = gameProvider.Id,
@@ -224,11 +223,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     MaxBetPerMatch = x.MaxBetPerMatch,
                     ExternalSetting = x.ExternalSetting
                 };
-            }
 
             var betLimits = request.BetLimits.Select(Expression);
 
-            return new HashSet<GameProviderBetLimit>(betLimits.ToArray());
+            return new(betLimits.ToArray());
         }
     }
 }

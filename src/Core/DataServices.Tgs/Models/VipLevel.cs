@@ -3,11 +3,30 @@ using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class VipLevel : BaseEntity<Guid>
+    public class VipLevel
     {
-        public bool IsDefault { get; set; }
+        public Guid Id { get; set; }
+        public int Level { get; set; }
+        public string Name { get; set; }
         public Guid BrandId { get; set; }
         public virtual Brand Brand { get; set; }
+        public decimal LevelUpAccumulateBetAmount { get; set; }
+        public decimal LevelUpAccumulateDeposit { get; set; }
+        public decimal LevelKeepAccumulateBetAmount { get; set; }
+        public decimal LevelKeepAccumulateDeposit { get; set; }
+        public bool LevelKeepCondition { get; set; }
+        public decimal BirthReward { get; set; }
+        public decimal PromotionReward { get; set; }
+        public decimal QuarterlyReward { get; set; }
+        public decimal LiveDealerRebate { get; set; }
+        public decimal SlotRebate { get; set; }
+        public decimal CardGameRebate { get; set; }
+        public decimal SportsRebate { get; set; }
+        public decimal VirtualSportsRebate { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
+        public string CreatedByUsername { get; set; }
+        public string UpdatedByUsername { get; set; }
         public virtual ICollection<Player> Players { get; set; }
         public virtual ICollection<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
     }

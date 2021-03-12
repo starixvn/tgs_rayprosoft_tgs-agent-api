@@ -1,59 +1,94 @@
 import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  createContext,
-  useContext
+    useState,
+    useEffect,
+    useMemo,
+    useRef,
+    createContext,
+    useContext
 } from "react"
 import { css, Global } from "@emotion/react"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import { Dialog, Button, Box } from "bumbag"
+import { Dialog, Button, Box, Set } from "bumbag"
 import { CancelText, CloseText, SubmitText } from "../button/ActionButtons"
 import AlertDialog from "../dialog/Alert"
 
 export const ConfirmButtonFooter = ({
-  isLoading,
-  disabled,
-  width = "100%",
-  alignX = "center",
-  ...props
+    isLoading,
+    disabled,
+    width = "100%",
+    alignX = "center",
+    confirmText: ConfirmText = SubmitText,
+    ...props
 }) => {
-  return (
-    <Box width={width} alignX={alignX} {...props}>
-      <Button
-        palette="primary"
-        type="submit"
-        isLoading={isLoading}
-        disabled={disabled}
-      >
-        <SubmitText />
-      </Button>
-    </Box>
-  )
+    return (
+        <Box width={width} alignX={alignX} {...props}>
+            <Button
+                palette="primary"
+                type="submit"
+                isLoading={isLoading}
+                disabled={disabled}
+            >
+                <ConfirmText />
+            </Button>
+        </Box>
+    )
+}
+
+export const ConfirmCancelFooter = ({
+    isLoading,
+    disabled,
+    width = "100%",
+    alignX = "center",
+    confirmText: ConfirmText = SubmitText,
+    cancelText: CancelTextLabel = CancelText,
+    onClickClose,
+    dialog,
+    ...props
+}) => {
+    return (
+        <Set orientation="horizontal" width={width} alignX={alignX} {...props}>
+            <Button
+                palette="primary"
+                type="submit"
+                isLoading={isLoading}
+                disabled={disabled}
+            >
+                <ConfirmText />
+            </Button>
+            <Button
+                type="button"
+                onClick={() => {
+                    dialog?.hide()
+                    onClickClose?.()
+                }}
+            >
+                <CancelTextLabel />
+            </Button>
+        </Set>
+    )
 }
 
 export const CloseButtonFooter = ({
-  width = "100%",
-  alignX = "center",
-  dialog,
-  onClickClose,
-  ...props
+    width = "100%",
+    alignX = "center",
+    dialog,
+    onClickClose,
+    ...props
 }) => {
-  return (
-    <Box width={width} alignX={alignX} {...props}>
-      <Button
-        palette="primary"
-        type="button"
-        onClick={() => {
-          dialog?.hide()
-          onClickClose?.()
-        }}
-      >
-        <CloseText />
-      </Button>
-    </Box>
-  )
+    return (
+        <Box width={width} alignX={alignX} {...props}>
+            <Button
+                palette="primary"
+                type="button"
+                onClick={() => {
+                    dialog?.hide()
+                    onClickClose?.()
+                }}
+            >
+                <CloseText />
+            </Button>
+        </Box>
+    )
 }
 
 export default ConfirmButtonFooter

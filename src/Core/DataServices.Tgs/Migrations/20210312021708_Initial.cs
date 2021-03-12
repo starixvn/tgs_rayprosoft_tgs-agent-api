@@ -1419,10 +1419,28 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>("uuid", nullable: false),
-                    is_default = table.Column<bool>("boolean", nullable: false),
-                    brand_id = table.Column<Guid>("uuid", nullable: false),
-                    code = table.Column<string>("character varying(16)", maxLength: 16, nullable: false),
+                    level = table.Column<int>("integer", nullable: false),
                     name = table.Column<string>("character varying(32)", maxLength: 32, nullable: false),
+                    brand_id = table.Column<Guid>("uuid", nullable: false),
+                    level_up_accumulate_bet_amount =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    level_up_accumulate_deposit =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    level_keep_accumulate_bet_amount =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    level_keep_accumulate_deposit =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    level_keep_condition = table.Column<bool>("boolean", nullable: false),
+                    birth_reward = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    promotion_reward = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    quarterly_reward = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    live_dealer_rebate =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    slot_rebate = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    card_game_rebate = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    sports_rebate = table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    virtual_sports_rebate =
+                        table.Column<decimal>("numeric(18,6)", precision: 18, scale: 6, nullable: false),
                     created_on = table.Column<DateTimeOffset>("timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTimeOffset>("timestamp with time zone", nullable: false),
                     created_by_username = table.Column<string>("character varying(32)", maxLength: 32, nullable: false),
@@ -1431,11 +1449,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_vip_levels", x => x.id);
-                    table.UniqueConstraint("ak_vip_levels_brand_id_code", x => new
-                    {
-                        x.brand_id,
-                        x.code
-                    });
                     table.ForeignKey(
                         "fk_vip_levels_brands_brand_id",
                         x => x.brand_id,

@@ -23,7 +23,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
             CancellationToken cancellationToken)
         {
             var ids = request.Orders.Select(q => q.Id);
-            var games = await _service.GetBrandGamesAsync().Where(x => ids.Contains(x.Id))
+            var games = await _service.GetBrandGameQueries(q => q.Where(x => ids.Contains(x.Id)))
                 .ToListAsync(cancellationToken);
             games.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 

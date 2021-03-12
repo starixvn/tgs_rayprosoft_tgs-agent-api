@@ -30,17 +30,16 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
         {
             var betLimit = await _betLimitService.GetBetLimitAsync(x => request.BetLimitId == x.Id);
 
-            var betLimits = await _service.GetGameProviderBetLimitsAsync()
-                .Where(ResellerId,
-                    r => r.GameProvider.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
-                .Where(LicenseeId,
-                    l => l.GameProvider.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
-                .Where(BrandId, b => b.GameProvider.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
-                .Where(x => request.GameProviderIds.Contains(x.GameProviderId))
-                .Where(betLimit != null, x =>
-                    x.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= x.MinBet &&
-                    betLimit.MaxBet >= x.MaxBet)
-                .Where(betLimit != null && request.IsSports, x => betLimit.MaxBetPerMatch >= x.MaxBetPerMatch)
+            var betLimits = await _service.GetGameProviderBetLimitQueries(q => q.Where(ResellerId,
+                        r => r.GameProvider.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
+                    .Where(LicenseeId,
+                        l => l.GameProvider.Licensees.Select(x => x.LicenseeId).Contains(LicenseeId.Value))
+                    .Where(BrandId, b => b.GameProvider.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
+                    .Where(x => request.GameProviderIds.Contains(x.GameProviderId))
+                    .Where(betLimit != null, x =>
+                        x.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= x.MinBet &&
+                        betLimit.MaxBet >= x.MaxBet)
+                    .Where(betLimit != null && request.IsSports, x => betLimit.MaxBetPerMatch >= x.MaxBetPerMatch))
                 .Select(x => new GameProviderBetLimitModel
                 {
                     Id = x.Id,
@@ -52,11 +51,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     ExternalSetting = x.ExternalSetting
                 }).ToArrayAsync(cancellationToken);
 
-            return new GetGameProviderBetLimitsResponse
-            {
-                Valid = true,
-                BetLimits = betLimits
-            };
+            return new() {Valid = true, BetLimits = betLimits};
         }
     }
 }

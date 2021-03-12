@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<BetLimit> GetBetLimitAsync(Expression<Func<BetLimit, bool>> predicate,
             Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery = null);
 
-        IQueryable<BetLimit> GetBetLimitsAsync(Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery = null,
+        IQueryable<BetLimit> GetBetLimitQueries(Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery = null,
             bool tracking = false);
 
         Task CreateBetLimitAsync(CreateBetLimitRequest request);
@@ -60,7 +60,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return UpdateEntityAsync(betLimit);
         }
 
-        IQueryable<BetLimit> IBetLimitService.GetBetLimitsAsync(
+        IQueryable<BetLimit> IBetLimitService.GetBetLimitQueries(
             Func<IQueryable<BetLimit>, IQueryable<BetLimit>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);

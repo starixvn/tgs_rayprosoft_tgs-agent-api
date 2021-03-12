@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery =
                 null);
 
-        IQueryable<BrandGameProviderSchedule> GetBrandGameProviderSchedulesAsync(
+        IQueryable<BrandGameProviderSchedule> GetBrandGameProviderScheduleQueries(
             Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery = null,
             bool tracking = false);
 
@@ -42,7 +42,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<BrandGameProviderSchedule> IBrandGameProviderScheduleService.GetBrandGameProviderSchedulesAsync(
+        IQueryable<BrandGameProviderSchedule> IBrandGameProviderScheduleService.GetBrandGameProviderScheduleQueries(
             Func<IQueryable<BrandGameProviderSchedule>, IQueryable<BrandGameProviderSchedule>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
