@@ -2462,6 +2462,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<short>("ClientStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("client_status");
+
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("closed_on");

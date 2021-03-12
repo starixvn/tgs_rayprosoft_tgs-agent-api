@@ -3,10 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Round;
-using TGS.Services.Report.Domain.Enums;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
@@ -67,14 +65,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                 .Select(combine => new RoundModel
                 {
                     Id = combine.round.Id,
-                    Status =
-                        combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss > 0
-                            ? ReportRoundStatus.Win
-                            : combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss < 0
-                                ? ReportRoundStatus.Loss
-                                : combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss == 0
-                                    ? ReportRoundStatus.Draw
-                                    : ReportRoundStatus.Open,
+                    Status = combine.round.ClientStatus,
                     PlayerCode = combine.player.PlayerCode,
                     ExternalPlayerCode = combine.player.PlayerCode,
                     PlayerName = combine.player.Username,
