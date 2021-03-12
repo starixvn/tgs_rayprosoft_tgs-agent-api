@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<Language> GetLanguageAsync(Expression<Func<Language, bool>> predicate,
             Func<IQueryable<Language>, IQueryable<Language>> preQuery = null);
 
-        IQueryable<Language> GetLanguagesAsync(
+        IQueryable<Language> GetLanguageQueries(
             Func<IQueryable<Language>, IQueryable<Language>> preQuery = null,
             bool tracking = false);
 
@@ -33,7 +33,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<Language>, IQueryable<Language>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<Language> ILanguageService.GetLanguagesAsync(
+        IQueryable<Language> ILanguageService.GetLanguageQueries(
             Func<IQueryable<Language>, IQueryable<Language>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);

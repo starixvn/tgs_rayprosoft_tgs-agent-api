@@ -95,5 +95,20 @@ export const FormattedNumber = ({ value, format = "0,0" }) => {
     )
 }
 
+export const FormattedNumberDecimal = ({
+    value,
+    format = "0,0.00",
+    postfix = ""
+}) => {
+    return (
+        Number.isFinite(value) && (
+            <Text>
+                {numeral(value).format(format)}
+                {postfix}
+            </Text>
+        )
+    )
+}
+
 export const getTrans = (messages = {}, locale = Locales.zh) =>
     Reflect.get(messages, locale) ?? ""

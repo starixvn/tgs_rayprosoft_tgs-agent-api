@@ -24,17 +24,16 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
 
         public override Task<PagedResponse<BrandGameModel>> Handle(
             GetBrandGamesRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetBrandGamesAsync()
-                .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId, b => b.BrandId == BrandId)
-                .Where(request.GameProviderId, x => x.Game.GameProviderId == request.GameProviderId)
-                .Where(request.GameType, x => x.Game.Type == request.GameType)
-                .Where(request.Keyword, x => EF.Functions.ILike(x.Game.GameProvider.Name, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(x.Game.Name, $"%{request.Keyword}%"))
+            CancellationToken cancellationToken) =>
+            _service.GetBrandGameQueries(q => q.Where(request.BrandId, x => x.BrandId == request.BrandId)
+                    .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
+                    .Where(BrandId, b => b.BrandId == BrandId)
+                    .Where(request.GameProviderId, x => x.Game.GameProviderId == request.GameProviderId)
+                    .Where(request.GameType, x => x.Game.Type == request.GameType)
+                    .Where(request.Keyword, x => EF.Functions.ILike(x.Game.GameProvider.Name, $"%{request.Keyword}%") ||
+                        EF.Functions.ILike(x.Game.Name, $"%{request.Keyword}%"))
+                )
                 .Select(x => new BrandGameModel
                 {
                     Id = x.Id,
@@ -49,6 +48,5 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
                     IsRecommend = x.Tag.IsRecommend(),
                     DisplayOrder = x.DisplayOrder
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

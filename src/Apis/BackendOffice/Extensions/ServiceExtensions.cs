@@ -33,6 +33,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
@@ -76,7 +77,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddRedis()
                 .AddOperations()
                 .AddApiClient()
-                .AddPluggableServices();
+                .AddPluggableServices()
+                .AddTransactions();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -118,7 +120,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new PathString("/api/auth");
+                    options.LoginPath = new("/api/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.Events.OnRedirectToLogin = context =>
                     {
@@ -133,13 +135,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[]
-                {
-                    new CultureInfo(enUSCulture),
-                    new CultureInfo(zhCNCulture)
-                };
+                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
 
-                options.DefaultRequestCulture = new RequestCulture(zhCNCulture, zhCNCulture);
+                options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 

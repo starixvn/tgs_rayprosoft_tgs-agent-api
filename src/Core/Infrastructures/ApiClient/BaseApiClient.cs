@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Json;
@@ -34,18 +35,18 @@ namespace TGS.Core.Infrastructures.ApiClient
         protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, string path,
             TRequest request, IReadOnlyDictionary<string, string> headers = null,
             IReadOnlyDictionary<string, string> contentHeaders = null,
-            string logPrefix = null, TimeSpan? timeout = null)
+            string logPrefix = null, TimeSpan? timeout = null, JsonSerializerOptions options = null)
         {
             var requestMessage = CreateHttpRequestMessage(path, method);
             var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
-            return await ReadJsonContentAsync<TResponse>(response.Content);
+            return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
 
         protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, Uri apiUrl,
             string path, TRequest request, IReadOnlyDictionary<string, string> headers = null,
             IReadOnlyDictionary<string, string> contentHeaders = null,
-            string logPrefix = null, TimeSpan? timeout = null)
+            string logPrefix = null, TimeSpan? timeout = null, JsonSerializerOptions options = null)
         {
             var uriString = apiUrl.AbsoluteUri.Trim(UrlTrimChars);
             if (!string.IsNullOrWhiteSpace(path))
@@ -56,7 +57,7 @@ namespace TGS.Core.Infrastructures.ApiClient
             var requestMessage = CreateHttpRequestMessage(uriString, method);
             var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
-            return await ReadJsonContentAsync<TResponse>(response.Content);
+            return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
 
         protected HttpRequestMessage CreateRequest(
@@ -84,7 +85,7 @@ namespace TGS.Core.Infrastructures.ApiClient
             {
                 var response = await SendWithTimeoutAsync(request, timeout);
                 sw.Stop();
-                await Logger.LogHttpResponseAsync(response, (int) sw.ElapsedMilliseconds, requestContent, logPrefix);
+                await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, logPrefix);
 
                 return response;
             }
@@ -100,7 +101,7 @@ namespace TGS.Core.Infrastructures.ApiClient
                     RequestMessage = request
                 };
 
-                await Logger.LogHttpResponseAsync(response, (int) sw.ElapsedMilliseconds, requestContent, logPrefix);
+                await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, logPrefix);
                 throw;
             }
             catch (Exception ex)
@@ -114,7 +115,7 @@ namespace TGS.Core.Infrastructures.ApiClient
                     RequestMessage = request
                 };
 
-                await Logger.LogHttpResponseAsync(response, (int) sw.ElapsedMilliseconds, requestContent, logPrefix);
+                await Logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, requestContent, logPrefix);
 
                 throw;
             }
@@ -185,10 +186,10 @@ namespace TGS.Core.Infrastructures.ApiClient
         private static HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method) =>
             new(method, path);
 
-        private async Task<T> ReadJsonContentAsync<T>(HttpContent content)
+        private async Task<T> ReadJsonContentAsync<T>(HttpContent content, JsonSerializerOptions options)
         {
             var json = await content.ReadAsStringAsync();
-            return Json.DeserializeFromString<T>(json);
+            return Json.DeserializeFromString<T>(json, options);
         }
 
         #endregion Private Methods

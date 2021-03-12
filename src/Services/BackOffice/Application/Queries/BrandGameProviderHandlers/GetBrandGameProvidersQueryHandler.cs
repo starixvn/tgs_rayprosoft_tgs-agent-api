@@ -23,17 +23,15 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
 
         public override Task<PagedResponse<BrandGameProviderModel>> Handle(
             GetBrandGameProvidersRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetBrandGameProvidersAsync()
-                .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, b => b.BrandId == BrandId)
-                .Where(request.Keyword, x => x.GameProvider.Name.Contains(request.Keyword))
-                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.Id == BrandId)
+            CancellationToken cancellationToken) =>
+            _service.GetBrandGameProviderQueries(q => q.Where(request.BrandId, x => x.BrandId == request.BrandId)
+                    .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                    .Where(BrandId != null, b => b.BrandId == BrandId)
+                    .Where(request.Keyword, x => x.GameProvider.Name.Contains(request.Keyword))
+                    .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+                    .Where(BrandId != null, l => l.Id == BrandId))
                 .Select(x => new BrandGameProviderModel
                 {
                     Id = x.Id,
@@ -45,6 +43,5 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                     DayOfWeek = x.Schedules.FirstOrDefault(s => s.IsDefault).DayOfWeek,
                     ScheduleStatus = x.Schedules.FirstOrDefault(s => s.IsDefault).Status
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

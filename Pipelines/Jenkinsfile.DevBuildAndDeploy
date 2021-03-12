@@ -6,10 +6,16 @@ pipeline {
 		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
 	}
     stages {
-		stage('initial') {
+		stage ('Drop Database') {
 			steps {
-				script {
-					sh 'sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
+				print 'DropDb:' + params['DropDb']
+				script {	    
+					if (!params['DropDb'].isEmpty()) {
+						def arr = params['DropDb'].split(",") 
+						for (i = 0;i < arr.length; i++) {
+							sh "../dropdb.sh ${arr[i]}"
+						}
+					}
 				}
 			}
 		}

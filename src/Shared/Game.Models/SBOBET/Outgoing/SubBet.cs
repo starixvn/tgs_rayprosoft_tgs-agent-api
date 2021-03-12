@@ -5,8 +5,8 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
 {
     public record SubBet
     {
-        [JsonPropertyName("sportsType")]
-        public string SportsType { get; init; }
+        [JsonPropertyName("sportType")]
+        public string SportType { get; init; }
 
         [JsonPropertyName("betOption")]
         public string BetOption { get; init; }
@@ -15,10 +15,10 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         public string MarketType { get; init; }
 
         [JsonPropertyName("hdp")]
-        public decimal HandicapPoint { get; init; }
+        public string HandicapPoint { get; init; }
 
         [JsonPropertyName("odds")]
-        public decimal Odds { get; init; }
+        public string Odds { get; init; }
 
         [JsonPropertyName("league")]
         public string League { get; init; }
@@ -29,7 +29,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         [JsonPropertyName("status")]
         public string Status { get; init; }
 
-        [JsonPropertyName("winLostDate")]
+        [JsonPropertyName("winlostDate")]
         public DateTime? WinLostDate { get; init; }
 
         [JsonPropertyName("liveScore")]

@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Tgs.Models;
 
@@ -11,17 +10,59 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             builder.ToTable("vip_levels");
 
-            ConfigureBaseProperties<VipLevel, Guid>(builder, "pk_vip_levels");
-
-            builder.HasAlternateKey(c => new {c.BrandId, c.Code})
-                .HasName("ak_vip_levels_brand_id_code");
-
-            builder.Property(c => c.Code)
-                .HasMaxLength(16)
-                .IsRequired();
+            builder.HasKey(p => p.Id)
+                .HasName("pk_vip_levels");
 
             builder.Property(c => c.Name)
                 .HasMaxLength(32)
+                .IsRequired();
+
+            builder.Property(c => c.LevelUpAccumulateBetAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.LevelUpAccumulateDeposit)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.LevelKeepAccumulateBetAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.LevelKeepAccumulateDeposit)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.BirthReward)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.PromotionReward)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.QuarterlyReward)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.LiveDealerRebate)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.SlotRebate)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.CardGameRebate)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.SportsRebate)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.VirtualSportsRebate)
+                .HasPrecision(18, 6)
                 .IsRequired();
 
             builder.Property(c => c.CreatedByUsername)

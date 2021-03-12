@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery =
                 null);
 
-        IQueryable<GameProviderBetLimit> GetGameProviderBetLimitsAsync(
+        IQueryable<GameProviderBetLimit> GetGameProviderBetLimitQueries(
             Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery = null,
             bool tracking = false);
 
@@ -59,17 +59,15 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<GameProviderBetLimit> IGameProviderBetLimitService.GetGameProviderBetLimitsAsync(
+        IQueryable<GameProviderBetLimit> IGameProviderBetLimitService.GetGameProviderBetLimitQueries(
             Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        Task<string[]> IGameProviderBetLimitService.GetInUseBrandsAsync(Guid id)
-        {
-            return _repository.BrandGroupGameProviderBetLimits
+        Task<string[]> IGameProviderBetLimitService.GetInUseBrandsAsync(Guid id) =>
+            _repository.BrandGroupGameProviderBetLimits
                 .Where(x => x.GameProviderBetLimitId == id)
                 .Select(x => x.BrandGroupBetLimit.BrandGroup.Brand.Name).Distinct().ToArrayAsync();
-        }
 
         Task IGameProviderBetLimitService.UpdateGameProviderBetLimitAsync(GameProviderBetLimit gameProviderBetLimit,
             UpdateGameProviderBetLimitRequest request)

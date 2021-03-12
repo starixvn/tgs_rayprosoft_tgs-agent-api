@@ -37,53 +37,42 @@ namespace TGS.Services.Report.Infrastructure.DataService
             GetQueriesAsync(preQuery, tracking);
 
         Task<MarketRequest[]> IRoundService.GetRoundsAsync(DateTimeOffset start, DateTimeOffset end) =>
-            (from brand in _repository.Brands
-             join player in _repository.Players on brand equals player
-                 .Brand into bpGroup
-             from p in bpGroup.DefaultIfEmpty()
-             join transaction in _repository.Transactions.Where(x =>
-                     x.ConfirmedOn >= start && x.ConfirmedOn < end)
-                 on brand equals transaction.Brand into btGroup
-             from t in btGroup.DefaultIfEmpty()
-             join round in _repository.Rounds.Where(x =>
-                     x.ClosedOn >= start && x.ClosedOn < end) on
-                 brand.Id equals
-                 round.BrandId into brGroup
-             from r in brGroup.DefaultIfEmpty()
-             select new {brandId = brand.Id, player = p, transaction = t, round = r}
-             into x
-             group x by x.brandId
-             into g
-             select new MarketRequest
-             {
-                 BrandId = g.Key,
-                 Hour = start.Hour,
-                 ReportDate = new(start.Year, start.Month, start.Day, 0,
-                     0, 0,
-                     start.Offset),
-                 RegisteredCount = g.Count(x =>
-                     x.player.RegisteredOn >= start &&
-                     x.player.RegisteredOn < end),
-                 FirstFundInCount = g.Count(x =>
-                     x.player.FirstDepositOn >= start &&
-                     x.player.FirstDepositOn < end),
-                 DepositAmount = g.Where(x =>
-                         x.transaction.Type == TransactionType.Deposit)
-                     .Sum(x => x.transaction.Amount),
-                 WithdrawalAmount = g
-                     .Where(x => x.transaction.Type ==
-                         TransactionType.Withdrawal)
-                     .Sum(x => x.transaction.Amount),
-                 AdjustmentAmount = g.Where(x =>
-                         x.transaction.Type == TransactionType.Adjust)
-                     .Sum(x => x.transaction.Amount),
-                 BonusAmount = 0,
-                 BetAmount = g.Sum(x => x.round.BetAmount) ?? 0,
-                 ValidBetAmount = g.Sum(x => x.round.Turnover) ?? 0,
-                 WinLossAmount = g.Sum(x => x.round.WinLoss) ?? 0,
-                 NetProfit = g.Sum(x => x.round.WinLoss) -
-                     g.Sum(x => x.round.Turnover) ?? 0,
-                 CreatedOn = DateTimeOffset.Now
-             }).ToArrayAsync();
+            _repository.Brands
+                .Select(x =>
+                    new MarketRequest
+                    {
+                        BrandId = x.Id,
+                        Hour = start.Hour,
+                        ReportDate = new(start.Year, start.Month, start.Day, 0,
+                            0, 0,
+                            start.Offset),
+                        RegisteredCount =
+                            _repository.Players.Count(p =>
+                                p.BrandId == x.Id && p.RegisteredOn >= start && p.RegisteredOn < end),
+                        FirstFundInCount =
+                            _repository.Players.Count(p =>
+                                p.BrandId == x.Id && p.FirstDepositOn >= start && p.FirstDepositOn < end),
+                        DepositAmount =
+                            _repository.Transactions.Where(t =>
+                                t.BrandId == x.Id && t.Type == TransactionType.Deposit && t.ConfirmedOn >= start &&
+                                t.ConfirmedOn < end).Sum(t => t.Amount),
+                        WithdrawalAmount =
+                            _repository.Transactions.Where(t =>
+                                t.BrandId == x.Id && t.Type == TransactionType.Withdrawal && t.ConfirmedOn >= start &&
+                                t.ConfirmedOn < end).Sum(t => t.Amount),
+                        AdjustmentAmount = _repository.Transactions.Where(t =>
+                            t.BrandId == x.Id && t.Type == TransactionType.Adjust && t.ConfirmedOn >= start &&
+                            t.ConfirmedOn < end).Sum(t => t.Amount),
+                        BetAmount =
+                            _repository.Rounds.Where(r => r.BrandId == x.Id && r.ClosedOn >= start && r.ClosedOn < end)
+                                .Sum(r => r.BetAmount) ?? 0,
+                        ValidBetAmount =
+                            _repository.Rounds.Where(r => r.BrandId == x.Id && r.ClosedOn >= start && r.ClosedOn < end)
+                                .Sum(r => r.Turnover) ?? 0,
+                        WinLossAmount = _repository.Rounds
+                            .Where(r => r.BrandId == x.Id && r.ClosedOn >= start && r.ClosedOn < end)
+                            .Sum(r => r.WinLoss) ?? 0,
+                        CreatedOn = DateTimeOffset.Now
+                    }).ToArrayAsync();
     }
 }

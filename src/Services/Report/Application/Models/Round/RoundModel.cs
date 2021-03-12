@@ -17,7 +17,7 @@ namespace TGS.Services.Report.Application.Models.Round
         public string ExternalPlayerCode { get; set; }
         public string CurrencyCode { get; set; }
         public PlatformType PlatformType { get; set; }
-        public RoundStatus Status { get; set; }
+        public ClientRoundStatus Status { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset? ClosedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }

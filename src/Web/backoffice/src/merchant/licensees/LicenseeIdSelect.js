@@ -4,30 +4,42 @@ import Select from "../../select/Select"
 import { useLicenseeList } from "./client"
 import { useTrans } from "../../i18n"
 
-export const LicenseeIdSelect = ({ resellerId = "", ...props }) => {
-  let { data, isLoading } = useLicenseeList({ showAll: true, resellerId })
+export const LicenseeIdSelect = ({
+    resellerId = "",
+    placeholderDisabled = false,
+    ...props
+}) => {
+    let { data, isLoading } = useLicenseeList({ showAll: true, resellerId })
 
-  let options =
-    data?.items.map((licensee) => ({
-      label: licensee.code,
-      value: licensee.id
-    })) ?? []
+    let placeholder = useLicenseePlaceholder()
+    let placeholderOption = {
+        label: placeholder,
+        value: "",
+        disabled: placeholderDisabled
+    }
 
-  let placeholder = useLicenseePlaceholder()
-  return (
-    <Select
-      isLoading={isLoading}
-      options={options}
-      placeholder={placeholder}
-      {...props}
-    />
-  )
+    if (isLoading) {
+        return (
+            <Select
+                isLoading={isLoading}
+                options={[placeholderOption]}
+                {...props}
+            />
+        )
+    }
+
+    let options =
+        data?.items.map((licensee) => ({
+            label: licensee.code,
+            value: licensee.id
+        })) ?? []
+    return <Select options={[placeholderOption, ...options]} {...props} />
 }
 
 const useLicenseePlaceholder = () =>
-  useTrans({
-    zh: "选择公司",
-    en: "Select Licensee"
-  })
+    useTrans({
+        zh: "选择公司",
+        en: "Select Licensee"
+    })
 
 export default LicenseeIdSelect

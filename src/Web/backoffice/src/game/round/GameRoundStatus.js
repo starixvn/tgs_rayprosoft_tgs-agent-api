@@ -27,10 +27,17 @@ const OpenTrans = {
     en: "Open"
 }
 
+const Void = "Void"
+const VoidTrans = {
+    zh: "作废",
+    en: "Void"
+}
+
 export const GameRoundStatus = {
     Win,
     Loss,
     Draw,
+    Void,
     Open
 }
 
@@ -44,6 +51,9 @@ export const GameRoundStatusLabel = ({ value }) => {
 
         case Draw:
             return <Trans {...DrawTrans} />
+
+        case Void:
+            return <Trans {...VoidTrans} />
 
         case Open:
             return <Trans {...OpenTrans} />
@@ -66,6 +76,10 @@ export const GameRoundStatusSelect = ({ placeholder, ...props }) => {
         {
             value: Draw,
             label: useTrans(DrawTrans)
+        },
+        {
+            value: Void,
+            label: useTrans(VoidTrans)
         },
         {
             value: Open,

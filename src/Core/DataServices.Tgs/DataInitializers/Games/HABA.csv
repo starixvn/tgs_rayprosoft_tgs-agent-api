@@ -1,7 +1,7 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,Html5,AvailableCurrencies
-Totem Towers,,,SGTotemTowers,Slot,Desktop,FALSE,,,FALSE,TRUE,
-Totem Towers,,,SGTotemTowers,Slot,Mobile,FALSE,,,FALSE,TRUE,
-Christmas Gift Rush,,,SGChristmasGiftRush,Slot,Desktop,FALSE,,,FALSE,TRUE,
-Christmas Gift Rush,,,SGChristmasGiftRush,Slot,Mobile,FALSE,,,FALSE,TRUE,
-Aces & Eights 1 Hand,Acesand_Eights_1_Hand,,AcesandEights1Hand,TableGame,Desktop,FALSE,,,FALSE,TRUE,
-Aces & Eights 1 Hand,Acesand_Eights_1_Hand,,AcesandEights1Hand,TableGame,Mobile,FALSE,,,FALSE,TRUE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+Totem Towers,,,SGTotemTowers,Slot,Desktop,FALSE,,,FALSE,TRUE,TRUE,
+Totem Towers,,,SGTotemTowers,Slot,Mobile,FALSE,,,FALSE,TRUE,TRUE,
+Christmas Gift Rush,,,SGChristmasGiftRush,Slot,Desktop,FALSE,,,FALSE,TRUE,TRUE,
+Christmas Gift Rush,,,SGChristmasGiftRush,Slot,Mobile,FALSE,,,FALSE,TRUE,TRUE,
+Aces & Eights 1 Hand,Acesand_Eights_1_Hand,,AcesandEights1Hand,TableGame,Desktop,FALSE,,,FALSE,TRUE,TRUE,
+Aces & Eights 1 Hand,Acesand_Eights_1_Hand,,AcesandEights1Hand,TableGame,Mobile,FALSE,,,FALSE,TRUE,TRUE,

@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<Currency> GetCurrencyAsync(Expression<Func<Currency, bool>> predicate,
             Func<IQueryable<Currency>, IQueryable<Currency>> preQuery = null);
 
-        IQueryable<Currency> GetCurrenciesAsync(
+        IQueryable<Currency> GetCurrencieQueries(
             Func<IQueryable<Currency>, IQueryable<Currency>> preQuery = null,
             bool tracking = false);
 
@@ -33,7 +33,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<Currency>, IQueryable<Currency>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<Currency> ICurrencyService.GetCurrenciesAsync(
+        IQueryable<Currency> ICurrencyService.GetCurrencieQueries(
             Func<IQueryable<Currency>, IQueryable<Currency>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);

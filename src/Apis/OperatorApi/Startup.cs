@@ -15,6 +15,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Services;
+using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -27,6 +28,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
+using TGS.Services.Report.Application.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
@@ -45,6 +47,7 @@ namespace TGS.Apis.OperatorApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs");
+            services.AddReportRepository(_configuration, "Report");
 
             services.AddScoped<IInvitationCodeValidator, InvitationCodeValidator>();
 
@@ -57,7 +60,8 @@ namespace TGS.Apis.OperatorApi
                 .AddOperations()
                 .AddErrorMappers()
                 .AddApiClient()
-                .AddPluggableServices();
+                .AddPluggableServices()
+                .AddReportServices();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
@@ -94,8 +98,7 @@ namespace TGS.Apis.OperatorApi
                         Scheme = "bearer",
                         Reference = new()
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
                         }
                     };
 

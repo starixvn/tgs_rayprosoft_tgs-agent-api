@@ -11,7 +11,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
-    public class PlayerController : ControllerBase
+    public partial class PlayerController : ControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -91,6 +91,16 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ApiExplorerSettings(IgnoreApi = true)]
         public Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request) =>
+            _mediator.Send(request);
+
+        /// <summary>
+        ///     Player verify id, player login is needed when use this
+        /// </summary>
+        [HttpPut]
+        [Route("verifyId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public Task<VerifyIdResponse> VerifyIdAsync(VerifyIdRequest request) =>
             _mediator.Send(request);
     }
 }

@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<GameProviderConfiguration>, IQueryable<GameProviderConfiguration>> preQuery =
                 null);
 
-        IQueryable<GameProviderConfiguration> GetGameProviderConfigurationsAsync(
+        IQueryable<GameProviderConfiguration> GetGameProviderConfigurationQueries(
             Func<IQueryable<GameProviderConfiguration>, IQueryable<GameProviderConfiguration>> preQuery = null,
             bool tracking = false);
 
@@ -42,7 +42,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         IQueryable<GameProviderConfiguration> IGameProviderConfigurationService.
-            GetGameProviderConfigurationsAsync(
+            GetGameProviderConfigurationQueries(
                 Func<IQueryable<GameProviderConfiguration>, IQueryable<GameProviderConfiguration>> preQuery,
                 bool tracking) =>
             GetQueriesAsync(preQuery, tracking);

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.BetHistories.JsonConverter;
+using TGS.Core.Models.Services.BetHistories.JsonConverters;
 
 namespace TGS.Core.Models.Services.BetHistories
 {

@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi
             return CreateHostBuilder(args).Build().RunAsync();
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
         {
             var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ??
                          string.Empty;

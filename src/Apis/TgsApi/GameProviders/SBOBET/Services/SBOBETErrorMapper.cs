@@ -21,16 +21,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 {typeof(InvalidCredentialsException), InvalidCredentials},
                 {typeof(MissingTokenException), PlayerNotLogin},
                 {typeof(PlayerLoginExpiredException), PlayerNotLogin},
-
                 {typeof(PlayerNotFoundException), PlayerNotFound},
                 {typeof(PlayerDisabledException), UserBlocked},
                 {typeof(CountryRestrictedException), CountryRestricted},
                 {typeof(CurrencyNotMatchingException), CurrencyMismatch},
                 {typeof(PlayerHasInsufficientFundsException), InsufficientFunds},
-
                 {typeof(InvalidGameActionException), InvalidGameAction},
                 {typeof(InvalidAmountException), InvalidAmount},
-
                 {typeof(ArgumentException), InvalidArguments},
                 {typeof(ModelBindingException), InvalidArguments},
                 {typeof(FormatException), IncorrectFormat},
@@ -38,7 +35,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 {typeof(GameProviderUnderMaintenanceException), UnderMaintenance},
                 {typeof(GameUnderMaintenanceException), UnderMaintenance},
                 {typeof(InvalidStatusException), SystemError},
-
                 {typeof(InvalidOperationException), SystemError}
             };
 
@@ -47,10 +43,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
                     {Settled, BetAlreadySettled},
-                    {TransactionNotFound, BetNotExists},
-                    {TransactionBeingCancelledNotFound, BetNotExists},
-                    {TransactionBeingReferencedNotFound, BetNotExists},
-                    {RoundNotFound, BetNotExists}
+                    {TransactionNotFound, BetNotExist},
+                    {TransactionBeingCancelledNotFound, BetNotExist},
+                    {TransactionBeingReferencedNotFound, BetNotExist},
+                    {RoundNotFound, BetNotExist},
+                    {GameNotFound, GameNotExist}
                 };
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>
@@ -63,17 +60,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         {
             if (exception == null)
             {
-                return (int) Success;
+                return (int)Success;
             }
 
             if (exception is InvalidGameActionException e &&
                 ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
-                return (int) error;
+                return (int)error;
             }
 
             var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int) error : (int) SystemError;
+            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)SystemError;
         }
     }
 }

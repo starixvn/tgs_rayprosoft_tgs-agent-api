@@ -735,104 +735,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<bool>("AfterAllPlayers")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_all_players");
-
-                    b.Property<string>("AfterChannelName")
+                    b.Property<string>("After")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("after_channel_name");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("after");
 
-                    b.Property<decimal>("AfterDepositedAmountMax")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_deposited_amount_max");
-
-                    b.Property<decimal>("AfterDepositedAmountMin")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_deposited_amount_min");
-
-                    b.Property<bool>("AfterDepositedAmountUnlimited")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_deposited_amount_unlimited");
-
-                    b.Property<bool>("AfterIdentityAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_identity_authentication");
-
-                    b.Property<int>("AfterPaymentStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("after_payment_status");
-
-                    b.Property<bool>("AfterPhoneAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("after_phone_authentication");
-
-                    b.Property<int>("AfterPlayerListCondition")
-                        .HasColumnType("integer")
-                        .HasColumnName("after_player_list_condition");
-
-                    b.Property<decimal>("AfterTransferLimitFrom")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_transfer_limit_from");
-
-                    b.Property<decimal>("AfterTransferLimitTo")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("after_transfer_limit_to");
-
-                    b.Property<bool>("BeforeAllPlayers")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_all_players");
-
-                    b.Property<string>("BeforeChannelName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("before_channel_name");
-
-                    b.Property<decimal>("BeforeDepositedAmountMax")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_deposited_amount_max");
-
-                    b.Property<decimal>("BeforeDepositedAmountMin")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_deposited_amount_min");
-
-                    b.Property<bool>("BeforeDepositedAmountUnlimited")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_deposited_amount_unlimited");
-
-                    b.Property<bool>("BeforeIdentityAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_identity_authentication");
-
-                    b.Property<int>("BeforePaymentStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("before_payment_status");
-
-                    b.Property<bool>("BeforePhoneAuthentication")
-                        .HasColumnType("boolean")
-                        .HasColumnName("before_phone_authentication");
-
-                    b.Property<int>("BeforePlayerListCondition")
-                        .HasColumnType("integer")
-                        .HasColumnName("before_player_list_condition");
-
-                    b.Property<decimal>("BeforeTransferLimitFrom")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_transfer_limit_from");
-
-                    b.Property<decimal>("BeforeTransferLimitTo")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("before_transfer_limit_to");
+                    b.Property<string>("Before")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("before");
 
                     b.Property<Guid>("BrandPaymentId")
                         .HasColumnType("uuid")
@@ -1037,6 +948,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("available_currencies");
 
+                    b.Property<bool>("AvailableToBrand")
+                        .HasColumnType("boolean")
+                        .HasColumnName("available_to_brand");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -1074,15 +989,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("game_provider_id");
 
                     b.Property<bool>("HasTurnoverOnTieBet")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("has_turnover_on_tie_bet");
 
                     b.Property<bool>("Html5")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("html5");
 
                     b.Property<string>("Name")
@@ -1105,9 +1016,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("status");
 
                     b.Property<bool>("SubGame")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("sub_game");
 
                     b.Property<short>("Type")
@@ -2036,6 +1945,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("has_agent");
 
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id_number");
+
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");
@@ -2495,8 +2409,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasColumnType("jsonb")
                         .HasColumnName("menu_setting");
 
                     b.Property<string>("Name")
@@ -2548,6 +2461,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<short>("ClientStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("client_status");
 
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("timestamp with time zone")
@@ -3029,15 +2946,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal>("BirthReward")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("birth_reward");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("code");
+                    b.Property<decimal>("CardGameRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_rebate");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
@@ -3049,15 +2970,64 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<bool>("IsDefault")
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<decimal>("LevelKeepAccumulateBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_keep_accumulate_bet_amount");
+
+                    b.Property<decimal>("LevelKeepAccumulateDeposit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_keep_accumulate_deposit");
+
+                    b.Property<bool>("LevelKeepCondition")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_default");
+                        .HasColumnName("level_keep_condition");
+
+                    b.Property<decimal>("LevelUpAccumulateBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_up_accumulate_bet_amount");
+
+                    b.Property<decimal>("LevelUpAccumulateDeposit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_up_accumulate_deposit");
+
+                    b.Property<decimal>("LiveDealerRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_rebate");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("name");
+
+                    b.Property<decimal>("PromotionReward")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_reward");
+
+                    b.Property<decimal>("QuarterlyReward")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("quarterly_reward");
+
+                    b.Property<decimal>("SlotRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_rebate");
+
+                    b.Property<decimal>("SportsRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_rebate");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -3069,11 +3039,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on");
 
+                    b.Property<decimal>("VirtualSportsRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_rebate");
+
                     b.HasKey("Id")
                         .HasName("pk_vip_levels");
-
-                    b.HasAlternateKey("BrandId", "Code")
-                        .HasName("ak_vip_levels_brand_id_code");
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_vip_levels_brand_id");

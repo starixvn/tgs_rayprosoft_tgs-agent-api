@@ -40,9 +40,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet]
         [Description("Get roles")]
-        public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request)
-        {
-            return _roleQueries.GetQueries()
+        public Task<PagedResponse<RoleModel>> GetListAsync([FromQuery] GetRolesRequest request) =>
+            _roleQueries.GetQueries()
                 .Where(request.IsRoot, x => x.IsRoot == request.IsRoot)
                 .Where(request.ResellerId, x => x.ResellerId == request.ResellerId)
                 .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
@@ -65,7 +64,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     UpdatedByUsername = role.UpdatedByUsername
                 })
                 .CreatePagedResponseAsync(request);
-        }
 
         [HttpGet("{roleId}")]
         [Description("Get a role")]
@@ -113,11 +111,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UpdatedByUsername = role.UpdatedByUsername
             };
 
-            return new GetRoleResponse
-            {
-                Valid = true,
-                Role = roleModel
-            };
+            return new() {Valid = true, Role = roleModel};
         }
 
         [HttpPut("{roleId}")]
@@ -167,6 +161,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var brandRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Brand && x.IsRoot);
+
+            if (brandRootRole == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.BrandRootRoleNotExists);
+            }
+
             UpdateRoles(role, new[] {brandRootRole});
             var brandRoles = roles.Where(x => x.RoleType == RoleType.Brand).ToArray();
             UpdateRoles(brandRootRole, brandRoles);
@@ -234,17 +234,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             switch (request.IsRoot)
             {
                 case true when request.RoleType == RoleType.Brand &&
-                               await _roleQueries.GetCountAsync(x => x.IsRoot && x.BrandId == request.BrandId) > 0:
+                    await _roleQueries.GetCountAsync(x => x.IsRoot && x.BrandId == request.BrandId) > 0:
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.BrandRootExisted);
 
                 case true when request.RoleType == RoleType.Licensee &&
-                               await _roleQueries.GetCountAsync(x => x.IsRoot && x.LicenseeId == request.LicenseeId) >
-                               0:
+                    await _roleQueries.GetCountAsync(x => x.IsRoot && x.LicenseeId == request.LicenseeId) >
+                    0:
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.LicenseeRootExisted);
 
                 case true when request.RoleType == RoleType.Reseller &&
-                               await _roleQueries.GetCountAsync(x => x.IsRoot && x.ResellerId == request.ResellerId) >
-                               0:
+                    await _roleQueries.GetCountAsync(x => x.IsRoot && x.ResellerId == request.ResellerId) >
+                    0:
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.ResellerRootExisted);
 
                 case true when request.RoleType == RoleType.Admin && await _roleQueries.GetCountAsync(x =>
@@ -275,11 +275,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var menus = GetMenuSettingByString(setting);
 
-            return new GetMenuResponse
-            {
-                Valid = true,
-                Menus = menus
-            };
+            return new() {Valid = true, Menus = menus};
         }
 
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
@@ -318,7 +314,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     var roleMenuLevel2 = SetMenuDisplay(subMenu, roleMenuLevel1?.SubMenus);
 
-                    foreach (var permission in subMenu.SubMenus) SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
+                    foreach (var permission in subMenu.SubMenus)
+                    {
+                        SetMenuDisplay(permission, roleMenuLevel2?.SubMenus);
+                    }
                 }
             }
 

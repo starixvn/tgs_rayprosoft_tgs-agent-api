@@ -7,11 +7,18 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NSubstitute;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using TGS.Apis.OperatorApi;
+using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -21,6 +28,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
@@ -44,11 +52,77 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public SBOBETEndpoint(ScenarioContext context)
             : base(context)
         {
-            var services = (IServiceCollection) new ServiceCollection();
+            Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
+
+            var opApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration((_, builder) =>
+                {
+                    builder.SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                        "../../../../../Apis/OperatorApi")));
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseStartup<Startup>()
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(sp =>
+                            {
+                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
+                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
+                                return fakeAnalyzer;
+                            });
+                        });
+                })
+                .Build();
+
+            opApiHost.StartAsync();
+            var opApiClient = opApiHost.GetTestClient();
+
+            var tgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration((_, builder) =>
+                {
+                    builder
+                        .SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                            "../../../../../Apis/TgsApi")))
+                        .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseStartup<SBOBETStartup>()
+                        .UseKestrel(options => options.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(sp =>
+                            {
+                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
+
+                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
+
+                                return fakeAnalyzer;
+                            });
+                        });
+                })
+                .Build();
+
+            tgsApiHost.StartAsync();
+            var tgsApiClient = tgsApiHost
+                .GetTestClient();
+
+            var services = (IServiceCollection)new ServiceCollection();
+
+#if DEBUG
+            var jsonFile = "appsettings.json";
+#else
+            var jsonFile = "appsettings.IntTest.json";
+#endif
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile(jsonFile, true, true)
                 .AddEnvironmentVariables()
                 .Build();
 
@@ -63,12 +137,23 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddApiClient()
                 .AddRedis();
 
-            var apiUrlSection = configuration.GetSection("ApiUrls");
-            services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
-                c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
+            var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
-            services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
-                c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
+            if (isDev)
+            {
+                services.AddTransient<IPlayerApiClient>(sp =>
+                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                services.AddTransient<ISBOBETApiClient>(sp =>
+                    ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+            }
+            else
+            {
+                services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
+                    c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+
+                services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
+                    c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-SBO")));
+            }
 
             _serviceProvider = services.BuildServiceProvider();
         }
@@ -156,10 +241,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"set random external round id")]
-        public void GivenSetRandomExternalRoundId()
-        {
-            Set(SR.ExternalRoundId, NewRoundId());
-        }
+        public void GivenSetRandomExternalRoundId() => Set(SR.ExternalRoundId, NewRoundId());
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
@@ -399,7 +481,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
-                        {r.PlayerCode, r.CurrencyCode, r.PlatformType, r.ExternalRoundId, r.ExternalGameId})
+                    {
+                        r.PlayerCode,
+                        r.CurrencyCode,
+                        r.PlatformType,
+                        r.ExternalRoundId,
+                        r.ExternalGameId
+                    })
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
                         if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
@@ -410,7 +498,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         return new BatchRequestTransaction
                         {
                             PlayerCode = g.Key.PlayerCode,
-                            PlatformType = (int) g.Key.PlatformType,
+                            PlatformType = (int)g.Key.PlatformType,
                             CurrencyCode = curr,
                             Amount = ga.Amount.Negate(),
                             ExternalGameId = g.Key.ExternalGameId,
@@ -429,7 +517,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
-
 
         [Then(@"I will receive bet response of no error and balance of \$(.*)")]
         public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance) =>
@@ -581,7 +668,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
             var response = Get<GetBetStatusResponse>(SR.Response);
 
-            response.ErrorCode.Should().Be((int) GameApiError.Success);
+            response.ErrorCode.Should().Be((int)GameApiError.Success);
             response.ExternalTransactionId.Should().Be(betRequest.ExternalTransactionId);
             response.ExternalRoundId.Should().Be(betRequest.ExternalRoundId);
             response.Status.Should().Be(status);
@@ -593,7 +680,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public void ThenIWillReceiveSuccessfulResponse()
         {
             var response = Get<BatchResponse>(SR.Response);
-            response.ErrorCode.Should().Be((int) TgsApiError.None);
+            response.ErrorCode.Should().Be((int)TgsApiError.None);
             response.ErrorMessage.Should().BeNullOrEmpty();
         }
 
@@ -611,8 +698,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Errors.Length.Should().Be(errorsCount);
         }
 
-        [Then(@"all cancel bet related database records will be created and the balance of each user will be matched as original")]
-        public async Task ThenAllCancelBetRelatedDatabaseRecordsWillBeCreatedAndTheBalanceOfEachUserWillBeMatchedAsOriginal()
+        [Then(
+            @"all cancel bet related database records will be created and the balance of each user will be matched as original")]
+        public async Task
+            ThenAllCancelBetRelatedDatabaseRecordsWillBeCreatedAndTheBalanceOfEachUserWillBeMatchedAsOriginal()
         {
             var request = Get<BatchRequest>(SR.Request);
             var txids = request.Transactions.Select(t => t.ExternalTransactionId).ToArray();
@@ -620,7 +709,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameActions = await db.GameActions
                 .Where(ga => txids.Contains(ga.ExternalTransactionId))
-                .Select(ga => new { ga.Round.PlayerCode, ga.Id }).ToArrayAsync();
+                .Select(ga => new
+                {
+                    ga.Round.PlayerCode,
+                    ga.Id
+                }).ToArrayAsync();
 
             gameActions.Length.Should().Be(txids.Length);
 
@@ -628,14 +721,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             foreach (var ga in gameActions)
             {
                 var data = await db.Wallets.Where(w => w.PlayerCode == ga.PlayerCode)
-                    .Select(w => new { w.Player.Username, w.Balance}).FirstOrDefaultAsync();
+                    .Select(w => new
+                    {
+                        w.Player.Username,
+                        w.Balance
+                    }).FirstOrDefaultAsync();
 
                 var expectdBalance = players[data.Username];
                 data.Balance.Should().Be(expectdBalance);
             }
         }
-
-
 
         [Then(@"the round will be closed")]
         public Task ThenTheRoundWillBeClosedAsync() =>
@@ -678,7 +773,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             public decimal BetAmount { get; init; }
         }
 
-        #endregion
+        #endregion Private Classes
 
         #region After Scenario
 
@@ -699,7 +794,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task AfterChangeBrandStatusScenarioAsync() =>
             ChangeBrandStatusAsync(_serviceProvider, Status.Active);
 
-        #endregion
+        #endregion After Scenario
 
         #region Private Methods
 
@@ -755,7 +850,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var response = Get<T>(SR.Response);
 
             response.Should().NotBeNull();
-            response.ErrorCode.Should().Be((int) error);
+            response.ErrorCode.Should().Be((int)error);
             response.Balance.Should().BeNull();
         }
 
@@ -836,6 +931,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

@@ -21,7 +21,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<Brand> GetBrandAsync(Expression<Func<Brand, bool>> predicate,
             Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null);
 
-        IQueryable<Brand> GetBrandsAsync(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null,
+        IQueryable<Brand> GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null,
             bool tracking = false);
 
         Task CreateBrandAsync(CreateBrandRequest request);
@@ -115,7 +115,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await tran.CommitAsync();
         }
 
-        IQueryable<Brand> IBrandService.GetBrandsAsync(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
+        IQueryable<Brand> IBrandService.GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
@@ -132,20 +132,15 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BrandCultureCode = request.Languages.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
                         ?.BrandCultureCode
                 });
-            return new HashSet<BrandLanguage>(brandLanguages);
+            return new(brandLanguages);
         }
 
         private HashSet<BrandCurrency> GenerateBrandCurrencies(Brand brand, BrandRequest request)
         {
             var brandCurrencies = _repository.Currencies
                 .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
-                    new BrandCurrency
-                    {
-                        BrandId = brand.Id,
-                        CurrencyCode = x.Code,
-                        BrandCurrencyCode = x.Code
-                    });
-            return new HashSet<BrandCurrency>(brandCurrencies);
+                    new BrandCurrency {BrandId = brand.Id, CurrencyCode = x.Code, BrandCurrencyCode = x.Code});
+            return new(brandCurrencies);
         }
 
         private async Task<HashSet<BrandBetLimit>> GenerateBetLimits(Brand brand, BrandRequest request)
@@ -160,34 +155,36 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BetLimit = x,
                     IsDefault = request.BetLimits.First(b => b.Id == x.Id).IsDefault
                 });
-            return new HashSet<BrandBetLimit>(brandBetLimits);
+            return new(brandBetLimits);
         }
 
         private HashSet<BrandGroup> GenerateWithCreateGroups(Brand brand, BrandRequest request)
         {
             var groups = (from BrandGroupType type in Enum.GetValues(typeof(BrandGroupType))
-                let id = Guid.NewGuid()
-                let code = type.ToString()
-                let gameIds = type == BrandGroupType.Sports
-                    ? brand.Games.Where(x => Consts.Sports.Contains(x.Game.Type)).Select(x => x.GameId).ToArray()
-                    : brand.Games.Where(x => !Consts.Sports.Contains(x.Game.Type)).Select(x => x.GameId).ToArray()
-                select new BrandGroup
-                {
-                    Id = id,
-                    Name = code,
-                    IsSports = type == BrandGroupType.Sports,
-                    BrandId = brand.Id,
-                    Description = code,
-                    BrandGames = GenerateBrandGroupGames(brand, id, gameIds),
-                    BrandGroupBetLimits =
-                        GenerateBrandGroupBetLimits(brand, id, type == BrandGroupType.Sports),
-                    CreatedByUsername = request.Username,
-                    UpdatedByUsername = request.Username,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedOn = DateTimeOffset.Now
-                }).ToList();
+                          let id = Guid.NewGuid()
+                          let code = type.ToString()
+                          let gameIds = type == BrandGroupType.Sports
+                              ? brand.Games.Where(x => Consts.Sports.Contains(x.Game.Type)).Select(x => x.GameId)
+                                  .ToArray()
+                              : brand.Games.Where(x => !Consts.Sports.Contains(x.Game.Type)).Select(x => x.GameId)
+                                  .ToArray()
+                          select new BrandGroup
+                          {
+                              Id = id,
+                              Name = code,
+                              IsSports = type == BrandGroupType.Sports,
+                              BrandId = brand.Id,
+                              Description = code,
+                              BrandGames = GenerateBrandGroupGames(brand, id, gameIds),
+                              BrandGroupBetLimits =
+                                  GenerateBrandGroupBetLimits(brand, id, type == BrandGroupType.Sports),
+                              CreatedByUsername = request.Username,
+                              UpdatedByUsername = request.Username,
+                              CreatedOn = DateTimeOffset.Now,
+                              UpdatedOn = DateTimeOffset.Now
+                          }).ToList();
 
-            return new HashSet<BrandGroup>(groups);
+            return new(groups);
         }
 
         private async Task<HashSet<BrandGame>> GenerateWithCreateGamesAsync(Brand brand)
@@ -208,7 +205,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     Rebate = false,
                     EffectiveBettingPercentage = decimal.Zero
                 });
-            return new HashSet<BrandGame>(games);
+            return new(games);
         }
 
         private HashSet<BrandGroup> GenerateWithUpdateGroups(Brand brand, UpdateBrandRequest request)
@@ -234,7 +231,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 return brandGroup;
             });
 
-            return new HashSet<BrandGroup>(brandGroups);
+            return new(brandGroups);
         }
 
         private async Task<HashSet<BrandGame>> GenerateWithUpdateGamesAsync(Brand brand,
@@ -248,12 +245,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 var originBrandGame = brand.Games.FirstOrDefault(g => g.GameId == x.Id);
 
-                var brandGame = new BrandGame
-                {
-                    BrandId = brand.Id,
-                    GameId = x.Id,
-                    Game = x
-                };
+                var brandGame = new BrandGame {BrandId = brand.Id, GameId = x.Id, Game = x};
 
                 if (originBrandGame == null)
                 {
@@ -271,7 +263,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             });
 
 
-            return new HashSet<BrandGame>(brandGames);
+            return new(brandGames);
         }
 
         private static HashSet<BrandGroupGame> GenerateWithUpdateBrandGroupGames(Brand brand, BrandGroup brandGroup,
@@ -279,10 +271,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
             {
-                BrandGroup = brandGroup,
-                BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
+                BrandGroup = brandGroup, BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
             });
-            return new HashSet<BrandGroupGame>(brandGroupGames);
+            return new(brandGroupGames);
         }
 
         private static HashSet<BrandGroupGame> GenerateBrandGroupGames(Brand brand, Guid brandGroupId,
@@ -290,10 +281,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
             {
-                BrandGroupId = brandGroupId,
-                BrandGame = brand.Games.First(g => g.GameId == brandGameId)
+                BrandGroupId = brandGroupId, BrandGame = brand.Games.First(g => g.GameId == brandGameId)
             });
-            return new HashSet<BrandGroupGame>(brandGroupGames);
+            return new(brandGroupGames);
         }
 
         private async Task<HashSet<BrandGameProvider>> GenerateBrandGameProviders(
@@ -324,7 +314,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     return brandGameProvider;
                 }
             );
-            return new HashSet<BrandGameProvider>(brandGameProviders);
+            return new(brandGameProviders);
         }
 
         private HashSet<BrandGroupBetLimit> GenerateWithUpdateBrandGroupBetLimits(Brand brand, BrandGroup brandGroup,
@@ -332,17 +322,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brandGroupBetLimits = brand.BetLimits.Select(x =>
             {
-                var brandGroupBetLimit = new BrandGroupBetLimit
-                {
-                    BrandGroup = brandGroup,
-                    BetLimitId = x.BetLimitId
-                };
+                var brandGroupBetLimit = new BrandGroupBetLimit {BrandGroup = brandGroup, BetLimitId = x.BetLimitId};
                 brandGroupBetLimit.GameProviderBetLimits =
                     GenerateWithUpdateGameProviderBetLimits(brandGroupBetLimit, models);
 
                 return brandGroupBetLimit;
             });
-            return new HashSet<BrandGroupBetLimit>(brandGroupBetLimits);
+            return new(brandGroupBetLimits);
         }
 
         private HashSet<BrandGroupBetLimit> GenerateBrandGroupBetLimits(Brand brand, Guid brandGroupId,
@@ -359,22 +345,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     GameProviderBetLimits = GenerateGameProviderBetLimits(brand, id, x.BetLimit, isSports)
                 };
             });
-            return new HashSet<BrandGroupBetLimit>(brandGroupBetLimits);
+            return new(brandGroupBetLimits);
         }
 
         private static HashSet<BrandGroupGameProviderBetLimit> GenerateGameProviderBetLimits(Brand brand,
             Guid brandGroupBetLimitId, BetLimit betLimit, bool isSports)
         {
-            bool BetLimitRangeFunc(GameProviderBetLimit gb)
-            {
-                return gb.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= gb.MinBet &&
-                       betLimit.MaxBet >= gb.MaxBet;
-            }
+            bool BetLimitRangeFunc(GameProviderBetLimit gb) =>
+                gb.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= gb.MinBet &&
+                betLimit.MaxBet >= gb.MaxBet;
 
-            bool BetLimitIsSportsFunc(GameProviderBetLimit b)
-            {
-                return betLimit.MaxBetPerMatch >= b.MaxBetPerMatch;
-            }
+            bool BetLimitIsSportsFunc(GameProviderBetLimit b) => betLimit.MaxBetPerMatch >= b.MaxBetPerMatch;
 
             var brandGroupGameProviderBetLimits = brand.GameProviders.Where(x => x.GameProvider.BetLimits
                     .Any(BetLimitRangeFunc))
@@ -394,7 +375,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     };
                 });
 
-            return new HashSet<BrandGroupGameProviderBetLimit>(brandGroupGameProviderBetLimits);
+            return new(brandGroupGameProviderBetLimits);
         }
 
         private static HashSet<BrandGroupGameProviderBetLimit> GenerateWithUpdateGameProviderBetLimits(
@@ -404,11 +385,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .Select(x =>
                     new BrandGroupGameProviderBetLimit
                     {
-                        BrandGroupBetLimit = brandGroupBetLimit,
-                        GameProviderBetLimitId = x.GameProviderBetLimitId
+                        BrandGroupBetLimit = brandGroupBetLimit, GameProviderBetLimitId = x.GameProviderBetLimitId
                     });
 
-            return new HashSet<BrandGroupGameProviderBetLimit>(brandGroupGameProviderBetLimits);
+            return new(brandGroupGameProviderBetLimits);
         }
     }
 }

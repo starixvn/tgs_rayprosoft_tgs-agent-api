@@ -27,7 +27,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         public DateTime ModifyDate { get; init; }
 
         [JsonPropertyName("odds")]
-        public decimal Odds { get; init; }
+        public string Odds { get; init; }
 
         [JsonPropertyName("oddsStyle")]
         public string OddsStyle { get; init; }
@@ -44,7 +44,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         [JsonPropertyName("status")]
         public string Status { get; init; }
 
-        [JsonPropertyName("winlost")]
+        [JsonPropertyName("winLost")]
         public decimal WinLose { get; init; }
 
         [JsonPropertyName("turnover")]
@@ -61,6 +61,12 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
 
         [JsonPropertyName("ip")]
         public string IpAddress { get; init; }
+
+        [JsonPropertyName("isSystemTagRisky")]
+        public bool IsSystemTagRisky { get; init; }
+
+        [JsonPropertyName("isCustomerTagRisky")]
+        public bool IsCustomerTagRisky { get; init; }
 
         [JsonPropertyName("subBet")]
         public SubBet[] SubBets { get; init; }

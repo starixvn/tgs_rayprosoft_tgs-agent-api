@@ -22,9 +22,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BetLimitHandlers
 
         public override Task<PagedResponse<BetLimitModel>> Handle(
             GetBetLimitsRequest request,
-            CancellationToken cancellationToken)
-        {
-            return _service.GetBetLimitsAsync()
+            CancellationToken cancellationToken) =>
+            _service.GetBetLimitQueries()
                 .Select(x => new BetLimitModel
                 {
                     Id = x.Id,
@@ -37,6 +36,5 @@ namespace TGS.Services.BackOffice.Application.Queries.BetLimitHandlers
                     CreatedByUsername = x.CreatedByUsername,
                     UpdatedByUsername = x.UpdatedByUsername
                 }).CreatePagedResponseAsync(request);
-        }
     }
 }

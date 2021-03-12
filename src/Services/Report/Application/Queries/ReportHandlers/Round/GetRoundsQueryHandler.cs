@@ -25,7 +25,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
             CancellationToken cancellationToken) =>
             _service.GetRoundsAsync()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ExternalClosedOn >= request.From && x.ExternalClosedOn <= request.To)
+                .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
                 .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
                 .Where(request.Status, x => request.Status == x.Status)
                 .Where(request.RoundId, x => x.Id == request.RoundId)
@@ -65,7 +65,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                 .Select(combine => new RoundModel
                 {
                     Id = combine.round.Id,
-                    Status = combine.round.Status,
+                    Status = combine.round.ClientStatus,
                     PlayerCode = combine.player.PlayerCode,
                     ExternalPlayerCode = combine.player.PlayerCode,
                     PlayerName = combine.player.Username,
@@ -83,7 +83,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                     BetAmount = combine.round.BetAmount,
                     ValidBetAmount = combine.round.Turnover,
                     SettleAmount = combine.round.SettleAmount,
-                    WinLoss = combine.round.WinLoss,
+                    WinLoss = -combine.round.WinLoss,
                     AdditionalData = combine.detail.AdditionalData
                 })
                 .CreatePagedResponseAsync(request);
