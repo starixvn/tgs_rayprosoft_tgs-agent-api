@@ -25,6 +25,10 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         public void GivenTheRoundIs(RoundStatus status) =>
             Set(SR.RoundStatus, status);
 
+        [Given(@"set HasTurnoverOnTieBet is ""(.*)""")]
+        public void GivenSetHasTurnoverOnTieBetIs(bool hasTurnoverOnTieBet) =>
+            Set(SR.HasTurnoverOnTieBet, hasTurnoverOnTieBet);
+
         [Given(@"a sequence of game actions")]
         public void GivenASequenceOfGameActions(Table table)
         {
@@ -42,9 +46,11 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var betValuesCalculator =
                 (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
 
+            var hasTurnoverOnTieBet = Get<bool>(SR.HasTurnoverOnTieBet);
+
             var current = Actions.Last();
             var previousActions = Actions.Except(new[] {current}).ToArray();
-            var betValuesResult = betValuesCalculator.Calculate(false, current, previousActions);
+            var betValuesResult = betValuesCalculator.Calculate(hasTurnoverOnTieBet, current, previousActions);
 
             var hasFreeBet = Actions.Any(a => a.Type == GameActionType.FreeBet);
             var roundStatus = Get<RoundStatus>(SR.RoundStatus);
@@ -59,6 +65,17 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         {
             var status = Get<ClientRoundStatus>(SR.ClientRoundStatus);
             status.Should().Be(expectedRoundStatus);
+        }
+
+        [After]
+        public void RemoveHasTurnoverOnTieBet()
+        {
+            if (!HasTag("HasTurnoverOnTieBet"))
+            {
+                return;
+            }
+
+            Remove(SR.HasTurnoverOnTieBet);
         }
 
         #region Private Members

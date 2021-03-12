@@ -187,6 +187,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HasTurnoverOnTieBet.
+        /// </summary>
+        public static string HasTurnoverOnTieBet {
+            get {
+                return ResourceManager.GetString("HasTurnoverOnTieBet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LoginTime.
         /// </summary>
         public static string LoginTime {

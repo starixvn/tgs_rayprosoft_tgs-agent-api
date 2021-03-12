@@ -49,7 +49,38 @@ Scenario: 02.c - If I bet and the bet is tie, and the round is closed, the clien
 	When I get the client round status
 	Then the client round status should be "Draw"
 
-Scenario: 02.d - If I place 1 bet and the bet is cancelled, and the round is closed, the client round status should be void
+Scenario: 02.d - If I bet and the bet is tie with return half amount, and the round is closed, the client round status should be draw
+	Given the round is "Closed"
+		And a sequence of game actions
+			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound |
+			| PlaceBet    | 1  |                       | -10    |                |
+			| TieBet      | 2  | 1                     | 5      | YES            |
+	When I get the client round status
+	Then the client round status should be "Draw"
+
+@HasTurnoverOnTieBet
+Scenario: 02.e - If I bet and the bet is tie, and the round is closed, and tie bet turnover is counted, the client round status should be draw
+	Given the round is "Closed"
+		And set HasTurnoverOnTieBet is "true"
+		And a sequence of game actions
+			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound |
+			| PlaceBet    | 1  |                       | -10    |                |
+			| TieBet      | 2  | 1                     | 10     | YES            |
+	When I get the client round status
+	Then the client round status should be "Draw"
+
+@HasTurnoverOnTieBet
+Scenario: 02.f - If I bet and the bet is tie with return half amount, and the round is closed, and tie bet turnover is counted, the client round status should be loss
+	Given the round is "Closed"
+		And set HasTurnoverOnTieBet is "true"
+		And a sequence of game actions
+			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound |
+			| PlaceBet    | 1  |                       | -10    |                |
+			| TieBet      | 2  | 1                     | 5      | YES            |
+	When I get the client round status
+	Then the client round status should be "Loss"
+
+Scenario: 02.g - If I place 1 bet and the bet is cancelled, and the round is closed, the client round status should be void
 	Given the round is "Closed"
 		And a sequence of game actions
 			| Action Type       | ID | Referencing Action ID | Amount | IsClosingRound |
