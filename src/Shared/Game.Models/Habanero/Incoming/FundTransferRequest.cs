@@ -25,7 +25,7 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public string RoundId { get; init; }
 
         [JsonPropertyName("friendlygameinstanceid")]
-        public string ClientRoundId { get; init; }
+        public int ClientRoundId { get; init; }
 
         [JsonPropertyName("isretry")]
         public bool IsRetry { get; init; }

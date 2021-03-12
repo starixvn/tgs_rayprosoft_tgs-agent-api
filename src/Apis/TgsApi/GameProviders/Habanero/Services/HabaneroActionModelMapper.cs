@@ -72,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                         ExternalTransactionId = trx.TransactionId,
                         ExternalTransactionReferenceId = trx.TransactionReferenceId,
                         ExternalGameActionGroupId = r.Detail.RoundId,
-                        ExternalBetId = r.Detail.ClientRoundId,
+                        ExternalBetId = r.Detail.ClientRoundId.ToString(),
                         ExternalRoundId = r.Detail.RoundId,
                         ExternalGameId = r.Game.ExternalId,
                         GameActionType = GameActionType.CancelTransaction,
@@ -92,7 +92,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                     ExternalTransactionId = t.TransactionId,
                     ExternalTransactionReferenceId = t.IsPlaceBet ? null : t.TransactionReferenceId,
                     ExternalGameActionGroupId = r.Detail.RoundId,
-                    ExternalBetId = r.Detail.ClientRoundId,
+                    ExternalBetId = r.Detail.ClientRoundId.ToString(),
                     ExternalRoundId = r.Detail.RoundId,
                     ExternalGameId = r.Game.ExternalId,
                     GameActionType =
