@@ -54,9 +54,9 @@ const BodyContent = ({ brandId }) => {
         setState({ brandId })
     }, [brandId])
 
-    let { items, isLoading, mutate } = useVipLevelList(toApiParams(state))
+    let { data, isLoading, mutate } = useVipLevelList(toApiParams(state))
 
-    let columns = useColumns({ items, mutate })
+    let columns = useColumns({ items: data?.items, mutate })
     return (
         <PageContent
             actionBar={
@@ -69,7 +69,8 @@ const BodyContent = ({ brandId }) => {
             <Table
                 controlledState={state}
                 columns={columns}
-                data={items}
+                data={data?.items}
+                pageCount={pageCount(state?.pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
@@ -84,9 +85,14 @@ const useColumns = ({ items = [], mutate }) => {
     return useMemo(() => {
         let columns = [
             textColumn({
-                accessor: "name",
+                accessor: "level",
                 Header: <Trans zh="等级名称" en="VIP Level" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    if (Number.isFinite(value)) {
+                        return `VIP ${value + 1}`
+                    }
+                }
             })
         ]
 

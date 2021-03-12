@@ -160,6 +160,7 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
         mutate(undefined, false)
         setSubmit(undefined)
     }
+    console.log("record", record)
     return (
         <FormDialog
             defaultValues={{ ...record }}
@@ -206,8 +207,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                         <FieldValues>
                             <NormalLabel>
                                 <Trans
-                                    zh="累积投注金额 （当月）"
-                                    en="Accumulated bet amount (current month)"
+                                    zh="累积投注金额 （当月）："
+                                    en="Accumulated bet amount (current month)："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -230,8 +231,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="累积充值金额 （当月）"
-                                    en="Accumulated deposit amount (current month)"
+                                    zh="累积充值金额 （当月）："
+                                    en="Accumulated deposit amount (current month)："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -268,15 +269,15 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                         <FieldValues>
                             <NormalLabel>
                                 <Trans
-                                    zh="累积投注金额 （每季）"
-                                    en="Accumulated bet amount (per quarter)"
+                                    zh="累积投注金额 （每季）："
+                                    en="Accumulated bet amount (per quarter)："
                                 />
                             </NormalLabel>
                             {editable && (
                                 <Box>
                                     <Input
                                         type="number"
-                                        name="levelKeepAccumulateBetAmount "
+                                        name="levelKeepAccumulateBetAmount"
                                     />
                                 </Box>
                             )}
@@ -292,8 +293,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="累积充值金额 （每季）"
-                                    en="Accumulated deposit amount (per quarter)"
+                                    zh="累积充值金额 （每季）："
+                                    en="Accumulated deposit amount (per quarter)："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -361,7 +362,10 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                     >
                         <FieldValues>
                             <NormalLabel>
-                                <Trans zh="生日福利" en="Birthday benefit" />
+                                <Trans
+                                    zh="生日福利："
+                                    en="Birthday benefit："
+                                />
                             </NormalLabel>
                             {editable && (
                                 <Box>
@@ -377,7 +381,10 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             )}
 
                             <NormalLabel>
-                                <Trans zh="晋升福利" en="Promotion benefit" />
+                                <Trans
+                                    zh="晋升福利："
+                                    en="Promotion benefit："
+                                />
                             </NormalLabel>
                             {editable && (
                                 <Box>
@@ -396,7 +403,10 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             )}
 
                             <NormalLabel>
-                                <Trans zh="季度福利" en="Quarterly benefit" />
+                                <Trans
+                                    zh="季度福利："
+                                    en="Quarterly benefit："
+                                />
                             </NormalLabel>
                             {editable && (
                                 <Box>
@@ -429,8 +439,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                         <FieldValues>
                             <NormalLabel>
                                 <Trans
-                                    zh="真人反水比例（%）"
-                                    en="Live Dealer rebate （%）"
+                                    zh="真人反水比例（%）："
+                                    en="Live Dealer rebate （%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -452,22 +462,19 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="电子反水比例（%）"
-                                    en="Slot Game rebate （%）"
+                                    zh="电子反水比例（%）："
+                                    en="Slot Game rebate （%）："
                                 />
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
-                                        name="slotGameRebate "
-                                    />
+                                    <Input type="number" name="slotRebate " />
                                 </Box>
                             )}
                             {readonly && (
                                 <Box alignY="center">
                                     <FormattedNumberDecimal
-                                        value={record?.slotGameRebate}
+                                        value={record?.slotRebate}
                                         postfix="%"
                                     />
                                 </Box>
@@ -475,8 +482,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="棋牌反水比例（%）"
-                                    en="Card Game rebate （%）"
+                                    zh="棋牌反水比例（%）："
+                                    en="Card Game rebate （%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -498,8 +505,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="体育反水比例（%）"
-                                    en="Sportsbook rebate （%）"
+                                    zh="体育反水比例（%）："
+                                    en="Sportsbook rebate （%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -518,8 +525,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="虚拟体育反水比例（%）"
-                                    en="VirtualSports rebate （%）"
+                                    zh="虚拟体育反水比例（%）："
+                                    en="VirtualSports rebate （%）："
                                 />
                             </NormalLabel>
                             {editable && (
