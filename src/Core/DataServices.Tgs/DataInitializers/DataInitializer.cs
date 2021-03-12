@@ -131,8 +131,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 .Select(brand => new VipLevel
                 {
                     Id = GuidExtensions.NewSequentialGuid(),
-                    Name = "Default Level",
                     BrandId = brand.Id,
+                    Level = 1,
                     CreatedByUsername = AdminUsername,
                     UpdatedByUsername = AdminUsername,
                     CreatedOn = Now,
@@ -147,13 +147,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             var languages = new[]
                 {
-                    new
-                    {
-                        CultureCode = "en-US",
-                        LanguageCode = "en",
-                        Name = "English",
-                        LocalizedName = "English"
-                    },
+                    new {CultureCode = "en-US", LanguageCode = "en", Name = "English", LocalizedName = "English"},
                     new
                     {
                         CultureCode = "id-ID",
@@ -161,27 +155,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         Name = "Indonesian",
                         LocalizedName = "bahasa Indonesia"
                     },
-                    new
-                    {
-                        CultureCode = "ja-JP",
-                        LanguageCode = "ja",
-                        Name = "Japanese",
-                        LocalizedName = "日本語"
-                    },
-                    new
-                    {
-                        CultureCode = "ko-KR",
-                        LanguageCode = "ko",
-                        Name = "Korean",
-                        LocalizedName = "한국어 / 조선말"
-                    },
-                    new
-                    {
-                        CultureCode = "th-TH",
-                        LanguageCode = "th",
-                        Name = "Thai",
-                        LocalizedName = "ภาษาไทย"
-                    },
+                    new {CultureCode = "ja-JP", LanguageCode = "ja", Name = "Japanese", LocalizedName = "日本語"},
+                    new {CultureCode = "ko-KR", LanguageCode = "ko", Name = "Korean", LocalizedName = "한국어 / 조선말"},
+                    new {CultureCode = "th-TH", LanguageCode = "th", Name = "Thai", LocalizedName = "ภาษาไทย"},
                     new
                     {
                         CultureCode = "vi-VN",
@@ -467,12 +443,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var relation = (from s in sports
                             let m = markets.First(m => m.GameProviderId == s.GameProviderId)
-                            select new SportMarketType
-                            {
-                                Id = Guid.NewGuid(),
-                                SportTypeId = s.Id,
-                                MarketTypeId = m.Id
-                            }).ToArray();
+                            select new SportMarketType {Id = Guid.NewGuid(), SportTypeId = s.Id, MarketTypeId = m.Id})
+                .ToArray();
 
             await _repository.BulkInsertAsync(sports);
             await _repository.BulkInsertAsync(markets);

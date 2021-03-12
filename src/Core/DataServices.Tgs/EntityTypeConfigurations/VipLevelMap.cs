@@ -13,10 +13,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(p => p.Id)
                 .HasName("pk_vip_levels");
 
-            builder.Property(c => c.Name)
-                .HasMaxLength(32)
-                .IsRequired();
-
             builder.Property(c => c.LevelUpAccumulateBetAmount)
                 .HasPrecision(18, 6)
                 .IsRequired();

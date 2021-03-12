@@ -7,7 +7,6 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public Guid Id { get; set; }
         public int Level { get; set; }
-        public string Name { get; set; }
         public Guid BrandId { get; set; }
         public virtual Brand Brand { get; set; }
         public decimal LevelUpAccumulateBetAmount { get; set; }

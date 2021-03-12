@@ -24,7 +24,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new PlayerController(
+            _controller = new(
                 _passwordHandlerMonk.Object,
                 _queriesMock.Object,
                 _auditLogQueriesMock.Object,
@@ -84,7 +84,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             {
                 response.Items[i].PlayerCode.Should().Be(expectedPlayers[i].PlayerCode);
                 response.Items[i].Username.Should().Be(expectedPlayers[i].Username);
-                response.Items[i].VipLevel.Should().Be(expectedPlayers[i].Vip.Name);
                 response.Items[i].Status.Should().Be(expectedPlayers[i].Status.ToString());
                 response.Items[i].HasAgent.Should().Be(expectedPlayers[i].HasAgent);
             }
@@ -159,7 +158,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Player.Status.Should().Be(player.Status);
             response.Player.Username.Should().Be(player.Username);
             response.Player.RealName.Should().Be(player.RealName);
-            response.Player.VipLevel.Should().Be(player.Vip.Name);
             response.Player.HasAgent.Should().Be(player.HasAgent);
             response.Player.RegisteredOn.Should().Be(player.RegisteredOn);
             response.Player.ParentUsername.Should().Be(player.ParentPlayer.Username);
@@ -355,21 +353,22 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Player>(u => u
-                .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Name = "Vip"})
+                .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Level = 1})
                 .With(s => s.Brand, new Brand())
                 .With(s => s.ParentPlayer, new Player())
                 .With(s => s.BetLimit, new BetLimit())
                 .With(s => s.SubPlayers, new Player[] { })
-                .With(s => s.Banks, new[]
-                {
-                    new PlayerBank
+                .With(s => s.Banks,
+                    new[]
                     {
-                        Id = Guid.NewGuid(),
-                        RealName = Generator.RandomString(5),
-                        BankName = Generator.RandomString(20),
-                        BankAccount = Generator.RandomIntString(20)
-                    }
-                })
+                        new PlayerBank
+                        {
+                            Id = Guid.NewGuid(),
+                            RealName = Generator.RandomString(5),
+                            BankName = Generator.RandomString(20),
+                            BankAccount = Generator.RandomIntString(20)
+                        }
+                    })
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
                 .With(s => s.Wallets, new[] {new Wallet {Balance = 0}})

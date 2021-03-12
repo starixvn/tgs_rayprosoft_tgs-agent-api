@@ -3008,12 +3008,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("live_dealer_rebate");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("name");
-
                     b.Property<decimal>("PromotionReward")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
