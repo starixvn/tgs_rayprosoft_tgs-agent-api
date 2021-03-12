@@ -7,12 +7,12 @@ using Newtonsoft.Json.Linq;
 using TGS.Services.ValidateCode;
 using Valhalla.Services;
 
-namespace ValidateCodeApi.Controllers
+namespace TGS.Apis.ValidateCodeApi.Controllers
 {
     /// <summary>
     /// ValidateCode Service
     /// </summary>
-    /// <seealso cref="Microsoft.AspNetCore.Mvc.ControllerBase" />
+    /// <seealso cref="ControllerBase" />
     [Route("validate-code")]
     [ApiController]
     public class ValidateCodeController : ControllerBase

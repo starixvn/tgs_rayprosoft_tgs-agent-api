@@ -3,7 +3,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace ValidateCodeApi
+namespace TGS.Apis.ValidateCodeApi
 {
     public class Program
     {
