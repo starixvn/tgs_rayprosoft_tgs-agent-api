@@ -83,6 +83,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<Player> IPlayerQueries.GetPlayerByCodeAsync(string playerCode) =>
             _repository.Players
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
 
         Task<(byte[] salt, byte[] password)> IPlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(string playerCode) =>
