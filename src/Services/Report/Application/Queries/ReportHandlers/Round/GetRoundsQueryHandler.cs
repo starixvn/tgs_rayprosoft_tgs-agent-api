@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Round;
 using TGS.Services.Report.Infrastructure.DataService;
@@ -33,45 +32,15 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                 .GroupJoin(
                     _service.Repository.Players,
                     round => round.PlayerCode, player => player.PlayerCode,
-                    (round, player) => new
-                    {
-                        round,
-                        player
-                    })
-                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new
-                {
-                    x.round,
-                    player
-                })
+                    (round, player) => new {round, player})
+                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new {x.round, player})
                 .GroupJoin(_service.Repository.Games,
                     combine => combine.round.GameId, game => game.Id,
-                    (combine, game) => new
-                    {
-                        combine.round,
-                        combine.player,
-                        game
-                    })
-                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new
-                {
-                    x.round,
-                    x.player,
-                    game
-                })
+                    (combine, game) => new {combine.round, combine.player, game})
+                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new {x.round, x.player, game})
                 .GroupJoin(_service.Repository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
-                    (combine, detail) => new
-                    {
-                        combine.round,
-                        combine.player,
-                        combine.game,
-                        detail
-                    })
-                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new
-                {
-                    x.round,
-                    x.player,
-                    x.game,
-                    detail
-                })
+                    (combine, detail) => new {combine.round, combine.player, combine.game, detail})
+                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new {x.round, x.player, x.game, detail})
                 .Where(request.Username, x => request.Username == x.player.Username)
                 .Where(request.GameType, x => x.game.Type == request.GameType)
                 .GroupJoin(_service.Repository.GameProviders, combine => combine.round.GameProviderId,
@@ -96,14 +65,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                 .Select(combine => new RoundModel
                 {
                     Id = combine.round.Id,
-                    Status =
-                        combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss > 0
-                            ? ClientRoundStatus.Win
-                            : combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss < 0
-                                ? ClientRoundStatus.Loss
-                                : combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss == 0
-                                    ? ClientRoundStatus.Draw
-                                    : ClientRoundStatus.Open,
+                    Status = combine.round.ClientStatus,
                     PlayerCode = combine.player.PlayerCode,
                     ExternalPlayerCode = combine.player.PlayerCode,
                     PlayerName = combine.player.Username,
