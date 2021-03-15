@@ -332,7 +332,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                         )}
                         {readonly && (
                             <Checkbox
-                                value={record?.levelKeepCondition}
+                                checked={record?.levelKeepCondition}
                                 disabled
                                 label={
                                     <Trans

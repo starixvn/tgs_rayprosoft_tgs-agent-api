@@ -37,6 +37,7 @@ export const Tab = ({ ...props }) => {
 }
 
 export const EditPanel = ({
+    brandId,
     playerCode = "",
     player = {},
     onSubmitted,
@@ -93,6 +94,7 @@ export const EditPanel = ({
             <FormProvider {...formMethods}>
                 <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                     <EditForm
+                        brandId={brandId}
                         player={player}
                         isLoading={isLoading}
                         onClickClose={() => {
@@ -106,7 +108,13 @@ export const EditPanel = ({
     )
 }
 
-const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
+const EditForm = ({
+    brandId,
+    player = {},
+    isLoading,
+    onClickClose,
+    ...props
+}) => {
     let { username = "", registeredOn, balance } = player
 
     return (
@@ -122,7 +130,13 @@ const EditForm = ({ player = {}, isLoading, onClickClose, ...props }) => {
 
                 <VIPLevelLabel />
                 <Box>
-                    <VipLevelSelect name="vipId" required placeholder={false} />
+                    <VipLevelSelect
+                        name="vipId"
+                        defaultValue={player?.vipId}
+                        required
+                        brandId={brandId}
+                        placeholderDisabled={true}
+                    />
                 </Box>
 
                 <ParentUsernameLabel />

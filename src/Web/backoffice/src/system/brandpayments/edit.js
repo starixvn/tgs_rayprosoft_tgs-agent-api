@@ -293,6 +293,7 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
                             <VipLevelsText />
                         </Label>
                         <Box alignY="center">
+                            {/* TODO: brandId */}
                             <VipLevelCheckboxGroup name="vipLevelIds" />
                         </Box>
                     </FieldValues>

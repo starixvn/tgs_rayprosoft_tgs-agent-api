@@ -5,7 +5,17 @@ const API = "/api/vipLevel"
 
 export const useVipLevelList = (searchParams) => {
     let url = urlWith(searchParams, API)
-    return useGet(url)
+    let { data, ...rest } = useGet(url)
+    if (data?.items?.length > 0) {
+        data.items = data.items.map((item) => ({
+            name: `VIP ${item.level}`,
+            ...item
+        }))
+    }
+    return {
+        data,
+        ...rest
+    }
 }
 
 export const useAddVipLevel = (data) => {

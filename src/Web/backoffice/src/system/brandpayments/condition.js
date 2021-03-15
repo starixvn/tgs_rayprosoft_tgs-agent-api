@@ -141,8 +141,7 @@ const toVipLevelNames = (ids = [], list = []) => {
 
     let names = ids.reduce((detail, id) => {
         let item = list.find((item) => item.id === id)
-        let vipName = item ? `/VIP ${item.level}` : ""
-        return detail ? `${detail}/${vipName}` : vipName
+        return detail ? `${detail}/${item.name}` : item.name
     }, "")
 
     return names ? `(${names})` : ""

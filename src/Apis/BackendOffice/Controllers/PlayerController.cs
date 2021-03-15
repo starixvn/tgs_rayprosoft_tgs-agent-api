@@ -82,6 +82,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 Username = player.Username,
                 RealName = player.RealName,
+                VipId = player.Vip.Id,
                 VipLevel = player.Vip.Level,
                 Status = player.Status,
                 StatusName = player.Status.ToString(),

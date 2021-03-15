@@ -61,7 +61,7 @@ const BodyContent = ({ brandId }) => {
         <PageContent
             actionBar={
                 <Box alignX="right">
-                    <AddButton />
+                    <AddButton onSubmitted={mutate} />
                 </Box>
             }
             title={<Trans zh="VIP等级" en="VIP Level" />}
@@ -85,14 +85,9 @@ const useColumns = ({ items = [], mutate }) => {
     return useMemo(() => {
         let columns = [
             textColumn({
-                accessor: "level",
+                accessor: "name",
                 Header: <Trans zh="等级名称" en="VIP Level" />,
-                disableSortBy: true,
-                Cell: ({ value }) => {
-                    if (Number.isFinite(value)) {
-                        return `VIP ${value + 1}`
-                    }
-                }
+                disableSortBy: true
             })
         ]
 
