@@ -108,7 +108,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeValidateCodeGenerator.GenerateToken().Returns(token);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Any<ValidateCodeData>())
+                .SaveValidateDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
             var expected = $"Your ID verification code is : {validateCode}";
@@ -158,7 +158,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
             fakeValidateCodeOperator
-                .GetValidateCodeDataAsync(Arg.Is(validateCode), Arg.Is(token))
+                .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
                 .Returns(new ValidateCodeData(player.PlayerCode, token));
 
             await sut.ExecuteAsync(command);
@@ -203,7 +203,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
             fakeValidateCodeOperator
-                .GetValidateCodeDataAsync(Arg.Is(validateCode), Arg.Is(token))
+                .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
                 .Returns((ValidateCodeData)null);
 
             Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));

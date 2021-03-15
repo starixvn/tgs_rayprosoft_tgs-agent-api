@@ -29,7 +29,7 @@ namespace TGS.Services.Operator.PayPassowrd
                 .ConfigureAwait(false);
 
             var result = await _validateCodeOperator
-                .GetValidateCodeDataAsync(command.ValidateCode, command.Token)
+                .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.Token)
                 .ConfigureAwait(false);
 
             if (result == null)

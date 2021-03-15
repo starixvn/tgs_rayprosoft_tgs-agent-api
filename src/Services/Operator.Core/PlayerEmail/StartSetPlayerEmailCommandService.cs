@@ -32,10 +32,10 @@ namespace TGS.Services.Operator.PlayerEmail
                     var validateCode = _codeGenerator.GenerateCode();
                     var token = _codeGenerator.GenerateToken();
 
-                    var data = new ValidateCodeData(command.PlayerCode, token);
+                    var data = new EmailValidateData(command.Email, command.PlayerCode);
 
                     var result = await _validateCodeOperator
-                        .SaveValidateDataAsync(validateCode, data)
+                        .SaveValidateDataAsync(validateCode, token, data)
                         .ConfigureAwait(false);
 
                     return (result, validateCode, token);

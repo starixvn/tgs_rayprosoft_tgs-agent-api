@@ -31,5 +31,12 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return setPlayerEmailService.GetAsync(command);
         }
+
+        [HttpPut]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public void SubmitChangeEmail()
+        {
+
+        }
     }
 }

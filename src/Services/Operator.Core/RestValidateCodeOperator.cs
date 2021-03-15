@@ -15,10 +15,10 @@ namespace TGS.Services.Operator
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
         }
 
-        public ValueTask<bool> SaveValidateDataAsync(string validateCode, ValidateCodeData data)
+        public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
         {
             return _validateCodeServiceClient
-                .SaveValidateCodeDataAsync(validateCode, data.Token, SerializeValidateCodeData(data));
+                .SaveValidateCodeDataAsync(validateCode, token, SerializeValidateCodeData(data));
         }
 
         public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)
@@ -26,20 +26,20 @@ namespace TGS.Services.Operator
             return _smsServiceClient.SendShortMessageAsync(phone, shortMessage, currency, brandId);
         }
 
-        public async ValueTask<ValidateCodeData?> GetValidateCodeDataAsync(string validateCode, string token)
+        public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
         {
             var result = await _validateCodeServiceClient
                 .GetValidateCodeDataAsync(validateCode, token)
                 .ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(result))
-                return null;
+                return default;
 
-            return DeserializeValidateCodeData(result);
+            return DeserializeValidateCodeData<TData>(result);
         }
 
-        private ValidateCodeData? DeserializeValidateCodeData(string json) => JsonSerializer.Deserialize<ValidateCodeData>(json);
+        private TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
 
-        private string SerializeValidateCodeData(ValidateCodeData data) => JsonSerializer.Serialize(data);
+        private string SerializeValidateCodeData<TData>(TData data) => JsonSerializer.Serialize(data);
     }
 }

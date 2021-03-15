@@ -43,7 +43,7 @@ namespace TGS.Services.Operator.PlayerPassword
                     var data = new ValidateCodeData(player.PlayerCode, token);
 
                     var result = await _validateCodeOperator
-                        .SaveValidateDataAsync(validateCode, data)
+                        .SaveValidateDataAsync(validateCode, token, data)
                         .ConfigureAwait(false);
 
                     return (result, validateCode, token);
