@@ -22,7 +22,7 @@ namespace TGS.Tests.ApiClients.GameProviders
 
     public sealed class SBOBETApiClient : BaseApiClient, ISBOBETApiClient
     {
-        private const string RoutePrefix = "api/provider";
+        private static readonly string RoutePrefix = "api/provider";
 
         public SBOBETApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
             : base(client, logger, json)

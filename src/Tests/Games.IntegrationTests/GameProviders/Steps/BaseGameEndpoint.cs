@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -13,8 +14,9 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Models;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Tokens;
 using TGS.Tests.ApiClients.Operators;
 using TGS.Tests.TestsCommon;
 
@@ -30,27 +32,32 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         protected async Task PlayerLoginAsync(IServiceProvider serviceProvider, string username,
             PlatformType platformType, string brandCode, string currencyCode)
         {
-            var loginTimeCacheKey = $"{SR.LoginTime}:{username}:{platformType}";
+            var db = GetDb<ITgsRepository>(serviceProvider);
+            var player = await db.Players.FirstOrDefaultAsync(p => p.Brand.Code == brandCode &&
+                p.Username.ToLower() == username.ToLower());
 
-            var loginTime = Get<DateTimeOffset?>(loginTimeCacheKey);
-            if (loginTime.HasValue &&
-                loginTime.Value.AddSeconds(Consts.TokenExpireSeconds.PlayerLogin) >= DateTimeOffset.UtcNow)
+            var playerCode = string.Empty;
+
+            if (player != null)
             {
-                return;
+                playerCode = player.PlayerCode;
+
+                var key = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
+                var tokenData = Get<PlayerTokenData>(key);
+                if (tokenData != null && tokenData.ExpiredOn > DateTimeOffset.Now)
+                {
+                    return;
+                }
             }
 
             var brandCacheKey = $"{SR.Brand}:{brandCode}";
             var brand = Get<Brand>(brandCacheKey);
-            var db = GetDb<ITgsRepository>(serviceProvider);
 
             if (brand == null)
             {
                 brand = await db.Brands.FirstAsync(b => b.Code == brandCode);
                 Set(brandCacheKey, brand);
             }
-
-            var player = await db.Players.FirstOrDefaultAsync(p => p.BrandId == brand.Id &&
-                p.Username.ToLower() == username.ToLower());
 
             var apiClient = serviceProvider.GetRequiredService<IPlayerApiClient>();
 
@@ -75,12 +82,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
 
             const string password = "TgsP@ssw0rd";
-            var headers = new Dictionary<string, string>
-            {
-                {"Authorization", $"Bearer {brandToken}"}
-            };
-
-            var playerCode = player?.PlayerCode;
+            var headers = new Dictionary<string, string> {{"Authorization", $"Bearer {brandToken}"}};
 
             if (player == null)
             {
@@ -103,11 +105,19 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlatformType = platformType
             }, headers);
 
+            var handler = serviceProvider.GetRequiredService<IJwtTokenHandler>();
+            var jwt = handler.ReadToken(res.PlayerToken);
+            var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+            var tokenProvider = serviceProvider.GetRequiredService<ITokenProvider>();
+            var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
+
+            var tokenKey = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
+
             Set(SR.BrandCode, brandCode);
             Set(SR.PlayerCode, playerCode);
-            Set(SR.Username, username);
             Set(SR.PlatformType, platformType);
-            Set(loginTimeCacheKey, res.LoginTime);
+            Set(tokenKey, data);
         }
 
         protected async Task SetPlayerBalanceAsync(ServiceProvider serviceProvider, decimal balance)
@@ -116,11 +126,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             const string sql = "update dbo.wallets w set balance=:balance where w.player_code=:player_code";
-            await db.ExecuteSqlCommandAsync(sql, CommandType.Text, new Dictionary<string, object>
-            {
-                {":balance", balance},
-                {":player_code", playerCode}
-            });
+            await db.ExecuteSqlCommandAsync(sql, CommandType.Text,
+                new Dictionary<string, object>
+                {
+                    {":balance", balance},
+                    {":player_code", playerCode}
+                });
         }
 
         protected async Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
@@ -139,7 +150,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return json.DeserializeFromString<T>(setting.Value);
         }
 
-        protected static async Task DeauthorizePlayerAsync(IServiceProvider serviceProvider, string playerCode)
+        protected async Task DeauthorizePlayerAsync(IServiceProvider serviceProvider, string playerCode)
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
 
@@ -155,6 +166,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
             await cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, playerCode);
+
+            Remove(SR.PlayerTokenData);
         }
 
         protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)

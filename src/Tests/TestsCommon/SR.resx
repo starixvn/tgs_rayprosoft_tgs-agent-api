@@ -162,9 +162,6 @@
   <data name="HasTurnoverOnTieBet" xml:space="preserve">
     <value>HasTurnoverOnTieBet</value>
   </data>
-  <data name="LoginTime" xml:space="preserve">
-    <value>LoginTime</value>
-  </data>
   <data name="PlaceBetRequest" xml:space="preserve">
     <value>PlaceBetRequest</value>
   </data>
@@ -176,6 +173,9 @@
   </data>
   <data name="Players" xml:space="preserve">
     <value>Players</value>
+  </data>
+  <data name="PlayerTokenData" xml:space="preserve">
+    <value>PlayerTokenData</value>
   </data>
   <data name="Request" xml:space="preserve">
     <value>Request</value>
@@ -200,8 +200,5 @@
   </data>
   <data name="UserBalance" xml:space="preserve">
     <value>UserBalance</value>
-  </data>
-  <data name="Username" xml:space="preserve">
-    <value>Username</value>
   </data>
 </root>

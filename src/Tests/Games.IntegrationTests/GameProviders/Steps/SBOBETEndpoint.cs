@@ -177,20 +177,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.BrandCode, brandCode);
             Set(SR.PlayerCode, playerCode);
-            Set(SR.Username, username);
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Desktop}");
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Mobile}");
         }
 
         [Given(@"player logout")]
         public Task GivenPlayerLogoutAsync()
         {
-            var username = Get<string>(SR.Username);
             var playerCode = Get<string>(SR.PlayerCode);
-
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Desktop}");
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Mobile}");
-
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
