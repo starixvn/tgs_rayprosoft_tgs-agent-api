@@ -79,5 +79,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
 
             return map.Response(request, r);
         }
+
+        [HttpPost]
+        [Route("transfer/query")]
+        public async Task<QueryResponse> QueryAsync(
+            [FromServices] IHabaneroServices services,
+            [FromServices] IHabaneroActionModelMapper map,
+            QueryRequest request)
+        {
+            var exists = await services.GameActionExistsAsync(request.Detail);
+
+            return map.Response(exists);
+        }
     }
 }

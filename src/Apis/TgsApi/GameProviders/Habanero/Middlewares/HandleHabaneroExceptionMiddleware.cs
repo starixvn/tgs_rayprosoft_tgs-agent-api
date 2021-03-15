@@ -36,7 +36,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             _responseGenerator = new()
             {
                 {typeof(AuthorizePlayerRequest), GetAuthorizePlayerResponseAsync},
-                {typeof(FundTransferRequest), GetFundTransferResponseAsync}
+                {typeof(FundTransferRequest), GetFundTransferResponseAsync},
+                {typeof(QueryRequest), GetQueryResponseAsync}
             };
         }
 
@@ -77,8 +78,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             }
 
             var request = await context.Request.ReadAsObjectFromJsonAsync<FundTransferRequest>();
-            var res = _map.Response(error, message, request, result);
-            return res;
+            return _map.Response(error, message, request, result);
+        }
+
+        private Task<object> GetQueryResponseAsync(HttpContext context, GameApiError error, string message)
+        {
+            var response = _map.Response(false);
+            return Task.FromResult((object)response);
         }
 
         #endregion

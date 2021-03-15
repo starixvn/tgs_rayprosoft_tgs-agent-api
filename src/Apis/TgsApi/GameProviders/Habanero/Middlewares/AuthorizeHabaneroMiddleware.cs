@@ -5,9 +5,12 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
+using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
@@ -70,33 +73,39 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
                 throw new InvalidCredentialsException("invalid username and passkey");
             }
 
-            var token = string.Empty;
+            var playerCode = string.Empty;
+            var platformType = PlatformType.Desktop;
 
             if (type == typeof(AuthorizePlayerRequest))
             {
                 var r = _json.DeserializeFromString<AuthorizePlayerRequest>(value);
-                token = r.Detail.Token;
+                var loginRecord = await DecryptTokenAsync(r.Detail.Token);
+                playerCode = loginRecord.PlayerCode;
+                platformType = loginRecord.PlatformType;
             }
             else if (type == typeof(FundTransferRequest))
             {
                 var r = _json.DeserializeFromString<FundTransferRequest>(value);
-                token = r.Detail.Token;
+                var actionType = r.Detail.ActionType;
+                var loginRecord = await DecryptTokenAsync(r.Detail.Token);
+
+                if (actionType != ActionType.PlaceAndSettleBet && actionType != ActionType.PlaceBet &&
+                    loginRecord == null)
+                {
+                    playerCode = r.Detail.PlayerCode;
+                }
+                else
+                {
+                    playerCode = loginRecord.PlayerCode;
+                    platformType = loginRecord.PlatformType;
+                }
             }
             else if (type == typeof(QueryRequest))
             {
                 var r = _json.DeserializeFromString<QueryRequest>(value);
-                //token = r.Detail.Token;
+                playerCode = r.Detail.PlayerCode;
             }
 
-            if (token.IsNullOrEmpty())
-            {
-                throw new MissingTokenException("empty token");
-            }
-
-            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
-            var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
-
-            var playerCode = loginRecord.PlayerCode;
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
             var gameProviderId = ids.Id;
@@ -110,9 +119,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
             context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, gameProviderConfigurationId);
             context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
-            context.Items.Add(Consts.ContextItems.PlatformType, loginRecord.PlatformType);
+            context.Items.Add(Consts.ContextItems.PlatformType, platformType);
 
             await next(context);
+        }
+
+        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(
+            string token)
+        {
+            if (token.IsNullOrEmpty())
+            {
+                throw new MissingTokenException("empty token");
+            }
+
+            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
     }
 }

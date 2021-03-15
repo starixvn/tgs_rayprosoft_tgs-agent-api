@@ -26,6 +26,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
 
         FundTransferResponse Response(GameApiError error, string message, FundTransferRequest request,
             GetBalanceResult result);
+
+        QueryResponse Response(bool success);
     }
 
     public sealed class HabaneroActionModelMapper : IHabaneroActionModelMapper
@@ -187,6 +189,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 }
             };
         }
+
+        QueryResponse IHabaneroActionModelMapper.Response(bool success) =>
+            new() {Result = new() {Status = new() {Success = success}}};
 
         #region Private Methods
 
