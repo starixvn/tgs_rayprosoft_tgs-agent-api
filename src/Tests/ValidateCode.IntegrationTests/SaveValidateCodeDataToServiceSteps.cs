@@ -35,7 +35,7 @@ namespace TGS.ValidateCode.IntegrationTests
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseStartup<ValidateCodeApi.Startup>()
+                        .UseStartup<Apis.ValidateCodeApi.Startup>()
                         .UseTestServer()
                         .ConfigureTestServices(services =>
                         {
@@ -66,7 +66,7 @@ namespace TGS.ValidateCode.IntegrationTests
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseStartup<ValidateCodeApi.Startup>()
+                        .UseStartup<Apis.ValidateCodeApi.Startup>()
                         .UseTestServer()
                         .ConfigureTestServices(services =>
                         {
