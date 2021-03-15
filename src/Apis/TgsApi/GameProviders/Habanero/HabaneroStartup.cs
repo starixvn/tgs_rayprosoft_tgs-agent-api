@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Habanero
@@ -36,6 +38,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
 
             services.AddScoped<IHabaneroServices, HabaneroServices>();
             services.AddSingleton<IHabaneroActionModelMapper, HabaneroActionModelMapper>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(HabaneroGameInitializer)}, (provider, _) =>
+                provider.GetRequiredService<HabaneroGameInitializer>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

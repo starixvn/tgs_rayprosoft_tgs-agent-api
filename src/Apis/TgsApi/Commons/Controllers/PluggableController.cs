@@ -16,40 +16,30 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public sealed class PluggableController : ControllerBase
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly Func<string, IGameHistory> _historyFactory;
-        private readonly Func<string, IGameInitializer> _initializerFactory;
-        private readonly Func<string, IPlayerAction> _playerActionFactory;
-
-        public PluggableController(
-            Func<string, IGameInitializer> initializerFactory,
-            Func<string, IGameHistory> historyFactory,
-            Func<string, IPlayerAction> playerActionFactory,
-            IGameProviderOperations gameProviderOperations)
-        {
-            _initializerFactory = initializerFactory;
-            _historyFactory = historyFactory;
-            _playerActionFactory = playerActionFactory;
-            _gameProviderOperations = gameProviderOperations;
-        }
-
         [HttpPost]
         [Route("gameurl")]
-        public Task<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request) =>
-            _initializerFactory(request.GameProviderCode).GetGameUrlAsync(request);
+        public Task<GetGameUrlResponse> GetGameUrlAsync(
+            [FromServices] Func<string, IGameInitializer> initializerFactory,
+            GetGameUrlRequest request) =>
+            initializerFactory(request.GameProviderCode).GetGameUrlAsync(request);
 
         [HttpPost]
         [Route("history/round")]
-        public Task<GetRoundHistoryResponse> GetRoundHistory(GetRoundHistoryRequest request) =>
-            _historyFactory(request.GameProviderCode).GetRoundHistoryAsync(request);
+        public Task<GetRoundHistoryResponse> GetRoundHistory(
+            [FromServices] Func<string, IGameHistory> historyFactory,
+            GetRoundHistoryRequest request) =>
+            historyFactory(request.GameProviderCode).GetRoundHistoryAsync(request);
 
         [HttpPost]
         [Route("player/kick")]
-        public async Task<PlayerKickResponse> KickPlayerAsync(PlayerKickRequest request)
+        public async Task<PlayerKickResponse> KickPlayerAsync(
+            [FromServices] IGameProviderOperations gameProviderOperations,
+            [FromServices] Func<string, IPlayerAction> playerActionFactory,
+            PlayerKickRequest request)
         {
             var gameProviderCode = request.GameProviderCode;
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
-            var allowKickPlayer = await _gameProviderOperations.GetAllowKickPlayerAsync(gameProviderId);
+            var gameProviderId = await gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
+            var allowKickPlayer = await gameProviderOperations.GetAllowKickPlayerAsync(gameProviderId);
 
             if (!allowKickPlayer)
             {
@@ -57,7 +47,7 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
                     $"Game Provider '{request.GameProviderCode}' doesn't support to kick player");
             }
 
-            return await _playerActionFactory(gameProviderCode).KickAsync(request);
+            return await playerActionFactory(gameProviderCode).KickAsync(request);
         }
     }
 }
