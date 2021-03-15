@@ -89,86 +89,82 @@ namespace TGS.Core.DataServices.Tgs
             _uploader = new NpgsqlBulkUploader(this);
         }
 
-        DbSet<Reseller> ITgsRepository.Resellers { get; set; }
-        DbSet<Game> ITgsRepository.Games { get; set; }
-        DbSet<GameProvider> ITgsRepository.GameProviders { get; set; }
-        DbSet<GameProviderConfiguration> ITgsRepository.GameProviderConfigurations { get; set; }
-        DbSet<BrandGameProvider> ITgsRepository.BrandGameProviders { get; set; }
-        DbSet<ResellerCurrency> ITgsRepository.ResellerCurrencies { get; set; }
-        DbSet<ResellerLanguage> ITgsRepository.ResellerLanguages { get; set; }
-        DbSet<ResellerGameProvider> ITgsRepository.ResellerGameProviders { get; set; }
-        DbSet<Currency> ITgsRepository.Currencies { get; set; }
-        DbSet<Language> ITgsRepository.Languages { get; set; }
-        DbSet<BrandGame> ITgsRepository.BrandGames { get; set; }
-        DbSet<BrandGroup> ITgsRepository.BrandGroups { get; set; }
-        DbSet<BrandGroupGame> ITgsRepository.BrandGroupGames { get; set; }
-        DbSet<LocalizedString> ITgsRepository.LocalizedStrings { get; set; }
-        DbSet<Player> ITgsRepository.Players { get; set; }
-        DbSet<Wallet> ITgsRepository.Wallets { get; set; }
-        DbSet<Setting> ITgsRepository.Settings { get; set; }
-        DbSet<Whitelist> ITgsRepository.Whitelists { get; set; }
-        DbSet<GameProviderCurrency> ITgsRepository.GameProviderCurrencies { get; set; }
-        DbSet<GameProviderLanguage> ITgsRepository.GameProviderLanguages { get; set; }
-        DbSet<LicenseeCurrency> ITgsRepository.LicenseeCurrencies { get; set; }
-        DbSet<LicenseeLanguage> ITgsRepository.LicenseeLanguages { get; set; }
-        DbSet<LicenseeGameProvider> ITgsRepository.LicenseeGameProviders { get; set; }
-        DbSet<Licensee> ITgsRepository.Licensees { get; set; }
-        DbSet<BetLimit> ITgsRepository.BetLimits { get; set; }
-        DbSet<ResellerBetLimit> ITgsRepository.ResellerBetLimits { get; set; }
-        DbSet<LicenseeBetLimit> ITgsRepository.LicenseeBetLimits { get; set; }
-        DbSet<BrandBetLimit> ITgsRepository.BrandBetLimits { get; set; }
-        DbSet<BrandGroupBetLimit> ITgsRepository.BrandGroupBetLimits { get; set; }
-        DbSet<GameProviderBetLimit> ITgsRepository.GameProviderBetLimits { get; set; }
-        DbSet<BrandGroupGameProviderBetLimit> ITgsRepository.BrandGroupGameProviderBetLimits { get; set; }
-        DbSet<PlayerLoginRecord> ITgsRepository.PlayerLoginRecords { get; set; }
-        DbSet<PlayerBank> ITgsRepository.PlayerBanks { get; set; }
-        DbSet<VipLevel> ITgsRepository.VipLevels { get; set; }
-        DbSet<PlayerAuditLog> ITgsRepository.PlayerAuditLogs { get; set; }
-        DbSet<Announcement> ITgsRepository.Announcements { get; set; }
-        DbSet<StationLetterPlayer> ITgsRepository.StationLetterPlayers { get; set; }
-        DbSet<StationLetter> ITgsRepository.StationLetters { get; set; }
-        DbSet<Payment> ITgsRepository.Payments { get; set; }
-        DbSet<PaymentMethod> ITgsRepository.PaymentMethods { get; set; }
-        DbSet<PaymentChannel> ITgsRepository.PaymentChannels { get; set; }
-        DbSet<BrandPayment> ITgsRepository.BrandPayments { get; set; }
-        DbSet<BrandPaymentPlayer> ITgsRepository.PaymentPlayerList { get; set; }
-        DbSet<BrandPaymentVipLevel> ITgsRepository.PaymentVipLevels { get; set; }
-        DbSet<BrandPaymentAuditLog> ITgsRepository.PaymentAuditLogs { get; set; }
-        DbSet<Brand> ITgsRepository.Brands { get; set; }
-        DbSet<BrandCurrency> ITgsRepository.BrandCurrencies { get; set; }
-        DbSet<BrandLanguage> ITgsRepository.BrandLanguages { get; set; }
-        DbSet<User> ITgsRepository.Users { get; set; }
-        DbSet<Role> ITgsRepository.Roles { get; set; }
-        DbSet<Department> ITgsRepository.Departments { get; set; }
-        DbSet<SportType> ITgsRepository.SportTypes { get; set; }
-        DbSet<MarketType> ITgsRepository.MarketTypes { get; set; }
-        DbSet<SportMarketType> ITgsRepository.SportMarketTypes { get; set; }
-        DbSet<PlayerSportsBetLimit> ITgsRepository.PlayerSportsBetLimits { get; set; }
-        DbSet<Round> ITgsRepository.Rounds { get; set; }
-        DbSet<RoundDetail> ITgsRepository.RoundDetails { get; set; }
-        DbSet<GameAction> ITgsRepository.GameActions { get; set; }
-        DbSet<GameActionBatch> ITgsRepository.GameActionBatches { get; set; }
-        DbSet<Transaction> ITgsRepository.Transactions { get; set; }
+        public DbSet<Reseller> Resellers { get; set; }
+        public DbSet<Game> Games { get; set; }
+        public DbSet<GameProvider> GameProviders { get; set; }
+        public DbSet<GameProviderConfiguration> GameProviderConfigurations { get; set; }
+        public DbSet<BrandGameProvider> BrandGameProviders { get; set; }
+        public DbSet<ResellerCurrency> ResellerCurrencies { get; set; }
+        public DbSet<ResellerLanguage> ResellerLanguages { get; set; }
+        public DbSet<ResellerGameProvider> ResellerGameProviders { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
+        public DbSet<Language> Languages { get; set; }
+        public DbSet<BrandGame> BrandGames { get; set; }
+        public DbSet<BrandGroup> BrandGroups { get; set; }
+        public DbSet<BrandGroupGame> BrandGroupGames { get; set; }
+        public DbSet<LocalizedString> LocalizedStrings { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Setting> Settings { get; set; }
+        public DbSet<Whitelist> Whitelists { get; set; }
+        public DbSet<GameProviderCurrency> GameProviderCurrencies { get; set; }
+        public DbSet<GameProviderLanguage> GameProviderLanguages { get; set; }
+        public DbSet<LicenseeCurrency> LicenseeCurrencies { get; set; }
+        public DbSet<LicenseeLanguage> LicenseeLanguages { get; set; }
+        public DbSet<LicenseeGameProvider> LicenseeGameProviders { get; set; }
+        public DbSet<Licensee> Licensees { get; set; }
+        public DbSet<BetLimit> BetLimits { get; set; }
+        public DbSet<ResellerBetLimit> ResellerBetLimits { get; set; }
+        public DbSet<LicenseeBetLimit> LicenseeBetLimits { get; set; }
+        public DbSet<BrandBetLimit> BrandBetLimits { get; set; }
+        public DbSet<BrandGroupBetLimit> BrandGroupBetLimits { get; set; }
+        public DbSet<GameProviderBetLimit> GameProviderBetLimits { get; set; }
+        public DbSet<BrandGroupGameProviderBetLimit> BrandGroupGameProviderBetLimits { get; set; }
+        public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
+        public DbSet<PlayerBank> PlayerBanks { get; set; }
+        public DbSet<VipLevel> VipLevels { get; set; }
+        public DbSet<PlayerAuditLog> PlayerAuditLogs { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<StationLetterPlayer> StationLetterPlayers { get; set; }
+        public DbSet<StationLetter> StationLetters { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<PaymentChannel> PaymentChannels { get; set; }
+        public DbSet<BrandPayment> BrandPayments { get; set; }
+        public DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        public DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        public DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
+        public DbSet<Brand> Brands { get; set; }
+        public DbSet<BrandCurrency> BrandCurrencies { get; set; }
+        public DbSet<BrandLanguage> BrandLanguages { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<SportType> SportTypes { get; set; }
+        public DbSet<MarketType> MarketTypes { get; set; }
+        public DbSet<SportMarketType> SportMarketTypes { get; set; }
+        public DbSet<PlayerSportsBetLimit> PlayerSportsBetLimits { get; set; }
+        public DbSet<Round> Rounds { get; set; }
+        public DbSet<RoundDetail> RoundDetails { get; set; }
+        public DbSet<GameAction> GameActions { get; set; }
+        public DbSet<GameActionBatch> GameActionBatches { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
 
-        IDbContextTransaction IBaseRepository.CurrentTransaction =>
+        public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
 
-        ChangeTracker IBaseRepository.ChangeTracker => ChangeTracker;
+        public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
-        Task<bool> IBaseRepository.CanConnectionAsync() => Database.CanConnectAsync();
-
-        void IBaseRepository.SetTimeoutToSeconds(int seconds)
+        public void SetTimeoutToSeconds(int seconds)
         {
             Database.SetCommandTimeout(seconds);
         }
 
-        Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) =>
+        public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);
 
-        IDbConnection IBaseRepository.GetDbConnection() =>
+        public IDbConnection GetDbConnection() =>
             Database.GetDbConnection();
-
-        Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
 
         Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
             _uploader.InsertAsync(entities);
@@ -176,7 +172,7 @@ namespace TGS.Core.DataServices.Tgs
         Task IBaseRepository.BulkUpdateAsync<T>(IEnumerable<T> entities) =>
             _uploader.UpdateAsync(entities);
 
-        async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
+        public async Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
                             (await Database.GetPendingMigrationsAsync()).Any();
@@ -192,12 +188,6 @@ namespace TGS.Core.DataServices.Tgs
                 await data.SetInitialDataAsync();
             }
         }
-
-        DbSet<T> IBaseRepository.Set<T>() =>
-            Set<T>();
-
-        EntityEntry<T> IBaseRepository.Entry<T>(T entity) =>
-            base.Entry(entity);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

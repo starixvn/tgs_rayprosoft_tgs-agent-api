@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,7 @@ namespace TGS.Core.DataServices.Report
         IDbConnection IBaseRepository.GetDbConnection() =>
             Database.GetDbConnection();
 
-        Task IBaseRepository.SaveChangesAsync() => SaveChangesAsync();
+        Task<int> IBaseRepository.SaveChangesAsync(CancellationToken cancellationToken) => SaveChangesAsync(cancellationToken);
 
         Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
             _uploader.InsertAsync(entities);

@@ -36,8 +36,9 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             _playerOperations = playerOperations;
         }
 
-        async Task<ChangePasswordResponse> IRequestHandler<ChangePasswordRequest, ChangePasswordResponse>.Handle(
-            ChangePasswordRequest request, CancellationToken cancellationToken)
+        public async Task<ChangePasswordResponse> Handle(
+            ChangePasswordRequest request,
+            CancellationToken cancellationToken)
         {
             var brandId = _httpContext.Items.GetBrandId();
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
@@ -66,6 +67,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
 
             return new()
             {
+                PlayerCode = playerCode,
                 UpdateTime = updatedOn
             };
         }

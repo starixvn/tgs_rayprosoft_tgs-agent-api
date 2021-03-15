@@ -7,7 +7,7 @@ namespace TGS.Core.Infrastructures.Security
 {
     public interface IPasswordHandler
     {
-        (byte[], byte[]) GenerateCredential(string password);
+        (byte[] Salt, byte[] HashedPassword) GenerateCredential(string password);
 
         bool Verify(byte[] existedPassword, byte[] existedSalt, string password);
         byte[] GenerateRandomSalt(ushort length);
@@ -25,7 +25,7 @@ namespace TGS.Core.Infrastructures.Security
             _interface = this;
         }
 
-        (byte[], byte[]) IPasswordHandler.GenerateCredential(string password)
+        (byte[] Salt, byte[] HashedPassword) IPasswordHandler.GenerateCredential(string password)
         {
             var salt = _interface.GenerateRandomSalt(32);
             var hashedPassword = _hashProvider.Hash(
