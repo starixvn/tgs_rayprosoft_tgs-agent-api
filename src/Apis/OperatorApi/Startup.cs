@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -61,6 +62,12 @@ namespace TGS.Apis.OperatorApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
+                .AddOperatorApiCore((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    config.GetSection("Operator").Bind(options);
+                })
                 .AddReportServices();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
@@ -86,7 +93,7 @@ namespace TGS.Apis.OperatorApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() {Title = "TGS Operator API", Version = "v1"});
+                    c.SwaggerDoc("v1", new() { Title = "TGS Operator API", Version = "v1" });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -98,7 +105,8 @@ namespace TGS.Apis.OperatorApi
                         Scheme = "bearer",
                         Reference = new()
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme
                         }
                     };
 
@@ -130,6 +138,12 @@ namespace TGS.Apis.OperatorApi
         public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
