@@ -5,10 +5,10 @@ namespace TGS.Services.Operator
 {
     public interface IValidateCodeOperator
     {
-        ValueTask<bool> SaveValidateDataAsync(string validateCode, ValidateCodeData data);
+        ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data);
 
         ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId);
 
-        ValueTask<ValidateCodeData?> GetValidateCodeDataAsync(string validateCode, string token);
+        ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token);
     }
 }

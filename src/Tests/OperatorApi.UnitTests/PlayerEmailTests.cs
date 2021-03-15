@@ -36,7 +36,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeValidateCodeGenerator.GenerateToken().Returns(token);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Any<ValidateCodeData>())
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
             var expected = new
