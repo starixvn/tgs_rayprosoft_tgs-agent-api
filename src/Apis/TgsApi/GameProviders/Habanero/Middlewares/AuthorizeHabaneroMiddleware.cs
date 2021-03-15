@@ -79,7 +79,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             if (type == typeof(AuthorizePlayerRequest))
             {
                 var r = _json.DeserializeFromString<AuthorizePlayerRequest>(value);
-                var loginRecord = await DecryptTokenAsync(r.Detail.Token);
+                var loginRecord = await DecryptTokenAsync(r.Detail.Token, false);
                 playerCode = loginRecord.PlayerCode;
                 platformType = loginRecord.PlatformType;
             }
@@ -87,10 +87,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             {
                 var r = _json.DeserializeFromString<FundTransferRequest>(value);
                 var actionType = r.Detail.ActionType;
-                var loginRecord = await DecryptTokenAsync(r.Detail.Token);
+                var allowExpiredLogin = actionType is not ActionType.PlaceAndSettleBet and not ActionType.PlaceBet;
+                var loginRecord = await DecryptTokenAsync(r.Detail.Token, allowExpiredLogin);
 
-                if (actionType != ActionType.PlaceAndSettleBet && actionType != ActionType.PlaceBet &&
-                    loginRecord == null)
+                if (allowExpiredLogin && loginRecord == null)
                 {
                     playerCode = r.Detail.PlayerCode;
                 }
@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
         }
 
         private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(
-            string token)
+            string token, bool allowExpiredLogin)
         {
             if (token.IsNullOrEmpty())
             {
@@ -133,7 +133,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             }
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
-            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+            var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+
+            if (!allowExpiredLogin && loginRecord == null)
+            {
+                throw new PlayerLoginExpiredException();
+            }
+
+            return loginRecord;
         }
     }
 }
