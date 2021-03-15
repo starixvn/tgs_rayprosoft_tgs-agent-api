@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210311034521_Initial")]
+    [Migration("20210312093127_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2464,6 +2464,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<short>("ClientStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("client_status");
+
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("closed_on");
@@ -2538,6 +2542,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on");
+
+                    b.Property<decimal?>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
 
                     b.Property<Guid>("WalletId")
                         .HasColumnType("uuid")
@@ -3000,12 +3009,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("live_dealer_rebate");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("name");
 
                     b.Property<decimal>("PromotionReward")
                         .HasPrecision(18, 6)

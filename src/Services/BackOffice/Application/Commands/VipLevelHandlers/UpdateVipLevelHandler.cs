@@ -30,8 +30,8 @@ namespace TGS.Services.BackOffice.Application.Commands.VipLevelHandlers
             var previousVip =
                 await _service.GetVipLevelAsync(x => x.BrandId == vipLevel.BrandId && x.Level == vipLevel.Level - 1);
 
-            if (previousVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount ||
-                previousVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit)
+            if (previousVip != null && (previousVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount ||
+                previousVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit))
             {
                 return CreateInvalidResponse<MessageResponse>(string.Format(
                     VipLevel.LevelUpAccumulateLessThanPreviousLevel,
@@ -41,8 +41,8 @@ namespace TGS.Services.BackOffice.Application.Commands.VipLevelHandlers
             var nextVip =
                 await _service.GetVipLevelAsync(x => x.BrandId == vipLevel.BrandId && x.Level == vipLevel.Level + 1);
 
-            if (nextVip.LevelUpAccumulateBetAmount <= request.LevelUpAccumulateBetAmount ||
-                nextVip.LevelUpAccumulateDeposit <= request.LevelUpAccumulateDeposit)
+            if (nextVip != null && (nextVip.LevelUpAccumulateBetAmount <= request.LevelUpAccumulateBetAmount ||
+                nextVip.LevelUpAccumulateDeposit <= request.LevelUpAccumulateDeposit))
             {
                 return CreateInvalidResponse<MessageResponse>(string.Format(
                     VipLevel.LevelUpAccumulateGreaterThanNextLevel,

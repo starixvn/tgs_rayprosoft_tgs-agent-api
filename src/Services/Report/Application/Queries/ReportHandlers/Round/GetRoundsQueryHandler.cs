@@ -3,10 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Round;
-using TGS.Services.Report.Domain.Enums;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
@@ -25,12 +23,12 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
         public override Task<PagedResponse<RoundModel>> Handle(
             GetRoundsRequest request,
             CancellationToken cancellationToken) =>
-            _service.GetRoundsAsync()
-                .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
-                .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
-                .Where(request.Status, x => request.Status == x.Status)
-                .Where(request.RoundId, x => x.Id == request.RoundId)
+            _service.GetRoundQueries(q => q.Where(x => x.BrandId == request.BrandId)
+                    .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
+                    .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
+                    .Where(request.Status, x => request.Status == x.ClientStatus)
+                    .Where(request.RoundId, x => x.Id == request.RoundId)
+                )
                 .GroupJoin(
                     _service.Repository.Players,
                     round => round.PlayerCode, player => player.PlayerCode,
@@ -67,14 +65,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                 .Select(combine => new RoundModel
                 {
                     Id = combine.round.Id,
-                    Status =
-                        combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss > 0
-                            ? ReportRoundStatus.Win
-                            : combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss < 0
-                                ? ReportRoundStatus.Loss
-                                : combine.round.Status == RoundStatus.Closed && -combine.round.WinLoss == 0
-                                    ? ReportRoundStatus.Draw
-                                    : ReportRoundStatus.Open,
+                    Status = combine.round.ClientStatus,
                     PlayerCode = combine.player.PlayerCode,
                     ExternalPlayerCode = combine.player.PlayerCode,
                     PlayerName = combine.player.Username,

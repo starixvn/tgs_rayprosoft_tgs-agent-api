@@ -76,6 +76,7 @@ const BodyContent = ({ brandId = "" }) => {
             title={<Trans zh="玩家列表" en="Players" />}
             actionBar={
                 <SearchBar
+                    brandId={brandId}
                     search={(data) => {
                         let newState = {
                             pageIndex: 0,
@@ -98,7 +99,7 @@ const BodyContent = ({ brandId = "" }) => {
                             ...data
                         })
                     }}
-                    isPending={isLoading}
+                    isLoading={isLoading}
                 />
             }
         >
@@ -115,7 +116,7 @@ const BodyContent = ({ brandId = "" }) => {
     )
 }
 
-const SearchBar = ({ search, isLoading, ...props }) => {
+const SearchBar = ({ brandId, search, isLoading, ...props }) => {
     let usernameInputPlaceholder = useSearchInputPlaceHolder()
 
     let formMethods = useForm()
@@ -127,7 +128,7 @@ const SearchBar = ({ search, isLoading, ...props }) => {
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <PlayerStatusSelect name="status" />
-                    <VipLevelSelect name="vipId" />
+                    <VipLevelSelect name="vipId" brandId={brandId} />
                     <InputField
                         name="username"
                         addonAfter={
@@ -214,6 +215,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                             <Set>
                                 <ViewButton player={value} brandId={brandId} />
                                 <EditButton
+                                    brandId={brandId}
                                     player={value}
                                     onSubmitted={mutate}
                                 />

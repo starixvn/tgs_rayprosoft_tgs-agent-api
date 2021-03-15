@@ -25,11 +25,11 @@ namespace TGS.Services.BackOffice.Application.Queries.VipLevelHandlers
                         r => r.Brand.Licensee.ResellerId == ResellerId)
                     .Where(LicenseeId != null,
                         l => l.Brand.LicenseeId == LicenseeId)
-                    .Where(BrandId != null, b => b.BrandId == BrandId))
+                    .Where(BrandId != null, b => b.BrandId == BrandId)
+                    .Where(request.BrandId, b => b.BrandId == request.BrandId))
                 .Select(x => new VipLevelModel
                 {
                     Id = x.Id,
-                    Name = x.Name,
                     Level = x.Level,
                     BrandId = x.BrandId,
                     LevelKeepAccumulateBetAmount = x.LevelKeepAccumulateBetAmount,

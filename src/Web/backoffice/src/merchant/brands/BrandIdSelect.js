@@ -4,29 +4,41 @@ import Select from "../../select/Select"
 import { useBrandList } from "./client"
 import { useTrans } from "../../i18n"
 
-export const BrandIdSelect = ({ licenseeId = "", ...props }) => {
-  let { data, isLoading } = useBrandList({ showAll: true, licenseeId })
+export const BrandIdSelect = ({
+    licenseeId = "",
+    placeholderDisabled,
+    ...props
+}) => {
+    let { data, isLoading } = useBrandList({ showAll: true, licenseeId })
 
-  let options =
-    data?.items.map((brand) => ({
-      label: brand.code,
-      value: brand.id
-    })) ?? []
+    let placeholder = useBrandPlaceholder()
+    let placeholderOption = {
+        label: placeholder,
+        value: "",
+        disabled: placeholderDisabled
+    }
 
-  let placeholder = useBrandPlaceholder()
-  return (
-    <Select
-      isLoading={isLoading}
-      options={options}
-      placeholder={placeholder}
-      {...props}
-    />
-  )
+    if (isLoading) {
+        return (
+            <Select
+                isLoading={isLoading}
+                options={[placeholderOption]}
+                {...props}
+            />
+        )
+    }
+
+    let options =
+        data?.items.map((brand) => ({
+            label: brand.code,
+            value: brand.id
+        })) ?? []
+    return <Select options={[placeholderOption, ...options]} {...props} />
 }
 
 const useBrandPlaceholder = () =>
-  useTrans({
-    zh: "选择品牌",
-    en: "Select Brand"
-  })
+    useTrans({
+        zh: "选择品牌",
+        en: "Select Brand"
+    })
 export default BrandIdSelect

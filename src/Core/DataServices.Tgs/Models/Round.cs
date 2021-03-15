@@ -24,11 +24,13 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset? ExternalCreatedOn { get; set; }
         public DateTimeOffset? ExternalClosedOn { get; set; }
         public decimal? BetAmount { get; set; }
-        public decimal? SettleAmount { get; set;}
+        public decimal? ValidBetAmount { get; set; }
+        public decimal? SettleAmount { get; set; }
         public decimal? Commission { get; set; }
         public decimal? Turnover { get; set; }
         public decimal? WinLoss { get; set; }
         public decimal? TieBetAdjustment { get; set; }
+        public ClientRoundStatus ClientStatus { get; set; }
         public virtual RoundDetail RoundDetail { get; set; }
     }
 }

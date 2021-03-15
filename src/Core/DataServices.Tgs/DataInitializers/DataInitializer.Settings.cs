@@ -78,6 +78,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("View"),
                                 new MenuSetting("Verify")
                             }
+                        },
+                        new MenuSetting("VipLevel")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
                         }
                     }
                 },

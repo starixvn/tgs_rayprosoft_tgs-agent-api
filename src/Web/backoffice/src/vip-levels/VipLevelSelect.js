@@ -6,32 +6,44 @@ import { useVipLevelList } from "./client"
 import Select from "../select/Select"
 import { useTrans } from "../i18n"
 
-export const VipLevelSelect = ({ placeholder, ...props }) => {
-  let defaultPlaceholder = useTrans({
-    zh: "等级",
-    en: "VIP Level"
-  })
-  placeholder = placeholder ?? defaultPlaceholder
+export const VipLevelSelect = ({
+    placeholder,
+    placeholderDisabled,
+    brandId,
+    ...props
+}) => {
+    let defaultPlaceholder = useTrans({
+        zh: "选择 VIP 等级",
+        en: "Select VIP Level"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
 
-  let { items, isLoading, error } = useVipLevelList()
+    let { data, isLoading, error } = useVipLevelList({ brandId, showAll: true })
 
-  let options =
-    items?.map(({ id, name }) => ({
-      label: name,
-      value: id
-    })) ?? []
+    let vipLevelOptions =
+        data?.items?.map(({ id, ...item }) => ({
+            label: item.name,
+            value: id
+        })) ?? []
 
-  return (
-    <>
-      <Select
-        isLoading={isLoading}
-        options={options}
-        placeholder={placeholder}
-        {...props}
-      />
-      {error && <AlertDialog {...error} />}
-    </>
-  )
+    let options =
+        typeof placeholder === "string"
+            ? [
+                  {
+                      label: placeholder,
+                      value: "",
+                      disabled: placeholderDisabled
+                  },
+                  ...vipLevelOptions
+              ]
+            : vipLevelOptions
+
+    return (
+        <>
+            <Select isLoading={isLoading} options={options} {...props} />
+            {error && <AlertDialog {...error} />}
+        </>
+    )
 }
 
 export default VipLevelSelect

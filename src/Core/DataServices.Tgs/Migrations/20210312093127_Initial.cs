@@ -206,11 +206,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     external_created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     external_closed_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     bet_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
+                    valid_bet_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     settle_amount = table.Column<decimal>(type: "numeric", nullable: true),
                     commission = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     turnover = table.Column<decimal>(type: "numeric", nullable: true),
                     win_loss = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
-                    tie_bet_adjustment = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true)
+                    tie_bet_adjustment = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
+                    client_status = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1319,7 +1321,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     level = table.Column<int>(type: "integer", nullable: false),
-                    name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     level_up_accumulate_bet_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
                     level_up_accumulate_deposit = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),

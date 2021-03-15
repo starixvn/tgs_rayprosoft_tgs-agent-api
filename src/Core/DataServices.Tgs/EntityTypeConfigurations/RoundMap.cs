@@ -64,6 +64,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.BetAmount)
                 .HasPrecision(18, 6);
 
+            builder.Property(c => c.ValidBetAmount)
+                .HasPrecision(18, 6);
+
             builder.Property(c => c.WinLoss)
                 .HasPrecision(18, 6);
 
@@ -72,7 +75,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Commission)
                 .HasPrecision(18, 6);
-            
+
+            builder.Property(c => c.ClientStatus)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
             builder.HasIndex(c => c.GameProviderId)
                 .HasDatabaseName("ix_rounds_game_provider_id");
 
@@ -85,9 +92,19 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_rounds_brand_id");
 
-            builder.HasIndex(c => new {c.ExternalRoundId, c.PlayerCode, c.GameProviderId, c.GameId})
+            builder.HasIndex(c => new
+                {
+                    c.ExternalRoundId,
+                    c.PlayerCode,
+                    c.GameProviderId,
+                    c.GameId
+                })
                 .IsUnique()
-                .IncludeProperties(c => new { c.GameProviderConfigurationId, c.WalletId })
+                .IncludeProperties(c => new
+                {
+                    c.GameProviderConfigurationId,
+                    c.WalletId
+                })
                 .HasDatabaseName("ux_rounds_external_round_id_composite");
         }
     }

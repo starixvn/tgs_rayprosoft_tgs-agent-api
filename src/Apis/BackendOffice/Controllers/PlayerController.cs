@@ -57,7 +57,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     PlayerCode = p.PlayerCode,
                     Username = p.Username,
-                    VipLevel = p.Vip.Name,
+                    VipLevel = p.Vip.Level,
                     Status = p.Status.ToString(),
                     HasAgent = p.HasAgent
                 }).CreatePagedResponseAsync(request);
@@ -82,7 +82,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 Username = player.Username,
                 RealName = player.RealName,
-                VipLevel = player.Vip?.Name,
+                VipId = player.Vip.Id,
+                VipLevel = player.Vip.Level,
                 Status = player.Status,
                 StatusName = player.Status.ToString(),
                 HasAgent = player.HasAgent,

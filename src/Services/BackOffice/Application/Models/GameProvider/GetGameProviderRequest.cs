@@ -11,5 +11,6 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         }
 
         public Guid Id { get; set; }
+        public bool IncludeAllGames { get; set; } = false;
     }
 }

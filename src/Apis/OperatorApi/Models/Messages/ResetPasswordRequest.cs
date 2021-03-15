@@ -1,4 +1,15 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record ResetPasswordRequest(string Token, string ValidateCode, string NewPassword);
+    public record ResetPasswordRequest
+    {
+        public string Token { get; init; }
+
+        [JsonPropertyName("validatecode")]
+        public string ValidateCode { get; init; }
+
+        [JsonPropertyName("newpwd")]
+        public string NewPassword { get; init; }
+    }
 }
