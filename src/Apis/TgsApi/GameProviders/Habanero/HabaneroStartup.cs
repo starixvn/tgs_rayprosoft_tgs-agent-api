@@ -41,6 +41,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(HabaneroGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<HabaneroGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(HabaneroGameHistory)}, (provider, _) =>
+                provider.GetRequiredService<HabaneroGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

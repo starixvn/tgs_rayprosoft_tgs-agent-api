@@ -14,9 +14,9 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
 {
     public abstract class BaseBetHistory : IGameHistory
     {
-        private readonly IRoundQueries _roundQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ILocalizationOperations _localizationOperations;
+        private readonly IRoundQueries _roundQueries;
 
         protected BaseBetHistory(
             IRoundQueries roundQueries,
@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
         {
             var playerCode = request.PlayerCode;
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
-            
+
             var round = await _roundQueries.GetRoundByRoundIdAsync(request.RoundId, true, true);
             if (round == null || round.GameProviderId != gameProviderId || round.PlayerCode != playerCode)
             {
@@ -45,14 +45,22 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, round.GameId);
 
-            var result = await GetGameProviderBetHistoryAsync(playerCode, round, cachedGameProvider, cachedGame, language);
+            var result =
+                await GetGameProviderBetHistoryAsync(playerCode, round, cachedGameProvider, cachedGame, language);
 
             var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, language);
 
             return new()
             {
-                GameProviderName = _localizationOperations.Parse(store, gameProviderId.ToString(), Consts.LocalizationContext.GameProviderName, cachedGameProvider.Name),
-                GameName = _localizationOperations.Parse(store, cachedGame.Id.ToString(), Consts.LocalizationContext.GameName, cachedGame.Name),
+                GameProviderName =
+                    _localizationOperations.Parse(store, gameProviderId.ToString(),
+                        Consts.LocalizationContext.GameProviderName, cachedGameProvider.Name),
+                GameName =
+                    _localizationOperations.Parse(store, cachedGame.Id.ToString(),
+                        Consts.LocalizationContext.GameName, cachedGame.Name),
+                BetAmount = result.BetAmount,
+                Winloss = result.Winloss,
+                Turnover = result.Turnover,
                 ExternalRoundId = round.ExternalRoundId,
                 GameResult = result.GameResult,
                 Data = result.Data
