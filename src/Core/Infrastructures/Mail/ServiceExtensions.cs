@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,63 @@ namespace TGS.Core.Infrastructures.Mail
                     EnableSsl = true
                 };
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddMail(this IServiceCollection services, Action<EmailConfiguration, IServiceProvider> configure)
+        {
+            services
+                .AddOptions<EmailConfiguration>()
+                .Configure(configure);
+
+            services
+                .AddTransient(sp => sp.GetRequiredService<IOptions<EmailConfiguration>>().Value)
+                .AddTransient<IEmailManager, EmailManager>()
+                .AddTransient(sp =>
+                {
+                    var emailConfig = sp.GetRequiredService<IOptions<EmailConfiguration>>().Value;
+
+                    return new SmtpClient
+                    {
+                        Host = emailConfig.SmtpServer,
+                        Port = emailConfig.Port,
+                        UseDefaultCredentials = false,
+                        Credentials = new NetworkCredential(
+                            emailConfig.FromMail,
+                            emailConfig.Password
+                        ),
+                        EnableSsl = true
+                    };
+                });
+
+            return services;
+        }
+
+        public static IServiceCollection AddMail(this IServiceCollection services)
+        {
+            services
+                .AddOptions<EmailConfiguration>();
+
+            services
+                .AddTransient(sp => sp.GetRequiredService<IOptions<EmailConfiguration>>().Value)
+                .AddTransient<IEmailManager, EmailManager>()
+                .AddTransient(sp =>
+                {
+                    var emailConfig = sp.GetRequiredService<IOptions<EmailConfiguration>>().Value;
+
+                    return new SmtpClient
+                    {
+                        Host = emailConfig.SmtpServer,
+                        Port = emailConfig.Port,
+                        UseDefaultCredentials = false,
+                        Credentials = new NetworkCredential(
+                            emailConfig.FromMail,
+                            emailConfig.Password
+                        ),
+                        EnableSsl = true
+                    };
+                });
 
             return services;
         }
