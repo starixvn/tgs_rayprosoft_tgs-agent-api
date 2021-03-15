@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using TGS.Services.Operator;
 using Valhalla.Services;
 
@@ -7,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class OperatorServiceCollectionExtensions
     {
-        public static IServiceCollection AddOperatorApiCore(this IServiceCollection services)
+        public static IServiceCollection AddOperatorApiCore(this IServiceCollection services, Action<OperatorOptions, IServiceProvider> configure)
         {
             var allTypes = typeof(OperatorServiceCollectionExtensions).Assembly.GetTypes();
 
@@ -45,16 +46,23 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.AddTransient(t.ServiceType, t.ImplementationType);
 
             services
+                .AddOptions<OperatorOptions>()
+                .Configure(configure)
+                .Services
                 .AddHttpClient<SmsServiceClient>()
-                .ConfigureHttpClient(httpClient =>
+                .ConfigureHttpClient((sp, httpClient) =>
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:5002");
+                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+                    httpClient.BaseAddress = options.SmsBaseUrl;
                 })
                 .Services
                 .AddHttpClient<ValidateCodeServiceClient>()
-                .ConfigureHttpClient(httpClient =>
+                .ConfigureHttpClient((sp, httpClient) =>
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:5001");
+                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+                    httpClient.BaseAddress = options.ValidateCodeBaseUrl;
                 })
                 .Services
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
