@@ -68,5 +68,23 @@ namespace TGS.Services.Operator.Properties {
                 return ResourceManager.GetString("ForgotPasswordMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查詢類似 Your ID verification code is : {0} 的當地語系化字串。
+        /// </summary>
+        internal static string ValidateCodeMailBody {
+            get {
+                return ResourceManager.GetString("ValidateCodeMailBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Verification Code 的當地語系化字串。
+        /// </summary>
+        internal static string ValidateCodeMailSubject {
+            get {
+                return ResourceManager.GetString("ValidateCodeMailSubject", resourceCulture);
+            }
+        }
     }
 }

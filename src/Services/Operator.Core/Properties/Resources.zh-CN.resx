@@ -120,4 +120,10 @@
   <data name="ForgotPasswordMessage" xml:space="preserve">
     <value>[身份验证] 验证码为{0}, 请于3分钟内完成验证。</value>
   </data>
+  <data name="ValidateCodeMailSubject" xml:space="preserve">
+    <value>验证码</value>
+  </data>
+  <data name="ValidateCodeMailBody" xml:space="preserve">
+    <value>[身份验证] 验证码为{0}, 请于3分钟内完成验证。</value>
+  </data>
 </root>
