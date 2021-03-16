@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Polly;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.Properties;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PlayerEmail
 {

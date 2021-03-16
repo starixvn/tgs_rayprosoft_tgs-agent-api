@@ -1,10 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
