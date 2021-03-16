@@ -1,7 +1,7 @@
 ﻿using FluentValidation.TestHelper;
 using NUnit.Framework;
-using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player;
+using TGS.Services.BackOffice.Application.Models.PlayerBank;
+using TGS.Services.BackOffice.Validation.Player;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
 {
@@ -9,10 +9,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
     public class PlayerBankRequestValidatorTests
     {
         [SetUp]
-        public void Setup()
-        {
-            _validator = new PlayerBankRequestValidator();
-        }
+        public void Setup() => _validator = new();
 
         private PlayerBankRequestValidator _validator;
 
@@ -22,7 +19,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var model = new PlayerBankRequest {RealName = null};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.RealName)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Player.BankRealNameRequired);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Player.BankRealNameRequired);
         }
 
         [Test]
@@ -39,7 +36,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var model = new PlayerBankRequest {BankName = null};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.BankName)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Player.BankNameRequired);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Player.BankNameRequired);
         }
 
         [Test]
@@ -56,7 +53,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var model = new PlayerBankRequest {BankAccount = null};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.BankAccount)
-                .WithErrorMessage(Apis.BackendOffice.Resources.Player.BankAccountRequired);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Player.BankAccountRequired);
         }
 
         [Test]

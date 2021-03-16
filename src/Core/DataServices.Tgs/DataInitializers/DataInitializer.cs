@@ -296,8 +296,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 InvitationCode = invitationCode,
                 Password = password,
                 Salt = salt,
-                WithdrawPassword = password,
-                WithdrawSalt = salt,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
                 DefaultWalletId = walletId,
                 DefaultWalletCurrencyCode = currencyCode,
                 Status = PlayerStatus.Enabled,
@@ -337,7 +337,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         PlayerCode = playerCode,
                         RealName = Generator.RandomString(4),
                         BankName = Generator.RandomString(12),
-                        BankAccount = Generator.RandomIntString(20)
+                        BankAccount = Generator.RandomIntString(20),
+                        CreatedByUsername = AdminUsername,
+                        UpdatedByUsername = AdminUsername,
+                        CreatedOn = Now,
+                        UpdatedOn = Now
                     }
                 }
             };

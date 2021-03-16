@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Services.BackOffice.Application.Models.VipLevel;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
@@ -26,14 +25,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
     public class VipLevelService : BaseRepositoryOperations<ITgsRepository>, IVipLevelService
     {
-        private readonly ITgsRepository _repository;
-        private readonly ITransactionManager _transactionManager;
-
-        public VipLevelService(ITgsRepository tgsRepository, ITransactionManager transactionManager) : base(
+        public VipLevelService(ITgsRepository tgsRepository) : base(
             tgsRepository)
         {
-            _transactionManager = transactionManager;
-            _repository = tgsRepository;
         }
 
         Task<VipLevel> IVipLevelService.GetVipLevelAsync(Expression<Func<VipLevel, bool>> predicate,
@@ -45,7 +39,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task IVipLevelService.UpdateVipLevelAsync(
+        Task IVipLevelService.UpdateVipLevelAsync(
             VipLevel vipLevel, UpdateVipLevelRequest request)
         {
             vipLevel.LevelUpAccumulateBetAmount = request.LevelUpAccumulateBetAmount;
@@ -63,10 +57,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             vipLevel.VirtualSportsRebate = request.VirtualSportsRebate;
             vipLevel.UpdatedOn = DateTimeOffset.Now;
 
-            await UpdateEntityAsync(vipLevel);
+            return UpdateEntityAsync(vipLevel);
         }
 
-        async Task IVipLevelService.CreateVipLevelAsync(CreateVipLevelRequest request)
+        Task IVipLevelService.CreateVipLevelAsync(CreateVipLevelRequest request)
         {
             var vipLevel = new VipLevel
             {
@@ -91,7 +85,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            await CreateEntityAsync(vipLevel);
+            return CreateEntityAsync(vipLevel);
         }
 
         Task<bool> IVipLevelService.ExistsAsync(Expression<Func<VipLevel, bool>> predicate) =>

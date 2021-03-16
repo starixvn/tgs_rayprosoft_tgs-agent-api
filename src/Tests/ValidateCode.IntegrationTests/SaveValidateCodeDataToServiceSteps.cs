@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
+using TGS.Apis.ValidateCodeApi;
 using TGS.Services.Operator;
 using TGS.Services.ValidateCode;
 
