@@ -50,9 +50,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Content = $"Your ID verification code is : {validateCode}"
             }.ToExpectedObject();
 
-            Message actual = null;
+            EmailPackage actual = null;
             fakeEmailManager
-                .SendEmailAsync(Arg.Do<Message>(msg =>
+                .SendEmailAsync(Arg.Do<EmailPackage>(msg =>
                 {
                     actual = msg;
                 }))
@@ -61,7 +61,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = fakeEmailManager
                 .Received(1)
-                .SendEmailAsync(Arg.Any<Message>());
+                .SendEmailAsync(Arg.Any<EmailPackage>());
 
             expected.ShouldMatch(actual);
         }

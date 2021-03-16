@@ -50,7 +50,7 @@ namespace TGS.Services.Operator.PlayerEmail
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
                 saveResult.ValidateCode);
 
-            var mailMessage = new Message(
+            var mailMessage = new EmailPackage(
                 new[] { command.Email },
                 mailSubject,
                 mailBody);
