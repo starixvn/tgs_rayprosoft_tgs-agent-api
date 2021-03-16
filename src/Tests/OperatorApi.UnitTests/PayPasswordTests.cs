@@ -108,7 +108,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeValidateCodeGenerator.GenerateToken().Returns(token);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
             var expected = $"Your ID verification code is : {validateCode}";
