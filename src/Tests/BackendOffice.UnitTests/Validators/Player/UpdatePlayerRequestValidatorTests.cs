@@ -1,7 +1,7 @@
 ﻿using FluentValidation.TestHelper;
 using NUnit.Framework;
-using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player;
+using TGS.Services.BackOffice.Application.Models.Player;
+using TGS.Services.BackOffice.Validation.Player;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
 {
@@ -9,10 +9,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
     public class UpdatePlayerRequestValidatorTests
     {
         [SetUp]
-        public void Setup()
-        {
-            _validator = new UpdatePlayerRequestValidator();
-        }
+        public void Setup() => _validator = new();
 
         private UpdatePlayerRequestValidator _validator;
 
@@ -30,7 +27,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var model = new UpdatePlayerRequest {Password = "Pswd", ConfirmedPassword = "Pswd"};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordLengthAtLeast);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Player.PasswordLengthAtLeast);
         }
 
         [Test]
@@ -39,7 +36,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var model = new UpdatePlayerRequest {Password = "P@ssword", ConfirmedPassword = "P@ssword"};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNeedNumber);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Player.PasswordNeedNumber);
         }
 
         [Test]
@@ -48,7 +45,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
             var model = new UpdatePlayerRequest {Password = "Password", ConfirmedPassword = "ConfirmedPassword"};
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Password)
-                .WithErrorMessage(Apis.BackendOffice.Resources.User.PasswordNotMatched);
+                .WithErrorMessage(Services.BackOffice.Application.Resources.Player.PasswordNotMatched);
         }
 
         [Test]

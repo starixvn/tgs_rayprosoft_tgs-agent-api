@@ -166,10 +166,10 @@ namespace TGS.Core.DataServices.Tgs
         public IDbConnection GetDbConnection() =>
             Database.GetDbConnection();
 
-        Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
+        public Task BulkInsertAsync<T>(IEnumerable<T> entities) where T : class =>
             _uploader.InsertAsync(entities);
 
-        Task IBaseRepository.BulkUpdateAsync<T>(IEnumerable<T> entities) =>
+        public Task BulkUpdateAsync<T>(IEnumerable<T> entities) where T : class =>
             _uploader.UpdateAsync(entities);
 
         public async Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)

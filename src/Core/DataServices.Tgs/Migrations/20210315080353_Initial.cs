@@ -1678,7 +1678,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     player_code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
                     real_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     bank_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    bank_account = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
+                    bank_account = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
                 {

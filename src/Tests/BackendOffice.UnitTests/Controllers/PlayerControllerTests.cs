@@ -1,18 +1,17 @@
-﻿using System;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using MediatR;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
-using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Security;
+using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models.Player;
+using TGS.Services.BackOffice.Application.Resources;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -25,31 +24,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new(
-                _passwordHandlerMonk.Object,
-                _queriesMock.Object,
-                _auditLogQueriesMock.Object,
-                _bankQueriesMock.Object,
-                _commandsMock.Object,
-                _bankCommandsMock.Object,
-                _auditLogCommandsMock.Object);
-            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
+                _mediatorMock.Object);
         }
 
         private PlayerController _controller;
-
-        private readonly Mock<ITgsQueries<Player>> _queriesMock = new();
-
-        private readonly Mock<ITgsQueries<PlayerAuditLog>> _auditLogQueriesMock =
-            new();
-
-        private readonly Mock<ITgsQueries<PlayerBank>> _bankQueriesMock = new();
-        private readonly Mock<ITgsCommands<Player>> _commandsMock = new();
-        private readonly Mock<ITgsCommands<PlayerBank>> _bankCommandsMock = new();
-
-        private readonly Mock<ITgsCommands<PlayerAuditLog>> _auditLogCommandsMock =
-            new();
-
-        private readonly Mock<IPasswordHandler> _passwordHandlerMonk = new();
+        private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -64,8 +43,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 ShowAll = showAll
             };
 
-            var list = CreatePlayerFixture()
-                .CreateMany<Player>(105)
+            var list = CreatePlayersModelFixture()
+                .CreateMany<PlayersModel>(105)
                 .AsQueryable()
                 .BuildMock().Object;
 
@@ -74,8 +53,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
 
-            _queriesMock.Setup(x => x.GetQueries())
-                .Returns(list);
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PagedResponse<PlayersModel> {Valid = true, Items = expectedPlayers});
 
             var response = await _controller.GetListAsync(request);
             response.Valid.Should().BeTrue();
@@ -84,11 +64,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             {
                 response.Items[i].PlayerCode.Should().Be(expectedPlayers[i].PlayerCode);
                 response.Items[i].Username.Should().Be(expectedPlayers[i].Username);
-                response.Items[i].Status.Should().Be(expectedPlayers[i].Status.ToString());
+                response.Items[i].Status.Should().Be(expectedPlayers[i].Status);
                 response.Items[i].HasAgent.Should().Be(expectedPlayers[i].HasAgent);
             }
 
-            _queriesMock.Verify(p => p.GetQueries());
+            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [TestCase(true)]
@@ -106,8 +86,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 ShowAll = showAll
             };
 
-            var list = new Fixture()
-                .CreateMany<PlayerAuditLog>(105)
+            var list = CreatePlayerOperationModelFixture()
+                .CreateMany<PlayerOperationModel>(105)
                 .AsQueryable()
                 .BuildMock().Object;
 
@@ -116,8 +96,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
 
-            _auditLogQueriesMock.Setup(x => x.GetQueries())
-                .Returns(list);
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PagedResponse<PlayerOperationModel> {Valid = true, Items = expectedPlayers});
 
             var response = await _controller.GetPlayerOperationsAsync(playerCode, request);
             response.Valid.Should().BeTrue();
@@ -129,252 +110,97 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].Operation.Should().Be(expectedPlayers[i].Operation);
             }
 
-            _auditLogQueriesMock.Verify(p => p.GetQueries());
+            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [Test]
         public async Task Cannot_Get_Player_Not_Found()
         {
             var playerCode = Generator.RandomString(12);
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult<Player>(null));
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GetPlayerResponse {Valid = false, Message = Player.NotFound});
 
             var response = await _controller.GetSingleAsync(playerCode);
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.NotFound);
+            response.Message.Should().Be(Player.NotFound);
+
+            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [Test]
         public async Task Can_Get_Player()
         {
-            var player = CreatePlayerFixture().Create<Player>();
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(player));
+            var player = CreatePlayersModelFixture().Create<PlayerModel>();
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GetPlayerResponse {Valid = true, Player = player});
 
-            var response = await _controller.GetSingleAsync(player.PlayerCode);
+            var response = await _controller.GetSingleAsync(It.IsAny<string>());
             response.Valid.Should().BeTrue();
             response.Player.Status.Should().Be(player.Status);
             response.Player.Username.Should().Be(player.Username);
             response.Player.RealName.Should().Be(player.RealName);
             response.Player.HasAgent.Should().Be(player.HasAgent);
             response.Player.RegisteredOn.Should().Be(player.RegisteredOn);
-            response.Player.ParentUsername.Should().Be(player.ParentPlayer.Username);
-            response.Player.Balance.Should().Be(0);
+            response.Player.ParentUsername.Should().Be(player.ParentUsername);
+            response.Player.Balance.Should().Be(player.Balance);
             response.Player.Phone.Should().Be(player.Phone);
             response.Player.Email.Should().Be(player.Email);
             response.Player.QQ.Should().Be(player.QQ);
-            response.Player.WeChat.Should().Be(player.Wechat);
+            response.Player.WeChat.Should().Be(player.WeChat);
 
-            for (var i = 0; i < response.Player.Banks.Length; i++)
-            {
-                response.Player.Banks[i].Id.Should().Be(player.Banks.ElementAt(i).Id);
-                response.Player.Banks[i].RealName.Should().Be(player.Banks.ElementAt(i).RealName);
-                response.Player.Banks[i].BankName.Should().Be(player.Banks.ElementAt(i).BankName);
-                response.Player.Banks[i].BankAccount.Should().Be(player.Banks.ElementAt(i).BankAccount);
-            }
-        }
-
-        [Test]
-        public async Task Can_Update_Player_Info()
-        {
-            var player = CreatePlayerFixture().Create<Player>();
-            var parnetPlayer = CreatePlayerFixture().Create<Player>();
-
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(player))
-                .Returns(Task.FromResult(parnetPlayer));
-
-            var request = new Fixture().Create<UpdatePlayerRequest>();
-            var response = await _controller.UpdateAsync(player.PlayerCode, "info", request);
-            response.Valid.Should().BeTrue();
-
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                a.RealName == request.RealName &&
-                a.VipId == request.VipId &&
-                a.ParentInvitationCode == parnetPlayer.InvitationCode &&
-                a.Status == request.Status &&
-                a.HasAgent == request.HasAgent)));
-
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
-                a.Username == player.PlayerCode)));
-        }
-
-        [Test]
-        public async Task Can_Update_Player_Contact()
-        {
-            var player = CreatePlayerFixture().Create<Player>();
-            var parnetPlayer = CreatePlayerFixture().Create<Player>();
-
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(player))
-                .Returns(Task.FromResult(parnetPlayer));
-
-            var request = new Fixture().Create<UpdatePlayerRequest>();
-            var response = await _controller.UpdateAsync(player.PlayerCode, "contact", request);
-            response.Valid.Should().BeTrue();
-
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                a.Phone == request.Phone &&
-                a.Email == request.Email &&
-                a.QQ == request.QQ &&
-                a.Wechat == request.Wechat)));
-
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
-                a.Username == player.PlayerCode)));
-        }
-
-        [Test]
-        public async Task Can_Update_Player_Password()
-        {
-            var player = CreatePlayerFixture().Create<Player>();
-            var parnetPlayer = CreatePlayerFixture().Create<Player>();
-
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(player))
-                .Returns(Task.FromResult(parnetPlayer));
-
-            var request = new Fixture().Create<UpdatePlayerRequest>();
-
-            var salt = new Fixture().Create<byte[]>();
-            var password = new Fixture().Create<byte[]>();
-            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
-                .Returns((salt, password));
-
-            var response = await _controller.UpdateAsync(player.PlayerCode, "password", request);
-
-            response.Valid.Should().BeTrue();
-
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                a.Password == password &&
-                a.Salt == salt &&
-                a.UpdatedByUsername == "admin.enabled")));
-
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
-                a.Username == player.PlayerCode)));
+            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [Test]
         public async Task Cannot_Update_Player_With_Invalid_Update_Type()
         {
             var playerCode = Generator.RandomString(12);
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult<Player>(null))
-                .Returns(Task.FromResult<Player>(null));
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MessageResponse {Valid = false, Message = Player.UpdateTypeNotFound});
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
-
-            var salt = new Fixture().Create<byte[]>();
-            var password = new Fixture().Create<byte[]>();
-            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
-                .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info2", request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.UpdateTypeNotFound);
+            response.Message.Should().Be(Player.UpdateTypeNotFound);
 
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                a.Password == password &&
-                a.Salt == salt &&
-                a.UpdatedByUsername == "admin.enabled")), Times.Never);
-
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
-                a.Username == playerCode)), Times.Never);
+            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [Test]
         public async Task Cannot_Update_Player_Not_Found()
         {
             var playerCode = Generator.RandomString(12);
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult<Player>(null))
-                .Returns(Task.FromResult<Player>(null));
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new MessageResponse {Valid = false, Message = Player.NotFound});
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
-
-            var salt = new Fixture().Create<byte[]>();
-            var password = new Fixture().Create<byte[]>();
-            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
-                .Returns((salt, password));
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
             response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.NotFound);
+            response.Message.Should().Be(Player.NotFound);
 
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                a.Password == password &&
-                a.Salt == salt &&
-                a.UpdatedByUsername == "admin.enabled")), Times.Never);
-
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
-                a.Username == playerCode)), Times.Never);
+            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()));
         }
 
-        [Test]
-        public async Task Cannot_Update_Player_With_Parent_Player_Not_Found()
-        {
-            var player = CreatePlayerFixture().Create<Player>();
-            var playerCode = Generator.RandomString(12);
-            _queriesMock.SetupSequence(s => s.GetSingleAsync(It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(player))
-                .Returns(Task.FromResult<Player>(null));
-
-            var request = new Fixture().Create<UpdatePlayerRequest>();
-
-            var salt = new Fixture().Create<byte[]>();
-            var password = new Fixture().Create<byte[]>();
-            _passwordHandlerMonk.Setup(p => p.GenerateCredential(It.IsAny<string>()))
-                .Returns((salt, password));
-
-            var response = await _controller.UpdateAsync(playerCode, "info", request);
-
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Player.ParentPlayerNotFound);
-
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Player>(a =>
-                a.Password == password &&
-                a.Salt == salt &&
-                a.UpdatedByUsername == "admin.enabled")), Times.Never);
-
-            _auditLogCommandsMock.Verify(p => p.CreateAsync(It.Is<PlayerAuditLog>(a =>
-                a.Username == playerCode)), Times.Never);
-        }
-
-        private Fixture CreatePlayerFixture()
+        private Fixture CreatePlayersModelFixture()
         {
             var fixture = new Fixture();
-            fixture.Customize<Player>(u => u
-                .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Level = 1})
-                .With(s => s.Brand, new Brand())
-                .With(s => s.ParentPlayer, new Player())
-                .With(s => s.BetLimit, new BetLimit())
-                .With(s => s.SubPlayers, new Player[] { })
-                .With(s => s.Banks,
-                    new[]
-                    {
-                        new PlayerBank
-                        {
-                            Id = Guid.NewGuid(),
-                            RealName = Generator.RandomString(5),
-                            BankName = Generator.RandomString(20),
-                            BankAccount = Generator.RandomIntString(20)
-                        }
-                    })
-                .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
-                .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new[] {new Wallet {Balance = 0}})
-                .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
-                .With(s => s.SportsBetLimits, new PlayerSportsBetLimit[] { }));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            fixture.Create<PlayersModel>();
+            return fixture;
+        }
+
+        private Fixture CreatePlayerOperationModelFixture()
+        {
+            var fixture = new Fixture();
+            fixture.Create<PlayerOperationModel>();
             return fixture;
         }
     }

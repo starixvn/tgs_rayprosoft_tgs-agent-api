@@ -20,6 +20,7 @@ namespace TGS.Services.Operations.Commands
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
         Task UpdatePlayerAsync(UpdatePlayerData data);
+
         Task UpdatePlayerIdNumberAsync(Player player);
 
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
@@ -29,6 +30,8 @@ namespace TGS.Services.Operations.Commands
         Task DeauthorizePlayerAsync(string playerCode, Guid loginRecordId);
 
         Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType);
+
+        Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -45,7 +48,7 @@ namespace TGS.Services.Operations.Commands
             _log = log;
         }
 
-        async Task<string> IPlayerCommands.CreatePlayerAsync(CreatePlayerData data)
+        public async Task<string> CreatePlayerAsync(CreatePlayerData data)
         {
             var retries = 0;
 
@@ -124,7 +127,7 @@ namespace TGS.Services.Operations.Commands
             return playerCode;
         }
 
-        Task IPlayerCommands.UpdatePlayerAsync(UpdatePlayerData data)
+        public Task UpdatePlayerAsync(UpdatePlayerData data)
         {
             var player = new Player
             {
@@ -148,11 +151,14 @@ namespace TGS.Services.Operations.Commands
             return _repository.SaveChangesAsync();
         }
 
-        Task IPlayerCommands.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        public Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
         {
             var player = new Player
             {
-                PlayerCode = data.PlayerCode, Salt = data.Salt, Password = data.Password, UpdatedOn = data.UpdatedOn
+                PlayerCode = data.PlayerCode,
+                Salt = data.Salt,
+                Password = data.Password,
+                UpdatedOn = data.UpdatedOn
             };
 
             _repository.Players.Attach(player);
@@ -163,7 +169,7 @@ namespace TGS.Services.Operations.Commands
             return _repository.SaveChangesAsync();
         }
 
-        async Task<PlayerLoginRecord> IPlayerCommands.PlayerLoginAsync(PlayerLoginData data)
+        public async Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data)
         {
             var loginRecord = new PlayerLoginRecord
             {
@@ -183,23 +189,41 @@ namespace TGS.Services.Operations.Commands
             return loginRecord;
         }
 
-        Task IPlayerCommands.DeauthorizePlayerAsync(string playerCode, Guid loginRecordId)
+        public Task DeauthorizePlayerAsync(string playerCode, Guid loginRecordId)
         {
             const string sql = "call dbo.player_deauthorize_by_login_record_id(:player_code, :login_record_id)";
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> {{":player_code", playerCode}, {":login_record_id", loginRecordId}});
+                new Dictionary<string, object> { { ":player_code", playerCode }, { ":login_record_id", loginRecordId } });
         }
 
-        Task IPlayerCommands.DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
+        public Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
         {
             const string sql = "call dbo.player_deauthorize_by_platform_type";
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> {{":player_code", playerCode}, {":platform_type", platformType}});
+                new Dictionary<string, object> { { ":player_code", playerCode }, { ":platform_type", platformType } });
         }
 
-        Task IPlayerCommands.UpdatePlayerIdNumberAsync(Player player)
+        public Task UpdatePlayerIdNumberAsync(Player player)
         {
             _repository.Entry(player).State = EntityState.Modified;
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        {
+            var player = new Player
+            {
+                PlayerCode = playerCode,
+                WithdrawPassword = newPassword,
+                WithdrawSalt = newSalt,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(player);
+            _repository.Entry(player).Property(nameof(player.WithdrawSalt)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.WithdrawPassword)).IsModified = true;
+            _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
+
             return _repository.SaveChangesAsync();
         }
     }

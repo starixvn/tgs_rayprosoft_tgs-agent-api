@@ -1,0 +1,33 @@
+﻿using System;
+using TGS.Core.Models.Enums;
+
+namespace TGS.Services.BackOffice.Application.Models.Player
+{
+    public class PlayerModel
+    {
+        public string Username { get; init; }
+        public string RealName { get; init; }
+        public int VipLevel { get; init; }
+        public string ParentUsername { get; init; }
+        public DateTimeOffset RegisteredOn { get; init; }
+        public decimal Balance { get; init; }
+        public PlayerStatus Status { get; init; }
+        public string StatusName { get; init; }
+        public bool HasAgent { get; init; }
+
+        public string Phone { get; init; }
+        public string Email { get; init; }
+        public string QQ { get; init; }
+        public string WeChat { get; init; }
+
+        public BankModel[] Banks { get; init; }
+
+        public class BankModel
+        {
+            public Guid Id { get; init; }
+            public string RealName { get; init; }
+            public string BankName { get; init; }
+            public string BankAccount { get; init; }
+        }
+    }
+}
