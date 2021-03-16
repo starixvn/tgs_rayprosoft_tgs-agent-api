@@ -1,17 +1,20 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NSubstitute;
+using Moq;
 using TechTalk.SpecFlow;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -24,10 +27,12 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Tokens;
+using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
 using TGS.Tests.ApiClients.Operators;
 using TGS.Tests.TestsCommon;
+using Status = TGS.Core.Models.Enums.Status;
 
 namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 {
@@ -35,7 +40,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "Habanero")]
     public sealed class HabaneroEndpoint : BaseGameEndpoint
     {
-        private const string GameProviderCode = Consts.GameProvider.Habanero;
+        private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
+        private static readonly string TimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK";
 
         private readonly Authorization _authorization = new()
         {
@@ -53,8 +59,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
 
-            var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
-            fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
 
             var currentDictionary = Directory.GetCurrentDirectory();
 
@@ -70,7 +76,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {
-                            srv.AddTransient(_ => fakeAnalyzer);
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
                         });
                 })
                 .Build();
@@ -93,7 +99,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {
-                            srv.AddTransient(_ => fakeAnalyzer);
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
                         });
                 })
                 .Build();
@@ -151,15 +157,53 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
+        [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
+        public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
+        {
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var playerCode = await
+                (from p in db.Players
+                 join b in db.Brands on p.BrandId equals b.Id
+                 where p.Username == username && b.Code == brandCode
+                 select p.PlayerCode).AsNoTracking().FirstAsync();
+
+            await DeauthorizePlayerAsync(_serviceProvider, playerCode);
+
+            Set(SR.BrandCode, brandCode);
+            Set(SR.PlayerCode, playerCode);
+        }
+
+        [Given(@"player logout")]
+        public Task GivenPlayerLogoutAsync()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            return DeauthorizePlayerAsync(_serviceProvider, playerCode);
+        }
+
         [Given(@"player having balance of \$(.*)")]
         public Task GivenPlayerHavingBalanceOfAsync(decimal balance) =>
             SetPlayerBalanceAsync(_serviceProvider, balance);
+
+        [Given(@"game provider has status set to ""(.*)""")]
+        public Task GivenGameProviderHasStatusSetToAsync(Status status) =>
+            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
+
+        [Given(@"brand has status set to ""(.*)""")]
+        public Task GivenBrandHasStatusSetToAsync(Status status) =>
+            ChangeBrandStatusAsync(_serviceProvider, status);
+
+        [Given(@"I place bet of \$(.*) for game ""(.*)""")]
+        [When(@"I place bet of \$(.*) for game ""(.*)""")]
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
+            PlaceBetAsync(amount, externalGameId);
 
         [When(@"I call authorize endpoint with username=""(.*)"" and passkey=""(.*)"" and brandid=""(.*)""")]
         public async Task WhenICallDetailsEndpointWithUsernameAndPasswordAndPlayerAuthToken(string clientId,
             string secretKey, string habaneroBrandId)
         {
-            var encryptedToken = await GetEncryptedTokenAsync();
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
 
             var response = await client.AuthorizePlayerAsync(new()
@@ -204,21 +248,130 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Result.PlayerUsername.Should().NotBeNullOrEmpty();
         }
 
+        [Then(@"I will get error authorize response and no player balance")]
+        public void ThenIWillGetErrorDetailsResponseAndPlayerBalanceWillBe()
+        {
+            var response = Get<AuthorizePlayerResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeFalse();
+            response.Result.Status.HasAuthenticationError.Should().BeNull();
+            response.Result.Balance.Should().BeNull();
+            response.Result.CurrencyCode.Should().BeNullOrEmpty();
+            response.Result.PlayerCode.Should().BeNullOrEmpty();
+            response.Result.PlayerUsername.Should().BeNullOrEmpty();
+        }
+
+        [Then(@"I will receive bet response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var placeBetRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
+            var response = Get<FundTransferResponse>(SR.Response);
+
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeTrue();
+            response.Result.Status.DebitSucceeded.Should().BeTrue();
+            response.Result.Status.CreditSucceeded.Should().BeTrue();
+            response.Result.Balance.Should().Be(expectedBalance);
+            //response.Result.CurrencyCode.Should().Be(TestData.PlayerCurrency);
+        }
+
+        #region After Scenario
+
+        [After]
+        public Task AfterChangeGameProviderStatusScenarioAsync() =>
+            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+
+        [After]
+        public Task AfterChangeGameProviderConfigurationStatusScenarioAsync() =>
+            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+
+        [After]
+        public Task AfterChangeGameStatusScenarioAsync() =>
+            ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
+                GameStatus.Active, true);
+
+        [After]
+        public Task AfterChangeBrandStatusScenarioAsync() =>
+            ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
+
+        #endregion After Scenario
+
         #region Private Method
 
         private Task<HabaneroConfiguration> GetHabaneroSetting() =>
             GetSettingAsync<HabaneroConfiguration>(_serviceProvider, SettingConsts.GameProviderConfigurations.Habanero);
 
-        private Task<string> GetEncryptedTokenAsync()
+        private Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
 
             var tokenProvider = _serviceProvider.GetRequiredService<ITokenProvider>();
             return tokenProvider.EncryptAsync(tokenData.LoginRecordId);
         }
+
+        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var currencyCode = Get<string>(SR.CurrencyCode);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            externalRoundId ??= NewRoundId();
+            var externalTransactionId = externalRoundId;
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
+            var now = DateTimeOffset.Now;
+
+            var request = new FundTransferRequest
+            {
+                Type = "fundtransferrequest",
+                SentOn = now,
+                Authorization = _authorization,
+                Game = new() {ExternalId = externalGameId},
+                Detail = new()
+                {
+                    RoundId = externalRoundId,
+                    ClientRoundId = (int)DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    IsCancel = false,
+                    IsRetry = false,
+                    RetryCount = 0,
+                    IsSettlementRetry = false,
+                    FundTransfer = new()
+                    {
+                        IsBetAndSettle = false,
+                        Transactions = new[]
+                        {
+                            new Transaction
+                            {
+                                GameState = GameState.NewGame,
+                                TransactionId = externalRoundId,
+                                CurrencyCode = currencyCode,
+                                Amount = -amount,
+                                TransactionReferenceId = externalRoundId,
+                                Timestamp = now.ToString(TimeFormat)
+                            }
+                        }
+                    },
+                    Token = encryptedToken,
+                    PlayerCode = playerCode
+                }
+            };
+
+            var response = await client.FundTransferAsync(request);
+
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        private string NewRoundId() =>
+            Guid.NewGuid().ToString();
 
         #endregion
     }

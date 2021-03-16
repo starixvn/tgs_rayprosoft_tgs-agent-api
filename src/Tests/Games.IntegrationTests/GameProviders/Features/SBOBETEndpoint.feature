@@ -68,8 +68,8 @@ Scenario: 02.f - Real player cannot place bet with game provider configuration w
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeGameProviderConfigurationStatus
-Scenario: 02.g - GPI Test player can place bet with game provider configuration with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"	
+Scenario: 02.g - TGS Test player can place bet with game provider configuration with maintenance status
+	Given player "TP01_cny" of brand "GPI" with "TGS" login via "Desktop"	
 		And player having balance of $100
 	Given game provider configuration has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -87,8 +87,8 @@ Scenario: 02.h - Real player cannot place bet with game with maintenance status
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeGameStatus
-Scenario: 02.i - GPI Test player place bet with game with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"	
+Scenario: 02.i - TGS Test player place bet with game with maintenance status
+	Given player "TP01_cny" of brand "GPI" with "TGS" login via "Desktop"	
 		And player having balance of $100
 	Given game "1_1" has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"

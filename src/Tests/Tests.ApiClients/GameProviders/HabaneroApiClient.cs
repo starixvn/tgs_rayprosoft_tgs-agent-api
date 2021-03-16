@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -9,6 +10,8 @@ namespace TGS.Tests.ApiClients.GameProviders
     public interface IHabaneroApiClient
     {
         Task<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request);
+
+        Task<FundTransferResponse> FundTransferAsync(FundTransferRequest request);
     }
 
     public sealed class HabaneroApiClient : BaseApiClient, IHabaneroApiClient
@@ -23,5 +26,8 @@ namespace TGS.Tests.ApiClients.GameProviders
         Task<AuthorizePlayerResponse> IHabaneroApiClient.AuthorizePlayerAsync(AuthorizePlayerRequest request) =>
             ExecuteJsonRequestAsync<AuthorizePlayerRequest, AuthorizePlayerResponse>(HttpMethod.Post,
                 $"{RoutePrefix}/authorize", request);
+
+        Task<FundTransferResponse> IHabaneroApiClient.FundTransferAsync(FundTransferRequest request) =>
+            throw new NotImplementedException();
     }
 }

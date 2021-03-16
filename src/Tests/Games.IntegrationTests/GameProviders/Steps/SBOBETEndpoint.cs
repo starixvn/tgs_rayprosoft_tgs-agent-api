@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NSubstitute;
+using Moq;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TGS.Apis.OperatorApi;
@@ -54,25 +54,25 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
 
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
             var opApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration((_, builder) =>
+                .ConfigureAppConfiguration(builder =>
                 {
-                    builder.SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                    builder.SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
                         "../../../../../Apis/OperatorApi")));
                 })
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    webBuilder
+                    builder
                         .UseStartup<Startup>()
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {
-                            srv.AddTransient(sp =>
-                            {
-                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
-                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
-                                return fakeAnalyzer;
-                            });
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
                         });
                 })
                 .Build();
@@ -81,29 +81,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var opApiClient = opApiHost.GetTestClient();
 
             var tgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration((_, builder) =>
+                .ConfigureAppConfiguration(builder =>
                 {
                     builder
-                        .SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                        .SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
                             "../../../../../Apis/TgsApi")))
                         .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
                 })
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    webBuilder
+                    builder
                         .UseStartup<SBOBETStartup>()
                         .UseKestrel(options => options.AddServerHeader = false)
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {
-                            srv.AddTransient(sp =>
-                            {
-                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
-
-                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
-
-                                return fakeAnalyzer;
-                            });
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
                         });
                 })
                 .Build();
@@ -771,20 +764,20 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [After]
         public Task AfterChangeGameProviderStatusScenarioAsync() =>
-            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active);
+            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
 
         [After]
         public Task AfterChangeGameProviderConfigurationStatusScenarioAsync() =>
-            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active);
+            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
 
         [After]
         public Task AfterChangeGameStatusScenarioAsync() =>
             ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
-                GameStatus.Active);
+                GameStatus.Active, true);
 
         [After]
         public Task AfterChangeBrandStatusScenarioAsync() =>
-            ChangeBrandStatusAsync(_serviceProvider, Status.Active);
+            ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
 
         #endregion After Scenario
 

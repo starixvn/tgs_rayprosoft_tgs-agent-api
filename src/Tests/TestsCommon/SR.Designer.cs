@@ -142,6 +142,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CurrencyCode.
+        /// </summary>
+        public static string CurrencyCode {
+            get {
+                return ResourceManager.GetString("CurrencyCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ErrorResponse.
         /// </summary>
         public static string ErrorResponse {

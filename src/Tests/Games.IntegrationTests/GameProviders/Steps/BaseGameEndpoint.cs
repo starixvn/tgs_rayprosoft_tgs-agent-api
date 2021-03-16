@@ -44,9 +44,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
                 var key = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
                 var tokenData = Get<PlayerTokenData>(key);
-                if (tokenData != null && tokenData.ExpiredOn > DateTimeOffset.Now)
+
+                if (tokenData != null)
                 {
-                    return;
+                    var loginRecord =
+                        await db.PlayerLoginRecords.FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
+                    if (loginRecord?.Status == LoginStatus.Enabled)
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -116,6 +122,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.BrandCode, brandCode);
             Set(SR.PlayerCode, playerCode);
+            Set(SR.CurrencyCode, currencyCode);
             Set(SR.PlatformType, platformType);
             Set(tokenKey, data);
         }
@@ -166,8 +173,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
             await cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, playerCode);
-
-            Remove(SR.PlayerTokenData);
         }
 
         protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)
@@ -182,9 +187,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         protected async Task ChangeGameProviderStatusAsync(IServiceProvider serviceProvider,
-            string gameProviderCode, Status status)
+            string gameProviderCode, Status status, bool hasTag = false)
         {
-            if (!HasTag("ChangeGameProviderStatus"))
+            if (hasTag && !HasTag("ChangeGameProviderStatus"))
             {
                 return;
             }
@@ -201,9 +206,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         protected async Task ChangeGameProviderConfigurationStatusAsync(IServiceProvider serviceProvider,
-            string gameProviderCode, Status status)
+            string gameProviderCode, Status status, bool hasTag = false)
         {
-            if (!HasTag("ChangeGameProviderConfigurationStatus"))
+            if (hasTag && !HasTag("ChangeGameProviderConfigurationStatus"))
             {
                 return;
             }
@@ -232,9 +237,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         protected async Task ChangeGameStatusAsync(IServiceProvider serviceProvider, string gameProviderCode,
-            string externalGameId, GameStatus gameStatus)
+            string externalGameId, GameStatus gameStatus, bool hasTag = false)
         {
-            if (!HasTag("ChangeGameStatus"))
+            if (hasTag && !HasTag("ChangeGameStatus"))
             {
                 return;
             }
@@ -258,9 +263,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await cacheManager.ClearCacheAsync(RedisCacheType.Games, game.GameProviderId);
         }
 
-        protected async Task ChangeBrandStatusAsync(IServiceProvider serviceProvider, Status status)
+        protected async Task ChangeBrandStatusAsync(IServiceProvider serviceProvider, Status status,
+            bool hasTag = false)
         {
-            if (!HasTag("ChangeBrandStatus"))
+            if (hasTag && !HasTag("ChangeBrandStatus"))
             {
                 return;
             }
