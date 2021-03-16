@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<string> StartChangeEmailAsync(
             [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
-            StartSetEmailRequest request)
+            [FromBody] StartSetEmailRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -34,9 +34,15 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public void SubmitChangeEmail()
+        public ValueTask SubmitChangeEmailAsync(
+            [FromServices] ICommandService<CommitSetPlayerEmailCommand> commitPlayerEmailService,
+            [FromBody] SubmitChangeEmailRequest request)
         {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
+            var command = new CommitSetPlayerEmailCommand(playerTokenData.PlayerCode, request.Token, request.ValidateCode);
+
+            return commitPlayerEmailService.ExecuteAsync(command);
         }
     }
 }

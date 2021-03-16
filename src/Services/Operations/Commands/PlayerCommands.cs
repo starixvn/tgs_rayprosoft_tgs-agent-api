@@ -32,6 +32,8 @@ namespace TGS.Services.Operations.Commands
         Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType);
 
         Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
+
+        Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -223,6 +225,22 @@ namespace TGS.Services.Operations.Commands
             _repository.Entry(player).Property(nameof(player.WithdrawSalt)).IsModified = true;
             _repository.Entry(player).Property(nameof(player.WithdrawPassword)).IsModified = true;
             _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
+
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
+        {
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                Email = email,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(updateInfo);
+            _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
 
             return _repository.SaveChangesAsync();
         }
