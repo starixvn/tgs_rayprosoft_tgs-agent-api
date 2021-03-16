@@ -144,6 +144,9 @@
   <data name="ClientRoundStatus" xml:space="preserve">
     <value>ClientRoundStatus</value>
   </data>
+  <data name="CurrencyCode" xml:space="preserve">
+    <value>CurrencyCode</value>
+  </data>
   <data name="ErrorResponse" xml:space="preserve">
     <value>ErrorResponse</value>
   </data>
@@ -158,6 +161,9 @@
   </data>
   <data name="GameAction" xml:space="preserve">
     <value>GameAction</value>
+  </data>
+  <data name="GameProviderCurrencyCode" xml:space="preserve">
+    <value>GameProviderCurrencyCode</value>
   </data>
   <data name="HasTurnoverOnTieBet" xml:space="preserve">
     <value>HasTurnoverOnTieBet</value>

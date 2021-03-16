@@ -2,7 +2,6 @@
 using System.Linq;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
@@ -137,11 +136,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
 
         FundTransferResponse IHabaneroActionModelMapper.Response(FundTransferRequest request, BetResult result)
         {
-            if (!request.Detail.IsSettlementRetry)
-            {
-                ThrowDuplicateErrorResponse(result);
-            }
-
             var actionType = request.Detail.ActionType;
 
             return new()
@@ -209,19 +203,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             Transactions = transactions
         };
 
-        private static void ThrowDuplicateErrorResponse(BetResult betResult)
-        {
-            var transaction = betResult.Transactions.FirstOrDefault();
-            var isDuplicate = transaction?.IsDuplicate ?? false;
-
-            if (isDuplicate)
-            {
-                throw new InvalidGameActionException(
-                    $"Bet with transaction id {transaction.ExternalTransactionId} is duplicate",
-                    InvalidGameActionErrorCode.Duplicate);
-            }
-        }
-
         private static FundTransferStatus GetFundTransferStatusWithDefaultErrors(GameApiError error, string message,
             FundTransferRequest request)
         {
@@ -238,11 +219,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             }
 
             var isBetAndSettle = request.Detail.FundTransfer.IsBetAndSettle;
+            var success = error == GameApiError.Success;
 
             return new()
             {
-                Success = false,
-                Message = message,
+                Success = success,
+                Message = success ? string.Empty : message,
                 DebitSucceeded = isBetAndSettle ? false : null,
                 CreditSucceeded = isBetAndSettle ? false : null
             };

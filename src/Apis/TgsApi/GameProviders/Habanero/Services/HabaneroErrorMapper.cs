@@ -32,8 +32,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
                     {Cancelled, Success},
-                    {Settled, Success}, 
-                    {Duplicate, DuplicateTransaction},
+                    {Settled, Success},
+                    {Duplicate, Success},
                     {TransactionNotFound, TransactionNotExist},
                     {TransactionBeingCancelledNotFound, TransactionNotExist},
                     {TransactionBeingReferencedNotFound, TransactionNotExist},
@@ -44,17 +44,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
         {
             if (exception == null)
             {
-                return (int) Success;
+                return (int)Success;
             }
 
             if (exception is InvalidGameActionException e &&
                 ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
-                return (int) error;
+                return (int)error;
             }
 
             var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int) error : (int) Uncategorized;
+            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Uncategorized;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>

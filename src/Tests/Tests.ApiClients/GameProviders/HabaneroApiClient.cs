@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -12,6 +11,8 @@ namespace TGS.Tests.ApiClients.GameProviders
         Task<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request);
 
         Task<FundTransferResponse> FundTransferAsync(FundTransferRequest request);
+
+        Task<QueryResponse> QueryGameActionAsync(QueryRequest queryRequest);
     }
 
     public sealed class HabaneroApiClient : BaseApiClient, IHabaneroApiClient
@@ -28,6 +29,11 @@ namespace TGS.Tests.ApiClients.GameProviders
                 $"{RoutePrefix}/authorize", request);
 
         Task<FundTransferResponse> IHabaneroApiClient.FundTransferAsync(FundTransferRequest request) =>
-            throw new NotImplementedException();
+            ExecuteJsonRequestAsync<FundTransferRequest, FundTransferResponse>(HttpMethod.Post,
+                $"{RoutePrefix}/transfer", request);
+
+        Task<QueryResponse> IHabaneroApiClient.QueryGameActionAsync(QueryRequest request) =>
+            ExecuteJsonRequestAsync<QueryRequest, QueryResponse>(HttpMethod.Post,
+                $"{RoutePrefix}/transfer/query", request);
     }
 }

@@ -175,6 +175,20 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, playerCode);
         }
 
+        protected async Task ChangePlayerStatusAsync(ServiceProvider serviceProvider, string playerCode,
+            PlayerStatus status)
+        {
+            var db = GetDb<ITgsRepository>(serviceProvider);
+
+            var player = await db.Players.FirstAsync(r => r.PlayerCode == playerCode);
+            player.Status = status;
+
+            await db.SaveChangesAsync();
+
+            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+            await cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
         protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);

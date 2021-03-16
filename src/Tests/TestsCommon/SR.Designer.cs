@@ -196,6 +196,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GameProviderCurrencyCode.
+        /// </summary>
+        public static string GameProviderCurrencyCode {
+            get {
+                return ResourceManager.GetString("GameProviderCurrencyCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to HasTurnoverOnTieBet.
         /// </summary>
         public static string HasTurnoverOnTieBet {
