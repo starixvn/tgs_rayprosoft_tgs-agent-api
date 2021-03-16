@@ -4,5 +4,5 @@
         string PlayerCode,
         string NewPassword,
         string ValidateCode,
-        string Token);
+        string SecurityKey);
 }

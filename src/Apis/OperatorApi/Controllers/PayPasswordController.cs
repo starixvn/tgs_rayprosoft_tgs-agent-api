@@ -51,7 +51,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 request.NewPassword,
                 request.ValidateCode,
-                request.Token);
+                request.SecurityKey);
 
             return changePayPasswordService.ExecuteAsync(command);
         }

@@ -1,9 +1,13 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record SubmitChangeEmailRequest
     {
-        public string Token { get; init; }
+        [JsonPropertyName("securitykey")]
+        public string SecurityKey { get; init; }
 
+        [JsonPropertyName("validatecode")]
         public string ValidateCode { get; init; }
     }
 }

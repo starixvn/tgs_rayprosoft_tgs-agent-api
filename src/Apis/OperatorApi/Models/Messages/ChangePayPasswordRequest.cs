@@ -10,6 +10,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("validatecode")]
         public string ValidateCode { get; init; }
 
-        public string Token { get; init; }
+        [JsonPropertyName("securitykey")]
+        public string SecurityKey { get; init; }
     }
 }

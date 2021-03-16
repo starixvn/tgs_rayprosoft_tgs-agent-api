@@ -21,7 +21,7 @@ namespace TGS.Services.Operator.PlayerEmail
         public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command)
         {
             var result = await _validateCodeOperator
-                .GetValidateCodeDataAsync<EmailValidateData>(command.ValidateCode, command.Token)
+                .GetValidateCodeDataAsync<EmailValidateData>(command.ValidateCode, command.SecurityKey)
                 .ConfigureAwait(false);
 
             if (result == null)

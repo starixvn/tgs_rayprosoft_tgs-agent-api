@@ -40,7 +40,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new CommitSetPlayerEmailCommand(playerTokenData.PlayerCode, request.Token, request.ValidateCode);
+            var command = new CommitSetPlayerEmailCommand(playerTokenData.PlayerCode, request.SecurityKey, request.ValidateCode);
 
             return commitPlayerEmailService.ExecuteAsync(command);
         }

@@ -61,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             try
             {
                 await resetService
-                    .ExecuteAsync(new ResetPasswordCommand(request.Token, request.ValidateCode, request.NewPassword))
+                    .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
                     .ConfigureAwait(false);
 
                 return Ok();

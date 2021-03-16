@@ -25,7 +25,7 @@ namespace TGS.Services.Operator.PlayerPassword
         public async ValueTask ExecuteAsync(ResetPasswordCommand command)
         {
             var result = await _validateCodeOperator
-                .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.Token)
+                .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)
                 .ConfigureAwait(false);
 
             if (result == null)
