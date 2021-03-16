@@ -2,7 +2,7 @@ pipeline {
     agent any
 	
 	environment {
-		TAG = sh(script: "echo ${ENV}-`date +%yy%m%d%H%M`", returnStdout: true).trim()
+		TAG = sh(script: "echo ${ENV}-`date +%Y%m%d%H%M`", returnStdout: true).trim()
 		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
 	}
     stages {
