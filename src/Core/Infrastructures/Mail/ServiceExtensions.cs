@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,29 +9,46 @@ namespace TGS.Core.Infrastructures.Mail
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddMail(this IServiceCollection services, IConfiguration configuration,
+        public static IServiceCollection AddMail(
+            this IServiceCollection services,
+            IConfiguration configuration,
             string configSectionName = "EmailSetting")
         {
-            services.Configure<EmailConfiguration>(configuration.GetSection(configSectionName));
-            services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailConfiguration>>().Value);
-
-            services.AddTransient<IEmailManager, EmailManager>();
-            services.AddTransient(sp =>
+            return services.AddMail((emailConfig, sp) =>
             {
-                var settings = sp.GetRequiredService<EmailConfiguration>();
-
-                return new SmtpClient
-                {
-                    Host = settings.SmtpServer,
-                    Port = settings.Port,
-                    UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(
-                        settings.FromMail,
-                        settings.Password
-                    ),
-                    EnableSsl = true
-                };
+                configuration.GetSection(configSectionName).Bind(emailConfig);
             });
+        }
+
+        public static IServiceCollection AddMail(
+            this IServiceCollection services,
+            Action<EmailConfiguration, IServiceProvider> configure = null)
+        {
+            if (configure == null)
+                services.AddOptions<EmailConfiguration>();
+            else
+                services
+                    .AddOptions<EmailConfiguration>()
+                    .Configure(configure);
+
+            services
+                .AddTransient<IEmailManager, EmailManager>()
+                .AddTransient(sp =>
+                {
+                    var emailConfig = sp.GetRequiredService<IOptions<EmailConfiguration>>().Value;
+
+                    return new SmtpClient
+                    {
+                        Host = emailConfig.SmtpServer,
+                        Port = emailConfig.Port,
+                        UseDefaultCredentials = false,
+                        Credentials = new NetworkCredential(
+                            emailConfig.FromMail,
+                            emailConfig.Password
+                        ),
+                        EnableSsl = true
+                    };
+                });
 
             return services;
         }

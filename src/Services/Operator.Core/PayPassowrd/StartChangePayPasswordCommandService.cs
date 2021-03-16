@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Properties;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PayPassowrd
 {
@@ -41,7 +38,7 @@ namespace TGS.Services.Operator.PayPassowrd
                     var data = new ValidateCodeData(command.PlayerCode, token);
 
                     var result = await _validateCodeOperator
-                        .SaveValidateDataAsync(validateCode, data)
+                        .SaveValidateDataAsync<ValidateCodeData>(validateCode, token, data)
                         .ConfigureAwait(false);
 
                     return (result, validateCode, token);

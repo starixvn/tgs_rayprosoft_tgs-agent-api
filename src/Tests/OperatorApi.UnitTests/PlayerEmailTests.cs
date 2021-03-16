@@ -1,0 +1,120 @@
+﻿using System;
+using System.Globalization;
+using System.Net.Mail;
+using System.Threading.Tasks;
+using ExpectedObjects;
+using NSubstitute;
+using NUnit.Framework;
+using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Operations;
+using TGS.Services.Operator;
+using TGS.Services.Operator.PlayerEmail;
+
+namespace TGS.Tests.OperatorApi.UnitTests
+{
+    [TestFixture]
+    public class PlayerEmailTests
+    {
+        [Test]
+        public async Task Start_Set_Player_Email_Should_Send_Confirm_Mail()
+        {
+            var fakeEmailManager = Substitute.For<IEmailManager>();
+            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+
+            var sut = new StartSetPlayerEmailCommandService(
+                fakeEmailManager,
+                fakeValidateCodeGenerator,
+                fakeValidateCodeOperator);
+
+            var playerCode = "testPlayerCode";
+            var email = "test@raypro.com";
+            var command = new StartSetPlayerEmailCommand(playerCode, email, CultureInfo.GetCultureInfo("en-US"));
+
+            var validateCode = "123456";
+            var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+
+            fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+            fakeValidateCodeGenerator.GenerateToken().Returns(token);
+
+            fakeValidateCodeOperator
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<EmailValidateData>())
+                .Returns(true);
+
+            var expected = new
+            {
+                To = new MailAddressCollection() {
+                    new MailAddress(email)
+                },
+                Subject = "Verification Code",
+                Content = $"Your ID verification code is : {validateCode}"
+            }.ToExpectedObject();
+
+            EmailPackage actual = null;
+            fakeEmailManager
+                .SendEmailAsync(Arg.Do<EmailPackage>(msg =>
+                {
+                    actual = msg;
+                }))
+                .Returns(Task.CompletedTask);
+            await sut.GetAsync(command);
+
+            _ = fakeEmailManager
+                .Received(1)
+                .SendEmailAsync(Arg.Any<EmailPackage>());
+
+            expected.ShouldMatch(actual);
+        }
+
+        [Test]
+        public async Task Commit_Set_Player_Email_Should_Success()
+        {
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+
+            var sut = new CommitSetPlayerEmailCommandService(
+                fakeValidateCodeOperator,
+                fakePlayerOperations);
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var email = "test@raypro.com";
+
+            var command = new CommitSetPlayerEmailCommand(playerCode, token, validateCode);
+
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(token))
+                .Returns(new EmailValidateData(email, playerCode));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePlayerOperations
+                .Received(1)
+                .SetEmailAsync(Arg.Is(playerCode), Arg.Is(email), Arg.Any<DateTimeOffset>());
+        }
+
+        [Test]
+        public void Commit_Set_Player_Email_IF_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+
+            var sut = new CommitSetPlayerEmailCommandService(
+                fakeValidateCodeOperator,
+                fakePlayerOperations);
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+
+            var command = new CommitSetPlayerEmailCommand(playerCode, token, validateCode);
+
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
+                .Returns((EmailValidateData)null);
+
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+        }
+    }
+}

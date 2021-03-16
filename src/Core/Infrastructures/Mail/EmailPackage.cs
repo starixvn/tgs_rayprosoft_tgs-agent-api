@@ -3,10 +3,15 @@ using System.Net.Mail;
 
 namespace TGS.Core.Infrastructures.Mail
 {
-    public record Message
+    public record EmailPackage
     {
-        public Message(IEnumerable<string> to, string subject, string content, string htmlBodyContent = null,
-            IEnumerable<string> cc = null, AttachmentData[] attachments = null,
+        public EmailPackage(
+            IEnumerable<string> to,
+            string subject,
+            string content,
+            string htmlBodyContent = null,
+            IEnumerable<string> cc = null,
+            AttachmentData[] attachments = null,
             AttachmentData[] inlineAttachments = null)
         {
             To = new();

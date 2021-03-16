@@ -100,7 +100,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             }
             else
             {
-                providers = await GetGameProviderModels(brandId, currencyCode, platformType, playerType);
+                providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
 
                 await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
                 {
@@ -126,7 +126,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             };
         }
 
-        private async Task<GameProviderModel[]> GetGameProviderModels(Guid brandId,
+        private async Task<GameProviderModel[]> GetGameProviderModelsAsync(Guid brandId,
             string currencyCode, PlatformType platformType,
             PlayerType playerType)
         {

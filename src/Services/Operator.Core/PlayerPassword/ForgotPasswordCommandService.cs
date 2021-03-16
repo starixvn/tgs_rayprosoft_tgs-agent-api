@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.Properties;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PlayerPassword
 {
@@ -43,7 +43,7 @@ namespace TGS.Services.Operator.PlayerPassword
                     var data = new ValidateCodeData(player.PlayerCode, token);
 
                     var result = await _validateCodeOperator
-                        .SaveValidateDataAsync(validateCode, data)
+                        .SaveValidateDataAsync(validateCode, token, data)
                         .ConfigureAwait(false);
 
                     return (result, validateCode, token);
