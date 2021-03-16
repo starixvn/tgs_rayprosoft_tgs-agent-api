@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PlayerEmail
 {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.Properties;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PlayerPassword
 {
