@@ -337,7 +337,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         PlayerCode = playerCode,
                         RealName = Generator.RandomString(4),
                         BankName = Generator.RandomString(12),
-                        BankAccount = Generator.RandomIntString(20)
+                        BankAccount = Generator.RandomIntString(20),
+                        CreatedByUsername = AdminUsername,
+                        UpdatedByUsername = AdminUsername,
+                        CreatedOn = Now,
+                        UpdatedOn = Now
                     }
                 }
             };

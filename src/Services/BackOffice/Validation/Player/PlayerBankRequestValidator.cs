@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using TGS.Apis.BackendOffice.Controllers.Messages.Players;
+using TGS.Services.BackOffice.Application.Models.PlayerBank;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
+namespace TGS.Services.BackOffice.Validation.Player
 {
     public class PlayerBankRequestValidator : AbstractValidator<PlayerBankRequest>
     {
@@ -10,15 +10,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Player
             RuleFor(p => p.RealName)
                 .NotNull()
                 .NotEmpty()
-                .WithMessage(Resources.Player.BankRealNameRequired);
+                .WithMessage(Application.Resources.Player.BankRealNameRequired);
 
             RuleFor(p => p.BankName)
                 .NotNull()
-                .WithMessage(Resources.Player.BankNameRequired);
+                .WithMessage(Application.Resources.Player.BankNameRequired);
 
             RuleFor(p => p.BankAccount)
                 .NotNull()
-                .WithMessage(Resources.Player.BankAccountRequired);
+                .WithMessage(Application.Resources.Player.BankAccountRequired);
         }
     }
 }

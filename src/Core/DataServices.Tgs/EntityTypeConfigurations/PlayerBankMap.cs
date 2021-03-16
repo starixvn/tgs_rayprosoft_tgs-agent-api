@@ -29,6 +29,20 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(32)
                 .IsRequired();
 
+            builder.Property(c => c.CreatedByUsername)
+                .HasMaxLength(32)
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedByUsername)
+                .HasMaxLength(32)
+                .IsRequired();
+
+            builder.Property(c => c.CreatedOn)
+                .IsRequired();
+
+            builder.Property(c => c.UpdatedOn)
+                .IsRequired();
+
             builder.HasOne(c => c.Player)
                 .WithMany(c => c.Banks)
                 .HasForeignKey(c => c.PlayerCode)
