@@ -79,6 +79,7 @@ const DefaultBrandProps = {
 export const MerchantIdSelect = ({
     start = Reseller,
     end = Brand,
+    // stepByStep,
 
     resellerProps: {
         name: resellerIdName = ResellerIdName,

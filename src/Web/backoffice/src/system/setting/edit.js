@@ -16,7 +16,7 @@ import { useUpdateVipLevel } from "../../vip-levels/client"
 import { useTrans } from "../../i18n"
 import { useDeleteSystemSetting } from "./client"
 
-export const AddButton = () => {
+export const AddButton = ({ onSubmitted }) => {
     let dialog = useModalState()
     let isDisplay = useIsDisplayMenuByRoute()
     if (!isDisplay) {
@@ -26,12 +26,14 @@ export const AddButton = () => {
     return (
         <>
             <AddDisclosure {...dialog} />
-            {dialog.visible && <AddDialog dialog={dialog} />}
+            {dialog.visible && (
+                <AddDialog dialog={dialog} onSubmitted={onSubmitted} />
+            )}
         </>
     )
 }
 
-const AddDialog = ({ dialog }) => {
+const AddDialog = ({ onSubmitted, dialog }) => {
     return (
         <FormDialog
             defaultValues={{}}
@@ -52,7 +54,7 @@ const AddDialog = ({ dialog }) => {
     )
 }
 
-export const EditButton = ({ record }) => {
+export const EditButton = ({ record, onSubmitted }) => {
     let dialog = useModalState()
     let isDisplay = useIsDisplayMenuByRoute()
     if (!isDisplay) {
@@ -62,12 +64,18 @@ export const EditButton = ({ record }) => {
     return (
         <>
             <EditDisclosure {...dialog} />
-            {dialog.visible && <EditDialog record={record} dialog={dialog} />}
+            {dialog.visible && (
+                <EditDialog
+                    record={record}
+                    onSubmitted={onSubmitted}
+                    dialog={dialog}
+                />
+            )}
         </>
     )
 }
 
-const EditDialog = ({ record = {}, dialog }) => {
+const EditDialog = ({ record = {}, onSubmitted, dialog }) => {
     let { id } = record
     let [formData, setSubmit] = useState()
     let { result, error, isLoading, deleteCache, mutate } = useUpdateVipLevel(
@@ -76,7 +84,7 @@ const EditDialog = ({ record = {}, dialog }) => {
     )
 
     let title = useTrans({
-        zh: "Setting",
+        zh: "设定",
         en: "Setting"
     })
 

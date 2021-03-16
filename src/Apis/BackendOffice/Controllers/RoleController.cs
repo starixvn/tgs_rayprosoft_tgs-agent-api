@@ -54,6 +54,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     Id = role.Id,
                     RoleType = role.RoleType,
+                    ResellerId = role.ResellerId.Value,
+                    LicenseeId = role.LicenseeId.Value,
+                    BrandId = role.BrandId.Value,
                     Name = role.Name,
                     DisplayName = role.DisplayName,
                     Description = role.Description,

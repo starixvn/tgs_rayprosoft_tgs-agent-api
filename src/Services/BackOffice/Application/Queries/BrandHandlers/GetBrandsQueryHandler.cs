@@ -35,6 +35,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                 {
                     Id = x.Id,
                     LicenseeId = x.LicenseeId,
+                    LicenseeName = x.Licensee.Name,
                     Name = x.Name,
                     Code = x.Code,
                     Status = x.Status,

@@ -82,9 +82,6 @@ export const codeLabelPair = [
             locale,
             codes,
             label: labelOf,
-            subLabelPairs: [
-                announcementPair,
-                stationLetterPair /*vipLevelPair*/
-            ]
+            subLabelPairs: [announcementPair, stationLetterPair, vipLevelPair]
         })
 ]
