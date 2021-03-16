@@ -93,7 +93,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                 ExpiredOn = createdOn.AddSeconds(Core.Models.Consts.TokenExpireSeconds.PlayerLogin)
             });
 
-            var token = await GeneratePlayerJwtToken(brandId, new()
+            var token = await GeneratePlayerJwtTokenAsync(brandId, new()
             {
                 PlayerCode = playerCode,
                 LoginRecordId = record.Id,
@@ -108,7 +108,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             };
         }
 
-        private async Task<string> GeneratePlayerJwtToken(Guid brandId, PlayerTokenData playerTokenData)
+        private async Task<string> GeneratePlayerJwtTokenAsync(Guid brandId, PlayerTokenData playerTokenData)
         {
             var data = await _tokenProvider.EncryptAsync(playerTokenData);
 
