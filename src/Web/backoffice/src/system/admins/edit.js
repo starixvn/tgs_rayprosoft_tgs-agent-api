@@ -200,14 +200,12 @@ const AddBody = ({}) => {
     let password = watch("password")
 
     let userResellerId = useUserResellerId()
-    let [resellerId, setResellerId] = useState(userResellerId)
-
     let userLicenseeId = useUserLicenseeId()
-    let [licenseeId, setLicenseeId] = useState(userLicenseeId)
-
     let userBrandId = useUserBrandId()
-    let [brandId, setBrandId] = useState(userBrandId)
 
+    let resellerId = watch("resellerId")
+    let licenseeId = watch("licenseeId")
+    let brandId = watch("brandId")
     return (
         <Stack spacing="major-3" margin="major-1">
             <FieldValues>
@@ -218,12 +216,9 @@ const AddBody = ({}) => {
 
                 <RoleLabel required />
                 <RoleSelectGroup
-                    resellerId={resellerId}
-                    setResellerId={setResellerId}
-                    licenseeId={licenseeId}
-                    setLicenseeId={setLicenseeId}
-                    brandId={brandId}
-                    setBrandId={setBrandId}
+                    defalultResellerId={userResellerId}
+                    defaultLicenseeId={userLicenseeId}
+                    defaultBrandId={userBrandId}
                     emptyDepartment={() => {
                         setValue("departmentId", "")
                     }}
@@ -269,12 +264,9 @@ const AddBody = ({}) => {
 
 const RoleSelectGroup = ({
     defaultRoleType,
-    resellerId,
-    setResellerId,
-    licenseeId,
-    setLicenseeId,
-    brandId,
-    setBrandId,
+    defalultResellerId,
+    defaultLicenseeId,
+    defaultBrandId,
     emptyDepartment
 }) => {
     let userRoleType = useUserRoleType()
@@ -283,6 +275,9 @@ const RoleSelectGroup = ({
 
     let roleType = watch("roleType")
 
+    let resellerId = watch("resellerId")
+    let licenseeId = watch("licenseeId")
+    let brandId = watch("brandId")
     return (
         <Set orientation="vertical">
             {roleTypeOptions.length > 1 && (
@@ -298,18 +293,18 @@ const RoleSelectGroup = ({
                                 role === RoleTypes.Admin ||
                                 role === RoleTypes.Reseller
                             ) {
-                                setResellerId("")
-                                setLicenseeId("")
-                                setBrandId("")
+                                setValue("resellerId", "")
+                                setValue("licenseeId", "")
+                                setValue("brandId", "")
                             }
 
                             if (role === RoleTypes.Licensee) {
-                                setLicenseeId("")
-                                setBrandId("")
+                                setValue("licenseeId", "")
+                                setValue("brandId", "")
                             }
 
                             if (role === RoleTypes.Brand) {
-                                setBrandId("")
+                                setValue("brandId", "")
                             }
 
                             setValue("roleId", "")
@@ -321,16 +316,13 @@ const RoleSelectGroup = ({
                             start={adminOrNextRoleType(userRoleType)}
                             end={roleType}
                             resellerProps={{
-                                value: resellerId,
-                                onChange: (value) => setResellerId(value)
+                                defaultValue: defalultResellerId
                             }}
                             licenseeProps={{
-                                value: licenseeId,
-                                onChange: (value) => setLicenseeId(value)
+                                defaultValue: defaultLicenseeId
                             }}
                             brandProps={{
-                                value: brandId,
-                                onChange: (value) => setBrandId(value)
+                                defaultValue: defaultBrandId
                             }}
                         />
                     )}
@@ -423,9 +415,9 @@ const EditBody = ({ user, dialog }) => {
         defaultRoleType = RoleTypes.Brand
     }
 
-    let [resellerId, setResellerId] = useState(user?.resellerId)
-    let [licenseeId, setLicenseeId] = useState(user?.licenseeId)
-    let [brandId, setBrandId] = useState(user?.brandId)
+    let resellerId = watch("resellerId")
+    let licenseeId = watch("licenseeId")
+    let brandId = watch("brandId")
 
     let departmentId = watch("departmentId")
     return (
@@ -439,12 +431,9 @@ const EditBody = ({ user, dialog }) => {
                 <RoleLabel />
                 <RoleSelectGroup
                     defaultRoleType={defaultRoleType}
-                    resellerId={resellerId}
-                    setResellerId={setResellerId}
-                    licenseeId={licenseeId}
-                    setLicenseeId={setLicenseeId}
-                    brandId={brandId}
-                    setBrandId={setBrandId}
+                    defalultResellerId={user?.resellerId}
+                    defaultLicenseeId={user?.licenseeId}
+                    defaultBrandId={user?.brandId}
                     emptyDepartment={() => {
                         setValue("departmentId", "")
                     }}
