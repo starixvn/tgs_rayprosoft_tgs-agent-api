@@ -1,6 +1,6 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Players
+namespace TGS.Services.BackOffice.Application.Models.Player
 {
     public class GetPlayerResponse : MessageResponse
     {

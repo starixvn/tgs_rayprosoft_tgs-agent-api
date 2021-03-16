@@ -27,6 +27,8 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<ICurrencyService, CurrencyService>();
             services.AddTransient<ILanguageService, LanguageService>();
             services.AddTransient<IVipLevelService, VipLevelService>();
+            services.AddTransient<IPlayerService, PlayerService>();
+            services.AddTransient<IPlayerBankService, PlayerBankService>();
             services.AddTransient<ICredentialGenerator, CredentialGenerator>();
 
             return services;

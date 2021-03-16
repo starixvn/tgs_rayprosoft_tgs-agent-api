@@ -10,5 +10,9 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string BankName { get; set; }
         public string BankAccount { get; set; }
         public virtual Player Player { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
+        public string CreatedByUsername { get; set; }
+        public string UpdatedByUsername { get; set; }
     }
 }

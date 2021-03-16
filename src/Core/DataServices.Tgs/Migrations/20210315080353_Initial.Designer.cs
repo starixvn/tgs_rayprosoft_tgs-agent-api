@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210312093127_Initial")]
+    [Migration("20210315080353_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2130,6 +2130,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("bank_name");
 
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -2141,6 +2151,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("real_name");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_player_banks");
