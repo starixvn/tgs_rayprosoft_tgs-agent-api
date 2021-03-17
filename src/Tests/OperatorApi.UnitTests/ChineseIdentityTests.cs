@@ -16,7 +16,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public void Id_Length_15_Verify_Should_Correct()
         {
-            var sut = new ChineseIdentity15Verifier();
+            var sut = new ChineseIdentityVerifier();
 
             var id = "320101000101105";
 
@@ -28,7 +28,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public void Id_Length_18_Verify_Should_Correct()
         {
-            var sut = new ChineseIdentity18Verifier();
+            var sut = new ChineseIdentityVerifier();
 
             var id = "22010119000101191X";
 
