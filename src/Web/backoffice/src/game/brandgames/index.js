@@ -16,7 +16,8 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
     useIsDisplayMenuByRoute,
-    useHasSubMenuByRoute
+    useHasSubMenuByRoute,
+    useUserBrandId
 } from "../../user/context"
 import { Code } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
@@ -34,6 +35,7 @@ import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import { BrandGameProviderSelect } from "../brandproviders/BrandGameProviderSelect"
 import AlertDialog from "../../dialog/Alert"
+import BrandBar from "../../report/BrandBar"
 
 export { Code } from "./menu"
 
@@ -48,7 +50,23 @@ export const Content = () => {
 
 export const CodeContentPair = [Code, Content]
 
-export const Body = () => {
+const Body = () => {
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandId] = useState(userBrandId)
+
+    return (
+        <Set orientation="vertical" isFilled>
+            <BrandBar
+                onBrandChange={(value) => {
+                    setBrandId(value)
+                }}
+            />
+            {brandId && <BodyContent brandId={brandId} />}
+        </Set>
+    )
+}
+
+const BodyContent = ({ brandId }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         gameProviderId: "",
         gameType: "",
@@ -57,7 +75,8 @@ export const Body = () => {
     let { pageIndex, pageSize, gameProviderId, gameType, keyword } = state
     let { isLoading, data, error, mutate, deleteCache } = useBrandGameList({
         ...toApiParams(state),
-        sortby: "displayOrder"
+        sortby: "displayOrder",
+        brandId
     })
 
     return (
