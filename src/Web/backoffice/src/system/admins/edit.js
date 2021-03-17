@@ -200,9 +200,38 @@ const AddBody = ({}) => {
     let { watch, setValue } = useFormContext()
     let password = watch("password")
 
-    let resellerId = watch("resellerId")
-    let licenseeId = watch("licenseeId")
-    let brandId = watch("brandId")
+    let userResellerId = useUserResellerId()
+    let [resellerId, setResellerState] = useState(userResellerId)
+    const setResellerId = (value) => {
+        if (!userResellerId) {
+            //admin user
+            setResellerState(value)
+        }
+
+        //ignore change
+    }
+
+    let userLicenseeId = useUserLicenseeId()
+    let [licenseeId, setLicenseeState] = useState(userLicenseeId)
+    const setLicenseeId = (value) => {
+        if (!userLicenseeId) {
+            //reseller user
+            setLicenseeState(value)
+        }
+
+        //ignore change
+    }
+
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandState] = useState(userBrandId)
+    const setBrandId = (value) => {
+        if (!userBrandId) {
+            //licensee user
+            setBrandState(value)
+        }
+
+        //ignore change
+    }
 
     return (
         <Stack spacing="major-3" margin="major-1">
@@ -214,6 +243,12 @@ const AddBody = ({}) => {
 
                 <RoleLabel required />
                 <RoleSelectGroup
+                    resellerId={resellerId}
+                    setResellerId={setResellerId}
+                    licenseeId={licenseeId}
+                    setLicenseeId={setLicenseeId}
+                    brandId={brandId}
+                    setBrandId={setBrandId}
                     emptyDepartment={() => {
                         setValue("departmentId", "")
                     }}
@@ -257,17 +292,20 @@ const AddBody = ({}) => {
     )
 }
 
-const RoleSelectGroup = ({ emptyDepartment }) => {
+const RoleSelectGroup = ({
+    resellerId,
+    setResellerId,
+    licenseeId,
+    setLicenseeId,
+    brandId,
+    setBrandId,
+    emptyDepartment
+}) => {
     let userRoleType = useUserRoleType()
     let { watch, setValue, getValues, reset } = useFormContext()
     let roleTypeOptions = useRoleTypeOptions()
 
     let roleType = watch("roleType")
-
-    let resellerId = watch("resellerId")
-    let licenseeId = watch("licenseeId")
-    let brandId = watch("brandId")
-
     let roleId = watch("roleId")
 
     const onMerchantResetted = () => {
@@ -289,18 +327,18 @@ const RoleSelectGroup = ({ emptyDepartment }) => {
                                 role === RoleTypes.Admin ||
                                 role === RoleTypes.Reseller
                             ) {
-                                setValue("resellerId", "")
-                                setValue("licenseeId", "")
-                                setValue("brandId", "")
+                                setResellerId("")
+                                setLicenseeId("")
+                                setBrandId("")
                             }
 
                             if (role === RoleTypes.Licensee) {
-                                setValue("licenseeId", "")
-                                setValue("brandId", "")
+                                setLicenseeId("")
+                                setBrandId("")
                             }
 
                             if (role === RoleTypes.Brand) {
-                                setValue("brandId", "")
+                                setBrandId("")
                             }
 
                             onMerchantResetted()
@@ -314,16 +352,25 @@ const RoleSelectGroup = ({ emptyDepartment }) => {
                             start={adminOrNextRoleType(userRoleType)}
                             end={roleType}
                             resellerProps={{
-                                defaultValue: resellerId,
-                                onChange: onMerchantResetted
+                                value: resellerId,
+                                onChange: (value) => {
+                                    setResellerId(value)
+                                    onMerchantResetted()
+                                }
                             }}
                             licenseeProps={{
-                                defaultValue: licenseeId,
-                                onChange: onMerchantResetted
+                                value: licenseeId,
+                                onChange: (value) => {
+                                    setLicenseeId(value)
+                                    onMerchantResetted()
+                                }
                             }}
                             brandProps={{
-                                defaultValue: brandId,
-                                onChange: onMerchantResetted
+                                value: brandId,
+                                onChange: (value) => {
+                                    setBrandId(value)
+                                    onMerchantResetted()
+                                }
                             }}
                         />
                     )}
@@ -418,9 +465,38 @@ const EditDialog = ({ user = {}, onSubmitted, dialog, ...props }) => {
 const EditBody = ({ user }) => {
     let { watch, setValue } = useFormContext()
 
-    let resellerId = watch("resellerId")
-    let licenseeId = watch("licenseeId")
-    let brandId = watch("brandId")
+    let userResellerId = useUserResellerId()
+    let [resellerId, setResellerState] = useState(user?.resellerId)
+    const setResellerId = (value) => {
+        if (!userResellerId) {
+            //admin user
+            setResellerState(value)
+        }
+
+        //ignore change
+    }
+
+    let userLicenseeId = useUserLicenseeId()
+    let [licenseeId, setLicenseeState] = useState(user?.licenseeId)
+    const setLicenseeId = (value) => {
+        if (!userLicenseeId) {
+            //reseller user
+            setLicenseeState(value)
+        }
+
+        //ignore change
+    }
+
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandState] = useState(user?.brandId)
+    const setBrandId = (value) => {
+        if (!userBrandId) {
+            //licensee user
+            setBrandState(value)
+        }
+
+        //ignore change
+    }
 
     let departmentId = watch("departmentId")
     return (
@@ -433,6 +509,12 @@ const EditBody = ({ user }) => {
 
                 <RoleLabel />
                 <RoleSelectGroup
+                    resellerId={resellerId}
+                    setResellerId={setResellerId}
+                    licenseeId={licenseeId}
+                    setLicenseeId={setLicenseeId}
+                    brandId={brandId}
+                    setBrandId={setBrandId}
                     emptyDepartment={() => {
                         setValue("departmentId", "")
                     }}

@@ -90,7 +90,9 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     }, [licensee])
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useAddBrand(formData)
+    let { result, isLoading, error, mutate, deleteCache } = useAddBrand(
+        formData
+    )
 
     const onSubmit = (data) => {
         let formData = normalizeFormData(data)
@@ -110,6 +112,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     }
 
     const reset = () => {
+        deleteCache()
         mutate(undefined, false)
         setSubmit(undefined)
     }
@@ -284,7 +287,10 @@ const EditDialog = ({ brandId, licenseeId, onSubmitted, dialog, ...props }) => {
     } = useLicenseeBrand({ brandId, licenseeId })
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useUpdateBrand(brandId, formData)
+    let { result, isLoading, error, mutate, deleteCache } = useUpdateBrand(
+        brandId,
+        formData
+    )
 
     let title = useTrans({
         zh: "编辑品牌",
@@ -317,6 +323,7 @@ const EditDialog = ({ brandId, licenseeId, onSubmitted, dialog, ...props }) => {
         mutateBrand(undefined, false)
         deleteBrandCache()
 
+        deleteCache()
         mutate(undefined, false)
         setSubmit(undefined)
     }
