@@ -62,12 +62,16 @@ namespace TGS.Apis.OperatorApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddOperatorApiCore((options, sp) =>
+                .AddOperatorApiCore()
+                .ConfigureOperatorOptions<IConfiguration>((options, config) =>
                 {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
                     config.GetSection("Operator").Bind(options);
                 })
+                .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("EmailSetting").Bind(options);
+                })
+                .Services
                 .AddReportServices();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())

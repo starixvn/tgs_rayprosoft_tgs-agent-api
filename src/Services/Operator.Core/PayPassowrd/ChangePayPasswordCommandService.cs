@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PayPassowrd
 {
@@ -29,7 +29,7 @@ namespace TGS.Services.Operator.PayPassowrd
                 .ConfigureAwait(false);
 
             var result = await _validateCodeOperator
-                .GetValidateCodeDataAsync(command.ValidateCode, command.Token)
+                .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)
                 .ConfigureAwait(false);
 
             if (result == null)

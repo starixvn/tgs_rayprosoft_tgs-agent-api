@@ -6,7 +6,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.PayPassowrd;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -51,7 +51,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 request.NewPassword,
                 request.ValidateCode,
-                request.Token);
+                request.SecurityKey);
 
             return changePayPasswordService.ExecuteAsync(command);
         }

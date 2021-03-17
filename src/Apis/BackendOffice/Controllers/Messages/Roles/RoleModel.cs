@@ -8,6 +8,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
     {
         public Guid Id { get; set; }
         public RoleType RoleType { get; set; }
+        public Guid? ResellerId { get; set; }
+        public Guid? LicenseeId { get; set; }
+        public Guid? BrandId { get; set; }
         public string Name { get; set; }
         public string DisplayName { get; set; }
         public string Description { get; set; }

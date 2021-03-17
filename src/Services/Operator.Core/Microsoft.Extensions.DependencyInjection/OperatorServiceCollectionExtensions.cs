@@ -1,14 +1,15 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.Extensions.Options;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator;
-using Valhalla.Services;
+using TGS.Services.Operator.Configuration;
+using TGS.ServiceUtility;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class OperatorServiceCollectionExtensions
     {
-        public static IServiceCollection AddOperatorApiCore(this IServiceCollection services, Action<OperatorOptions, IServiceProvider> configure)
+        public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
         {
             var allTypes = typeof(OperatorServiceCollectionExtensions).Assembly.GetTypes();
 
@@ -47,7 +48,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services
                 .AddOptions<OperatorOptions>()
-                .Configure(configure)
                 .Services
                 .AddHttpClient<SmsServiceClient>()
                 .ConfigureHttpClient((sp, httpClient) =>
@@ -68,9 +68,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
                 .AddTransient<ISmsServiceClient>(sp => sp.GetRequiredService<SmsServiceClient>())
                 .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
-                .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>();
+                .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
+                .AddMail();
 
-            return services;
+            var opConfiguration = new OperatorConfiguration(services);
+
+            return opConfiguration;
         }
     }
 }

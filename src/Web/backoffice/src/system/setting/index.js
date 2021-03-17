@@ -12,10 +12,10 @@ import { Code } from "./menu"
 import { useSystemSetting } from "./client"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
-import { EditButton } from "../../merchant/resellers/edit"
 import { useForm, FormProvider } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import SearchButton from "../../button/SearchButton"
+import { PageContent } from "../../page/Content"
 
 export { Code }
 
@@ -37,10 +37,10 @@ const Body = () => {
 
     let { data, isLoading, mutate } = useSystemSetting(toApiParams(state))
 
-    let columns = useColumns({ mutate, items })
+    let columns = useColumns({ mutate, items: data?.items })
     return (
         <PageContent
-            title={<Trans zh="Setting" en="Setting" />}
+            title={<Trans zh="设定" en="Setting" />}
             actionBar={
                 <>
                     <SearchBar
@@ -63,8 +63,8 @@ const Body = () => {
             <Table
                 controlledState={state}
                 columns={columns}
-                data={items}
-                pageCount={pageCount(pageSize, data?.totalCount)}
+                data={data?.items}
+                pageCount={pageCount(state?.pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
@@ -82,7 +82,10 @@ const SearchBar = ({ key = "", search, isLoading }) => {
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
-                    <InputField name="key" />
+                    <InputField
+                        name="key"
+                        showEmptyFieldValueAddonAfter={true}
+                    />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>
@@ -90,7 +93,7 @@ const SearchBar = ({ key = "", search, isLoading }) => {
     )
 }
 
-const useColumns = ({ items = [] }) => {
+const useColumns = ({ items = [], mutate }) => {
     return useMemo(
         () => [
             textColumn({

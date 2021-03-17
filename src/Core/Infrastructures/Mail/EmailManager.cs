@@ -4,34 +4,31 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.Infrastructures.Mail
 {
-    public interface IEmailManager
-    {
-        Task SendEmailAsync(Message message);
-    }
-
     public sealed class EmailManager : IEmailManager
     {
         private readonly EmailConfiguration _emailConfig;
         private readonly SmtpClient _smtpClient;
 
-        public EmailManager(EmailConfiguration emailConfig, SmtpClient smtpClient)
+        public EmailManager(IOptions<EmailConfiguration> emailConfigAccessor, SmtpClient smtpClient)
         {
-            _emailConfig = emailConfig;
-            _smtpClient = smtpClient;
+            _emailConfig = emailConfigAccessor.Value;
+            _smtpClient = smtpClient ?? throw new System.ArgumentNullException(nameof(smtpClient));
         }
 
-        async Task IEmailManager.SendEmailAsync(Message data)
+        public async Task SendEmailAsync(EmailPackage data)
         {
             if (data.To.Count == 0)
             {
                 return;
             }
 
-            var message = new MailMessage($"{_emailConfig.FromName} <{_emailConfig.FromMail}>",
+            var message = new MailMessage(
+                $"{_emailConfig.FromName} <{_emailConfig.FromMail}>",
                 data.To.Select(x => x.Address).JoinAsStringByComma());
 
             Setup(message, data);
@@ -48,14 +45,14 @@ namespace TGS.Core.Infrastructures.Mail
             };
         }
 
-        private static void Setup(MailMessage message, Message data)
+        private static void Setup(MailMessage message, EmailPackage data)
         {
             message.Subject = data.Subject;
             message.SubjectEncoding = Encoding.UTF8;
             message.BodyEncoding = Encoding.UTF8;
         }
 
-        private static void SetupContent(MailMessage message, Message data)
+        private static void SetupContent(MailMessage message, EmailPackage data)
         {
             var plainView = AlternateView.CreateAlternateViewFromString(
                 data.Content, null, "text/plain");
@@ -63,7 +60,7 @@ namespace TGS.Core.Infrastructures.Mail
             message.AlternateViews.Add(plainView);
         }
 
-        private static void SetupHtmlContent(MailMessage message, Message data)
+        private static void SetupHtmlContent(MailMessage message, EmailPackage data)
         {
             if (data.HtmlBodyContent == null)
             {
@@ -76,7 +73,7 @@ namespace TGS.Core.Infrastructures.Mail
             message.AlternateViews.Add(htmlBody);
         }
 
-        private static void SetupLinkedResource(AlternateView htmlBody, Message data)
+        private static void SetupLinkedResource(AlternateView htmlBody, EmailPackage data)
         {
             if (data.InlineAttachments == null || data.InlineAttachments.Length == 0)
             {
@@ -95,7 +92,7 @@ namespace TGS.Core.Infrastructures.Mail
             }
         }
 
-        private static void SetupCcReceivers(MailMessage message, Message data)
+        private static void SetupCcReceivers(MailMessage message, EmailPackage data)
         {
             if (data.Cc.Count > 0)
             {
@@ -103,7 +100,7 @@ namespace TGS.Core.Infrastructures.Mail
             }
         }
 
-        private static void AddAttachments(MailMessage message, Message data)
+        private static void AddAttachments(MailMessage message, EmailPackage data)
         {
             if (data.Attachments == null || data.Attachments.Length == 0)
             {

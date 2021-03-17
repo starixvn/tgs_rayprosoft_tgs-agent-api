@@ -3,12 +3,14 @@ import { css, Global } from "@emotion/react"
 import Select from "../../select/Select"
 import { useLicenseeList } from "./client"
 import { useTrans } from "../../i18n"
+import { Controller, useFormContext } from "react-hook-form"
 
 export const LicenseeIdSelect = ({
     resellerId = "",
     placeholderDisabled = false,
     ...props
 }) => {
+    let formMethods = useFormContext()
     let { data, isLoading } = useLicenseeList({ showAll: true, resellerId })
 
     let placeholder = useLicenseePlaceholder()
@@ -18,12 +20,18 @@ export const LicenseeIdSelect = ({
         disabled: placeholderDisabled
     }
 
-    if (isLoading) {
+    if (
+        isLoading &&
+        props?.name &&
+        props?.defaultValue &&
+        formMethods?.control
+    ) {
         return (
-            <Select
-                isLoading={isLoading}
-                options={[placeholderOption]}
-                {...props}
+            <Controller
+                name={props?.name}
+                control={formMethods?.control}
+                render={() => <Select isLoading={isLoading} options={[]} />}
+                defaultValue={props?.defaultValue}
             />
         )
     }

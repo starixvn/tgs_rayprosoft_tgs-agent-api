@@ -30,7 +30,9 @@ namespace TGS.Services.Operations
         Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
 
         Task<Player> GetPlayerByCodeAsync(string playerCode);
+
         Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
+
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
         Task UpdatePlayerAsync(UpdatePlayerData data);
@@ -48,6 +50,8 @@ namespace TGS.Services.Operations
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
 
         Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
+
+        Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -233,8 +237,19 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-
         #region Private Methods
+
+        public async Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
+        public async Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
         {
@@ -329,12 +344,6 @@ namespace TGS.Services.Operations
             return noCache(cachedPlayer);
         }
 
-        public async Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
-
         private static class CachedPlayerFields
         {
             public const string BrandId = "brandId";
@@ -348,6 +357,6 @@ namespace TGS.Services.Operations
             public const string ExternalCurrencyCode = "externalCurrencyCode";
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

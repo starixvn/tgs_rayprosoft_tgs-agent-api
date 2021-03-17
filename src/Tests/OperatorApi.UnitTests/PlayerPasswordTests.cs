@@ -142,7 +142,7 @@ namespace OperatorApi.UnitTests
             fakeValidateCodeGenerator.GenerateToken().Returns(token);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Any<ValidateCodeData>())
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
             var expected = $"Your ID verification code is : {validateCode}";
@@ -171,7 +171,7 @@ namespace OperatorApi.UnitTests
 
             var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "123456", "newPassword");
 
-            fakeValidateCodeOperator.GetValidateCodeDataAsync(Arg.Any<string>(), Arg.Any<string>())
+            fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
                 .Returns(callInfo =>
                 {
                     var token = callInfo.ArgAt<string>(0);
@@ -198,7 +198,7 @@ namespace OperatorApi.UnitTests
 
             var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
 
-            fakeValidateCodeOperator.GetValidateCodeDataAsync(Arg.Any<string>(), Arg.Any<string>())
+            fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
                 .Returns((ValidateCodeData)null);
 
             Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));

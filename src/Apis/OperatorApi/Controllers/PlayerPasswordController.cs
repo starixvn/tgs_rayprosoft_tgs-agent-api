@@ -8,7 +8,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.PlayerPassword;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -61,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             try
             {
                 await resetService
-                    .ExecuteAsync(new ResetPasswordCommand(request.Token, request.ValidateCode, request.NewPassword))
+                    .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
                     .ConfigureAwait(false);
 
                 return Ok();
