@@ -6,7 +6,8 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
     useIsDisplayMenuByRoute,
-    useHasSubMenuByRoute
+    useHasSubMenuByRoute,
+    useUserBrandId
 } from "../../user/context"
 import { Code } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
@@ -22,6 +23,7 @@ import { EditPresetButton } from "./PresetMaintenance"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import AlertDialog from "../../dialog/Alert"
+import BrandBar from "../../report/BrandBar"
 
 export { Code }
 
@@ -37,6 +39,22 @@ export const Content = () => {
 export const CodeContentPair = [Code, Content]
 
 const Body = () => {
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandId] = useState(userBrandId)
+
+    return (
+        <Set orientation="vertical" isFilled>
+            <BrandBar
+                onBrandChange={(value) => {
+                    setBrandId(value)
+                }}
+            />
+            {brandId && <BodyContent brandId={brandId} />}
+        </Set>
+    )
+}
+
+const BodyContent = ({ brandId }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         keyword: ""
     })
@@ -48,7 +66,7 @@ const Body = () => {
         error,
         mutate,
         deleteCache
-    } = useBrandGameProviderList(toApiParams(state))
+    } = useBrandGameProviderList({ ...toApiParams(state), brandId })
 
     let columns = useColumns({ items: data?.items, mutate })
 
