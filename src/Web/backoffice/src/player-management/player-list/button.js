@@ -50,7 +50,7 @@ export const ViewButton = ({ player, brandId, ...props }) => {
     )
 }
 
-export const EditButton = ({ player, onSubmitted, ...props }) => {
+export const EditButton = ({ brandId, player, onSubmitted, ...props }) => {
     let dialog = useModalState()
 
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -66,6 +66,7 @@ export const EditButton = ({ player, onSubmitted, ...props }) => {
             {dialog.visible && (
                 <TabsDialog
                     edit={true}
+                    brandId={brandId}
                     playerCode={player.playerCode}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -176,6 +177,7 @@ const ViewTabs = ({ playerCode, brandId, player, tab }) => {
 }
 
 const EditTabs = ({
+    brandId,
     playerCode,
     player,
     tab,
@@ -193,6 +195,7 @@ const EditTabs = ({
             </TabList>
             <PlayerEditTab
                 player={player}
+                brandId={brandId}
                 playerCode={playerCode}
                 onSubmitted={onSubmitted}
                 onClickClose={onClickClose}

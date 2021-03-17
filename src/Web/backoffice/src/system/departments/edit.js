@@ -111,10 +111,10 @@ const EditBody = ({ record = {}, isAdd = false }) => {
     let userRoleType = useUserRoleType()
     let roleTypeOptions = useRoleTypeOptions()
 
-    let { watch, setValue } = useFormContext()
-    let resellerId = watch("resellerId")
-    let licenseeId = watch("licenseeId")
-    let brandId = watch("brandId")
+    let { watch } = useFormContext()
+    let resellerId = watch("resellerId", record?.resellerId ?? "")
+    let licenseeId = watch("licenseeId", record?.licenseeId ?? "")
+    let brandId = watch("brandId", record?.brandId ?? "")
 
     return (
         <Stack spacing="major-3" margin="major-1">
@@ -129,19 +129,13 @@ const EditBody = ({ record = {}, isAdd = false }) => {
                                 disabled={!isAdd}
                                 start={nextRoleType(userRoleType)}
                                 resellerProps={{
-                                    value: resellerId,
-                                    onChange: (value) =>
-                                        setValue("resellerId", value)
+                                    defaultValue: resellerId
                                 }}
                                 licenseeProps={{
-                                    value: licenseeId,
-                                    onChange: (value) =>
-                                        setValue("licenseeId", value)
+                                    defaultValue: licenseeId
                                 }}
                                 brandProps={{
-                                    value: brandId,
-                                    onChange: (value) =>
-                                        setValue("brandId", value)
+                                    defaultValue: brandId
                                 }}
                                 required={false}
                                 parentRequired={true}

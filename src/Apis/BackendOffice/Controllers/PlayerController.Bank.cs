@@ -2,67 +2,36 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
-using Player = TGS.Apis.BackendOffice.Resources.Player;
+using TGS.Services.BackOffice.Application.Models.PlayerBank;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
     public partial class PlayerController
     {
-        [Route("{playerCode}/bank/{id}")]
-        [HttpPut]
+        [HttpPut("{playerCode}/bank/{id}")]
         [Description("Update player bank")]
-        public async Task<MessageResponse> UpdatePlayerBankAsync(string playerCode, Guid id,
-            [FromBody] PlayerBankRequest request)
+        public Task<MessageResponse> UpdatePlayerBankAsync(string playerCode, Guid id,
+            [FromBody] UpdatePlayerBankRequest request)
         {
-            var bank = await _bankQueries.GetSingleAsync(p => p.Id == id);
-            if (bank == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Player.BankNotFound);
-            }
-
-            bank.PlayerCode = playerCode;
-            bank.RealName = request.RealName;
-            bank.BankName = request.BankName;
-            bank.BankAccount = request.BankAccount;
-            await _bankCommands.UpdateAsync(bank);
-            return CreateValidResponse<MessageResponse>();
+            request.PlayerCode = playerCode;
+            request.Id = id;
+            return _mediator.Send(request);
         }
 
-        [Route("{playerCode}/bank")]
-        [HttpPost]
+        [HttpPost("{playerCode}/bank")]
         [Description("Create a player bank")]
-        public async Task<MessageResponse> CreatePlayerBankAsync(string playerCode,
-            [FromBody] PlayerBankRequest request)
+        public Task<MessageResponse> CreatePlayerBankAsync(string playerCode,
+            [FromBody] CreatePlayerBankRequest request)
         {
-            var bank = new PlayerBank
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                PlayerCode = playerCode,
-                RealName = request.RealName,
-                BankAccount = request.BankAccount,
-                BankName = request.BankName
-            };
-            await _bankCommands.CreateAsync(bank);
-            return CreateValidResponse<MessageResponse>();
+            request.PlayerCode = playerCode;
+            return _mediator.Send(request);
         }
 
         [Route("{playerCode}/bank/{id}")]
         [HttpDelete]
         [Description("Delete a player bank")]
-        public async Task<MessageResponse> DeletePlayerBankAsync(string playerCode, Guid id)
-        {
-            var bank = await _bankQueries.GetSingleAsync(p => p.Id == id);
-            if (bank == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Player.BankNotFound);
-            }
-
-            await _bankCommands.DeleteAsync(bank);
-            return CreateValidResponse<MessageResponse>();
-        }
+        public Task<MessageResponse> DeletePlayerBankAsync(string playerCode, Guid id) =>
+            _mediator.Send(new DeletePlayerBankRequest(playerCode, id));
     }
 }

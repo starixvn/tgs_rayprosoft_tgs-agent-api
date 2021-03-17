@@ -22,19 +22,20 @@ namespace TGS.Services.BackOffice.Application.Commands.VipLevelHandlers
         public override async Task<MessageResponse> Handle(CreateVipLevelRequest request,
             CancellationToken cancellationToken)
         {
-            var lastLevel = await _service.GetVipLevelQueries(q => q.Where(v => v.BrandId == request.BrandId))
-                .MaxAsync(x => x.Level, cancellationToken);
-            var lastVip = await _service.GetVipLevelAsync(x => x.BrandId == request.BrandId && x.Level == lastLevel);
+            var vipLevels = await _service.GetVipLevelQueries(q => q.Where(v => v.BrandId == request.BrandId))
+                .ToArrayAsync(cancellationToken);
+            var max = vipLevels.Any() ? vipLevels.Max(x => x.Level) : 0;
+            var lastVip = await _service.GetVipLevelAsync(x => x.BrandId == request.BrandId && x.Level == max);
 
-            if (lastVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount ||
-                lastVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit)
+            if (lastVip != null && (lastVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount ||
+                lastVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit))
             {
                 return CreateInvalidResponse<MessageResponse>(string.Format(
                     VipLevel.LevelUpAccumulateLessThanPreviousLevel,
                     lastVip.LevelUpAccumulateBetAmount, lastVip.LevelUpAccumulateDeposit));
             }
 
-            request.Level = lastVip.Level + 1;
+            request.Level = (lastVip?.Level ?? 0) + 1;
 
             await _service.CreateVipLevelAsync(request);
 

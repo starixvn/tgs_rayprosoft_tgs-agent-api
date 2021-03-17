@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -87,8 +88,8 @@ namespace TGS.Core.DataServices.Log
             await SaveChangesAsync();
         }
 
-        Task IBaseRepository.SaveChangesAsync() =>
-            SaveChangesAsync();
+        Task<int> IBaseRepository.SaveChangesAsync(CancellationToken cancellationToken) =>
+            SaveChangesAsync(cancellationToken);
 
         Task ILogRepository.AddAdminLogsAsync(IList<AdminLog> logs) =>
             _repository.BulkInsertAsync(logs);

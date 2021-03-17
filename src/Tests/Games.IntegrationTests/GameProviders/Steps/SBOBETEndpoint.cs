@@ -130,22 +130,21 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddApiClient()
                 .AddRedis();
 
+            var apiUrlSection = configuration.GetSection("ApiUrls");
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
             if (isDev)
             {
-                services.AddTransient<IPlayerApiClient>(sp =>
-                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
-                services.AddTransient<ISBOBETApiClient>(sp =>
-                    ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+                services.AddTransient<IPlayerApiClient>(sp => ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                services.AddTransient<ISBOBETApiClient>(sp => ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
             }
             else
             {
                 services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
-                    c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+                    c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
 
                 services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
-                    c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-SBO")));
+                    c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -622,7 +621,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
+                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));

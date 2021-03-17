@@ -10,6 +10,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public string PlayerCode { get; init; }
 
         [JsonPropertyName("updatetime")]
-        public DateTimeOffset UpdateTime { get; init; }        
+        public DateTimeOffset UpdateTime { get; init; }
     }
 }

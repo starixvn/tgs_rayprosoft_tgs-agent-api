@@ -6,7 +6,6 @@ namespace TGS.Services.BackOffice.Application.Models.VipLevel
     {
         public Guid Id { get; init; }
         public int Level { get; set; }
-        public string Name { get; init; }
         public Guid BrandId { get; init; }
         public decimal LevelUpAccumulateBetAmount { get; init; }
         public decimal LevelUpAccumulateDeposit { get; init; }

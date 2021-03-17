@@ -70,15 +70,6 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Brand root role is not exists..
-        /// </summary>
-        public static string BrandRootRoleNotExists {
-            get {
-                return ResourceManager.GetString("BrandRootRoleNotExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Can not copy root role..
         /// </summary>
         public static string CannotCopyRootRole {
@@ -93,6 +84,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         public static string CannotDeleteRole {
             get {
                 return ResourceManager.GetString("CannotDeleteRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot delete root role..
+        /// </summary>
+        public static string CannotDeleteRootRole {
+            get {
+                return ResourceManager.GetString("CannotDeleteRootRole", resourceCulture);
             }
         }
         

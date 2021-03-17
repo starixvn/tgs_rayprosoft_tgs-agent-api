@@ -39,7 +39,7 @@ import {
 } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { FieldValues } from "../../layout/Grid"
-import Input from "../../input/Input"
+import Input, { InputField } from "../../input/Input"
 import { useAddVipLevel, useUpdateVipLevel } from "../../vip-levels/client"
 import { NormalLabel } from "../../form/Label"
 import Checkbox from "../../checkbox"
@@ -215,7 +215,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                 <Box>
                                     <Input
                                         type="number"
-                                        name="levelUpAccumulateBetAmount "
+                                        name="levelUpAccumulateBetAmount"
+                                        min="0"
                                     />
                                 </Box>
                             )}
@@ -239,7 +240,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                 <Box>
                                     <Input
                                         type="number"
-                                        name="levelUpAccumulateDeposit "
+                                        name="levelUpAccumulateDeposit"
+                                        min="0"
                                     />
                                 </Box>
                             )}
@@ -278,6 +280,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                     <Input
                                         type="number"
                                         name="levelKeepAccumulateBetAmount"
+                                        min="0"
                                     />
                                 </Box>
                             )}
@@ -301,7 +304,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                 <Box>
                                     <Input
                                         type="number"
-                                        name="levelKeepAccumulateDeposit "
+                                        name="levelKeepAccumulateDeposit"
+                                        min="0"
                                     />
                                 </Box>
                             )}
@@ -328,7 +332,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                         )}
                         {readonly && (
                             <Checkbox
-                                value={record?.levelKeepCondition}
+                                checked={record?.levelKeepCondition}
                                 disabled
                                 label={
                                     <Trans
@@ -369,7 +373,11 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input type="number" name="birthBenefit" />
+                                    <Input
+                                        type="number"
+                                        name="birthBenefit"
+                                        min="0"
+                                    />
                                 </Box>
                             )}
                             {readonly && (
@@ -390,7 +398,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                 <Box>
                                     <Input
                                         type="number"
-                                        name="promotionBenefit "
+                                        name="promotionBenefit"
+                                        min="0"
                                     />
                                 </Box>
                             )}
@@ -412,7 +421,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                 <Box>
                                     <Input
                                         type="number"
-                                        name="quarterlyBenefit "
+                                        name="quarterlyBenefit"
+                                        min="0"
                                     />
                                 </Box>
                             )}
@@ -445,9 +455,13 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
+                                    <InputField
                                         type="number"
-                                        name="liveDealerRebate "
+                                        name="liveDealerRebate"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        addonAfter={<Button isStatic>%</Button>}
                                     />
                                 </Box>
                             )}
@@ -468,7 +482,14 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input type="number" name="slotRebate " />
+                                    <InputField
+                                        type="number"
+                                        name="slotRebate"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        addonAfter={<Button isStatic>%</Button>}
+                                    />
                                 </Box>
                             )}
                             {readonly && (
@@ -488,9 +509,13 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
+                                    <InputField
                                         type="number"
                                         name="cardGameRebate"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        addonAfter={<Button isStatic>%</Button>}
                                     />
                                 </Box>
                             )}
@@ -511,7 +536,14 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input type="number" name="sportsRebate" />
+                                    <InputField
+                                        type="number"
+                                        name="sportsRebate"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        addonAfter={<Button isStatic>%</Button>}
+                                    />
                                 </Box>
                             )}
                             {readonly && (
@@ -531,9 +563,13 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
+                                    <InputField
                                         type="number"
-                                        name="virtualSportsRebate "
+                                        name="virtualSportsRebate"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        addonAfter={<Button isStatic>%</Button>}
                                     />
                                 </Box>
                             )}

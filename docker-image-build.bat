@@ -34,5 +34,8 @@ docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/global-api:%tag
 docker build -f src\Apis\ReportApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/report-api:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/report-api:%tag%
 
+docker build -f src\Apis\ValidateCodeApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/validatecode-api:%tag% .
+docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/validatecode-api:%tag%
+
 docker build -f src\Workers\Schedulers\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/schedulers:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/schedulers:%tag%

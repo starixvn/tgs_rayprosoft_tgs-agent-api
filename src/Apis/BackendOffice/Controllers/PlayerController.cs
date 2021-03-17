@@ -1,16 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TGS.Apis.BackendOffice.Controllers.Messages.Players;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models.Player;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -18,177 +11,40 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public partial class PlayerController : BaseContextController
     {
-        private readonly ITgsCommands<PlayerAuditLog> _auditLogCommands;
-        private readonly ITgsQueries<PlayerAuditLog> _auditLogQueries;
-        private readonly ITgsCommands<PlayerBank> _bankCommands;
-        private readonly ITgsQueries<PlayerBank> _bankQueries;
-        private readonly ITgsCommands<Player> _commands;
-        private readonly IPasswordHandler _passwordHandler;
-        private readonly ITgsQueries<Player> _queries;
+        private readonly IMediator _mediator;
 
-        public PlayerController(
-            IPasswordHandler passwordHandler,
-            ITgsQueries<Player> queries,
-            ITgsQueries<PlayerAuditLog> auditLogQueries,
-            ITgsQueries<PlayerBank> bankQueries,
-            ITgsCommands<Player> commands,
-            ITgsCommands<PlayerBank> bankCommands,
-            ITgsCommands<PlayerAuditLog> auditLogCommands)
+        public PlayerController(IMediator mediator)
         {
-            _passwordHandler = passwordHandler;
-            _queries = queries;
-            _bankQueries = bankQueries;
-            _auditLogQueries = auditLogQueries;
-            _commands = commands;
-            _bankCommands = bankCommands;
-            _auditLogCommands = auditLogCommands;
+            _mediator = mediator;
         }
 
-        [Route("")]
         [HttpGet]
         [Description("Get player list")]
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request) =>
-            _queries.GetQueries()
-                .Where(request.BrandId, p => p.BrandId == request.BrandId)
-                .Where(request.Status, p => p.Status == request.Status)
-                .Where(request.VipId, p => p.VipId == request.VipId)
-                .Where(request.Username, p => EF.Functions.ILike(p.Username, $"%{request.Username}%"))
-                .Select(p => new PlayersModel
-                {
-                    PlayerCode = p.PlayerCode,
-                    Username = p.Username,
-                    VipLevel = p.Vip.Name,
-                    Status = p.Status.ToString(),
-                    HasAgent = p.HasAgent
-                }).CreatePagedResponseAsync(request);
+            _mediator.Send(request);
 
-        [Route("{playerCode}")]
-        [HttpGet]
+        [HttpGet("{playerCode}")]
         [Description("Get player")]
-        public async Task<GetPlayerResponse> GetSingleAsync(string playerCode)
-        {
-            var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode, p =>
-                p.Include(s => s.Vip)
-                    .Include(s => s.Banks)
-                    .Include(s => s.Wallets)
-                    .Include(s => s.ParentPlayer));
+        public Task<GetPlayerResponse> GetSingleAsync(string playerCode) =>
+            _mediator.Send(new GetPlayerRequest(playerCode));
 
-            if (player == null)
-            {
-                return CreateInvalidResponse<GetPlayerResponse>(Resources.Player.NotFound);
-            }
-
-            var playerModel = new PlayerModel
-            {
-                Username = player.Username,
-                RealName = player.RealName,
-                VipLevel = player.Vip?.Name,
-                Status = player.Status,
-                StatusName = player.Status.ToString(),
-                HasAgent = player.HasAgent,
-                RegisteredOn = player.RegisteredOn,
-                ParentUsername = player.ParentPlayer?.Username,
-                Balance = player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
-                Phone = player.Phone,
-                Email = player.Email,
-                QQ = player.QQ,
-                WeChat = player.Wechat,
-                Banks = player.Banks.Select(p => new PlayerModel.BankModel
-                {
-                    Id = p.Id, RealName = p.RealName, BankName = p.BankName, BankAccount = p.BankAccount
-                }).ToArray()
-            };
-
-            return new() {Valid = true, Player = playerModel};
-        }
-
-        [Route("{playerCode}/operations")]
-        [HttpGet]
+        [HttpGet("{playerCode}/operations")]
         [Description("Get player operation")]
         public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode,
-            [FromQuery] GetPlayerOperationRequest request) =>
-            _auditLogQueries.GetQueries()
-                .Where(p => p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == playerCode)
-                .Select(p => new PlayerOperationModel
-                {
-                    CreatedOn = p.CreatedOn, CreatedByUsername = p.CreatedByUsername, Operation = p.Operation
-                }).CreatePagedResponseAsync(request);
-
-        [Route("{playerCode}/{type}")]
-        [HttpPut]
-        [Description("Update player")]
-        public async Task<MessageResponse> UpdateAsync(string playerCode, string type,
-            [FromBody] UpdatePlayerRequest request)
+            [FromQuery] GetPlayerOperationRequest request)
         {
-            var updatePlayerType = new[] {"info", "contact", "password"};
-
-            if (!updatePlayerType.Contains(type))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.UpdateTypeNotFound);
-            }
-
-            var player = await _queries.GetSingleAsync(p => p.PlayerCode == playerCode);
-
-            if (player == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Player.NotFound);
-            }
-
-            if (type == updatePlayerType[0])
-            {
-                if (!request.ParentUsername.IsNullOrEmpty())
-                {
-                    var parentPlayer = await _queries.GetSingleAsync(p => p.Username == request.ParentUsername);
-                    if (parentPlayer == null)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(Resources.Player.ParentPlayerNotFound);
-                    }
-
-                    player.ParentInvitationCode = parentPlayer.InvitationCode;
-                    player.ParentPlayerCode = parentPlayer.PlayerCode;
-                }
-
-                player.RealName = request.RealName;
-                player.VipId = request.VipId;
-                player.Status = request.Status;
-                player.HasAgent = request.HasAgent;
-            }
-
-            if (type == updatePlayerType[1])
-            {
-                player.Phone = request.Phone;
-                player.Email = request.Email;
-                player.QQ = request.QQ;
-                player.Wechat = request.Wechat;
-            }
-
-            if (type == updatePlayerType[2])
-            {
-                var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
-                player.Password = pwd;
-                player.Salt = salt;
-            }
-
-            player.UpdatedByUsername = Username;
-            player.UpdatedOn = DateTimeOffset.Now;
-            await _commands.UpdateAsync(player);
-            await CreateAuditLogAsync(type, playerCode);
-            return CreateValidResponse<MessageResponse>();
+            request.PlayerCode = playerCode;
+            return _mediator.Send(request);
         }
 
-        private async Task CreateAuditLogAsync(string type, string playerCode)
+        [HttpPut("{playerCode}/{type}")]
+        [Description("Update player")]
+        public Task<MessageResponse> UpdateAsync(string playerCode, string type,
+            [FromBody] UpdatePlayerRequest request)
         {
-            var auditLog = new PlayerAuditLog
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                ModuleName = "Player",
-                CreatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                Operation = $"Update Player {type}",
-                Username = playerCode
-            };
-
-            await _auditLogCommands.CreateAsync(auditLog);
+            request.PlayerCode = playerCode;
+            request.Type = type;
+            return _mediator.Send(request);
         }
     }
 }

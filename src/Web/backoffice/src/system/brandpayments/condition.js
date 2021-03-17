@@ -141,7 +141,6 @@ const toVipLevelNames = (ids = [], list = []) => {
 
     let names = ids.reduce((detail, id) => {
         let item = list.find((item) => item.id === id)
-
         return detail ? `${detail}/${item.name}` : item.name
     }, "")
 

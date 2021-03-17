@@ -31,6 +31,8 @@ namespace TGS.Services.Operations
 
         Task<Player> GetPlayerByCodeAsync(string playerCode);
 
+        Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
+
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
         Task UpdatePlayerAsync(UpdatePlayerData data);
@@ -48,6 +50,8 @@ namespace TGS.Services.Operations
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
 
         Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
+
+        Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -76,7 +80,7 @@ namespace TGS.Services.Operations
             _interface = this;
         }
 
-        async Task<CachedPlayer> IPlayerOperations.GetCachedPlayerAsync(string playerCode)
+        public async Task<CachedPlayer> GetCachedPlayerAsync(string playerCode)
         {
             var cachedPlayer = await GetCachedPlayerOrNullAsync(playerCode);
             if (cachedPlayer != null)
@@ -96,10 +100,10 @@ namespace TGS.Services.Operations
             return cachedPlayer;
         }
 
-        Task<decimal> IPlayerOperations.GetPlayerBalanceAsync(Guid walletId, bool dirtyRead) =>
+        public Task<decimal> GetPlayerBalanceAsync(Guid walletId, bool dirtyRead) =>
             _walletQueriesFactory().GetBalanceAsync(walletId);
 
-        async Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
+        public async Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
             PlatformType? platform)
         {
             var loginRecords = await _interface.GetPlayerEnabledLoginRecordsAsync(playerCode);
@@ -108,7 +112,7 @@ namespace TGS.Services.Operations
                 .FirstOrDefault(r => platform == null || r.PlatformType == platform);
         }
 
-        async Task<CachedPlayerLoginRecord[]> IPlayerOperations.GetPlayerEnabledLoginRecordsAsync(string playerCode)
+        public async Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode)
         {
             var field = "enabled";
             var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, field);
@@ -118,11 +122,11 @@ namespace TGS.Services.Operations
                 : await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
         }
 
-        Task<CachedPlayerLoginRecord> IPlayerOperations.GetPlayerLoginRecordAsync(Guid loginRecordId) =>
+        public Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId) =>
             _cacheManager.SafeGetAndCacheAsync(RedisCacheType.PlayerLoginRecords, loginRecordId,
                 TimeSpan.FromHours(2), () => _playerQueriesFactory().GetPlayerLoginRecordAsync(loginRecordId));
 
-        async Task<string> IPlayerOperations.GetPlayerCodeByUsernameAsync(Guid brandId, string username)
+        public async Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username)
         {
             const RedisCacheType cacheType = RedisCacheType.UsernameToPlayerCode;
             var cacheKey = brandId;
@@ -141,7 +145,7 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-        async Task<string> IPlayerOperations.CreatePlayerAsync(CreatePlayerData data)
+        public async Task<string> CreatePlayerAsync(CreatePlayerData data)
         {
             var playerCode = await _playerCommands.CreatePlayerAsync(data);
 
@@ -151,19 +155,19 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-        async Task IPlayerOperations.UpdatePlayerAsync(UpdatePlayerData data)
+        public async Task UpdatePlayerAsync(UpdatePlayerData data)
         {
             await _playerCommands.UpdatePlayerAsync(data);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
         }
 
-        async Task IPlayerOperations.ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        public async Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
         {
             await _playerCommands.ChangePlayerPasswordAsync(data);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
         }
 
-        async Task<PlayerLoginRecord> IPlayerOperations.PlayerLoginAsync(PlayerLoginData data)
+        public async Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data)
         {
             var record = await _playerCommands.PlayerLoginAsync(data);
             await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
@@ -171,7 +175,7 @@ namespace TGS.Services.Operations
             return record;
         }
 
-        async Task IPlayerOperations.PlayerLogoutAsync(PlayerLogoutData data)
+        public async Task PlayerLogoutAsync(PlayerLogoutData data)
         {
             await _playerCommands.DeauthorizePlayerAsync(data.PlayerCode, data.LoginRecordId);
             await _cacheManager.ClearCacheByBatchAsync(new CacheKey[]
@@ -189,25 +193,25 @@ namespace TGS.Services.Operations
             });
         }
 
-        Task<Player> IPlayerOperations.GetPlayerByCodeAsync(string playerCode) =>
+        public Task<Player> GetPlayerByCodeAsync(string playerCode) =>
             _playerQueriesFactory().GetPlayerByCodeAsync(playerCode);
 
-        Task<Guid> IPlayerOperations.GetBrandIdByPlayerCodeAsync(string playerCode) =>
+        public Task<Guid> GetBrandIdByPlayerCodeAsync(string playerCode) =>
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.BrandId,
                 v => Guid.Parse(v),
                 cachedPlayer => cachedPlayer?.BrandId ?? Guid.Empty);
 
-        Task<Guid> IPlayerOperations.GetDefaultWalletIdByPlayerCodeAsync(string playerCode) =>
+        public Task<Guid> GetDefaultWalletIdByPlayerCodeAsync(string playerCode) =>
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.DefaultWalletId,
                 v => Guid.Parse(v),
                 cachedPlayer => cachedPlayer?.DefaultWalletId ?? Guid.Empty);
 
-        Task<string> IPlayerOperations.GetUsernameByPlayerCodeAsync(string playerCode) =>
+        public Task<string> GetUsernameByPlayerCodeAsync(string playerCode) =>
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.Username,
                 value => (string)value,
                 cachedPlayer => cachedPlayer?.Username);
 
-        async Task<string> IPlayerOperations.GetPlayerCodeByInvitationCodeAsync(string invitationCode)
+        public async Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode)
         {
             const RedisCacheType cacheType = RedisCacheType.InvitationCodeToPlayerCode;
             var field = invitationCode;
@@ -225,8 +229,20 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-
         #region Private Methods
+
+        public async Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt,
+            DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
+        public async Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
         {
@@ -328,6 +344,6 @@ namespace TGS.Services.Operations
             public const string ExternalCurrencyCode = "externalCurrencyCode";
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

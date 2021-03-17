@@ -40,50 +40,50 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get brand payments")]
-        public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request)
-        {
-            return _brandPaymentService.GetPaymentsAsync()
+        public Task<PagedResponse<BrandPaymentModel>>
+            GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request) =>
+            _brandPaymentService.GetPaymentQueries()
                 .Include(p => p.BrandPaymentPlayers).ThenInclude(pp => pp.Player)
                 .Include(p => p.VipLevels)
-                .Where(request.TransferType, p => p.TransferType == request.TransferType)
-                .Where(request.PaymentStatus, p => p.PaymentStatus == request.PaymentStatus)
-                .Where(request.Keyword, p => EF.Functions.ILike(p.Payment.Name, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(p.PaymentMethod.Name, $"%{request.Keyword}%") ||
-                                             EF.Functions.ILike(p.PaymentChannel.Name, $"%{request.Keyword}%"))
-                .Select(p => new BrandPaymentModel
+                .Where(ResellerId, x => x.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, x => x.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId, x => x.BrandId == BrandId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .Where(request.TransferType, x => x.TransferType == request.TransferType)
+                .Where(request.PaymentStatus, x => x.PaymentStatus == request.PaymentStatus)
+                .Where(request.Keyword, x => EF.Functions.ILike(x.Payment.Name, $"%{request.Keyword}%") ||
+                    EF.Functions.ILike(x.PaymentMethod.Name, $"%{request.Keyword}%") ||
+                    EF.Functions.ILike(x.PaymentChannel.Name, $"%{request.Keyword}%"))
+                .Select(x => new BrandPaymentModel
                 {
-                    Id = p.Id,
-                    Number = p.DisplayOrder,
-                    PaymentName = p.Payment.Name,
-                    PaymentMethodName = p.PaymentMethod.Name,
-                    PaymentChannelName = p.PaymentChannel.Name,
-                    TransferType = p.TransferType,
-                    ChannelName = p.ChannelName,
-                    PlayerListCondition = p.PlayerListCondition,
-                    AllPlayers = p.AllPlayers,
-                    DepositedAmountMin = p.DepositedAmountMin,
-                    DepositedAmountMax = p.DepositedAmountMax,
-                    DepositedAmountUnlimited = p.DepositedAmountUnlimited,
-                    IdentityAuthentication = p.IdentityAuthentication,
-                    PhoneAuthentication = p.PhoneAuthentication,
-                    TransferLimitFrom = p.TransferLimitFrom,
-                    TransferLimitTo = p.TransferLimitTo,
-                    PaymentStatus = p.PaymentStatus,
-                    DesignatedUsers = GetDesignatedUsersAsync(p).Any(),
-                    PaymentFee = new PaymentFeeModel
-                    {
-                        FeePercentage = p.FeePercentage,
-                        HighestFee = p.HighestFee,
-                        LowestFee = p.LowestFee
-                    },
-                    VipLevelIds = p.VipLevels.Select(p => p.VipLevelId).ToArray(),
-                    CreatedByUsername = p.CreatedByUsername,
-                    UpdatedByUsername = p.UpdatedByUsername,
-                    CreatedOn = p.CreatedOn,
-                    UpdatedOn = p.UpdatedOn
+                    Id = x.Id,
+                    BrandId = x.BrandId,
+                    Number = x.DisplayOrder,
+                    PaymentName = x.Payment.Name,
+                    PaymentMethodName = x.PaymentMethod.Name,
+                    PaymentChannelName = x.PaymentChannel.Name,
+                    TransferType = x.TransferType,
+                    ChannelName = x.ChannelName,
+                    PlayerListCondition = x.PlayerListCondition,
+                    AllPlayers = x.AllPlayers,
+                    DepositedAmountMin = x.DepositedAmountMin,
+                    DepositedAmountMax = x.DepositedAmountMax,
+                    DepositedAmountUnlimited = x.DepositedAmountUnlimited,
+                    IdentityAuthentication = x.IdentityAuthentication,
+                    PhoneAuthentication = x.PhoneAuthentication,
+                    TransferLimitFrom = x.TransferLimitFrom,
+                    TransferLimitTo = x.TransferLimitTo,
+                    PaymentStatus = x.PaymentStatus,
+                    DesignatedUsers = GetDesignatedUsersAsync(x).Any(),
+                    PaymentFee =
+                        new() {FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee},
+                    VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
+                    CreatedByUsername = x.CreatedByUsername,
+                    UpdatedByUsername = x.UpdatedByUsername,
+                    CreatedOn = x.CreatedOn,
+                    UpdatedOn = x.UpdatedOn
                 })
                 .CreatePagedResponseAsync(request);
-        }
 
         [HttpGet("{id}")]
         [Description("Get a Payment")]
@@ -104,12 +104,13 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<GetBrandPaymentResponse>(Resources.BrandPayment.PaymentNotFound);
             }
 
-            return new GetBrandPaymentResponse
+            return new()
             {
                 Valid = true,
-                Payment = new BrandPaymentModel
+                Payment = new()
                 {
                     Id = brandPayment.Id,
+                    BrandId = brandPayment.BrandId,
                     PaymentId = brandPayment.Payment.Id,
                     PaymentName = brandPayment.Payment.Name,
                     PaymentMethodId = brandPayment.Payment.Id,
@@ -148,10 +149,10 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         {
             var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id, p => p.AsNoTracking());
 
-            return new GetPaymentFeeResponse
+            return new()
             {
                 Valid = true,
-                PaymentFee = new PaymentFeeModel
+                PaymentFee = new()
                 {
                     FeePercentage = brandPayment.FeePercentage,
                     HighestFee = brandPayment.HighestFee,
@@ -169,7 +170,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
                 if (duplicatePlayers.Any())
                 {
-                    return new CreateUpdateBrandPaymentResponse
+                    return new()
                     {
                         Valid = false,
                         Message = Resources.BrandPayment.WhiteSameAsBlack,
@@ -197,7 +198,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
                 if (duplicatePlayers.Any())
                 {
-                    return new CreateUpdateBrandPaymentResponse
+                    return new()
                     {
                         Valid = false,
                         Message = Resources.BrandPayment.WhiteSameAsBlack,
@@ -258,17 +259,8 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             var diffUsers = users.Except(allPlayers).ToArray();
 
             return diffUsers.Any()
-                ? new UploadFileResponse
-                {
-                    Valid = false,
-                    Message = Resources.BrandPayment.PlayersNotFound,
-                    NotExistsPlayers = diffUsers
-                }
-                : new UploadFileResponse
-                {
-                    Valid = true,
-                    Players = allPlayers
-                };
+                ? new() {Valid = false, Message = Resources.BrandPayment.PlayersNotFound, NotExistsPlayers = diffUsers}
+                : new UploadFileResponse {Valid = true, Players = allPlayers};
         }
 
         [HttpPut("ChangeOrders")]
@@ -296,11 +288,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
             var players = GetDesignatedUsersAsync(brandPayment);
 
-            return new GetDesignatedUsersResponse
-            {
-                Valid = true,
-                Players = players
-            };
+            return new() {Valid = true, Players = players};
         }
 
         private static string[] GetDesignatedUsersAsync(Core.DataServices.Tgs.Models.BrandPayment brandPayment)
@@ -315,7 +303,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 .Where(x =>
                     x.Player.AccumulatedDeposit >= brandPayment.DepositedAmountMin &&
                     (brandPayment.DepositedAmountUnlimited ||
-                     x.Player.AccumulatedDeposit < brandPayment.DepositedAmountMax))
+                        x.Player.AccumulatedDeposit < brandPayment.DepositedAmountMax))
                 .Where(isAll && brandPayment.IdentityAuthentication,
                     x => x.Player.IdentityAuthentication)
                 .Where(isAll && brandPayment.PhoneAuthentication,

@@ -83,17 +83,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Player changes password, player login is needed when use this
-        /// </summary>
-        [HttpPut]
-        [Route("changePassword")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request) =>
-            _mediator.Send(request);
-
-        /// <summary>
         ///     Player verify id, player login is needed when use this
         /// </summary>
         [HttpPut]
