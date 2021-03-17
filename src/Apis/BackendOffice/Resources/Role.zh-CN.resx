@@ -138,7 +138,7 @@
   <data name="CannotCopyRootRole" xml:space="preserve">
     <value>无法复制根角色</value>
   </data>
-  <data name="BrandRootRoleNotExists" xml:space="preserve">
-    <value>品牌管理员角色不存在</value>
+  <data name="CannotDeleteRootRole" xml:space="preserve">
+    <value>不能删除根角色</value>
   </data>
 </root>

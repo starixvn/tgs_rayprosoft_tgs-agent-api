@@ -158,19 +158,22 @@ namespace TGS.Apis.BackendOffice.Controllers
             if (role.RoleType == RoleType.Reseller || role.RoleType == RoleType.Licensee)
             {
                 var licenseeRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Licensee && x.IsRoot);
-                UpdateRoles(role, new[] {licenseeRootRole});
+                if (licenseeRootRole != null)
+                {
+                    UpdateRoles(role, new[] {licenseeRootRole});
+                }
+
                 var licenseeRoles = roles.Where(x => x.RoleType == RoleType.Licensee).ToArray();
                 UpdateRoles(licenseeRootRole, licenseeRoles);
             }
 
             var brandRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Brand && x.IsRoot);
 
-            if (brandRootRole == null)
+            if (brandRootRole != null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Role.BrandRootRoleNotExists);
+                UpdateRoles(role, new[] {brandRootRole});
             }
 
-            UpdateRoles(role, new[] {brandRootRole});
             var brandRoles = roles.Where(x => x.RoleType == RoleType.Brand).ToArray();
             UpdateRoles(brandRootRole, brandRoles);
 
@@ -189,10 +192,16 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
             }
 
-            if (role.Users.Any() || role.IsRoot)
+            if (role.Users.Any())
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRole);
             }
+
+            if (role.IsRoot)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRole);
+            }
+
 
             await _roleCommands.DeleteAsync(role);
             return CreateValidResponse<MessageResponse>();

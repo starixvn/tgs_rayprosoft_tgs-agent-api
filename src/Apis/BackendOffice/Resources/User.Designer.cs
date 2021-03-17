@@ -151,6 +151,15 @@ namespace TGS.Apis.BackendOffice.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User status is disabled..
+        /// </summary>
+        public static string StatusDisabled {
+            get {
+                return ResourceManager.GetString("StatusDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Username has existed already.
         /// </summary>
         public static string UsernameExistedAlready {

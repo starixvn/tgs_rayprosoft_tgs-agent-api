@@ -153,4 +153,7 @@
   <data name="UsernameRequired" xml:space="preserve">
     <value>Username is required.</value>
   </data>
+  <data name="StatusDisabled" xml:space="preserve">
+    <value>User status is disabled.</value>
+  </data>
 </root>

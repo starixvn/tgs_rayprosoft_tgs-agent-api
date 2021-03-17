@@ -16,6 +16,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -67,15 +68,20 @@ namespace TGS.Apis.BackendOffice.Controllers
                 user.LastLoginIp = HttpContext.Connection.RemoteIpAddress.ToString();
             }
 
+            if (user.Status == UserStatus.Disabled)
+            {
+                return CreateInvalidResponse<AuthenticateUserResponse>(Resources.User.StatusDisabled);
+            }
+
             user.LastLoginTime = DateTimeOffset.Now;
 
             await _userCommands.UpdateAsync(user);
             await SignInAsync(user);
 
-            return new AuthenticateUserResponse
+            return new()
             {
                 Valid = true,
-                UserInfo = new UserInfo
+                UserInfo = new()
                 {
                     Role = user.Role.Name,
                     RoleId = user.Role.Id,
@@ -86,7 +92,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Username = user.Username,
                     UserId = user.Id,
                     TimeZone = user.TimeZone,
-                    Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(user.Role.MenuSetting)
+                    Menus = _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(user.Role
+                        .MenuSetting)
                 }
             };
         }
@@ -101,13 +108,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             HttpContext.Response.Cookies.Append(
                 Consts.BackendOffice.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
-                new CookieOptions
-                {
-                    HttpOnly = false,
-                    Path = "/",
-                    IsEssential = true,
-                    SameSite = SameSiteMode.Lax
-                }
+                new() {HttpOnly = false, Path = "/", IsEssential = true, SameSite = SameSiteMode.Lax}
             );
         }
 
@@ -128,12 +129,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var authProperties = new AuthenticationProperties
             {
-                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20),
-                IsPersistent = true
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(20), IsPersistent = true
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            return HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity), authProperties);
+            return HttpContext.SignInAsync(new(claimsIdentity), authProperties);
         }
     }
 }
