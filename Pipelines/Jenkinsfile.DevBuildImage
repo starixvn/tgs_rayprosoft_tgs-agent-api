@@ -9,7 +9,7 @@ pipeline {
 		stage('initial') {
 			steps {
 				script {
-					sh 'sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p 1q2w3e4r'
+					sh 'sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p oD2cksJhGN1tgUuaE6C9'
 				}
 			}
 		}
