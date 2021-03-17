@@ -22,6 +22,7 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import BrandBar from "../../report/BrandBar"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -64,11 +65,10 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, status, vipId, username = "" } = state
-    let { data = {}, isLoading, isValidating, mutate } = usePlayerList({
+    let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList({
         ...toApiParams(state),
         brandId
     })
-
     let columns = useColumns({ mutate, items: data?.items, brandId })
 
     return (
@@ -112,6 +112,15 @@ const BodyContent = ({ brandId = "" }) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
@@ -131,15 +140,7 @@ const SearchBar = ({ brandId, search, isLoading, ...props }) => {
                     <VipLevelSelect name="vipId" brandId={brandId} />
                     <InputField
                         name="username"
-                        addonAfter={
-                            <Button
-                                onClick={() =>
-                                    formMethods.setValue("username", "")
-                                }
-                            >
-                                X
-                            </Button>
-                        }
+                        showEmptyFieldValueAddonAfter
                         placeholder={usernameInputPlaceholder}
                         autocomplete="off"
                     />

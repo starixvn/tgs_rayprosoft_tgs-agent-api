@@ -18,7 +18,10 @@ export const VipLevelSelect = ({
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    let { data, isLoading, error } = useVipLevelList({ brandId, showAll: true })
+    let { isLoading, data, error, mutate, deleteCache } = useVipLevelList({
+        brandId,
+        showAll: true
+    })
 
     let vipLevelOptions =
         data?.items?.map(({ id, ...item }) => ({
@@ -41,7 +44,6 @@ export const VipLevelSelect = ({
     return (
         <>
             <Select isLoading={isLoading} options={options} {...props} />
-            {error && <AlertDialog {...error} />}
         </>
     )
 }

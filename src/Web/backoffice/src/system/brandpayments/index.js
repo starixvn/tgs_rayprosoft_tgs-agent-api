@@ -38,7 +38,7 @@ import { EditButton } from "./edit"
 import { EditButton as FeeEditButton } from "./handlingfee"
 import { ViewButton as LogsButton } from "./logs"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
-import Alert from "../../dialog/Alert"
+import Alert, { AlertDialog } from "../../dialog/Alert"
 import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
 import { InputField } from "../../input/Input"
 
@@ -60,7 +60,7 @@ const Body = () => {
     })
     let [transferType, setTransferType] = useState(TransferType.Deposit)
 
-    let { data, isLoading, mutate } = useBrandPaymentList({
+    let { isLoading, data, error, mutate, deleteCache } = useBrandPaymentList({
         ...toApiParams(state),
         transferType,
         sortby: "number"
@@ -154,6 +154,15 @@ const Body = () => {
                     )}
                 </TabPanel>
             </Tabs>
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }

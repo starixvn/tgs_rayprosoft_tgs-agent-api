@@ -89,7 +89,14 @@ const BodyContent = ({ brandId }) => {
     })
     let { statusName } = state
     let isEffectiveTab = statusName === EffectiveName
-    let { data = {}, isLoading, mutate, clearCache } = useAnnouncementList(
+    let {
+        isLoading,
+        data = {},
+        error,
+        mutate,
+        clearCache,
+        deleteCache
+    } = useAnnouncementList(
         isEffectiveTab
             ? {
                   ...toApiParams(state),
@@ -221,6 +228,15 @@ const BodyContent = ({ brandId }) => {
                     )}
                 </TabPanel>
             </Tabs>
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
