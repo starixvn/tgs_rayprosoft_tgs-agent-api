@@ -33,7 +33,7 @@ namespace TGS.Services.Operator.PayPassowrd
                 .ExecuteAsync(async () =>
                 {
                     var validateCode = _codeGenerator.GenerateCode();
-                    var token = _codeGenerator.GenerateToken();
+                    var token = _codeGenerator.GenerateSecurityKey();
 
                     var data = new ValidateCodeData(command.PlayerCode, token);
 

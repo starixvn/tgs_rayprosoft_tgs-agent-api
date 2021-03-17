@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator
 {

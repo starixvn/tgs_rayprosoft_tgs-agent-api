@@ -32,13 +32,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var command = new StartSetPlayerEmailCommand(playerCode, email, CultureInfo.GetCultureInfo("en-US"));
 
             var validateCode = "123456";
-            var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
             fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-            fakeValidateCodeGenerator.GenerateToken().Returns(token);
+            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<EmailValidateData>())
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
                 .Returns(true);
 
             var expected = new
@@ -57,13 +57,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     actual = msg;
                 }))
                 .Returns(Task.CompletedTask);
-            await sut.GetAsync(command);
+            var actualSecurityKey = await sut.GetAsync(command);
 
             _ = fakeEmailManager
                 .Received(1)
                 .SendEmailAsync(Arg.Any<EmailPackage>());
 
             expected.ShouldMatch(actual);
+            Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
         }
 
         [Test]

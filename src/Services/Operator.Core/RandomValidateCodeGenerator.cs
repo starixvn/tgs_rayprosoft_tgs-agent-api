@@ -12,7 +12,7 @@ namespace TGS.Services.Operator
             return string.Join(string.Empty, CreateNumberSerial().Take(6));
         }
 
-        public string GenerateToken()
+        public string GenerateSecurityKey()
         {
             return Guid.NewGuid().ToString();
         }
