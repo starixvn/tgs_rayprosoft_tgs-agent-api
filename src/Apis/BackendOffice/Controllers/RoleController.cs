@@ -202,6 +202,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRole);
             }
 
+            if (role.IsRoot)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRootRole);
+            }
+
 
             await _roleCommands.DeleteAsync(role);
             return CreateValidResponse<MessageResponse>();
