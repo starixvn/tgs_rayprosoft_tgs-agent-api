@@ -32,6 +32,7 @@ import GameProviderSelect from "../../game/providers/GameProviderSelect"
 import BrandGameProviderSelect from "../../game/brandproviders/BrandGameProviderSelect"
 import { useGameRoundList } from "../../game/round/client"
 import { GameRoundButton } from "./button"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -90,13 +91,15 @@ const ReportContent = ({ brandId }) => {
         gameProviderId
     } = state
 
-    let { data = {}, isLoading, mutate } = useGameRoundList({
-        ...toApiParams(state),
-        sortby: "createdOn",
-        orderby: "descending",
-        from,
-        to: startOfNextDay(to)
-    })
+    let { isLoading, data = {}, error, mutate, deleteCache } = useGameRoundList(
+        {
+            ...toApiParams(state),
+            sortby: "createdOn",
+            orderby: "descending",
+            from,
+            to: startOfNextDay(to)
+        }
+    )
 
     let DataRetentionDays = 180
     let minDate = subDays(dateRange.start, DataRetentionDays)
@@ -155,6 +158,15 @@ const ReportContent = ({ brandId }) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }

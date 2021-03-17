@@ -21,6 +21,7 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import { InputField } from "../../input/Input"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -40,9 +41,11 @@ const Body = () => {
         name: ""
     })
     let { pageIndex, pageSize, name } = state
-    let { data, isLoading, mutate } = useRoleList(toApiParams(state))
+    let { isLoading, data, error, mutate, deleteCache } = useRoleList(
+        toApiParams(state)
+    )
     let userRoleId = useUserRoleId()
-    let items = data?.items.filter(({ id }) => id != userRoleId)
+    let items = data?.items?.filter(({ id }) => id != userRoleId)
 
     let columns = useColumns({ mutate, items })
     return (
@@ -76,6 +79,15 @@ const Body = () => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
@@ -91,13 +103,7 @@ const SearchBar = ({ search, isLoading, ...props }) => {
                 <Set>
                     <InputField
                         name="name"
-                        addonAfter={
-                            <Button
-                                onClick={() => formMethods.setValue("name", "")}
-                            >
-                                X
-                            </Button>
-                        }
+                        showEmptyFieldValueAddonAfter
                         placeholder={useSearchInputPlaceHolder()}
                     />
                     <SearchButton isLoading={isLoading} />

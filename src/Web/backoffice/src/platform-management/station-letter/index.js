@@ -31,6 +31,7 @@ import { useFormContext, useForm, FormProvider } from "react-hook-form"
 import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
 import { nextRoleType } from "../../system/roles/type"
 import BrandBar from "../../report/BrandBar"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -72,7 +73,13 @@ const BodyContent = ({ brandId }) => {
             : null
     })
     let { pageSize, statusName } = state
-    let { data = {}, isLoading, mutate } = useStationLetterList({
+    let {
+        isLoading,
+        data = {},
+        error,
+        mutate,
+        deleteCache
+    } = useStationLetterList({
         ...toApiParams(state),
         status: statusFrom(statusName)
     })
@@ -176,6 +183,15 @@ const BodyContent = ({ brandId }) => {
                     )}
                 </TabPanel>
             </Tabs>
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }

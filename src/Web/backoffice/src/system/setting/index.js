@@ -16,6 +16,7 @@ import { useForm, FormProvider } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -35,7 +36,9 @@ const Body = () => {
         key: ""
     })
 
-    let { data, isLoading, mutate } = useSystemSetting(toApiParams(state))
+    let { isLoading, data, error, mutate, deleteCache } = useSystemSetting(
+        toApiParams(state)
+    )
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -69,6 +72,15 @@ const Body = () => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
@@ -82,10 +94,7 @@ const SearchBar = ({ key = "", search, isLoading }) => {
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
-                    <InputField
-                        name="key"
-                        showEmptyFieldValueAddonAfter={true}
-                    />
+                    <InputField name="key" showEmptyFieldValueAddonAfter />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>

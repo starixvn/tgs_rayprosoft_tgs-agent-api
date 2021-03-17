@@ -13,6 +13,7 @@ import { Code } from "./menu"
 import { useDepartmentList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -31,7 +32,9 @@ const Body = () => {
     let { state, setState, setPageIndex, setSortOrder } = useTable()
     let { pageIndex, pageSize } = state
 
-    let { data, isLoading, mutate } = useDepartmentList(toApiParams(state))
+    let { isLoading, data, error, mutate, deleteCache } = useDepartmentList(
+        toApiParams(state)
+    )
     let columns = useColumns({ mutate, items: data?.items })
 
     return (
@@ -52,6 +55,15 @@ const Body = () => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
