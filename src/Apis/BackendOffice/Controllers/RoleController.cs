@@ -199,7 +199,12 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (role.IsRoot)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRole);
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRootRole);
+            }
+
+            if (role.IsRoot)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Role.CannotDeleteRootRole);
             }
 
 
