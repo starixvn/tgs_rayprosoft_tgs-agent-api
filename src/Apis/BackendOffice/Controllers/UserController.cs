@@ -41,9 +41,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Route("")]
         [HttpGet]
         [Description("Get users")]
-        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request)
-        {
-            return _userQueries.GetQueries()
+        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request) =>
+            _userQueries.GetQueries().Include(x => x.Role)
                 .Where(ResellerId, r => r.Role.ResellerId == ResellerId)
                 .Where(LicenseeId, l => l.Role.LicenseeId == LicenseeId)
                 .Where(BrandId, l => l.Role.BrandId == BrandId)
@@ -54,9 +53,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Username = user.Username,
                     Name = user.Name,
                     RoleId = user.RoleId,
-                    ResellerId = user.Role.ResellerId.Value,
-                    LicenseeId = user.Role.LicenseeId.Value,
-                    BrandId = user.Role.BrandId.Value,
+                    ResellerId = user.Role.ResellerId,
+                    LicenseeId = user.Role.LicenseeId,
+                    BrandId = user.Role.BrandId,
                     DepartmentId = user.DepartmentId,
                     Role = user.Role.Name,
                     DepartmentName = user.Department.Name,
@@ -66,7 +65,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = user.CreatedOn
                 })
                 .CreatePagedResponseAsync(request);
-        }
 
         [Route("")]
         [HttpPost]

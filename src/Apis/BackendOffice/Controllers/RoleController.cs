@@ -158,19 +158,22 @@ namespace TGS.Apis.BackendOffice.Controllers
             if (role.RoleType == RoleType.Reseller || role.RoleType == RoleType.Licensee)
             {
                 var licenseeRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Licensee && x.IsRoot);
-                UpdateRoles(role, new[] {licenseeRootRole});
+                if (licenseeRootRole != null)
+                {
+                    UpdateRoles(role, new[] {licenseeRootRole});
+                }
+
                 var licenseeRoles = roles.Where(x => x.RoleType == RoleType.Licensee).ToArray();
                 UpdateRoles(licenseeRootRole, licenseeRoles);
             }
 
             var brandRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Brand && x.IsRoot);
 
-            if (brandRootRole == null)
+            if (brandRootRole != null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Role.BrandRootRoleNotExists);
+                UpdateRoles(role, new[] {brandRootRole});
             }
 
-            UpdateRoles(role, new[] {brandRootRole});
             var brandRoles = roles.Where(x => x.RoleType == RoleType.Brand).ToArray();
             UpdateRoles(brandRootRole, brandRoles);
 
