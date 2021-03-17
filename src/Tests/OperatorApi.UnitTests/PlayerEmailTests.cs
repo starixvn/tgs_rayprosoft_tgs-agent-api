@@ -79,13 +79,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
-            var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
             var email = "test@raypro.com";
 
-            var command = new CommitSetPlayerEmailCommand(playerCode, token, validateCode);
+            var command = new CommitSetPlayerEmailCommand(playerCode, securityKey, validateCode);
 
             fakeValidateCodeOperator
-                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(token))
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(securityKey))
                 .Returns(new EmailValidateData(email, playerCode));
 
             await sut.ExecuteAsync(command);

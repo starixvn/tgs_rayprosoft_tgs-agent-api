@@ -13,7 +13,7 @@
     </PackageReference>
     <PackageReference Include="Polly" Version="7.2.1" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.1" />
-    <PackageReference Include="TGS.SmsServiceClient" Version="0.0.4-alpha" />
+    <PackageReference Include="TGS.SmsServiceClient" Version="0.0.5-alpha" />
   </ItemGroup>
 
   <ItemGroup>

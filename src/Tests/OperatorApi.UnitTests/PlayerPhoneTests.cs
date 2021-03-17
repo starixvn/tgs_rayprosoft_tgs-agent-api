@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
@@ -75,6 +71,67 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         It.IsAny<Guid>()),
                     Times.Exactly(1));
             Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+        }
+
+        [Test]
+        public async Task Commit_Set_Player_Phone_Should_Success()
+        {
+            var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+            var moqPlayerOperations = new Mock<IPlayerOperations>();
+
+            var sut = new CommitSetPlayerPhoneCommandService(
+                moqValidateCodeOperator.Object,
+                moqPlayerOperations.Object);
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var phone = "0988123456";
+
+            var command = new CommitSetPlayerPhoneCommand(playerCode, securityKey, validateCode);
+
+            moqValidateCodeOperator
+                .Setup(
+                    fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+                        It.Is<string>(x => x == validateCode),
+                        It.Is<string>(x => x == securityKey)))
+                .Returns(ValueTask.FromResult(new PhoneValidateData(phone, playerCode)));
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerOperations
+                .Verify(
+                    fake => fake.SetPhoneAsync(
+                        It.Is<string>(x => x == playerCode),
+                        It.Is<string>(x => x == phone),
+                        It.IsAny<DateTimeOffset>()),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public void Commit_Set_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+            var moqPlayerOperations = new Mock<IPlayerOperations>();
+
+            var sut = new CommitSetPlayerPhoneCommandService(
+                moqValidateCodeOperator.Object,
+                moqPlayerOperations.Object);
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+
+            var command = new CommitSetPlayerPhoneCommand(playerCode, securityKey, validateCode);
+
+            moqValidateCodeOperator
+                .Setup(
+                    fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+                        It.IsAny<string>(),
+                        It.IsAny<string>()))
+                .Returns(ValueTask.FromResult<PhoneValidateData>(null));
+
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
         }
     }
 }

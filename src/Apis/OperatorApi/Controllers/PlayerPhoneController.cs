@@ -31,5 +31,24 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return startSetPlayerPhoneService.GetAsync(command);
         }
+
+        /// <summary>
+        /// Submits the change phone.
+        /// </summary>
+        /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPut]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask SubmitChangePhoneAsync(
+            [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
+            [FromBody] SubmitChangePhoneRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new CommitSetPlayerPhoneCommand(playerTokenData.PlayerCode, request.SecurityKey, request.ValidateCode);
+
+            return commitPlayerPhoneService.ExecuteAsync(command);
+        }
     }
 }
