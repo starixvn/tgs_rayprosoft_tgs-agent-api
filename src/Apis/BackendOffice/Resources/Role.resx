@@ -150,7 +150,4 @@
   <data name="CannotCopyRootRole" xml:space="preserve">
     <value>Can not copy root role.</value>
   </data>
-  <data name="BrandRootRoleNotExists" xml:space="preserve">
-    <value>Brand root role is not exists.</value>
-  </data>
 </root>
