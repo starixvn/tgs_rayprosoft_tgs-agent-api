@@ -26,7 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new BrandPaymentController(
+            _controller = new(
                 _playerQueriesMock.Object,
                 _uploadServiceMock.Object,
                 _paymentServiceMock.Object,
@@ -70,7 +70,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _paymentServiceMock.Setup(x => x.GetPaymentsAsync(false))
+            _paymentServiceMock.Setup(x => x.GetPaymentQueries(false))
                 .Returns(list);
 
             var response = await _controller.GetBrandPaymentsAsync(request);
@@ -82,7 +82,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].ChannelName.Should().Be(expectedRoles[i].ChannelName);
             }
 
-            _paymentServiceMock.Verify(p => p.GetPaymentsAsync(false));
+            _paymentServiceMock.Verify(p => p.GetPaymentQueries(false));
         }
 
         [Test]
@@ -214,6 +214,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<BrandPayment>(u => u
+                .With(s => s.Brand, new Brand())
                 .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
                 .With(s => s.VipLevels, new BrandPaymentVipLevel[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());

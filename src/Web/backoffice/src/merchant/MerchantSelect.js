@@ -1,14 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/react"
 import {
-    Spinner,
-    Stack,
-    Flex,
-    Box,
-    Card,
-    Button,
-    Text,
-    Input,
     Checkbox,
     FieldStack,
     FieldWrapper,
@@ -30,6 +22,7 @@ import { useFormContext } from "react-hook-form"
 import { ResellerIdSelect } from "./resellers/ResellerIdSelect"
 import { LicenseeIdSelect } from "./licensees/LicenseeIdSelect"
 import { BrandIdSelect } from "./brands/BrandIdSelect"
+import Input from "../input/Input"
 
 const isActive = (merchant, start, end) => {
     const order = [Reseller, Licensee, Brand]
@@ -145,53 +138,55 @@ export const MerchantIdSelect = ({
 
     let isBrandActive = isActive(Brand, start, end)
     return (
-        <Group {...props}>
-            {isResellerActive && (
-                <ResellerIdSelect
-                    name={resellerIdName}
-                    required={required}
-                    disabled={disabled}
-                    {...resellerProps}
-                    onChange={(event) => {
-                        formMethods?.setValue(licenseeIdName, undefined)
-                        formMethods?.setValue(brandIdName, undefined)
+        <>
+            <Group {...props}>
+                {isResellerActive && (
+                    <ResellerIdSelect
+                        name={resellerIdName}
+                        required={required}
+                        disabled={disabled}
+                        {...resellerProps}
+                        onChange={(event) => {
+                            formMethods?.setValue(licenseeIdName, undefined)
+                            formMethods?.setValue(brandIdName, undefined)
 
-                        let resellerId = event.target.value
-                        setResellerId(resellerId)
-                        onResellerChange?.(resellerId)
-                    }}
-                />
-            )}
-            {isLicenseeActive && (
-                <LicenseeIdSelect
-                    name={licenseeIdName}
-                    required={required}
-                    disabled={disabled}
-                    resellerId={resellerId}
-                    {...licenseeProps}
-                    onChange={(event) => {
-                        formMethods?.setValue(brandIdName, undefined)
+                            let resellerId = event.target.value
+                            setResellerId(resellerId)
+                            onResellerChange?.(resellerId)
+                        }}
+                    />
+                )}
+                {isLicenseeActive && (
+                    <LicenseeIdSelect
+                        name={licenseeIdName}
+                        required={required}
+                        disabled={disabled}
+                        resellerId={resellerId}
+                        {...licenseeProps}
+                        onChange={(event) => {
+                            formMethods?.setValue(brandIdName, undefined)
 
-                        let licenseeId = event.target.value
-                        setLicenseeId(licenseeId)
-                        onLicenseeChange?.(licenseeId)
-                    }}
-                />
-            )}
-            {isBrandActive && (
-                <BrandIdSelect
-                    name={brandIdName}
-                    required={required}
-                    disabled={disabled}
-                    licenseeId={licenseeId}
-                    {...brandProps}
-                    onChange={(event) => {
-                        let value = event.target.value
-                        onBrandChange?.(value)
-                    }}
-                />
-            )}
-        </Group>
+                            let licenseeId = event.target.value
+                            setLicenseeId(licenseeId)
+                            onLicenseeChange?.(licenseeId)
+                        }}
+                    />
+                )}
+                {isBrandActive && (
+                    <BrandIdSelect
+                        name={brandIdName}
+                        required={required}
+                        disabled={disabled}
+                        licenseeId={licenseeId}
+                        {...brandProps}
+                        onChange={(event) => {
+                            let value = event.target.value
+                            onBrandChange?.(value)
+                        }}
+                    />
+                )}
+            </Group>
+        </>
     )
 }
 
