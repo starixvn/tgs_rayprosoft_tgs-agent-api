@@ -35,7 +35,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 {
                     Username = player.Username,
                     RealName = player.RealName,
-                    VipLevel = player.Vip.Level,
+                    VipLevel = player.Vip?.Level,
                     Status = player.Status,
                     StatusName = player.Status.ToString(),
                     HasAgent = player.HasAgent,
