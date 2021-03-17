@@ -607,6 +607,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("all_players");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
                     b.Property<string>("ChannelName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -715,6 +719,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_brand_payments");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_brand_payments_brand_id");
 
                     b.HasIndex("PaymentChannelId")
                         .HasDatabaseName("ix_brand_payments_payment_channel_id");
@@ -3446,6 +3453,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_brand_payments_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.PaymentChannel", "PaymentChannel")
                         .WithMany()
                         .HasForeignKey("PaymentChannelId")
@@ -3466,6 +3480,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasConstraintName("fk_brand_payments_payment_methods_payment_method_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Brand");
 
                     b.Navigation("Payment");
 
