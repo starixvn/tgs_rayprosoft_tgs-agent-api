@@ -23,6 +23,7 @@ import {
 } from "../../betlimit/trans"
 import { CurrencyTrans } from "../../currency/trans"
 import { PageContent } from "../../page/Content"
+import AlertDialog from "../../dialog/Alert"
 
 export const SystemBetLimitsCode = Code
 
@@ -42,7 +43,9 @@ const Body = () => {
         keyword: ""
     })
 
-    let { data, isLoading, mutate } = useBetLimitList(toApiParams(state))
+    let { isLoading, data, error, mutate, deleteCache } = useBetLimitList(
+        toApiParams(state)
+    )
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -56,6 +59,15 @@ const Body = () => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }

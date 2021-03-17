@@ -17,6 +17,7 @@ import { ViewButton, EditButton, AddButton } from "./edit"
 import { Trans } from "../../i18n"
 import textColumn from "../../table/column/textColumn"
 import { useVipLevelList } from "../../vip-levels/client"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -54,7 +55,9 @@ const BodyContent = ({ brandId }) => {
         setState({ brandId })
     }, [brandId])
 
-    let { data, isLoading, mutate } = useVipLevelList(toApiParams(state))
+    let { isLoading, data, error, mutate, deleteCache } = useVipLevelList(
+        toApiParams(state)
+    )
 
     let columns = useColumns({ items: data?.items, mutate })
     return (
@@ -75,6 +78,15 @@ const BodyContent = ({ brandId }) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }

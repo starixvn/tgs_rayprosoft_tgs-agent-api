@@ -25,6 +25,7 @@ import numberColumn, {
     numberDecimalColumn
 } from "../../table/column/numberColumn"
 import startOfToday from "date-fns/startOfToday"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -70,7 +71,13 @@ const ReportContent = ({ brandId }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, from, to } = state
-    let { data = {}, isLoading, mutate } = useMarketReportList({
+    let {
+        isLoading,
+        data = {},
+        error,
+        mutate,
+        deleteCache
+    } = useMarketReportList({
         ...toApiParams(state),
         sortby: "reportDate",
         from,
@@ -129,6 +136,15 @@ const ReportContent = ({ brandId }) => {
                 isLoading={isLoading}
                 foot={data?.items?.length > 0}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
