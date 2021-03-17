@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -32,18 +33,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
             new()
             {
-                {
-                    AlipayScan,
-                    (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment])
-                },
-                {
-                    BankTransfer,
-                    (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment])
-                },
-                {
-                    WeChatPayScan,
-                    (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment])
-                }
+                {AlipayScan, (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment])},
+                {BankTransfer, (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment])},
+                {WeChatPayScan, (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment])}
             };
 
         private async Task GeneratePaymentAsync()
@@ -107,66 +99,63 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private async Task GenerateBrandPaymentsAsync()
         {
-            var paymentId = new Guid("013345DE-F145-483A-B982-9FF962AE055C");
-            var brandPayments = new[]
-            {
-                new BrandPayment
+            var brandPayments = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+                .Distinct()
+                .Select(x =>
                 {
-                    Id = paymentId,
-                    DisplayOrder = 1,
-                    PaymentId = Payments[Help2Pay],
-                    PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
-                    PaymentChannelId = PaymentChannels[BankTransfer].Item1,
-                    TransferType = PaymentTransferType.Deposit,
-                    ChannelName = "阿里pay",
-                    PaymentStatus = SwitchStatus.Enabled,
-                    TransferLimitFrom = 10,
-                    TransferLimitTo = 100000,
-                    PlayerListCondition = PlayerListCondition.All,
-                    AllPlayers = true,
-                    IdentityAuthentication = true,
-                    PhoneAuthentication = true,
-                    DepositedAmountUnlimited = true,
-                    DepositedAmountMin = 100,
-                    DepositedAmountMax = 1000,
-                    Reason = "Reason",
-                    FeePercentage = 50,
-                    LowestFee = 50,
-                    HighestFee = 500,
-                    BrandPaymentPlayers = new[]
+                    var paymentId = GuidExtensions.NewSequentialGuid();
+                    return new BrandPayment
                     {
-                        new BrandPaymentPlayer
+                        Id = paymentId,
+                        DisplayOrder = 1,
+                        BrandId = x.Id,
+                        PaymentId = Payments[Help2Pay],
+                        PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
+                        PaymentChannelId = PaymentChannels[BankTransfer].Item1,
+                        TransferType = PaymentTransferType.Deposit,
+                        ChannelName = "阿里pay",
+                        PaymentStatus = SwitchStatus.Enabled,
+                        TransferLimitFrom = 10,
+                        TransferLimitTo = 100000,
+                        PlayerListCondition = PlayerListCondition.All,
+                        AllPlayers = true,
+                        IdentityAuthentication = true,
+                        PhoneAuthentication = true,
+                        DepositedAmountUnlimited = true,
+                        DepositedAmountMin = 100,
+                        DepositedAmountMax = 1000,
+                        Reason = "Reason",
+                        FeePercentage = 50,
+                        LowestFee = 50,
+                        HighestFee = 500,
+                        BrandPaymentPlayers =
+                            new[]
+                            {
+                                new BrandPaymentPlayer
+                                {
+                                    PlayerCode = _players[0].PlayerCode,
+                                    ListType = PlayerListType.White,
+                                    BrandPaymentId = paymentId
+                                },
+                                new BrandPaymentPlayer
+                                {
+                                    PlayerCode = _players[1].PlayerCode,
+                                    ListType = PlayerListType.Black,
+                                    BrandPaymentId = paymentId
+                                }
+                            },
+                        VipLevels = new[]
                         {
-                            PlayerCode = _players[0].PlayerCode,
-                            ListType = PlayerListType.White,
-                            BrandPaymentId = paymentId
+                            new BrandPaymentVipLevel {BrandPaymentId = paymentId, VipLevelId = _vipLevels[0].Id},
+                            new BrandPaymentVipLevel {BrandPaymentId = paymentId, VipLevelId = _vipLevels[1].Id}
                         },
-                        new BrandPaymentPlayer
-                        {
-                            PlayerCode = _players[1].PlayerCode,
-                            ListType = PlayerListType.Black,
-                            BrandPaymentId = paymentId
-                        }
-                    },
-                    VipLevels = new[]
-                    {
-                        new BrandPaymentVipLevel
-                        {
-                            BrandPaymentId = paymentId,
-                            VipLevelId = _vipLevels[0].Id
-                        },
-                        new BrandPaymentVipLevel
-                        {
-                            BrandPaymentId = paymentId,
-                            VipLevelId = _vipLevels[1].Id
-                        }
-                    },
-                    CreatedByUsername = AdminUsername,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedByUsername = AdminUsername,
-                    UpdatedOn = DateTimeOffset.Now
-                }
-            };
+                        CreatedByUsername = AdminUsername,
+                        CreatedOn = DateTimeOffset.Now,
+                        UpdatedByUsername = AdminUsername,
+                        UpdatedOn = DateTimeOffset.Now
+                    };
+                }).ToArray();
+
             await _repository.BulkInsertAsync(brandPayments);
             await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.VipLevels).ToArray());
             await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.BrandPaymentPlayers).ToArray());

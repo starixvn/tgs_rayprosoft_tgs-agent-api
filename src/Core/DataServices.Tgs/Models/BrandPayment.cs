@@ -7,6 +7,8 @@ namespace TGS.Core.DataServices.Tgs.Models
     public class BrandPayment
     {
         public Guid Id { get; set; }
+        public Guid BrandId { get; set; }
+        public virtual Brand Brand { get; set; }
         public int DisplayOrder { get; set; }
         public Guid PaymentId { get; set; }
         public virtual Payment Payment { get; set; }

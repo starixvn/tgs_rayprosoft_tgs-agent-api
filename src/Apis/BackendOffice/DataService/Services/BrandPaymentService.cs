@@ -15,251 +15,247 @@ using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
 {
-	public interface IBrandPaymentService
-	{
-		Task<BrandPayment> GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
-			Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery = null, bool tracking = false);
+    public interface IBrandPaymentService
+    {
+        Task<BrandPayment> GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
+            Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery = null, bool tracking = false);
 
-		IQueryable<BrandPayment> GetPaymentsAsync(bool tracking = false);
+        IQueryable<BrandPayment> GetPaymentQueries(bool tracking = false);
 
-		Task CreatePaymentAsync(CreateBrandPaymentRequest request, string username);
+        Task CreatePaymentAsync(CreateBrandPaymentRequest request, string username);
 
-		Task UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request, string username);
+        Task UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request, string username);
 
-		Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username);
+        Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username);
 
-		Task<bool> ExistsAsync(Expression<Func<BrandPayment, bool>> predicate);
+        Task<bool> ExistsAsync(Expression<Func<BrandPayment, bool>> predicate);
 
-		Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request, string username);
+        Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request, string username);
 
-		Task ChangeOrderAsync(ChangeOrderRequest request);
-	}
+        Task ChangeOrderAsync(ChangeOrderRequest request);
+    }
 
-	public class BrandPaymentService : IBrandPaymentService
-	{
-		private readonly ITgsRepository _repository;
+    public class BrandPaymentService : IBrandPaymentService
+    {
+        private readonly ITgsRepository _repository;
 
-		public BrandPaymentService(ITgsRepository repository)
-		{
-			_repository = repository;
-		}
+        public BrandPaymentService(ITgsRepository repository)
+        {
+            _repository = repository;
+        }
 
-		async Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
-		{
-			var paymentId = Guid.NewGuid();
-			var payment = new BrandPayment
-			{
-				Id = paymentId,
-				DisplayOrder = 99,
-				PaymentId = request.PaymentId,
-				PaymentMethodId = request.PaymentMethodId,
-				PaymentChannelId = request.PaymentChannelId,
-				ChannelName = request.ChannelName,
-				TransferLimitFrom = request.TransferLimitFrom,
-				TransferLimitTo = request.TransferLimitTo,
-				PlayerListCondition = request.PlayerListCondition,
-				AllPlayers = request.AllPlayers,
-				IdentityAuthentication = request.IdentityAuthentication,
-				PhoneAuthentication = request.PhoneAuthentication,
-				DepositedAmountUnlimited = request.DepositedAmountUnlimited,
-				DepositedAmountMin = request.DepositedAmountMin,
-				DepositedAmountMax = request.DepositedAmountMax,
-				Reason = request.Reason,
-				CreatedByUsername = username,
-				UpdatedByUsername = username,
-				CreatedOn = DateTimeOffset.Now,
-				UpdatedOn = DateTimeOffset.Now
-			};
+        async Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
+        {
+            var paymentId = Guid.NewGuid();
+            var payment = new BrandPayment
+            {
+                Id = paymentId,
+                DisplayOrder = 99,
+                PaymentId = request.PaymentId,
+                PaymentMethodId = request.PaymentMethodId,
+                PaymentChannelId = request.PaymentChannelId,
+                ChannelName = request.ChannelName,
+                TransferLimitFrom = request.TransferLimitFrom,
+                TransferLimitTo = request.TransferLimitTo,
+                PlayerListCondition = request.PlayerListCondition,
+                AllPlayers = request.AllPlayers,
+                IdentityAuthentication = request.IdentityAuthentication,
+                PhoneAuthentication = request.PhoneAuthentication,
+                DepositedAmountUnlimited = request.DepositedAmountUnlimited,
+                DepositedAmountMin = request.DepositedAmountMin,
+                DepositedAmountMax = request.DepositedAmountMax,
+                Reason = request.Reason,
+                CreatedByUsername = username,
+                UpdatedByUsername = username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
 
-			var whitelist = await GeneratePaymentPlayerList(paymentId, request.Whitelist, PlayerListType.White);
+            var whitelist = await GeneratePaymentPlayerList(paymentId, request.Whitelist, PlayerListType.White);
 
-			var blacklist = await GeneratePaymentPlayerList(paymentId, request.Blacklist, PlayerListType.Black);
+            var blacklist = await GeneratePaymentPlayerList(paymentId, request.Blacklist, PlayerListType.Black);
 
-			var playerList = whitelist.Union(blacklist);
+            var playerList = whitelist.Union(blacklist);
 
-			payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
+            payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
-			var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id))
-				.ToArrayAsync();
-			var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
-			{
-				BrandPaymentId = paymentId,
-				VipLevelId = vip.Id,
-				VipLevel = vip
-			}).ToArray();
+            var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id))
+                .ToArrayAsync();
+            var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
+            {
+                BrandPaymentId = paymentId, VipLevelId = vip.Id, VipLevel = vip
+            }).ToArray();
 
-			payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
+            payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
 
-			await _repository.BrandPayments.AddAsync(payment);
-			await _repository.SaveChangesAsync();
-		}
+            await _repository.BrandPayments.AddAsync(payment);
+            await _repository.SaveChangesAsync();
+        }
 
-		async Task IBrandPaymentService.UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
-			string username)
-		{
-			var beforePayment = new BrandPayment
-			{
-				ChannelName = payment.ChannelName,
-				PaymentStatus = payment.PaymentStatus,
-				TransferLimitFrom = payment.TransferLimitFrom,
-				TransferLimitTo = payment.TransferLimitTo,
-				PlayerListCondition = payment.PlayerListCondition,
-				AllPlayers = payment.AllPlayers,
-				IdentityAuthentication = payment.IdentityAuthentication,
-				PhoneAuthentication = payment.PhoneAuthentication,
-				DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-				DepositedAmountMin = payment.DepositedAmountMin,
-				DepositedAmountMax = payment.DepositedAmountMax
-			};
+        async Task IBrandPaymentService.UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
+            string username)
+        {
+            var beforePayment = new BrandPayment
+            {
+                ChannelName = payment.ChannelName,
+                PaymentStatus = payment.PaymentStatus,
+                TransferLimitFrom = payment.TransferLimitFrom,
+                TransferLimitTo = payment.TransferLimitTo,
+                PlayerListCondition = payment.PlayerListCondition,
+                AllPlayers = payment.AllPlayers,
+                IdentityAuthentication = payment.IdentityAuthentication,
+                PhoneAuthentication = payment.PhoneAuthentication,
+                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                DepositedAmountMin = payment.DepositedAmountMin,
+                DepositedAmountMax = payment.DepositedAmountMax
+            };
 
-			payment.ChannelName = request.ChannelName;
-			payment.PaymentStatus = request.PaymentStatus;
-			payment.TransferLimitFrom = request.TransferLimitFrom;
-			payment.TransferLimitTo = request.TransferLimitTo;
-			payment.PlayerListCondition = request.PlayerListCondition;
-			payment.AllPlayers = request.AllPlayers;
-			payment.IdentityAuthentication = request.IdentityAuthentication;
-			payment.PhoneAuthentication = request.PhoneAuthentication;
-			payment.DepositedAmountUnlimited = request.DepositedAmountUnlimited;
-			payment.DepositedAmountMin = request.DepositedAmountMin;
-			payment.DepositedAmountMax = request.DepositedAmountMax;
-			payment.Reason = request.Reason;
-			payment.UpdatedByUsername = username;
-			payment.UpdatedOn = DateTimeOffset.Now;
+            payment.ChannelName = request.ChannelName;
+            payment.PaymentStatus = request.PaymentStatus;
+            payment.TransferLimitFrom = request.TransferLimitFrom;
+            payment.TransferLimitTo = request.TransferLimitTo;
+            payment.PlayerListCondition = request.PlayerListCondition;
+            payment.AllPlayers = request.AllPlayers;
+            payment.IdentityAuthentication = request.IdentityAuthentication;
+            payment.PhoneAuthentication = request.PhoneAuthentication;
+            payment.DepositedAmountUnlimited = request.DepositedAmountUnlimited;
+            payment.DepositedAmountMin = request.DepositedAmountMin;
+            payment.DepositedAmountMax = request.DepositedAmountMax;
+            payment.Reason = request.Reason;
+            payment.UpdatedByUsername = username;
+            payment.UpdatedOn = DateTimeOffset.Now;
 
-			await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-			_repository.PaymentPlayerList.RemoveRange(payment.BrandPaymentPlayers);
-			_repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
+            await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            _repository.PaymentPlayerList.RemoveRange(payment.BrandPaymentPlayers);
+            _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
 
-			await _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
-			var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist, PlayerListType.White);
-			var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist, PlayerListType.Black);
-			var playerList = whitelist.Union(blacklist).ToArray();
+            var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist, PlayerListType.White);
+            var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist, PlayerListType.Black);
+            var playerList = whitelist.Union(blacklist).ToArray();
 
-			payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
+            payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
-			var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
-			var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
-			{
-				BrandPaymentId = payment.Id,
-				VipLevelId = vip.Id,
-				VipLevel = vip
-			}).ToArray();
+            var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
+            var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
+            {
+                BrandPaymentId = payment.Id, VipLevelId = vip.Id, VipLevel = vip
+            }).ToArray();
 
-			payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
+            payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
 
-			_repository.Entry(payment).State = EntityState.Modified;
+            _repository.Entry(payment).State = EntityState.Modified;
 
-			await _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
-			await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-			await _repository.SaveChangesAsync();
+            await _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            await _repository.SaveChangesAsync();
 
-			await tran.CommitAsync();
-		}
+            await tran.CommitAsync();
+        }
 
-		Task<BrandPayment> IBrandPaymentService.GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
-			Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
-		{
-			var payment = tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
-			preQuery ??= c => c;
+        Task<BrandPayment> IBrandPaymentService.GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
+            Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
+        {
+            var payment = tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
+            preQuery ??= c => c;
 
-			return preQuery(payment).FirstOrDefaultAsync(predicate);
-		}
+            return preQuery(payment).FirstOrDefaultAsync(predicate);
+        }
 
-		IQueryable<BrandPayment> IBrandPaymentService.GetPaymentsAsync(bool tracking) =>
-			tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
+        IQueryable<BrandPayment> IBrandPaymentService.GetPaymentQueries(bool tracking) =>
+            tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
 
-		Task<bool> IBrandPaymentService.ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
-			_repository.BrandPayments.AnyAsync(predicate);
+        Task<bool> IBrandPaymentService.ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
+            _repository.BrandPayments.AnyAsync(predicate);
 
-		Task IBrandPaymentService.UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
-			string username)
-		{
-			payment.FeePercentage = request.FeePercentage;
-			payment.LowestFee = request.LowestFee;
-			payment.HighestFee = request.HighestFee;
-			_repository.Entry(payment).State = EntityState.Modified;
-			return _repository.SaveChangesAsync();
-		}
+        Task IBrandPaymentService.UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
+            string username)
+        {
+            payment.FeePercentage = request.FeePercentage;
+            payment.LowestFee = request.LowestFee;
+            payment.HighestFee = request.HighestFee;
+            _repository.Entry(payment).State = EntityState.Modified;
+            return _repository.SaveChangesAsync();
+        }
 
-		async Task IBrandPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
-		{
-			var ids = request.Orders.Select(q => q.Id);
-			var payments = await _repository.BrandPayments.Where(q => ids.Contains(q.Id)).ToListAsync();
-			payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
+        async Task IBrandPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            var ids = request.Orders.Select(q => q.Id);
+            var payments = await _repository.BrandPayments.Where(q => ids.Contains(q.Id)).ToListAsync();
+            payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
-			await _repository.BulkUpdateAsync(payments.ToArray());
-		}
+            await _repository.BulkUpdateAsync(payments.ToArray());
+        }
 
-		Task IBrandPaymentService.ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
-		{
-			var beforePayment = new BrandPayment
-			{
-				ChannelName = payment.ChannelName,
-				PaymentStatus = payment.PaymentStatus,
-				TransferLimitFrom = payment.TransferLimitFrom,
-				TransferLimitTo = payment.TransferLimitTo,
-				PlayerListCondition = payment.PlayerListCondition,
-				AllPlayers = payment.AllPlayers,
-				IdentityAuthentication = payment.IdentityAuthentication,
-				PhoneAuthentication = payment.PhoneAuthentication,
-				DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-				DepositedAmountMin = payment.DepositedAmountMin,
-				DepositedAmountMax = payment.DepositedAmountMax
-			};
+        Task IBrandPaymentService.ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
+        {
+            var beforePayment = new BrandPayment
+            {
+                ChannelName = payment.ChannelName,
+                PaymentStatus = payment.PaymentStatus,
+                TransferLimitFrom = payment.TransferLimitFrom,
+                TransferLimitTo = payment.TransferLimitTo,
+                PlayerListCondition = payment.PlayerListCondition,
+                AllPlayers = payment.AllPlayers,
+                IdentityAuthentication = payment.IdentityAuthentication,
+                PhoneAuthentication = payment.PhoneAuthentication,
+                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                DepositedAmountMin = payment.DepositedAmountMin,
+                DepositedAmountMax = payment.DepositedAmountMax
+            };
 
-			payment.PaymentStatus = status;
-			payment.UpdatedOn = DateTimeOffset.Now;
-			payment.UpdatedByUsername = username;
+            payment.PaymentStatus = status;
+            payment.UpdatedOn = DateTimeOffset.Now;
+            payment.UpdatedByUsername = username;
 
-			_repository.Entry(payment).State = EntityState.Modified;
-			_repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-			return _repository.SaveChangesAsync();
-		}
+            _repository.Entry(payment).State = EntityState.Modified;
+            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            return _repository.SaveChangesAsync();
+        }
 
-		private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
-			PlayerListType playerListType)
-		{
-			var playerWhitelist = list != null
-				? await _repository.Players.Where(x => list.Contains(x.Username))
-					.ToArrayAsync()
-				: Array.Empty<Player>();
-			return playerWhitelist.Select(player => new BrandPaymentPlayer
-			{
-				ListType = playerListType,
-				BrandPaymentId = paymentId,
-				PlayerCode = player.PlayerCode,
-				Player = player
-			}).ToArray();
-		}
+        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
+            PlayerListType playerListType)
+        {
+            var playerWhitelist = list != null
+                ? await _repository.Players.Where(x => list.Contains(x.Username))
+                    .ToArrayAsync()
+                : Array.Empty<Player>();
+            return playerWhitelist.Select(player => new BrandPaymentPlayer
+            {
+                ListType = playerListType,
+                BrandPaymentId = paymentId,
+                PlayerCode = player.PlayerCode,
+                Player = player
+            }).ToArray();
+        }
 
-		private BrandPaymentAuditLog GeneratePaymentAuditLog(BrandPayment payment, BrandPayment beforePayment) =>
-			new()
-			{
-				Id = Guid.NewGuid(),
-				BrandPaymentId = payment.Id,
-				Before = JsonSerializer.Serialize(ExchangeBrandPaymentData(beforePayment)),
-				After = JsonSerializer.Serialize(ExchangeBrandPaymentData(payment)),
-				Reason = payment.Reason,
-				CreatedOn = payment.UpdatedOn,
-				CreatedByUsername = payment.UpdatedByUsername,
-				Operation = AuditLogOperation.Update
-			};
+        private BrandPaymentAuditLog GeneratePaymentAuditLog(BrandPayment payment, BrandPayment beforePayment) =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                BrandPaymentId = payment.Id,
+                Before = JsonSerializer.Serialize(ExchangeBrandPaymentData(beforePayment)),
+                After = JsonSerializer.Serialize(ExchangeBrandPaymentData(payment)),
+                Reason = payment.Reason,
+                CreatedOn = payment.UpdatedOn,
+                CreatedByUsername = payment.UpdatedByUsername,
+                Operation = AuditLogOperation.Update
+            };
 
-		private BrandPaymentAuditData ExchangeBrandPaymentData(BrandPayment payment) =>
-			new BrandPaymentAuditData(
-				payment.ChannelName,
-				payment.PaymentStatus,
-				payment.TransferLimitFrom,
-				payment.TransferLimitTo,
-				payment.PlayerListCondition,
-				payment.AllPlayers,
-				payment.IdentityAuthentication,
-				payment.PhoneAuthentication,
-				payment.DepositedAmountMin,
-				payment.DepositedAmountMax,
-				payment.DepositedAmountUnlimited);
-	}
+        private BrandPaymentAuditData ExchangeBrandPaymentData(BrandPayment payment) =>
+            new(
+                payment.ChannelName,
+                payment.PaymentStatus,
+                payment.TransferLimitFrom,
+                payment.TransferLimitTo,
+                payment.PlayerListCondition,
+                payment.AllPlayers,
+                payment.IdentityAuthentication,
+                payment.PhoneAuthentication,
+                payment.DepositedAmountMin,
+                payment.DepositedAmountMax,
+                payment.DepositedAmountUnlimited);
+    }
 }

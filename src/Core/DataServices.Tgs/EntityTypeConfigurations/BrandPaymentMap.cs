@@ -80,6 +80,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasForeignKey(c => c.PaymentId)
                 .HasConstraintName("fk_brand_payments_payments_payment_id");
 
+            builder.HasOne(c => c.Brand)
+                .WithMany()
+                .HasForeignKey(c => c.BrandId)
+                .HasConstraintName("fk_brand_payments_brands_brand_id");
+
             builder.HasIndex(c => c.PaymentId)
                 .HasDatabaseName("ix_brand_payments_payment_id");
         }
