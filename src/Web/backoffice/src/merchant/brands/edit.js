@@ -385,6 +385,8 @@ const normalizeFormData = ({
 
     let currencyCodes = toCheckedCurrencyCodes(currencies)
 
+    gameProviders = gameProviders.filter(({ checked }) => checked)
+
     betLimits = betLimits
         .filter((betLimit) => betLimit.checked)
         .map(({ id, ...props }) => ({ id: parseInt(id), ...props }))
