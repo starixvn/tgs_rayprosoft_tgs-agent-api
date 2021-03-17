@@ -350,7 +350,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                                     body .tox-tinymce-aux {
                                         z-index: 19900420;
                                     }
-                                    .tox-fullscreen .tox.tox-tinymce-aux {
+                                    body.tox-fullscreen .tox.tox-tinymce-aux {
                                         z-index: 19900420;
                                     }
                                 `}
