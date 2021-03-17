@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PlayerPhone
 {
-    class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPlayerPhoneCommand>
+    internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPlayerPhoneCommand>
     {
         private readonly IValidateCodeOperator _validateCodeOperator;
         private readonly IPlayerOperations _playerOperations;
@@ -20,6 +17,7 @@ namespace TGS.Services.Operator.PlayerPhone
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
+
         public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command)
         {
             var result = await _validateCodeOperator

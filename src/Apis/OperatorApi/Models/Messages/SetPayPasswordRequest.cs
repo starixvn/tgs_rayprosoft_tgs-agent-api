@@ -1,4 +1,10 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record SetPayPasswordRequest(string Password);
+    public record SetPayPasswordRequest
+    {
+        [JsonPropertyName("pwd")]
+        public string Password { get; init; }
+    }
 }
