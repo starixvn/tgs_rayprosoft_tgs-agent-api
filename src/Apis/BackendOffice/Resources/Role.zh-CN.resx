@@ -138,4 +138,7 @@
   <data name="CannotCopyRootRole" xml:space="preserve">
     <value>无法复制根角色</value>
   </data>
+  <data name="CannotDeleteRootRole" xml:space="preserve">
+    <value>不能删除根角色</value>
+  </data>
 </root>

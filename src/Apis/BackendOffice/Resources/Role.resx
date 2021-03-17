@@ -150,4 +150,7 @@
   <data name="CannotCopyRootRole" xml:space="preserve">
     <value>Can not copy root role.</value>
   </data>
+  <data name="CannotDeleteRootRole" xml:space="preserve">
+    <value>Cannot delete root role.</value>
+  </data>
 </root>
