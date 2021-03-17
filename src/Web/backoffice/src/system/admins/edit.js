@@ -30,6 +30,7 @@ import {
 } from "../roles/type"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { useRole } from "../roles/client"
+import clone from "clone-deep"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
     let dialog = Modal.useState()
@@ -188,7 +189,7 @@ const AddDialog = ({ onSubmitted, dialog, finalFocusRef, ...props }) => {
             dialog={dialog}
             finalFocusRef={finalFocusRef}
             maxWidth="80vw"
-            minWidth="50vw"
+            minWidth="55vw"
         >
             <AddBody dialog={dialog} />
         </FormDialog>
@@ -199,13 +200,10 @@ const AddBody = ({}) => {
     let { watch, setValue } = useFormContext()
     let password = watch("password")
 
-    let userResellerId = useUserResellerId()
-    let userLicenseeId = useUserLicenseeId()
-    let userBrandId = useUserBrandId()
-
     let resellerId = watch("resellerId")
     let licenseeId = watch("licenseeId")
     let brandId = watch("brandId")
+
     return (
         <Stack spacing="major-3" margin="major-1">
             <FieldValues>
@@ -216,9 +214,6 @@ const AddBody = ({}) => {
 
                 <RoleLabel required />
                 <RoleSelectGroup
-                    defalultResellerId={userResellerId}
-                    defaultLicenseeId={userLicenseeId}
-                    defaultBrandId={userBrandId}
                     emptyDepartment={() => {
                         setValue("departmentId", "")
                     }}
@@ -262,15 +257,9 @@ const AddBody = ({}) => {
     )
 }
 
-const RoleSelectGroup = ({
-    defaultRoleType,
-    defalultResellerId,
-    defaultLicenseeId,
-    defaultBrandId,
-    emptyDepartment
-}) => {
+const RoleSelectGroup = ({ emptyDepartment }) => {
     let userRoleType = useUserRoleType()
-    let { watch, setValue } = useFormContext()
+    let { watch, setValue, getValues, reset } = useFormContext()
     let roleTypeOptions = useRoleTypeOptions()
 
     let roleType = watch("roleType")
@@ -278,13 +267,20 @@ const RoleSelectGroup = ({
     let resellerId = watch("resellerId")
     let licenseeId = watch("licenseeId")
     let brandId = watch("brandId")
+
+    let roleId = watch("roleId")
+
+    const onMerchantResetted = () => {
+        setValue("roleId", "")
+        emptyDepartment?.()
+    }
     return (
         <Set orientation="vertical">
             {roleTypeOptions.length > 1 && (
                 <Set orientation="horizontal">
                     <RoleTypeSelect
                         name="roleType"
-                        defaultValue={defaultRoleType}
+                        defaultValue={roleType}
                         required
                         onChange={(event) => {
                             let role = event.target.value
@@ -307,8 +303,10 @@ const RoleSelectGroup = ({
                                 setValue("brandId", "")
                             }
 
-                            setValue("roleId", "")
-                            emptyDepartment?.()
+                            onMerchantResetted()
+
+                            let values = getValues()
+                            reset(values)
                         }}
                     />
                     {roleType && roleType != RoleTypes.Admin && (
@@ -316,13 +314,16 @@ const RoleSelectGroup = ({
                             start={adminOrNextRoleType(userRoleType)}
                             end={roleType}
                             resellerProps={{
-                                defaultValue: defalultResellerId
+                                defaultValue: resellerId,
+                                onChange: onMerchantResetted
                             }}
                             licenseeProps={{
-                                defaultValue: defaultLicenseeId
+                                defaultValue: licenseeId,
+                                onChange: onMerchantResetted
                             }}
                             brandProps={{
-                                defaultValue: defaultBrandId
+                                defaultValue: brandId,
+                                onChange: onMerchantResetted
                             }}
                         />
                     )}
@@ -330,6 +331,7 @@ const RoleSelectGroup = ({
             )}
             <RoleSelect
                 name="roleId"
+                defaultValue={roleId}
                 required
                 resellerId={resellerId}
                 licenseeId={licenseeId}
@@ -381,9 +383,22 @@ const EditDialog = ({ user = {}, onSubmitted, dialog, ...props }) => {
     }
 
     let title = useUpdateTitle()
+
+    let userRoleType = useUserRoleType()
+    let roleType = userRoleType
+    if (user?.resellerId) {
+        roleType = RoleTypes.Reseller
+    }
+    if (user?.licenseeId) {
+        roleType = RoleTypes.Licensee
+    }
+    if (user?.brandId) {
+        roleType = RoleTypes.Brand
+    }
+
     return (
         <FormDialog
-            defaultValues={user}
+            defaultValues={{ ...clone(user), roleType }}
             onSubmit={submit}
             isLoading={isLoading}
             result={result}
@@ -393,27 +408,15 @@ const EditDialog = ({ user = {}, onSubmitted, dialog, ...props }) => {
             title={title}
             dialog={dialog}
             maxWidth="80vw"
-            minWidth="50vw"
+            minWidth="55vw"
         >
             <EditBody user={user} dialog={dialog} />
         </FormDialog>
     )
 }
 
-const EditBody = ({ user, dialog }) => {
+const EditBody = ({ user }) => {
     let { watch, setValue } = useFormContext()
-
-    let userRoleType = useUserRoleType()
-    let defaultRoleType = userRoleType
-    if (user?.resellerId) {
-        defaultRoleType = RoleTypes.Reseller
-    }
-    if (user?.licenseeId) {
-        defaultRoleType = RoleTypes.Licensee
-    }
-    if (user?.brandId) {
-        defaultRoleType = RoleTypes.Brand
-    }
 
     let resellerId = watch("resellerId")
     let licenseeId = watch("licenseeId")
@@ -430,10 +433,6 @@ const EditBody = ({ user, dialog }) => {
 
                 <RoleLabel />
                 <RoleSelectGroup
-                    defaultRoleType={defaultRoleType}
-                    defalultResellerId={user?.resellerId}
-                    defaultLicenseeId={user?.licenseeId}
-                    defaultBrandId={user?.brandId}
                     emptyDepartment={() => {
                         setValue("departmentId", "")
                     }}
