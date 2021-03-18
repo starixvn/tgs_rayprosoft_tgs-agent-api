@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
-using MediatR;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record GetBetStatusRequest : BaseRequest, IRequest<GetBetStatusResponse>
+    public record GetBetStatusRequest : BaseRequest
     {
         [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; set; }
+        public string ExternalTransactionId { get; init; }
 
         [JsonPropertyName("transactionId")]
-        public string ExternalRoundId { get; set; }
+        public string ExternalRoundId { get; init; }
     }
 }

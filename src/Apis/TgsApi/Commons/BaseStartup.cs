@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -73,8 +72,6 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddRedis(Configuration)
                 .AddNats()
                 .ForwardToPrometheus();
-
-            services.AddMediatR(typeof(BaseStartup).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,7 +79,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix, new[] {"/health", "/favicon.ico"});
+            app.UseApiLogger(LogPrefix, new[] {"/health", "/favicon.ico", "/metrics"});
 
             UseCustomMiddlewares(app);
 

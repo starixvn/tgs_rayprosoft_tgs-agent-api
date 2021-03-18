@@ -49,6 +49,7 @@ namespace TGS.Core.Models
         {
             public const string RedTiger = "RT";
             public const string SBOBET = "SBO";
+            public const string Habanero = "HABA";
         }
 
         public static class EnvironmentVariable
@@ -60,11 +61,13 @@ namespace TGS.Core.Models
 
         public static class ContextItems
         {
-            public const string BrandId = "brandId";
-            public const string GameProviderId = "gameProviderId";
-            public const string GameProviderConfigurationId = "gameProviderConfigurationId";
-            public const string PlatformType = "platformType";
-            public const string PlayerToken = "playerToken";
+            public static readonly string BrandId = "brandId";
+            public static readonly string GameProviderId = "gameProviderId";
+            public static readonly string GameProviderConfigurationId = "gameProviderConfigurationId";
+            public static readonly string PlatformType = "platformType";
+            public static readonly string PlayerToken = "playerToken";
+            public static readonly string PlayerCode = "playerCode";
+            public static readonly string RequestType = "requestType";
         }
 
         public static class LocalizationContext

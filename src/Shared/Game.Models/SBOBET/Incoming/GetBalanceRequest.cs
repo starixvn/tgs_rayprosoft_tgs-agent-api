@@ -1,8 +1,6 @@
-﻿using MediatR;
-
-namespace TGS.Shared.Game.Models.SBOBET.Incoming
+﻿namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record GetBalanceRequest : BaseRequest, IRequest<GetBalanceResponse>
+    public record GetBalanceRequest : BaseRequest
     {
     }
 }

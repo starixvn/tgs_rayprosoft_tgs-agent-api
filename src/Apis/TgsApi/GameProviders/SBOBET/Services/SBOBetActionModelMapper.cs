@@ -16,7 +16,7 @@ using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
-    public interface ISBOBETGameControllerMapper
+    public interface ISBOBETActionModelMapper
     {
         BetData Request(GameProviderConfigurationData data, PlaceBetRequest request);
 
@@ -51,12 +51,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         BatchResponse Response(BatchBetResult r);
     }
 
-    public sealed class SBOBETGameControllerMapper : ISBOBETGameControllerMapper
+    public sealed class SBOBetActionModelMapper : ISBOBETActionModelMapper
     {
         private const string GameProviderCode = Consts.GameProvider.SBOBET;
         private const bool HasCurrencyFromGameProvider = false;
 
-        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request)
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request)
         {
             var externalTransactionId = request.ExternalTransactionId;
             var externalRoundId = request.ExternalRoundId;
@@ -79,7 +79,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, string externalRoundId,
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, string externalRoundId,
             SettleBetRequest request, RoundStatus? roundStatus, GameActionExternalIds[] settleGameActionExternalIds)
         {
             var settleCount = settleGameActionExternalIds.Length;
@@ -108,7 +108,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, CancelBetRequest request)
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, CancelBetRequest request)
         {
             var externalTransactionReferenceId = request.ExternalTransactionId;
             var externalRoundId = request.ExternalRoundId;
@@ -131,7 +131,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, CancelBetRequest request,
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, CancelBetRequest request,
             GameActionExternalIds[] validGameActionExternalIds)
         {
             var transactions = validGameActionExternalIds
@@ -152,7 +152,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETGameControllerMapper.Request(GameProviderConfigurationData data, RollbackRequest request,
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, RollbackRequest request,
             GameActionExternalIds[] gameActionExternalIds)
         {
             var externalIds = gameActionExternalIds.OrderBy(ga => ga.RecordedOn).ToArray();
@@ -185,10 +185,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        GetBalanceResponse ISBOBETGameControllerMapper.Response(string playerCode, GetBalanceResult r) =>
+        GetBalanceResponse ISBOBETActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
             Response<GetBalanceResponse>(playerCode, r.Balance);
 
-        PlaceBetResponse ISBOBETGameControllerMapper.Response(PlaceBetRequest request, BetResult r)
+        PlaceBetResponse ISBOBETActionModelMapper.Response(PlaceBetRequest request, BetResult r)
         {
             var isDuplicate = r.Transactions.Any(t => t.IsDuplicate);
 
@@ -205,22 +205,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
-        SettleBetResponse ISBOBETGameControllerMapper.Response(SettleBetRequest request, BetResult r) =>
+        SettleBetResponse ISBOBETActionModelMapper.Response(SettleBetRequest request, BetResult r) =>
             r.Transactions.Any(t => t.IsDuplicate)
                 ? Response<SettleBetResponse>(request.PlayerCode, r.Balance, GameApiError.BetAlreadySettled)
                 : Response<SettleBetResponse>(request.PlayerCode, r.Balance);
 
-        CancelBetResponse ISBOBETGameControllerMapper.Response(CancelBetRequest request, BetResult r) =>
+        CancelBetResponse ISBOBETActionModelMapper.Response(CancelBetRequest request, BetResult r) =>
             r.Transactions.Any(t => t.IsDuplicate)
                 ? Response<CancelBetResponse>(request.PlayerCode, r.Balance, GameApiError.BetAlreadyCanceled)
                 : Response<CancelBetResponse>(request.PlayerCode, r.Balance);
 
-        RollbackResponse ISBOBETGameControllerMapper.Response(RollbackRequest request, BetResult r) =>
+        RollbackResponse ISBOBETActionModelMapper.Response(RollbackRequest request, BetResult r) =>
             r.Transactions.Any(t => t.IsDuplicate)
                 ? Response<RollbackResponse>(request.PlayerCode, r.Balance, GameApiError.BetAlreadyRollback)
                 : Response<RollbackResponse>(request.PlayerCode, r.Balance);
 
-        GetBetStatusResponse ISBOBETGameControllerMapper.Response(GetBetStatusRequest request, GameActionData ga)
+        GetBetStatusResponse ISBOBETActionModelMapper.Response(GetBetStatusRequest request, GameActionData ga)
         {
             var roundData = ga.Round;
             var status = GetBetStatus(roundData);
@@ -242,7 +242,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
-        T ISBOBETGameControllerMapper.Response<T>(string playerCode, GameApiError errorCode) =>
+        T ISBOBETActionModelMapper.Response<T>(string playerCode, GameApiError errorCode) =>
             Response<T>(playerCode, 0, errorCode);
 
         #region Private Methods
@@ -332,7 +332,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 Balance = error != GameApiError.Success ? null : balance
             };
 
-        BatchBetData ISBOBETGameControllerMapper.Request(Guid gameProviderId,
+        BatchBetData ISBOBETActionModelMapper.Request(Guid gameProviderId,
             Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound, BatchRequest request) =>
             new()
             {
@@ -364,7 +364,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 }).ToArray()
             };
 
-        BatchResponse ISBOBETGameControllerMapper.Response(BatchBetResult r) =>
+        BatchResponse ISBOBETActionModelMapper.Response(BatchBetResult r) =>
             new()
             {
                 ErrorCode = (int)r.Error,

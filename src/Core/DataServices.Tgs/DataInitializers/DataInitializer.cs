@@ -68,7 +68,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             _passwordHandler = new PasswordHandler(hashProvider);
             _jsonSerializationProvider = new JsonSerializationProvider();
 
-            _gameProviders = new IGameProvider[] {new SBOGameProvider(env)};
+            _gameProviders = new IGameProvider[]
+            {
+                new SBOGameProvider(env),
+                new HabaneroGameProvider(env)
+            };
         }
 
         protected override async Task SetInitialDataAsync()
@@ -356,12 +360,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             }
 
             var gameProviders = _gameProvidersCreated.Values.ToArray();
-            await _repository.BulkInsertAsync(gameProviders);
-            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.GameProviderConfigurations).ToArray());
-            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Currencies).ToArray());
-            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Languages).ToArray());
-            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.Games).ToArray());
-            await _repository.BulkInsertAsync(gameProviders.SelectMany(gp => gp.BetLimits).ToArray());
+
+            // since there is a issue that makes game provider configurations returning wrong data
+            // after use BulkInsertAsync, change to add entities directly.
+            foreach (var gp in gameProviders)
+            {
+                _gameProvidersCreated[gp.Code] = gp;
+                await _repository.GameProviders.AddAsync(gp);
+            }
+
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateResellersWithDescendantsAsync()

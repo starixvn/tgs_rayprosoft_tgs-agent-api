@@ -1,17 +1,16 @@
 ﻿using System.Text.Json.Serialization;
-using MediatR;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record CancelBetRequest : BaseRequest, IRequest<CancelBetResponse>
+    public record CancelBetRequest : BaseRequest
     {
         [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; set; }
+        public string ExternalTransactionId { get; init; }
 
         [JsonPropertyName("transactionId")]
-        public string ExternalRoundId { get; set; }
+        public string ExternalRoundId { get; init; }
 
         [JsonPropertyName("IsCancelAll")]
-        public bool IsCancelAll { get; set; }
+        public bool IsCancelAll { get; init; }
     }
 }

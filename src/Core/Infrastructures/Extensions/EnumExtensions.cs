@@ -13,7 +13,7 @@ namespace TGS.Core.Infrastructures.Extensions
 
             return attributes == null || attributes.Length == 0
                 ? defaultValue
-                : ((DescriptionAttribute) attributes[0]).Description;
+                : ((DescriptionAttribute)attributes[0]).Description;
         }
     }
 }

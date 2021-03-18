@@ -31,6 +31,7 @@ namespace TGS.Services.Operations.Validators
         {
             var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
             VerifyLoginRecordPlayer(loginRecord?.PlayerCode, playerCode);
+            VerifyLoginRecordStatus(loginRecord?.Status, playerCode);
             VerifyLoginRecordExpiredTime(loginRecord?.ExpiredOn, playerCode);
         }
 
@@ -42,9 +43,17 @@ namespace TGS.Services.Operations.Validators
             }
         }
 
+        private static void VerifyLoginRecordStatus(LoginStatus? status, string playerCode)
+        {
+            if (!status.HasValue || status.Value != LoginStatus.Enabled)
+            {
+                throw new PlayerLoginExpiredException(playerCode);
+            }
+        }
+
         private static void VerifyLoginRecordExpiredTime(DateTimeOffset? expiredOn, string playerCode)
         {
-            if (!expiredOn.HasValue || expiredOn < DateTimeOffset.UtcNow)
+            if (!expiredOn.HasValue || expiredOn.Value < DateTimeOffset.UtcNow)
             {
                 throw new PlayerLoginExpiredException(playerCode);
             }
