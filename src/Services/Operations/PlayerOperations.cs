@@ -25,6 +25,8 @@ namespace TGS.Services.Operations
 
         Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
 
+        Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn);
+
         Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
 
         Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
@@ -266,6 +268,12 @@ namespace TGS.Services.Operations
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 
+        public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
         public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
         {
             await _playerCommands.SetPhoneAsync(playerCode, phone, updatedOn);
@@ -359,9 +367,9 @@ namespace TGS.Services.Operations
             return noCache(cachedPlayer);
         }
 
-        public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+        public async Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
         {
-            await _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
+            await _playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 

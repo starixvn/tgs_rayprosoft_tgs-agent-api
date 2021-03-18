@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +92,24 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new SetQqCommand(playerTokenData.PlayerCode, request.QqId);
 
             await setQqService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the we chat identifier.
+        /// </summary>
+        /// <param name="setWeChatService">The set we chat service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("wechat")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetWeChatIdAsync(
+            [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
+            [FromBody] SetWeChatIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetWeChatCommand(playerTokenData.PlayerCode, request.WebChatId);
+
+            await setWeChatService.ExecuteAsync(command).ConfigureAwait(false);
         }
     }
 }
