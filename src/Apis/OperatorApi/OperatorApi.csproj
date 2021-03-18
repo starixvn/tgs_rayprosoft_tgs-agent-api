@@ -8,7 +8,7 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <AssemblyName>TGS.Apis.OperatorApi</AssemblyName>
     <RootNamespace>TGS.Apis.OperatorApi</RootNamespace>
-    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)"</DockerfileBuildArguments>
+    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">operator-api</DockerfileTag>
   </PropertyGroup>
 
