@@ -15,23 +15,28 @@ namespace TGS.Apis.OperatorApi.Validators
             IPlayerOperations playerOperations,
             IIdentityVerifierSelector<string> identityVerifierSelector)
         {
-            RuleFor(x => x.RealName).NotNull().NotEmpty();
+            RuleFor(x => x.RealName)
+                .NotNull()
+                .NotEmpty()
+                .WithName(x => GetJsonPropertyName(x, nameof(x.RealName)));
 
-            RuleFor(x => x.Identity).MustAsync(async (id, _) =>
-            {
-                var httpContext = httpContextAccessor.HttpContext;
-                var playerTokenData = httpContext.Items.GetPlayerTokenData();
+            RuleFor(x => x.Identity)
+                .MustAsync(async (id, _) =>
+                {
+                    var httpContext = httpContextAccessor.HttpContext;
+                    var playerTokenData = httpContext.Items.GetPlayerTokenData();
 
-                var player = await playerOperations
-                    .GetPlayerByCodeAsync(playerTokenData.PlayerCode)
-                    .ConfigureAwait(false);
+                    var player = await playerOperations
+                        .GetPlayerByCodeAsync(playerTokenData.PlayerCode)
+                        .ConfigureAwait(false);
 
-                var playerCurrency = player.DefaultWalletCurrencyCode;
+                    var playerCurrency = player.DefaultWalletCurrencyCode;
 
-                var identityVerifier = identityVerifierSelector.GetIdentityVerifier(playerCurrency);
+                    var identityVerifier = identityVerifierSelector.GetIdentityVerifier(playerCurrency);
 
-                return identityVerifier.Verify(id);
-            });
+                    return identityVerifier.Verify(id);
+                })
+                .WithName(x => GetJsonPropertyName(x, nameof(x.Identity))); ;
         }
     }
 }

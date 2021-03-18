@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PlayerInfo
 {
-    class SetQqCommandService : ICommandService<SetQqCommand>
+    internal class SetQqCommandService : ICommandService<SetQqCommand>
     {
         private readonly IPlayerOperations _playerOperations;
 
@@ -16,6 +13,7 @@ namespace TGS.Services.Operator.PlayerInfo
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
+
         public async ValueTask ExecuteAsync(SetQqCommand command)
         {
             var player = await _playerOperations
