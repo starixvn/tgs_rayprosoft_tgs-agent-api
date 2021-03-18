@@ -1,8 +1,8 @@
 ﻿namespace TGS.IdentityVerifiers
 {
-    public class IdentityVerifierSelector
+    public class CurrencyIdentityVerifierSelector : IIdentityVerifierSelector<string>
     {
-        public IIdentityVerifier GetIdentityVerifierByCurrency(string currency) => currency switch
+        public IIdentityVerifier GetIdentityVerifier(string currency) => currency switch
         {
             "CNY" => new ChineseIdentityVerifier(),
             _ => new SoutheastAsiaIdentityVerifier()
