@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace TGS.Services.Operator
+namespace TGS.IdentityVerifiers
 {
     public class ChineseIdentityVerifier : IIdentityVerifier
     {

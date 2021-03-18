@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TGS.Services.Operator
+namespace TGS.IdentityVerifiers
 {
-    internal class ChineseIdentity15Verifier : IIdentityVerifier
+    public class ChineseIdentity15Verifier : IIdentityVerifier
     {
         public bool Verify(string id)
         {

@@ -1,4 +1,4 @@
-﻿namespace TGS.Services.Operator
+﻿namespace TGS.IdentityVerifiers
 {
     public interface IIdentityVerifier
     {

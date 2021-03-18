@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using TGS.Services.Operator;
+﻿using NUnit.Framework;
+using TGS.IdentityVerifiers;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
