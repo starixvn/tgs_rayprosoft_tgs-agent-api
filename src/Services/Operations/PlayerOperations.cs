@@ -54,6 +54,13 @@ namespace TGS.Services.Operations
         Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
 
         Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
+
+        Task SetIdentityAsync(
+            string playerCode,
+            string realName,
+            string identity,
+            bool isAuthenticate,
+            DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -337,6 +344,17 @@ namespace TGS.Services.Operations
 
             var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
             return noCache(cachedPlayer);
+        }
+
+        public async Task SetIdentityAsync(
+            string playerCode,
+            string realName,
+            string identity,
+            bool isAuthenticate,
+            DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetIdentityAsync(playerCode, realName, identity, isAuthenticate, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 
         private static class CachedPlayerFields
