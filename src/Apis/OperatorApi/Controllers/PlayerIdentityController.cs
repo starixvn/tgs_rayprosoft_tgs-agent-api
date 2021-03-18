@@ -41,7 +41,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="playerOperations">The player operations.</param>
         /// <param name="id">The identify number.</param>
         /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpGet("check/{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<bool> CheckIdentityIsValidAsync(
             [FromServices] IIdentityVerifierSelector<string> identityVerifierSelector,
