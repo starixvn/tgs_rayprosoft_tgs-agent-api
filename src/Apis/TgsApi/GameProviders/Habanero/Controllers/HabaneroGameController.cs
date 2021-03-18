@@ -26,40 +26,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
     {
         private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
 
-        [HttpPost]
-        [Route("authorize")]
-        public async Task<AuthorizePlayerResponse> AuthorizePlayerAsync(
-            [FromServices] IGamePlayActions actions,
-            [FromServices] IHabaneroActionModelMapper map,
-            AuthorizePlayerRequest request)
+        private readonly IReadOnlyDictionary<ActionType, Func<BetData, Task<BetResult>>> _actionMapper;
+        private readonly IGamePlayActions _actions;
+        private readonly IHabaneroActionModelMapper _map;
+        private readonly IHabaneroServices _services;
+
+        public HabaneroGameController(
+            IGamePlayActions actions,
+            IHabaneroServices services,
+            IHabaneroActionModelMapper map)
         {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            _actions = actions;
+            _services = services;
+            _map = map;
 
-            if (request.Detail.GameLaunch)
-            {
-                var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-                var validationResult = await actions.ValidatePlayerAsync(map.Request(playerCode, platformType));
-                return map.Response(playerCode, validationResult);
-            }
-
-            var balanceResult = await actions.GetBalanceAsync(GameProviderCode, playerCode);
-            return map.Response(playerCode, balanceResult);
-        }
-
-        [HttpPost]
-        [Route("transfer")]
-        public async Task<FundTransferResponse> TransferFundsAsync(
-            [FromServices] IGamePlayActions actions,
-            [FromServices] IHabaneroServices services,
-            [FromServices] IHabaneroActionModelMapper map,
-            FundTransferRequest request)
-        {
-            var actionType = request.Detail.ActionType;
-            Request.Path = new($"{Request.Path}/{actionType.ToString().ToLower()}");
-
-            var actionMapper = new Dictionary<ActionType, Func<BetData, Task<BetResult>>>
+            _actionMapper = new Dictionary<ActionType, Func<BetData, Task<BetResult>>>
             {
                 {ActionType.PlaceBet, actions.PlaceBetAsync},
                 {ActionType.SettleBet, actions.SettleBetAsync},
@@ -68,28 +49,57 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
                 {ActionType.PlaceAndSettleBet, actions.PlaceAndSettleBetAsync},
                 {ActionType.RetrySettlement, actions.SettleBetAsync}
             };
+        }
+
+        [HttpPost]
+        [Route("authorize")]
+        public async ValueTask<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request)
+        {
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+
+            if (request.Detail.GameLaunch)
+            {
+                var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+                var validationData = _map.Request(playerCode, platformType);
+                var validationResult = await _actions.ValidatePlayerAsync(validationData)
+                    .ConfigureAwait(false);
+
+                return _map.Response(playerCode, validationResult);
+            }
+
+            var balanceResult = await _actions.GetBalanceAsync(GameProviderCode, playerCode).ConfigureAwait(false);
+            return _map.Response(playerCode, balanceResult);
+        }
+
+        [HttpPost]
+        [Route("transfer")]
+        public async ValueTask<FundTransferResponse> TransferFundsAsync(FundTransferRequest request)
+        {
+            var actionType = request.Detail.ActionType;
+            Request.Path = new($"{Request.Path}/{actionType.ToString().ToLower()}");
 
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await services.GetGameProviderConfigurationDataAsync();
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
 
-            var betData = map.Request(playerCode, data, request);
-            var execute = actionMapper[actionType];
+            var betData = _map.Request(playerCode, data, request);
+            var execute = _actionMapper[actionType];
 
-            var r = await execute(betData);
+            var r = await execute(betData).ConfigureAwait(false);
 
-            return map.Response(request, r);
+            return _map.Response(request, r);
         }
 
         [HttpPost]
         [Route("transfer/query")]
-        public async Task<QueryResponse> QueryAsync(
-            [FromServices] IHabaneroServices services,
-            [FromServices] IHabaneroActionModelMapper map,
-            QueryRequest request)
+        public async ValueTask<QueryResponse> QueryAsync(QueryRequest request)
         {
-            var exists = await services.GameActionExistsAsync(request.Detail);
+            var exists = await _services.GameActionExistsAsync(request.Detail)
+                .ConfigureAwait(false);
 
-            return map.Response(exists);
+            return _map.Response(exists);
         }
     }
 }

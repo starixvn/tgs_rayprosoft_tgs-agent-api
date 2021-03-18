@@ -13,8 +13,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
 {
     public interface IHabaneroServices
     {
-        Task<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
-        Task<bool> GameActionExistsAsync(QueryDetail detail);
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+        ValueTask<bool> GameActionExistsAsync(QueryDetail detail);
     }
 
     public sealed class HabaneroServices : IHabaneroServices
@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             _gameActionQueries = gameActionQueries;
         }
 
-        async Task<GameProviderConfigurationData> IHabaneroServices.GetGameProviderConfigurationDataAsync()
+        async ValueTask<GameProviderConfigurationData> IHabaneroServices.GetGameProviderConfigurationDataAsync()
         {
             var items = _httpContext?.Items ??
                 throw new InvalidOperationException("Can not get http context items");
@@ -42,7 +42,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId);
+            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
+                .ConfigureAwait(false);
 
             return new()
             {
@@ -53,13 +54,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             };
         }
 
-        Task<bool> IHabaneroServices.GameActionExistsAsync(QueryDetail detail)
+        async ValueTask<bool> IHabaneroServices.GameActionExistsAsync(QueryDetail detail)
         {
             var items = _httpContext?.Items ?? throw new InvalidOperationException("Can not get http context items");
 
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            return _gameActionQueries.ReferencedGameActionExistsAsync(gameProviderId, detail.PlayerCode,
-                detail.RoundId, detail.TransactionId);
+            return await _gameActionQueries.ReferencedGameActionExistsAsync(gameProviderId, detail.PlayerCode,
+                detail.RoundId, detail.TransactionId).ConfigureAwait(false);
         }
     }
 }
