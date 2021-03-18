@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -10,7 +11,7 @@ using static TGS.Core.Models.Enums.GameActionType;
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Handlers
 {
     /// <summary>
-    /// case: Cancel Settle or Cancel CancelTransaction
+    ///     case: Cancel Settle or Cancel CancelTransaction
     /// </summary>
     public sealed class RollbackHandler
         : IRequestHandler<RollbackRequest, RollbackResponse>
@@ -35,15 +36,32 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Handlers
             CancellationToken cancellationToken)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
+            var playerCode = request.PlayerCode;
             var externalRoundId = request.ExternalTransactionId;
-
             var gameProviderId = data.GameProviderId;
-            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+
+            int? gameId;
+            if (request.GameType > 0)
+            {
+                gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+            }
+            else
+            {
+                var externalTransactionId = externalRoundId;
+                (_, gameId) = await _services.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode,
+                    externalRoundId, externalTransactionId);
+
+                if (!gameId.HasValue)
+                {
+                    throw new InvalidGameActionException(
+                        $"Game with referenced round is not found. RoundId: {externalRoundId}",
+                        InvalidGameActionErrorCode.GameNotFound);
+                }
+            }
 
             var gameActionExternalIds =
-                await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
-                    gameId,
-                    ActionTypes);
+                await _services.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId,
+                    gameId.Value, ActionTypes);
 
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);

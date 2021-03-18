@@ -32,6 +32,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             int gameId);
 
         Task<int> GetGameIdAsync(Guid gameProviderId, string externalGameId, PlatformType platformType);
+
+        Task<(RoundStatus? RoundStatus, int? GameId)> GetRoundStatusWithGameIdAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, string externalTransactionId);
     }
 
     public sealed class SBOBETServices : ISBOBETServices
@@ -116,5 +119,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             string externalRoundId, int gameId) =>
             _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId,
                 gameId);
+
+        Task<(RoundStatus? RoundStatus, int? GameId)> ISBOBETServices.GetRoundStatusWithGameIdAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, string externalTransactionId) =>
+            _roundQueries.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode, externalRoundId,
+                externalTransactionId);
     }
 }

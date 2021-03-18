@@ -5,11 +5,8 @@ using TGS.Shared.Game.Models.SBOBET.Enums;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record SettleBetRequest : BaseRequest, IRequest<SettleBetResponse>
+    public record SettleBetRequest : TransactionRequest, IRequest<SettleBetResponse>
     {
-        [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; init; }
-
         [JsonPropertyName("winloss")]
         public decimal WinLoss { get; init; }
 

@@ -25,13 +25,31 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Handlers
             GetBetStatusRequest request, CancellationToken cancellationToken)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
-
+            var externalRoundId = request.ExternalRoundId;
+            var playerCode = request.PlayerCode;
             var gameProviderId = data.GameProviderId;
-            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+
+            int? gameId;
+            if (request.GameType > 0)
+            {
+                gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+            }
+            else
+            {
+                var externalTransactionId = externalRoundId;
+                (_, gameId) = await _services.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode,
+                    externalRoundId, externalTransactionId);
+
+                if (!gameId.HasValue)
+                {
+                    throw new InvalidGameActionException(
+                        $"Game with referenced round is not found. RoundId: {externalRoundId}",
+                        InvalidGameActionErrorCode.GameNotFound);
+                }
+            }
 
             var ga = await _services.GetValidGameActionsAsync(gameProviderId, request.PlayerCode,
-                request.ExternalRoundId,
-                gameId);
+                request.ExternalRoundId, gameId.Value);
 
             if (ga == null)
             {

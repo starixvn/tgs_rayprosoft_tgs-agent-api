@@ -99,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalRoundId = externalRoundId,
                     ExternalBetId = request.ExternalTransactionId,
                     ExternalGameActionGroupId = externalRoundId,
-                    ExternalGameId = request.ExternalGameId,
+                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
                     GameActionType = GetGameActionType(request.Result),
                     TimeStamp = request.SettleTime
                 }
@@ -122,7 +122,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalRoundId = externalRoundId,
                     ExternalBetId = externalTransactionReferenceId,
                     ExternalGameActionGroupId = externalRoundId,
-                    ExternalGameId = request.ExternalGameId,
+                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
                     GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.UtcNow
                 }
@@ -143,7 +143,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalRoundId = ga.ExternalRoundId,
                     ExternalBetId = ga.ExternalBetId,
                     ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
-                    ExternalGameId = request.ExternalGameId,
+                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
                     GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.UtcNow,
                     RoundClosed = idx + 1 == validGameActionExternalIds.Length
@@ -175,7 +175,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalRoundId = action.ExternalRoundId,
                     ExternalBetId = action.ExternalBetId,
                     ExternalGameActionGroupId = action.ExternalGameActionGroupId,
-                    ExternalGameId = request.ExternalGameId,
+                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
                     GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.UtcNow,
                     RoundClosed = false
