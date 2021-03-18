@@ -21,6 +21,9 @@ namespace TGS.Services.Operations.Queries
 
         Task<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, int gameId);
+
+        Task<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId, string externalTransactionId);
     }
 
     public sealed class GameActionQueries : IGameActionQueries
@@ -124,6 +127,20 @@ namespace TGS.Services.Operations.Queries
                         ReferencedGameActionId = gar.ReferencedGameActionId
                     }).ToArray()
                 }).First();
+        }
+
+        Task<bool> IGameActionQueries.ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId, string externalTransactionId)
+        {
+            const string spName = "bet.game_action_referenced_game_action_exists";
+            return _repository.SqlQuerySingleAsync<bool>(spName, parameters:
+                new Dictionary<string, object>
+                {
+                    {":game_provider_id", gameProviderId},
+                    {":player_code", playerCode},
+                    {":external_round_id", externalRoundId},
+                    {":external_transaction_id", externalTransactionId}
+                });
         }
     }
 }

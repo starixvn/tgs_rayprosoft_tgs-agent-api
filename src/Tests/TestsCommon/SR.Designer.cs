@@ -142,6 +142,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CurrencyCode.
+        /// </summary>
+        public static string CurrencyCode {
+            get {
+                return ResourceManager.GetString("CurrencyCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ErrorResponse.
         /// </summary>
         public static string ErrorResponse {
@@ -187,20 +196,20 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GameProviderCurrencyCode.
+        /// </summary>
+        public static string GameProviderCurrencyCode {
+            get {
+                return ResourceManager.GetString("GameProviderCurrencyCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to HasTurnoverOnTieBet.
         /// </summary>
         public static string HasTurnoverOnTieBet {
             get {
                 return ResourceManager.GetString("HasTurnoverOnTieBet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LoginTime.
-        /// </summary>
-        public static string LoginTime {
-            get {
-                return ResourceManager.GetString("LoginTime", resourceCulture);
             }
         }
         
@@ -237,6 +246,15 @@ namespace TGS.Tests.TestsCommon {
         public static string Players {
             get {
                 return ResourceManager.GetString("Players", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PlayerTokenData.
+        /// </summary>
+        public static string PlayerTokenData {
+            get {
+                return ResourceManager.GetString("PlayerTokenData", resourceCulture);
             }
         }
         
@@ -309,15 +327,6 @@ namespace TGS.Tests.TestsCommon {
         public static string UserBalance {
             get {
                 return ResourceManager.GetString("UserBalance", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Username.
-        /// </summary>
-        public static string Username {
-            get {
-                return ResourceManager.GetString("Username", resourceCulture);
             }
         }
     }

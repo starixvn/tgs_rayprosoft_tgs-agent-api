@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using MediatR;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record PlaceBetRequest : TransactionRequest, IRequest<PlaceBetResponse>
+    public record PlaceBetRequest : TransactionRequest
     {
         [JsonPropertyName("transactionId")]
         public string ExternalRoundId { get; init; }

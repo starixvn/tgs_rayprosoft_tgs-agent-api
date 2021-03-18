@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using MediatR;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record BatchRequest : IRequest<BatchResponse>
+    public record BatchRequest
     {
         [JsonPropertyName("batchid")]
         public string ExternalBatchId { get; init; }

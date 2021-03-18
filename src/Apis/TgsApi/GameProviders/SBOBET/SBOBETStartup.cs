@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
             services.AddScoped<HandleSBOBETExceptionMiddleware>();
 
             services.AddScoped<ISBOBETServices, SBOBETServices>();
-            services.AddSingleton<ISBOBETGameControllerMapper, SBOBETGameControllerMapper>();
+            services.AddSingleton<ISBOBETActionModelMapper, SBOBetActionModelMapper>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SBOBETGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<SBOBETGameInitializer>());

@@ -11,9 +11,10 @@ namespace TGS.Core.Models
 
         public static class GameProviderConfigurations
         {
-            public const string Template = "{0}Configuration";
+            public static readonly string Template = "{0}Configuration";
 
             public static readonly string SBOBET = string.Format(Template, Consts.GameProvider.SBOBET);
+            public static readonly string Habanero = string.Format(Template, Consts.GameProvider.Habanero);
         }
     }
 }

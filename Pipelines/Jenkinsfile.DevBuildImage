@@ -4,12 +4,13 @@ pipeline {
 	environment {
 		TAG = sh(script: "echo ${ENV}-`date +%m%d%H%M`", returnStdout: true).trim()
 		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
+		gitlab_user_pwd = credentials('gitlab-user-pwd')
 	}
     stages {
 		stage('initial') {
 			steps {
 				script {
-					sh 'sudo docker login registry.gitlab.com -u lester.wei@rayprosoft.com -p oD2cksJhGN1tgUuaE6C9'
+					sh "sudo docker login registry.gitlab.com -u ${gitlab_user_pwd_USR} -p ${gitlab_user_pwd_PSW}"
 				}
 			}
 		}

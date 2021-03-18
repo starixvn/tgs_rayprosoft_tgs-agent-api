@@ -3,6 +3,7 @@ pipeline {
 	
 	environment {
 		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
+		gitlab_user_pwd = credentials('gitlab-user-pwd')
 	}
 	
 	parameters {
@@ -38,6 +39,7 @@ pipeline {
 			steps {
 				script {
 					try {
+						sh "sudo docker login registry.gitlab.com -u ${gitlab_user_pwd_USR} -p ${gitlab_user_pwd_PSW}"
 						sh "sudo docker build -f src/Apis/LogApi/Dockerfile -t ${Registry}log-api:int-test ."
 						sh "sudo docker build -f src/Apis/TgsApi/Dockerfile -t ${Registry}tgs-api:int-test ."
 						sh "sudo docker build -f src/Apis/OperatorApi/Dockerfile -t ${Registry}operator-api:int-test ."
