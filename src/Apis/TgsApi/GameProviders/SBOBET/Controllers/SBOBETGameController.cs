@@ -85,31 +85,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
             var playerCode = request.PlayerCode;
-            RoundStatus? roundStatus;
-            int? gameId;
 
-            if (request.GameType > 0)
-            {
-                gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
-                roundStatus =
-                    await _services.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId.Value);
-            }
-            else
-            {
-                var externalTransactionId = externalRoundId;
-                (roundStatus, gameId) = await _services.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode,
-                    externalRoundId, externalTransactionId);
-
-                if (!gameId.HasValue)
-                {
-                    throw new InvalidGameActionException(
-                        $"Game with referenced round is not found. RoundId: {externalRoundId}",
-                        InvalidGameActionErrorCode.GameNotFound);
-                }
-            }
+            var (roundStatus, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode,
+                    externalRoundId, request.ExternalGameId, request.GameType);
 
             var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(gameProviderId,
-                playerCode, externalRoundId, gameId.Value, actionTypes);
+                playerCode, externalRoundId, gameId, actionTypes);
 
             var betData = _map.Request(data, externalRoundId, request, roundStatus, gameActionExternalIds);
             var r = await _actions.SettleBetAsync(betData);
@@ -144,28 +126,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var externalRoundId = request.ExternalTransactionId;
             var gameProviderId = data.GameProviderId;
 
-            int? gameId;
-            if (request.GameType > 0)
-            {
-                gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
-            }
-            else
-            {
-                var externalTransactionId = externalRoundId;
-                (_, gameId) = await _services.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode,
-                    externalRoundId, externalTransactionId);
-
-                if (!gameId.HasValue)
-                {
-                    throw new InvalidGameActionException(
-                        $"Game with referenced round is not found. RoundId: {externalRoundId}",
-                        InvalidGameActionErrorCode.GameNotFound);
-                }
-            }
+            var (_, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode,
+                    externalRoundId, request.ExternalGameId, request.GameType);
 
             var gameActionExternalIds =
                 await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
-                    gameId.Value, actionTypes);
+                    gameId, actionTypes);
 
             var betData = _map.Request(data, request, gameActionExternalIds);
             var r = await _actions.CancelTransactionAsync(betData);
@@ -181,28 +148,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var playerCode = request.PlayerCode;
             var gameProviderId = data.GameProviderId;
 
-            int? gameId;
-            if (request.GameType > 0)
-            {
-                gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
-            }
-            else
-            {
-                var externalTransactionId = externalRoundId;
-                (_, gameId) = await _services.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode,
-                    externalRoundId, externalTransactionId);
-
-                if (!gameId.HasValue)
-                {
-                    throw new InvalidGameActionException(
-                        $"Game with referenced round is not found. RoundId: {externalRoundId}",
-                        InvalidGameActionErrorCode.GameNotFound);
-                }
-            }
+            var (_, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode,
+                    externalRoundId, request.ExternalGameId, request.GameType);
 
             var ga = await _services.GetValidGameActionsAsync(gameProviderId, request.PlayerCode,
-                request.ExternalRoundId,
-                gameId.Value);
+                request.ExternalRoundId, gameId);
 
             if (ga == null)
             {
@@ -231,33 +182,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var externalRoundId = request.ExternalRoundId;
             var playerCode = request.PlayerCode;
 
-            RoundStatus? roundStatus;
-            int? gameId;
-
-            if (request.GameType > 0)
-            {
-                gameId =
-                    await _services.GetGameIdAsync(data.GameProviderId, request.ExternalGameId, data.PlatformType);
-                roundStatus =
-                    await _services.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId.Value);
-            }
-            else
-            {
-                var externalTransactionId = externalRoundId;
-                (roundStatus, gameId) = await _services.GetRoundStatusWithGameIdAsync(gameProviderId, playerCode,
-                    externalRoundId, externalTransactionId);
-
-                if (!gameId.HasValue)
-                {
-                    throw new InvalidGameActionException(
-                        $"Game with referenced round is not found. RoundId: {externalRoundId}",
-                        InvalidGameActionErrorCode.GameNotFound);
-                }
-            }
+            var (roundStatus, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode,
+                    externalRoundId, request.ExternalGameId, request.GameType);
 
             var gameActionExternalIds =
                 await _services.GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId,
-                    gameId.Value);
+                    gameId);
 
             if (roundStatus == RoundStatus.Closed && gameActionExternalIds.Length == 0)
             {
