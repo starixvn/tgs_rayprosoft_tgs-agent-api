@@ -45,14 +45,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             _map = map;
         }
 
+        [HttpPost]
         [Route("transactions/cancel")]
-        public async Task<BatchResponse> CancelTransactionsAsync(BatchRequest request)
+        public async ValueTask<BatchResponse> CancelTransactionsAsync(BatchRequest request)
         {
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode);
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId);
-            var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, request.Transactions);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode)
+                .ConfigureAwait(false);
 
-            var r = await _action.CancelBatchAsync(_map.Request(gameProviderId, data, autoCloseRound, request));
+            var autoCloseRound =
+                await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
+
+            var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, request.Transactions)
+                .ConfigureAwait(false);
+
+            var r = await _action.CancelBatchAsync(_map.Request(gameProviderId, data, autoCloseRound, request))
+                .ConfigureAwait(false);
+
             return _map.Response(r);
         }
 
@@ -68,9 +76,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
                     continue;
                 }
 
-                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
+                    .ConfigureAwait(false);
+
                 var gameProviderConfigurationId =
-                    await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
+                    await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
+                        .ConfigureAwait(false);
 
                 map.Add(playerCode, gameProviderConfigurationId);
             }
