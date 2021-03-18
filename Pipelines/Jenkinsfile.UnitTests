@@ -38,17 +38,17 @@ pipeline {
 			}
 		}
 		
-		stage('Sonarqube') {
-			steps {			
-				withSonarQubeEnv('sonar') {		
-				    withEnv(['PATH+EXTRA=/var/jenkins_home/.dotnet/tools']) {
-						sh "echo $PATH"
-						sh "dotnet sonarscanner begin /k:TGS /d:sonar.login=${token}  /d:sonar.host.url=${sonar_url}"  
-						sh "dotnet build tgs.sln"
-						sh "dotnet sonarscanner end /d:sonar.login=${sonar_login_USR} /d:sonar.password=${sonar_login_PSW}"
-					}
-				}
-			}
-		}
+		//stage('Sonarqube') {
+		//	steps {			
+		//		withSonarQubeEnv('sonar') {		
+		//		    withEnv(['PATH+EXTRA=/var/jenkins_home/.dotnet/tools']) {
+		//				sh "echo $PATH"
+		//				sh "dotnet sonarscanner begin /k:TGS /d:sonar.login=${token}  /d:sonar.host.url=${sonar_url}"  
+		//				sh "dotnet build tgs.sln"
+		//				sh "dotnet sonarscanner end /d:sonar.login=${sonar_login_USR} /d:sonar.password=${sonar_login_PSW}"
+		//			}
+		//		}
+		//	}
+		//}
     }
 }
