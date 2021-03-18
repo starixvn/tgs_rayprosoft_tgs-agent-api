@@ -1,10 +1,12 @@
-﻿using System;
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator.PlayerInfo;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -21,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     Check username exists
+        /// Check username exists
         /// </summary>
         [HttpGet]
         [Route("checkUsername")]
@@ -29,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Create a player
+        /// Create a player
         /// </summary>
         [HttpPost]
         [Route("create")]
@@ -38,7 +40,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Player login
+        /// Player login
         /// </summary>
         [HttpPost]
         [Route("login")]
@@ -47,7 +49,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Player logout, player login is needed when use this
+        /// Player logout, player login is needed when use this
         /// </summary>
         [HttpDelete]
         [Route("logout")]
@@ -56,7 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(new LogoutRequest());
 
         /// <summary>
-        ///     Get player information
+        /// Get player information
         /// </summary>
         [HttpGet]
         [Route("info")]
@@ -65,15 +67,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(new GetPlayerRequest());
 
         /// <summary>
-        ///     Player forget password
-        /// </summary>
-        [HttpPost]
-        [Route("forgotPassword")]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public Task ForgotPasswordAsync(ForgotPasswordRequest request) => throw new NotImplementedException();
-
-        /// <summary>
-        ///     Update player information, player login is needed when use this
+        /// Update player information, player login is needed when use this
         /// </summary>
         [HttpPut]
         [Route("update")]
@@ -83,13 +77,39 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Player verify id, player login is needed when use this
+        /// Sets the qq number.
         /// </summary>
-        [HttpPut]
-        [Route("verifyId")]
+        /// <param name="setQqService">The set qq service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("qq")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public Task<VerifyIdResponse> VerifyIdAsync(VerifyIdRequest request) =>
-            _mediator.Send(request);
+        public async Task SetQqIdAsync(
+            [FromServices] ICommandService<SetQqCommand> setQqService,
+            [FromBody] SetQqIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetQqCommand(playerTokenData.PlayerCode, request.QqId);
+
+            await setQqService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the we chat identifier.
+        /// </summary>
+        /// <param name="setWeChatService">The set we chat service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("wechat")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetWeChatIdAsync(
+            [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
+            [FromBody] SetWeChatIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetWeChatCommand(playerTokenData.PlayerCode, request.WebChatId);
+
+            await setWeChatService.ExecuteAsync(command).ConfigureAwait(false);
+        }
     }
 }

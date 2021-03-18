@@ -25,6 +25,10 @@ namespace TGS.Services.Operations
 
         Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
 
+        Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn);
+
+        Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
+
         Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
@@ -54,6 +58,13 @@ namespace TGS.Services.Operations
         Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
 
         Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
+
+        Task SetIdentityAsync(
+            string playerCode,
+            string realName,
+            string identity,
+            bool isAuthenticate,
+            DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -246,6 +257,23 @@ namespace TGS.Services.Operations
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 
+        public async Task SetIdentityAsync(
+            string playerCode,
+            string realName,
+            string identity,
+            bool isAuthenticate,
+            DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetIdentityAsync(playerCode, realName, identity, isAuthenticate, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
+        public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
         public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
         {
             await _playerCommands.SetPhoneAsync(playerCode, phone, updatedOn);
@@ -337,6 +365,12 @@ namespace TGS.Services.Operations
 
             var cachedPlayer = await _interface.GetCachedPlayerAsync(playerCode);
             return noCache(cachedPlayer);
+        }
+
+        public async Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 
         private static class CachedPlayerFields
