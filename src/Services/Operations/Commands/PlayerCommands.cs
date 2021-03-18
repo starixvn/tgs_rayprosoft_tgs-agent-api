@@ -42,6 +42,8 @@ namespace TGS.Services.Operations.Commands
             string identity,
             bool isAuthenticate,
             DateTimeOffset updatedOn);
+
+        Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -286,6 +288,22 @@ namespace TGS.Services.Operations.Commands
             _repository.Entry(updateInfo).Property(nameof(Player.RealName)).IsModified = true;
             _repository.Entry(updateInfo).Property(nameof(Player.IdNumber)).IsModified = true;
             _repository.Entry(updateInfo).Property(nameof(Player.IdentityAuthentication)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+        {
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                QQ = qqId,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(updateInfo);
+            _repository.Entry(updateInfo).Property(nameof(Player.QQ)).IsModified = true;
             _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
 
             return _repository.SaveChangesAsync();

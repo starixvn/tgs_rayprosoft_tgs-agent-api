@@ -4,7 +4,10 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator.PlayerInfo;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -73,5 +76,23 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) =>
             _mediator.Send(request);
+
+        /// <summary>
+        /// Sets the qq number.
+        /// </summary>
+        /// <param name="setQqService">The set qq service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("qq")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetQqIdAsync(
+            [FromServices] ICommandService<SetQqCommand> setQqService,
+            [FromBody] SetQqIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetQqCommand(playerTokenData.PlayerCode, request.QqId);
+
+            await setQqService.ExecuteAsync(command).ConfigureAwait(false);
+        }
     }
 }
