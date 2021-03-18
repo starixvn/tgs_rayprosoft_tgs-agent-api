@@ -21,7 +21,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     Check username exists
+        /// Check username exists
         /// </summary>
         [HttpGet]
         [Route("checkUsername")]
@@ -29,7 +29,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Create a player
+        /// Create a player
         /// </summary>
         [HttpPost]
         [Route("create")]
@@ -38,7 +38,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Player login
+        /// Player login
         /// </summary>
         [HttpPost]
         [Route("login")]
@@ -47,7 +47,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(request);
 
         /// <summary>
-        ///     Player logout, player login is needed when use this
+        /// Player logout, player login is needed when use this
         /// </summary>
         [HttpDelete]
         [Route("logout")]
@@ -56,7 +56,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(new LogoutRequest());
 
         /// <summary>
-        ///     Get player information
+        /// Get player information
         /// </summary>
         [HttpGet]
         [Route("info")]
@@ -65,31 +65,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(new GetPlayerRequest());
 
         /// <summary>
-        ///     Player forget password
-        /// </summary>
-        [HttpPost]
-        [Route("forgotPassword")]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public Task ForgotPasswordAsync(ForgotPasswordRequest request) => throw new NotImplementedException();
-
-        /// <summary>
-        ///     Update player information, player login is needed when use this
+        /// Update player information, player login is needed when use this
         /// </summary>
         [HttpPut]
         [Route("update")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [Consumes(MediaTypeNames.Application.Json)]
         public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) =>
-            _mediator.Send(request);
-
-        /// <summary>
-        ///     Player verify id, player login is needed when use this
-        /// </summary>
-        [HttpPut]
-        [Route("verifyId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public Task<VerifyIdResponse> VerifyIdAsync(VerifyIdRequest request) =>
             _mediator.Send(request);
     }
 }
