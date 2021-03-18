@@ -18,6 +18,7 @@ COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
 COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
+COPY ["src/Libraries/IdentityVerifiers/IdentityVerifiers.csproj", "src/Libraries/IdentityVerifiers/"]
 COPY ["src/Services/Operator.Core/Operator.Core.csproj", "src/Services/Operator.Core/"]
 RUN dotnet restore "src/Apis/OperatorApi/OperatorApi.csproj"
 COPY . .
