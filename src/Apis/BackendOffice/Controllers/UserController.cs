@@ -41,7 +41,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Route("")]
         [HttpGet]
         [Description("Get users")]
-        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request) =>
+        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request) => 
             _userQueries.GetQueries()
                 .Where(ResellerId, r => r.Role.ResellerId == ResellerId)
                 .Where(LicenseeId, l => l.Role.LicenseeId == LicenseeId)

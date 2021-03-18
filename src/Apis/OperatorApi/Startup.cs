@@ -62,6 +62,9 @@ namespace TGS.Apis.OperatorApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
+                .AddReportServices();
+
+            services
                 .AddOperatorApiCore()
                 .ConfigureOperatorOptions<IConfiguration>((options, config) =>
                 {
@@ -70,9 +73,7 @@ namespace TGS.Apis.OperatorApi
                 .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
                 {
                     config.GetSection("EmailSetting").Bind(options);
-                })
-                .Services
-                .AddReportServices();
+                });
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)

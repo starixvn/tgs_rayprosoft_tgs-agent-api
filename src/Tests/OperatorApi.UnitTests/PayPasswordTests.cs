@@ -105,7 +105,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
 
             fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-            fakeValidateCodeGenerator.GenerateToken().Returns(token);
+            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
 
             fakeValidateCodeOperator
                 .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())

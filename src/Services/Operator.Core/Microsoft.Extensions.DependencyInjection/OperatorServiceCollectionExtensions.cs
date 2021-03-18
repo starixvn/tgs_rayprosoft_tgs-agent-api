@@ -4,6 +4,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
 using TGS.ServiceUtility;
+using TGS.SmsService.Client;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -49,14 +50,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddOptions<OperatorOptions>()
                 .Services
-                .AddHttpClient<SmsServiceClient>()
-                .ConfigureHttpClient((sp, httpClient) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
-
-                    httpClient.BaseAddress = options.SmsBaseUrl;
-                })
-                .Services
                 .AddHttpClient<ValidateCodeServiceClient>()
                 .ConfigureHttpClient((sp, httpClient) =>
                 {
@@ -66,10 +59,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
                 .Services
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
-                .AddTransient<ISmsServiceClient>(sp => sp.GetRequiredService<SmsServiceClient>())
                 .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
-                .AddMail();
+                .AddMail()
+                .AddSmsClient((sp, httpClient) =>
+                {
+                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+                    httpClient.BaseAddress = options.SmsBaseUrl;
+                });
 
             var opConfiguration = new OperatorConfiguration(services);
 

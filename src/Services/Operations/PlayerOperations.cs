@@ -37,6 +37,8 @@ namespace TGS.Services.Operations
 
         Task UpdatePlayerAsync(UpdatePlayerData data);
 
+        Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn);
+
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
 
         Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data);
@@ -241,6 +243,12 @@ namespace TGS.Services.Operations
         public async Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
         {
             await _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+        }
+
+        public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
+        {
+            await _playerCommands.SetPhoneAsync(playerCode, phone, updatedOn);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 

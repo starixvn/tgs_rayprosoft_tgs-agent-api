@@ -4,6 +4,6 @@
     {
         string GenerateCode();
 
-        string GenerateToken();
+        string GenerateSecurityKey();
     }
 }
