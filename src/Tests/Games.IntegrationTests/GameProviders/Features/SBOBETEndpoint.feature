@@ -68,8 +68,8 @@ Scenario: 02.f - Real player cannot place bet with game provider configuration w
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeGameProviderConfigurationStatus
-Scenario: 02.g - TGS Test player can place bet with game provider configuration with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "TGS" login via "Desktop"	
+Scenario: 02.g - Test player can place bet with game provider configuration with maintenance status
+	Given player "TP01_cny" of brand "GPI" with "GPI" login via "Desktop"	
 		And player having balance of $100
 	Given game provider configuration has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -87,8 +87,8 @@ Scenario: 02.h - Real player cannot place bet with game with maintenance status
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeGameStatus
-Scenario: 02.i - TGS Test player place bet with game with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "TGS" login via "Desktop"	
+Scenario: 02.i - Test player place bet with game with maintenance status
+	Given player "TP01_cny" of brand "GPI" with "GPI" login via "Desktop"	
 		And player having balance of $100
 	Given game "1_1" has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -106,8 +106,8 @@ Scenario: 02.j - Real player cannot place bet with brand with maintenance status
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeBrandStatus
-Scenario: 02.k - GPI Test player place bet with brand with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"	
+Scenario: 02.k - TGS Test player place bet with brand with maintenance status
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"	
 		And player having balance of $100
 	Given brand has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -115,6 +115,12 @@ Scenario: 02.k - GPI Test player place bet with brand with maintenance status
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
 		And game platform will be recorded in the database of type "Desktop"
+
+Scenario: 02.l - Player cannot place bet with unknown game
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	When I place bet of $10 for game "1_0"
+	Then I will receive bet response of error "SystemError"
 
 Scenario: 03.a - Win bet
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -208,7 +214,7 @@ Scenario: 03.g - Resend win bet
 	Then I will receive settle bet response of error "BetAlreadySettled"
 
 Scenario: 03.h - Win bet with unknown game
-	Given player "RP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
 		And balance now being $90
@@ -493,7 +499,7 @@ Scenario: 06.g - Resend cancel bet
 	Then I will receive cancel bet response of error "BetAlreadyCanceled"
 
 Scenario: 06.h - Cancel bet with unknown game
-	Given player "RP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
 		And balance now being $90
@@ -604,7 +610,7 @@ Scenario: 07.g - Resend cancel bet of void round
 	Then I will receive cancel bet response of error "BetAlreadyCanceled"
 
 Scenario: 07.h - Void round with unknown game
-	Given player "RP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
 		And balance now being $90
