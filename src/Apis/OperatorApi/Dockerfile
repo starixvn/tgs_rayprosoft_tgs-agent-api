@@ -7,6 +7,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 ARG BuildConfiguration=Release
+RUN --mount=type=secret,id=nuget,dst=/pat cp /pat ~/.nuget/NuGet/NuGet.Config
+RUN dotnet nuget remove source 'Microsoft Visual Studio Offline Packages' || true
+RUN dotnet nuget list source
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["src/Apis/OperatorApi/OperatorApi.csproj", "src/Apis/OperatorApi/"]
