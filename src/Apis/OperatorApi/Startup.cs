@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
+using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices.Report.Extensions;
@@ -121,10 +122,12 @@ namespace TGS.Apis.OperatorApi
 
                     c.OperationFilter<SwaggerHeaderFilter>();
                     c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+                    c.OperationFilter<TgsDocFixer>();
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);
-                    c.IncludeXmlComments(path);
+                    if (File.Exists(path))
+                        c.IncludeXmlComments(path);
                 });
             }
 
@@ -140,11 +143,14 @@ namespace TGS.Apis.OperatorApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
+
+            services.AddSingleton<OperatorApiErrorMapper>();
         }
 
         public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
+            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
 
             app.UseRequestLocalization(options =>
             {

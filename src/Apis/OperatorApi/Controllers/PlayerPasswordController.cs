@@ -35,6 +35,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [TgsResponseAdjustment]
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
@@ -53,23 +54,14 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
-        [ProducesErrorResponseType(typeof(void))]
-        public async ValueTask<IActionResult> ResetPasswordAsync(
+        [TgsResponseAdjustment]
+        public async ValueTask ResetPasswordAsync(
             [FromServices] ICommandService<ResetPasswordCommand> resetService,
             [FromBody] ResetPasswordRequest request)
         {
-            try
-            {
-                await resetService
-                    .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
-                    .ConfigureAwait(false);
-
-                return Ok();
-            }
-            catch (ValidateCodeNotVerifyException)
-            {
-                return StatusCode(StatusCodes.Status406NotAcceptable, null);
-            }
+            await resetService
+                .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
+                .ConfigureAwait(false);
         }
     }
 }
