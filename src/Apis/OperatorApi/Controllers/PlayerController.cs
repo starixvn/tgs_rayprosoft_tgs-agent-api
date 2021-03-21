@@ -67,16 +67,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(new GetPlayerRequest());
 
         /// <summary>
-        /// Update player information, player login is needed when use this
-        /// </summary>
-        [HttpPut]
-        [Route("update")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) =>
-            _mediator.Send(request);
-
-        /// <summary>
         /// Sets the qq number.
         /// </summary>
         /// <param name="setQqService">The set qq service.</param>
