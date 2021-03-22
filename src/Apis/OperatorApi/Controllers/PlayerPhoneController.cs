@@ -10,7 +10,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/player/phone")]
     [ApiController]
     public class PlayerPhoneController : ControllerBase
     {
