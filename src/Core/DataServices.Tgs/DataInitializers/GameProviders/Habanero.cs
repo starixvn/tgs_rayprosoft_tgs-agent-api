@@ -17,10 +17,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         internal record HabaneroGameProvider : IGameProvider
         {
             private const int UniqueId = 2;
-            private readonly IWebHostEnvironment _env;
-            private readonly IGame[] _games;
 
             private static readonly string EndpointPath = "?brandId={BRANDID}&token={TOKEN}&locale={CULTURE}&mode=real";
+            private readonly IWebHostEnvironment _env;
+            private readonly IGame[] _games;
 
             public HabaneroGameProvider(IWebHostEnvironment env)
             {
@@ -32,7 +32,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game) g with {EndpointPath = EndpointPath};
+                        return (Game)g with {EndpointPath = EndpointPath};
                     })
                     .ToArray();
 
@@ -52,20 +52,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"),
-                new VNDCurrency("VND"), new IDRCurrency("IDR"),
-                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"),
-                new JPYCurrency("JPY"), new KRWCurrency("KRW"),
-                new MYRCurrency("MYR"), new THBCurrency("THB"),
-                new GBPCurrency("GBP")
+                new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"), new IDRCurrency("IDR"),
+                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"), new MYRCurrency("MYR"), new THBCurrency("THB"), new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-CN"),
-                new IDLanguage("id"), new JPLanguage("ja"),
-                new KRLanguage("ko"), new THLanguage("th"),
-                new VNLanguage("vi"), new TWLanguage("zh-TW")
+                new USLanguage("en"), new CNLanguage("zh-CN"), new IDLanguage("id"), new JPLanguage("ja"),
+                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vi"), new TWLanguage("zh-TW")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -84,7 +79,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     BrandId = "a5df0ada-7b6a-eb11-9889-00155db5435a",
                     ApiKey = "349F896E-DBC8-4A9D-963D-EFC921AD19FC",
                     ApiUrl = new("https://ws-test.insvr.com/jsonapi"),
-                    BetHistoryUrl = new("https://app-test.insvr.com")
+                    BetHistoryUrl = new("https://app-test.insvr.com"),
+                    DelaySecondsForPlaceBet = 0
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

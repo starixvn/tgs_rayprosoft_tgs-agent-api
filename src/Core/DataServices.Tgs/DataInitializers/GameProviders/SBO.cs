@@ -94,8 +94,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new("http://game-sbo") : new Uri("http://localhost:62330"),
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
-                    EnableCancelFailedTransactionsJob = true,
-                    DelaySecondsForDeduct = 0
+                    EnableCancelFailedTransactionsJob = false,
+                    DelaySecondsForPlaceBet = 0
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new()

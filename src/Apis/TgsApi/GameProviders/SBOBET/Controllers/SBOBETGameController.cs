@@ -49,51 +49,56 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 
         [HttpPost]
         [Route("GetBalance")]
-        public async Task<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
+        public async ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
         {
-            var r = await _actions.GetBalanceAsync(GameProviderConst.SBOBET, request.PlayerCode);
+            var r = await _actions.GetBalanceAsync(GameProviderConst.SBOBET, request.PlayerCode)
+                .ConfigureAwait(false);
+
             return _map.Response(request.PlayerCode, r);
         }
 
         [HttpPost]
         [Route("Deduct")]
-        public async Task<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
+        public async ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
         {
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
-                    .GameProviderConfigurations.SBOBET);
+                await _settingOperations
+                    .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET)
+                    .ConfigureAwait(false);
 
-            if (configuration.DelaySecondsForDeduct > 0)
+            if (configuration.DelaySecondsForPlaceBet > 0)
             {
-                await Task.Delay(configuration.DelaySecondsForDeduct * 1000);
+                await Task.Delay(configuration.DelaySecondsForPlaceBet * 1000).ConfigureAwait(false);
             }
 
-            var data = await _services.GetGameProviderConfigurationDataAsync();
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
 
             var betData = _map.Request(data, request);
-            var r = await _actions.PlaceBetAsync(betData);
+            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r);
         }
 
         [HttpPost]
         [Route("Settle")]
-        public async Task<SettleBetResponse> SettleBetAsync(SettleBetRequest request)
+        public async ValueTask<SettleBetResponse> SettleBetAsync(SettleBetRequest request)
         {
             var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet};
 
-            var data = await _services.GetGameProviderConfigurationDataAsync();
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
             var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalTransactionId;
-
             var playerCode = request.PlayerCode;
-            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
 
-            var roundStatus = await _services.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
-            var gameActionExternalIds = await _services.GetGameActionExternalIdsAsync(gameProviderId,
-                playerCode, externalRoundId, gameId, actionTypes);
+            var (roundStatus, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode, externalRoundId,
+                    request.ExternalGameId, request.GameType).ConfigureAwait(false);
+
+            var gameActionExternalIds = await _services
+                .GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, actionTypes)
+                .ConfigureAwait(false);
 
             var betData = _map.Request(data, externalRoundId, request, roundStatus, gameActionExternalIds);
-            var r = await _actions.SettleBetAsync(betData);
+            var r = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r);
         }
 
@@ -102,13 +107,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         /// </summary>
         [HttpPost]
         [Route("Cancel")]
-        public async Task<CancelBetResponse> CancelBetAsync(CancelBetRequest request)
+        public async ValueTask<CancelBetResponse> CancelBetAsync(CancelBetRequest request)
         {
-            var data = await _services.GetGameProviderConfigurationDataAsync();
-            Func<GameProviderConfigurationData, CancelBetRequest, Task<CancelBetResponse>> func =
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+            Func<GameProviderConfigurationData, CancelBetRequest, ValueTask<CancelBetResponse>> func =
                 request.IsCancelAll ? VoidRoundAsync : CancelBetAsync;
 
-            return await func(data, request);
+            return await func(data, request).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -116,37 +121,45 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
         /// </summary>
         [HttpPost]
         [Route("Rollback")]
-        public async Task<RollbackResponse> RollbackAsync(RollbackRequest request)
+        public async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
         {
             var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet, CancelTransaction};
 
-            var data = await _services.GetGameProviderConfigurationDataAsync();
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+            var playerCode = request.PlayerCode;
             var externalRoundId = request.ExternalTransactionId;
-
             var gameProviderId = data.GameProviderId;
-            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
+
+            var (_, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode, externalRoundId,
+                    request.ExternalGameId, request.GameType).ConfigureAwait(false);
 
             var gameActionExternalIds =
-                await _services.GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId,
-                    gameId, actionTypes);
+                await _services
+                    .GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId, gameId,
+                        actionTypes).ConfigureAwait(false);
 
             var betData = _map.Request(data, request, gameActionExternalIds);
-            var r = await _actions.CancelTransactionAsync(betData);
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r);
         }
 
         [HttpPost]
         [Route("GetBetStatus")]
-        public async Task<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
+        public async ValueTask<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
         {
-            var data = await _services.GetGameProviderConfigurationDataAsync();
-
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+            var externalRoundId = request.ExternalRoundId;
+            var playerCode = request.PlayerCode;
             var gameProviderId = data.GameProviderId;
-            var gameId = await _services.GetGameIdAsync(gameProviderId, request.ExternalGameId, data.PlatformType);
 
-            var ga = await _services.GetValidGameActionsAsync(gameProviderId, request.PlayerCode,
-                request.ExternalRoundId,
-                gameId);
+            var (_, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode, externalRoundId,
+                    request.ExternalGameId, request.GameType).ConfigureAwait(false);
+
+            var ga = await _services
+                .GetValidGameActionsAsync(gameProviderId, request.PlayerCode, request.ExternalRoundId, gameId)
+                .ConfigureAwait(false);
 
             if (ga == null)
             {
@@ -160,28 +173,28 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 
         #region Private Methods
 
-        private async Task<CancelBetResponse> CancelBetAsync(GameProviderConfigurationData data,
+        private async ValueTask<CancelBetResponse> CancelBetAsync(GameProviderConfigurationData data,
             CancelBetRequest request)
         {
             var betData = _map.Request(data, request);
-            var r = await _actions.CancelTransactionAsync(betData);
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r);
         }
 
-        private async Task<CancelBetResponse> VoidRoundAsync(GameProviderConfigurationData data,
+        private async ValueTask<CancelBetResponse> VoidRoundAsync(GameProviderConfigurationData data,
             CancelBetRequest request)
         {
             var gameProviderId = data.GameProviderId;
             var externalRoundId = request.ExternalRoundId;
-
             var playerCode = request.PlayerCode;
-            var gameId = await _services.GetGameIdAsync(data.GameProviderId, request.ExternalGameId, data.PlatformType);
 
-            var roundStatus =
-                await _services.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
+            var (roundStatus, gameId) =
+                await _services.GetRoundStatusAndGameIdAsync(gameProviderId, data, playerCode, externalRoundId,
+                    request.ExternalGameId, request.GameType).ConfigureAwait(false);
 
             var gameActionExternalIds =
-                await _services.GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId);
+                await _services.GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId)
+                    .ConfigureAwait(false);
 
             if (roundStatus == RoundStatus.Closed && gameActionExternalIds.Length == 0)
             {
@@ -189,7 +202,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             }
 
             var betData = _map.Request(data, request, gameActionExternalIds);
-            var r = await _actions.CancelTransactionAsync(betData);
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r);
         }
 

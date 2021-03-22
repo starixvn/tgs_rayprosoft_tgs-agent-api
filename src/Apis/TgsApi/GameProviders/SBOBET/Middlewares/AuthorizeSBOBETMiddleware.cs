@@ -17,8 +17,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 {
     public sealed class AuthorizeSBOBETMiddleware : IMiddleware
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
@@ -63,9 +63,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             }
             else
             {
+                var gamePlatforms = games.Length == 0
+                    ? new[] {PlatformType.Desktop, PlatformType.Mobile}
+                    : games.Select(g => g.PlatformType).ToArray();
+
                 var loginRecords = await _playerOperations.GetPlayerEnabledLoginRecordsAsync(playerCode);
                 platformType = (from rec in loginRecords
-                                join g in games on rec.PlatformType equals g.PlatformType
+                                join p in gamePlatforms on rec.PlatformType equals p
                                 orderby rec.ExpiredOn descending
                                 select rec.PlatformType)
                     .DefaultIfEmpty(PlatformType.Desktop)

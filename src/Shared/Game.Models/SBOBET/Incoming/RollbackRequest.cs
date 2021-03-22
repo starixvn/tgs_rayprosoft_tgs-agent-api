@@ -1,10 +1,6 @@
-﻿using System.Text.Json.Serialization;
-
-namespace TGS.Shared.Game.Models.SBOBET.Incoming
+﻿namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record RollbackRequest : BaseRequest
+    public record RollbackRequest : TransactionRequest
     {
-        [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; init; }
     }
 }

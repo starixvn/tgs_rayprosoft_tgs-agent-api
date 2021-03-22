@@ -37,7 +37,7 @@ namespace TGS.Services.GameOperations.Data
                     InvalidGameActionErrorCode.RoundNotFound);
             }
 
-            if (!s.HasExtGameId)
+            if (s.GameActionType.IsOneOf(LockAmount, PlaceBet, UnlockAmount) && !s.HasExtGameId)
             {
                 throw new InvalidGameActionException(
                     $"Missing game external id for '{s.PlatformType}' of provider config with id={s.GameProviderConfigurationId}",

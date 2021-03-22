@@ -3,11 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record PlaceBetRequest : BaseRequest
+    public record PlaceBetRequest : TransactionRequest
     {
-        [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; init; }
-
         [JsonPropertyName("transactionId")]
         public string ExternalRoundId { get; init; }
 

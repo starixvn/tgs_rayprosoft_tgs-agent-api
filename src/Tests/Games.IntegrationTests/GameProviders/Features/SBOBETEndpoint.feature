@@ -68,8 +68,8 @@ Scenario: 02.f - Real player cannot place bet with game provider configuration w
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeGameProviderConfigurationStatus
-Scenario: 02.g - TGS Test player can place bet with game provider configuration with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "TGS" login via "Desktop"	
+Scenario: 02.g - Test player can place bet with game provider configuration with maintenance status
+	Given player "TP01_cny" of brand "GPI" with "GPI" login via "Desktop"	
 		And player having balance of $100
 	Given game provider configuration has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -87,8 +87,8 @@ Scenario: 02.h - Real player cannot place bet with game with maintenance status
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeGameStatus
-Scenario: 02.i - TGS Test player place bet with game with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "TGS" login via "Desktop"	
+Scenario: 02.i - Test player place bet with game with maintenance status
+	Given player "TP01_cny" of brand "GPI" with "GPI" login via "Desktop"	
 		And player having balance of $100
 	Given game "1_1" has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -106,8 +106,8 @@ Scenario: 02.j - Real player cannot place bet with brand with maintenance status
 	Then I will receive bet response of error "UnderMaintenance"
 
 @ChangeBrandStatus
-Scenario: 02.k - GPI Test player place bet with brand with maintenance status
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"	
+Scenario: 02.k - TGS Test player place bet with brand with maintenance status
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"	
 		And player having balance of $100
 	Given brand has status set to "Maintenance"
 	When I place bet of $10 for game "1_1"
@@ -115,6 +115,12 @@ Scenario: 02.k - GPI Test player place bet with brand with maintenance status
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
 		And game platform will be recorded in the database of type "Desktop"
+
+Scenario: 02.l - Player cannot place bet with unknown game
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	When I place bet of $10 for game "1_0"
+	Then I will receive bet response of error "SystemError"
 
 Scenario: 03.a - Win bet
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -206,6 +212,18 @@ Scenario: 03.g - Resend win bet
 		And balance now being $105
 	When I resend the win bet
 	Then I will receive settle bet response of error "BetAlreadySettled"
+
+Scenario: 03.h - Win bet with unknown game
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	When I win bet for game "1_0" for $15 
+	Then I will receive settle bet response of no error and balance of $105
+		And player wallet database record will be for $105
+		And game action will be recorded in the database of type "WinBet" for $15
+		And game platform will be recorded in the database of type "Desktop"
+		And the round will be closed
 
 Scenario: 04.a - Lose bet
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -480,6 +498,18 @@ Scenario: 06.g - Resend cancel bet
 	When I resend cancel transaction
 	Then I will receive cancel bet response of error "BetAlreadyCanceled"
 
+Scenario: 06.h - Cancel bet with unknown game
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	When I cancel transaction for game "1_0"
+	Then I will receive cancel response of no error and balance of $100
+		And player wallet database record will be for $100
+		And game action will be recorded in the database of type "CancelTransaction" for $10
+		And game platform will be recorded in the database of type "Desktop"
+		And the round will be closed
+
 Scenario: 07.a - Void round
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
@@ -578,6 +608,19 @@ Scenario: 07.g - Resend cancel bet of void round
 		And balance now being $100
 	When I resend cancel transaction
 	Then I will receive cancel bet response of error "BetAlreadyCanceled"
+
+Scenario: 07.h - Void round with unknown game
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given I win bet for $10
+		And balance now being $100
+	When I cancel all transactions for game "1_0"
+	Then I will receive cancel response of no error and balance of $100
+		And player wallet database record will be for $100
+		And the round has no valid bets
+		And the round will be closed
 
 Scenario: 08.a - Cancel settlement
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -803,8 +846,20 @@ Scenario: 10.a - Get bet status of place bet
 		| status  | running |
 		| stake   | 10      |
 		| winloss | 0       |
+	
+Scenario: 10.b - Get bet status of place bet with unknown game
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And player having balance of $90
+	When I get bet status for game "1_0"
+	Then I will receive bet response of no error
+		| Field   | Value   |
+		| status  | running |
+		| stake   | 10      |
+		| winloss | 0       |
 
-Scenario: 10.b - Get bet status of win bet
+Scenario: 10.c - Get bet status of win bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
@@ -818,7 +873,21 @@ Scenario: 10.b - Get bet status of win bet
 		| stake   | 10      |
 		| winloss | 20      |
 
-Scenario: 10.c - Get bet status of lose bet
+Scenario: 10.d - Get bet status of win bet with unknown game
+	Given player "TP01_cny" of brand "TGS" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And player having balance of $90
+	Given I win bet for $20
+		And player having balance of $110
+	When I get bet status for game "1_0"
+	Then I will receive bet response of no error
+		| Field   | Value   |
+		| status  | settled |
+		| stake   | 10      |
+		| winloss | 20      |
+
+Scenario: 10.e - Get bet status of lose bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
@@ -832,7 +901,7 @@ Scenario: 10.c - Get bet status of lose bet
 		| stake   | 10      |
 		| winloss | 0       |
 
-Scenario: 10.d - Get bet status of cancel transaction
+Scenario: 10.f - Get bet status of cancel transaction
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"

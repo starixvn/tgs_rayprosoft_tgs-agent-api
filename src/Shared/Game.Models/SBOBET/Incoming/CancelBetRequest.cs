@@ -2,11 +2,8 @@
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record CancelBetRequest : BaseRequest
+    public record CancelBetRequest : TransactionRequest
     {
-        [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; init; }
-
         [JsonPropertyName("transactionId")]
         public string ExternalRoundId { get; init; }
 
