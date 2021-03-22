@@ -49,7 +49,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="GameProviders\PragmaticPlay\Middlewares\" />
     <Folder Include="GameProviders\PragmaticPlay\Services\" />
   </ItemGroup>
 
