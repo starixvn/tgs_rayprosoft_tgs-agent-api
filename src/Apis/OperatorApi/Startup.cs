@@ -29,6 +29,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
+using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
 using TGS.Services.Report.Application.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
@@ -75,6 +76,15 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("EmailSetting").Bind(options);
                 });
+
+            services
+                .AddOptions<ConstValidateCodeOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("Operator").Bind(options);
+                })
+                .Services
+                .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
             services.AddIdentityVerifiers();
 
