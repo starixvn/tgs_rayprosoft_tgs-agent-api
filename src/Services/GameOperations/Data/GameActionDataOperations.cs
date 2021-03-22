@@ -102,12 +102,12 @@ namespace TGS.Services.GameOperations.Data
                 throw new InvalidOperationException("No transactions in the request");
             }
 
-            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode).ConfigureAwait(false);
             ThrowIfPlayerDisableToPlaceBet(data.Transactions, player.Status);
 
             // TODO: validate if place bet cap amount is exceed
 
-            var brand = await _brandOperations.GetCachedBrandAsync(player.BrandId);
+            var brand = await _brandOperations.GetCachedBrandAsync(player.BrandId).ConfigureAwait(false);
 
             PlayerRelatedData playerRelatedData = new()
             {
@@ -135,23 +135,24 @@ namespace TGS.Services.GameOperations.Data
             };
 
             var gameProvider =
-                await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId);
-            var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId);
+                await _gameProviderOperations.GetCachedGameProviderAsync(data.GameProviderId).ConfigureAwait(false);
+            var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId).ConfigureAwait(false);
 
             var externalTransactionIds =
                 data.Transactions.Select(t => t.ExternalTransactionId).JoinAsStringBySemicolon();
             var transactionResult = await _transactionManager.ExecuteTransactionAsync(
-                _repoFactory,
-                IsolationLevel.RepeatableRead,
-                externalTransactionIds,
-                async r => await _processor.ExecuteAsync(new()
-                {
-                    Repository = r,
-                    BetData = data,
-                    Player = playerRelatedData,
-                    GameProvider = gameProvider,
-                    Games = games
-                }), autoDetectChangesEnabled: false);
+                    _repoFactory,
+                    IsolationLevel.RepeatableRead,
+                    externalTransactionIds,
+                    async r => await _processor.ExecuteAsync(new()
+                    {
+                        Repository = r,
+                        BetData = data,
+                        Player = playerRelatedData,
+                        GameProvider = gameProvider,
+                        Games = games
+                    }), autoDetectChangesEnabled: false)
+                .ConfigureAwait(false);
 
             return transactionResult;
         }
@@ -192,18 +193,16 @@ namespace TGS.Services.GameOperations.Data
 
                 foreach (var segment in segments)
                 {
-                    var subStates = await segment.EachAsync(
-                        degreeOfParallelism,
-                        CancellationToken.None,
+                    var subStates = await segment.EachAsync(degreeOfParallelism, CancellationToken.None,
                         () => new BatchBetPartitionState(batch.Id),
                         async (t, state, _) =>
                         {
                             var errorMapper = _errorMapperFactory(data.ErrorMapperKey);
-
-                            await ExecuteSegmentTransactionsAsync(gameProviderId, gameProviderCode,
-                                data.AutoCloseRound, data.HasCurrencyFromGameProvider, t,
-                                state, execute, errorMapper);
-                        });
+                            await ExecuteSegmentTransactionsAsync(
+                                gameProviderId, gameProviderCode,
+                                data.AutoCloseRound, data.HasCurrencyFromGameProvider,
+                                t, state, execute, errorMapper);
+                        }).ConfigureAwait(false);
 
                     states.AddRange(subStates);
                 }
@@ -229,7 +228,7 @@ namespace TGS.Services.GameOperations.Data
                 PlayerBalances = playerBalances
             };
 
-            await SaveBatchAsync(batch.Id, repo, result);
+            await SaveBatchAsync(batch.Id, repo, result).ConfigureAwait(false);
 
             return result;
         }
@@ -246,7 +245,7 @@ namespace TGS.Services.GameOperations.Data
                 var betData = MapBetData(state.BatchId, gameProviderId, gameProviderCode, autoCloseRound,
                     hasCurrencyFromGameProvider, transaction);
 
-                var betResult = await execute(betData);
+                var betResult = await execute(betData).ConfigureAwait(false);
 
                 if (betResult.Error == TgsApiError.None)
                 {
@@ -288,7 +287,7 @@ namespace TGS.Services.GameOperations.Data
             Guid gameProviderId, string externalBatchId)
         {
             var batch = await repo.GameActionBatches.FirstOrDefaultAsync(b =>
-                b.GameProviderId == gameProviderId && b.ExternalId == externalBatchId);
+                b.GameProviderId == gameProviderId && b.ExternalId == externalBatchId).ConfigureAwait(false);
 
             if (batch != null)
             {
@@ -303,9 +302,9 @@ namespace TGS.Services.GameOperations.Data
                 CreatedOn = DateTimeOffset.UtcNow,
                 Error = TgsApiError.None,
                 TransactionsCount = 0
-            });
+            }).ConfigureAwait(false);
 
-            await repo.SaveChangesAsync();
+            await repo.SaveChangesAsync().ConfigureAwait(false);
 
             return batch;
         }
@@ -375,9 +374,9 @@ namespace TGS.Services.GameOperations.Data
                 }
             };
 
-        private Task SaveBatchAsync(Guid batchId, ITgsRepository repo, BatchBetResult result)
+        private async Task SaveBatchAsync(Guid batchId, ITgsRepository repo, BatchBetResult result)
         {
-            var batch = repo.GameActionBatches.Find(batchId);
+            var batch = await repo.GameActionBatches.FindAsync(batchId).ConfigureAwait(false);
 
             if (result.Error != TgsApiError.None)
             {
@@ -400,7 +399,7 @@ namespace TGS.Services.GameOperations.Data
             }
 
             repo.GameActionBatches.Update(batch);
-            return repo.SaveChangesAsync();
+            await repo.SaveChangesAsync().ConfigureAwait(false);
         }
 
         #endregion

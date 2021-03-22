@@ -33,6 +33,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Tokens;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
@@ -206,6 +207,31 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"balance now being \$(.*)")]
         public void GivenBalanceNowBeing(decimal balance) =>
             VerifyResponseWithoutError<BaseResponse>(balance);
+
+        [Given(@"clear all redis token cache")]
+        public Task GivenClearAllRedisTokenCache()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platformType = Get<PlatformType>(SR.PlatformType);
+
+            var tokenKey = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
+            var tokenData = Get<PlayerTokenData>(tokenKey);
+
+            var manager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
+            return manager.ClearCacheByBatchAsync(new CacheKey[]
+            {
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = playerCode
+                },
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = tokenData.LoginRecordId
+                }
+            });
+        }
 
         [When(@"I request the player balance")]
         public async Task WhenIRequestThePlayerBalanceAsync()
