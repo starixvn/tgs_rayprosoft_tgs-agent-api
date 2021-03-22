@@ -8,5 +8,6 @@ namespace TGS.Core.Models.GameProviders.Settings
         public string ApiKey { get; init; }
         public Uri ApiUrl { get; init; }
         public Uri BetHistoryUrl { get; init; }
+        public int DelaySecondsForPlaceBet { get; init; }
     }
 }

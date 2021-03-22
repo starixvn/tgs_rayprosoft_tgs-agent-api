@@ -66,9 +66,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
                     .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET)
                     .ConfigureAwait(false);
 
-            if (configuration.DelaySecondsForDeduct > 0)
+            if (configuration.DelaySecondsForPlaceBet > 0)
             {
-                await Task.Delay(configuration.DelaySecondsForDeduct * 1000).ConfigureAwait(false);
+                await Task.Delay(configuration.DelaySecondsForPlaceBet * 1000).ConfigureAwait(false);
             }
 
             var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);

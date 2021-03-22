@@ -9,8 +9,10 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Services;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 
@@ -30,15 +32,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
         private readonly IGamePlayActions _actions;
         private readonly IHabaneroActionModelMapper _map;
         private readonly IHabaneroServices _services;
+        private readonly ISettingOperations _settingOperations;
 
         public HabaneroGameController(
             IGamePlayActions actions,
             IHabaneroServices services,
-            IHabaneroActionModelMapper map)
+            IHabaneroActionModelMapper map,
+            ISettingOperations settingOperations)
         {
             _actions = actions;
             _services = services;
             _map = map;
+            _settingOperations = settingOperations;
 
             _actionMapper = new Dictionary<ActionType, Func<BetData, Task<BetResult>>>
             {
@@ -79,6 +84,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
         {
             var actionType = request.Detail.ActionType;
             Request.Path = new($"{Request.Path}/{actionType.ToString().ToLower()}");
+
+            if (actionType is ActionType.PlaceBet or ActionType.PlaceAndSettleBet)
+            {
+                var configuration =
+                    await _settingOperations.GetValueFromJsonByKeyAsync<HabaneroConfiguration>(Consts.GameProvider
+                        .Habanero);
+
+                if (configuration.DelaySecondsForPlaceBet > 0)
+                {
+                    await Task.Delay(configuration.DelaySecondsForPlaceBet * 1000).ConfigureAwait(false);
+                }
+            }
 
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
