@@ -56,6 +56,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "deposit_forms",
+                schema: "dbo",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    player_code = table.Column<string>(type: "text", nullable: true),
+                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    bank_account = table.Column<string>(type: "text", nullable: true),
+                    amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    brand_payment_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_deposit_forms", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "game_providers",
                 schema: "dbo",
                 columns: table => new
@@ -2374,6 +2392,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.DropTable(
                 name: "brand_payment_vip_levels",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "deposit_forms",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210317051344_Initial")]
+    [Migration("20210322091650_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -941,6 +941,43 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_departments_reseller_id");
 
                     b.ToTable("departments");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DepositForm", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("BankAccount")
+                        .HasColumnType("text")
+                        .HasColumnName("bank_account");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("BrandPaymentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_payment_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.HasKey("Id")
+                        .HasName("pk_deposit_forms");
+
+                    b.ToTable("deposit_forms");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>
