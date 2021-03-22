@@ -16,8 +16,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record HabaneroGameProvider : IGameProvider
         {
-            private const int UniqueId = 2;
-
             private static readonly string EndpointPath = "?brandId={BRANDID}&token={TOKEN}&locale={CULTURE}&mode=real";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
@@ -65,9 +63,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             IGame[] IGameProvider.Games => _games;
 
-            bool IGameProvider.AllowKickPlayer => false;
-
-            short IGameProvider.UniqueId => UniqueId;
+            short IGameProvider.UniqueId => 2;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
@@ -90,7 +86,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         internal record HabaneroGameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _endpoint = "https://app-test.insvr.com/go.ashx";
+            private static readonly string _Endpoint = "https://app-test.insvr.com/go.ashx";
 
             Guid IGameProviderConfiguration.Id => new("92207E3A-96FA-4D90-B713-BD83F023A38B");
 
@@ -101,9 +97,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.SecretKey => "slPrV84jbxM8jIH9nUYBAndgVyjF5nU6";
 
-            string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
+            string IGameProviderConfiguration.DesktopEndpoint => _Endpoint;
 
-            string IGameProviderConfiguration.MobileEndpoint => _endpoint;
+            string IGameProviderConfiguration.MobileEndpoint => _Endpoint;
         }
     }
 }

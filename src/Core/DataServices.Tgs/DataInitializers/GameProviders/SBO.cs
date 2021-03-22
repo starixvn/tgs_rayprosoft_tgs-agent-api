@@ -16,7 +16,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record SBOGameProvider : IGameProvider
         {
-            private const int UniqueId = 1;
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -65,7 +64,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => true;
 
-            short IGameProvider.UniqueId => UniqueId;
+            short IGameProvider.UniqueId => 1;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => new GameProviderBetLimit[]
             {

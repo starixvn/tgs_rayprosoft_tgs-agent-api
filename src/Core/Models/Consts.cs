@@ -42,7 +42,7 @@ namespace TGS.Core.Models
         public static class TokenExpireSeconds
         {
             public const int PlayerLogin = 3600 * 12; // 12 hours
-            public const int Jwt = 60 * 60; // 1 hours
+            public const int Jwt = 60 * 60;           // 1 hours
         }
 
         public static class GameProvider
@@ -50,6 +50,7 @@ namespace TGS.Core.Models
             public const string RedTiger = "RT";
             public const string SBOBET = "SBO";
             public const string Habanero = "HABA";
+            public const string PragmaticPlay = "PP";
         }
 
         public static class EnvironmentVariable
