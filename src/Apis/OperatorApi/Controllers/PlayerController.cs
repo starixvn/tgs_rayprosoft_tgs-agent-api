@@ -67,22 +67,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             _mediator.Send(new GetPlayerRequest());
 
         /// <summary>
-        /// Update player information, player login is needed when use this
-        /// </summary>
-        [HttpPut]
-        [Route("update")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public Task<UpdatePlayerResponse> UpdatePlayerAsync(UpdatePlayerRequest request) =>
-            _mediator.Send(request);
-
-        /// <summary>
         /// Sets the qq number.
         /// </summary>
         /// <param name="setQqService">The set qq service.</param>
         /// <param name="request">The request.</param>
         [HttpPatch("qq")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public async Task SetQqIdAsync(
             [FromServices] ICommandService<SetQqCommand> setQqService,
             [FromBody] SetQqIdRequest request)
@@ -101,6 +92,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPatch("wechat")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public async Task SetWeChatIdAsync(
             [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
             [FromBody] SetWeChatIdRequest request)

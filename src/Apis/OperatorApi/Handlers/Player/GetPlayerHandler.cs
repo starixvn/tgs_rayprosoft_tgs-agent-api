@@ -51,7 +51,9 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                     Email = player.Email,
                     Phone = player.Phone,
                     QQ = player.QQ,
-                    Wechat = player.Wechat
+                    Wechat = player.Wechat,
+                    IsSetPayPassword = player.WithdrawPassword.Length > 0,
+                    IdentityAuthentication = player.IdentityAuthentication
                 }
             };
         }
