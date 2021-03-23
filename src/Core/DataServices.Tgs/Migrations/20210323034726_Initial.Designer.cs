@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210323014251_Initial")]
+    [Migration("20210323034726_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -990,13 +990,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_deposit_forms");
 
                     b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_deposit_forms_brand_id");
+                        .HasDatabaseName("ix_deposit_forms_brandId");
 
                     b.HasIndex("BrandPaymentId")
-                        .HasDatabaseName("ix_deposit_forms_brand_payment_id");
+                        .HasDatabaseName("ix_deposit_forms_brandPaymentId");
 
                     b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_deposit_forms_player_code");
+                        .HasDatabaseName("ix_deposit_forms_playerCode");
 
                     b.ToTable("deposit_forms");
                 });
@@ -3622,21 +3622,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DepositForm", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
-                        .WithMany("DepositForms")
+                        .WithMany()
                         .HasForeignKey("BrandId")
                         .HasConstraintName("fk_deposit_froms_brands_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "BrandPayment")
-                        .WithMany("DepositForms")
+                        .WithMany()
                         .HasForeignKey("BrandPaymentId")
                         .HasConstraintName("fk_deposit_forms_brand_payments_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithMany("DepositForms")
+                        .WithMany()
                         .HasForeignKey("PlayerCode")
                         .HasConstraintName("fk_deposit_forms_players_playerCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -4300,8 +4300,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Navigation("Departments");
 
-                    b.Navigation("DepositForms");
-
                     b.Navigation("GameProviders");
 
                     b.Navigation("Games");
@@ -4342,8 +4340,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
                     b.Navigation("BrandPaymentPlayers");
-
-                    b.Navigation("DepositForms");
 
                     b.Navigation("VipLevels");
                 });
@@ -4470,8 +4466,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Banks");
 
                     b.Navigation("BrandPaymentPlayers");
-
-                    b.Navigation("DepositForms");
 
                     b.Navigation("Letters");
 

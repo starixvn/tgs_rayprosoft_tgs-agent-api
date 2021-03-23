@@ -69,7 +69,5 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
         public virtual ICollection<BrandPaymentVipLevel> VipLevels { get; set; }
-
-        public virtual ICollection<DepositForm> DepositForms { get; set; }
     }
 }

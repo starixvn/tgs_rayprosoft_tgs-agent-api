@@ -47,7 +47,5 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<VipLevel> VipLevels { get; set; }
 
         public virtual ICollection<Department> Departments { get; set; }
-
-        public virtual ICollection<DepositForm> DepositForms { get; set; }
     }
 }

@@ -40,21 +40,30 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder
                 .HasOne(c => c.Player)
-                .WithMany(p => p.DepositForms)
+                .WithMany()
                 .HasForeignKey(c => c.PlayerCode)
                 .HasConstraintName("fk_deposit_forms_players_playerCode");
 
+            builder.HasIndex(c => c.PlayerCode)
+                .HasDatabaseName("ix_deposit_forms_playerCode");
+
             builder
                 .HasOne(c => c.Brand)
-                .WithMany(b => b.DepositForms)
+                .WithMany()
                 .HasForeignKey(c => c.BrandId)
                 .HasConstraintName("fk_deposit_froms_brands_id");
 
+            builder.HasIndex(c => c.BrandId)
+                .HasDatabaseName("ix_deposit_forms_brandId");
+
             builder
                 .HasOne(c => c.BrandPayment)
-                .WithMany(bp => bp.DepositForms)
+                .WithMany()
                 .HasForeignKey(c => c.BrandPaymentId)
                 .HasConstraintName("fk_deposit_forms_brand_payments_id");
+
+            builder.HasIndex(c => c.BrandPaymentId)
+                .HasDatabaseName("ix_deposit_forms_brandPaymentId");
         }
     }
 }

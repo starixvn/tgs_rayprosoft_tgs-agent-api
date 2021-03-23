@@ -2069,19 +2069,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "reseller_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_deposit_forms_brand_id",
+                name: "ix_deposit_forms_brandId",
                 schema: "dbo",
                 table: "deposit_forms",
                 column: "brand_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_deposit_forms_brand_payment_id",
+                name: "ix_deposit_forms_brandPaymentId",
                 schema: "dbo",
                 table: "deposit_forms",
                 column: "brand_payment_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_deposit_forms_player_code",
+                name: "ix_deposit_forms_playerCode",
                 schema: "dbo",
                 table: "deposit_forms",
                 column: "player_code");
@@ -2388,6 +2388,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "whitelists",
                 column: "reseller_id");
+
+            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
