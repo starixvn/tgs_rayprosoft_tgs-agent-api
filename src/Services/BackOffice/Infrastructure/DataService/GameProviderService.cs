@@ -60,7 +60,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.PlaceBetTimeout = request.PlaceBetTimeout;
             gameProvider.SettleBetTimeout = request.SettleBetTimeout;
             gameProvider.Description = request.Description;
-            gameProvider.UpdatedByUsername = request.Username;
+            gameProvider.UpdatedByUsername = request.EditorUsername;
             gameProvider.UpdatedOn = DateTimeOffset.Now;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
@@ -81,7 +81,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task IGameProviderService.ChangeStatusAsync(GameProvider gameProvider, UpdateGameProviderStatusRequest request)
         {
             gameProvider.Status = request.Status;
-            gameProvider.UpdatedByUsername = request.Username;
+            gameProvider.UpdatedByUsername = request.EditorUsername;
             gameProvider.UpdatedOn = DateTimeOffset.Now;
 
             return UpdateEntityAsync(gameProvider);
@@ -101,8 +101,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 SettleBetTimeout = request.SettleBetTimeout,
                 UniqueId = request.UniqueId,
                 Description = request.Description,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
@@ -137,8 +137,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                 Html5 = x.Html5,
                 AvailableCurrencies = x.AvailableCurrencies,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             });
@@ -169,8 +169,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                     Html5 = x.Html5,
                     AvailableCurrencies = x.AvailableCurrencies,
-                    CreatedByUsername = originGame == null ? request.Username : x.CreatedByUsername,
-                    UpdatedByUsername = originGame == null ? request.Username : x.UpdatedByUsername,
+                    CreatedByUsername = originGame == null ? request.EditorUsername : x.CreatedByUsername,
+                    UpdatedByUsername = originGame == null ? request.EditorUsername : x.UpdatedByUsername,
                     CreatedOn = originGame == null ? DateTimeOffset.Now : x.CreatedOn,
                     UpdatedOn = originGame == null ? DateTimeOffset.Now : x.UpdatedOn
                 };

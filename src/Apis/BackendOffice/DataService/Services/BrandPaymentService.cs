@@ -241,7 +241,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 Reason = payment.Reason,
                 CreatedOn = payment.UpdatedOn,
                 CreatedByUsername = payment.UpdatedByUsername,
-                Operation = AuditLogOperation.Update
+                Operation = BrandPaymentOperation.Update
             };
 
         private BrandPaymentAuditData ExchangeBrandPaymentData(BrandPayment payment) =>

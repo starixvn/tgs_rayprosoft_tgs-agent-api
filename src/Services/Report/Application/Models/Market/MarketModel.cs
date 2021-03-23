@@ -4,7 +4,6 @@ namespace TGS.Services.Report.Application.Models.Market
 {
     public class MarketModel
     {
-        public Guid BrandId { get; set; }
         public DateTimeOffset ReportDate { get; set; }
         public int RegisteredCount { get; set; }
         public int FirstFundInCount { get; set; }

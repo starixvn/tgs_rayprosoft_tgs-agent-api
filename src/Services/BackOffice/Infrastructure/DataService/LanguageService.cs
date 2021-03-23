@@ -58,8 +58,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CultureCode = request.CultureCode,
                 LanguageCode = request.LanguageCode,
                 LocalizedName = request.LocalizedName,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };

@@ -35,8 +35,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 MinBet = request.MinBet,
                 MaxBet = request.MaxBet,
                 MaxBetPerMatch = request.MaxBetPerMatch,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
@@ -54,7 +54,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             betLimit.MinBet = request.MinBet;
             betLimit.MaxBet = request.MaxBet;
             betLimit.MaxBetPerMatch = request.MaxBetPerMatch;
-            betLimit.UpdatedByUsername = request.Username;
+            betLimit.UpdatedByUsername = request.EditorUsername;
             betLimit.UpdatedOn = DateTimeOffset.Now;
 
             return UpdateEntityAsync(betLimit);

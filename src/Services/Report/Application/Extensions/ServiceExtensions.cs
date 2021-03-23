@@ -10,8 +10,12 @@ namespace TGS.Services.Report.Application.Extensions
         public static IServiceCollection AddReportServices(this IServiceCollection services)
         {
             services.AddMediatR(Assembly.GetExecutingAssembly());
-            services.AddTransient<IMarketService, MarketService>();
-            services.AddTransient<IRoundService, RoundService>();
+            services.AddTransient<ITgsPlayerService, TgsPlayerService>();
+            services.AddTransient<ITgsRoundService, TgsRoundService>();
+            services.AddTransient<ITgsAgentService, TgsAgentService>();
+            services.AddTransient<IPlayerAggregateService, PlayerAggregateService>();
+            services.AddTransient<IPlayerGameTypeAggregateService, PlayerGameTypeAggregateService>();
+            services.AddTransient<IRoundAggregateService, RoundAggregateService>();
 
             return services;
         }

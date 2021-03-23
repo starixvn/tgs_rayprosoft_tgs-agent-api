@@ -12,9 +12,9 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
 {
     internal class GetMarketsQueryHandler : Handler<GetMarketsRequest, PagedResponse<MarketModel>>
     {
-        private readonly IMarketService _service;
+        private readonly IPlayerAggregateService _service;
 
-        public GetMarketsQueryHandler(IMarketService service, IHttpContextAccessor accessor) :
+        public GetMarketsQueryHandler(IPlayerAggregateService service, IHttpContextAccessor accessor) :
             base(accessor)
         {
             _service = service;
@@ -32,26 +32,33 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
             DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,
                 requestTo.Offset);
 
-            return _service.GetMarketsAsync()
-                .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ReportDate >= from && x.ReportDate < to)
-                .GroupBy(x => new {x.BrandId, x.ReportDate}, (market, markets) =>
+            var dates = Enumerable.Range(0, 1 + to.Subtract(from).Days)
+                .Select(x => from.AddDays(x))
+                .ToArray();
+
+            return dates.GroupJoin(_service.GetPlayerAggregateQueries()
+                        .Where(x => x.BrandId == request.BrandId)
+                        .Where(x => x.ReportDate >= from && x.ReportDate < to), date => date,
+                    market => market.ReportDate,
+                    (date, markets) => new {date, markets})
+                .SelectMany(x => x.markets.DefaultIfEmpty(),
+                    (x, market) => new {ReportDate = x.date, market})
+                .GroupBy(x => new {x.ReportDate}, (market, markets) =>
                     new MarketModel
                     {
-                        BrandId = market.BrandId,
                         ReportDate = market.ReportDate,
-                        RegisteredCount = markets.Sum(m => m.RegisteredCount),
-                        FirstFundInCount = markets.Sum(m => m.FirstFundInCount),
-                        DepositAmount = markets.Sum(m => m.DepositAmount),
-                        WithdrawalAmount = markets.Sum(m => m.WithdrawalAmount),
-                        AdjustmentAmount = markets.Sum(m => m.AdjustmentAmount),
-                        BonusAmount = markets.Sum(m => m.BonusAmount),
-                        BetAmount = markets.Sum(m => m.BetAmount),
-                        ValidBetAmount = markets.Sum(m => m.ValidBetAmount),
-                        WinLossAmount = markets.Sum(m => m.WinLossAmount),
-                        NetProfit = markets.Sum(m => m.NetProfit)
+                        RegisteredCount = markets.Sum(m => m.market?.RegisteredCount ?? 0),
+                        FirstFundInCount = markets.Sum(m => m.market?.FirstFundInCount ?? 0),
+                        DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
+                        WithdrawalAmount = markets.Sum(m => m.market?.WithdrawalAmount ?? 0),
+                        AdjustmentAmount = markets.Sum(m => m.market?.AdjustmentAmount ?? 0),
+                        BonusAmount = markets.Sum(m => m.market?.BonusAmount ?? 0),
+                        BetAmount = markets.Sum(m => m.market?.BetAmount ?? 0),
+                        ValidBetAmount = markets.Sum(m => m.market?.ValidBetAmount ?? 0),
+                        WinLossAmount = markets.Sum(m => m.market?.WinLossAmount ?? 0),
+                        NetProfit = markets.Sum(m => m.market?.NetProfit ?? 0)
                     })
-                .CreatePagedResponseAsync(request);
+                .CreatePagedResponseAsync(dates.Length);
         }
     }
 }

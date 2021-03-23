@@ -79,8 +79,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CardGameRebate = request.CardGameRebate,
                 SportsRebate = request.SportsRebate,
                 VirtualSportsRebate = request.VirtualSportsRebate,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                        CreatedByUsername = request.EditorUsername,
+                        UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
