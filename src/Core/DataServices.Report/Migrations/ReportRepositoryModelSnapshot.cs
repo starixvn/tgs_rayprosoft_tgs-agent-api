@@ -20,7 +20,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.2");
 
-            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.Market", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PlayerAggregate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,6 +32,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("adjustment_amount");
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
 
                     b.Property<decimal>("BetAmount")
                         .HasPrecision(18, 6)
@@ -69,6 +73,12 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
                     b.Property<int>("RegisteredCount")
                         .HasColumnType("integer")
                         .HasColumnName("registered_count");
@@ -93,13 +103,219 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnName("withdrawal_amount");
 
                     b.HasKey("Id")
-                        .HasName("pk_markets");
+                        .HasName("pk_player_aggregates_id");
 
-                    b.HasIndex("BrandId", "Hour", "ReportDate")
-                        .IsUnique()
-                        .HasDatabaseName("ix_markets_brand_id_hour_report_date");
+                    b.HasIndex("BrandId", "ReportDate")
+                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date");
 
-                    b.ToTable("markets");
+                    b.HasIndex("BrandId", "ReportDate", "AgentId")
+                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_agent_id");
+
+                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
+                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_player_code");
+
+                    b.ToTable("player_aggregates");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PlayerGameTypeAggregate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<decimal>("CardGameAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_amount");
+
+                    b.Property<decimal>("CardGameRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_rebate");
+
+                    b.Property<decimal>("CardGameValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_valid_bet_amount");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<decimal>("LiveDealerAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_amount");
+
+                    b.Property<decimal>("LiveDealerRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_rebate");
+
+                    b.Property<decimal>("LiveDealerValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_valid_bet_amount");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("SlotAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_amount");
+
+                    b.Property<decimal>("SlotRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_rebate");
+
+                    b.Property<decimal>("SlotValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_valid_bet_amount");
+
+                    b.Property<decimal>("SportsAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_amount");
+
+                    b.Property<decimal>("SportsRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_rebate");
+
+                    b.Property<decimal>("SportsValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_valid_bet_amount");
+
+                    b.Property<decimal>("VirtualSportsAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_amount");
+
+                    b.Property<decimal>("VirtualSportsRebate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_rebate");
+
+                    b.Property<decimal>("VirtualSportsValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_valid_bet_amount");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_game_type_rebate_aggregates_id");
+
+                    b.HasIndex("BrandId", "ReportDate")
+                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date");
+
+                    b.HasIndex("BrandId", "ReportDate", "AgentId")
+                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_agent_id");
+
+                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
+                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_player_code");
+
+                    b.ToTable("player_game_type_rebate_aggregates");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.RoundAggregate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("BetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bet_amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("Turnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover");
+
+                    b.Property<decimal>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
+
+                    b.Property<decimal>("WinLoss")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("win_loss");
+
+                    b.HasKey("Id")
+                        .HasName("pk_round_aggregate_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_round_aggregate_player_code");
+
+                    b.HasIndex("ReportDate", "Hour", "Minute")
+                        .HasDatabaseName("ix_round_aggregate_multiple_keys");
+
+                    b.ToTable("round_aggregate");
                 });
 #pragma warning restore 612, 618
         }

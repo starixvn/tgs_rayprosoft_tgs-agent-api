@@ -1,0 +1,61 @@
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using TGS.Services.BackOffice.Application.Models.Agent;
+using TGS.Services.BackOffice.Application.Resources;
+using TGS.Services.BackOffice.Infrastructure.DataService;
+
+namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
+{
+    public class GetAgentQueryHandler : Handler<GetAgentRequest, GetAgentResponse>
+    {
+        private readonly IAgentService _service;
+
+        public GetAgentQueryHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
+        {
+            _service = service;
+        }
+
+        public override async Task<GetAgentResponse> Handle(GetAgentRequest request,
+            CancellationToken cancellationToken)
+        {
+            var agent = await _service.GetAgentAsync(x => x.Id == request.Id);
+
+            if (agent == null)
+            {
+                return CreateInvalidResponse<GetAgentResponse>(Agent.NotFound);
+            }
+
+            return new()
+            {
+                Valid = true,
+                Agent = new()
+                {
+                    Id = agent.Id,
+                    BrandId = agent.BrandId,
+                    Username = agent.Username,
+                    RealName = agent.RealName,
+                    Status = agent.Status,
+                    Type = agent.Type,
+                    InvitationCode = agent.InvitationCode,
+                    ParentAgentUsername = agent.ParentAgent?.Username,
+                    RegisteredOn = agent.RegisteredOn,
+                    Balance = agent.Wallets.FirstOrDefault()?.Balance ?? 0,
+                    PositionTakingPercentage = agent.PositionTakingPercentage,
+                    BonusPercentage = agent.BonusPercentage,
+                    RebatePercentage = agent.RebatePercentage,
+                    Email = agent.Email,
+                    Phone = agent.Phone,
+                    QQ = agent.QQ,
+                    Wechat = agent.Wechat,
+                    Remarks = agent.Remarks,
+                    Banks = agent.Banks.Select(b => new AgentBankModel
+                    {
+                        Id = b.Id, RealName = b.RealName, BankName = b.BankName, BankAccount = b.BankAccount
+                    }).ToArray()
+                }
+            };
+        }
+    }
+}

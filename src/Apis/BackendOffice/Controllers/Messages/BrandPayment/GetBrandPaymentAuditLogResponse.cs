@@ -38,6 +38,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
         public string Reason { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public string CreatedByUsername { get; set; }
-        public AuditLogOperation Operation { get; set; }
+        public BrandPaymentOperation Operation { get; set; }
     }
 }

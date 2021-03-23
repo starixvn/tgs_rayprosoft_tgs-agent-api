@@ -30,6 +30,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string QQ { get; set; }
         public string Wechat { get; set; }
         public bool HasAgent { get; set; }
+        public Guid? AgentId { get; set; }
+        public virtual Agent Agent { get; set; }
         public bool IdentityAuthentication { get; set; }
         public bool PhoneAuthentication { get; set; }
         public decimal AccumulatedDeposit { get; set; }

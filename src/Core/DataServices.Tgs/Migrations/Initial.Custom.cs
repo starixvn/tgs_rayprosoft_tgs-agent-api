@@ -100,6 +100,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "game_action_referenced_game_action_exists"));
 
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "report_get_round_aggregates"));
+
             #endregion Functions
 
             #region Views

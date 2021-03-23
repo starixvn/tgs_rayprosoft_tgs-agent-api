@@ -25,7 +25,7 @@ namespace TGS.Services.BackOffice.Application.Middlewares
             if (request is BaseRequest br)
             {
                 var userInfoMap = _httpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-                br.Username = userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
+                br.EditorUsername = userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
             }
 
             var result = await next();

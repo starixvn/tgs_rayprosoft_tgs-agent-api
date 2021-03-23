@@ -46,7 +46,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             brand.Status = request.Status;
             brand.UpdatedOn = DateTimeOffset.Now;
-            brand.UpdatedByUsername = request.Username;
+            brand.UpdatedByUsername = request.EditorUsername;
 
             return UpdateEntityAsync(brand);
         }
@@ -65,8 +65,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 ApiKey = _credentialGenerator.GetApiKey(),
                 ClientId = request.Code,
                 SecretKey = _credentialGenerator.GetSecretKey(),
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
@@ -93,7 +93,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.Name = request.Name;
             brand.Description = request.Description;
             brand.OperationalEmail = request.OperationalEmail;
-            brand.UpdatedByUsername = request.Username;
+            brand.UpdatedByUsername = request.EditorUsername;
             brand.UpdatedOn = DateTimeOffset.Now;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
@@ -178,8 +178,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                               BrandGames = GenerateBrandGroupGames(brand, id, gameIds),
                               BrandGroupBetLimits =
                                   GenerateBrandGroupBetLimits(brand, id, type == BrandGroupType.Sports),
-                              CreatedByUsername = request.Username,
-                              UpdatedByUsername = request.Username,
+                    CreatedByUsername = request.EditorUsername,
+                    UpdatedByUsername = request.EditorUsername,
                               CreatedOn = DateTimeOffset.Now,
                               UpdatedOn = DateTimeOffset.Now
                           }).ToList();
@@ -218,8 +218,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BrandId = brand.Id,
                     Description = x.Description,
                     IsSports = x.IsSports,
-                    CreatedByUsername = request.Username,
-                    UpdatedByUsername = request.Username,
+                    CreatedByUsername = request.EditorUsername,
+                    UpdatedByUsername = request.EditorUsername,
                     CreatedOn = DateTimeOffset.Now,
                     UpdatedOn = DateTimeOffset.Now
                 };

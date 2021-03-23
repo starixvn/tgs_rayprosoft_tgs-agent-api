@@ -68,11 +68,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             _passwordHandler = new PasswordHandler(hashProvider);
             _jsonSerializationProvider = new JsonSerializationProvider();
 
-            _gameProviders = new IGameProvider[]
-            {
-                new SBOGameProvider(env),
-                new HabaneroGameProvider(env)
-            };
+            _gameProviders = new IGameProvider[] {new SBOGameProvider(env), new HabaneroGameProvider(env)};
         }
 
         protected override async Task SetInitialDataAsync()
@@ -92,7 +88,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await LogSeedingTimeAsync(GenerateBetLimitsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateGameProvidersAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateResellersWithDescendantsAsync, logBuilder);
-            await LogSeedingTimeAsync(GenerateVipLevelAsync, logBuilder);
+            await LogSeedingTimeAsync(GenerateVipLevelsAsync, logBuilder);
+            await LogSeedingTimeAsync(GenerateAgentsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateSettingsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateLocalizedStringsAsync, logBuilder);
             await LogSeedingTimeAsync(GeneratePlayersAsync, logBuilder);
@@ -128,7 +125,35 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             return _repository.BulkInsertAsync(currencies);
         }
 
-        private Task GenerateVipLevelAsync()
+        private async Task GenerateAgentsAsync()
+        {
+            var brands = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+                .Distinct()
+                .Select(brand => brand)
+                .ToArray();
+
+            var agents = new List<Agent>();
+            foreach (var brand in brands)
+            {
+                var chiefId = GuidExtensions.NewSequentialGuid();
+                agents.Add(CreateAgent($"{brand.Name}Chief", Status.Active, AgentStatus.DoneForConfigurePercentage,
+                    AgentLevelType.Chief,
+                    AgentType.Cash, brand.Id, 50, 50, 50, "CNY", chiefId));
+                agents.Add(CreateAgent($"{brand.Name}Agent", Status.Active, AgentStatus.DoneForConfigurePercentage,
+                    AgentLevelType.Agent,
+                    AgentType.Cash, brand.Id, 30, 30, 30, "CNY", null,
+                    chiefId));
+                agents.Add(CreateAgent($"{brand.Name}Agent", Status.Active, AgentStatus.WaitForConfigurePercentage,
+                    AgentLevelType.Agent,
+                    AgentType.Cash, brand.Id, 0, 0, 0, "CNY", null,
+                    chiefId));
+            }
+
+            await _repository.BulkInsertAsync(agents);
+            await _repository.BulkInsertAsync(agents.SelectMany(a => a.Wallets).ToArray());
+        }
+
+        private Task GenerateVipLevelsAsync()
         {
             _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Distinct()
