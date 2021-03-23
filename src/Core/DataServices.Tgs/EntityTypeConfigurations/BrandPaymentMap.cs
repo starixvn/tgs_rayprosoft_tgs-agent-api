@@ -17,6 +17,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(50)
                 .IsRequired();
 
+            builder.Property(c => c.BankAccount)
+                .IsRequired();
+
             builder.Property(c => c.Reason)
                 .HasMaxLength(4000);
 

@@ -10,7 +10,11 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
+<<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210325095216_Initial.Designer.cs
     [Migration("20210325095216_Initial")]
+=======
+    [Migration("20210323080423_Initial")]
+>>>>>>> bfac5cb5 (在BrandPayment table加入BankAccount欄位):src/Core/DataServices.Tgs/Migrations/20210323080423_Initial.Designer.cs
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -875,6 +879,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<bool>("AllPlayers")
                         .HasColumnType("boolean")
                         .HasColumnName("all_players");
+
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_account");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")

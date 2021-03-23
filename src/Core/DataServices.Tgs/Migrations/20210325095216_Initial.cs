@@ -1249,6 +1249,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     payment_channel_id = table.Column<Guid>(type: "uuid", nullable: false),
                     transfer_type = table.Column<int>(type: "integer", nullable: false),
                     channel_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    bank_account = table.Column<string>(type: "text", nullable: false),
                     payment_status = table.Column<int>(type: "integer", nullable: false),
                     transfer_limit_from = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
                     transfer_limit_to = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),

@@ -874,6 +874,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("all_players");
 
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_account");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
