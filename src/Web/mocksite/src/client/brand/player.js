@@ -15,7 +15,7 @@ export const useBrandPlayerList = (formData) => {
               formData.brandCode
           }&currency=${formData.currency}&playertype=${playerTypeIntValue(
               formData.playerType
-          )}&page=${page}&rows=${rows}`
+          )}&page=${page}&rows=${rows}&showAll=false`
         : undefined
     let { data: result, error, ...rest } = useSWR(keys, (url) =>
         fetch(url)

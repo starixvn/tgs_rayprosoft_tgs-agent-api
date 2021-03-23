@@ -34,14 +34,16 @@ export const PlayerList = ({ brandToken }) => {
         state
     )
 
-    let currentPage = Math.ceil((result?.totalCount ?? 0) / DefaultRows)
+    let rows = DefaultRows
+    let currentPage = Math.ceil((result?.totalCount ?? 0) / rows)
     let players = result?.items ?? []
+    let numberOfPages = pageCount(state.rows, result?.totalcount)
 
     useEffect(() => {
         setState({
             ...params,
             page: 1,
-            rows: DefaultRows
+            rows
         })
     }, [params])
 
@@ -57,10 +59,11 @@ export const PlayerList = ({ brandToken }) => {
                             brandToken={brandToken}
                             currency={currency}
                             players={players}
+                            numberOfPages={numberOfPages}
                             currentPage={currentPage}
-                            onChangePage={(page) =>
-                                setState({ ...params, page, rows: DefaultRows })
-                            }
+                            onChangePage={(page) => {
+                                setState({ ...params, page, rows })
+                            }}
                         />
                     </Stack>
                 </PageWithHeader>
@@ -78,7 +81,8 @@ const PlayerTable = ({
     brandToken,
     players,
     currentPage,
-    onChangePage
+    onChangePage,
+    numberOfPages
 }) => {
     return (
         <Set orientation="vertical">
@@ -106,10 +110,19 @@ const PlayerTable = ({
             <Pagination
                 currentPage={currentPage}
                 onChangePage={onChangePage}
-                numberOfPages={DefaultRows}
+                numberOfPages={numberOfPages}
             />
         </Set>
     )
+}
+
+const pageCount = (pageSize, totalCount) => {
+    if (!pageSize) {
+        return
+    }
+
+    let numberOfPages = Math.ceil(totalCount / pageSize)
+    return numberOfPages
 }
 
 const PlayerRow = ({ player, brandCode, currency, brandToken }) => {
