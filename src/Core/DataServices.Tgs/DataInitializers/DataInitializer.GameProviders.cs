@@ -83,7 +83,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string GameRuleUrl { get; init; }
             string Description { get; init; }
             GameType GameTypeCode { get; init; }
-            PlatformType PlatformType { get; init; }
+            GamePlatformType PlatformType { get; init; }
             bool HasTurnoverOnTieBet { get; init; }
             bool SubGame { get; init; }
             bool AvailableToBrand { get; init; }
@@ -117,6 +117,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             private readonly string _availableCurrencies;
             private readonly string _code;
 
+            [Name("Platform")]
+            public GamePlatformType PlatformType { get; init; }
+
             [Name("Name")]
             public string Name { get; init; }
 
@@ -146,9 +149,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             [Name("GameType")]
             public GameType GameTypeCode { get; init; }
-
-            [Name("Platform")]
-            public PlatformType PlatformType { get; init; }
 
             [Name("HasTurnoverOnTieBet")]
             public bool HasTurnoverOnTieBet { get; init; }

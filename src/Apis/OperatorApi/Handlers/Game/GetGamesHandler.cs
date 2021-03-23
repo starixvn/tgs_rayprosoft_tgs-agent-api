@@ -92,7 +92,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
             const RedisCacheType cacheType = RedisCacheType.BrandGamesWithConditions;
             var cacheKey = brandId;
-            var field = $"{gameProviderId}:{platformType}:{currencyCode}:{(int) playerType}";
+            var field = $"{gameProviderId}:{platformType}:{currencyCode}:{(int)playerType}";
 
             var value =
                 await _cacheManger.SafeGetHashSetAsync(cacheType, cacheKey, field);
@@ -108,10 +108,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode,
                     playerType);
 
-                await _cacheManger.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
-                {
-                    new(field, _json.SerializeToString(games))
-                }, TimeSpan.FromHours(2));
+                await _cacheManger.SafeCacheHashSetAsync(cacheType, cacheKey,
+                    new HashEntry[] {new(field, _json.SerializeToString(games))}, TimeSpan.FromHours(2));
             }
 
             var types = request.Types ?? Array.Empty<GameType>();
@@ -132,10 +130,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                     };
                 }).ToArray();
 
-            return new()
-            {
-                Games = translatedGames
-            };
+            return new() {Games = translatedGames};
         }
 
         private async Task<GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
@@ -155,9 +150,10 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 }
             }
 
+            var gamePlatformTypes = GetGamePlatformTypes(platformType);
             var brandGameProviderStatus =
                 await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId) ?? Status.Active;
-            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, platformType);
+            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, gamePlatformTypes);
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId);
 
@@ -188,5 +184,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             GameStatus[] gameStatuses, GameStatus gameStatus, GameStatus brandGameStatus) =>
             statuses.Contains(gameProviderStatus) && gameStatuses.Contains(gameStatus) &&
             statuses.Contains(brandGameProviderStatus) && gameStatuses.Contains(brandGameStatus);
+
+        private static GamePlatformType[] GetGamePlatformTypes(PlatformType platformType) => platformType switch
+        {
+            PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
+            PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
+        };
     }
 }

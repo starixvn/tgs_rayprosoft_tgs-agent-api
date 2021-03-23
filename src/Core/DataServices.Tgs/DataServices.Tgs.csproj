@@ -44,7 +44,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_currencies_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_languages_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_languages_by_external_code.sql" />
-    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_game_id_maps.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_games.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_games_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Procedures\usp_GameProvider_GetGameProviderBetLimitCode.sql" />

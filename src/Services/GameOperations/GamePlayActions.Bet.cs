@@ -84,20 +84,31 @@ namespace TGS.Services.GameOperations
             if (!supported)
             {
                 throw new InvalidOperationException(
-                    $"gameProvider {data.GameProviderCode} doesn't support currency '{player.DefaultWalletCurrencyCode}'");
+                    $"GameProvider '{data.GameProviderCode}' doesn't support currency '{player.DefaultWalletCurrencyCode}'");
             }
 
             var platformType = data.PlatformType;
-            var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, platformType);
-            var subGames = await _gameProviderOperations.GetSubGameIdsAsync(gameProviderId, platformType);
 
-            var games = brandGames
-                .Select(g => new IdMap<int>
+            if (!platformType.HasValue)
+            {
+                throw new InvalidOperationException("Platform can't be empty for place bet action");
+            }
+
+            var gamePlatformTypes = GetGamePlatformTypes();
+            var brandGames =
+                await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, gamePlatformTypes);
+            var subGames = await _gameProviderOperations.GetSubGamesAsync(gameProviderId, gamePlatformTypes);
+
+            var games = brandGames.Select(g => new IdMap<int>
                 {
                     Id = g.GameId,
                     ExternalId = g.ExternalGameId
                 })
-                .Concat(subGames).Distinct()
+                .Concat(subGames.Select(s => new IdMap<int>
+                {
+                    Id = s.Id,
+                    ExternalId = s.ExternalId
+                })).Distinct()
                 .ToArray();
 
             var gameIds = games
@@ -134,6 +145,12 @@ namespace TGS.Services.GameOperations
                 throw new InvalidOperationException(
                     $"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{gameStatuses.JoinAsStringByComma()}' but game status is '{cachedGame.Status}'");
             }
+
+            GamePlatformType[] GetGamePlatformTypes() => platformType switch
+            {
+                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
+                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
+            };
         }
 
         private async Task<BetData> EnsureMappingsAsync(BetData data, string playerCurrencyCode)

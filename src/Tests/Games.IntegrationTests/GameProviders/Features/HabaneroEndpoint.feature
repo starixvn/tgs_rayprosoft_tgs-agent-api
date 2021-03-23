@@ -81,7 +81,6 @@ Scenario: 02.a - Place desktop bet
     Then I will receive bet response of no error and balance of $90
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 Scenario: 02.b - Place mobile bet
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Mobile"
@@ -90,7 +89,6 @@ Scenario: 02.b - Place mobile bet
     Then I will receive bet response of no error and balance of $90
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "PlaceBet" for $-10
-        And game platform will be recorded in the database of type "Mobile"
 
 Scenario: 02.c - Player cannot place bet without login
 	Given player "TP01_cny" of brand "GPI" without login
@@ -112,7 +110,6 @@ Scenario: 02.f - Place bet with duplicate transaction ID
     Then I will receive bet response of no error and balance of $90
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 Scenario: 02.g - Place bet using expired player token
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -306,7 +303,6 @@ Scenario: 08.g - Place bet and settle with invalid reference Id
         And #1 game action will NOT be recorded in the database
         And #2 game action will NOT be recorded in the database
 
-
 Scenario: 09.a - Query existent game action status
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
@@ -334,4 +330,3 @@ Scenario: 09.d - Query existent game action status with empty token
         And I place bet of $10 for game "AcesandEights1Hand"
     When I query bet existence without token
     Then I get "true" query result
-

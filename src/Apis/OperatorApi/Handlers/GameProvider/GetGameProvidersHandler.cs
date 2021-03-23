@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,7 +88,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
 
             const RedisCacheType cacheType = RedisCacheType.BrandGameProvidersWithConditions;
             var cacheKey = brandId;
-            var field = $"{currencyCode}:{platformType}:{(int) playerType}";
+            var field = $"{currencyCode}:{platformType}:{(int)playerType}";
             var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, field);
 
             GameProviderModel[] providers;
@@ -102,10 +101,8 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             {
                 providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
 
-                await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
-                {
-                    new(field, _json.SerializeToString(providers))
-                }, TimeSpan.FromHours(12));
+                await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey,
+                    new HashEntry[] {new(field, _json.SerializeToString(providers))}, TimeSpan.FromHours(12));
             }
 
             var translatedProviders = await providers.Select(async gpm =>
@@ -120,10 +117,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                 };
             }).WhenAll();
 
-            return new()
-            {
-                GameProviders = translatedProviders
-            };
+            return new() {GameProviders = translatedProviders};
         }
 
         private async Task<GameProviderModel[]> GetGameProviderModelsAsync(Guid brandId,
@@ -132,7 +126,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
         {
             var gameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId);
             var statuses = _validStatus.GetStatus(playerType);
-            
+
             var providers = await gameProviders
                 .Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
                 .Select(async bgp =>
@@ -147,7 +141,8 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                         return null;
                     }
 
-                    var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, platformType);
+                    var gamePlatformTypes = GetGamePlatformTypes(platformType);
+                    var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
 
                     if (games.Length == 0)
                     {
@@ -161,12 +156,19 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                         Name = gameProvider.Name,
                         Description = gameProvider.Description,
                         Status = gameProvider.Status,
-                        GameTypes = games.Select(g => g.Type).OrderBy(t => (int) t)
+                        GameTypes = games.Select(g => g.Type).OrderBy(t => (int)t)
                             .Distinct().ToArray()
                     };
                 }).WhenAll();
 
             return providers.Where(gpm => gpm != null).ToArray();
         }
+
+        private static GamePlatformType[] GetGamePlatformTypes(PlatformType platformType) =>
+            platformType switch
+            {
+                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
+                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
+            };
     }
 }

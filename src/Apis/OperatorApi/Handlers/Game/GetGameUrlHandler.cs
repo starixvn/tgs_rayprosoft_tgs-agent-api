@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
@@ -79,10 +81,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 throw new InvalidOperationException($"Game with id '{gameId}' doesn't exist");
             }
 
-            if (gamePlatformType.Value != platformType)
+            var allowedGamePlatformTypes = GetAllowedGamePlatformTypes(platformType);
+            if (!allowedGamePlatformTypes.Contains(gamePlatformType.Value))
             {
                 throw new InvalidOperationException(
-                    $"Launch game platform is expected as '{gamePlatformType.Value}' but player login as '{platformType}'");
+                    $"Launch game platform is expected as '{allowedGamePlatformTypes.JoinAsString(",")}' but player login as '{platformType}'");
             }
 
             var language =
@@ -103,5 +106,12 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 Url = r.Url
             };
         }
+
+        private static GamePlatformType[] GetAllowedGamePlatformTypes(PlatformType platformType) =>
+            platformType switch
+            {
+                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
+                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
+            };
     }
 }

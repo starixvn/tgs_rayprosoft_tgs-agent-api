@@ -6,7 +6,7 @@ namespace TGS.Core.Models.Services.Games
     public record BetData
     {
         public string PlayerCode { get; init; }
-        public PlatformType PlatformType { get; init; }
+        public PlatformType? PlatformType { get; init; }
         public string CurrencyCode { get; init; }
         public Guid GameProviderConfigurationId { get; init; }
         public Guid GameProviderId { get; init; }

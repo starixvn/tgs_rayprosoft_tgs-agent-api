@@ -19,8 +19,6 @@
         BrandGames,
         BrandGamesWithConditions,
         Games,
-        GamesByExternalId,
-        GamesByPlatform,
         SubGames,
         UsernameToPlayerCode,
         InvitationCodeToPlayerCode,

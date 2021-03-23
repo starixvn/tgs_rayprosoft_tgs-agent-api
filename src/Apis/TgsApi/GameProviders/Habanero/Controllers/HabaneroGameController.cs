@@ -88,8 +88,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
             if (actionType is ActionType.PlaceBet or ActionType.PlaceAndSettleBet)
             {
                 var configuration =
-                    await _settingOperations.GetValueFromJsonByKeyAsync<HabaneroConfiguration>(SettingConsts
-                        .GameProviderConfigurations.Habanero);
+                    await _settingOperations.GetValueFromJsonByKeyAsync<HabaneroConfiguration>(
+                        SettingConsts.GameProviderConfigurations.Habanero);
 
                 if (configuration.DelaySecondsForPlaceBet > 0)
                 {

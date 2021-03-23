@@ -485,7 +485,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                                    select new
                                    {
                                        r.PlayerCode,
-                                       r.PlatformType,
                                        r.CurrencyCode,
                                        ExternalGameId = g.ExternalId,
                                        r.ExternalRoundId,
@@ -509,7 +508,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     {
                         r.PlayerCode,
                         r.CurrencyCode,
-                        r.PlatformType,
                         r.ExternalRoundId,
                         r.ExternalGameId
                     })
@@ -523,7 +521,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         return new BatchRequestTransaction
                         {
                             PlayerCode = g.Key.PlayerCode,
-                            PlatformType = (int)g.Key.PlatformType,
                             CurrencyCode = curr,
                             Amount = ga.Amount.Negate(),
                             ExternalGameId = g.Key.ExternalGameId,
@@ -589,20 +586,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ga.Should().NotBeNull();
             ga.Type.Should().Be(type);
             ga.Amount.Should().Be(amount);
-        }
-
-        [Then(@"game platform will be recorded in the database of type ""(.*)""")]
-        public async Task ThenGamePlatformWillBeRecordedInTheDatabaseOfTypeAsync(PlatformType platformType)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-            var platform = await db.Rounds
-                .Where(r => r.ExternalRoundId == externalRoundId)
-                .AsNoTracking()
-                .Select(r => r.PlatformType)
-                .FirstAsync();
-
-            platform.Should().Be(platformType);
         }
 
         [Then(@"the last settle game action recorded in the database will be canceled")]

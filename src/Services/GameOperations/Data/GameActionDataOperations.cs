@@ -346,7 +346,6 @@ namespace TGS.Services.GameOperations.Data
             new()
             {
                 PlayerCode = transaction.PlayerCode,
-                PlatformType = transaction.PlatformType,
                 CurrencyCode = transaction.CurrencyCode,
                 BatchId = batchId,
                 GameProviderId = gameProviderId,

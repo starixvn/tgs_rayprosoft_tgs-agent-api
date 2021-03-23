@@ -1,11 +1,8 @@
-﻿using System;
-
-namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums
 {
     /// <summary>
     ///     Platform Type
     /// </summary>
-    [Flags]
     public enum PlatformType
     {
         /// <summary>
@@ -16,11 +13,6 @@ namespace TGS.Core.Models.Enums
         /// <summary>
         ///     Mobile
         /// </summary>
-        Mobile = 1,
-
-        /// <summary>
-        ///     Desktop & Mobile
-        /// </summary>
-        DesktopAndMobile = Desktop | Mobile
+        Mobile = 1
     }
 }

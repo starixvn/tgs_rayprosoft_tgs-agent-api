@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         {
             var externalTransactionId = externalRoundId;
             var data = await _roundQueries
-                .GetRoundStatusAndGameIdAndPlatformAsync(gameProviderId, playerCode, externalRoundId,
+                .GetRoundStatusAndGameIdAsync(gameProviderId, playerCode, externalRoundId,
                     externalTransactionId)
                 .ConfigureAwait(false);
 
@@ -136,7 +136,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     InvalidGameActionErrorCode.RoundNotFound);
             }
 
-            return (data.Value.RoundStatus, data.Value.GameId, data.Value.PlatformType);
+            return (data.Value.RoundStatus, data.Value.GameId, PlatformType.Desktop);
         }
 
         async ValueTask<PlatformType> ISBOBETServices.
@@ -164,9 +164,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return platformType.Value;
 
             PlatformType[] GetPlatformTypes(CachedGame game) =>
-                game.PlatformType == PlatformType.DesktopAndMobile
-                    ? platformTypes
-                    : new[] {game.PlatformType};
+                game.PlatformType switch
+                {
+                    GamePlatformType.DesktopAndMobile => platformTypes,
+                    GamePlatformType.Desktop          => new[] {PlatformType.Desktop},
+                    GamePlatformType.Mobile           => new[] {PlatformType.Mobile}
+                };
         }
     }
 }
