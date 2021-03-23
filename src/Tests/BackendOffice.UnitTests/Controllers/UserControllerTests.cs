@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
@@ -40,9 +41,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
         private readonly Mock<ITgsCommands<User>> _userCommandsMock = new();
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Users(bool showAll)
+        [Test]
+        public async Task Can_Get_All_Users()
         {
             var request = new GetUsersRequest
             {
@@ -50,7 +50,56 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Rows = 10,
                 SortBy = "Username",
                 OrderBy = SortOrder.Descending,
-                ShowAll = showAll
+                ShowAll = true
+            };
+
+
+            var a = CreateUserFixture()
+                .CreateMany<User>(105)
+                .ToArray();
+
+            var users = CreateUserFixture()
+                .CreateMany<User>(105)
+                .AsQueryable()
+                .BuildMock().Object;
+
+            var (skip, take) = GetPage(request);
+            var orderedUsers = users.OrderByDescending(p => p.Username);
+
+            var expectedUsers = orderedUsers.ToArray();
+
+            _userQueriesMock.Setup(x => x.GetQueries())
+                .Returns(users);
+
+            var response = await _controller.GetListAsync(request);
+            response.Valid.Should().BeTrue();
+
+            for (var i = 0; i < response.Items.Length; i++)
+            {
+                response.Items[i].Name.Should().Be(expectedUsers[i].Name);
+                response.Items[i].Username.Should().Be(expectedUsers[i].Username);
+                response.Items[i].Role.Should().Be(expectedUsers[i].Role.Name);
+                response.Items[i].DepartmentName.Should().Be(expectedUsers[i].Department.Name);
+                response.Items[i].Id.Should().Be(expectedUsers[i].Id);
+                response.Items[i].LastLoginIp.Should().Be(expectedUsers[i].LastLoginIp);
+                response.Items[i].LastLoginTime.Should().Be(expectedUsers[i].LastLoginTime);
+                response.Items[i].Status.Should().Be(expectedUsers[i].Status.ToString());
+                response.Items[i].CreatedOn.Should().Be(expectedUsers[i].CreatedOn);
+            }
+
+            _userQueriesMock.Verify(p => p.GetQueries());
+        }
+
+        [Test]
+        public async Task Can_Get_Page_Users()
+        {
+            var request = new GetUsersRequest
+            {
+                Page = 1,
+                Rows = 10,
+                SortBy = "Username",
+                OrderBy = SortOrder.Descending,
+                ShowAll = false
             };
 
             var users = CreateUserFixture()
@@ -61,7 +110,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var (skip, take) = GetPage(request);
             var orderedUsers = users.OrderByDescending(p => p.Username);
 
-            var expectedUsers = showAll ? orderedUsers.ToArray() : orderedUsers.Skip(skip).Take(take).ToArray();
+            var expectedUsers = orderedUsers.Skip(skip).Take(take).ToArray();
 
             _userQueriesMock.Setup(x => x.GetQueries())
                 .Returns(users);
@@ -308,8 +357,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<User>(u => u
-                .With(s => s.Role, new Role {Name = Generator.RandomString(5)})
-                .With(p => p.Department, new Department {Name = Generator.RandomString(5)}));
+                .With(s => s.Role, new Role { Name = Generator.RandomString(5) })
+                .With(p => p.Department, new Department { Name = Generator.RandomString(5) }));
             return fixture;
         }
     }

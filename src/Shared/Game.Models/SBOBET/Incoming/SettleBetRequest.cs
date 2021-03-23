@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using MediatR;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 
 namespace TGS.Shared.Game.Models.SBOBET.Incoming
 {
-    public record SettleBetRequest : BaseRequest, IRequest<SettleBetResponse>
+    public record SettleBetRequest : TransactionRequest
     {
-        [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; init; }
-
         [JsonPropertyName("winloss")]
         public decimal WinLoss { get; init; }
 

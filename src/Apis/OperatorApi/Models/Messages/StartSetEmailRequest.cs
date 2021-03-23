@@ -1,7 +1,10 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record StartSetEmailRequest
     {
-        public string Email { get; set; }
+        [JsonPropertyName("email")]
+        public string Email { get; init; }
     }
 }

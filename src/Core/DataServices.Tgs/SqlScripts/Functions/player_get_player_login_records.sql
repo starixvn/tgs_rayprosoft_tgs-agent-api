@@ -2,6 +2,7 @@
 RETURNS TABLE(
  "BrandId" uuid, 
  "PlatformType" smallint, 
+ "Status" smallint,
  "CreatedOn" timestamptz , 
  "ExpiredOn" timestamptz)
 LANGUAGE plpgsql
@@ -12,6 +13,7 @@ begin
 	select
 		plr.brand_id as "BrandId",
 		plr.platform_type as "PlatformType",
+		plr.status as "Status",
 		plr.created_on as "CreatedOn",
 		plr.expired_on as "ExpiredOn"
 	from dbo.player_login_records plr

@@ -43,10 +43,8 @@ namespace TGS.Services.Operations.Queries
         Task<CachedPlayer> IPlayerQueries.GetCachedPlayerAsync(string playerCode)
         {
             const string spName = "dbo.player_get_player_for_cache";
-            return _repository.SqlQuerySingleAsync<CachedPlayer>(spName, parameters: new Dictionary<string, object>
-            {
-                {":player_code", playerCode}
-            });
+            return _repository.SqlQuerySingleAsync<CachedPlayer>(spName,
+                parameters: new Dictionary<string, object> {{":player_code", playerCode}});
         }
 
         async Task<GetPlayerLoginRecordResult[]> IPlayerQueries.GetPlayerLoginsRecordsInOneDayAsync(string playerCode,
@@ -58,7 +56,7 @@ namespace TGS.Services.Operations.Queries
                     new Dictionary<string, object>
                     {
                         {":player_code", playerCode},
-                        {":statuses", new ArrayParameter<int>(statuses.Select(s => (int) s).ToArray())},
+                        {":statuses", new ArrayParameter<int>(statuses.Select(s => (int)s).ToArray())},
                         {":from", DateTimeOffset.UtcNow.AddDays(-1)}
                     });
 
@@ -66,11 +64,12 @@ namespace TGS.Services.Operations.Queries
         }
 
         Task<CachedPlayerLoginRecord> IPlayerQueries.GetPlayerLoginRecordAsync(Guid loginRecordId) =>
-            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId && r.Status == LoginStatus.Enabled)
+            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
                 .Select(r => new CachedPlayerLoginRecord
                 {
                     PlayerCode = r.PlayerCode,
                     PlatformType = r.PlatformType,
+                    Status = r.Status,
                     ExpiredOn = r.ExpiredOn
                 }).FirstOrDefaultAsync();
 

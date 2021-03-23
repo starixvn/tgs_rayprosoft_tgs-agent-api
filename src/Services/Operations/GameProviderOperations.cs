@@ -58,6 +58,8 @@ namespace TGS.Services.Operations
         Task<bool> GetAllowKickPlayerAsync(Guid gameProviderId);
 
         Task<bool> GetAutoCloseRoundAsync(Guid gameProviderId);
+
+        Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -332,7 +334,7 @@ namespace TGS.Services.Operations
             GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.AllowKickPlayer,
                 v => (bool) v, gp => gp?.AllowKickPlayer ?? false);
 
-        Task<bool> IGameProviderOperations.GetAutoCloseRoundAsync(Guid gameProviderId) => 
+        Task<bool> IGameProviderOperations.GetAutoCloseRoundAsync(Guid gameProviderId) =>
             GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.AutoCloseRound,
                 v => (bool) v, gp => gp?.AutoCloseRound ?? true);
 
@@ -455,6 +457,14 @@ namespace TGS.Services.Operations
 
             return games;
         }
+
+        Task<IdAndCodeAndConfigurationId> IGameProviderOperations.GetGameProviderIdsByCredentialsAsync(string clientId,
+            string secretKey) =>
+            _cacheManager.SafeGetAndCacheAsync(
+                RedisCacheType.GameProviderIdAndConfigurationIdByCredentials,
+                $"{clientId}{secretKey}", TimeSpan.FromDays(1),
+                () => _gameProviderQueries.GetGameProviderIdsByCredentialsAsync(clientId, secretKey));
+
 
         private static class CachedGameProviderFields
         {

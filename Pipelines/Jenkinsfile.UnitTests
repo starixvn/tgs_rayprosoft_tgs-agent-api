@@ -1,11 +1,12 @@
 def token = "e67339132a7d6490b54ebeac33aa2a6956ebbcaf"
 def sonar_url = "http://sonarqube.ci:9000"
-def sonar_login = "admin"
-def sonar_pwd = "1q2w3e4r"
-
 
 pipeline {
     agent any
+	environment {
+		sonar_login = credentials('sonar_login')
+	}
+	
     stages {
         stage('Checkout SCM') {
           steps {
@@ -37,17 +38,17 @@ pipeline {
 			}
 		}
 		
-		stage('Sonarqube') {
-			steps {			
-				withSonarQubeEnv('sonar') {		
-				    withEnv(['PATH+EXTRA=/var/jenkins_home/.dotnet/tools']) {
-						sh "echo $PATH"
-						sh "dotnet sonarscanner begin /k:TGS /d:sonar.login=${token}  /d:sonar.host.url=${sonar_url}"  
-						sh "dotnet build tgs.sln"
-						sh "dotnet sonarscanner end /d:sonar.login=${sonar_login} /d:sonar.password=${sonar_pwd}"
-					}
-				}
-			}
-		}
+		//stage('Sonarqube') {
+		//	steps {			
+		//		withSonarQubeEnv('sonar') {		
+		//		    withEnv(['PATH+EXTRA=/var/jenkins_home/.dotnet/tools']) {
+		//				sh "echo $PATH"
+		//				sh "dotnet sonarscanner begin /k:TGS /d:sonar.login=${token}  /d:sonar.host.url=${sonar_url}"  
+		//				sh "dotnet build tgs.sln"
+		//				sh "dotnet sonarscanner end /d:sonar.login=${sonar_login_USR} /d:sonar.password=${sonar_login_PSW}"
+		//			}
+		//		}
+		//	}
+		//}
     }
 }

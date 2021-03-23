@@ -1,12 +1,11 @@
 ﻿// ReSharper disable IdentifierTypo
 
 using System.Text.Json.Serialization;
-using MediatR;
 using TGS.Core.Models.Tokens;
 
 namespace TGS.Services.PluggableServices.Models
 {
-    public record GetGameUrlRequest : IRequest<GetGameUrlResponse>
+    public record GetGameUrlRequest
     {
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }

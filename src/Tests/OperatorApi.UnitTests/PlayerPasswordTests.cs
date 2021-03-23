@@ -139,7 +139,7 @@ namespace OperatorApi.UnitTests
             var token = "abc123";
 
             fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-            fakeValidateCodeGenerator.GenerateToken().Returns(token);
+            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
 
             fakeValidateCodeOperator
                 .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())

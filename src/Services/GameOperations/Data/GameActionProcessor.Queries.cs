@@ -11,10 +11,9 @@ namespace TGS.Services.GameOperations.Data
 {
     internal sealed partial class GameActionProcessor
     {
-        private static Task<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repository,
-            Guid gameProviderConfigurationId, Guid walletId, string externalRoundId, int gameId)
-        {
-            return repository.Rounds
+        private static async ValueTask<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repository,
+            Guid gameProviderConfigurationId, Guid walletId, string externalRoundId, int gameId) =>
+            await repository.Rounds
                 .Where(r => r.GameProviderConfigurationId == gameProviderConfigurationId &&
                     r.WalletId == walletId && r.GameId == gameId &&
                     r.ExternalRoundId == externalRoundId)
@@ -24,10 +23,9 @@ namespace TGS.Services.GameOperations.Data
                     ExternalRoundId = r.ExternalRoundId,
                     Status = r.Status
                 })
-                .FirstOrDefaultAsync();
-        }
+                .FirstOrDefaultAsync().ConfigureAwait(false);
 
-        private static async Task<SameRoundActionData[]> GetGameActionsInSameRoundAsync(ITgsRepository repository,
+        private static async ValueTask<SameRoundActionData[]> GetGameActionsInSameRoundAsync(ITgsRepository repository,
             Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
         {
             const string sql = "bet.game_action_get_game_actions_in_same_round";
@@ -38,27 +36,33 @@ namespace TGS.Services.GameOperations.Data
                     {":player_code", playerCode},
                     {":external_round_id", externalRoundId},
                     {":game_id", gameId}
-                });
+                }).ConfigureAwait(false);
 
             return data.ToArray();
         }
 
-        private static Task<string> GetExternalRoundIdAsync(ITgsRepository repository, string externalTransactionId)
-        {
-            return repository.GameActions
+        private static async ValueTask<string> GetExternalRoundIdAsync(ITgsRepository repository,
+            string externalTransactionId) =>
+            await repository.GameActions
                 .Where(ga => ga.ExternalTransactionId == externalTransactionId)
                 .Include(ga => ga.Round)
                 .Select(ga => ga.Round.ExternalRoundId)
-                .FirstOrDefaultAsync();
-        }
+                .FirstOrDefaultAsync().ConfigureAwait(false);
 
-        private static Task<decimal> GetBalanceAsync(ITgsRepository repository, Guid walletId)
+        private static async ValueTask<decimal> GetBalanceAsync(ITgsRepository repository, Guid walletId)
         {
             const string spName = "dbo.wallet_get_balance";
-            return repository.SqlQuerySingleAsync<decimal>(spName, parameters: new Dictionary<string, object>
-            {
-                {":wallet_id", walletId}
-            });
+            return await repository.SqlQuerySingleAsync<decimal>(spName,
+                parameters: new Dictionary<string, object> {{":wallet_id", walletId}}).ConfigureAwait(false);
         }
+
+        private static async ValueTask<int?> GetGameIdInSameRoundAsync(ITgsRepository repository, Guid gameProviderId,
+            string playerCode, string externalRoundId, string externalTransactionReferenceId) =>
+            await repository.Rounds.Where(r =>
+                    r.GameProviderId == gameProviderId &&
+                    r.ExternalRoundId == externalRoundId &&
+                    r.PlayerCode == playerCode &&
+                    r.GameActions.Any(ga => ga.ExternalTransactionId == externalTransactionReferenceId))
+                .Select(r => (int?)r.GameId).FirstOrDefaultAsync().ConfigureAwait(false);
     }
 }

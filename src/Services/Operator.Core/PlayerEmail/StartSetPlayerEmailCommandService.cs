@@ -25,12 +25,12 @@ namespace TGS.Services.Operator.PlayerEmail
 
         public async ValueTask<string> GetAsync(StartSetPlayerEmailCommand command)
         {
-            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
+            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
                 .RetryAsync(5)
                 .ExecuteAsync(async () =>
                 {
                     var validateCode = _codeGenerator.GenerateCode();
-                    var token = _codeGenerator.GenerateToken();
+                    var token = _codeGenerator.GenerateSecurityKey();
 
                     var data = new EmailValidateData(command.Email, command.PlayerCode);
 
@@ -57,7 +57,7 @@ namespace TGS.Services.Operator.PlayerEmail
 
             await _emailManager.SendEmailAsync(mailMessage).ConfigureAwait(false);
 
-            return saveResult.Token;
+            return saveResult.SecurityKey;
         }
     }
 }

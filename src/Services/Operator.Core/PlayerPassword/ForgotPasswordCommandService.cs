@@ -38,7 +38,7 @@ namespace TGS.Services.Operator.PlayerPassword
                 .ExecuteAsync(async () =>
                 {
                     var validateCode = _codeGenerator.GenerateCode();
-                    var token = _codeGenerator.GenerateToken();
+                    var token = _codeGenerator.GenerateSecurityKey();
 
                     var data = new ValidateCodeData(player.PlayerCode, token);
 

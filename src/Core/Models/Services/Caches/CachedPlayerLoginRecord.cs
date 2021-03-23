@@ -7,6 +7,7 @@ namespace TGS.Core.Models.Services.Caches
     {
         public string PlayerCode { get; init; }
         public PlatformType PlatformType { get; init; }
+        public LoginStatus Status { get; init; }
         public DateTimeOffset ExpiredOn { get; init; }
     }
 }

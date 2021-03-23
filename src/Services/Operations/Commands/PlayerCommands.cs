@@ -34,6 +34,18 @@ namespace TGS.Services.Operations.Commands
         Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
 
         Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
+        Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn);
+
+        Task SetIdentityAsync(
+            string playerCode,
+            string realName,
+            string identity,
+            bool isAuthenticate,
+            DateTimeOffset updatedOn);
+
+        Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
+
+        Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn);
     }
 
     public sealed class PlayerCommands : IPlayerCommands
@@ -240,6 +252,76 @@ namespace TGS.Services.Operations.Commands
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
+        {
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                Phone = phone,
+                PhoneAuthentication = true,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(updateInfo);
+            _repository.Entry(updateInfo).Property(nameof(Player.Phone)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.PhoneAuthentication)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetIdentityAsync(string playerCode, string realName, string identity, bool isAuthenticate, DateTimeOffset updatedOn)
+        {
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                RealName = realName,
+                IdNumber = identity,
+                IdentityAuthentication = isAuthenticate,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(updateInfo);
+            _repository.Entry(updateInfo).Property(nameof(Player.RealName)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.IdNumber)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.IdentityAuthentication)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+        {
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                QQ = qqId,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(updateInfo);
+            _repository.Entry(updateInfo).Property(nameof(Player.QQ)).IsModified = true;
+            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+
+            return _repository.SaveChangesAsync();
+        }
+
+        public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
+        {
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                Wechat = weChatId,
+                UpdatedOn = updatedOn
+            };
+
+            _repository.Players.Attach(updateInfo);
+            _repository.Entry(updateInfo).Property(nameof(Player.Wechat)).IsModified = true;
             _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
 
             return _repository.SaveChangesAsync();

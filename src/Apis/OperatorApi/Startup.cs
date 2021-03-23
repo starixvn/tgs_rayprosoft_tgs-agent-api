@@ -62,6 +62,9 @@ namespace TGS.Apis.OperatorApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
+                .AddReportServices();
+
+            services
                 .AddOperatorApiCore()
                 .ConfigureOperatorOptions<IConfiguration>((options, config) =>
                 {
@@ -70,15 +73,15 @@ namespace TGS.Apis.OperatorApi
                 .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
                 {
                     config.GetSection("EmailSetting").Bind(options);
-                })
-                .Services
-                .AddReportServices();
+                });
+
+            services.AddIdentityVerifiers();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
                 {
-                    c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Singleton);
+                    c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
                     c.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;

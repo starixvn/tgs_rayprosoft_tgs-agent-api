@@ -3,11 +3,12 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Services.Data
 {
-    public class GetPlayerLoginRecordResult
+    public record GetPlayerLoginRecordResult
     {
-        public Guid BrandId { get; set; }
-        public PlatformType PlatformType { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
-        public DateTimeOffset ExpiredOn { get; set; }
+        public Guid BrandId { get; init; }
+        public PlatformType PlatformType { get; init; }
+        public LoginStatus Status { get; init; }
+        public DateTimeOffset CreatedOn { get; init; }
+        public DateTimeOffset ExpiredOn { get; init; }
     }
 }

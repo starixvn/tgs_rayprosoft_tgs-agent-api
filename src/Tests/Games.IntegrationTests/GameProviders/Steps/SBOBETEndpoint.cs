@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NSubstitute;
+using Moq;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TGS.Apis.OperatorApi;
@@ -54,25 +54,25 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
 
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
             var opApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration((_, builder) =>
+                .ConfigureAppConfiguration(builder =>
                 {
-                    builder.SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                    builder.SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
                         "../../../../../Apis/OperatorApi")));
                 })
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    webBuilder
+                    builder
                         .UseStartup<Startup>()
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {
-                            srv.AddTransient(sp =>
-                            {
-                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
-                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
-                                return fakeAnalyzer;
-                            });
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
                         });
                 })
                 .Build();
@@ -81,29 +81,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var opApiClient = opApiHost.GetTestClient();
 
             var tgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration((_, builder) =>
+                .ConfigureAppConfiguration(builder =>
                 {
                     builder
-                        .SetBasePath(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                        .SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
                             "../../../../../Apis/TgsApi")))
                         .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
                 })
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    webBuilder
+                    builder
                         .UseStartup<SBOBETStartup>()
                         .UseKestrel(options => options.AddServerHeader = false)
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {
-                            srv.AddTransient(sp =>
-                            {
-                                var fakeAnalyzer = Substitute.For<IRequestAnalyzer>();
-
-                                fakeAnalyzer.GetIp(Arg.Any<HttpContext>()).Returns("127.0.0.1");
-
-                                return fakeAnalyzer;
-                            });
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
                         });
                 })
                 .Build();
@@ -142,8 +135,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             if (isDev)
             {
-                services.AddTransient<IPlayerApiClient>(sp => ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
-                services.AddTransient<ISBOBETApiClient>(sp => ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
+                services.AddTransient<IPlayerApiClient>(sp =>
+                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                services.AddTransient<ISBOBETApiClient>(sp =>
+                    ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, tgsApiClient));
             }
             else
             {
@@ -176,20 +171,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.BrandCode, brandCode);
             Set(SR.PlayerCode, playerCode);
-            Set(SR.Username, username);
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Desktop}");
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Mobile}");
         }
 
         [Given(@"player logout")]
         public Task GivenPlayerLogoutAsync()
         {
-            var username = Get<string>(SR.Username);
             var playerCode = Get<string>(SR.PlayerCode);
-
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Desktop}");
-            Remove($"{SR.LoginTime}:{username}:{PlatformType.Mobile}");
-
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
@@ -280,6 +267,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task WhenIWinBetForAsync(decimal amount) =>
             SettleBetAsync(GameActionType.WinBet, amount);
 
+        [When(@"I win bet for game ""(.*)"" for \$(.*)")]
+        public Task WhenIWinBetForGameFor(string externalGameId, decimal amount) =>
+            SettleBetAsync(GameActionType.WinBet, amount, externalGameId);
+
         [Given(@"I lose bet")]
         [When(@"I lose bet")]
         public Task WhenILoseBetAsync() =>
@@ -306,6 +297,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.ExternalRoundId, externalRoundId);
         }
 
+        [When(@"I cancel transaction for game ""(.*)""")]
+        public async Task WhenICancelTransactionForGame(string externalGameId)
+        {
+            var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
+
+            await CancelTransactionAsync(betRequest, externalGameId: externalGameId);
+
+            var externalTransactionId = betRequest.ExternalTransactionId;
+            var externalRoundId = betRequest.ExternalRoundId;
+            var cancelId = $"{externalTransactionId}_cancel";
+
+            Set(SR.ExternalTransactionId, cancelId);
+            Set(SR.ExternalRoundId, externalRoundId);
+        }
+
+
         [Given(@"I cancel all transactions")]
         [When(@"I cancel all transactions")]
         public async Task WhenICancelAllTransactionsAsync()
@@ -313,6 +320,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
             await CancelTransactionAsync(betRequest, true);
+
+            var externalRoundId = betRequest.ExternalRoundId;
+            Set(SR.ExternalRoundId, externalRoundId);
+        }
+
+        [When(@"I cancel all transactions for game ""(.*)""")]
+        public async Task WhenICancelAllTransactionsForGame(string externalGameId)
+        {
+            var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
+
+            await CancelTransactionAsync(betRequest, true, externalGameId);
 
             var externalRoundId = betRequest.ExternalRoundId;
             Set(SR.ExternalRoundId, externalRoundId);
@@ -420,30 +438,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [When(@"I get bet status")]
-        public async Task WhenIGetBetStatusAsync()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+        public Task WhenIGetBetStatusAsync() =>
+            GetBetStatusAsync();
 
-            var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
-
-            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
-
-            var request = new GetBetStatusRequest
-            {
-                CompanyKey = config.CompanyKey,
-                PlayerCode = playerCode,
-                GameType = betRequest.GameType,
-                ProductType = betRequest.ProductType,
-                ExternalTransactionId = betRequest.ExternalTransactionId,
-                ExternalRoundId = betRequest.ExternalRoundId
-            };
-
-            var response = await client.GetBetStatusAsync(request);
-
-            Set(SR.Request, request);
-            Set(SR.Response, response);
-        }
+        [When(@"I get bet status for game ""(.*)""")]
+        public Task WhenIGetBetStatusForGame(string externalGameId) =>
+            GetBetStatusAsync(externalGameId);
 
         [When(@"I submit the batch of bets to be canceled")]
         public async Task WhenISubmitTheBatchOfBetsToBeCanceled()
@@ -636,7 +636,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
+                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -778,20 +778,20 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [After]
         public Task AfterChangeGameProviderStatusScenarioAsync() =>
-            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active);
+            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
 
         [After]
         public Task AfterChangeGameProviderConfigurationStatusScenarioAsync() =>
-            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active);
+            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
 
         [After]
         public Task AfterChangeGameStatusScenarioAsync() =>
             ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
-                GameStatus.Active);
+                GameStatus.Active, true);
 
         [After]
         public Task AfterChangeBrandStatusScenarioAsync() =>
-            ChangeBrandStatusAsync(_serviceProvider, Status.Active);
+            ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
 
         #endregion After Scenario
 
@@ -853,7 +853,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Balance.Should().BeNull();
         }
 
-        private async Task SettleBetAsync(GameActionType type, decimal amount)
+        private async Task SettleBetAsync(GameActionType type, decimal amount, string externalGameId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var config = await GetSBOSetting();
@@ -872,14 +872,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 _ => throw new InvalidOperationException($"Invalid game action type '{type}' for settle bet")
             };
 
+            var (gameType, productType) = GetGameTypeAndProductType(externalGameId, betRequest);
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
 
             var request = new SettleBetRequest
             {
                 CompanyKey = config.CompanyKey,
                 PlayerCode = playerCode,
-                GameType = betRequest.GameType,
-                ProductType = betRequest.ProductType,
+                GameType = gameType,
+                ProductType = productType,
                 ExternalTransactionId = betRequest.ExternalTransactionId,
                 WinLoss = amount,
                 Result = result,
@@ -896,6 +897,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
+        private static (int GameType, int ProductType) GetGameTypeAndProductType(string externalGameId,
+            PlaceBetRequest betRequest)
+        {
+            if (externalGameId.IsNullOrEmpty())
+            {
+                return (betRequest.GameType, betRequest.ProductType);
+            }
+
+            var types = externalGameId.SplitByUnderscore().Select(int.Parse).ToArray();
+            return (types[1], types[0]);
+        }
+
         private async Task ResentSettleBetAsync()
         {
             var request = Get<SettleBetRequest>(SR.Request);
@@ -906,25 +919,51 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        private async Task CancelTransactionAsync(PlaceBetRequest betRequest, bool isVoid = false)
+        private async Task CancelTransactionAsync(PlaceBetRequest betRequest, bool isVoid = false,
+            string externalGameId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var config = await GetSBOSetting();
 
-            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
-
+            var (gameType, productType) = GetGameTypeAndProductType(externalGameId, betRequest);
             var request = new CancelBetRequest
             {
                 CompanyKey = config.CompanyKey,
                 PlayerCode = playerCode,
-                GameType = betRequest.GameType,
-                ProductType = betRequest.ProductType,
+                GameType = gameType,
+                ProductType = productType,
                 ExternalTransactionId = betRequest.ExternalTransactionId,
                 ExternalRoundId = betRequest.ExternalRoundId,
                 IsCancelAll = isVoid
             };
 
+            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
             var response = await client.CancelBetAsync(request);
+
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        private async Task GetBetStatusAsync(string externalGameId = null)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var config = await GetSBOSetting();
+
+            var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
+            var (gameType, productType) = GetGameTypeAndProductType(externalGameId, betRequest);
+
+            var request = new GetBetStatusRequest
+            {
+                CompanyKey = config.CompanyKey,
+                PlayerCode = playerCode,
+                GameType = gameType,
+                ProductType = productType,
+                ExternalTransactionId = betRequest.ExternalTransactionId,
+                ExternalRoundId = betRequest.ExternalRoundId
+            };
+
+            var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
+            var response = await client.GetBetStatusAsync(request);
 
             Set(SR.Request, request);
             Set(SR.Response, response);

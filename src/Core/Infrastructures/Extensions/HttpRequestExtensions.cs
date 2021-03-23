@@ -7,7 +7,7 @@ namespace TGS.Core.Infrastructures.Extensions
 {
     public static class HttpRequestExtensions
     {
-        public static async Task<string> ReadAsStringAsync(this HttpRequest request)
+        public static async ValueTask<string> ReadAsStringAsync(this HttpRequest request)
         {
             request.EnableBuffering();
 
@@ -24,7 +24,7 @@ namespace TGS.Core.Infrastructures.Extensions
             return body;
         }
 
-        public static async Task<T> ReadAsObjectFromJsonAsync<T>(this HttpRequest request)
+        public static async ValueTask<T> ReadAsObjectFromJsonAsync<T>(this HttpRequest request)
         {
             request.EnableBuffering();
 

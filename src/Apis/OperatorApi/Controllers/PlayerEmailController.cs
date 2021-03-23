@@ -14,7 +14,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class PlayerEmailController : ControllerBase
     {
         /// <summary>
-        /// Starts the change email asynchronous.
+        /// Starts the change email.
         /// </summary>
         /// <param name="setPlayerEmailService">The set player email service.</param>
         /// <param name="request">The request.</param>
@@ -32,6 +32,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             return setPlayerEmailService.GetAsync(command);
         }
 
+        /// <summary>
+        /// Submits the change email.
+        /// </summary>
+        /// <param name="commitPlayerEmailService">The commit player email service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask SubmitChangeEmailAsync(

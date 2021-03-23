@@ -6,11 +6,14 @@ namespace TGS.Services.PluggableServices.Models
 {
     public record GetRoundHistoryRequest : IRequest<GetRoundHistoryResponse>
     {
-        [JsonPropertyName("gpcode")] public string GameProviderCode { get; init; }
+        [JsonPropertyName("gpcode")]
+        public string GameProviderCode { get; init; }
 
-        [JsonPropertyName("playercode")] public string PlayerCode { get; init; }
+        [JsonPropertyName("playercode")]
+        public string PlayerCode { get; init; }
 
-        [JsonPropertyName("roundid")] public Guid RoundId { get; set; }
+        [JsonPropertyName("roundid")]
+        public Guid RoundId { get; set; }
 
         /// <summary>
         ///     player's culture code

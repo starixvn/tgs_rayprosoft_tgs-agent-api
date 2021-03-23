@@ -9,6 +9,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
+using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Models.Data;
@@ -107,13 +108,16 @@ namespace TGS.Services.GameOperations.Data
             ThrowIfHaveNoRequiredIds(s);
             ValidateAmounts(s);
 
-            s = GetGame(s);
-            s = await FillRoundDataAsync(s);
+            s = await GetGameAsync(s).ConfigureAwait(false);
+            s = await FillRoundDataAsync(s).ConfigureAwait(false);
 
-            var (st, r) = await GetAndValidatePreviousActionsAsync(s);
+            var (st, r) = await GetAndValidatePreviousActionsAsync(s).ConfigureAwait(false);
             if (r != null)
             {
-                s.PlayerData.Wallet.Balance = await GetBalanceAsync(s.Repository, s.PlayerData.Wallet.Id);
+                s.PlayerData.Wallet.Balance =
+                    await GetBalanceAsync(s.Repository, s.PlayerData.Wallet.Id)
+                        .ConfigureAwait(false);
+
                 return r;
             }
 
@@ -123,9 +127,9 @@ namespace TGS.Services.GameOperations.Data
 
             s = GetNewRoundStatus(s);
 
-            await ThrowIfStatusesIsInvalidAsync(s);
+            await ThrowIfStatusesIsInvalidAsync(s).ConfigureAwait(false);
 
-            var ga = await SaveDatabaseRecordsAsync(s);
+            var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
 
             var output = new GameActionResult
             {
@@ -143,10 +147,11 @@ namespace TGS.Services.GameOperations.Data
             return output;
         }
 
-        private static async Task<GameActionState> FillRoundDataAsync(GameActionState s)
+        private static async ValueTask<GameActionState> FillRoundDataAsync(GameActionState s)
         {
             var roundData = await GetRoundByExternalRoundIdAsync(s.Repository,
-                s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId, s.GameId);
+                    s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId, s.GameId)
+                .ConfigureAwait(false);
 
             if (roundData == null)
             {
@@ -166,12 +171,26 @@ namespace TGS.Services.GameOperations.Data
             return s;
         }
 
-        private static GameActionState GetGame(GameActionState s)
+        private static async Task<GameActionState> GetGameAsync(GameActionState s)
         {
-            var game =
-                s.GameProviderGames.FirstOrDefault(
-                    g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId)
-                        && g.PlatformType == s.PlatformType);
+            CachedGame game = null;
+
+            if (s.HasExtGameId)
+            {
+                game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId)
+                    && g.PlatformType == s.PlatformType);
+            }
+            else
+            {
+                var gameId = await GetGameIdInSameRoundAsync(s.Repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
+                        s.ExternalRoundId, s.ExternalTransactionReferenceId)
+                    .ConfigureAwait(false);
+
+                if (gameId.HasValue)
+                {
+                    game = s.GameProviderGames.FirstOrDefault(g => g.Id == gameId);
+                }
+            }
 
             if (game == null)
             {
@@ -200,12 +219,14 @@ namespace TGS.Services.GameOperations.Data
             // get all transactions belonging to this round
             var actionsData =
                 await GetGameActionsInSameRoundAsync(repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
-                    externalRoundId, s.GameId);
+                        externalRoundId, s.GameId)
+                    .ConfigureAwait(false);
 
             if (actionsData.Length == 0 && s.HasExtRefTransactionId)
             {
                 await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repository, externalRoundId,
-                    s.ExternalTransactionReferenceId);
+                    s.ExternalTransactionReferenceId).ConfigureAwait(false);
+
                 return (s, null);
             }
 
@@ -435,17 +456,17 @@ namespace TGS.Services.GameOperations.Data
             current.WinLoss = betValues.WinLoss;
             current.UnsettledBets = betValues.UnsettledBets;
 
-            s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s);
+            s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s).ConfigureAwait(false);
             s.InternalRoundId = CreateOrUpdateRound(s, current);
 
             var ga = CreateGameAction(s, current);
 
-            await s.Repository.SaveChangesAsync();
+            await s.Repository.SaveChangesAsync().ConfigureAwait(false);
 
             return ga;
         }
 
-        private static async Task<decimal> GetOrUpdateBalanceAsync(GameActionState s)
+        private static async ValueTask<decimal> GetOrUpdateBalanceAsync(GameActionState s)
         {
             var repository = s.Repository;
             var walletId = s.PlayerData.Wallet.Id;
@@ -454,7 +475,8 @@ namespace TGS.Services.GameOperations.Data
             if (s.HasWalletUpdate && s.Amount != 0)
             {
                 balance =
-                    await AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow);
+                    await AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
+                        .ConfigureAwait(false);
 
                 if (balance < 0 && s.GameActionType.IsOneOf(PlaceBet, LockAmount))
                 {
@@ -463,7 +485,8 @@ namespace TGS.Services.GameOperations.Data
             }
             else
             {
-                balance = await GetBalanceAsync(repository, walletId);
+                balance = await GetBalanceAsync(repository, walletId)
+                    .ConfigureAwait(false);
             }
 
             return balance;
