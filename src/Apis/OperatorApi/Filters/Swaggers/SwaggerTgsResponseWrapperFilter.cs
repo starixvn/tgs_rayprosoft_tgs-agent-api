@@ -9,13 +9,13 @@ using TGS.Apis.OperatorApi.Models;
 
 namespace TGS.Apis.OperatorApi.Filters.Swaggers
 {
-    public class TgsDocFixer : IOperationFilter
+    public class SwaggerTgsResponseWrapperFilter : IOperationFilter
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var responseAdjustments = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
                 .Union(context.MethodInfo.GetCustomAttributes(true))
-                .OfType<TgsResponseAdjustmentAttribute>();
+                .OfType<TgsResponseWrapperAttribute>();
 
             if (responseAdjustments.Any())
             {

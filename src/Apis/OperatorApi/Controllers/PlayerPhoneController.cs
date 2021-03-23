@@ -21,7 +21,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
@@ -41,7 +41,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public ValueTask SubmitChangePhoneAsync(
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
             [FromBody] SubmitChangePhoneRequest request)

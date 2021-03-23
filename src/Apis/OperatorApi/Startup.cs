@@ -132,7 +132,7 @@ namespace TGS.Apis.OperatorApi
 
                     c.OperationFilter<SwaggerHeaderFilter>();
                     c.SchemaFilter<SwaggerEnumDescriptionFilter>();
-                    c.OperationFilter<TgsDocFixer>();
+                    c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);

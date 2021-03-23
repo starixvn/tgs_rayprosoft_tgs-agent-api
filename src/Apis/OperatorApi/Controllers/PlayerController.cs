@@ -73,7 +73,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPatch("qq")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public async Task SetQqIdAsync(
             [FromServices] ICommandService<SetQqCommand> setQqService,
             [FromBody] SetQqIdRequest request)
@@ -92,7 +92,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPatch("wechat")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public async Task SetWeChatIdAsync(
             [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
             [FromBody] SetWeChatIdRequest request)

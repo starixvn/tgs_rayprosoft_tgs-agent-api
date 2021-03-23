@@ -35,7 +35,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
@@ -54,7 +54,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public async ValueTask ResetPasswordAsync(
             [FromServices] ICommandService<ResetPasswordCommand> resetService,
             [FromBody] ResetPasswordRequest request)

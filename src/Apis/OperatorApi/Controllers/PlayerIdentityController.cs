@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPatch]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public ValueTask SetPlayerIdentityAsync(
             [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
             [FromBody] SetPlayerIdentityRequest request)
@@ -44,7 +44,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet("check/{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseAdjustment]
+        [TgsResponseWrapper]
         public async Task<bool> CheckIdentityIsValidAsync(
             [FromServices] IIdentityVerifierSelector<string> identityVerifierSelector,
             [FromServices] IPlayerOperations playerOperations,
