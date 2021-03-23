@@ -56,24 +56,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "deposit_forms",
-                schema: "dbo",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    player_code = table.Column<string>(type: "text", nullable: true),
-                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    bank_account = table.Column<string>(type: "text", nullable: true),
-                    amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    brand_payment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_deposit_forms", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "game_providers",
                 schema: "dbo",
                 columns: table => new
@@ -1696,6 +1678,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "deposit_forms",
+                schema: "dbo",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    player_code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
+                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    bank_account = table.Column<string>(type: "text", nullable: false),
+                    amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    brand_payment_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_deposit_forms", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_deposit_forms_brand_payments_id",
+                        column: x => x.brand_payment_id,
+                        principalSchema: "dbo",
+                        principalTable: "brand_payments",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_deposit_forms_players_playerCode",
+                        column: x => x.player_code,
+                        principalSchema: "dbo",
+                        principalTable: "players",
+                        principalColumn: "player_code",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_deposit_froms_brands_id",
+                        column: x => x.brand_id,
+                        principalSchema: "dbo",
+                        principalTable: "brands",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "player_banks",
                 schema: "dbo",
                 columns: table => new
@@ -2047,6 +2069,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "reseller_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_deposit_forms_brand_id",
+                schema: "dbo",
+                table: "deposit_forms",
+                column: "brand_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_deposit_forms_brand_payment_id",
+                schema: "dbo",
+                table: "deposit_forms",
+                column: "brand_payment_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_deposit_forms_player_code",
+                schema: "dbo",
+                table: "deposit_forms",
+                column: "player_code");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_game_action_batches_game_provider_id",
                 schema: "bet",
                 table: "game_action_batches",
@@ -2348,8 +2388,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "whitelists",
                 column: "reseller_id");
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

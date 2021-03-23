@@ -949,10 +949,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount");
 
                     b.Property<string>("BankAccount")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("bank_account");
 
@@ -965,15 +967,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("brand_payment_id");
 
                     b.Property<DateTimeOffset>("CreatedOn")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("text")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pk_deposit_forms");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_deposit_forms_brand_id");
+
+                    b.HasIndex("BrandPaymentId")
+                        .HasDatabaseName("ix_deposit_forms_brand_payment_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_deposit_forms_player_code");
 
                     b.ToTable("deposit_forms");
                 });
@@ -3596,6 +3617,36 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Reseller");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DepositForm", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany("DepositForms")
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_deposit_froms_brands_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "BrandPayment")
+                        .WithMany("DepositForms")
+                        .HasForeignKey("BrandPaymentId")
+                        .HasConstraintName("fk_deposit_forms_brand_payments_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany("DepositForms")
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_deposit_forms_players_playerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("BrandPayment");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
@@ -4247,6 +4298,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Navigation("Departments");
 
+                    b.Navigation("DepositForms");
+
                     b.Navigation("GameProviders");
 
                     b.Navigation("Games");
@@ -4287,6 +4340,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
                     b.Navigation("BrandPaymentPlayers");
+
+                    b.Navigation("DepositForms");
 
                     b.Navigation("VipLevels");
                 });
@@ -4413,6 +4468,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Banks");
 
                     b.Navigation("BrandPaymentPlayers");
+
+                    b.Navigation("DepositForms");
 
                     b.Navigation("Letters");
 

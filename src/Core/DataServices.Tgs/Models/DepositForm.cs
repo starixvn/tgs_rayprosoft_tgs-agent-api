@@ -16,6 +16,14 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid BrandPaymentId { get; set; }
 
+        public int Status { get; set; }
+
         public DateTimeOffset CreatedOn { get; set; }
+
+        public virtual Player Player { get; set; }
+
+        public virtual Brand Brand { get; set; }
+
+        public virtual BrandPayment BrandPayment { get; set; }
     }
 }
