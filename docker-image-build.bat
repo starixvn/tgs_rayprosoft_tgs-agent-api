@@ -19,7 +19,8 @@ docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:
 docker build -f src\Apis\LogApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/log-api:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/log-api:%tag%
 
-docker build -f src\Apis\OperatorApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag% .
+dotnet build src\Apis\OperatorApi\OperatorApi.csproj -p:DockerfileTag=registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag%
+REM docker build -f src\Apis\OperatorApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag%
 
 docker build -f src\Apis\TgsApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/tgs-api:%tag% .
