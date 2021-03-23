@@ -10,7 +10,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/player/phone")]
     [ApiController]
     public class PlayerPhoneController : ControllerBase
     {
@@ -21,6 +21,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
@@ -40,6 +41,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public ValueTask SubmitChangePhoneAsync(
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
             [FromBody] SubmitChangePhoneRequest request)
