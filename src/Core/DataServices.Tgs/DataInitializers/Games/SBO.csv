@@ -1,10 +1,7 @@
 Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Sportsbook,,,1_1,Sportsbook,Desktop,FALSE,,,FALSE,TRUE,FALSE,
-Sportsbook,,,1_1,Sportsbook,Mobile,FALSE,,,FALSE,TRUE,FALSE,
-Virtual Sports Lobby,,,VirtualSportsLobby,VirtualSportsLobby,Desktop,FALSE,,,FALSE,TRUE,FALSE,
-Virtual Sports Lobby,,,VirtualSportsLobby,VirtualSportsLobby,Mobile,FALSE,,,FALSE,TRUE,FALSE,
-Virtual Sports,,,5_200000,VirtualSports,Desktop,FALSE,,,TRUE,TRUE,FALSE,
-Virtual Sports,,,5_200000,VirtualSports,Mobile,FALSE,,,TRUE,TRUE,FALSE,
+Sportsbook,,,1_1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,
+Virtual Sports Lobby,,,VirtualSportsLobby,VirtualSportsLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,
+Virtual Sports,,,5_200000,VirtualSports,DesktopAndMobile,FALSE,,,TRUE,TRUE,FALSE,
 Virtual Racing,,,5_201602,VirtualSports,Desktop,FALSE,,,TRUE,TRUE,FALSE,
 Virtual Football,,,5_201601,VirtualSports,Desktop,FALSE,,,TRUE,TRUE,FALSE,
 Virtual Football,,,5_202601,VirtualSports,Mobile,FALSE,,,TRUE,TRUE,FALSE,
