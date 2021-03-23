@@ -11,10 +11,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
 <<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210325095216_Initial.Designer.cs
+<<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210325095216_Initial.Designer.cs
     [Migration("20210325095216_Initial")]
 =======
     [Migration("20210323080423_Initial")]
 >>>>>>> bfac5cb5 (在BrandPayment table加入BankAccount欄位):src/Core/DataServices.Tgs/Migrations/20210323080423_Initial.Designer.cs
+=======
+    [Migration("20210323090639_Initial")]
+>>>>>>> 90b532bc (加入取得BankDepositForm查詢):src/Core/DataServices.Tgs/Migrations/20210323090639_Initial.Designer.cs
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -880,11 +884,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("all_players");
 
-                    b.Property<string>("BankAccount")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("bank_account");
-
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
@@ -922,6 +921,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer")
                         .HasColumnName("display_order");
+
+                    b.Property<string>("ExtendedData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("extended_data");
 
                     b.Property<decimal?>("FeePercentage")
                         .HasPrecision(18, 6)

@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.BankDeposit;
 using TGS.ServiceUtility;
 
@@ -30,6 +32,25 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Amount);
 
             return createDepositFormService.ExecuteAsync(command);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<DepositFormResponse> GetDepositFormAsync(
+            [FromServices] IGetService<GetBankDepositFormQuery, BankDepositForm> getBankDepositService,
+            Guid id)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var getBankDepositFormQuery = new GetBankDepositFormQuery(playerTokenData.PlayerCode, id);
+
+            var form = await getBankDepositService
+                .GetAsync(getBankDepositFormQuery)
+                .ConfigureAwait(false);
+
+            return new DepositFormResponse
+            {
+                Amount = form.Amount
+            };
         }
     }
 }

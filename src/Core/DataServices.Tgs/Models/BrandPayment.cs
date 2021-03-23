@@ -30,8 +30,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string ChannelName { get; set; }
 
-        public string BankAccount { get; set; }
-
         public SwitchStatus PaymentStatus { get; set; }
 
         public decimal TransferLimitFrom { get; set; }
@@ -67,6 +65,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string CreatedByUsername { get; set; }
 
         public string UpdatedByUsername { get; set; }
+
+        public string ExtendedData { get; set; }
 
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 

@@ -874,11 +874,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("all_players");
 
-                    b.Property<string>("BankAccount")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("bank_account");
-
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
@@ -916,6 +911,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer")
                         .HasColumnName("display_order");
+
+                    b.Property<string>("ExtendedData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("extended_data");
 
                     b.Property<decimal?>("FeePercentage")
                         .HasPrecision(18, 6)

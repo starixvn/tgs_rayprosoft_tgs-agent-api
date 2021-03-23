@@ -1249,7 +1249,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     payment_channel_id = table.Column<Guid>(type: "uuid", nullable: false),
                     transfer_type = table.Column<int>(type: "integer", nullable: false),
                     channel_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    bank_account = table.Column<string>(type: "text", nullable: false),
                     payment_status = table.Column<int>(type: "integer", nullable: false),
                     transfer_limit_from = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
                     transfer_limit_to = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
@@ -1267,7 +1266,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
+                    updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    extended_data = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {

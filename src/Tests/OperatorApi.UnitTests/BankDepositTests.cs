@@ -37,5 +37,55 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.CreateDepositFormAsync(It.Is<BankDepositForm>(form => expected.Matches(form))),
                 Times.Exactly(1));
         }
+
+        [Test]
+        public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new GetBankDepositFromQueryService(moqDepositRepository.Object);
+
+            var query = new GetBankDepositFormQuery(
+                "ThisIsPlayerCode",
+                Guid.NewGuid());
+
+            moqDepositRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
+                .Returns(ValueTask.FromResult(new BankDepositForm(
+                    query.PlayerCode,
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "test",
+                    1000M)));
+
+            var actual = await sut.GetAsync(query);
+
+            moqDepositRepository.Verify(
+                fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public void Bank_Deposit_Form_If_Not_Player_Own_Will_Throw_Exception()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new GetBankDepositFromQueryService(moqDepositRepository.Object);
+
+            var query = new GetBankDepositFormQuery(
+                "ThisIsPlayerCode",
+                Guid.NewGuid());
+
+            moqDepositRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
+                .Returns(ValueTask.FromResult(new BankDepositForm(
+                    "OtherPlayerCode",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "test",
+                    1000M)));
+
+            Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
+        }
     }
 }

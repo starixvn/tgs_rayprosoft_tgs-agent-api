@@ -9,5 +9,7 @@ namespace TGS.Services.Operator
     public interface IDepositRepository
     {
         ValueTask CreateDepositFormAsync(BankDepositForm form);
+
+        ValueTask<BankDepositForm> GetDepositFormByIdAsync(Guid id);
     }
 }

@@ -29,5 +29,12 @@ namespace TGS.Operator.Repositories
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
+
+        public async ValueTask<BankDepositForm> GetDepositFormByIdAsync(Guid id)
+        {
+            var data = await _tgsRepository.DepositForms.FindAsync(id).ConfigureAwait(false);
+
+            return new BankDepositForm(data.PlayerCode, data.BrandId, data.BrandPaymentId, data.BankAccount, data.Amount);
+        }
     }
 }

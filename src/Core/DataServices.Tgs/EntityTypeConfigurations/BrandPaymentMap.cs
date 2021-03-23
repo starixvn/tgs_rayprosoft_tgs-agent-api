@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -15,9 +16,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.ChannelName)
                 .HasMaxLength(50)
-                .IsRequired();
-
-            builder.Property(c => c.BankAccount)
                 .IsRequired();
 
             builder.Property(c => c.Reason)
@@ -61,6 +59,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.HighestFee)
                 .HasPrecision(18, 6);
+
+            builder.Property(c => c.ExtendedData)
+                .HasColumnType(ColumnTypes.Jsonb)
+                .IsRequired();
 
             builder.HasOne(c => c.PaymentChannel)
                 .WithMany()
