@@ -119,15 +119,7 @@ const SearchForm = ({ search, isLoading, ...props }) => {
                 <Set>
                     <InputField
                         name="keyword"
-                        addonAfter={
-                            <Button
-                                onClick={() =>
-                                    formMethods.setValue("keyword", "")
-                                }
-                            >
-                                X
-                            </Button>
-                        }
+                        showEmptyFieldValueAddonAfter
                         placeholder={searchPlaceHolder}
                     />
 
