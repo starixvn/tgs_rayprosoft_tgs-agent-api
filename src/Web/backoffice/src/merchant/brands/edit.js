@@ -37,6 +37,9 @@ import CurrencyFieldsBox, {
     toCheckedCurrencyCodes
 } from "../CurrencyFieldsBox"
 import { toCheckedFieldName } from "../../currency/CurrencyCheckboxGroup"
+import CurrencyBetLimitFieldsBox, {
+    flatCheckedCurrencyBetLimits
+} from "../CurrencyBetLimitFieldsBox"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -312,10 +315,31 @@ const EditDialog = ({ brandId, licenseeId, onSubmitted, dialog, ...props }) => {
     }
 
     const onSubmit = (data) => {
+        let { gameProviders = [], ...restData } = normalizeFormData(data)
+        let gameProviderIds = gameProviders.map(
+            ({ gameProviderId }) => gameProviderId
+        )
+        let games = brand.games.filter(({ gameProviderId }) =>
+            gameProviderIds.includes(gameProviderId)
+        )
+
+        let brandGroups = brand.brandGroups.map(
+            ({ brandGames = [], ...brandGroup }) => ({
+                brandGames: brandGames.filter(({ gameProviderId }) =>
+                    gameProviderIds.includes(gameProviderId)
+                ),
+                ...brandGroup
+            })
+        )
+
         let formData = {
             ...brand,
-            ...normalizeFormData(data)
+            gameProviders,
+            games,
+            brandGroups,
+            ...restData
         }
+
         setSubmit(formData)
     }
 
@@ -385,11 +409,18 @@ const normalizeFormData = ({
 
     let currencyCodes = toCheckedCurrencyCodes(currencies)
 
-    gameProviders = gameProviders.filter(({ checked }) => checked)
-
-    betLimits = betLimits
-        .filter((betLimit) => betLimit.checked)
-        .map(({ id, ...props }) => ({ id: parseInt(id), ...props }))
+    gameProviders = gameProviders
+        .filter(({ checked }) => checked)
+        .map(({ id, checked, ...gameProvider }) =>
+            id ? { id, ...gameProvider } : gameProvider
+        )
+    // betLimits = betLimits
+    //     .filter((betLimit) => betLimit.checked)
+    //     .map(({ id, ...props }) => ({ id: parseInt(id), ...props }))
+    betLimits = flatCheckedCurrencyBetLimits(
+        ({ checked, ...betLimit }) => betLimit,
+        currencies
+    )
 
     return {
         ...data,
@@ -505,12 +536,16 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
 
                 <LanguageFieldsBox readonly={readonly} />
 
-                <CurrencyFieldsBox readonly={readonly} />
+                <CurrencyBetLimitFieldsBox
+                    readonly={readonly}
+                    showBetLimitDefault
+                />
+                {/* <CurrencyFieldsBox readonly={readonly} />
 
                 <BrandBetLimitFieldsBox
                     readonly={readonly}
                     currencyFieldArrayName={currencyFieldArrayName}
-                />
+                /> */}
 
                 <BrandGameProviderFieldsBox readonly={readonly} />
             </FieldValues>
@@ -557,7 +592,7 @@ const BrandGameProviderFieldsBox = ({ readonly }) => {
         keyName: "_id"
     })
     let gameProviders = watch(fieldsName)
-
+    console.log("gameProviders", gameProviders)
     if (gameProviders.length == 0) {
         return null
     }
@@ -576,6 +611,7 @@ const BrandGameProviderFieldsBox = ({ readonly }) => {
     )
 }
 
+//TODO: rm
 const BrandBetLimitFieldsBox = ({ currencyFieldArrayName, readonly }) => {
     let { watch, control, getValues } = useFormContext()
 
