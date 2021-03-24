@@ -137,7 +137,17 @@ Scenario: 03.b - Win bet after player logout
     When I settle bet for $15
     Then I will receive bet response of no error and balance of $105
 
-Scenario: 03.c - Lose bet
+Scenario: 03.c - Win bet with different platform token
+    Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AcesandEights1Hand"
+        And balance now being $90
+        And player logout
+    Given player "RP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+    When I settle bet for $15
+    Then I will receive bet response of no error and balance of $105
+
+Scenario: 03.d - Lose bet
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AcesandEights1Hand"
@@ -147,7 +157,7 @@ Scenario: 03.c - Lose bet
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 03.d - Free bet
+Scenario: 03.e - Free bet
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I placed bet for $10 and settle it for $15 for game "AcesandEights1Hand"
@@ -156,7 +166,7 @@ Scenario: 03.d - Free bet
         And player wallet database record will be for $115
         And game action will be recorded in the database of type "FreeBet" for $10
 
-Scenario: 03.e - Settle bet with duplicate transaction ID
+Scenario: 03.f - Settle bet with duplicate transaction ID
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AcesandEights1Hand"

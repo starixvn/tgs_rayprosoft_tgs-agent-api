@@ -212,12 +212,24 @@ Scenario: 03.h - Win bet with unknown game
 		And game action will be recorded in the database of type "WinBet" for $15
 		And the round will be closed
 
-Scenario: 03.h - Win bet with token cache all cleared
+Scenario: 03.i - Win bet with token cache all cleared
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Mobile"
 		And player having balance of $100
 	Given I place bet of $10 for game "1_1"
 		And balance now being $90
 	Given clear all redis token cache
+	When I win bet for game "1_0" for $15 
+	Then I will receive settle bet response of no error and balance of $105
+		And player wallet database record will be for $105
+		And game action will be recorded in the database of type "WinBet" for $15
+		And the round will be closed
+
+Scenario: 03.i - Win bet with login records in db are all removed
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given remove all login records
 	When I win bet for game "1_0" for $15 
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105

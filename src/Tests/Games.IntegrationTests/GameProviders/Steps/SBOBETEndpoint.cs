@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -232,6 +234,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 }
             });
         }
+
+        [Given(@"remove all login records")]
+        public async Task GivenRemoveAllLoginRecords()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var sql = "delete from dbo.player_login_records where player_code = @player_code;";
+            await db.ExecuteSqlCommandAsync(sql, CommandType.Text,
+                new Dictionary<string, object> {{"@player_code", playerCode}}).ConfigureAwait(false);
+        }
+
 
         [When(@"I request the player balance")]
         public async Task WhenIRequestThePlayerBalanceAsync()
