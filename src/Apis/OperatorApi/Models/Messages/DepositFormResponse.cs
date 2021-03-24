@@ -4,11 +4,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public class DepositFormResponse
     {
-        public Guid Id { get; init; }
+        public string MethodName { get; init; }
 
-        public Guid MethodId { get; init; }
-
-        public Guid ChannelId { get; init; }
+        public string ChannelName { get; init; }
 
         public decimal Amount { get; init; }
 

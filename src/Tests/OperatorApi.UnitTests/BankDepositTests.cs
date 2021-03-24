@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
@@ -86,6 +87,68 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M)));
 
             Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
+        }
+
+        [Test]
+        public async Task Get_Payment_Methods_Should_Success()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new AllPaymentMethodsQueryService(moqDepositRepository.Object);
+
+            var query = new AllPaymentMethodsQuery();
+
+            moqDepositRepository
+                .Setup(fake => fake.GetAllPaymentMethodsAsync())
+                .Returns(new[] {
+                    new PaymentMethod(Guid.NewGuid(), "test1"),
+                    new PaymentMethod(Guid.NewGuid(), "test2")
+                }.ToAsyncEnumerable());
+
+            _ = await sut.GetAsync(query);
+
+            moqDepositRepository.Verify(
+                fake => fake.GetAllPaymentMethodsAsync(),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Payment_Channels_Should_Success()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new AllPaymentChannelsQueryService(moqDepositRepository.Object);
+
+            var query = new AllPaymentChannelsQuery();
+
+            moqDepositRepository
+                .Setup(fake => fake.GetAllPaymentChannelsAsync())
+                .Returns(new[] {
+                    new PaymentChannel(Guid.NewGuid(), "test1"),
+                    new PaymentChannel(Guid.NewGuid(), "test2")
+                }.ToAsyncEnumerable());
+
+            _ = await sut.GetAsync(query);
+
+            moqDepositRepository.Verify(
+                fake => fake.GetAllPaymentChannelsAsync(),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Brand_Payment_Should_SuccessAsync()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new GetBrandPaymentQueryService(moqDepositRepository.Object);
+
+            var query = new GetBrandPaymentQuery(Guid.NewGuid());
+
+            _ = await sut.GetAsync(query);
+
+            moqDepositRepository.Verify(
+                fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
+                Times.Exactly(1));
         }
     }
 }
