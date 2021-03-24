@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Models.Enums;
+using TGS.Core.Models.Extensions;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.OperatorApi.Handlers.Game
@@ -36,7 +36,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var gameType = request.GameType;
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
 
-            var gamePlatformTypes = GetGamePlatformTypes(platformType);
+            var gamePlatformTypes = platformType.ToGamePlatformTypes();
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes, gameType);
             if (games.Length != 1)
             {
@@ -54,12 +54,5 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
             return await _mediator.Send(r, cancellationToken);
         }
-
-        private static GamePlatformType[] GetGamePlatformTypes(PlatformType platformType) =>
-            platformType switch
-            {
-                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
-                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
-            };
     }
 }

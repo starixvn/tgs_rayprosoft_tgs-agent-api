@@ -13,6 +13,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -141,7 +142,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                         return null;
                     }
 
-                    var gamePlatformTypes = GetGamePlatformTypes(platformType);
+                    var gamePlatformTypes = platformType.ToGamePlatformTypes();
                     var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
 
                     if (games.Length == 0)
@@ -163,12 +164,5 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
 
             return providers.Where(gpm => gpm != null).ToArray();
         }
-
-        private static GamePlatformType[] GetGamePlatformTypes(PlatformType platformType) =>
-            platformType switch
-            {
-                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
-                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
-            };
     }
 }

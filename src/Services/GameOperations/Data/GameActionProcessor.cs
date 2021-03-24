@@ -176,7 +176,7 @@ namespace TGS.Services.GameOperations.Data
 
             if (s.HasExtGameId)
             {
-                var types = GetGamePlatformTypes(s.PlatformType);
+                var types = s.PlatformType.ToGamePlatformTypes();
                 game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId)
                     && types.Contains(g.PlatformType));
             }
@@ -205,14 +205,6 @@ namespace TGS.Services.GameOperations.Data
 
             return s;
         }
-
-        private static GamePlatformType[] GetGamePlatformTypes(PlatformType? platformType) =>
-            platformType switch
-            {
-                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
-                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile},
-                _                    => Consts.AllGamePlatformTypes
-            };
 
         private static async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
             GameActionState s)

@@ -150,7 +150,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 }
             }
 
-            var gamePlatformTypes = GetGamePlatformTypes(platformType);
+            var gamePlatformTypes = platformType.ToGamePlatformTypes();
             var brandGameProviderStatus =
                 await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId) ?? Status.Active;
             var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, gamePlatformTypes);
@@ -184,11 +184,5 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             GameStatus[] gameStatuses, GameStatus gameStatus, GameStatus brandGameStatus) =>
             statuses.Contains(gameProviderStatus) && gameStatuses.Contains(gameStatus) &&
             statuses.Contains(brandGameProviderStatus) && gameStatuses.Contains(brandGameStatus);
-
-        private static GamePlatformType[] GetGamePlatformTypes(PlatformType platformType) => platformType switch
-        {
-            PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
-            PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
-        };
     }
 }

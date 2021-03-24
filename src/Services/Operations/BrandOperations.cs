@@ -59,11 +59,6 @@ namespace TGS.Services.Operations
 
     public sealed class BrandOperations : IBrandOperations
     {
-        private readonly GamePlatformType[] _allGamePlatformTypes =
-        {
-            GamePlatformType.Desktop, GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile
-        };
-
         private readonly IBrandQueries _brandQueries;
         private readonly IRedisCacheManager _cacheManager;
         private readonly IBrandOperations _interface;

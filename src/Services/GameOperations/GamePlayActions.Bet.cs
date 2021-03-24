@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -88,13 +89,7 @@ namespace TGS.Services.GameOperations
             }
 
             var platformType = data.PlatformType;
-
-            if (!platformType.HasValue)
-            {
-                throw new InvalidOperationException("Platform can't be empty for place bet action");
-            }
-
-            var gamePlatformTypes = GetGamePlatformTypes();
+            var gamePlatformTypes = platformType!.Value.ToGamePlatformTypes();
             var brandGames =
                 await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, gamePlatformTypes);
             var subGames = await _gameProviderOperations.GetSubGamesAsync(gameProviderId, gamePlatformTypes);
@@ -145,12 +140,6 @@ namespace TGS.Services.GameOperations
                 throw new InvalidOperationException(
                     $"Brand {player.BrandCode} doesn't have game '{cachedGame.ExternalId}' with status '{gameStatuses.JoinAsStringByComma()}' but game status is '{cachedGame.Status}'");
             }
-
-            GamePlatformType[] GetGamePlatformTypes() => platformType switch
-            {
-                PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
-                PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
-            };
         }
 
         private async Task<BetData> EnsureMappingsAsync(BetData data, string playerCurrencyCode)
