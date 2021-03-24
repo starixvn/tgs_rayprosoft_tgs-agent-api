@@ -3,6 +3,7 @@ using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET;
 using TGS.Workers.Schedulers.Jobs.Reports;
+using TGS.Workers.Schedulers.Jobs.Rounds;
 
 namespace TGS.Workers.Schedulers.Services
 {
@@ -12,8 +13,10 @@ namespace TGS.Workers.Schedulers.Services
             base(
                 new JobDescription(new("500BD4EC-7B4A-4661-A00B-7C7BDC565CB4"), Cron.Minutely(), null,
                     typeof(BrandGameProviderScheduleWorker)),
-                new JobDescription(new("803E2BEE-7751-4D82-8CA7-BB1F1B83C4E0"), "0 */5 * * * *", null,
-                    typeof(MarketReportWorker)),
+                new JobDescription(new("888E2BEE-7751-4D82-8CA7-BB1F1B83C4E0"), "0 1 * * * *", null,
+                    typeof(RoundAggregateWorker)),
+                new JobDescription(new("999E2BEE-7751-4D82-8CA7-BB1F1B83C4E0"), "0 20 * * * *", null,
+                    typeof(PlayerAggregateReportWorker)),
                 new JobDescription(new("EFB74D1F-355C-4298-9E60-33C003B16ECE"), "0 */20 * * * *", null,
                     typeof(CancelFailedTransactionsJobWorker)))
         {

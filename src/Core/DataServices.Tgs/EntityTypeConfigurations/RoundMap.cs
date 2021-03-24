@@ -88,19 +88,13 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_rounds_brand_id");
 
-            builder.HasIndex(c => new
-                {
-                    c.ExternalRoundId,
-                    c.PlayerCode,
-                    c.GameProviderId,
-                    c.GameId
-                })
+            builder.HasIndex(c => c.ClosedOn)
+                .HasMethod("brin")
+                .HasDatabaseName("ix_rounds_closed_on");
+
+            builder.HasIndex(c => new {c.ExternalRoundId, c.PlayerCode, c.GameProviderId, c.GameId})
                 .IsUnique()
-                .IncludeProperties(c => new
-                {
-                    c.GameProviderConfigurationId,
-                    c.WalletId
-                })
+                .IncludeProperties(c => new {c.GameProviderConfigurationId, c.WalletId})
                 .HasDatabaseName("ux_rounds_external_round_id_composite");
         }
     }

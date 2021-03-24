@@ -44,7 +44,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             currency.Name = request.Name;
             currency.NativeName = request.NativeName;
             currency.Symbol = request.Symbol;
-            currency.UpdatedByUsername = request.Username;
+            currency.UpdatedByUsername = request.EditorUsername;
             currency.UpdatedOn = DateTimeOffset.Now;
 
             await UpdateEntityAsync(currency);
@@ -58,8 +58,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 Code = request.Code,
                 NativeName = request.NativeName,
                 Symbol = request.Symbol,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };

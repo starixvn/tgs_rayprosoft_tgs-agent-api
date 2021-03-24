@@ -42,6 +42,9 @@ import LanguageFieldsBox, { toCheckedCultureCodes } from "../LanguageFieldsBox"
 import BetLimitFieldsBox, { toCheckedBetLimitIds } from "../BetLimitFieldsBox"
 import GameProviderFieldsBox from "../GameProviderFieldsBox"
 import useResellerLicensee from "./useResellerLicensee"
+import CurrencyBetLimitFieldsBox, {
+    flatCheckedCurrencyBetLimitIds
+} from "../CurrencyBetLimitFieldsBox"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -100,7 +103,9 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     }, [reseller])
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useAddLicensee(formData)
+    let { result, isLoading, error, mutate, deleteCache } = useAddLicensee(
+        formData
+    )
 
     const onSubmit = (data) => {
         let formData = normalizeFormData(data)
@@ -111,6 +116,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     }
 
     const reset = () => {
+        deleteCache()
         mutate(undefined, false)
         setSubmit(undefined)
     }
@@ -283,7 +289,8 @@ const normalizeFormData = ({
         gameProviders
     )
 
-    let betLimitIds = toCheckedBetLimitIds(betLimits)
+    // let betLimitIds = toCheckedBetLimitIds(betLimits)
+    let betLimitIds = flatCheckedCurrencyBetLimitIds(currencies)
     return {
         ...data,
         cultureCodes,
@@ -307,16 +314,21 @@ const EditDialog = ({ id, resellerId, onSubmitted, dialog, ...props }) => {
         deleteLicenseeCache
     } = useResellerLicensee({ id, resellerId })
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useUpdateLicensee(id, formData)
+    let { result, isLoading, error, mutate, deleteCache } = useUpdateLicensee(
+        id,
+        formData
+    )
 
     const onSubmit = (data) => {
-        setSubmit(normalizeFormData(data))
+        let formData = normalizeFormData(data)
+        setSubmit(formData)
     }
 
     const reset = () => {
         mutateLicensee(undefined, false)
         deleteLicenseeCache()
 
+        deleteCache()
         mutate(undefined, false)
         setSubmit(undefined)
     }
@@ -462,9 +474,10 @@ const EditBody = ({
 
                 <LanguageFieldsBox readonly={readonly} />
 
-                <CurrencyFieldsBox readonly={readonly} />
+                <CurrencyBetLimitFieldsBox readonly={readonly} />
+                {/* <CurrencyFieldsBox readonly={readonly} />
 
-                <BetLimitFieldsBox readonly={readonly} />
+                <BetLimitFieldsBox readonly={readonly} /> */}
 
                 <GameProviderFieldsBox readonly={readonly} />
             </FieldValues>

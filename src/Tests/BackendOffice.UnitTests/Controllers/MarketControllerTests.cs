@@ -21,7 +21,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new MarketController(
+            _controller = new(
                 _mediatorMock.Object);
         }
 
@@ -51,18 +51,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetMarketsRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<MarketModel>
-                {
-                    Valid = true,
-                    Items = expectedRoles
-                });
+                .ReturnsAsync(new PagedResponse<MarketModel> {Valid = true, Items = expectedRoles});
 
             var response = await _controller.GetMarketsAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
             {
-                response.Items[i].BrandId.Should().Be(expectedRoles[i].BrandId);
                 response.Items[i].ReportDate.Should().Be(expectedRoles[i].ReportDate);
             }
 
