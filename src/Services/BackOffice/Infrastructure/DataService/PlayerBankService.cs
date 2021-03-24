@@ -37,7 +37,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             playerBank.RealName = request.RealName;
             playerBank.BankName = request.BankName;
             playerBank.BankAccount = request.BankAccount;
-            playerBank.UpdatedByUsername = request.Username;
+            playerBank.UpdatedByUsername = request.EditorUsername;
             playerBank.UpdatedOn = DateTimeOffset.Now;
 
             return UpdateEntityAsync(playerBank);
@@ -51,8 +51,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 RealName = request.RealName,
                 BankAccount = request.BankAccount,
                 BankName = request.BankName,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };

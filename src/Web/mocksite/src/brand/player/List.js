@@ -35,9 +35,10 @@ export const PlayerList = ({ brandToken }) => {
     )
 
     let rows = DefaultRows
-    let currentPage = Math.ceil((result?.totalCount ?? 0) / rows)
+    let totalCount = result?.totalcount ?? 0
+    let currentPage = state?.page
     let players = result?.items ?? []
-    let numberOfPages = pageCount(state.rows, result?.totalcount)
+    let numberOfPages = pageCount(totalCount, rows)
 
     useEffect(() => {
         setState({
@@ -116,7 +117,7 @@ const PlayerTable = ({
     )
 }
 
-const pageCount = (pageSize, totalCount) => {
+const pageCount = (totalCount, pageSize) => {
     if (!pageSize) {
         return
     }

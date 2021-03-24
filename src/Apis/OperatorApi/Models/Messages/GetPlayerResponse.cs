@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.OperatorApi.Models.Messages 
+namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record GetPlayerResponse : TgsResponse
     {
@@ -28,5 +28,11 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("wechat")]
         public string Wechat { get; init; }
+
+        [JsonPropertyName("issetpaypassword")]
+        public bool IsSetPayPassword { get; init; }
+
+        [JsonPropertyName("identityauthentication")]
+        public bool IdentityAuthentication { get; init; }
     }
 }

@@ -39,8 +39,6 @@ namespace TGS.Services.Operations
 
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
-        Task UpdatePlayerAsync(UpdatePlayerData data);
-
         Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn);
 
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
@@ -166,12 +164,6 @@ namespace TGS.Services.Operations
                 new HashEntry[] {new(data.Username, playerCode)}, TimeSpan.FromHours(12), true);
 
             return playerCode;
-        }
-
-        public async Task UpdatePlayerAsync(UpdatePlayerData data)
-        {
-            await _playerCommands.UpdatePlayerAsync(data);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
         }
 
         public async Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)

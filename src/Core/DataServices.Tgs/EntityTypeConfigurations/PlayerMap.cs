@@ -95,6 +95,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasForeignKey(p => p.BrandId)
                 .HasConstraintName("fk_players_brands_brand_id");
 
+            builder.HasOne(p => p.Agent)
+                .WithMany(p => p.Players)
+                .HasForeignKey(p => p.AgentId)
+                .HasConstraintName("fk_players_agents_agent_id")
+                .IsRequired(false);
+
             builder.HasOne(p => p.Vip)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.VipId)

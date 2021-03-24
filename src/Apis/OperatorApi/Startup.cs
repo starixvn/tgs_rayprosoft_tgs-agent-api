@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
+using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Services;
 using TGS.Core.DataServices.Report.Extensions;
@@ -28,6 +29,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
+using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
 using TGS.Services.Report.Application.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
@@ -75,6 +77,15 @@ namespace TGS.Apis.OperatorApi
                     config.GetSection("EmailSetting").Bind(options);
                 });
 
+            services
+                .AddOptions<ConstValidateCodeOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("Operator").Bind(options);
+                })
+                .Services
+                .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
+
             services.AddIdentityVerifiers();
 
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
@@ -121,10 +132,12 @@ namespace TGS.Apis.OperatorApi
 
                     c.OperationFilter<SwaggerHeaderFilter>();
                     c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+                    c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);
-                    c.IncludeXmlComments(path);
+                    if (File.Exists(path))
+                        c.IncludeXmlComments(path);
                 });
             }
 
@@ -140,11 +153,14 @@ namespace TGS.Apis.OperatorApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
+
+            services.AddSingleton<OperatorApiErrorMapper>();
         }
 
         public void Configure(IApplicationBuilder app)
         {
             app.UseGlobalExceptionHandler();
+            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
 
             app.UseRequestLocalization(options =>
             {

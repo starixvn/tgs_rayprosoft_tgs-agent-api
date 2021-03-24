@@ -196,10 +196,10 @@ services:
       tgs:
 
   operator-api:
-    build:
-      context: .
-      dockerfile: ./src/Apis/OperatorApi/Dockerfile
-    image: operator-api
+    # build:
+    #   context: .
+    #   dockerfile: ./src/Apis/OperatorApi/Dockerfile
+    image: operator-api:latest
     container_name: operator-api
     labels:
       - traefik.enable=true

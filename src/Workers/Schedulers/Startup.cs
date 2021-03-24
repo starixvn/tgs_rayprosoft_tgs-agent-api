@@ -1,7 +1,6 @@
 using System;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +23,7 @@ using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Reports;
+using TGS.Workers.Schedulers.Jobs.Rounds;
 using TGS.Workers.Schedulers.Services;
 using GlobalConsts = TGS.Core.Models.Consts;
 
@@ -64,11 +64,19 @@ namespace TGS.Workers.Schedulers
                 .AddMongoDb(_configuration, "Hangfire", "hangfire-mongodb")
                 .ForwardToPrometheus();
 
-            // add custom services for workers
+            // BO services
             services.AddTransient<IBrandGameProviderService, BrandGameProviderService>();
-            services.AddTransient<IMarketService, MarketService>();
-            services.AddTransient<IRoundService, RoundService>();
-            services.AddTransient<IMarketReportService, MarketReportService>();
+
+            // Report services
+            services.AddTransient<IPlayerAggregateService, PlayerAggregateService>();
+            services.AddTransient<IPlayerGameTypeAggregateService, PlayerGameTypeAggregateService>();
+            services.AddTransient<ITgsPlayerService, TgsPlayerService>();
+            services.AddTransient<ITgsRoundService, TgsRoundService>();
+            services.AddTransient<IRoundAggregateService, RoundAggregateService>();
+
+            // job
+            services.AddTransient<IPlayerAggregateReportWorkerService, PlayerAggregateReportWorkerService>();
+            services.AddTransient<IRoundAggregateWorkerService, RoundAggregateWorkerService>();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -83,7 +91,7 @@ namespace TGS.Workers.Schedulers
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+                endpoints.MapHealthChecks("/health", new()
                 {
                     ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
@@ -92,10 +100,8 @@ namespace TGS.Workers.Schedulers
 
                 endpoints.MapMetrics();
 
-                endpoints.MapHangfireDashboard("/hangfire", new DashboardOptions()
-                {
-                    Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}
-                });
+                endpoints.MapHangfireDashboard("/hangfire",
+                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
             });
         }
 
