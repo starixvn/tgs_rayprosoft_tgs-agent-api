@@ -37,8 +37,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             var configuration = await _settingOperations
                 .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET);
 
-            context.Request.EnableBuffering();
-
             var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
 
             if (request.CompanyKey.IsNullOrEmpty() || request.CompanyKey.NotEquals(configuration.CompanyKey))
@@ -47,6 +45,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             }
 
             var playerCode = request.PlayerCode;
+
+            if (configuration.BypassPlayerCodes.IgnoreCaseContains(playerCode))
+            {
+                var response = new BaseResponse
+                {
+                    PlayerCode = playerCode,
+                    Balance = 0
+                };
+
+                await context.Response.WriteAsJsonAsync(response);
+                return;
+            }
+
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProvider.SBOBET);
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
