@@ -137,6 +137,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Report.Client", "src\Client
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operator.Repositories", "src\Repositories\Operator.Repositories\Operator.Repositories.csproj", "{C199FF98-9A32-4912-99B3-A1E110DAC202}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.Core", "src\Services\FileService.Core\FileService.Core.csproj", "{C9D957FF-5F49-4FCD-ADE0-B46F79FA8DF4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoFileMetaRepository", "src\Repositories\MongoFileMetaRepository\MongoFileMetaRepository.csproj", "{D6B17115-7C30-40C8-9786-F08483EC7F7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -303,10 +307,14 @@ Global
 		{DA53E652-FDA7-41B2-BA4B-0ADE9FDB3A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA53E652-FDA7-41B2-BA4B-0ADE9FDB3A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA53E652-FDA7-41B2-BA4B-0ADE9FDB3A45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C199FF98-9A32-4912-99B3-A1E110DAC202}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C199FF98-9A32-4912-99B3-A1E110DAC202}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C199FF98-9A32-4912-99B3-A1E110DAC202}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C199FF98-9A32-4912-99B3-A1E110DAC202}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9D957FF-5F49-4FCD-ADE0-B46F79FA8DF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9D957FF-5F49-4FCD-ADE0-B46F79FA8DF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9D957FF-5F49-4FCD-ADE0-B46F79FA8DF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9D957FF-5F49-4FCD-ADE0-B46F79FA8DF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B17115-7C30-40C8-9786-F08483EC7F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B17115-7C30-40C8-9786-F08483EC7F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B17115-7C30-40C8-9786-F08483EC7F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B17115-7C30-40C8-9786-F08483EC7F7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -356,7 +364,8 @@ Global
 		{D22E7F19-C657-46A9-A905-6ACAD2E53A94} = {A0C1C28D-6A48-4227-B2B5-C02C7011928C}
 		{D721E4E8-A6BD-40D9-8C42-76498A1A3AA3} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{DA53E652-FDA7-41B2-BA4B-0ADE9FDB3A45} = {C7A4F6C1-F05B-4EA6-9FFD-7D70F78ECF3F}
-		{C199FF98-9A32-4912-99B3-A1E110DAC202} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
+		{C9D957FF-5F49-4FCD-ADE0-B46F79FA8DF4} = {2D13A664-6549-483A-9659-22362B2C1DE9}
+		{D6B17115-7C30-40C8-9786-F08483EC7F7E} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

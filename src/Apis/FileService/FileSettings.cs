@@ -1,4 +1,7 @@
-﻿namespace TGS.Apis.FileService
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
+
+namespace TGS.Apis.FileService
 {
     public class FileSettings
     {

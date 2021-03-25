@@ -1,69 +1,50 @@
 ﻿using System;
-using System.Net;
-using System.Threading;
+using System.IO;
 using System.Threading.Tasks;
-using Amazon.S3;
-using Amazon.S3.Model;
-using AutoFixture;
-using AutoFixture.Dsl;
-using AutoFixture.Kernel;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
-using TGS.Core.Infrastructures.Aws;
+using TGS.FileService;
 using TGS.Tests.FileService.UnitTests.Controllers;
 
 namespace TGS.Tests.FileService.UnitTests.Services
 {
     public class UploadServiceTests : BaseTests
     {
-        private readonly Mock<IAmazonS3> _amazonS3Mock = new();
-        private readonly Mock<IRepository<File>> _repositoryMock = new();
-        private readonly Mock<IRepository<StationLetterFile>> _stationLetterRepositoryMock = new();
-        private AwsSettings _awsSettings;
-
-        private UploadService _service;
-
-        [SetUp]
-        public void Setup()
-        {
-            _awsSettings = Customize<AwsSettings>(x => x)
-                .Create<AwsSettings>();
-
-            _service = new(
-                _amazonS3Mock.Object, _awsSettings, _repositoryMock.Object,
-                _stationLetterRepositoryMock.Object);
-        }
-
         [Test]
         public async Task Can_Upload_S3()
         {
             CreateFile();
+
+            var moqStationLetterRepository = new Mock<IRepository<StationLetterFile>>();
+            var moqFileManager = new Mock<IFileManager>();
+
+            var sut = new UploadService(moqStationLetterRepository.Object, moqFileManager.Object);
+
             var file = fileMock.Object;
-            var response = new PutObjectResponse
-            {
-                HttpStatusCode = HttpStatusCode.OK
-            };
+            var expected = "https://aws/bucket/filepath";
 
-            _amazonS3Mock.Setup(x => x.PutObjectAsync(It.IsAny<PutObjectRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(response);
+            moqFileManager
+                .Setup(fake => fake.SaveAsync(
+                    It.IsAny<string>(),
+                    It.Is<string>(x => x == file.ContentType),
+                    It.Is<long>(x => x == file.Length),
+                    It.IsAny<Stream>()))
+                .Returns(Task.FromResult(new FileMeta
+                {
+                    Id = "testId",
+                    FileName = file.FileName,
+                    ContentType = file.ContentType,
+                    FileLength = file.Length,
+                    CreatedOn = DateTimeOffset.Now,
+                    ExternalUrl = expected
+                }));
 
-            var url = await _service.UploadFileS3Async(file);
+            var url = await sut.UploadFileS3Async(file);
 
-            _repositoryMock.Verify(
-                c => c.InsertAsync(It.IsAny<File>()));
-
-            Assert.IsTrue(url.IndexOf($"{_awsSettings.ServiceUrl}/{_awsSettings.S3.Bucket}", StringComparison.Ordinal) > -1);
-        }
-
-        private static Fixture Customize<T>(Func<ICustomizationComposer<T>, ISpecimenBuilder> composerTransformation)
-            where T : new()
-        {
-            var fixture = new Fixture();
-            fixture.Customize(composerTransformation);
-            return fixture;
+            Assert.AreEqual(expected, url);
         }
     }
 }
