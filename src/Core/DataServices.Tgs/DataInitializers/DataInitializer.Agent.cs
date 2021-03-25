@@ -10,8 +10,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private Agent CreateAgent(
             string userName,
-            Status status,
-            AgentStatus agentStatus,
+            AgentStatus status,
+            AgentConfigStatus agentStatus,
             AgentLevelType levelType,
             AgentType type,
             Guid brandId,

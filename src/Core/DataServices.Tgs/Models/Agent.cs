@@ -13,8 +13,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public byte[] Salt { get; set; }
         public byte[] WithdrawPassword { get; set; }
         public byte[] WithdrawSalt { get; set; }
-        public Status Status { get; set; }
-        public AgentStatus AgentStatus { get; set; }
+        public AgentStatus Status { get; set; }
+        public AgentConfigStatus AgentStatus { get; set; }
         public AgentLevelType LevelType { get; set; }
         public AgentType Type { get; set; }
         public string InvitationCode { get; set; }

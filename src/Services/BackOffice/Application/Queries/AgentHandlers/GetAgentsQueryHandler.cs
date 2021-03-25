@@ -36,6 +36,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     Status = x.Status,
                     AgentStatus = x.AgentStatus,
                     Type = x.Type,
+                    LevelType = x.LevelType,
                     PositionTakingPercentage = x.PositionTakingPercentage,
                     BonusPercentage = x.BonusPercentage,
                     RebatePercentage = x.RebatePercentage,

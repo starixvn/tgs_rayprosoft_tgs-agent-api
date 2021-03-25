@@ -136,14 +136,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             foreach (var brand in brands)
             {
                 var chiefId = GuidExtensions.NewSequentialGuid();
-                agents.Add(CreateAgent($"{brand.Name}Chief", Status.Active, AgentStatus.DoneForConfigurePercentage,
+                agents.Add(CreateAgent($"{brand.Name}Chief", AgentStatus.Enabled,
+                    AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Chief,
                     AgentType.Cash, brand.Id, 50, 50, 50, "CNY", chiefId));
-                agents.Add(CreateAgent($"{brand.Name}Agent", Status.Active, AgentStatus.DoneForConfigurePercentage,
+                agents.Add(CreateAgent($"{brand.Name}Agent", AgentStatus.Enabled,
+                    AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Agent,
                     AgentType.Cash, brand.Id, 30, 30, 30, "CNY", null,
                     chiefId));
-                agents.Add(CreateAgent($"{brand.Name}Agent", Status.Active, AgentStatus.WaitForConfigurePercentage,
+                agents.Add(CreateAgent($"{brand.Name}Agent", AgentStatus.Enabled,
+                    AgentConfigStatus.WaitForConfigurePercentage,
                     AgentLevelType.Agent,
                     AgentType.Cash, brand.Id, 0, 0, 0, "CNY", null,
                     chiefId));

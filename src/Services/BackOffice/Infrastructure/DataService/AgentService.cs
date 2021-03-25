@@ -72,12 +72,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         LevelType = request.LevelType,
                         Type = request.Type,
                         BrandId = request.BrandId,
-                        Status = Status.Active,
+                        Status = AgentStatus.Enabled,
                         ParentAgentId = parentAgent?.Id,
                         AgentStatus =
                             request.PositionTakingPercentage == 0 && request.BonusPercentage == 0
-                                ? AgentStatus.WaitForConfigurePercentage
-                                : AgentStatus.DoneForConfigurePercentage,
+                                ? AgentConfigStatus.WaitForConfigurePercentage
+                                : AgentConfigStatus.DoneForConfigurePercentage,
                         PositionTakingPercentage = request.PositionTakingPercentage,
                         BonusPercentage = request.BonusPercentage,
                         InvitationCode = invitationCode,
@@ -152,8 +152,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             agent.PositionTakingPercentage = request.PositionTakingPercentage;
                             agent.BonusPercentage = request.BonusPercentage;
                             agent.AgentStatus = request.PositionTakingPercentage == 0 && request.BonusPercentage == 0
-                                ? AgentStatus.WaitForConfigurePercentage
-                                : AgentStatus.DoneForConfigurePercentage;
+                                ? AgentConfigStatus.WaitForConfigurePercentage
+                                : AgentConfigStatus.DoneForConfigurePercentage;
                             break;
                         case MemberUpdateType.Contact:
                             agent.Phone = request.Phone;
