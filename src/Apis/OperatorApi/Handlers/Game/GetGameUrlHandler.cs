@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Extensions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
@@ -79,10 +82,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 throw new InvalidOperationException($"Game with id '{gameId}' doesn't exist");
             }
 
-            if (gamePlatformType.Value != platformType)
+            var allowedGamePlatformTypes = platformType.ToGamePlatformTypes();
+            if (!allowedGamePlatformTypes.Contains(gamePlatformType.Value))
             {
                 throw new InvalidOperationException(
-                    $"Launch game platform is expected as '{gamePlatformType.Value}' but player login as '{platformType}'");
+                    $"Launch game platform is expected as '{allowedGamePlatformTypes.JoinAsString(",")}' but is {gamePlatformType.Value} with player login as '{platformType}'");
             }
 
             var language =

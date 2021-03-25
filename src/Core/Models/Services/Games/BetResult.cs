@@ -8,7 +8,6 @@ namespace TGS.Core.Models.Services.Games
         public string CurrencyCode { get; init; }
         public string GameProviderCurrencyCode { get; init; }
         public TransactionResult[] Transactions { get; init; }
-        public int PlatformType { get; init; }
         public TgsApiError Error { get; init; }
     }
 }

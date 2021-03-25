@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -33,6 +35,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Tokens;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
@@ -206,6 +209,43 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"balance now being \$(.*)")]
         public void GivenBalanceNowBeing(decimal balance) =>
             VerifyResponseWithoutError<BaseResponse>(balance);
+
+        [Given(@"clear all redis token cache")]
+        public Task GivenClearAllRedisTokenCache()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platformType = Get<PlatformType>(SR.PlatformType);
+
+            var tokenKey = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
+            var tokenData = Get<PlayerTokenData>(tokenKey);
+
+            var manager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
+            return manager.ClearCacheByBatchAsync(new CacheKey[]
+            {
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = playerCode
+                },
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = tokenData.LoginRecordId
+                }
+            });
+        }
+
+        [Given(@"remove all login records")]
+        public async Task GivenRemoveAllLoginRecords()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var sql = "delete from dbo.player_login_records where player_code = @player_code;";
+            await db.ExecuteSqlCommandAsync(sql, CommandType.Text,
+                new Dictionary<string, object> {{"@player_code", playerCode}}).ConfigureAwait(false);
+        }
+
 
         [When(@"I request the player balance")]
         public async Task WhenIRequestThePlayerBalanceAsync()
@@ -459,7 +499,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                                    select new
                                    {
                                        r.PlayerCode,
-                                       r.PlatformType,
                                        r.CurrencyCode,
                                        ExternalGameId = g.ExternalId,
                                        r.ExternalRoundId,
@@ -483,7 +522,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     {
                         r.PlayerCode,
                         r.CurrencyCode,
-                        r.PlatformType,
                         r.ExternalRoundId,
                         r.ExternalGameId
                     })
@@ -497,7 +535,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                         return new BatchRequestTransaction
                         {
                             PlayerCode = g.Key.PlayerCode,
-                            PlatformType = (int)g.Key.PlatformType,
                             CurrencyCode = curr,
                             Amount = ga.Amount.Negate(),
                             ExternalGameId = g.Key.ExternalGameId,
@@ -563,20 +600,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ga.Should().NotBeNull();
             ga.Type.Should().Be(type);
             ga.Amount.Should().Be(amount);
-        }
-
-        [Then(@"game platform will be recorded in the database of type ""(.*)""")]
-        public async Task ThenGamePlatformWillBeRecordedInTheDatabaseOfTypeAsync(PlatformType platformType)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-            var platform = await db.Rounds
-                .Where(r => r.ExternalRoundId == externalRoundId)
-                .AsNoTracking()
-                .Select(r => r.PlatformType)
-                .FirstAsync();
-
-            platform.Should().Be(platformType);
         }
 
         [Then(@"the last settle game action recorded in the database will be canceled")]

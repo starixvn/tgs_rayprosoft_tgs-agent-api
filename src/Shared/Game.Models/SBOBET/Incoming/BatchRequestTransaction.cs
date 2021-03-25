@@ -7,9 +7,6 @@ namespace TGS.Shared.Game.Models.SBOBET.Incoming
         [JsonPropertyName("playercode")]
         public string PlayerCode { get; init; }
 
-        [JsonPropertyName("platform")]
-        public int PlatformType { get; init; }
-
         [JsonPropertyName("currency")]
         public string CurrencyCode { get; init; }
 

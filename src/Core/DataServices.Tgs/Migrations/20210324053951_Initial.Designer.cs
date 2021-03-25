@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210318035126_Initial")]
+    [Migration("20210324053951_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1278,7 +1278,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<short>("PlatformType")
+                    b.Property<byte>("PlatformType")
                         .HasColumnType("smallint")
                         .HasColumnName("platform_type");
 
@@ -2813,10 +2813,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
-
-                    b.Property<short>("PlatformType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("platform_type");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()

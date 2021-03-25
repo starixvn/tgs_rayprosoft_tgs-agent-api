@@ -1276,7 +1276,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<short>("PlatformType")
+                    b.Property<byte>("PlatformType")
                         .HasColumnType("smallint")
                         .HasColumnName("platform_type");
 
@@ -2811,10 +2811,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
-
-                    b.Property<short>("PlatformType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("platform_type");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()

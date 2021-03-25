@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using StackExchange.Redis;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
@@ -90,29 +89,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
-            const RedisCacheType cacheType = RedisCacheType.BrandGamesWithConditions;
-            var cacheKey = brandId;
-            var field = $"{gameProviderId}:{platformType}:{currencyCode}:{(int) playerType}";
-
-            var value =
-                await _cacheManger.SafeGetHashSetAsync(cacheType, cacheKey, field);
-
-            GameModel[] games;
-
-            if (value.HasValue)
-            {
-                games = _json.DeserializeFromString<GameModel[]>(value);
-            }
-            else
-            {
-                games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode,
-                    playerType);
-
-                await _cacheManger.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
-                {
-                    new(field, _json.SerializeToString(games))
-                }, TimeSpan.FromHours(2));
-            }
+            var games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode,
+                playerType);
 
             var types = request.Types ?? Array.Empty<GameType>();
             var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
@@ -132,10 +110,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                     };
                 }).ToArray();
 
-            return new()
-            {
-                Games = translatedGames
-            };
+            return new() {Games = translatedGames};
         }
 
         private async Task<GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
@@ -155,9 +130,10 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 }
             }
 
+            var gamePlatformTypes = platformType.ToGamePlatformTypes();
             var brandGameProviderStatus =
                 await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId) ?? Status.Active;
-            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, platformType);
+            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, gamePlatformTypes);
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId);
 
