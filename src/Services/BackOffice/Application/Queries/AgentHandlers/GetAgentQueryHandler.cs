@@ -38,6 +38,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     RealName = agent.RealName,
                     Status = agent.Status,
                     Type = agent.Type,
+                    LevelType = agent.LevelType,
                     InvitationCode = agent.InvitationCode,
                     ParentAgentUsername = agent.ParentAgent?.Username,
                     RegisteredOn = agent.RegisteredOn,

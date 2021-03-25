@@ -23,6 +23,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         Task CreateAgentBankAsync(CreateAgentBankRequest request);
         Task UpdateAgentBankAsync(AgentBank agentBank, UpdateAgentBankRequest request);
+        Task DeleteAgentBankAsync(AgentBank agentBank);
         Task<bool> ExistsAsync(Expression<Func<AgentBank, bool>> predicate);
     }
 
@@ -41,16 +42,22 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var agentBank = new AgentBank
             {
-                BankName = request.BankName, RealName = request.RealName, BankAccount = request.BankAccount
+                AgentId = request.AgentId,
+                BankName = request.BankName,
+                RealName = request.RealName,
+                BankAccount = request.BankAccount
             };
 
             await CreateEntityAsync(agentBank);
         }
 
+        Task IAgentBankService.DeleteAgentBankAsync(AgentBank agentBank) => DeleteEntityAsync(agentBank);
+
         Task<bool> IAgentBankService.ExistsAsync(Expression<Func<AgentBank, bool>> predicate) => ExistsAsync(predicate);
 
         Task<AgentBank> IAgentBankService.GetAgentBankAsync(Expression<Func<AgentBank, bool>> predicate,
-            Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery) => throw new NotImplementedException();
+            Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery) =>
+            GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         IQueryable<AgentBank> IAgentBankService.GetAgentBanksAsync(
             Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery,

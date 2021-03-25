@@ -10,21 +10,24 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
     public partial class AgentController
     {
         [HttpPost("{agentId}/bank")]
-        [Description("Create a Agent bank")]
+        [Description("Create an Agent bank")]
         public Task<MessageResponse> CreateAgentBankAsync(Guid agentId, [FromBody] CreateAgentBankRequest request)
         {
             request.AgentId = agentId;
             return _mediator.Send(request);
         }
 
-        [HttpPut("{agentId}/bank/{id}")]
-        [Description("Update a Agent bank")]
-        public Task<MessageResponse> UpdateAgentBankAsync(Guid agentId, Guid id,
-            [FromBody] UpdateAgentBankRequest request)
+        [HttpPut("bank/{id}")]
+        [Description("Update an Agent bank")]
+        public Task<MessageResponse> UpdateAgentBankAsync(Guid id, [FromBody] UpdateAgentBankRequest request)
         {
-            request.AgentId = agentId;
             request.Id = id;
             return _mediator.Send(request);
         }
+
+        [HttpDelete("bank/{id}")]
+        [Description("Delete an Agent bank")]
+        public Task<MessageResponse> DeleteAgentBankAsync(Guid id) =>
+            _mediator.Send(new DeleteAgentBankRequest(id));
     }
 }

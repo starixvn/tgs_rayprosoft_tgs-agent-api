@@ -8,9 +8,10 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public Guid Id { get; set; }
         public string Username { get; set; }
         public string RealName { get; set; }
-        public Status Status { get; set; }
-        public AgentStatus AgentStatus { get; set; }
+        public AgentStatus Status { get; set; }
+        public AgentConfigStatus AgentStatus { get; set; }
         public AgentType Type { get; set; }
+        public AgentLevelType LevelType { get; init; }
         public string InvitationCode { get; set; }
         public Guid BrandId { get; set; }
         public string ParentAgentUsername { get; set; }
