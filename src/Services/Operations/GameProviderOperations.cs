@@ -5,6 +5,7 @@ using StackExchange.Redis;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
@@ -39,21 +40,20 @@ namespace TGS.Services.Operations
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, string externalGameId);
 
-        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType, GameType gameType);
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, GamePlatformType[] platformTypes,
+            GameType gameType);
 
-        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, PlatformType platformType);
+        Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, GamePlatformType[] platformTypes);
 
         Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
-
-        Task<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId, PlatformType platformType);
 
         Task<GameStatus?> GetGameStatusAsync(Guid gameProviderId, int gameId);
 
         Task<GameType?> GetGameTypeAsync(Guid gameProviderId, int gameId);
 
-        Task<PlatformType?> GetGamePlatformTypeAsync(Guid gameProviderId, int gameId);
+        Task<GamePlatformType?> GetGamePlatformTypeAsync(Guid gameProviderId, int gameId);
 
-        Task<IdMap<int>[]> GetSubGameIdsAsync(Guid gameProviderId, PlatformType platformType);
+        Task<CachedSubGame[]> GetSubGamesAsync(Guid gameProviderId, GamePlatformType[] platformTypes);
 
         Task<bool> GetAllowKickPlayerAsync(Guid gameProviderId);
 
@@ -161,11 +161,11 @@ namespace TGS.Services.Operations
 
         Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId) =>
             GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.Status,
-                v => (Status) (int) v, gp => gp?.Status);
+                v => (Status)(int)v, gp => gp?.Status);
 
         Task<bool> IGameProviderOperations.GetGameProviderSupportTestPlayerAsync(Guid gameProviderId) =>
             GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.SupportTestPlayer,
-                v => (bool) v, gp => gp?.SupportTestPlayer ?? false);
+                v => (bool)v, gp => gp?.SupportTestPlayer ?? false);
 
         Task<string[]> IGameProviderOperations.GetGameProviderLanguagesAsync(Guid gameProviderId) =>
             _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderLanguages,
@@ -231,51 +231,24 @@ namespace TGS.Services.Operations
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId, string externalGameId)
         {
-            const RedisCacheType cacheType = RedisCacheType.GamesByExternalId;
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, externalGameId);
-            if (value.HasValue)
-            {
-                return _json.DeserializeFromString<CachedGame[]>(value);
-            }
-
             var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
-            var games = cachedGames.Where(g => g.ExternalId.IgnoreCaseEquals(externalGameId)).ToArray();
-
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
-            {
-                new(externalGameId, _json.SerializeToString(games))
-            }, TimeSpan.FromHours(2));
-
-            return games;
+            return cachedGames.Where(g => g.ExternalId.IgnoreCaseEquals(externalGameId)).ToArray();
         }
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId,
-            PlatformType platformType, GameType gameType)
+            GamePlatformType[] platformTypes, GameType gameType)
         {
-            var games = await _interface.GetCachedGamesAsync(gameProviderId, platformType);
-            return games.Where(g => g.Type == gameType).ToArray();
+            var types = platformTypes?.Length > 0 ? platformTypes : Consts.AllGamePlatformTypes;
+            var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
+            return cachedGames.Where(g => types.Contains(g.PlatformType) && g.Type == gameType).ToArray();
         }
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId,
-            PlatformType platformType)
+            GamePlatformType[] platformTypes)
         {
-            const RedisCacheType cacheType = RedisCacheType.GamesByPlatform;
-            var field = $"{platformType}";
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, gameProviderId, field);
-            if (value.HasValue)
-            {
-                return _json.DeserializeFromString<CachedGame[]>(value);
-            }
-
+            var types = platformTypes?.Length > 0 ? platformTypes : Consts.AllGamePlatformTypes;
             var cachedGames = await _interface.GetCachedGamesAsync(gameProviderId);
-            var games = cachedGames.Where(g => g.PlatformType == platformType).ToArray();
-
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, gameProviderId, new HashEntry[]
-            {
-                new(field, _json.SerializeToString(games))
-            }, TimeSpan.FromHours(2));
-
-            return games;
+            return cachedGames.Where(g => types.Contains(g.PlatformType)).ToArray();
         }
 
         async Task<CachedGame> IGameProviderOperations.GetCachedGameAsync(Guid gameProviderId, int gameId)
@@ -291,13 +264,6 @@ namespace TGS.Services.Operations
             return games.FirstOrDefault(g => g.Id == gameId);
         }
 
-        async Task<CachedGame> IGameProviderOperations.GetCachedGameAsync(Guid gameProviderId, string externalGameId,
-            PlatformType platformType)
-        {
-            var games = await _interface.GetCachedGamesAsync(gameProviderId, externalGameId);
-            return games.FirstOrDefault(g => g.PlatformType == platformType);
-        }
-
         async Task<GameStatus?> IGameProviderOperations.GetGameStatusAsync(Guid gameProviderId, int gameId)
         {
             var game = await _interface.GetCachedGameAsync(gameProviderId, gameId);
@@ -310,33 +276,29 @@ namespace TGS.Services.Operations
             return game?.Type;
         }
 
-        async Task<PlatformType?> IGameProviderOperations.GetGamePlatformTypeAsync(Guid gameProviderId, int gameId)
+        async Task<GamePlatformType?> IGameProviderOperations.GetGamePlatformTypeAsync(Guid gameProviderId, int gameId)
         {
             var game = await _interface.GetCachedGameAsync(gameProviderId, gameId);
             return game?.PlatformType;
         }
 
-        async Task<IdMap<int>[]> IGameProviderOperations.GetSubGameIdsAsync(Guid gameProviderId,
-            PlatformType platformType)
-        {
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.SubGames, gameProviderId,
-                platformType.ToString());
-
-            if (value.HasValue)
-            {
-                return _json.DeserializeFromString<IdMap<int>[]>(value);
-            }
-
-            return await GetAndCachedSubGameIdMapsAsync(gameProviderId, platformType);
-        }
-
         Task<bool> IGameProviderOperations.GetAllowKickPlayerAsync(Guid gameProviderId) =>
             GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.AllowKickPlayer,
-                v => (bool) v, gp => gp?.AllowKickPlayer ?? false);
+                v => (bool)v, gp => gp?.AllowKickPlayer ?? false);
 
         Task<bool> IGameProviderOperations.GetAutoCloseRoundAsync(Guid gameProviderId) =>
             GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.AutoCloseRound,
-                v => (bool) v, gp => gp?.AutoCloseRound ?? true);
+                v => (bool)v, gp => gp?.AutoCloseRound ?? true);
+
+        async Task<CachedSubGame[]> IGameProviderOperations.GetSubGamesAsync(Guid gameProviderId,
+            GamePlatformType[] platformTypes)
+        {
+            var types = platformTypes?.Length > 0 ? platformTypes : Consts.AllGamePlatformTypes;
+            var games = await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.SubGames, gameProviderId,
+                TimeSpan.FromHours(2), () => _gameProviderQueries.GetSubGamesAsync(gameProviderId));
+
+            return games.Where(g => types.Contains(g.PlatformType)).ToArray();
+        }
 
         #region Private Methods
 
@@ -345,16 +307,11 @@ namespace TGS.Services.Operations
             var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
                 new RedisValue[]
                 {
-                    CachedGameProviderFields.GameProviderId,
-                    CachedGameProviderFields.GameProviderCode,
-                    CachedGameProviderFields.GameProviderName,
-                    CachedGameProviderFields.Status,
-                    CachedGameProviderFields.Description,
-                    CachedGameProviderFields.AutoCloseRound,
-                    CachedGameProviderFields.SupportTestPlayer,
-                    CachedGameProviderFields.PlaceBetTimeout,
-                    CachedGameProviderFields.SettleBetTimeout,
-                    CachedGameProviderFields.AllowKickPlayer
+                    CachedGameProviderFields.GameProviderId, CachedGameProviderFields.GameProviderCode,
+                    CachedGameProviderFields.GameProviderName, CachedGameProviderFields.Status,
+                    CachedGameProviderFields.Description, CachedGameProviderFields.AutoCloseRound,
+                    CachedGameProviderFields.SupportTestPlayer, CachedGameProviderFields.PlaceBetTimeout,
+                    CachedGameProviderFields.SettleBetTimeout, CachedGameProviderFields.AllowKickPlayer
                 });
 
             if (values.All(a => !a.IsNull))
@@ -364,13 +321,13 @@ namespace TGS.Services.Operations
                     Id = Guid.Parse(values[0]),
                     Code = values[1],
                     Name = values[2],
-                    Status = (Status) (int) values[3],
+                    Status = (Status)(int)values[3],
                     Description = values[4],
-                    AutoCloseRound = (bool) values[5],
-                    SupportTestPlayer = (bool) values[6],
-                    PlaceBetTimeout = (int) values[7],
-                    SettleBetTimeout = (int) values[8],
-                    AllowKickPlayer = (bool) values[9]
+                    AutoCloseRound = (bool)values[5],
+                    SupportTestPlayer = (bool)values[6],
+                    PlaceBetTimeout = (int)values[7],
+                    SettleBetTimeout = (int)values[8],
+                    AllowKickPlayer = (bool)values[9]
                 };
             }
 
@@ -384,7 +341,7 @@ namespace TGS.Services.Operations
                 new(CachedGameProviderFields.GameProviderId, gameProvider.Id.ToString()),
                 new(CachedGameProviderFields.GameProviderCode, gameProvider.Code),
                 new(CachedGameProviderFields.GameProviderName, gameProvider.Name),
-                new(CachedGameProviderFields.Status, (int) gameProvider.Status),
+                new(CachedGameProviderFields.Status, (int)gameProvider.Status),
                 new(CachedGameProviderFields.Description, gameProvider.Description),
                 new(CachedGameProviderFields.AutoCloseRound, gameProvider.AutoCloseRound),
                 new(CachedGameProviderFields.SupportTestPlayer, gameProvider.SupportTestPlayer),
@@ -422,10 +379,7 @@ namespace TGS.Services.Operations
         private async Task CacheGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
             CachedGameProviderConfiguration gpc)
         {
-            var fields = new HashEntry[]
-            {
-                new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))
-            };
+            var fields = new HashEntry[] {new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))};
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, fields,
                 TimeSpan.FromHours(2), true);
@@ -440,21 +394,6 @@ namespace TGS.Services.Operations
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Games, gameProviderId, fields,
                 TimeSpan.FromHours(2));
-            return games;
-        }
-
-        private async Task<IdMap<int>[]> GetAndCachedSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType)
-        {
-            var games = await _gameProviderQueries.GetSubGameIdMapsAsync(gameProviderId, platformType);
-
-            var fields = new HashEntry[]
-            {
-                new(platformType.ToString(), _json.SerializeToString(games))
-            };
-
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.SubGames, gameProviderId, fields,
-                TimeSpan.FromHours(2));
-
             return games;
         }
 

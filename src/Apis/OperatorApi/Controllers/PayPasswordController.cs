@@ -16,6 +16,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public async Task SetPayPasswordAsync(
             [FromServices] ICommandService<SetFirstPayPasswordCommand> setPayPasswordService,
             [FromBody] SetPayPasswordRequest request)
@@ -29,6 +30,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("validate-code")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public ValueTask<string> StartChangePayPasswordAsync(
             [FromServices] IGetService<StartChangePayPasswordCommand, string> startChangePayPasswordService)
         {
@@ -41,6 +43,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPatch]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public ValueTask ChangePayPasswordAsync(
             [FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
             ChangePayPasswordRequest request)

@@ -62,8 +62,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 MobileEndpoint = request.MobileEndpoint,
                 ConfigurationData = request.ConfigurationData,
                 IsDefault = request.IsDefault,
-                CreatedByUsername = request.Username,
-                UpdatedByUsername = request.Username,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };
@@ -89,7 +89,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             configuration.MobileEndpoint = request.MobileEndpoint;
             configuration.ConfigurationData = request.ConfigurationData;
             configuration.IsDefault = request.IsDefault;
-            configuration.UpdatedByUsername = request.Username;
+            configuration.UpdatedByUsername = request.EditorUsername;
             configuration.UpdatedOn = DateTimeOffset.Now;
 
             await UpdateEntityAsync(configuration);

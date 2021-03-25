@@ -2,6 +2,6 @@
 {
     public class BaseRequest
     {
-        public string Username { get; set; }
+        public string EditorUsername { get; set; }
     }
 }

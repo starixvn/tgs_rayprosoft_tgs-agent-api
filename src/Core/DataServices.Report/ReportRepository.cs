@@ -17,7 +17,9 @@ namespace TGS.Core.DataServices.Report
 {
     public interface IReportRepository : IBaseRepository
     {
-        DbSet<Market> Markets { get; set; }
+        DbSet<RoundAggregate> RoundAggregates { get; set; }
+        DbSet<PlayerAggregate> PlayerAggregates { get; set; }
+        DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
     }
 
     public class ReportRepository : DbContext, IReportRepository
@@ -29,7 +31,9 @@ namespace TGS.Core.DataServices.Report
             _uploader = new(this);
         }
 
-        DbSet<Market> IReportRepository.Markets { get; set; }
+        DbSet<RoundAggregate> IReportRepository.RoundAggregates { get; set; }
+        DbSet<PlayerAggregate> IReportRepository.PlayerAggregates { get; set; }
+        DbSet<PlayerGameTypeAggregate> IReportRepository.PlayerGameTypeAggregates { get; set; }
 
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;
@@ -38,10 +42,7 @@ namespace TGS.Core.DataServices.Report
 
         Task<bool> IBaseRepository.CanConnectionAsync() => Database.CanConnectAsync();
 
-        void IBaseRepository.SetTimeoutToSeconds(int seconds)
-        {
-            Database.SetCommandTimeout(seconds);
-        }
+        void IBaseRepository.SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);
 
         Task<IDbContextTransaction> IBaseRepository.BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);
@@ -49,7 +50,8 @@ namespace TGS.Core.DataServices.Report
         IDbConnection IBaseRepository.GetDbConnection() =>
             Database.GetDbConnection();
 
-        Task<int> IBaseRepository.SaveChangesAsync(CancellationToken cancellationToken) => SaveChangesAsync(cancellationToken);
+        Task<int> IBaseRepository.SaveChangesAsync(CancellationToken cancellationToken) =>
+            SaveChangesAsync(cancellationToken);
 
         Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
             _uploader.InsertAsync(entities);
@@ -60,7 +62,7 @@ namespace TGS.Core.DataServices.Report
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
             var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
-                            (await Database.GetPendingMigrationsAsync()).Any();
+                (await Database.GetPendingMigrationsAsync()).Any();
 
             if (isMigrate)
             {

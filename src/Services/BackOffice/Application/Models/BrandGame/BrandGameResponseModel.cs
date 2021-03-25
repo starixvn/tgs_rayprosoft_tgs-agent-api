@@ -11,7 +11,7 @@ namespace TGS.Services.BackOffice.Application.Models.BrandGame
         public string GameName { get; set; }
         public GameStatus Status { get; set; }
         public GameType GameType { get; set; }
-        public PlatformType Platform { get; set; }
+        public GamePlatformType Platform { get; set; }
         public bool SupportHtml5 { get; set; }
         public decimal EffectiveBettingPercentage { get; set; }
         public bool Rebate { get; set; }

@@ -12,6 +12,11 @@ namespace TGS.Core.Models
 
         public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
 
+        public static readonly GamePlatformType[] AllGamePlatformTypes =
+        {
+            GamePlatformType.Desktop, GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile
+        };
+
         public static readonly IDictionary<HealthStatus, int> HealthCheckResultStatusCodes =
             new Dictionary<HealthStatus, int>
             {

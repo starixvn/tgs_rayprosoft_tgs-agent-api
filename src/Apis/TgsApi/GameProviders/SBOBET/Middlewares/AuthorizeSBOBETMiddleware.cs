@@ -1,12 +1,10 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
@@ -39,8 +37,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             var configuration = await _settingOperations
                 .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET);
 
-            context.Request.EnableBuffering();
-
             var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
 
             if (request.CompanyKey.IsNullOrEmpty() || request.CompanyKey.NotEquals(configuration.CompanyKey))
@@ -49,37 +45,26 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
             }
 
             var playerCode = request.PlayerCode;
-            var externalGameId = request.ExternalGameId;
+
+            if (configuration.BypassPlayerCodes.IgnoreCaseContains(playerCode))
+            {
+                var response = new BaseResponse
+                {
+                    PlayerCode = playerCode,
+                    Balance = 0
+                };
+
+                await context.Response.WriteAsJsonAsync(response);
+                return;
+            }
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProvider.SBOBET);
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
-            PlatformType platformType;
-            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId);
-            if (games.Length == 1)
-            {
-                platformType = games[0].PlatformType;
-            }
-            else
-            {
-                var gamePlatforms = games.Length == 0
-                    ? new[] {PlatformType.Desktop, PlatformType.Mobile}
-                    : games.Select(g => g.PlatformType).ToArray();
-
-                var loginRecords = await _playerOperations.GetPlayerEnabledLoginRecordsAsync(playerCode);
-                platformType = (from rec in loginRecords
-                                join p in gamePlatforms on rec.PlatformType equals p
-                                orderby rec.ExpiredOn descending
-                                select rec.PlatformType)
-                    .DefaultIfEmpty(PlatformType.Desktop)
-                    .FirstOrDefault();
-            }
-
             context.Items.Add(ContextItems.BrandId, brandId);
             context.Items.Add(ContextItems.GameProviderId, gameProviderId);
             context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
-            context.Items.Add(ContextItems.PlatformType, platformType);
 
             await next(context);
         }

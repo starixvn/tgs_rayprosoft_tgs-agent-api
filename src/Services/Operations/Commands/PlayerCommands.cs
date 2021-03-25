@@ -19,8 +19,6 @@ namespace TGS.Services.Operations.Commands
     {
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
-        Task UpdatePlayerAsync(UpdatePlayerData data);
-
         Task UpdatePlayerIdNumberAsync(Player player);
 
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
@@ -139,30 +137,6 @@ namespace TGS.Services.Operations.Commands
             }
 
             return playerCode;
-        }
-
-        public Task UpdatePlayerAsync(UpdatePlayerData data)
-        {
-            var player = new Player
-            {
-                PlayerCode = data.PlayerCode,
-                RealName = data.RealName,
-                Email = data.Email,
-                Phone = data.Phone,
-                QQ = data.QQ,
-                Wechat = data.Wechat,
-                UpdatedOn = data.UpdatedOn
-            };
-
-            _repository.Players.Attach(player);
-            _repository.Entry(player).Property(nameof(player.RealName)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.Email)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.Phone)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.QQ)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.Wechat)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
-
-            return _repository.SaveChangesAsync();
         }
 
         public Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)

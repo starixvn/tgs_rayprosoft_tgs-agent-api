@@ -26,6 +26,7 @@
         IncorrectFormat = 402,
         UnderMaintenance = 403,
         InvalidStatus = 404,
+        ValidateCodeNotVerify = 405,
 
         SystemError = 900,
         OperationNotAllowed = 901,

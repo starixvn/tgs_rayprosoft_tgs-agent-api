@@ -59,7 +59,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     )
 }
 
-export const EditButton = ({ record, onSubmitted, dialog }) => {
+export const EditButton = ({ record, onSubmitted }) => {
     let dialog = useModalState()
     let isDisplay = useIsDisplayMenuByRoute()
     if (!isDisplay) {

@@ -528,20 +528,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ga.Amount.Should().Be(amount);
         }
 
-        [Then(@"game platform will be recorded in the database of type ""(.*)""")]
-        public async Task ThenGamePlatformWillBeRecordedInTheDatabaseOfTypeAsync(PlatformType platformType)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-            var platform = await db.Rounds
-                .Where(r => r.ExternalRoundId == externalRoundId)
-                .AsNoTracking()
-                .Select(r => r.PlatformType)
-                .FirstAsync();
-
-            platform.Should().Be(platformType);
-        }
-
         [Then(@"#(.*) game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
         public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeForAmount(int transactionIndex,
             GameActionType type, decimal amount)

@@ -84,6 +84,7 @@ const BodyContent = ({ brandId }) => {
             title={<Trans zh="游戏列表" en="Game List" />}
             actionBar={
                 <SearchBar
+                    brandId={brandId}
                     gameProviderId={gameProviderId}
                     gameType={gameType}
                     keyword={keyword}
@@ -218,6 +219,7 @@ const DataTable = ({
 }
 
 const SearchBar = ({
+    brandId,
     gameProviderId = "",
     gameType = "",
     keyword = "",
@@ -242,7 +244,10 @@ const SearchBar = ({
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
-                    <BrandGameProviderSelect name="gameProviderId" />
+                    <BrandGameProviderSelect
+                        name="gameProviderId"
+                        brandId={brandId}
+                    />
                     <GameTypeSelect name="gameType" />
                     <InputField
                         name="keyword"

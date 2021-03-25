@@ -10,8 +10,10 @@
     <None Remove="DataInitializers\Games\PP.csv" />
     <None Remove="DataInitializers\Games\SBO.csv" />
     <None Remove="SqlScripts\Functions\game_action_referenced_game_action_exists.sql" />
+    <None Remove="SqlScripts\Functions\report_get_round_aggregates.sql" />
   </ItemGroup>
 
+  
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -30,6 +32,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_round_id.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_action_external_ids.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_valid_game_action_external_ids.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\paymentChannels.sql" />
@@ -46,7 +49,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_currencies_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_languages_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_languages_by_external_code.sql" />
-    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_game_id_maps.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_games.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_games_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Procedures\usp_GameProvider_GetGameProviderBetLimitCode.sql" />

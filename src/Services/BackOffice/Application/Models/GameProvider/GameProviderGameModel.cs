@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         public string EndpointPath { get; set; }
         public string RuleUrl { get; set; }
         public GameType Type { get; set; }
-        public PlatformType PlatformType { get; set; }
+        public GamePlatformType PlatformType { get; set; }
         public bool SubGame { get; set; }
         public bool HasTurnoverOnTieBet { get; set; }
         public bool Html5 { get; set; }

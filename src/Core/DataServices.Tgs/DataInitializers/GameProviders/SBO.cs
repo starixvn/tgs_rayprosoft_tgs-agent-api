@@ -94,7 +94,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
                     EnableCancelFailedTransactionsJob = false,
-                    DelaySecondsForPlaceBet = 0
+                    DelaySecondsForPlaceBet = 0,
+                    BypassPlayerCodes = new[] {"4ud6wst6shvx"}
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new()

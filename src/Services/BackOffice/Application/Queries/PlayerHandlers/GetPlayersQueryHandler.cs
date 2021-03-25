@@ -26,7 +26,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     .Where(LicenseeId != null,
                         l => l.Brand.LicenseeId == LicenseeId)
                     .Where(BrandId != null, b => b.BrandId == BrandId)
-                    .Where(request.BrandId, b => b.BrandId == request.BrandId))
+                    .Where(request.BrandId, b => b.BrandId == request.BrandId)
+                    .Where(request.Username, x => x.Username == request.Username))
                 .Select(x => new PlayersModel
                 {
                     PlayerCode = x.PlayerCode,

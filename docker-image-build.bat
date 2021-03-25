@@ -19,7 +19,7 @@ docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-api:
 docker build -f src\Apis\LogApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/log-api:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/log-api:%tag%
 
-docker build -f src\Apis\OperatorApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag% .
+docker build -f src\Apis\OperatorApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag% --secret id=nuget,src="%USERPROFILE%\AppData\Roaming\NuGet\NuGet.Config" .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%tag%
 
 docker build -f src\Apis\TgsApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/tgs-api:%tag% .

@@ -22,7 +22,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public GameType Type { get; set; }
 
-        public PlatformType PlatformType { get; set; }
+        public GamePlatformType PlatformType { get; set; }
 
         public bool SubGame { get; set; }
 

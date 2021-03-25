@@ -68,7 +68,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 string.Format(Consts.FunctionSqlFormat, "game_provider_get_game_provider_for_cache"));
 
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.FunctionSqlFormat, "game_provider_get_sub_game_id_maps"));
+                string.Format(Consts.FunctionSqlFormat, "game_provider_get_sub_games"));
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "localization_get_localization_by_game_provider_id"));
@@ -99,6 +99,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "game_action_referenced_game_action_exists"));
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "report_get_round_aggregates"));
 
             #endregion Functions
 

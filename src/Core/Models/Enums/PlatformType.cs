@@ -1,18 +1,18 @@
 ﻿namespace TGS.Core.Models.Enums
 {
     /// <summary>
-    /// Platform Type
+    ///     Platform Type
     /// </summary>
     public enum PlatformType
     {
         /// <summary>
-        /// Desktop
+        ///     Desktop
         /// </summary>
         Desktop = 0,
 
         /// <summary>
-        /// Mobile
+        ///     Mobile
         /// </summary>
-        Mobile = 1,
+        Mobile = 1
     }
 }
