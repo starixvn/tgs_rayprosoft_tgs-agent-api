@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
     {
         [HttpPost("{agentId}/bank")]
         [Description("Create a Agent bank")]
-        public Task<MessageResponse> CreateAgentBankAsync(Guid agentId, [FromQuery] CreateAgentBankRequest request)
+        public Task<MessageResponse> CreateAgentBankAsync(Guid agentId, [FromBody] CreateAgentBankRequest request)
         {
             request.AgentId = agentId;
             return _mediator.Send(request);
@@ -20,7 +20,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
         [HttpPut("{agentId}/bank/{id}")]
         [Description("Update a Agent bank")]
         public Task<MessageResponse> UpdateAgentBankAsync(Guid agentId, Guid id,
-            [FromQuery] UpdateAgentBankRequest request)
+            [FromBody] UpdateAgentBankRequest request)
         {
             request.AgentId = agentId;
             request.Id = id;
