@@ -16,6 +16,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="GameProviders\PragmaticPlay\Services\**" />
+    <Content Remove="GameProviders\PragmaticPlay\Services\**" />
+    <EmbeddedResource Remove="GameProviders\PragmaticPlay\Services\**" />
+    <None Remove="GameProviders\PragmaticPlay\Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.2">
       <PrivateAssets>all</PrivateAssets>
@@ -46,10 +53,6 @@
     <Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="GameProviders\PragmaticPlay\Services\" />
   </ItemGroup>
 
 
