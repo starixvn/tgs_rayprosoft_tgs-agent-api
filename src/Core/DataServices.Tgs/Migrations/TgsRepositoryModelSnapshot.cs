@@ -21,6 +21,273 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.2");
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AgentStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("agent_status");
+
+                    b.Property<decimal>("BonusPercentage")
+                        .HasColumnType("numeric")
+                        .HasColumnName("bonus_percentage");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("CreatedByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("InvitationCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("invitation_code");
+
+                    b.Property<int>("LevelType")
+                        .HasColumnType("integer")
+                        .HasColumnName("level_type");
+
+                    b.Property<Guid?>("ParentAgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_agent_id");
+
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("password");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("phone");
+
+                    b.Property<decimal>("PositionTakingPercentage")
+                        .HasColumnType("numeric")
+                        .HasColumnName("position_taking_percentage");
+
+                    b.Property<string>("QQ")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("qq");
+
+                    b.Property<string>("RealName")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("real_name");
+
+                    b.Property<decimal>("RebatePercentage")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rebate_percentage");
+
+                    b.Property<DateTimeOffset>("RegisteredOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("registered_on");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text")
+                        .HasColumnName("remarks");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("salt");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("username");
+
+                    b.Property<string>("Wechat")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("wechat");
+
+                    b.Property<byte[]>("WithdrawPassword")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("withdraw_password");
+
+                    b.Property<byte[]>("WithdrawSalt")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("withdraw_salt");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agents");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_agents_brand_id");
+
+                    b.HasIndex("ParentAgentId")
+                        .HasDatabaseName("ix_agents_parent_agent_id");
+
+                    b.ToTable("agents");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<short>("Operation")
+                        .HasColumnType("smallint")
+                        .HasColumnName("operation");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_audit_logs");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_audit_logs_agent_id");
+
+                    b.ToTable("agent_audit_logs");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentBank", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("bank_account");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("bank_name");
+
+                    b.Property<string>("CreatedByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("RealName")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("real_name");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_banks");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_bankers_agent_id");
+
+                    b.ToTable("agent_banks");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentWallet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_wallets");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_wallets_agent_id");
+
+                    b.HasIndex("CurrencyCode")
+                        .HasDatabaseName("ix_agent_wallets_currency_code");
+
+                    b.ToTable("agent_wallets");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Announcement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1067,7 +1334,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<short>("PlatformType")
+                    b.Property<byte>("PlatformType")
                         .HasColumnType("smallint")
                         .HasColumnName("platform_type");
 
@@ -1979,6 +2246,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("accumulated_deposit");
 
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
                     b.Property<int>("BetLimitId")
                         .HasColumnType("integer")
                         .HasColumnName("bet_limit_id");
@@ -2115,6 +2386,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasKey("PlayerCode")
                         .HasName("pk_player_code");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_players_agent_id");
 
                     b.HasIndex("BetLimitId")
                         .HasDatabaseName("ix_players_bet_limit_id");
@@ -2596,10 +2870,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
 
-                    b.Property<short>("PlatformType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("platform_type");
-
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasColumnType("text")
@@ -2645,6 +2915,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_rounds_brand_id");
+
+                    b.HasIndex("ClosedOn")
+                        .HasDatabaseName("ix_rounds_closed_on")
+                        .HasMethod("brin");
 
                     b.HasIndex("GameId")
                         .HasDatabaseName("ix_rounds_game_id");
@@ -3261,6 +3535,70 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_whitelists_reseller_id");
 
                     b.ToTable("whitelists");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_agents_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "ParentAgent")
+                        .WithMany("SubAgents")
+                        .HasForeignKey("ParentAgentId")
+                        .HasConstraintName("fk_agents_parent_agent_id");
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("ParentAgent");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentAuditLog", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
+                        .WithMany()
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_agent_audit_logs_agent_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agent");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentBank", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
+                        .WithMany("Banks")
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_agent_banks_agents_agent_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agent");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentWallet", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
+                        .WithMany("Wallets")
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_agent_wallet_agent_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyCode")
+                        .HasConstraintName("fk_agent_wallets_currencies_currency_code")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Agent");
+
+                    b.Navigation("Currency");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Announcement", b =>
@@ -3925,6 +4263,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Player", b =>
                 {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
+                        .WithMany("Players")
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_players_agents_agent_id");
+
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.BetLimit", "BetLimit")
                         .WithMany("Players")
                         .HasForeignKey("BetLimitId")
@@ -3948,6 +4291,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .WithMany("Players")
                         .HasForeignKey("VipId")
                         .HasConstraintName("fk_players_vip_levels_vip_id");
+
+                    b.Navigation("Agent");
 
                     b.Navigation("BetLimit");
 
@@ -4271,6 +4616,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Licensee");
 
                     b.Navigation("Reseller");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
+                {
+                    b.Navigation("Banks");
+
+                    b.Navigation("Players");
+
+                    b.Navigation("SubAgents");
+
+                    b.Navigation("Wallets");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BetLimit", b =>

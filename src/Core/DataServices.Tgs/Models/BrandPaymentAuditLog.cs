@@ -19,6 +19,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string CreatedByUsername { get; set; }
 
-        public AuditLogOperation Operation { get; set; }
+        public BrandPaymentOperation Operation { get; set; }
     }
 }

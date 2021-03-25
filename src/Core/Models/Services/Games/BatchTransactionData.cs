@@ -7,7 +7,6 @@ namespace TGS.Core.Models.Services.Games
     {
         public string PlayerCode { get; init; }
         public int IndexPerPlayer { get; set; }
-        public PlatformType PlatformType { get; init; }
         public Guid GameProviderConfigurationId { get; init; }
         public decimal Amount { get; init; }
         public decimal? Commission { get; init; }

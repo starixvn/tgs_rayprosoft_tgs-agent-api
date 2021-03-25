@@ -12,7 +12,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string PlayerCode { get; set; }
         public int GameId { get; set; }
         public string CurrencyCode { get; set; }
-        public PlatformType PlatformType { get; set; }
         public RoundStatus Status { get; set; }
         public Guid GameProviderConfigurationId { get; set; }
         public Guid WalletId { get; set; }

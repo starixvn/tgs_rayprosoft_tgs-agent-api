@@ -52,7 +52,8 @@ export const BrandGameProviderCheckboxGroupTable = ({
                 <Table.Head>
                     <Table.Row>
                         <Table.HeadCell textAlign="center">
-                            <Checkbox
+                            <Box></Box>
+                            {/* <Checkbox
                                 checked={allChecked}
                                 onChange={(event) => {
                                     let checked = event.target.checked
@@ -68,7 +69,7 @@ export const BrandGameProviderCheckboxGroupTable = ({
                                     })
                                 }}
                                 disabled={disabled}
-                            />
+                            /> */}
                         </Table.HeadCell>
                         <Table.HeadCell textAlign="center">
                             <Trans zh="游戏厂商" en="Game Provider" />
@@ -96,12 +97,13 @@ export const BrandGameProviderCheckboxGroupTable = ({
 
 const Row = ({ name, disabled, field, index }) => {
     let formContext = useFormContext()
-    let { register, setValue, control } = formContext
+    let { register, setValue, control, getValues } = formContext
 
     let configDialog = useModalState()
     let defaultLangDialog = useModalState()
     let desktopQueryStringDialog = useModalState()
     let mobileQueryStringDialog = useModalState()
+
     return (
         <Table.Row>
             <Table.Cell textAlign="center">
@@ -138,7 +140,16 @@ const Row = ({ name, disabled, field, index }) => {
                         control={control}
                         name={configFieldName(name, field, index)}
                         defaultValue={field.configurationId}
-                        rules={{ required: true }}
+                        rules={{
+                            validate: (value) => {
+                                let isChecked = getValues(
+                                    checkedFieldName(name, field, index)
+                                )
+                                if (isChecked && !value) {
+                                    return "required"
+                                }
+                            }
+                        }}
                         render={(
                             { onChange, onBlur, value, name: configName, ref },
                             { invalid, isTouched, isDirty }

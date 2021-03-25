@@ -34,7 +34,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
-        Task<IdMap<int>[]> GetSubGameIdMapsAsync(Guid gameProviderId, PlatformType platformType);
+        Task<CachedSubGame[]> GetSubGamesAsync(Guid gameProviderId);
 
         Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
     }
@@ -165,20 +165,6 @@ namespace TGS.Services.Operations.Queries
             }).ToArray();
         }
 
-        async Task<IdMap<int>[]> IGameProviderQueries.GetSubGameIdMapsAsync(Guid gameProviderId,
-            PlatformType platformType)
-        {
-            const string spName = "dbo.game_provider_get_sub_game_id_maps";
-            var r = await _repository.SqlQueryMultipleAsync<IdMap<int>>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId},
-                    {":platform_type", (short)platformType}
-                });
-
-            return r.ToArray();
-        }
-
         Task<IdAndCodeAndConfigurationId> IGameProviderQueries.GetGameProviderIdsByCredentialsAsync(string clientId,
             string secretKey)
         {
@@ -198,6 +184,15 @@ namespace TGS.Services.Operations.Queries
                         ConfigurationId = gpc.Id
                     })
                 .FirstOrDefaultAsync();
+        }
+
+        async Task<CachedSubGame[]> IGameProviderQueries.GetSubGamesAsync(Guid gameProviderId)
+        {
+            const string spName = "dbo.game_provider_get_sub_games";
+            var r = await _repository.SqlQueryMultipleAsync<CachedSubGame>(spName,
+                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+
+            return r.ToArray();
         }
     }
 }

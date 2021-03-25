@@ -5,6 +5,7 @@ using StackExchange.Redis;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations.Queries;
@@ -26,10 +27,10 @@ namespace TGS.Services.Operations
 
         Task<string> GetBrandGameProviderConfigurationDefaultLanguageAsync(Guid brandId, Guid gameProviderId);
 
-        Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, PlatformType platformType);
+        Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, GamePlatformType[] platformTypes = null);
 
         Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, Guid gameProviderId,
-            PlatformType? platformType = null);
+            GamePlatformType[] platformTypes = null);
 
         Task<CachedBrandGame> GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId);
 
@@ -98,11 +99,11 @@ namespace TGS.Services.Operations
         }
 
         Task<string> IBrandOperations.GetBrandCodeByIdAsync(Guid brandId) =>
-            GetCachedBrandValueAsync(brandId, CachedBrandFields.BrandCode, v => (string) v,
+            GetCachedBrandValueAsync(brandId, CachedBrandFields.BrandCode, v => (string)v,
                 brand => brand?.Code);
 
         Task<Status?> IBrandOperations.GetBrandStatusAsync(Guid brandId) =>
-            GetCachedBrandValueAsync(brandId, CachedBrandFields.Status, v => (Status) (int) v,
+            GetCachedBrandValueAsync(brandId, CachedBrandFields.Status, v => (Status)(int)v,
                 brand => brand?.Status);
 
         async Task<Guid> IBrandOperations.GetBrandGameProviderConfigurationIdAsync(Guid brandId,
@@ -152,25 +153,14 @@ namespace TGS.Services.Operations
             return bgpc;
         }
 
-        async Task<CachedBrandGame[]> IBrandOperations.GetBrandGamesAsync(Guid brandId,
-            PlatformType platformType)
-        {
-            var games = await GetAndCachedBrandGamesAsync(brandId);
-
-            return games
-                .Where(g => g.PlatformType == platformType)
-                .ToArray();
-        }
-
         async Task<CachedBrandGame[]> IBrandOperations.GetBrandGamesAsync(Guid brandId, Guid gameProviderId,
-            PlatformType? platformType)
+            GamePlatformType[] platformTypes)
         {
             var games = await GetAndCachedBrandGamesAsync(brandId);
+            var types = platformTypes?.Length > 0 ? platformTypes : Consts.AllGamePlatformTypes;
 
-            return games
-                .Where(g => g.GameProviderId == gameProviderId &&
-                    (platformType == null || g.PlatformType == platformType))
-                .ToArray();
+            return games.Where(g => g.GameProviderId == gameProviderId &&
+                types.Contains(g.PlatformType)).ToArray();
         }
 
         async Task<CachedBrandGame> IBrandOperations.GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId)
@@ -180,7 +170,7 @@ namespace TGS.Services.Operations
         }
 
         Task<string> IBrandOperations.GetTimeZoneByBrandIdAsync(Guid brandId) =>
-            GetCachedBrandValueAsync(brandId, CachedBrandFields.TimeZoneId, v => (string) v,
+            GetCachedBrandValueAsync(brandId, CachedBrandFields.TimeZoneId, v => (string)v,
                 brand => brand?.TimeZoneId);
 
         Task<Guid> IBrandOperations.GetBrandIdByClientIdAsync(string clientId) =>
@@ -196,7 +186,7 @@ namespace TGS.Services.Operations
                 () => _brandQueries.GetBrandIdByCodeAsync(brandCode));
 
         Task<string> IBrandOperations.GetBrandSecretKeyAsync(Guid brandId) =>
-            GetCachedBrandValueAsync(brandId, CachedBrandFields.SecretKey, v => (string) v,
+            GetCachedBrandValueAsync(brandId, CachedBrandFields.SecretKey, v => (string)v,
                 brand => brand?.SecretKey);
 
         Task<CachedBrandGameProvider[]> IBrandOperations.GetBrandGameProvidersAsync(Guid brandId) =>
@@ -229,7 +219,7 @@ namespace TGS.Services.Operations
             var value = await _cacheManager.SafeGetHashSetAsync(type, brandId, currencyCode);
             if (value.HasValue)
             {
-                return (int) value;
+                return (int)value;
             }
 
             var betLimitId = await _brandQueries.GetBrandDefaultBetLimitAsync(brandId, currencyCode);
@@ -239,10 +229,8 @@ namespace TGS.Services.Operations
                     $"Brand with id '{brandId}' doesn't have default bet limit for currency '{currencyCode}'");
             }
 
-            await _cacheManager.SafeCacheHashSetAsync(type, brandId, new HashEntry[]
-            {
-                new(currencyCode, betLimitId.Value)
-            }, TimeSpan.FromHours(2));
+            await _cacheManager.SafeCacheHashSetAsync(type, brandId,
+                new HashEntry[] {new(currencyCode, betLimitId.Value)}, TimeSpan.FromHours(2));
 
             return betLimitId.Value;
         }
@@ -250,6 +238,15 @@ namespace TGS.Services.Operations
         Task<CachedAnnouncement[]> IBrandOperations.GetEffectiveAnnouncementsAsync(Guid brandId) =>
             _cacheManager.SafeGetAndCacheAsync(RedisCacheType.Announcements, brandId, TimeSpan.FromMinutes(10),
                 () => _brandQueries.GetEffectiveAnnouncementsAsync(brandId));
+
+        async Task<CachedBrandGame[]> IBrandOperations.GetBrandGamesAsync(Guid brandId,
+            GamePlatformType[] platformTypes)
+        {
+            var games = await GetAndCachedBrandGamesAsync(brandId);
+            var types = platformTypes?.Length > 0 ? platformTypes : Consts.AllGamePlatformTypes;
+
+            return games.Where(g => types.Contains(g.PlatformType)).ToArray();
+        }
 
         #region Private Methods
 
@@ -260,15 +257,9 @@ namespace TGS.Services.Operations
                 var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Brand, brandId,
                     new RedisValue[]
                     {
-                        CachedBrandFields.BrandCode,
-                        CachedBrandFields.BrandName,
-                        CachedBrandFields.TimeZoneId,
-                        CachedBrandFields.Status,
-                        CachedBrandFields.ResellerId,
-                        CachedBrandFields.ResellerCode,
-                        CachedBrandFields.LicenseeId,
-                        CachedBrandFields.LicenseeCode,
-                        CachedBrandFields.ClientId,
+                        CachedBrandFields.BrandCode, CachedBrandFields.BrandName, CachedBrandFields.TimeZoneId,
+                        CachedBrandFields.Status, CachedBrandFields.ResellerId, CachedBrandFields.ResellerCode,
+                        CachedBrandFields.LicenseeId, CachedBrandFields.LicenseeCode, CachedBrandFields.ClientId,
                         CachedBrandFields.SecretKey
                     });
 
@@ -279,7 +270,7 @@ namespace TGS.Services.Operations
                         Code = values[0],
                         Name = values[1],
                         TimeZoneId = values[2],
-                        Status = (Status) (int) values[3],
+                        Status = (Status)(int)values[3],
                         ResellerId = Guid.Parse(values[4]),
                         ResellerCode = values[5],
                         LicenseeId = Guid.Parse(values[6]),
@@ -303,10 +294,9 @@ namespace TGS.Services.Operations
             {
                 var fields = new HashEntry[]
                 {
-                    new(CachedBrandFields.BrandCode, brand.Code),
-                    new(CachedBrandFields.BrandName, brand.Name),
+                    new(CachedBrandFields.BrandCode, brand.Code), new(CachedBrandFields.BrandName, brand.Name),
                     new(CachedBrandFields.TimeZoneId, brand.TimeZoneId),
-                    new(CachedBrandFields.Status, (int) brand.Status),
+                    new(CachedBrandFields.Status, (int)brand.Status),
                     new(CachedBrandFields.ResellerId, brand.ResellerId.ToString()),
                     new(CachedBrandFields.ResellerCode, brand.ResellerCode),
                     new(CachedBrandFields.LicenseeId, brand.LicenseeId.ToString()),
@@ -351,10 +341,7 @@ namespace TGS.Services.Operations
         {
             try
             {
-                var fields = new HashEntry[]
-                {
-                    new(gameProviderId.ToString(), _json.SerializeToString(configuration))
-                };
+                var fields = new HashEntry[] {new(gameProviderId.ToString(), _json.SerializeToString(configuration))};
 
                 await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.BrandGameProviderConfiguration, brandId,
                     fields, TimeSpan.FromHours(2), true);

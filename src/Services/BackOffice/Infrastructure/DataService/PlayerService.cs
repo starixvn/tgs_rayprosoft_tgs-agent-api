@@ -93,14 +93,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         await _cacheManager.ClearCacheAsync(RedisCacheType.Player, request.PlayerCode);
                     }
 
-                    player.UpdatedByUsername = request.Username;
+                    player.UpdatedByUsername = request.EditorUsername;
                     player.UpdatedOn = DateTimeOffset.Now;
 
                     var auditLog = new PlayerAuditLog
                     {
                         Id = GuidExtensions.NewSequentialGuid(),
                         ModuleName = "Player",
-                        CreatedByUsername = request.Username,
+                        CreatedByUsername = request.EditorUsername,
                         CreatedOn = DateTimeOffset.Now,
                         Operation = $"Update Player {request.Type}",
                         Username = request.PlayerCode

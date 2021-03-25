@@ -8,26 +8,30 @@ using Hangfire.Dashboard.Management.Support;
 using Hangfire.Server;
 using TGS.Core.Models.Messages;
 using TGS.Workers.Schedulers.Jobs.Reports;
+using TGS.Workers.Schedulers.Jobs.Rounds;
 
 namespace TGS.Workers.Schedulers.Jobs
 {
     [ManagementPage("手動Schedule", Consts.Queue.Schedule)]
     public class JobManagement
     {
-        private readonly IMarketReportService _worker;
+        private readonly IPlayerAggregateReportWorkerService _playerAggregateWorker;
+        private readonly IRoundAggregateWorkerService _roundAggregateWorker;
 
-        public JobManagement(IMarketReportService worker)
+        public JobManagement(IRoundAggregateWorkerService roundAggregateWorker,
+            IPlayerAggregateReportWorkerService playerAggregateWorker)
         {
-            _worker = worker;
+            _roundAggregateWorker = roundAggregateWorker;
+            _playerAggregateWorker = playerAggregateWorker;
         }
 
         [Queue(Consts.Queue.Schedule)]
         [Job]
-        [DisplayName("create or update market report")]
-        [Description("更新市場報表指定的時間")]
+        [DisplayName("create or update round aggregate")]
+        [Description("更新局集合指定的時間")]
         [AutomaticRetry(Attempts = 3)]
         [DisableConcurrentExecution(90)]
-        public async Task<TgsResponse> UpdateMarketReportAsync(
+        public async Task<TgsResponse> UpdateRoundAggregateAsync(
             [DisplayData("指定日期",
                 "2021/02/18",
                 "Default offset +08:00")]
@@ -42,7 +46,34 @@ namespace TGS.Workers.Schedulers.Jobs
 
             if (DateTimeOffset.TryParse($"{dateTime} +8:00", out _))
             {
-                return await _worker.ExecutionAsync(dateTime, hour);
+                return await _roundAggregateWorker.ExecutionAsync(dateTime, hour);
+            }
+
+            return new() {ErrorMessage = "DateTime invalided"};
+        }
+
+        [Queue(Consts.Queue.Schedule)]
+        [Job]
+        [DisplayName("create or update player aggregate")]
+        [Description("更新局集合指定的時間")]
+        [AutomaticRetry(Attempts = 3)]
+        [DisableConcurrentExecution(90)]
+        public async Task<TgsResponse> UpdatePlayerAggregateAsync(
+            [DisplayData("指定日期",
+                "2021/02/18",
+                "Default offset +08:00")]
+            string dateTime = "",
+            [DisplayData("指定小時",
+                "",
+                "0~23, 13 = 13~14")]
+            int hour = 0,
+            PerformContext context = null)
+        {
+            context.WriteLine($"Start time:{DateTime.Now}");
+
+            if (DateTimeOffset.TryParse($"{dateTime} +8:00", out _))
+            {
+                return await _playerAggregateWorker.ManualExecutionAsync(dateTime, hour);
             }
 
             return new() {ErrorMessage = "DateTime invalided"};

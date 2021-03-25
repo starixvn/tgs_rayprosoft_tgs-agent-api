@@ -11,9 +11,9 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
 {
     internal class GetRoundsQueryHandler : Handler<GetRoundsRequest, PagedResponse<RoundModel>>
     {
-        private readonly IRoundService _service;
+        private readonly ITgsRoundService _service;
 
-        public GetRoundsQueryHandler(IRoundService service, IHttpContextAccessor accessor) :
+        public GetRoundsQueryHandler(ITgsRoundService service, IHttpContextAccessor accessor) :
             base(accessor)
         {
             _service = service;
@@ -30,20 +30,20 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
                     .Where(request.RoundId, x => x.Id == request.RoundId)
                 )
                 .GroupJoin(
-                    _service.Repository.Players,
+                    _service.TgsRepository.Players,
                     round => round.PlayerCode, player => player.PlayerCode,
                     (round, player) => new {round, player})
                 .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new {x.round, player})
-                .GroupJoin(_service.Repository.Games,
+                .GroupJoin(_service.TgsRepository.Games,
                     combine => combine.round.GameId, game => game.Id,
                     (combine, game) => new {combine.round, combine.player, game})
                 .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new {x.round, x.player, game})
-                .GroupJoin(_service.Repository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
+                .GroupJoin(_service.TgsRepository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
                     (combine, detail) => new {combine.round, combine.player, combine.game, detail})
                 .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new {x.round, x.player, x.game, detail})
                 .Where(request.Username, x => request.Username == x.player.Username)
                 .Where(request.GameType, x => x.game.Type == request.GameType)
-                .GroupJoin(_service.Repository.GameProviders, combine => combine.round.GameProviderId,
+                .GroupJoin(_service.TgsRepository.GameProviders, combine => combine.round.GameProviderId,
                     gameProvider => gameProvider.Id,
                     (combine, gameProvider) => new
                     {

@@ -98,7 +98,6 @@ namespace TGS.Services.GameOperations.Data
                 Balance = player.Wallet.Balance,
                 CurrencyCode = player.Wallet.CurrencyCode,
                 Transactions = transactionResults.ToArray(),
-                PlatformType = (int)betData.PlatformType,
                 Error = TgsApiError.None
             };
         }
@@ -177,10 +176,12 @@ namespace TGS.Services.GameOperations.Data
 
             if (s.HasExtGameId)
             {
+                var types = s.PlatformType.ToGamePlatformTypes();
                 game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId)
-                    && g.PlatformType == s.PlatformType);
+                    && types.Contains(g.PlatformType));
             }
-            else
+
+            if (game == null && s.HasExtRefTransactionId)
             {
                 var gameId = await GetGameIdInSameRoundAsync(s.Repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
                         s.ExternalRoundId, s.ExternalTransactionReferenceId)
@@ -509,7 +510,6 @@ namespace TGS.Services.GameOperations.Data
                 GameProviderConfigurationId = s.GameProviderConfigurationId,
                 WalletId = s.PlayerData.Wallet.Id,
                 GameId = s.GameId,
-                PlatformType = s.PlatformType,
                 CurrencyCode = s.PlayerData.Wallet.CurrencyCode,
                 BrandId = s.PlayerData.BrandId,
                 CreatedOn = s.UtcNow,

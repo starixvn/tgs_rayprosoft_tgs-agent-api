@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using StackExchange.Redis;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
@@ -14,6 +13,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -86,44 +86,25 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
             var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
+            var providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
 
-            const RedisCacheType cacheType = RedisCacheType.BrandGameProvidersWithConditions;
-            var cacheKey = brandId;
-            var field = $"{currencyCode}:{platformType}:{(int) playerType}";
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, field);
-
-            GameProviderModel[] providers;
-
-            if (value.HasValue)
-            {
-                providers = _json.DeserializeFromString<GameProviderModel[]>(value);
-            }
-            else
-            {
-                providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
-
-                await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
-                {
-                    new(field, _json.SerializeToString(providers))
-                }, TimeSpan.FromHours(12));
-            }
-
-            var translatedProviders = await providers.Select(async gpm =>
+            var translatedProviders = new List<GameProviderModel>();
+            foreach (var gpm in providers)
             {
                 var key = $"{gpm.Id}";
                 var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gpm.Id, culture);
 
-                return gpm with
+                var model = gpm with
                 {
                     Name = _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Name),
-                    Description = _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Description)
+                    Description =
+                    _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Description)
                 };
-            }).WhenAll();
 
-            return new()
-            {
-                GameProviders = translatedProviders
-            };
+                translatedProviders.Add(model);
+            }
+
+            return new() {GameProviders = translatedProviders.ToArray()};
         }
 
         private async Task<GameProviderModel[]> GetGameProviderModelsAsync(Guid brandId,
@@ -132,39 +113,42 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
         {
             var gameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId);
             var statuses = _validStatus.GetStatus(playerType);
-            
-            var providers = await gameProviders
-                .Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
-                .Select(async bgp =>
+
+            var providers = new List<GameProviderModel>();
+
+            foreach (var bgp in gameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus)))
+            {
+                var gameProviderId = bgp.GameProviderId;
+                var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(bgp.GameProviderId);
+                var currencySupported =
+                    await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
+
+                if (!currencySupported)
                 {
-                    var gameProviderId = bgp.GameProviderId;
-                    var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(bgp.GameProviderId);
-                    var currencySupported =
-                        await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
+                    continue;
+                }
 
-                    if (!currencySupported)
-                    {
-                        return null;
-                    }
+                var gamePlatformTypes = platformType.ToGamePlatformTypes();
+                var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
 
-                    var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, platformType);
+                if (games.Length == 0)
+                {
+                    continue;
+                }
 
-                    if (games.Length == 0)
-                    {
-                        return null;
-                    }
+                var model = new GameProviderModel
+                {
+                    Id = gameProviderId,
+                    Code = gameProvider.Code,
+                    Name = gameProvider.Name,
+                    Description = gameProvider.Description,
+                    Status = gameProvider.Status,
+                    GameTypes = games.Select(g => g.Type).OrderBy(t => (int)t)
+                        .Distinct().ToArray()
+                };
 
-                    return new GameProviderModel
-                    {
-                        Id = gameProviderId,
-                        Code = gameProvider.Code,
-                        Name = gameProvider.Name,
-                        Description = gameProvider.Description,
-                        Status = gameProvider.Status,
-                        GameTypes = games.Select(g => g.Type).OrderBy(t => (int) t)
-                            .Distinct().ToArray()
-                    };
-                }).WhenAll();
+                providers.Add(model);
+            }
 
             return providers.Where(gpm => gpm != null).ToArray();
         }

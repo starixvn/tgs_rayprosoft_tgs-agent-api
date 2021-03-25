@@ -136,6 +136,9 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         DbSet<Transaction> Transactions { get; set; }
+        DbSet<Agent> Agents { get; set; }
+        DbSet<AgentBank> AgentBanks { get; set; }
+        DbSet<AgentWallet> AgentWallets { get; set; }
 
         DbSet<DepositForm> DepositForms { get; set; }
     }
@@ -263,6 +266,9 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         public DbSet<Transaction> Transactions { get; set; }
+        DbSet<Agent> ITgsRepository.Agents { get; set; }
+        DbSet<AgentBank> ITgsRepository.AgentBanks { get; set; }
+        DbSet<AgentWallet> ITgsRepository.AgentWallets { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;

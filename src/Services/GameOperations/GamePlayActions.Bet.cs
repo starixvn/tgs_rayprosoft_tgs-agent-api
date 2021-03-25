@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -84,20 +85,25 @@ namespace TGS.Services.GameOperations
             if (!supported)
             {
                 throw new InvalidOperationException(
-                    $"gameProvider {data.GameProviderCode} doesn't support currency '{player.DefaultWalletCurrencyCode}'");
+                    $"GameProvider '{data.GameProviderCode}' doesn't support currency '{player.DefaultWalletCurrencyCode}'");
             }
 
             var platformType = data.PlatformType;
-            var brandGames = await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, platformType);
-            var subGames = await _gameProviderOperations.GetSubGameIdsAsync(gameProviderId, platformType);
+            var gamePlatformTypes = platformType!.Value.ToGamePlatformTypes();
+            var brandGames =
+                await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, gamePlatformTypes);
+            var subGames = await _gameProviderOperations.GetSubGamesAsync(gameProviderId, gamePlatformTypes);
 
-            var games = brandGames
-                .Select(g => new IdMap<int>
+            var games = brandGames.Select(g => new IdMap<int>
                 {
                     Id = g.GameId,
                     ExternalId = g.ExternalGameId
                 })
-                .Concat(subGames).Distinct()
+                .Concat(subGames.Select(s => new IdMap<int>
+                {
+                    Id = s.Id,
+                    ExternalId = s.ExternalId
+                })).Distinct()
                 .ToArray();
 
             var gameIds = games

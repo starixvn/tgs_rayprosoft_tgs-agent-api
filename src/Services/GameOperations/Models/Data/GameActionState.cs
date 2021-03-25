@@ -14,7 +14,8 @@ namespace TGS.Services.GameOperations.Models.Data
         internal GameActionState(TransactionData td)
         {
             if (td == null)
-                throw new ArgumentException("TransactionData passed to ExecuteGameActionTransactionState must not be NULL");
+                throw new ArgumentException(
+                    "TransactionData passed to ExecuteGameActionTransactionState must not be NULL");
 
             OldRoundStatus = NewRoundStatus = RoundStatus.New;
 
@@ -38,7 +39,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
         public ITgsRepository Repository { get; init; }
         public GameActionType GameActionType { get; init; }
-        public PlatformType PlatformType { get; init; }
+        public PlatformType? PlatformType { get; init; }
         public Action<string, decimal> ValidateAmount { get; init; }
         public Func<decimal, decimal> PrepareAmount { get; init; }
         public bool HasWalletUpdate { get; init; }
@@ -56,12 +57,12 @@ namespace TGS.Services.GameOperations.Models.Data
         public DateTimeOffset UtcNow { get; }
 
         /// <summary>
-        /// all game actions in the same round
+        ///     all game actions in the same round
         /// </summary>
         public IList<BetActionData> PreviousActions { get; set; }
 
         /// <summary>
-        /// game actions except that is cancelled in the same round
+        ///     game actions except that is cancelled in the same round
         /// </summary>
         public IList<BetActionData> ValidPreviousActions { get; set; }
 
@@ -80,7 +81,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public DateTimeOffset ExternalRoundCreatedOn =>
             PreviousActions?.FirstOrDefault()?.SentOn ?? UtcNow;
 
-        public DateTimeOffset? RoundClosedOn => 
+        public DateTimeOffset? RoundClosedOn =>
             NewRoundStatus == RoundStatus.Closed ? UtcNow : default(DateTimeOffset?);
 
         // set from TransactionData

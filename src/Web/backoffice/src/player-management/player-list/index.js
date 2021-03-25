@@ -67,6 +67,7 @@ const BodyContent = ({ brandId = "" }) => {
     let { pageIndex, pageSize, status, vipId, username = "" } = state
     let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList({
         ...toApiParams(state),
+        sortby: "username",
         brandId
     })
     let columns = useColumns({ mutate, items: data?.items, brandId })

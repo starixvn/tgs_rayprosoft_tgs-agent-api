@@ -24,6 +24,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Application\Resources\Agent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Agent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\AgentBank.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AgentBank.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\BetLimit.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -92,6 +102,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Application\Resources\Agent.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Agent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\AgentBank.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AgentBank.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\BetLimit.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>BetLimit.Designer.cs</LastGenOutput>

@@ -15,7 +15,7 @@ namespace TGS.Core.Models.Services.Caches
         public string RuleUrl { get; init; }
         public string EndpointPath { get; init; }
         public GameType Type { get; init; }
-        public PlatformType PlatformType { get; init; }
+        public GamePlatformType PlatformType { get; init; }
         public bool HasTurnoverOnTieBet { get; init; }
         public string[] AvailableCurrencies { get; init; }
     }
