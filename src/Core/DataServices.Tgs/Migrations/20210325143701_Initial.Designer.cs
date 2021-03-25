@@ -10,15 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-<<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210325095216_Initial.Designer.cs
-<<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210325095216_Initial.Designer.cs
-    [Migration("20210325095216_Initial")]
-=======
-    [Migration("20210323080423_Initial")]
->>>>>>> bfac5cb5 (在BrandPayment table加入BankAccount欄位):src/Core/DataServices.Tgs/Migrations/20210323080423_Initial.Designer.cs
-=======
-    [Migration("20210323090639_Initial")]
->>>>>>> 90b532bc (加入取得BankDepositForm查詢):src/Core/DataServices.Tgs/Migrations/20210323090639_Initial.Designer.cs
+    [Migration("20210325143701_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -162,7 +162,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var playerCode = await
-                (from p in db.Players
+                (from p in db.Players.AsQueryable()
                  join b in db.Brands on p.BrandId equals b.Id
                  where p.Username == username && b.Code == brandCode
                  select p.PlayerCode).AsNoTracking().FirstAsync();
@@ -516,7 +516,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var ga = await (
-                from act in db.GameActions
+                from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
@@ -537,6 +537,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameAction = await db.GameActions
+                .AsQueryable()
                 .FirstAsync(ga => ga.ExternalTransactionId == externalTransactionId);
 
             gameAction.Type.Should().Be(type, " The type of the game action should be as expected ");
@@ -551,6 +552,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameAction = await db.GameActions
+                .AsQueryable()
                 .FirstOrDefaultAsync(ga => ga.ExternalTransactionId == externalTransactionId);
 
             gameAction.Should().BeNull();
@@ -619,6 +621,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
                 .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
 
@@ -633,7 +636,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
                     RoundId = externalRoundId,
@@ -691,7 +694,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() {ExternalId = betRequest.Game.ExternalId},
+                Game = new() { ExternalId = betRequest.Game.ExternalId },
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -739,6 +742,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
                 .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
 
@@ -753,7 +757,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
                     RoundId = externalRoundId,
@@ -817,7 +821,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() {ExternalId = betRequest.Game.ExternalId},
+                Game = new() { ExternalId = betRequest.Game.ExternalId },
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -861,6 +865,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
                 .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
 
@@ -872,7 +877,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
                     RoundId = externalRoundId,
@@ -920,6 +925,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
                 .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
 
@@ -931,7 +937,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
                     RoundId = externalRoundId,

@@ -165,7 +165,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var playerCode = await
-                (from p in db.Players
+                (from p in db.Players.AsQueryable()
                  join b in db.Brands on p.BrandId equals b.Id
                  where p.Username == username && b.Code == brandCode
                  select p.PlayerCode).AsNoTracking().FirstAsync();
@@ -492,7 +492,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalRoundIds = betRequests.Select(r => r.ExternalRoundId).ToArray();
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
-            var roundData = await (from r in db.Rounds
+            var roundData = await (from r in db.Rounds.AsQueryable()
                                    where externalRoundIds.Contains(r.ExternalRoundId)
                                    from g in db.Games
                                    where r.GameId == g.Id
@@ -511,7 +511,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                                        }).ToArray()
                                    }).ToArrayAsync();
 
-            var currencies = await db.GameProviderCurrencies.Where(c => c.GameProvider.Code == GameProviderCode)
+            var currencies = await db.GameProviderCurrencies
+                .AsQueryable()
+                .Where(c => c.GameProvider.Code == GameProviderCode)
                 .Select(c => c).ToDictionaryAsync(c => c.CurrencyCode, c => c.GameProviderCurrencyCode);
 
             var request = new BatchRequest
@@ -590,7 +592,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var ga = await (
-                from act in db.GameActions
+                from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
@@ -609,7 +611,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var gameActions = await (
-                from act in db.GameActions
+                from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId
                 select act).AsNoTracking().ToArrayAsync();
@@ -631,7 +633,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var gameActions = await (
-                from act in db.GameActions
+                from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId
                 orderby act.RecordedOn
@@ -651,7 +653,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var gameActions = await (
-                from act in db.GameActions
+                from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId
                 orderby act.RecordedOn
@@ -730,6 +732,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var gameActions = await db.GameActions
+                .AsQueryable()
                 .Where(ga => txids.Contains(ga.ExternalTransactionId))
                 .Select(ga => new
                 {
@@ -742,7 +745,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var players = Get<Dictionary<string, decimal>>(SR.Players);
             foreach (var ga in gameActions)
             {
-                var data = await db.Wallets.Where(w => w.PlayerCode == ga.PlayerCode)
+                var data = await db.Wallets
+                    .AsQueryable()
+                    .Where(w => w.PlayerCode == ga.PlayerCode)
                     .Select(w => new
                     {
                         w.Player.Username,
@@ -770,7 +775,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var games = table.Rows.Select(r => r[0]).ToArray();
 
-            var gameIds = await (from r in db.Rounds
+            var gameIds = await (from r in db.Rounds.AsQueryable()
                                  join g in db.Games
                                      on r.GameId equals g.Id
                                  where r.ExternalRoundId == externalRoundId
