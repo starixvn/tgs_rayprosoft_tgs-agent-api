@@ -5,14 +5,15 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Extensions;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.OperatorApi.Handlers.Game
 {
     public sealed class GetLobbyGameUrlHandler : IRequestHandler<GetLobbyGameUrlRequest, GetGameUrlResponse>
     {
-        private readonly HttpContext _httpContext;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly HttpContext _httpContext;
         private readonly IMediator _mediator;
 
         public GetLobbyGameUrlHandler(
@@ -35,7 +36,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var gameType = request.GameType;
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
 
-            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, platformType, gameType);
+            var gamePlatformTypes = platformType.ToGamePlatformTypes();
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes, gameType);
             if (games.Length != 1)
             {
                 throw new InvalidOperationException(

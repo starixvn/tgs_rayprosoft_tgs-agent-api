@@ -11,7 +11,7 @@ namespace TGS.Services.BackOffice.Application.Models.BrandGame
         public int DisplayOrder { get; set; }
         public string GameName { get; set; }
         public GameType GameType { get; set; }
-        public PlatformType Platform { get; set; }
+        public GamePlatformType Platform { get; set; }
         public GameStatus Status { get; set; }
         public bool IsHot { get; set; }
         public bool IsNew { get; set; }

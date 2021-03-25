@@ -32,10 +32,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.GameId)
                 .IsRequired();
 
-            builder.Property(c => c.PlatformType)
-                .HasColumnType(ColumnTypes.SmallInt)
-                .IsRequired();
-
             builder.Property(c => c.CurrencyCode)
                 .HasMaxLength(10)
                 .IsRequired();

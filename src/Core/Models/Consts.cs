@@ -12,6 +12,11 @@ namespace TGS.Core.Models
 
         public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
 
+        public static readonly GamePlatformType[] AllGamePlatformTypes =
+        {
+            GamePlatformType.Desktop, GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile
+        };
+
         public static readonly IDictionary<HealthStatus, int> HealthCheckResultStatusCodes =
             new Dictionary<HealthStatus, int>
             {
@@ -42,7 +47,7 @@ namespace TGS.Core.Models
         public static class TokenExpireSeconds
         {
             public const int PlayerLogin = 3600 * 12; // 12 hours
-            public const int Jwt = 60 * 60; // 1 hours
+            public const int Jwt = 60 * 60;           // 1 hours
         }
 
         public static class GameProvider

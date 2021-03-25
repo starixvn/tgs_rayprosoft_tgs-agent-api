@@ -107,11 +107,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
                 {
                     ExternalBatchId = $"scheduler_sbo_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
                     Timestamp = DateTimeOffset.UtcNow,
-                    Transactions = failedRoundExternalIds.GroupBy(t => new
-                        {
-                            t.PlayerCode,
-                            t.PlatformType
-                        })
+                    Transactions = failedRoundExternalIds.GroupBy(t => t.PlayerCode)
                         .SelectMany(g => g.SelectMany(r => r.GameActionExternalIds.Select(ga =>
                         {
                             if (!currencyMap.TryGetValue(r.CurrencyCode, out var curr))
@@ -121,8 +117,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
 
                             return new BatchRequestTransaction
                             {
-                                PlayerCode = g.Key.PlayerCode,
-                                PlatformType = (int)g.Key.PlatformType,
+                                PlayerCode = g.Key,
                                 CurrencyCode = curr,
                                 Amount = ga.Amount.Negate(),
                                 ExternalGameId = r.ExternalGameId,

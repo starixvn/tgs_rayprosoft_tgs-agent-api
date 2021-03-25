@@ -347,7 +347,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     return new BatchTransactionData
                     {
                         PlayerCode = t.PlayerCode,
-                        PlatformType = (PlatformType)t.PlatformType,
                         GameProviderConfigurationId = gameProviderConfigurationid,
                         Amount = t.Amount,
                         ExternalRoundId = t.ExternalRoundId,

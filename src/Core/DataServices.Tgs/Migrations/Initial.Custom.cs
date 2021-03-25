@@ -68,7 +68,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 string.Format(Consts.FunctionSqlFormat, "game_provider_get_game_provider_for_cache"));
 
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.FunctionSqlFormat, "game_provider_get_sub_game_id_maps"));
+                string.Format(Consts.FunctionSqlFormat, "game_provider_get_sub_games"));
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "localization_get_localization_by_game_provider_id"));

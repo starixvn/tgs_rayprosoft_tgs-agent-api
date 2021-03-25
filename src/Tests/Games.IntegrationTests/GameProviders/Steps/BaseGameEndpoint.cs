@@ -262,11 +262,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(serviceProvider);
 
+            var gamePlatformTypes = GetGamePlatformTypes();
             var game = await (
                 from g in db.Games
                 join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
                     on g.GameProviderId equals gameProvider.Id
-                where g.ExternalId == externalGameId && g.PlatformType == platformType
+                where g.ExternalId == externalGameId && gamePlatformTypes.Contains(g.PlatformType)
                 select g).FirstAsync();
 
             game.Status = gameStatus;
@@ -275,6 +276,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
             await cacheManager.ClearCacheAsync(RedisCacheType.Games, game.GameProviderId);
+
+            GamePlatformType[] GetGamePlatformTypes() =>
+                platformType switch
+                {
+                    PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
+                    PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
+                };
         }
 
         protected async Task ChangeBrandStatusAsync(IServiceProvider serviceProvider, Status status,

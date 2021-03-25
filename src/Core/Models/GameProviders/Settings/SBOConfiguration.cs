@@ -10,5 +10,6 @@ namespace TGS.Core.Models.GameProviders.Settings
         public Uri ApiUrl { get; init; }
         public bool EnableCancelFailedTransactionsJob { get; init; } = false;
         public int DelaySecondsForPlaceBet { get; init; } = 0;
+        public string[] BypassPlayerCodes { get; init; } = Array.Empty<string>();
     }
 }

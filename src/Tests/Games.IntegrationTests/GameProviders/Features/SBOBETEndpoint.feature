@@ -23,7 +23,6 @@ Scenario: 02.a - Place desktop bet
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 Scenario: 02.b - Place mobile bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Mobile"
@@ -32,7 +31,6 @@ Scenario: 02.b - Place mobile bet
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Mobile"
 
 Scenario: 02.c - Player cannot place bet without login
 	Given player "TP01_cny" of brand "GPI" without login
@@ -57,7 +55,6 @@ Scenario: 02.e - GPI Test player can place bet with game provider with maintenan
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 @ChangeGameProviderConfigurationStatus
 Scenario: 02.f - Real player cannot place bet with game provider configuration with maintenance status
@@ -76,7 +73,6 @@ Scenario: 02.g - Test player can place bet with game provider configuration with
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 @ChangeGameStatus
 Scenario: 02.h - Real player cannot place bet with game with maintenance status
@@ -95,7 +91,6 @@ Scenario: 02.i - Test player place bet with game with maintenance status
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 @ChangeBrandStatus
 Scenario: 02.j - Real player cannot place bet with brand with maintenance status
@@ -114,7 +109,6 @@ Scenario: 02.k - TGS Test player place bet with brand with maintenance status
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 Scenario: 02.l - Player cannot place bet with unknown game
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -131,7 +125,6 @@ Scenario: 03.a - Win bet
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 03.b - Can win bet without player login
@@ -144,7 +137,6 @@ Scenario: 03.b - Can win bet without player login
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderStatus
@@ -158,7 +150,6 @@ Scenario: 03.c - Can win bet with game provider status set to maintenance
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderConfigurationStatus
@@ -172,7 +163,6 @@ Scenario: 03.d - Can win bet with game provider configuration status set to main
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameStatus
@@ -186,7 +176,6 @@ Scenario: 03.e - Can win bet with game status set to maintenance
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeBrandStatus
@@ -200,7 +189,6 @@ Scenario: 03.f - Can win bet with brand status set to maintenance
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 03.g - Resend win bet
@@ -222,7 +210,30 @@ Scenario: 03.h - Win bet with unknown game
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
+		And the round will be closed
+
+Scenario: 03.i - Win bet with token cache all cleared
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given clear all redis token cache
+	When I win bet for game "1_0" for $15 
+	Then I will receive settle bet response of no error and balance of $105
+		And player wallet database record will be for $105
+		And game action will be recorded in the database of type "WinBet" for $15
+		And the round will be closed
+
+Scenario: 03.i - Win bet with login records in db are all removed
+	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+		And player having balance of $100
+	Given I place bet of $10 for game "1_1"
+		And balance now being $90
+	Given remove all login records
+	When I win bet for game "1_0" for $15 
+	Then I will receive settle bet response of no error and balance of $105
+		And player wallet database record will be for $105
+		And game action will be recorded in the database of type "WinBet" for $15
 		And the round will be closed
 
 Scenario: 04.a - Lose bet
@@ -234,7 +245,6 @@ Scenario: 04.a - Lose bet
 	Then I will receive settle bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 04.b - Can lose bet without player login
@@ -247,7 +257,6 @@ Scenario: 04.b - Can lose bet without player login
 	Then I will receive settle bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderStatus
@@ -261,7 +270,6 @@ Scenario: 04.c - Can lose bet with game provider status set to maintenance
 	Then I will receive settle bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderConfigurationStatus
@@ -275,7 +283,6 @@ Scenario: 04.d - Can lose bet with game provider configuration status set to mai
 	Then I will receive settle bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameStatus
@@ -289,7 +296,6 @@ Scenario: 04.e - Can lose bet with game status set to maintenance
 	Then I will receive settle bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeBrandStatus
@@ -303,7 +309,6 @@ Scenario: 04.f - Can lose bet with brand status set to maintenance
 	Then I will receive settle bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 04.g - Resend lose bet
@@ -325,7 +330,6 @@ Scenario: 05.a - Tie bet
 	Then I will receive settle bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "TieBet" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 05.b - Can tie bet without player login
@@ -338,7 +342,6 @@ Scenario: 05.b - Can tie bet without player login
 	Then I will receive settle bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "TieBet" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderStatus
@@ -352,7 +355,6 @@ Scenario: 05.c - Can tie bet with game provider status set to maintenance
 	Then I will receive settle bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "TieBet" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderConfigurationStatus
@@ -366,7 +368,6 @@ Scenario: 05.d - Can tie bet with game provider configuration status set to main
 	Then I will receive settle bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "TieBet" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameStatus
@@ -380,7 +381,6 @@ Scenario: 05.e - Can tie bet with game status set to maintenance
 	Then I will receive settle bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "TieBet" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeBrandStatus
@@ -394,7 +394,6 @@ Scenario: 05.f - Can tie bet with brand status set to maintenance
 	Then I will receive settle bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "TieBet" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 05.g - Resend tie bet
@@ -416,7 +415,6 @@ Scenario: 06.a - Cancel bet
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 06.b - Can cancel bet without player login
@@ -429,7 +427,6 @@ Scenario: 06.b - Can cancel bet without player login
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderStatus
@@ -443,7 +440,6 @@ Scenario: 06.c - Can cancel bet with game provider status set to maintenance
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameProviderConfigurationStatus
@@ -457,7 +453,6 @@ Scenario: 06.d - Can cancel bet with game provider configuration status set to m
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeGameStatus
@@ -471,7 +466,6 @@ Scenario: 06.e - Can cancel bet with game status set to maintenance
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 @ChangeBrandStatus
@@ -485,7 +479,6 @@ Scenario: 06.f - Can cancel bet with brand status set to maintenance
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 06.g - Resend cancel bet
@@ -507,7 +500,6 @@ Scenario: 06.h - Cancel bet with unknown game
 	Then I will receive cancel response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario: 07.a - Void round
@@ -922,7 +914,6 @@ Scenario: 11.a - Place desktop bet of sub game
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
-		And game platform will be recorded in the database of type "Desktop"
 
 Scenario: 11.b - Win bet of sub game
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -933,7 +924,6 @@ Scenario: 11.b - Win bet of sub game
 	Then I will receive settle bet response of no error and balance of $105
 		And player wallet database record will be for $105
 		And game action will be recorded in the database of type "WinBet" for $15
-		And game platform will be recorded in the database of type "Desktop"
 		And the round will be closed
 
 Scenario:  12 - Place bet with the same external round id in differnet game
