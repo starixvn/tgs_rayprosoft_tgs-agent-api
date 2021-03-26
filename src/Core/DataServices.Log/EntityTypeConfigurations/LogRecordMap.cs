@@ -23,7 +23,6 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfigurations
                 .IsUnicode();
 
             builder.Property(c => c.Message)
-                .HasMaxLength(512)
                 .IsRequired()
                 .IsUnicode();
 
