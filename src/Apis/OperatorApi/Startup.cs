@@ -75,7 +75,8 @@ namespace TGS.Apis.OperatorApi
                 .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
                 {
                     config.GetSection("EmailSetting").Bind(options);
-                });
+                })
+                .UseOperatorRepositories();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()

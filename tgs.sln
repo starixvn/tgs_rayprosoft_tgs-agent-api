@@ -131,6 +131,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityVerifiers", "src\Li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityVerifiers.UnitTests", "src\Tests\IdentityVerifiers.UnitTests\IdentityVerifiers.UnitTests.csproj", "{D721E4E8-A6BD-40D9-8C42-76498A1A3AA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Operator.Repositories", "Operator.Repositories\Operator.Repositories.csproj", "{BD8C015E-843B-4229-B404-A947925ACA32}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -293,6 +295,10 @@ Global
 		{D721E4E8-A6BD-40D9-8C42-76498A1A3AA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D721E4E8-A6BD-40D9-8C42-76498A1A3AA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D721E4E8-A6BD-40D9-8C42-76498A1A3AA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD8C015E-843B-4229-B404-A947925ACA32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD8C015E-843B-4229-B404-A947925ACA32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD8C015E-843B-4229-B404-A947925ACA32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD8C015E-843B-4229-B404-A947925ACA32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -341,9 +347,10 @@ Global
 		{0C959833-AC55-4860-9CDC-0D93732700D4} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{D22E7F19-C657-46A9-A905-6ACAD2E53A94} = {A0C1C28D-6A48-4227-B2B5-C02C7011928C}
 		{D721E4E8-A6BD-40D9-8C42-76498A1A3AA3} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
+		{BD8C015E-843B-4229-B404-A947925ACA32} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_TaskErrorCategory = Message
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
+		RESX_TaskErrorCategory = Message
 	EndGlobalSection
 EndGlobal

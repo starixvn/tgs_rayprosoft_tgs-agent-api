@@ -1,7 +1,18 @@
 ## Migration Command 
 
+
 #TGS
+
+first, Delete Initial and TgsRepositoryModelSnapshot
+
+**In PackageManager Console:** 
+```
 add-migration <MigrationName> -c TgsRepository -p DataServices.Tgs -s TgsApi
+```
+**In Terminal Console:** (For repos root path) 
+```
+dotnet ef migrations add <MigrationName> -c TgsRepository -p .\src\Core\DataServices.Tgs -s .\src\Apis\TgsApi\
+```
 
 #Log
 add-migration <MigrationName> -c LogRepository -p DataServices.Log -s LogApi
