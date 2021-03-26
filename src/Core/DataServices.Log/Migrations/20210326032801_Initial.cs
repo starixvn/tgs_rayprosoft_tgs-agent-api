@@ -73,15 +73,13 @@ namespace TGS.Core.DataServices.Log.Migrations
                     server_name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     level = table.Column<int>(type: "integer", nullable: false),
                     logger = table.Column<string>(type: "text", nullable: true),
-                    message = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    message = table.Column<string>(type: "text", nullable: false),
                     exception = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_log_records", x => x.recorded_on);
                 });
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -16,7 +16,7 @@ RETURNS TABLE (
 	 "ServerName" character varying,
 	 "Level" integer,
 	 "Logger" text,
-	 "Message" character varying,
+	 "Message" text,
 	 "Exception" text,
 	 "TotalCount" bigint) 
 AS $$

@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="9.5.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.5.3" />
     <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />

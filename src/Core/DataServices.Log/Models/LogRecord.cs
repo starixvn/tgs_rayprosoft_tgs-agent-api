@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Log.Models
                 TrackingId = a.trackingid,
                 ServerName = a.servername,
                 RecordedOn = a.recordedon,
-                Exception = a.exception,
+                Exception = a.exception ?? string.Empty,
                 Message = a.message,
                 Level = a.level,
                 Logger = a.logger
