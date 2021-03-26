@@ -48,65 +48,70 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _transactionManager = transactionManager;
         }
 
-        Task IAgentService.CreateAgentAsync(CreateAgentRequest request)
+        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request)
         {
-            var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
+            var invitationCode = InvitationCodeGenerator.NewId();
 
-            return _transactionManager.ExecuteTransactionAsync(() => _repository,
-                IsolationLevel.ReadCommitted, id,
-                async _ =>
+            while (await ExistsAsync<Agent>(x => x.InvitationCode == invitationCode))
+            {
+                invitationCode = InvitationCodeGenerator.NewId();
+            }
+
+            var parentAgent =
+                await _repository.Agents.FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
+
+            var brand = await _repository.Brands.FirstAsync(x => x.Id == request.BrandId);
+
+            var agent = new Agent
+            {
+                Username = request.Username,
+                LevelType = request.LevelType,
+                Type = request.Type,
+                BrandId = request.BrandId,
+                Status = AgentStatus.Enabled,
+                ParentAgentId = parentAgent?.Id,
+                AgentStatus =
+                    request.LiveDealerRebatePercentage == 0 && request.BonusPercentage == 0
+                    && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
+                    request.CardGameRebatePercentage == 0
+                    && request.SportsRebatePercentage == 0 && request.VirtualSportsRebatePercentage == 0
+                        ? AgentConfigStatus.WaitForConfigurePercentage
+                        : AgentConfigStatus.DoneForConfigurePercentage,
+                CommissionPercentage = request.CommissionPercentage,
+                BonusPercentage = request.BonusPercentage,
+                LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
+                SlotRebatePercentage = request.SlotRebatePercentage,
+                LotteryRebatePercentage = request.LotteryRebatePercentage,
+                CardGameRebatePercentage = request.CardGameRebatePercentage,
+                SportsRebatePercentage = request.SportsRebatePercentage,
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage,
+                InvitationCode = invitationCode,
+                Remarks = request.Remarks,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now,
+                RegisteredOn = DateTimeOffset.Now
+            };
+
+            var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
+            agent.Password = pwd;
+            agent.Salt = salt;
+            agent.WithdrawPassword = Array.Empty<byte>();
+            agent.WithdrawSalt = Array.Empty<byte>();
+            agent.Wallets = new[]
+            {
+                new AgentWallet
                 {
-                    var invitationCode = InvitationCodeGenerator.NewId();
+                    Agent = agent,
+                    Balance = 0,
+                    CurrencyCode = brand.Currencies.First().CurrencyCode,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
+                }
+            }.ToHashSet();
 
-                    while (await ExistsAsync<Agent>(x => x.InvitationCode == invitationCode))
-                    {
-                        invitationCode = InvitationCodeGenerator.NewId();
-                    }
-
-                    var parentAgent =
-                        await _repository.Agents.FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
-
-                    var agent = new Agent
-                    {
-                        Username = request.Username,
-                        LevelType = request.LevelType,
-                        Type = request.Type,
-                        BrandId = request.BrandId,
-                        Status = AgentStatus.Enabled,
-                        ParentAgentId = parentAgent?.Id,
-                        AgentStatus =
-                            request.PositionTakingPercentage == 0 && request.BonusPercentage == 0
-                                ? AgentConfigStatus.WaitForConfigurePercentage
-                                : AgentConfigStatus.DoneForConfigurePercentage,
-                        PositionTakingPercentage = request.PositionTakingPercentage,
-                        BonusPercentage = request.BonusPercentage,
-                        InvitationCode = invitationCode,
-                        CreatedByUsername = request.EditorUsername,
-                        UpdatedByUsername = request.EditorUsername,
-                        CreatedOn = DateTimeOffset.Now,
-                        UpdatedOn = DateTimeOffset.Now,
-                        RegisteredOn = DateTimeOffset.Now
-                    };
-
-                    var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
-                    agent.Password = pwd;
-                    agent.Salt = salt;
-                    agent.WithdrawPassword = Array.Empty<byte>();
-                    agent.WithdrawSalt = Array.Empty<byte>();
-                    agent.Wallets = new[]
-                    {
-                        new AgentWallet
-                        {
-                            Agent = agent,
-                            Balance = 0,
-                            CurrencyCode = request.CurrencyCode,
-                            CreatedOn = DateTimeOffset.Now,
-                            UpdatedOn = DateTimeOffset.Now
-                        }
-                    }.ToHashSet();
-
-                    return CreateEntityAsync(agent);
-                });
+            await CreateEntityAsync(agent);
         }
 
         Task<bool> IAgentService.ExistsAsync(Expression<Func<Agent, bool>> predicate) => ExistsAsync(predicate);
@@ -131,7 +136,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 async _ =>
                 {
                     var parentAgent =
-                        await _repository.Agents.FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
+                        await _repository.Agents.FirstOrDefaultAsync(x =>
+                            x.BrandId == request.BrandId && x.Username == request.ParentUsername);
                     var operation = (AgentOperation)Enum.Parse(typeof(AgentOperation), request.UpdateType.ToString());
 
                     if (request.ParentUsername.IsNotNullOrEmpty() && agent.ParentAgentId != parentAgent.Id)
@@ -149,11 +155,31 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                                 ? AgentLevelType.Chief
                                 : AgentLevelType.Agent;
                             agent.Type = request.Type;
-                            agent.PositionTakingPercentage = request.PositionTakingPercentage;
-                            agent.BonusPercentage = request.BonusPercentage;
-                            agent.AgentStatus = request.PositionTakingPercentage == 0 && request.BonusPercentage == 0
-                                ? AgentConfigStatus.WaitForConfigurePercentage
-                                : AgentConfigStatus.DoneForConfigurePercentage;
+                            agent.CommissionPercentage =
+                                operation == AgentOperation.Agent ? -1 : request.CommissionPercentage;
+                            agent.BonusPercentage = operation == AgentOperation.Agent ? -1 : request.BonusPercentage;
+                            agent.LiveDealerRebatePercentage = operation == AgentOperation.Agent
+                                ? -1
+                                : request.LiveDealerRebatePercentage;
+                            agent.SlotRebatePercentage =
+                                operation == AgentOperation.Agent ? -1 : request.SlotRebatePercentage;
+                            agent.LotteryRebatePercentage = operation == AgentOperation.Agent
+                                ? -1
+                                : request.LotteryRebatePercentage;
+                            agent.CardGameRebatePercentage = operation == AgentOperation.Agent
+                                ? -1
+                                : request.CardGameRebatePercentage;
+                            agent.SportsRebatePercentage =
+                                operation == AgentOperation.Agent ? -1 : request.SportsRebatePercentage;
+                            agent.VirtualSportsRebatePercentage = operation == AgentOperation.Agent
+                                ? -1
+                                : request.VirtualSportsRebatePercentage;
+                            agent.AgentStatus = request.LiveDealerRebatePercentage == 0 && request.BonusPercentage == 0
+                                && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
+                                request.CardGameRebatePercentage == 0
+                                && request.SportsRebatePercentage == 0 && request.VirtualSportsRebatePercentage == 0
+                                    ? AgentConfigStatus.WaitForConfigurePercentage
+                                    : AgentConfigStatus.DoneForConfigurePercentage;
                             break;
                         case MemberUpdateType.Contact:
                             agent.Phone = request.Phone;
@@ -170,6 +196,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
                     agent.UpdatedByUsername = request.EditorUsername;
                     agent.UpdatedOn = DateTimeOffset.Now;
+                    agent.Remarks = request.Remarks;
 
                     var auditLog = new AgentAuditLog
                     {

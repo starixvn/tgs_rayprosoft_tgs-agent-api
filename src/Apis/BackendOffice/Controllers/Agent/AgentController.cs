@@ -48,7 +48,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<PlayerModel>> GetAgentTeamInformationAsync(Guid id) =>
-            _mediator.Send(new GetAgentTeamInfoRequest(id));
+        public Task<PagedResponse<PlayerModel>> GetAgentTeamInformationAsync(Guid id,
+            [FromQuery] GetAgentTeamInfoRequest request)
+        {
+            request.AgentId = id;
+            return _mediator.Send(new GetAgentTeamInfoRequest(id));
+        }
     }
 }

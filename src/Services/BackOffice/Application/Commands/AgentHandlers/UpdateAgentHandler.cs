@@ -23,6 +23,11 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         {
             var agent = await _service.GetAgentAsync(q => q.Id == request.Id);
 
+            if (agent == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
+            }
+
             if (request.ParentUsername.IsNotNullOrEmpty() &&
                 !await _service.ExistsAsync(x => x.Username == request.ParentUsername))
             {
