@@ -13,13 +13,15 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public AgentLevelType LevelType { get; init; }
         public AgentType Type { get; init; }
         public Guid BrandId { get; init; }
-        public Status Status { get; init; }
-        public decimal PositionTakingPercentage { get; init; } //佔成
+        public AgentStatus Status { get; init; }
+        public decimal CommissionPercentage { get; init; } //佔成
         public decimal BonusPercentage { get; init; }
-        public decimal RebatePercentage { get; init; }
-        public string Email { get; init; }
-        public string Phone { get; init; }
-        public string QQ { get; init; }
-        public string Wechat { get; init; }
+        public decimal LiveDealerRebatePercentage { get; init; }
+        public decimal SlotRebatePercentage { get; init; }
+        public decimal LotteryRebatePercentage { get; init; }
+        public decimal CardGameRebatePercentage { get; init; }
+        public decimal SportsRebatePercentage { get; init; }
+        public decimal VirtualSportsRebatePercentage { get; init; }
+        public string Remarks { get; init; }
     }
 }

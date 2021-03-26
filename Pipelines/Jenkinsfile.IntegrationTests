@@ -13,7 +13,7 @@ pipeline {
 	stages {
 		stage('Clone') {
 			steps {
-				git branch: "${params.BRANCH}", url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git' , credentialsId: 'gitlab-user-pwd'
+				git branch: "develop", url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git' , credentialsId: 'gitlab-user-pwd'
 			}
 		}
 		
@@ -24,7 +24,7 @@ pipeline {
 						sh "../dropintdb.sh tgs"
 						sh "../dropintdb.sh log"
 						
-						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
 							sh "kubectl delete -f ../int-test/update/"
 						}
 					} catch (err) {
@@ -59,7 +59,7 @@ pipeline {
 		stage('Prepare Env') {
 			steps {
 				script {
-					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://kubernetes.default.svc']) {
+					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
 						sh "kubectl apply -f ../int-test/update/"
 						sleep(time:15,unit:"SECONDS")
 					}

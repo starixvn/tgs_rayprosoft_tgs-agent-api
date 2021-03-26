@@ -209,26 +209,26 @@ namespace TGS.Services.GameOperations.Data
         private static async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
             GameActionState s)
         {
-            if (!ShouldGetPreviousActions(s))
-            {
-                return (s, null);
-            }
-
-            var repository = s.Repository;
             var externalRoundId = s.ExternalRoundId;
+            var actionsData = Array.Empty<SameRoundActionData>();
 
-            // get all transactions belonging to this round
-            var actionsData =
-                await GetGameActionsInSameRoundAsync(repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
-                        externalRoundId, s.GameId)
-                    .ConfigureAwait(false);
-
-            if (actionsData.Length == 0 && s.HasExtRefTransactionId)
+            if (ShouldGetPreviousActions(s))
             {
-                await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repository, externalRoundId,
-                    s.ExternalTransactionReferenceId).ConfigureAwait(false);
+                var repository = s.Repository;
 
-                return (s, null);
+                // get all transactions belonging to this round
+                actionsData =
+                    await GetGameActionsInSameRoundAsync(repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
+                            externalRoundId, s.GameId)
+                        .ConfigureAwait(false);
+
+                if (actionsData.Length == 0 && s.HasExtRefTransactionId)
+                {
+                    await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repository, externalRoundId,
+                        s.ExternalTransactionReferenceId).ConfigureAwait(false);
+
+                    return (s, null);
+                }
             }
 
             var (refData, refGameActionInternalId, amount) = GetReferencedActionAndActualAmount(s, actionsData);
@@ -285,7 +285,6 @@ namespace TGS.Services.GameOperations.Data
             }
 
             s.ValidPreviousActions = GetValidPreviousActions(actions);
-
             return (s, r);
         }
 

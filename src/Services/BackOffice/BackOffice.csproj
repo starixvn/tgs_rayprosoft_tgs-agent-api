@@ -12,8 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation" Version="9.5.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.5.0" />
+    <PackageReference Include="FluentValidation" Version="9.5.3" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.5.3" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
@@ -28,6 +28,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Agent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\AgentBank.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AgentBank.resx</DependentUpon>
     </Compile>
     <Compile Update="Application\Resources\BetLimit.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -100,6 +105,10 @@
     <EmbeddedResource Update="Application\Resources\Agent.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Agent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\AgentBank.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AgentBank.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\BetLimit.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

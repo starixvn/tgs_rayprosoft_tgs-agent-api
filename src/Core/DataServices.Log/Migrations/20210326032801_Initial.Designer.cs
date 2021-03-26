@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Log;
 namespace TGS.Core.DataServices.Log.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20210122091423_Initial")]
+    [Migration("20210326032801_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,9 +18,9 @@ namespace TGS.Core.DataServices.Log.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.AdminLog", b =>
                 {
@@ -230,9 +230,8 @@ namespace TGS.Core.DataServices.Log.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(512)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("text")
                         .HasColumnName("message");
 
                     b.Property<string>("ServerName")

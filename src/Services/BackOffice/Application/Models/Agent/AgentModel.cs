@@ -8,17 +8,23 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public Guid Id { get; set; }
         public string Username { get; set; }
         public string RealName { get; set; }
-        public Status Status { get; set; }
-        public AgentStatus AgentStatus { get; set; }
+        public AgentStatus Status { get; set; }
+        public AgentConfigStatus AgentStatus { get; set; }
         public AgentType Type { get; set; }
+        public AgentLevelType LevelType { get; init; }
         public string InvitationCode { get; set; }
         public Guid BrandId { get; set; }
         public string ParentAgentUsername { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
         public decimal Balance { get; set; }
-        public decimal PositionTakingPercentage { get; set; } //佔成
+        public decimal CommissionPercentage { get; set; } //佔成
         public decimal BonusPercentage { get; set; }
-        public decimal RebatePercentage { get; set; }
+        public decimal LiveDealerRebatePercentage { get; init; }
+        public decimal SlotRebatePercentage { get; init; }
+        public decimal LotteryRebatePercentage { get; init; }
+        public decimal CardGameRebatePercentage { get; init; }
+        public decimal SportsRebatePercentage { get; init; }
+        public decimal VirtualSportsRebatePercentage { get; init; }
         public string Email { get; set; }
         public string Phone { get; set; }
         public string QQ { get; set; }

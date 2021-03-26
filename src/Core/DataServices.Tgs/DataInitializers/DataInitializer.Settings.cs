@@ -104,6 +104,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
+                new MenuSetting("AgentManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("AgentList")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
                 new MenuSetting("AdminManagement")
                 {
                     SubMenus = new[]
@@ -237,19 +251,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("Update")
-                            }
-                        }
-                    }
-                },
-                new MenuSetting("Agent")
-                {
-                    SubMenus = new[]
-                    {
-                        new MenuSetting("Resellers")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Brands")
                             }
                         }
                     }
