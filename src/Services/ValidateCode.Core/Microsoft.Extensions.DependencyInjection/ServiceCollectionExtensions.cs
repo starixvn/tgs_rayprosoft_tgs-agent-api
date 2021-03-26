@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using TGS.Services.ValidateCode.Configuration;
-using Valhalla.Services;
+using TGS.ServiceUtility;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
