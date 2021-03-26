@@ -8,11 +8,14 @@ const DefaultNumberFormat = "0,0"
 export const numberColumn = ({
     Cell,
     format = DefaultNumberFormat,
+    postfix = "",
     sumColumn: sumColumnName = "",
     ...props
 }) => {
     let basic = {
-        Cell: ({ value }) => <FormattedNumber value={value} format={format} />,
+        Cell: ({ value }) => (
+            <FormattedNumber value={value} format={format} postfix={postfix} />
+        ),
         headCell: {
             textAlign: "center",
             whiteSpace: "nowrap"
@@ -45,7 +48,38 @@ export const numberColumn = ({
 }
 
 const DefaultNumberDecimal = "0,0.00"
-export const numberDecimalColumn = (props) =>
-    numberColumn({ format: DefaultNumberDecimal, ...props })
+export const numberDecimalColumn = ({
+    format = DefaultNumberDecimal,
+    ...props
+}) => numberColumn({ format, ...props })
+
+export const coloredNumberDecimalColumn = ({
+    value,
+    format = DefaultNumberDecimal,
+    postfix,
+    ...props
+}) =>
+    numberDecimalColumn({
+        format,
+        Cell: ({ value }) => {
+            let isPositive = value >= 0
+            return (
+                <Text color={isPositive ? "success" : "danger"}>
+                    <FormattedNumber
+                        value={value}
+                        format={format}
+                        postfix={postfix}
+                    />
+                </Text>
+            )
+        },
+        ...props
+    })
+
+export const numberDecimalPercentageColumn = ({
+    format = DefaultNumberDecimal,
+    postfix = "%",
+    ...props
+}) => numberColumn({ format, postfix, ...props })
 
 export default numberColumn
