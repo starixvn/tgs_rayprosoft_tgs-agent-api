@@ -7,6 +7,7 @@ using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.FileService;
+using TGS.FileService.Repositories;
 using TGS.Tests.FileService.UnitTests.Controllers;
 
 namespace TGS.Tests.FileService.UnitTests.Services
@@ -18,7 +19,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
         {
             CreateFile();
 
-            var moqStationLetterRepository = new Mock<IRepository<StationLetterFile>>();
+            var moqStationLetterRepository = new Mock<IMongoContext<StationLetterFile>>();
             var moqFileManager = new Mock<IFileManager>();
 
             var sut = new UploadService(moqStationLetterRepository.Object, moqFileManager.Object);
