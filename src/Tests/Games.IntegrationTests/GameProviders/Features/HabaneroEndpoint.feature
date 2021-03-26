@@ -7,7 +7,7 @@ Feature: Habanero Endpoint
 Scenario: 01.a - Get authorized player details
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $125
-	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
+	When I call authorize endpoint with username="habanero" and passkey="NzrgFf4Bb5KuXy9" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get authorize response and player balance will be $125
 
 Scenario Outline: 01.b - Get authorized player details with invalid authorization
@@ -48,26 +48,26 @@ Scenario: 01.f - Can get Test player details if the game provider status is set 
    Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And game provider has status set to "Maintenance"
-	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
+	When I call authorize endpoint with username="habanero" and passkey="NzrgFf4Bb5KuXy9" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get authorize response and player balance will be $125
 
 @ChangeBrandStatus
-Scenario: 01.j - Can get Test player details if the brand status is set to maintenance
+Scenario: 01.g - Can get Test player details if the brand status is set to maintenance
     Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And brand has status set to "Maintenance"
-	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
+	When I call authorize endpoint with username="habanero" and passkey="NzrgFf4Bb5KuXy9" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get authorize response and player balance will be $125
 
 @ChangeGameProviderStatus
-Scenario: 01.k - Cannot get Test player details if the game provider status is set to archived
+Scenario: 01.h - Cannot get Test player details if the game provider status is set to archived
     Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And game provider has status set to "Archived"
 	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get error authorize response and no player balance
 
 @ChangeBrandStatus
-Scenario: 01.l - Cannot get Test player details if the brand status is set to archived
+Scenario: 01.i - Cannot get Test player details if the brand status is set to archived
     Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And brand has status set to "Archived"
@@ -118,6 +118,14 @@ Scenario: 02.g - Place bet using expired player token
     When I place bet of $10 for game "AcesandEights1Hand"
     Then I will receive bet response with authorization error and no balance
 
+Scenario: 02.h - Place bet with slot game
+    Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+    When I place bet of $10 for game "SGLondonHunter"
+    Then I will receive bet response of no error and balance of $90
+        And player wallet database record will be for $90
+        And game action will be recorded in the database of type "PlaceBet" for $-10
+
 Scenario: 03.a - Win bet
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
@@ -147,7 +155,17 @@ Scenario: 03.c - Win bet with different platform token
     When I settle bet for $15
     Then I will receive bet response of no error and balance of $105
 
-Scenario: 03.d - Lose bet
+Scenario: 03.d - Win bet with slot game
+    Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "SGLondonHunter"
+        And balance now being $90
+    When I settle bet for $15
+    Then I will receive bet response of no error and balance of $105
+        And player wallet database record will be for $105
+        And game action will be recorded in the database of type "WinBet" for $15
+
+Scenario: 03.e - Lose bet
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AcesandEights1Hand"
@@ -157,7 +175,7 @@ Scenario: 03.d - Lose bet
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 03.e - Free bet
+Scenario: 03.f - Free bet
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I placed bet for $10 and settle it for $15 for game "AcesandEights1Hand"
@@ -166,7 +184,7 @@ Scenario: 03.e - Free bet
         And player wallet database record will be for $115
         And game action will be recorded in the database of type "FreeBet" for $10
 
-Scenario: 03.f - Settle bet with duplicate transaction ID
+Scenario: 03.g - Settle bet with duplicate transaction ID
     Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AcesandEights1Hand"
