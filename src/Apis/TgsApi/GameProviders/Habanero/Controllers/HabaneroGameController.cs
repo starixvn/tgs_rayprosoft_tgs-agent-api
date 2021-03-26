@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Services;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -80,7 +83,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
 
         [HttpPost]
         [Route("transfer")]
-        public async ValueTask<FundTransferResponse> TransferFundsAsync(FundTransferRequest request)
+        public async ValueTask<FundTransferResponse> TransferFundsAsync(
+            [FromServices] ITgsLog log,
+            [FromServices] IJsonSerializationProvider json,
+            FundTransferRequest request)
         {
             var actionType = request.Detail.ActionType;
             Request.Path = new($"{Request.Path}/{actionType.ToString().ToLower()}");
@@ -105,6 +111,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
             var execute = _actionMapper[actionType];
 
             var r = await execute(betData).ConfigureAwait(false);
+
+            var options = new JsonSerializerOptions {WriteIndented = false};
+            log.LogInfo(
+                $"RoundId: {request.Detail.RoundId}, BetData: {json.SerializeToString(betData, options)}, BetResult: {json.SerializeToString(r, options)}");
 
             return _map.Response(request, r);
         }
