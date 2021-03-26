@@ -1462,7 +1462,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("stored_on")
-                        .HasDefaultValueSql("now() at time zone 'utc'");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)
