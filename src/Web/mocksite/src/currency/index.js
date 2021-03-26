@@ -6,7 +6,7 @@ export const GBP = "GBP"
 
 export const IDR = "IDR"
 
-export const IDR1000 = "IDR1000"
+export const IDR1000 = "IDR_1000"
 
 export const INR = "INR"
 
@@ -24,7 +24,7 @@ export const USD = "USD"
 
 export const VND = "VND"
 
-export const VND1000 = "VND1000"
+export const VND1000 = "VND_1000"
 
 export const currencyList = () => [
     CNY,
