@@ -7,7 +7,7 @@ Feature: Habanero Endpoint
 Scenario: 01.a - Get authorized player details
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $125
-	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
+	When I call authorize endpoint with username="habanero" and passkey="NzrgFf4Bb5KuXy9" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get authorize response and player balance will be $125
 
 Scenario Outline: 01.b - Get authorized player details with invalid authorization
@@ -48,7 +48,7 @@ Scenario: 01.f - Can get Test player details if the game provider status is set 
    Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And game provider has status set to "Maintenance"
-	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
+	When I call authorize endpoint with username="habanero" and passkey="NzrgFf4Bb5KuXy9" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get authorize response and player balance will be $125
 
 @ChangeBrandStatus
@@ -56,7 +56,7 @@ Scenario: 01.g - Can get Test player details if the brand status is set to maint
     Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And brand has status set to "Maintenance"
-	When I call authorize endpoint with username="habanero" and passkey="slPrV84jbxM8jIH9nUYBAndgVyjF5nU6" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
+	When I call authorize endpoint with username="habanero" and passkey="NzrgFf4Bb5KuXy9" and brandid="a5df0ada-7b6a-eb11-9889-00155db5435a"
     Then I will get authorize response and player balance will be $125
 
 @ChangeGameProviderStatus

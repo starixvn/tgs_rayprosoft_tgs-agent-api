@@ -47,7 +47,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             HabaneroBrandId = "a5df0ada-7b6a-eb11-9889-00155db5435a",
             ClientId = "habanero",
-            SecretKey = "slPrV84jbxM8jIH9nUYBAndgVyjF5nU6",
+            SecretKey = "NzrgFf4Bb5KuXy9",
             MachineName = "TESTSERVER",
             Culture = "en"
         };
