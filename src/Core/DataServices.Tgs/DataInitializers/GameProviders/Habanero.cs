@@ -99,7 +99,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             // this one is defined by game provider and cannot be changed
             string IGameProviderConfiguration.ClientId => "habanero";
 
-            string IGameProviderConfiguration.SecretKey => "slPrV84jbxM8jIH9nUYBAndgVyjF5nU6";
+            // this one is defined by game provider and cannot be changed
+            string IGameProviderConfiguration.SecretKey => "NzrgFf4Bb5KuXy9";
 
             string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
 
