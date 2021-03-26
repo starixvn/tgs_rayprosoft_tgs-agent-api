@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Prometheus;
 using TGS.Apis.FileService.DataService;
+using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
 using TGS.Apis.FileService.Services;
@@ -18,6 +19,7 @@ using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Models;
+using TGS.FileService.Repositories;
 
 namespace TGS.Apis.FileService
 {
@@ -53,7 +55,22 @@ namespace TGS.Apis.FileService
                 .AddFile(_configuration)
                 .AddAws(_configuration);
 
-            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+            services.AddFileServiceCore()
+                .ConfigureAwsOptions((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    config.GetSection("AWS").Bind(options);
+                    options.Bucket = config.GetValue<string>("AWS:S3:Bucket");
+                })
+                .UseMongoRepository((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.MongoConnectionString = config.GetValue<string>("DatabaseSettings:ConnectionString");
+                });
+
+            services.AddTransient<IMongoContext<StationLetterFile>, MongoContext<StationLetterFile>>();
             services.AddTransient<IUploadService, UploadService>();
             services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
 

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>TGS.FileService.Repositories</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,6 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.12.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\..\Services\FileService.Core\FileService.Core.csproj" />
   </ItemGroup>
 

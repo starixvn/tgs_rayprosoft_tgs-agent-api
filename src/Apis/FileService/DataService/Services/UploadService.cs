@@ -9,16 +9,17 @@ using TGS.Apis.FileService.DataService.Model;
 using TGS.Core.Infrastructures.Nats.Model;
 using TGS.Core.Infrastructures.Utility;
 using TGS.FileService;
+using TGS.FileService.Repositories;
 
 namespace TGS.Apis.FileService.DataService.Services
 {
     public sealed class UploadService : IUploadService
     {
-        private readonly IRepository<StationLetterFile> _stationLetterRepository;
+        private readonly IMongoContext<StationLetterFile> _stationLetterRepository;
         private readonly IFileManager _fileManager;
 
         public UploadService(
-            IRepository<StationLetterFile> stationLetterRepository,
+            IMongoContext<StationLetterFile> stationLetterRepository,
             IFileManager fileManager)
         {
             _stationLetterRepository = stationLetterRepository ?? throw new ArgumentNullException(nameof(stationLetterRepository));

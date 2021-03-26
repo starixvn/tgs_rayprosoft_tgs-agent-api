@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>30a457ed-c0fd-46c9-bd7e-2ef259ac9187</UserSecretsId>
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
     <RootNamespace>TGS.Apis.FileService</RootNamespace>
@@ -15,10 +15,10 @@
     <Compile Remove="UploadImages\**" />
     <Content Remove="DataService\EntityTypeConfigurations\**" />
     <Content Remove="UploadImages\**" />
-	<Compile Remove="Properties\GlobalAssemblyInfo.cs" />
-	<Compile Include="..\..\GlobalAssemblyInfo.cs">
-	  <Link>GlobalAssemblyInfo.cs</Link>
-	</Compile>
+  <Compile Remove="Properties\GlobalAssemblyInfo.cs" />
+  <Compile Include="..\..\GlobalAssemblyInfo.cs">
+    <Link>GlobalAssemblyInfo.cs</Link>
+  </Compile>
     <EmbeddedResource Remove="DataService\EntityTypeConfigurations\**" />
     <EmbeddedResource Remove="UploadImages\**" />
     <None Remove="DataService\EntityTypeConfigurations\**" />
@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+    <ProjectReference Include="..\..\Repositories\MongoFileMetaRepository\MongoFileMetaRepository.csproj" />
     <ProjectReference Include="..\..\Services\FileService.Core\FileService.Core.csproj" />
   </ItemGroup>
 
