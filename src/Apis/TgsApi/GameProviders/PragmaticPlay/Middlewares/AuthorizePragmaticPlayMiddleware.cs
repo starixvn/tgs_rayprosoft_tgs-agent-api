@@ -9,7 +9,6 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
         {
             var coll = await context.Request.ReadFormAsync();
 
-
             await next(context).ConfigureAwait(false);
         }
     }
