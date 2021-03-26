@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -30,6 +32,8 @@ namespace TGS.Services.GameOperations.Data
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IAmountValidator _amountValidator;
         private readonly IBetValuesCalculator _betValuesCalculator;
+        private readonly IJsonSerializationProvider _json;
+        private readonly ITgsLog _log;
         private readonly IRoundStatusManager _roundStatusManager;
         private readonly IStatusValidator _statusValidator;
         private readonly ITimeZoneManager _timeZoneManager;
@@ -46,7 +50,9 @@ namespace TGS.Services.GameOperations.Data
             ITimeZoneManager timeZoneManager,
             IRoundStatusManager roundStatusManager,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus)
+            IValidStatus<GameStatus> validGameStatus,
+            ITgsLog log,
+            IJsonSerializationProvider json)
         {
             _transactionSettingsGenerator = transactionSettingsGenerator;
             _amountValidator = amountValidator;
@@ -57,6 +63,8 @@ namespace TGS.Services.GameOperations.Data
             _roundStatusManager = roundStatusManager;
             _validStatus = validStatus;
             _validGameStatus = validGameStatus;
+            _log = log;
+            _json = json;
         }
 
         async Task<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
@@ -127,6 +135,8 @@ namespace TGS.Services.GameOperations.Data
             s = GetNewRoundStatus(s);
 
             await ThrowIfStatusesIsInvalidAsync(s).ConfigureAwait(false);
+
+            OnLog(s, "BeforeSave");
 
             var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
 
@@ -206,7 +216,7 @@ namespace TGS.Services.GameOperations.Data
             return s;
         }
 
-        private static async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
+        private async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
             GameActionState s)
         {
             if (!ShouldGetPreviousActions(s))
@@ -231,10 +241,14 @@ namespace TGS.Services.GameOperations.Data
                 return (s, null);
             }
 
+            OnLog(s, "BeforeGetAmount");
+
             var (refData, refGameActionInternalId, amount) = GetReferencedActionAndActualAmount(s, actionsData);
 
             s.Amount = amount;
             s.ReferencedGameActionInternalId = refGameActionInternalId;
+
+            OnLog(s, "OnGetAmount");
 
             if (actionsData.Length == 0)
             {
@@ -289,7 +303,7 @@ namespace TGS.Services.GameOperations.Data
             return (s, r);
         }
 
-        private static (IList<BetActionData>, BetActionData) GetPreviousActions(GameActionType currentActionType,
+        private (IList<BetActionData>, BetActionData) GetPreviousActions(GameActionType currentActionType,
             Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
         {
             var refGameAction = default(BetActionData);
@@ -661,6 +675,23 @@ namespace TGS.Services.GameOperations.Data
             round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
             round.SettleAmount = s.BetValueResult.SettleAmount;
             round.Turnover = s.BetValueResult.Turnover;
+        }
+
+        private void OnLog(GameActionState s, string action)
+        {
+            var data = new
+            {
+                s.ExternalTransactionId,
+                s.ExternalRoundId,
+                s.Amount,
+                s.GameActionType,
+                s.ExternalGameId,
+                GpCode = s.GameProvider.Code,
+                PrepareAmount = s.PrepareAmount.Method.ToString()
+            };
+
+            _log.LogInfo(
+                $"GameActionProcessor({action}): {_json.SerializeToString(data, new() {WriteIndented = false})}");
         }
     }
 }
