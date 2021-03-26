@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.FileService.Controllers.Messages;
 using TGS.FileService;
 
 namespace TGS.Apis.FileService.Controllers
@@ -18,9 +19,21 @@ namespace TGS.Apis.FileService.Controllers
         }
 
         [HttpPost("{*path}")]
-        public Task<FileMeta> UploadFile(string path, IFormFile file)
+        public async Task<FileViewModel> UploadFile(string path, IFormFile file)
         {
-            return _fileManager.SaveAsync(path, file.ContentType, file.Length, file.OpenReadStream());
+            var meta = await _fileManager
+                .SaveAsync(path, file.ContentType, file.Length, file.OpenReadStream())
+                .ConfigureAwait(false);
+
+            return new FileViewModel
+            {
+                Id = meta.Id,
+                FileName = meta.FileName,
+                ContentType = meta.ContentType,
+                FileLength = meta.FileLength,
+                CreatedOn = meta.CreatedOn,
+                ExternalUrl = meta.ExternalUrl
+            };
         }
     }
 }
