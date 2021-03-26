@@ -17,9 +17,14 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public string ParentAgentUsername { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
         public decimal Balance { get; set; }
-        public decimal PositionTakingPercentage { get; set; } //佔成
+        public decimal CommissionPercentage { get; set; } //佔成
         public decimal BonusPercentage { get; set; }
-        public decimal RebatePercentage { get; set; }
+        public decimal LiveDealerRebatePercentage { get; init; }
+        public decimal SlotRebatePercentage { get; init; }
+        public decimal LotteryRebatePercentage { get; init; }
+        public decimal CardGameRebatePercentage { get; init; }
+        public decimal SportsRebatePercentage { get; init; }
+        public decimal VirtualSportsRebatePercentage { get; init; }
         public string Email { get; set; }
         public string Phone { get; set; }
         public string QQ { get; set; }

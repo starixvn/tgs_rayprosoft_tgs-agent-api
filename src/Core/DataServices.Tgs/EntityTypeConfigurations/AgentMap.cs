@@ -59,6 +59,39 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Wechat)
                 .HasMaxLength(64);
+
+            builder.Property(c => c.CommissionPercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.BonusPercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.LiveDealerRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.SlotRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.LotteryRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.CardGameRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.SportsRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.VirtualSportsRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.HasOne(p => p.Brand)
                 .WithMany()
                 .HasForeignKey(p => p.BrandId)

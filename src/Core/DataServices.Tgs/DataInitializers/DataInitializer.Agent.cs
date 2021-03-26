@@ -15,9 +15,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             AgentLevelType levelType,
             AgentType type,
             Guid brandId,
-            decimal positionTakingPercentage,
-            decimal bonusPercentage,
-            decimal rebatePercentage,
             string currencyCode,
             Guid? agentId = null,
             Guid? parentAgentId = null)
@@ -41,9 +38,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 InvitationCode = invitationCode,
                 BrandId = brandId,
                 ParentAgentId = parentAgentId,
-                PositionTakingPercentage = positionTakingPercentage,
-                BonusPercentage = bonusPercentage,
-                RebatePercentage = rebatePercentage,
+                CommissionPercentage = 10,
+                BonusPercentage = 10,
+                LiveDealerRebatePercentage = 10,
+                SlotRebatePercentage = 10,
+                LotteryRebatePercentage = 10,
+                CardGameRebatePercentage = 10,
+                SportsRebatePercentage = 10,
+                VirtualSportsRebatePercentage = 10,
                 RegisteredOn = Now,
                 Wallets = new[]
                 {

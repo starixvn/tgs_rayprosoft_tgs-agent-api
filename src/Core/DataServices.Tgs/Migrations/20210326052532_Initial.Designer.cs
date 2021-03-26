@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210325095216_Initial")]
+    [Migration("20210326052532_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,12 +35,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("agent_status");
 
                     b.Property<decimal>("BonusPercentage")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("bonus_percentage");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<decimal>("CardGameRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_rebate_percentage");
+
+                    b.Property<decimal>("CommissionPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("commission_percentage");
 
                     b.Property<string>("CreatedByUsername")
                         .HasColumnType("text")
@@ -65,6 +76,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("level_type");
 
+                    b.Property<decimal>("LiveDealerRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_rebate_percentage");
+
+                    b.Property<decimal>("LotteryRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("lottery_rebate_percentage");
+
                     b.Property<Guid?>("ParentAgentId")
                         .HasColumnType("uuid")
                         .HasColumnName("parent_agent_id");
@@ -79,10 +100,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("phone");
 
-                    b.Property<decimal>("PositionTakingPercentage")
-                        .HasColumnType("numeric")
-                        .HasColumnName("position_taking_percentage");
-
                     b.Property<string>("QQ")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
@@ -92,10 +109,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("real_name");
-
-                    b.Property<decimal>("RebatePercentage")
-                        .HasColumnType("numeric")
-                        .HasColumnName("rebate_percentage");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
                         .HasColumnType("timestamp with time zone")
@@ -109,6 +122,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("salt");
+
+                    b.Property<decimal>("SlotRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_rebate_percentage");
+
+                    b.Property<decimal>("SportsRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_rebate_percentage");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
@@ -131,6 +154,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("username");
+
+                    b.Property<decimal>("VirtualSportsRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_rebate_percentage");
 
                     b.Property<string>("Wechat")
                         .HasMaxLength(64)
