@@ -11,8 +11,8 @@ pipeline {
 			steps {
 				script {
 					try {
-						sh "../dropintdb.sh tgs_initest"
-						sh "../dropintdb.sh log_initest"
+						sh "../dropintdb.sh tgs_inttest"
+						sh "../dropintdb.sh log_inttest"
 						
 						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
 							sh "kubectl delete -f ../int-test/update/"
