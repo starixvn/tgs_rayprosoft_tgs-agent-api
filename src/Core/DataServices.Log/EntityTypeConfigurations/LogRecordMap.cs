@@ -10,8 +10,7 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfigurations
         {
             builder.ToTable("log_records", "dbo");
 
-
-            builder.HasKey(p => p.RecordedOn);
+            builder.HasKey(c => c.Id);
 
             builder.Property(c => c.ServerName)
                 .HasMaxLength(128)
@@ -32,6 +31,10 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfigurations
 
             builder.Property(c => c.RecordedOn)
                 .IsRequired();
+
+
+            builder.HasIndex(c => c.RecordedOn)
+                .HasDatabaseName("ix_log_records_recorded_on");
         }
     }
 }
