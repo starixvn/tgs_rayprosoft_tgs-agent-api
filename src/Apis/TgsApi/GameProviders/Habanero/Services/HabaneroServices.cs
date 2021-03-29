@@ -60,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
 
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             return await _gameActionQueries.ReferencedGameActionExistsAsync(gameProviderId, detail.PlayerCode,
-                detail.RoundId, detail.TransactionId).ConfigureAwait(false);
+                detail.ClientRoundId.ToString(), detail.TransactionId).ConfigureAwait(false);
         }
     }
 }

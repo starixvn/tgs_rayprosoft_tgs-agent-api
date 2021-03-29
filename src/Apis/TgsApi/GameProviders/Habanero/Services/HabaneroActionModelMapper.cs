@@ -63,18 +63,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             if (r.Detail.IsCancel)
             {
                 var trx = r.Detail.FundTransfer.CancelTransaction;
+                var clientRoundId = r.Detail.ClientRoundId.ToString();
 
                 currencyCode = trx.CurrencyCode;
                 transactions = new TransactionData[]
                 {
                     new()
                     {
-                        Amount = trx.Amount,
+                        Amount = Math.Abs(trx.Amount),
                         ExternalTransactionId = trx.TransactionId,
                         ExternalTransactionReferenceId = trx.TransactionReferenceId,
-                        ExternalGameActionGroupId = r.Detail.RoundId,
-                        ExternalBetId = r.Detail.ClientRoundId.ToString(),
-                        ExternalRoundId = r.Detail.RoundId,
+                        ExternalGameActionGroupId = clientRoundId,
+                        ExternalBetId = r.Detail.RoundId,
+                        ExternalRoundId = clientRoundId,
                         ExternalGameId = r.Game.ExternalId,
                         GameActionType = GameActionType.CancelTransaction,
                         TimeStamp = DateTimeOffset.Parse(trx.Timestamp),
@@ -87,21 +88,26 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 var trxs = r.Detail.FundTransfer.Transactions;
                 currencyCode = trxs[0].CurrencyCode;
 
-                transactions = trxs.Select(t => new TransactionData
+                transactions = trxs.Select(t =>
                 {
-                    Amount = Math.Abs(t.Amount),
-                    ExternalTransactionId = t.TransactionId,
-                    ExternalTransactionReferenceId = t.IsPlaceBet ? null : t.TransactionReferenceId,
-                    ExternalGameActionGroupId = r.Detail.RoundId,
-                    ExternalBetId = r.Detail.ClientRoundId.ToString(),
-                    ExternalRoundId = r.Detail.RoundId,
-                    ExternalGameId = r.Game.ExternalId,
-                    GameActionType =
-                        t.IsPlaceBet                              ? PlaceBet :
-                        r.Detail.ActionType == ActionType.FreeBet ? FreeBet :
-                        t.Amount == 0                             ? LoseBet : WinBet,
-                    TimeStamp = DateTimeOffset.Parse(t.Timestamp),
-                    RoundClosed = t.GameState is GameState.Completing or GameState.Expired
+                    var clientRoundId = r.Detail.ClientRoundId.ToString();
+
+                    return new TransactionData
+                    {
+                        Amount = Math.Abs(t.Amount),
+                        ExternalTransactionId = t.TransactionId,
+                        ExternalTransactionReferenceId = t.IsPlaceBet ? null : t.TransactionReferenceId,
+                        ExternalGameActionGroupId = clientRoundId,
+                        ExternalBetId = r.Detail.RoundId,
+                        ExternalRoundId = clientRoundId,
+                        ExternalGameId = r.Game.ExternalId,
+                        GameActionType =
+                            t.IsPlaceBet                              ? PlaceBet :
+                            r.Detail.ActionType == ActionType.FreeBet ? FreeBet :
+                            t.Amount == 0                             ? LoseBet : WinBet,
+                        TimeStamp = DateTimeOffset.Parse(t.Timestamp),
+                        RoundClosed = t.GameState is GameState.Completing or GameState.Expired
+                    };
                 }).ToArray();
             }
 
