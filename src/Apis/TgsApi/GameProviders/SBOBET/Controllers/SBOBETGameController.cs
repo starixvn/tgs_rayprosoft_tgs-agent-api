@@ -2,6 +2,7 @@
 // ReSharper disable IdentifierTypo
 
 using System;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -74,15 +75,16 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = await _services
-                .GetPlatformTypeWithGameAndLoginRecordsAsync(gameProviderId, request.ExternalGameId,
+            var (platformType, games) = await _services
+                .GetPlatformTypeAndGameWithLoginRecordsAsync(gameProviderId, request.ExternalGameId,
                     request.PlayerCode).ConfigureAwait(false);
 
             var data = await _services
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.Request(data, request);
+            var allowPlaceBetWithDifferentPlatformToken = games.Any(g => g.Type == GameType.VirtualSports);
+            var betData = _map.Request(data, request, allowPlaceBetWithDifferentPlatformToken);
             var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r);
         }

@@ -17,6 +17,7 @@ namespace TGS.Core.Models.Services.Games
         public bool ForceGetPreviousActions { get; init; }
         public bool AllowCancelCancelTransaction { get; init; }
         public bool FreeBetAsSingleRound { get; init; }
+        public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
         public Guid? BatchId { get; init; }
     }
 }

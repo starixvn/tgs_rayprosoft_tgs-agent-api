@@ -87,6 +87,7 @@ namespace TGS.Services.GameOperations.Data
                     ForceGetPreviousActions = betData.ForceGetPreviousActions,
                     FreeBetAsSingleRound = betData.FreeBetAsSingleRound,
                     AllowCancelCancelTransaction = betData.AllowCancelCancelTransaction,
+                    AllowPlaceBetWithDifferentPlatformToken = betData.AllowPlaceBetWithDifferentPlatformToken,
                     AutoCloseRound = betData.AutoCloseRound
                 });
 
@@ -176,7 +177,12 @@ namespace TGS.Services.GameOperations.Data
 
             if (s.HasExtGameId)
             {
-                var types = s.PlatformType.ToGamePlatformTypes();
+                var types = s.GameActionType == PlaceBet &&
+                    s.AllowPlaceBetWithDifferentPlatformToken ||
+                    !s.PlatformType.HasValue
+                        ? Consts.AllGamePlatformTypes
+                        : s.PlatformType.Value.ToGamePlatformTypes();
+
                 game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId)
                     && types.Contains(g.PlatformType));
             }

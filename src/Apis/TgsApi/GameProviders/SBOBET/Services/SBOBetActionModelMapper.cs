@@ -18,7 +18,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
     public interface ISBOBETActionModelMapper
     {
-        BetData Request(GameProviderConfigurationData data, PlaceBetRequest request);
+        BetData Request(GameProviderConfigurationData data, PlaceBetRequest request,
+            bool allowPlaceBetWithDifferentPlatformToken);
 
         BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request,
             RoundStatus? roundStatus, GameActionExternalIds[] settleGameActionExternalIds);
@@ -56,7 +57,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         private const string GameProviderCode = Consts.GameProvider.SBOBET;
         private const bool HasCurrencyFromGameProvider = false;
 
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request)
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request,
+            bool allowPlaceBetWithDifferentPlatformToken)
         {
             var externalTransactionId = request.ExternalTransactionId;
             var externalRoundId = request.ExternalRoundId;
@@ -76,7 +78,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 }
             };
 
-            return GetBetData(data, request.PlayerCode, transactions);
+            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
         }
 
         BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, string externalRoundId,
@@ -248,7 +250,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         #region Private Methods
 
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
-            TransactionData[] transactions) =>
+            TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false) =>
             new()
             {
                 PlayerCode = playerCode,
@@ -259,6 +261,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 HasCurrencyFromGameProvider = HasCurrencyFromGameProvider,
                 AutoCloseRound = data.AutoCloseRound,
                 AllowCancelCancelTransaction = true,
+                AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
                 Transactions = transactions
             };
 

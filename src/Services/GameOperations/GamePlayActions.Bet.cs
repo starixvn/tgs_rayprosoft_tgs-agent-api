@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
@@ -89,7 +90,10 @@ namespace TGS.Services.GameOperations
             }
 
             var platformType = data.PlatformType;
-            var gamePlatformTypes = platformType!.Value.ToGamePlatformTypes();
+            var gamePlatformTypes = data.AllowPlaceBetWithDifferentPlatformToken
+                ? Consts.AllGamePlatformTypes
+                : platformType!.Value.ToGamePlatformTypes();
+
             var brandGames =
                 await _brandOperations.GetBrandGamesAsync(player.BrandId, gameProviderId, gamePlatformTypes);
             var subGames = await _gameProviderOperations.GetSubGamesAsync(gameProviderId, gamePlatformTypes);
