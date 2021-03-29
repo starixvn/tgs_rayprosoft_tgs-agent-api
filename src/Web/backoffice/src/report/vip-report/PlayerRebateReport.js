@@ -25,6 +25,7 @@ import {
     numberDecimalColumn,
     numberDecimalPercentageColumn
 } from "../../table/column/numberColumn"
+import AlertDialog from "../../dialog/Alert"
 
 export const PlayerRebatDialogDisclosure = ({
     brandId,
@@ -54,7 +55,7 @@ export const PlayerRebatDialogDisclosure = ({
     )
 }
 
-const ReportDialog = ({ brandId, username, start, end, record, dialog }) => {
+const ReportDialog = ({ brandId, username, start, end, dialog }) => {
     let { state, setPageIndex, setSortOrder } = useTable({
         brandId,
         username,
@@ -70,13 +71,21 @@ const ReportDialog = ({ brandId, username, start, end, record, dialog }) => {
         deleteCache
     } = usePlayerVipRebateList(username, toApiParams(state))
 
+    let { pageIndex, pageSize } = state
+    let columns = usePlayerVipRebateColumns({ items: data?.items })
+
     let title = useTrans({
         zh: "返水详情",
         en: "Rebate Detail"
     })
 
-    let { pageIndex, pageSize } = state
-    let columns = usePlayerVipRebateColumns({ items: data?.items })
+    if (isLoading) {
+        return <LoadingBackdrop {...dialog} />
+    }
+
+    if (error) {
+        return <AlertDialog {...dialog} />
+    }
 
     return (
         <Dialog.Modal
@@ -237,6 +246,27 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
                     />
                 ),
                 sumColumn: "virtualSportsAmount",
+                disableSortBy: true
+            }),
+
+            numberDecimalPercentageColumn({
+                accessor: "lotteryRebate",
+                Header: <Trans zh="彩票反水比例" en="Lottery Rebate %" />,
+                Footer: () => <Box />,
+                disableSortBy: true
+            }),
+            numberDecimalColumn({
+                accessor: "lotteryValidBetAmount",
+                Header: (
+                    <Trans zh="彩票投注金额" en="Lottery Valid Bet Amount" />
+                ),
+                sumColumn: "lotteryValidBetAmount",
+                disableSortBy: true
+            }),
+            numberDecimalColumn({
+                accessor: "lotteryAmount",
+                Header: <Trans zh="彩票反水金额" en="Lottery Rebate Amount" />,
+                sumColumn: "lotteryAmount",
                 disableSortBy: true
             })
         ],
