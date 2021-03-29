@@ -6,17 +6,7 @@ pipeline {
 		gitlab_user_pwd = credentials('gitlab-user-pwd')
 	}
 	
-	parameters {
-		gitParameter branchFilter: 'origin/(.*)', defaultValue: 'develop', name: 'BRANCH', type: 'PT_BRANCH'
-	}
-
 	stages {
-		stage('Clone') {
-			steps {
-				git branch: "develop", url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git' , credentialsId: 'gitlab-user-pwd'
-			}
-		}
-		
 		stage('Clear') {
 			steps {
 				script {
