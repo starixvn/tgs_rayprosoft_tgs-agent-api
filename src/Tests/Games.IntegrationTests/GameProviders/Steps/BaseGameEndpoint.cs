@@ -280,8 +280,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             GamePlatformType[] GetGamePlatformTypes() =>
                 platformType switch
                 {
-                    PlatformType.Desktop => new[] {GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile},
-                    PlatformType.Mobile  => new[] {GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile}
+                    PlatformType.Desktop => new[] { GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile },
+                    PlatformType.Mobile => new[] { GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile },
+                    _ => throw new NotImplementedException()
                 };
         }
 

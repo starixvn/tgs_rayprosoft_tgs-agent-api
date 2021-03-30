@@ -9,16 +9,16 @@ namespace TGS.Services.Operator.BankDeposit
 {
     internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannel>>
     {
-        private readonly IDepositRepository _depositRepository;
+        private readonly IWalletRepository _walletRepository;
 
-        public AllPaymentChannelsQueryService(IDepositRepository depositRepository)
+        public AllPaymentChannelsQueryService(IWalletRepository walletRepository)
         {
-            _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
+            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
         public async ValueTask<IDictionary<Guid, PaymentChannel>> GetAsync(AllPaymentChannelsQuery query)
         {
-            var allPaymentChannels = await _depositRepository.GetAllPaymentChannelsAsync()
+            var allPaymentChannels = await _walletRepository.GetAllPaymentChannelsAsync()
                 .ToDictionaryAsync(method => method.Id)
                 .ConfigureAwait(false);
 

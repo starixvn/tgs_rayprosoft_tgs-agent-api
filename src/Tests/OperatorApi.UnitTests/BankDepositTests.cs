@@ -15,9 +15,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Create_Bank_Deposit_Form_Should_Success()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new CreateBankDepositFormCommandService(moqDepositRepository.Object);
+            var sut = new CreateBankDepositFormCommandService(moqWalletRepository.Object);
 
             var command = new CreateBankDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -34,7 +34,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqDepositRepository.Verify(
+            moqWalletRepository.Verify(
                 fake => fake.CreateDepositFormAsync(It.Is<BankDepositForm>(form => expected.Matches(form))),
                 Times.Exactly(1));
         }
@@ -42,15 +42,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new GetBankDepositFromQueryService(moqDepositRepository.Object);
+            var sut = new GetBankDepositFromQueryService(moqWalletRepository.Object);
 
             var query = new GetBankDepositFormQuery(
                 "ThisIsPlayerCode",
                 Guid.NewGuid());
 
-            moqDepositRepository
+            moqWalletRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
                 .Returns(ValueTask.FromResult(new BankDepositForm(
                     query.PlayerCode,
@@ -61,7 +61,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var actual = await sut.GetAsync(query);
 
-            moqDepositRepository.Verify(
+            moqWalletRepository.Verify(
                 fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)),
                 Times.Exactly(1));
         }
@@ -69,15 +69,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public void Bank_Deposit_Form_If_Not_Player_Own_Will_Throw_Exception()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new GetBankDepositFromQueryService(moqDepositRepository.Object);
+            var sut = new GetBankDepositFromQueryService(moqWalletRepository.Object);
 
             var query = new GetBankDepositFormQuery(
                 "ThisIsPlayerCode",
                 Guid.NewGuid());
 
-            moqDepositRepository
+            moqWalletRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
                 .Returns(ValueTask.FromResult(new BankDepositForm(
                     "OtherPlayerCode",
@@ -92,13 +92,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Methods_Should_Success()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new AllPaymentMethodsQueryService(moqDepositRepository.Object);
+            var sut = new AllPaymentMethodsQueryService(moqWalletRepository.Object);
 
             var query = new AllPaymentMethodsQuery();
 
-            moqDepositRepository
+            moqWalletRepository
                 .Setup(fake => fake.GetAllPaymentMethodsAsync())
                 .Returns(new[] {
                     new PaymentMethod(Guid.NewGuid(), "test1"),
@@ -107,7 +107,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query);
 
-            moqDepositRepository.Verify(
+            moqWalletRepository.Verify(
                 fake => fake.GetAllPaymentMethodsAsync(),
                 Times.Exactly(1));
         }
@@ -115,13 +115,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Channels_Should_Success()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new AllPaymentChannelsQueryService(moqDepositRepository.Object);
+            var sut = new AllPaymentChannelsQueryService(moqWalletRepository.Object);
 
             var query = new AllPaymentChannelsQuery();
 
-            moqDepositRepository
+            moqWalletRepository
                 .Setup(fake => fake.GetAllPaymentChannelsAsync())
                 .Returns(new[] {
                     new PaymentChannel(Guid.NewGuid(), "test1"),
@@ -130,7 +130,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query);
 
-            moqDepositRepository.Verify(
+            moqWalletRepository.Verify(
                 fake => fake.GetAllPaymentChannelsAsync(),
                 Times.Exactly(1));
         }
@@ -138,15 +138,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Brand_Payment_Should_SuccessAsync()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new GetBrandPaymentQueryService(moqDepositRepository.Object);
+            var sut = new GetBrandPaymentQueryService(moqWalletRepository.Object);
 
             var query = new GetBrandPaymentQuery(Guid.NewGuid());
 
             _ = await sut.GetAsync(query);
 
-            moqDepositRepository.Verify(
+            moqWalletRepository.Verify(
                 fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
                 Times.Exactly(1));
         }

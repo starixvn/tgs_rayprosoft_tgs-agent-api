@@ -6,16 +6,16 @@ namespace TGS.Services.Operator.BankDeposit
 {
     internal class GetBrandPaymentQueryService : IGetService<GetBrandPaymentQuery, BrandPayment>
     {
-        private readonly IDepositRepository _depositRepository;
+        private readonly IWalletRepository _walletRepository;
 
-        public GetBrandPaymentQueryService(IDepositRepository depositRepository)
+        public GetBrandPaymentQueryService(IWalletRepository walletRepository)
         {
-            _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
+            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
         public ValueTask<BrandPayment> GetAsync(GetBrandPaymentQuery query)
         {
-            return _depositRepository.GetBrandPaymentByIdAsync(query.Id);
+            return _walletRepository.GetBrandPaymentByIdAsync(query.Id);
         }
     }
 }

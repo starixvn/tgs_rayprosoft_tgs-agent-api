@@ -6,16 +6,16 @@ namespace TGS.Services.Operator.BankDeposit
 {
     internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, BankDepositForm>
     {
-        private readonly IDepositRepository _depositRepository;
+        private readonly IWalletRepository _walletRepository;
 
-        public GetBankDepositFromQueryService(IDepositRepository depositRepository)
+        public GetBankDepositFromQueryService(IWalletRepository walletRepository)
         {
-            _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
+            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
         public async ValueTask<BankDepositForm> GetAsync(GetBankDepositFormQuery query)
         {
-            var form = await _depositRepository
+            var form = await _walletRepository
                 .GetDepositFormByIdAsync(query.FormId)
                 .ConfigureAwait(false);
 

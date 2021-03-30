@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 
 namespace TGS.Services.Operator
 {
-    public interface IDepositRepository
+    public interface IWalletRepository
     {
         ValueTask CreateDepositFormAsync(BankDepositForm form);
+
+        ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode);
 
         ValueTask<BankDepositForm> GetDepositFormByIdAsync(Guid id);
 
