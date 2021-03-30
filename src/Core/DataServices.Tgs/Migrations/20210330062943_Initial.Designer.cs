@@ -10,11 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-<<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210326023136_Initial.Designer.cs
-    [Migration("20210326023136_Initial")]
-=======
-    [Migration("20210326052532_Initial")]
->>>>>>> remotes/origin/develop:src/Core/DataServices.Tgs/Migrations/20210326052532_Initial.Designer.cs
+    [Migration("20210330062943_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,9 +19,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
-                .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
                 {
@@ -404,7 +400,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id")
-                        .UseIdentityByDefaultColumn();
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
