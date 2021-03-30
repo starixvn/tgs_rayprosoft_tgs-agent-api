@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
 
             var url = $"{configuration.BetHistoryUrl.AbsoluteUri}games/history"
                 .AppendQueryString($"brandId={configuration.BrandId}")
-                .AppendQueryString($"gameinstanceid={round.ExternalRoundId}")
+                .AppendQueryString($"friendlyid={round.ExternalRoundId}")
                 .AppendQueryString("viewtype=game")
                 .AppendQueryString($"local={culture}")
                 .AppendQueryString($"hash={hash}");
