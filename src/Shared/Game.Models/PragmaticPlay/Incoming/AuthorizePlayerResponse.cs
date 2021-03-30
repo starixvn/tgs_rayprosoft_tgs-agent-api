@@ -5,12 +5,12 @@ namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
     public record AuthorizePlayerResponse : BalanceResponse
     {
         [JsonPropertyName("currency")]
-        public string Currency { get; set; }
+        public string Currency { get; init; }
 
         [JsonPropertyName("userId")]
-        public string PlayerCode { get; set; }
+        public string PlayerCode { get; init; }
 
         [JsonPropertyName("token")]
-        public string Token { get; set; }
+        public string Token { get; init; }
     }
 }

@@ -3,7 +3,7 @@ using TGS.Shared.Game.Models.PragmaticPlay.Common;
 
 namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
-    public record BalanceResponse : ErrorResponse
+    public abstract record BalanceResponse : ErrorResponse
     {
         [JsonPropertyName("cash")]
         public decimal Balance { get; init; }

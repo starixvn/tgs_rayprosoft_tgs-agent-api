@@ -7,6 +7,7 @@ using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
 {
@@ -21,9 +22,19 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddErrorMappers();
+            services.AddErrorMappers(
+                new[] {typeof(PragmaticPlayErrorMapper)},
+                (provider, key) => key switch
+                {
+                    GameProvider.PragmaticPlay => provider.GetRequiredService<PragmaticPlayErrorMapper>(),
+                    _                          => provider.GetRequiredService<TgsErrorMapper>()
+                }
+            );
 
             services.AddScoped<AuthorizePragmaticPlayMiddleware>();
+            services.AddScoped<HandlePragmaticPlayExceptionMiddleware>();
+
+            services.AddSingleton<IPragmaticPlayActionModelMapper, PragmaticPlayActionModelMapper>();
             services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
         }
 
@@ -34,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
-                    //builder.UseMiddleware<HandleHabaneroExceptionMiddleware>();
+                    builder.UseMiddleware<HandlePragmaticPlayExceptionMiddleware>();
                     builder.UseMiddleware<AuthorizePragmaticPlayMiddleware>();
                 });
         }
