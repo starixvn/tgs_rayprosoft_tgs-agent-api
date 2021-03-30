@@ -204,8 +204,7 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .HasName("pk_api_logs");
 
                     b.HasIndex("RecordedOn")
-                        .HasDatabaseName("ix_api_logs_recorded_on")
-                        .IncludeProperties(new[] { "Prefix", "Path", "Method", "RequestContent", "ResponseContent" });
+                        .HasDatabaseName("ix_api_logs_recorded_on");
 
                     b.ToTable("api_logs", "dbo");
                 });

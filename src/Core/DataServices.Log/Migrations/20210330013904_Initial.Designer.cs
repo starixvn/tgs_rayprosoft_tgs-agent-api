@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Log;
 namespace TGS.Core.DataServices.Log.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20210329070857_Initial")]
+    [Migration("20210330013904_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -206,8 +206,7 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .HasName("pk_api_logs");
 
                     b.HasIndex("RecordedOn")
-                        .HasDatabaseName("ix_api_logs_recorded_on")
-                        .IncludeProperties(new[] { "Prefix", "Path", "Method", "RequestContent", "ResponseContent" });
+                        .HasDatabaseName("ix_api_logs_recorded_on");
 
                     b.ToTable("api_logs", "dbo");
                 });
