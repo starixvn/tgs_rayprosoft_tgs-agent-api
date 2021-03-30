@@ -20,6 +20,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
     [FeatureGate(Consts.GameProvider.PragmaticPlay)]
     public sealed class PragmaticPlayGameController : ControllerBase
     {
+        private static readonly string GameProviderCode = Consts.GameProvider.PragmaticPlay;
+
         private readonly IGamePlayActions _actions;
         private readonly IPragmaticPlayActionModelMapper _map;
 
@@ -44,6 +46,16 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
                 .ConfigureAwait(false);
 
             return _map.Response(playerCode, request.Token, validationResult);
+        }
+
+        [HttpPost]
+        [Route("balance")]
+        public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync([FromForm] GetBalanceRequest request)
+        {
+            var r = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
+                .ConfigureAwait(false);
+
+            return _map.Response(r);
         }
     }
 }

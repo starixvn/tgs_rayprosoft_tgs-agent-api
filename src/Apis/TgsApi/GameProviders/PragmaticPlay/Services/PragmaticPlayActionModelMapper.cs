@@ -8,7 +8,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
     public interface IPragmaticPlayActionModelMapper
     {
         PlayerValidationData Request(string playerCode, PlatformType platformType);
-        AuthorizePlayerResponse Response(string playerCode, string token, PlayerValidationResult validationResult);
+        AuthorizePlayerResponse Response(string playerCode, string token, PlayerValidationResult result);
+        GetBalanceResponse Response(GetBalanceResult result);
     }
 
     public sealed class PragmaticPlayActionModelMapper : IPragmaticPlayActionModelMapper
@@ -24,14 +25,22 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             };
 
         AuthorizePlayerResponse IPragmaticPlayActionModelMapper.Response(string playerCode, string token,
-            PlayerValidationResult validationResult) =>
+            PlayerValidationResult result) =>
             new()
             {
                 PlayerCode = playerCode,
-                Currency = validationResult.GameProviderCurrencyCode,
-                Balance = validationResult.Balance,
+                Currency = result.GameProviderCurrencyCode,
+                Balance = result.Balance,
                 Bonus = 0,
                 Token = token
+            };
+
+        GetBalanceResponse IPragmaticPlayActionModelMapper.Response(GetBalanceResult result) =>
+            new()
+            {
+                Currency = result.GameProviderCurrencyCode,
+                Balance = result.Balance,
+                Bonus = 0
             };
     }
 }
