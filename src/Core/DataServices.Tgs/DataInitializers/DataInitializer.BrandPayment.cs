@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -21,21 +22,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private static readonly Dictionary<string, Guid> Payments = new()
         {
-            {Help2Pay, new("30CB4D17-2506-4D72-8470-65063B80F9C9")}
+            { Help2Pay, new("30CB4D17-2506-4D72-8470-65063B80F9C9") }
         };
 
         private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new()
         {
-            {AlipayPayment, (new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay])},
-            {WeChatPayPayment, (new("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay])}
+            { AlipayPayment, (new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay]) },
+            { WeChatPayPayment, (new("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay]) }
         };
 
         private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
             new()
             {
-                {AlipayScan, (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment])},
-                {BankTransfer, (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment])},
-                {WeChatPayScan, (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment])}
+                { AlipayScan, (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment]) },
+                { BankTransfer, (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment]) },
+                { WeChatPayScan, (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment]) }
             };
 
         private async Task GeneratePaymentAsync()
@@ -146,9 +147,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             },
                         VipLevels = new[]
                         {
-                            new BrandPaymentVipLevel {BrandPaymentId = paymentId, VipLevelId = _vipLevels[0].Id},
-                            new BrandPaymentVipLevel {BrandPaymentId = paymentId, VipLevelId = _vipLevels[1].Id}
+                            new BrandPaymentVipLevel { BrandPaymentId = paymentId, VipLevelId = _vipLevels[0].Id },
+                            new BrandPaymentVipLevel { BrandPaymentId = paymentId, VipLevelId = _vipLevels[1].Id }
                         },
+                        ExtendedData = JsonSerializer.Serialize(
+                            new
+                            {
+                                BankAccount = "987654321",
+                                Name = "測試者"
+                            },
+                            new JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                WriteIndented = false
+                            }),
                         CreatedByUsername = AdminUsername,
                         CreatedOn = DateTimeOffset.Now,
                         UpdatedByUsername = AdminUsername,

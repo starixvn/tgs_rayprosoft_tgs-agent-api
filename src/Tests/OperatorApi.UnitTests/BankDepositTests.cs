@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
@@ -35,6 +36,118 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqWalletRepository.Verify(
                 fake => fake.CreateDepositFormAsync(It.Is<BankDepositForm>(form => expected.Matches(form))),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
+        {
+            var moqWalletRepository = new Mock<IWalletRepository>();
+
+            var sut = new GetBankDepositFromQueryService(moqWalletRepository.Object);
+
+            var query = new GetBankDepositFormQuery(
+                "ThisIsPlayerCode",
+                Guid.NewGuid());
+
+            moqWalletRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
+                .Returns(ValueTask.FromResult(new BankDepositForm(
+                    query.PlayerCode,
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "test",
+                    1000M)));
+
+            var actual = await sut.GetAsync(query);
+
+            moqWalletRepository.Verify(
+                fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public void Bank_Deposit_Form_If_Not_Player_Own_Will_Throw_Exception()
+        {
+            var moqWalletRepository = new Mock<IWalletRepository>();
+
+            var sut = new GetBankDepositFromQueryService(moqWalletRepository.Object);
+
+            var query = new GetBankDepositFormQuery(
+                "ThisIsPlayerCode",
+                Guid.NewGuid());
+
+            moqWalletRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
+                .Returns(ValueTask.FromResult(new BankDepositForm(
+                    "OtherPlayerCode",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "test",
+                    1000M)));
+
+            Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
+        }
+
+        [Test]
+        public async Task Get_Payment_Methods_Should_Success()
+        {
+            var moqWalletRepository = new Mock<IWalletRepository>();
+
+            var sut = new AllPaymentMethodsQueryService(moqWalletRepository.Object);
+
+            var query = new AllPaymentMethodsQuery();
+
+            moqWalletRepository
+                .Setup(fake => fake.GetAllPaymentMethodsAsync())
+                .Returns(new[] {
+                    new PaymentMethod(Guid.NewGuid(), "test1"),
+                    new PaymentMethod(Guid.NewGuid(), "test2")
+                }.ToAsyncEnumerable());
+
+            _ = await sut.GetAsync(query);
+
+            moqWalletRepository.Verify(
+                fake => fake.GetAllPaymentMethodsAsync(),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Payment_Channels_Should_Success()
+        {
+            var moqWalletRepository = new Mock<IWalletRepository>();
+
+            var sut = new AllPaymentChannelsQueryService(moqWalletRepository.Object);
+
+            var query = new AllPaymentChannelsQuery();
+
+            moqWalletRepository
+                .Setup(fake => fake.GetAllPaymentChannelsAsync())
+                .Returns(new[] {
+                    new PaymentChannel(Guid.NewGuid(), "test1"),
+                    new PaymentChannel(Guid.NewGuid(), "test2")
+                }.ToAsyncEnumerable());
+
+            _ = await sut.GetAsync(query);
+
+            moqWalletRepository.Verify(
+                fake => fake.GetAllPaymentChannelsAsync(),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Brand_Payment_Should_SuccessAsync()
+        {
+            var moqWalletRepository = new Mock<IWalletRepository>();
+
+            var sut = new GetBrandPaymentQueryService(moqWalletRepository.Object);
+
+            var query = new GetBrandPaymentQuery(Guid.NewGuid());
+
+            _ = await sut.GetAsync(query);
+
+            moqWalletRepository.Verify(
+                fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
                 Times.Exactly(1));
         }
     }

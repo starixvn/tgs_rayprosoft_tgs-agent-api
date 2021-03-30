@@ -66,6 +66,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string UpdatedByUsername { get; set; }
 
+        public string ExtendedData { get; set; }
+
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
         public virtual ICollection<BrandPaymentVipLevel> VipLevels { get; set; }

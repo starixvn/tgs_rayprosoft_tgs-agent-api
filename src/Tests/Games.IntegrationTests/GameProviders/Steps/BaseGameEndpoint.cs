@@ -33,7 +33,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             PlatformType platformType, string brandCode, string currencyCode)
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
-            var player = await db.Players.FirstOrDefaultAsync(p => p.Brand.Code == brandCode &&
+            var player = await db.Players.AsQueryable().FirstOrDefaultAsync(p => p.Brand.Code == brandCode &&
                 p.Username.ToLower() == username.ToLower());
 
             var playerCode = string.Empty;
@@ -48,7 +48,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 if (tokenData != null)
                 {
                     var loginRecord =
-                        await db.PlayerLoginRecords.FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
+                        await db.PlayerLoginRecords.AsQueryable().FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
                     if (loginRecord?.Status == LoginStatus.Enabled)
                     {
                         return;
@@ -61,7 +61,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             if (brand == null)
             {
-                brand = await db.Brands.FirstAsync(b => b.Code == brandCode);
+                brand = await db.Brands.AsQueryable().FirstAsync(b => b.Code == brandCode);
                 Set(brandCacheKey, brand);
             }
 
@@ -88,7 +88,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
 
             const string password = "TgsP@ssw0rd";
-            var headers = new Dictionary<string, string> {{"Authorization", $"Bearer {brandToken}"}};
+            var headers = new Dictionary<string, string> { { "Authorization", $"Bearer {brandToken}" } };
 
             if (player == null)
             {
@@ -145,13 +145,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             await using var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
             var playerCode = Get<string>(SR.PlayerCode);
-            return await db.Wallets.FirstAsync(w => w.PlayerCode == playerCode);
+            return await db.Wallets.AsQueryable().FirstAsync(w => w.PlayerCode == playerCode);
         }
 
         protected static async Task<T> GetSettingAsync<T>(ServiceProvider serviceProvider, string key)
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
-            var setting = await db.Settings.FirstAsync(s => s.Key == key);
+            var setting = await db.Settings.AsQueryable().FirstAsync(s => s.Key == key);
 
             var json = serviceProvider.GetRequiredService<IJsonSerializationProvider>();
             return json.DeserializeFromString<T>(setting.Value);
@@ -161,7 +161,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var records = await db.PlayerLoginRecords
+            var records = await db.PlayerLoginRecords.AsQueryable()
                 .Where(r => r.PlayerCode == playerCode).ToArrayAsync();
 
             foreach (var r in records)
@@ -180,7 +180,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var player = await db.Players.FirstAsync(r => r.PlayerCode == playerCode);
+            var player = await db.Players.AsQueryable().FirstAsync(r => r.PlayerCode == playerCode);
             player.Status = status;
 
             await db.SaveChangesAsync();
@@ -193,7 +193,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             var db = GetDb<ITgsRepository>(serviceProvider);
-            var status = await db.Rounds.Where(r => r.ExternalRoundId == externalRoundId)
+            var status = await db.Rounds.AsQueryable().Where(r => r.ExternalRoundId == externalRoundId)
                 .Select(r => r.Status)
                 .FirstAsync();
 
@@ -210,7 +210,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var gameProvider = await db.GameProviders.FirstAsync(gp => gp.Code == gameProviderCode);
+            var gameProvider = await db.GameProviders.AsQueryable().FirstAsync(gp => gp.Code == gameProviderCode);
             gameProvider.Status = status;
 
             await db.SaveChangesAsync();
@@ -232,10 +232,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             var gameProviderConfiguration = await (
-                from bgp in db.BrandGameProviders
-                join brand in from b in db.Brands where b.Code == brandCode select b
+                from bgp in db.BrandGameProviders.AsQueryable()
+                join brand in from b in db.Brands.AsQueryable() where b.Code == brandCode select b
                     on bgp.BrandId equals brand.Id
-                join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
+                join gameProvider in from gp in db.GameProviders.AsQueryable() where gp.Code == gameProviderCode select gp
                     on bgp.GameProviderId equals gameProvider.Id
                 join gpc in db.GameProviderConfigurations
                     on bgp.GameProviderConfigurationId equals gpc.Id
@@ -265,7 +265,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var gamePlatformTypes = GetGamePlatformTypes();
             var game = await (
                 from g in db.Games
-                join gameProvider in from gp in db.GameProviders where gp.Code == gameProviderCode select gp
+                join gameProvider in from gp in db.GameProviders.AsQueryable() where gp.Code == gameProviderCode select gp
                     on g.GameProviderId equals gameProvider.Id
                 where g.ExternalId == externalGameId && gamePlatformTypes.Contains(g.PlatformType)
                 select g).FirstAsync();
@@ -297,7 +297,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var brand = await db.Brands.FirstAsync(b => b.Code == brandCode);
+            var brand = await db.Brands.AsQueryable().FirstAsync(b => b.Code == brandCode);
             brand.Status = status;
 
             await db.SaveChangesAsync();
