@@ -27,6 +27,9 @@ import {
 } from "../../table/column/numberColumn"
 import textColumn from "../../table/column/textColumn"
 import AlertDialog from "../../dialog/Alert"
+import { FieldValues } from "../../layout/Grid"
+import { formatNumberDecimal } from "../../number/format"
+import Separator from "../../layout/Separator"
 
 export const AgentWinLossDialogDisclosure = ({
     brandId,
@@ -67,9 +70,7 @@ const ReportDialog = ({
 }) => {
     let { state, setPageIndex, setSortOrder } = useTable({
         brandId,
-        /*
         username,
-        */
         from: start,
         to: end,
         showAll: true
@@ -107,7 +108,17 @@ const ReportDialog = ({
             maxWidth="90vw"
             maxHeight="90vh"
         >
-            <Stack>
+            <FieldStack>
+                <FieldValues marginLeft="1rem">
+                    <Trans zh="代理用户名" en="Agent Username" />
+                    <Text.Block alignY="center">{username}</Text.Block>
+
+                    <Trans zh="输赢金额" en="Win Loss Amount" />
+                    <Text.Block alignY="center">
+                        {formatNumberDecimal(winLossAmount)}
+                    </Text.Block>
+                </FieldValues>
+                <Separator />
                 <Table
                     controlledState={state}
                     columns={columns}
@@ -118,7 +129,7 @@ const ReportDialog = ({
                     isLoading={isLoading}
                     foot={data?.items?.length > 0}
                 />
-            </Stack>
+            </FieldStack>
         </Dialog.Modal>
     )
 }

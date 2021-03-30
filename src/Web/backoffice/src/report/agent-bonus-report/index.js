@@ -279,10 +279,11 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 Header: <Trans zh="有效投注" en="Valid Bet Amount" />,
                 disableSortBy: true
             }),
-            textColumn({
+            numberDecimalColumn({
                 id: "winLossAmount",
                 accessor: (row) => row,
                 sumColumn: "winLossAmount",
+                toValue: (row) => row?.winLossAmount,
                 Header: <Trans zh="输赢金额" en="Win Loss Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
@@ -304,10 +305,11 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 Header: <Trans zh="净盈利" en="Net Profit" />,
                 disableSortBy: true
             }),
-            textColumn({
+            numberDecimalColumn({
                 id: "agentBonusAmount",
                 accessor: (row) => row,
                 sumColumn: "agentBonusAmount",
+                toValue: (row) => row?.agentBonusAmount,
                 Header: <Trans zh="分红金额" en="Bonus Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {

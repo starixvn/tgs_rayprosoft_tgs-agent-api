@@ -33,11 +33,13 @@ import {
 import AlertDialog from "../../dialog/Alert"
 import textColumn from "../../table/column/textColumn"
 import { formatDateTime } from "../../date/format"
+import { FieldValues } from "../../layout/Grid"
+import { formatNumberDecimal } from "../../number/format"
+import Separator from "../../layout/Separator"
 
 export const AgentBonusDetailDialogDisclosure = ({
     brandId,
     username,
-    bonusAmount,
     start,
     end,
     value,
@@ -54,7 +56,7 @@ export const AgentBonusDetailDialogDisclosure = ({
                 <ReportDialog
                     brandId={brandId}
                     username={username}
-                    bonusAmount={bonusAmount}
+                    bonusAmount={value}
                     start={start}
                     end={end}
                     dialog={dialog}
@@ -88,7 +90,7 @@ const ReportDialog = ({
     } = useAgentBonusDetailList(username, toApiParams(state))
 
     let { pageIndex, pageSize } = state
-    let columns = useAgentBonusColumns({ items: data?.items })
+    let columns = useAgentBonusColumns({ username, items: data?.items })
 
     let title = useTrans({
         zh: "分红详情",
@@ -115,7 +117,17 @@ const ReportDialog = ({
             maxWidth="90vw"
             maxHeight="90vh"
         >
-            <Stack>
+            <FieldStack>
+                <FieldValues marginLeft="1rem">
+                    <Trans zh="代理用户名" en="Agent Username" />
+                    <Text.Block alignY="center">{username}</Text.Block>
+
+                    <Trans zh="分红金额" en="Bonus Amount" />
+                    <Text.Block alignY="center">
+                        {formatNumberDecimal(bonusAmount)}
+                    </Text.Block>
+                </FieldValues>
+                <Separator />
                 <Table
                     controlledState={state}
                     columns={columns}
@@ -126,14 +138,19 @@ const ReportDialog = ({
                     isLoading={isLoading}
                     foot={data?.items?.length > 0}
                 />
-            </Stack>
+            </FieldStack>
         </Dialog.Modal>
     )
 }
 
-const useAgentBonusColumns = ({ items = [] }) => {
+const useAgentBonusColumns = ({ username = "", items = [] }) => {
     return useMemo(
         () => [
+            textColumn({
+                accessor: "username",
+                Header: <Trans zh="代理用户名" en="Agent Username" />,
+                Cell: ({ value }) => value ?? username
+            }),
             dateTimeColumn({
                 accessor: "reportDate",
                 dateFormat: "dd/MM/yyyy",
@@ -149,14 +166,12 @@ const useAgentBonusColumns = ({ items = [] }) => {
                 id: "settlementInterval",
                 accessor: (row) => row,
                 Header: <Trans zh="结算区间" en="Settlement Interval" />,
+                disableSortBy: true,
                 Cell: ({ value }) => {
                     let format = "dd/MM/yyyy"
-                    return (
-                        <Text.Block>
-                            {`${formatDateTime(format, value?.from)}` -
-                                `${formatDateTime(format, value?.to)}`}
-                        </Text.Block>
-                    )
+                    let start = formatDateTime(format, value?.from)
+                    let end = formatDateTime(format, value?.to)
+                    return <Text.Block>{`${start} - ${end}`}</Text.Block>
                 }
             }),
 
