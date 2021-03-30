@@ -38,5 +38,13 @@ namespace TGS.Services.Operator.Configuration
 
             return this;
         }
+
+        public OperatorConfiguration UseStationLatterRepository<TStationLatterRepository>()
+            where TStationLatterRepository : class, IStationLatterRepository
+        {
+            Services.AddTransient<IStationLatterRepository, TStationLatterRepository>();
+
+            return this;
+        }
     }
 }
