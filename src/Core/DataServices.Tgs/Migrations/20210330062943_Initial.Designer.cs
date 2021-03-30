@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210326052532_Initial")]
+    [Migration("20210330062943_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,9 +19,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
-                .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
                 {
@@ -400,7 +400,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id")
-                        .UseIdentityByDefaultColumn();
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
@@ -941,6 +941,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer")
                         .HasColumnName("display_order");
+
+                    b.Property<string>("ExtendedData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("extended_data");
 
                     b.Property<decimal?>("FeePercentage")
                         .HasPrecision(18, 6)
@@ -1487,7 +1492,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("stored_on")
-                        .HasDefaultValueSql("now() at time zone 'utc'");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)

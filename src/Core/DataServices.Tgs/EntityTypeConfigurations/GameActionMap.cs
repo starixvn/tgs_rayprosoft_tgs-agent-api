@@ -38,7 +38,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             // shadow property, no actual property in GameAction model
             builder.Property<DateTimeOffset>("StoredOn")
-                .HasDefaultValueSql("now() at time zone 'utc'")
+                .HasDefaultValueSql("now()")
                 .IsRequired();
 
             builder.Property(c => c.Turnover)
