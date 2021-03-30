@@ -14,9 +14,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Create_Bank_Deposit_Form_Should_Success()
         {
-            var moqDepositRepository = new Mock<IWalletRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
 
-            var sut = new CreateBankDepositFormCommandService(moqDepositRepository.Object);
+            var sut = new CreateBankDepositFormCommandService(moqWalletRepository.Object);
 
             var command = new CreateBankDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -33,7 +33,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqDepositRepository.Verify(
+            moqWalletRepository.Verify(
                 fake => fake.CreateDepositFormAsync(It.Is<BankDepositForm>(form => expected.Matches(form))),
                 Times.Exactly(1));
         }

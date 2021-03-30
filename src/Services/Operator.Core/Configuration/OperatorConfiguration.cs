@@ -31,10 +31,10 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration UseDepositRepository<TDepositRepository>() where TDepositRepository : class, IWalletRepository
+        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IWalletRepository
         {
             Services
-                .AddTransient<IWalletRepository, TDepositRepository>();
+                .AddTransient<IWalletRepository, TWalletRepository>();
 
             return this;
         }

@@ -6,11 +6,11 @@ namespace TGS.Services.Operator.BankDeposit
 {
     internal class CreateBankDepositFormCommandService : ICommandService<CreateBankDepositFormCommand>
     {
-        private readonly IWalletRepository _depositRepository;
+        private readonly IWalletRepository _walletRepository;
 
-        public CreateBankDepositFormCommandService(IWalletRepository depositRepository)
+        public CreateBankDepositFormCommandService(IWalletRepository walletRepository)
         {
-            _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
+            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
         public async ValueTask ExecuteAsync(CreateBankDepositFormCommand command)
@@ -22,7 +22,7 @@ namespace TGS.Services.Operator.BankDeposit
                 command.BankAccount,
                 command.Amount);
 
-            await _depositRepository
+            await _walletRepository
                 .CreateDepositFormAsync(form)
                 .ConfigureAwait(false);
         }
