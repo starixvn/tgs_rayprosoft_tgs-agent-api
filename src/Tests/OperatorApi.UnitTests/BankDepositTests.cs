@@ -14,7 +14,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Create_Bank_Deposit_Form_Should_Success()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqDepositRepository = new Mock<IWalletRepository>();
 
             var sut = new CreateBankDepositFormCommandService(moqDepositRepository.Object);
 

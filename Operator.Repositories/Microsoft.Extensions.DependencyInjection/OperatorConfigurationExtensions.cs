@@ -7,6 +7,6 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration) =>
             configuration
-                .UseDepositRepository<DepositRepository>();
+                .UseDepositRepository<WalletRepository>();
     }
 }

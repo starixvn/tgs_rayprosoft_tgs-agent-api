@@ -6,9 +6,9 @@ namespace TGS.Services.Operator.BankDeposit
 {
     internal class CreateBankDepositFormCommandService : ICommandService<CreateBankDepositFormCommand>
     {
-        private readonly IDepositRepository _depositRepository;
+        private readonly IWalletRepository _depositRepository;
 
-        public CreateBankDepositFormCommandService(IDepositRepository depositRepository)
+        public CreateBankDepositFormCommandService(IWalletRepository depositRepository)
         {
             _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
         }
