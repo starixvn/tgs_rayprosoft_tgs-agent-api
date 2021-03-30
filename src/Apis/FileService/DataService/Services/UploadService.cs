@@ -65,7 +65,9 @@ namespace TGS.Apis.FileService.DataService.Services
         }
 
         public ValueTask<string[]> GetObjectsAsync(string prefix)
-            => _fileManager.ListPathAsync(prefix).ToArrayAsync();
+            => _fileManager.ListPathAsync(prefix)
+                .Select(meta => meta.FileName)
+                .ToArrayAsync();
 
         private async Task CleanFiles()
         {

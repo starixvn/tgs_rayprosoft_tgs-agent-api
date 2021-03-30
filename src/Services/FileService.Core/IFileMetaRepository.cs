@@ -10,6 +10,8 @@ namespace TGS.FileService
 
         IAsyncEnumerable<FileMeta> ListExpiredFileMetasAsync(string prefix, DateTimeOffset expireTime);
 
+        IAsyncEnumerable<FileMeta> ListFileMetasAsync(string prefix);
+
         ValueTask DeleteFileMetaByIdsAsync(IEnumerable<string> fileIds);
     }
 }

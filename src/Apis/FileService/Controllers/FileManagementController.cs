@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.FileService.Controllers.Messages;
 using TGS.FileService;
+using Yarp.ReverseProxy.Service;
+using Yarp.ReverseProxy.Service.Proxy;
+using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy.Abstractions;
 
 namespace TGS.Apis.FileService.Controllers
 {
@@ -18,6 +23,16 @@ namespace TGS.Apis.FileService.Controllers
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
         }
 
+        [HttpGet("{*path}")]
+        public async Task<IActionResult> GetFileAsync(
+            IHttpProxy httpProxy,
+            ITransformBuilder transformBuilder,
+            string path)
+        {
+            var meta = await _fileManager.GetFileAsync(path);
+
+            throw new NotImplementedException();
+        }
         [HttpPost("{*path}")]
         public async Task<FileViewModel> UploadFile(string path, IFormFile file)
         {

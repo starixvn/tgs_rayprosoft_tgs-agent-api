@@ -56,5 +56,25 @@ namespace TGS.FileService.Repositories
 
             return result.ToAsyncEnumerable();
         }
+
+        public IAsyncEnumerable<FileMeta> ListFileMetasAsync(string prefix)
+        {
+            var query = _mongoContext.GetQueries().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(prefix))
+                query = query.Where(row => row.FileName.StartsWith(prefix));
+
+            var result = query.ToArray()
+                .Select(row => new FileMeta
+                {
+                    Id = row.Id,
+                    FileName = row.FileName,
+                    ContentType = row.ContentType,
+                    FileLength = row.FileLength,
+                    CreatedOn = row.CreatedOn
+                });
+
+            return result.ToAsyncEnumerable();
+        }
     }
 }
