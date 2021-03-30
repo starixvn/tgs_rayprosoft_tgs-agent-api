@@ -193,8 +193,8 @@ const SearchBar = ({
     })
 
     let usernamePlaceholder = useTrans({
-        zh: "用户名输入框",
-        en: "Input user name"
+        zh: "玩家用户名",
+        en: "Player username"
     })
 
     const onSubmit = (data) => search?.(data)

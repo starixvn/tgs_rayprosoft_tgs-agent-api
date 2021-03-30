@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/react"
 import { CodeContentPair as MarketReportPair } from "./market-report"
 import { CodeContentPair as OrderReportPair } from "./order-report"
+import { CodeContentPair as AgentContributionReportPair } from "./agent-contribution-report"
 import { CodeContentPair as PlayerContributionReportPair } from "./player-contribution-report"
 import { CodeContentPair as AgentBonusReportPair } from "./agent-bonus-report"
 import { CodeContentPair as VipReportPair } from "./vip-report"
@@ -13,6 +14,7 @@ export { Code } from "./menu"
 const pairs = () => [
     MarketReportPair,
     OrderReportPair,
+    AgentContributionReportPair,
     PlayerContributionReportPair,
     AgentBonusReportPair,
     VipReportPair
