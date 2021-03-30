@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Log;
 namespace TGS.Core.DataServices.Log.Migrations
 {
     [DbContext(typeof(LogRepository))]
-    [Migration("20210326032801_Initial")]
+    [Migration("20210330013904_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,9 +24,10 @@ namespace TGS.Core.DataServices.Log.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.AdminLog", b =>
                 {
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("recorded_on");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -42,10 +43,6 @@ namespace TGS.Core.DataServices.Log.Migrations
                     b.Property<int>("ExecutionTimeMs")
                         .HasColumnType("integer")
                         .HasColumnName("execution_time_ms");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
 
                     b.Property<string>("Ip")
                         .IsRequired()
@@ -66,6 +63,10 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .IsUnicode(true)
                         .HasColumnType("character varying(256)")
                         .HasColumnName("path");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
 
                     b.Property<string>("RequestContent")
                         .IsRequired()
@@ -110,25 +111,25 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tracking_id");
 
-                    b.HasKey("RecordedOn")
+                    b.HasKey("Id")
                         .HasName("pk_admin_logs");
+
+                    b.HasIndex("RecordedOn")
+                        .HasDatabaseName("ix_admin_logs_recorded_on");
 
                     b.ToTable("admin_logs", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.ApiLog", b =>
                 {
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("recorded_on");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<int>("ExecutionTimeMs")
                         .HasColumnType("integer")
                         .HasColumnName("execution_time_ms");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
 
                     b.Property<string>("Ip")
                         .IsRequired()
@@ -157,6 +158,10 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .IsUnicode(true)
                         .HasColumnType("character varying(256)")
                         .HasColumnName("prefix");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
 
                     b.Property<string>("RequestContent")
                         .IsRequired()
@@ -197,27 +202,27 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tracking_id");
 
-                    b.HasKey("RecordedOn")
+                    b.HasKey("Id")
                         .HasName("pk_api_logs");
+
+                    b.HasIndex("RecordedOn")
+                        .HasDatabaseName("ix_api_logs_recorded_on");
 
                     b.ToTable("api_logs", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Log.Models.LogRecord", b =>
                 {
-                    b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("recorded_on");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Exception")
                         .IsRequired()
                         .IsUnicode(true)
                         .HasColumnType("text")
                         .HasColumnName("exception");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
 
                     b.Property<int>("Level")
                         .IsUnicode(true)
@@ -234,6 +239,10 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .HasColumnType("text")
                         .HasColumnName("message");
 
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
+
                     b.Property<string>("ServerName")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -245,8 +254,11 @@ namespace TGS.Core.DataServices.Log.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tracking_id");
 
-                    b.HasKey("RecordedOn")
+                    b.HasKey("Id")
                         .HasName("pk_log_records");
+
+                    b.HasIndex("RecordedOn")
+                        .HasDatabaseName("ix_log_records_recorded_on");
 
                     b.ToTable("log_records", "dbo");
                 });

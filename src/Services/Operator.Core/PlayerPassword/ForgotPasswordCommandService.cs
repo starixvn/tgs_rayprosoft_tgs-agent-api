@@ -26,7 +26,7 @@ namespace TGS.Services.Operator.PlayerPassword
 
         public async ValueTask<string> GetAsync(ForgotPasswordCommand command)
         {
-            var player = _tgsRepository.Players
+            var player = _tgsRepository.Players.AsQueryable()
                 .Where(player => player.PhoneAuthentication == true && player.Phone == command.Phone)
                 .FirstOrDefault();
 

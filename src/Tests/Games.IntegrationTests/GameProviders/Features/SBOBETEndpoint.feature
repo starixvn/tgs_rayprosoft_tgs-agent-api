@@ -116,6 +116,14 @@ Scenario: 02.l - Player cannot place bet with unknown game
 	When I place bet of $10 for game "1_0"
 	Then I will receive bet response of error "SystemError"
 
+Scenario: 02.m - Player can place mobile bet with desktop virtual sports
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+		And player having balance of $100
+	When I place bet of $10 for game "5_201604"
+	Then I will receive bet response of no error and balance of $90
+		And player wallet database record will be for $90
+		And game action will be recorded in the database of type "PlaceBet" for $-10
+
 Scenario: 03.a - Win bet
 	Given player "RP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100

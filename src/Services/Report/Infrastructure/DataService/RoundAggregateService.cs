@@ -66,7 +66,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             ExistsAsync(predicate);
 
         IQueryable<RoundAggregate> IRoundAggregateService.GetRoundAggregateQueries(
-            Func<IQueryable<RoundAggregate>, IQueryable<RoundAggregate>> preQuery, bool tracking = false) =>
+            Func<IQueryable<RoundAggregate>, IQueryable<RoundAggregate>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
         async Task<MarketDataModel[]> IRoundAggregateService.

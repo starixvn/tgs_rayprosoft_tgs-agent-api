@@ -10,6 +10,7 @@ export const VipLevelSelect = ({
     placeholder,
     placeholderDisabled,
     brandId,
+    optionValue,
     ...props
 }) => {
     let defaultPlaceholder = useTrans({
@@ -24,10 +25,13 @@ export const VipLevelSelect = ({
     })
 
     let vipLevelOptions =
-        data?.items?.map(({ id, ...item }) => ({
-            label: item.name,
-            value: id
-        })) ?? []
+        data?.items?.map((item) => {
+            let value = optionValue ? optionValue(item) : item?.id
+            return {
+                label: item.name,
+                value
+            }
+        }) ?? []
 
     let options =
         typeof placeholder === "string"

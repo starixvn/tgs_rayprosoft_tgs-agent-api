@@ -1,21 +1,26 @@
 import React from "react"
 import { css, Global } from "@emotion/react"
 import { FormattedNumber } from "../../i18n"
-import { sumColumn } from "../sumColumn"
+import { sumColumn, sumColumnValue } from "../sumColumn"
 
 const DefaultNumberFormat = "0,0"
+
+const defaultValueFn = (value) => value
 
 export const numberColumn = ({
     Cell,
     format = DefaultNumberFormat,
     postfix = "",
     sumColumn: sumColumnName = "",
+    toValue = defaultValueFn,
     ...props
 }) => {
+    const DefaultCell = ({ value }) => (
+        <FormattedNumber value={value} format={format} postfix={postfix} />
+    )
+    Cell = Cell ?? DefaultCell
     let basic = {
-        Cell: ({ value }) => (
-            <FormattedNumber value={value} format={format} postfix={postfix} />
-        ),
+        Cell,
         headCell: {
             textAlign: "center",
             whiteSpace: "nowrap"
@@ -29,12 +34,18 @@ export const numberColumn = ({
     if (sumColumnName) {
         basic = {
             ...basic,
-            Footer: (table) => (
-                <FormattedNumber
-                    value={sumColumn(sumColumnName, table.rows)}
-                    format={format}
-                />
-            ),
+            Footer: (table) => {
+                return (
+                    <FormattedNumber
+                        value={sumColumnValue(
+                            sumColumnName,
+                            toValue,
+                            table.rows
+                        )}
+                        format={format}
+                    />
+                )
+            },
             footerCellProps: {
                 textAlign: "center"
             }
