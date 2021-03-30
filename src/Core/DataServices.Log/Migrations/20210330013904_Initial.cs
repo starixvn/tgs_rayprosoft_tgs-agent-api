@@ -91,8 +91,7 @@ namespace TGS.Core.DataServices.Log.Migrations
                 name: "ix_api_logs_recorded_on",
                 schema: "dbo",
                 table: "api_logs",
-                column: "recorded_on")
-                .Annotation("Npgsql:IndexInclude", new[] { "prefix", "path", "method", "request_content", "response_content" });
+                column: "recorded_on");
 
             migrationBuilder.CreateIndex(
                 name: "ix_log_records_recorded_on",

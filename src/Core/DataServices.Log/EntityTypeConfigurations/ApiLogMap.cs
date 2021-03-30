@@ -64,15 +64,7 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfigurations
                 .IsRequired();
 
             builder.HasIndex(c => c.RecordedOn)
-                .HasDatabaseName("ix_api_logs_recorded_on")
-                .IncludeProperties(c => new
-                {
-                    c.Prefix,
-                    c.Path,
-                    c.Method,
-                    c.RequestContent,
-                    c.ResponseContent
-                });
+                .HasDatabaseName("ix_api_logs_recorded_on");
         }
     }
 }
