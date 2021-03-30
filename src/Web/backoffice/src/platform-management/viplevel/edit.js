@@ -160,7 +160,7 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
         mutate(undefined, false)
         setSubmit(undefined)
     }
-    console.log("record", record)
+
     return (
         <FormDialog
             defaultValues={{ ...record }}

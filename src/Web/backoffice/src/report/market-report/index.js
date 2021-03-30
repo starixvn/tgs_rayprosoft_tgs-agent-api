@@ -45,7 +45,7 @@ export const Body = () => {
     let [brandId, setBrandId] = useState(userBrandId)
 
     return (
-        <Set orientation="horizontal">
+        <Set orientation="vertical" isFilled>
             <BrandBar
                 onBrandChange={(value) => {
                     setBrandId(value)
@@ -122,9 +122,9 @@ const ReportContent = ({ brandId }) => {
             }
             title={<Trans zh="市场报表" en="Market Report" />}
             paddingTop="1em"
-            wrapperProps={{
-                width: "calc(100% - 1em)"
-            }}
+            // wrapperProps={{
+            //     width: "calc(100% - 1em)"
+            // }}
         >
             <Table
                 controlledState={state}

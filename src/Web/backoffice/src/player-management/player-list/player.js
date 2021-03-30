@@ -16,7 +16,13 @@ import {
     useClassName
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
-import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
+import {
+    Trans,
+    FormattedDateTime,
+    FormattedNumber,
+    useTrans,
+    FormattedNumberDecimal
+} from "../../i18n"
 import { PlayerStatusSelect, PlayerStatusLabel } from "../PlayerStatus"
 import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import AlertDialog from "../../dialog/Alert"
@@ -139,7 +145,7 @@ const EditForm = ({
                     />
                 </Box>
 
-                <ParentUsernameLabel />
+                <AgentParentUsernameLabel />
                 <Box>
                     <Input name="parentUsername" />
                 </Box>
@@ -151,7 +157,7 @@ const EditForm = ({
 
                 <BalanceLabel />
                 <Box>
-                    <FormattedNumber value={balance} />
+                    <FormattedNumberDecimal value={balance} />
                 </Box>
 
                 <StatusLabel />
@@ -162,20 +168,19 @@ const EditForm = ({
                         placeholder={false}
                     />
                 </Box>
-
-                <AgentLabel />
-                <Box>
-                    <PlayerAgentSelect name="hasAgent" required />
-                </Box>
             </FieldValues>
             <Box alignX="right">
-                <SubmitCancel onClickCancel={onClickClose} />
+                <SubmitCancel
+                    onClickCancel={onClickClose}
+                    isLoading={isLoading}
+                />
             </Box>
         </Stack>
     )
 }
 
 export const Panel = ({ player = {}, onSubmitted, ...props }) => {
+    //TODO: "parentUsername" -> use agent username
     let {
         username = "",
         realName = "",
@@ -205,7 +210,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
                     <Text>{`VIP ${vipLevel}`}</Text>
                 </Box>
 
-                <ParentUsernameLabel />
+                <AgentParentUsernameLabel />
                 <Box>
                     <Text>{parentUsername}</Text>
                 </Box>
@@ -217,7 +222,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
 
                 <BalanceLabel />
                 <Box>
-                    <FormattedNumber value={balance} />
+                    <FormattedNumberDecimal value={balance} />
                 </Box>
 
                 <StatusLabel />
@@ -243,7 +248,9 @@ const RealNameLabel = () => <Trans zh="真实姓名" en="Real name" />
 
 const VIPLevelLabel = () => <Trans zh="VIP等级" en="VIP Level" />
 
-const ParentUsernameLabel = () => <Trans zh="上级用户名" en="上级用户名" />
+const AgentParentUsernameLabel = () => (
+    <Trans zh="上级代理" en="Upper Level Agent" />
+)
 
 const RegistrationLabel = () => <Trans zh="注册时间" en="Registration" />
 

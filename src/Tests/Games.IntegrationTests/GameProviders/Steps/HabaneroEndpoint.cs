@@ -47,7 +47,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             HabaneroBrandId = "a5df0ada-7b6a-eb11-9889-00155db5435a",
             ClientId = "habanero",
-            SecretKey = "slPrV84jbxM8jIH9nUYBAndgVyjF5nU6",
+            SecretKey = "NzrgFf4Bb5KuXy9",
             MachineName = "TESTSERVER",
             Culture = "en"
         };
@@ -306,7 +306,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
             var transactionId = Get<string>(SR.ExternalTransactionId);
-            var roundId = Get<string>(SR.ExternalRoundId);
+            var roundId = Get<int>(SR.ExternalRoundId);
 
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
             var response = await client.QueryGameActionAsync(new()
@@ -318,7 +318,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = playerCode,
                     Token = encryptedToken,
                     TransactionId = transactionId,
-                    RoundId = roundId
+                    RoundId = DateTimeOffset.UtcNow.ToString(),
+                    ClientRoundId = roundId
                 }
             });
 
@@ -331,7 +332,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var playerCode = Get<string>(SR.PlayerCode);
 
             var transactionId = Get<string>(SR.ExternalTransactionId);
-            var roundId = Get<string>(SR.ExternalRoundId);
+            var roundId = Get<int>(SR.ExternalRoundId);
 
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
             var response = await client.QueryGameActionAsync(new()
@@ -343,7 +344,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = playerCode,
                     Token = string.Empty,
                     TransactionId = transactionId,
-                    RoundId = roundId
+                    RoundId = Guid.NewGuid().ToString(),
+                    ClientRoundId = roundId
                 }
             });
 
@@ -511,14 +513,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
         public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeFor(GameActionType type, decimal amount)
         {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalRoundId = Get<int>(SR.ExternalRoundId);
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
-                where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
+                where r.ExternalRoundId == externalRoundId.ToString() &&
+                    act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
@@ -612,7 +615,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return tokenProvider.EncryptAsync(loginRecordId);
         }
 
-        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
+        private async Task PlaceBetAsync(decimal amount, string externalGameId, int? externalRoundId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var platform = Get<PlatformType>(SR.PlatformType);
@@ -626,7 +629,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
 
             externalRoundId ??= NewRoundId();
-            var externalTransactionId = externalRoundId;
+            var externalTransactionId = Guid.NewGuid().ToString();
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
 
             var now = DateTimeOffset.Now;
@@ -639,8 +642,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
-                    RoundId = externalRoundId,
-                    ClientRoundId = (int)DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    RoundId = externalTransactionId,
+                    ClientRoundId = externalRoundId.Value,
                     IsCancel = false,
                     IsRetry = false,
                     RetryCount = 0,
@@ -653,10 +656,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                             new()
                             {
                                 GameState = GameState.NewGame,
-                                TransactionId = externalRoundId,
+                                TransactionId = externalTransactionId,
                                 CurrencyCode = gameProviderCurrencyCode,
                                 Amount = -amount,
-                                TransactionReferenceId = externalRoundId,
+                                TransactionReferenceId = externalTransactionId,
                                 Timestamp = now.ToString(TimeFormat)
                             }
                         }
@@ -747,7 +750,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
 
             var externalRoundId = NewRoundId();
-            var betExternalTransactionId = externalRoundId;
+            var betExternalTransactionId = Guid.NewGuid().ToString();
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
 
             var now = DateTimeOffset.Now;
@@ -760,8 +763,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
-                    RoundId = externalRoundId,
-                    ClientRoundId = (int)DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    RoundId = betExternalTransactionId,
+                    ClientRoundId = externalRoundId,
                     IsCancel = false,
                     IsRetry = false,
                     RetryCount = 0,
@@ -880,8 +883,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
-                    RoundId = externalRoundId,
-                    ClientRoundId = (int)now.ToUnixTimeMilliseconds(),
+                    RoundId = externalTransactionId,
+                    ClientRoundId = externalRoundId,
                     IsCancel = true,
                     IsRetry = true,
                     RetryCount = 0,
@@ -896,7 +899,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                             Timestamp = now.ToString(TimeFormat),
                             GameState = GameState.Completing,
                             TransactionId = externalTransactionId,
-                            TransactionReferenceId = externalRoundId
+                            TransactionReferenceId = externalTransactionId
                         }
                     },
                     Token = encryptedToken,
@@ -940,8 +943,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Game = new() { ExternalId = externalGameId },
                 Detail = new()
                 {
-                    RoundId = externalRoundId,
-                    ClientRoundId = (int)now.ToUnixTimeMilliseconds(),
+                    RoundId = externalTransactionId,
+                    ClientRoundId = externalRoundId,
                     IsCancel = false,
                     IsRetry = false,
                     RetryCount = 0,
@@ -958,7 +961,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                                 Timestamp = now.ToString(TimeFormat),
                                 GameState = GameState.NewGame,
                                 TransactionId = externalTransactionId,
-                                TransactionReferenceId = externalRoundId
+                                TransactionReferenceId = externalTransactionId
                             },
                             new()
                             {
@@ -994,8 +997,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ? fundTransferRequest.Detail.FundTransfer.CancelTransaction.TransactionId
                 : fundTransferRequest.Detail.FundTransfer.Transactions[(transactionIndex ?? 1) - 1].TransactionId;
 
-        private static string NewRoundId() =>
-            Guid.NewGuid().ToString();
+        private static int NewRoundId() => (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         #endregion
     }

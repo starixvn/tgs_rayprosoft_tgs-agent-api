@@ -23,9 +23,14 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid? ParentAgentId { get; set; }
         public virtual Agent ParentAgent { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
-        public decimal PositionTakingPercentage { get; set; } //佔成
+        public decimal CommissionPercentage { get; set; } //佔成
         public decimal BonusPercentage { get; set; }
-        public decimal RebatePercentage { get; set; }
+        public decimal LiveDealerRebatePercentage { get; set; }
+        public decimal SlotRebatePercentage { get; set; }
+        public decimal LotteryRebatePercentage { get; set; }
+        public decimal CardGameRebatePercentage { get; set; }
+        public decimal SportsRebatePercentage { get; set; }
+        public decimal VirtualSportsRebatePercentage { get; set; }
         public string Remarks { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }

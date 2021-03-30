@@ -89,9 +89,14 @@ export const FormattedDateTime = ({
     return <Text>{formatDateTime(format, value)}</Text>
 }
 
-export const FormattedNumber = ({ value, format = "0,0" }) => {
+export const FormattedNumber = ({ value, format = "0,0", postfix = "" }) => {
     return (
-        Number.isFinite(value) && <Text>{numeral(value).format(format)}</Text>
+        Number.isFinite(value) && (
+            <Text>
+                {numeral(value).format(format)}
+                {postfix}
+            </Text>
+        )
     )
 }
 

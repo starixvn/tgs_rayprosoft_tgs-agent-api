@@ -74,8 +74,8 @@ export const toApiParams = (state) => {
         ...restState,
         page,
         rows,
-        sortby,
-        orderby
+        sortby: state?.sortby ?? sortby,
+        orderby: state?.orderby ?? orderby
     }
 }
 

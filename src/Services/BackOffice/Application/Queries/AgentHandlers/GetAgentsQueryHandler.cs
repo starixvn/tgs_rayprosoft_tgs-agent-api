@@ -37,9 +37,14 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     AgentStatus = x.AgentStatus,
                     Type = x.Type,
                     LevelType = x.LevelType,
-                    PositionTakingPercentage = x.PositionTakingPercentage,
+                    CommissionPercentage = x.CommissionPercentage,
                     BonusPercentage = x.BonusPercentage,
-                    RebatePercentage = x.RebatePercentage,
+                    LiveDealerRebatePercentage = x.LiveDealerRebatePercentage,
+                    SlotRebatePercentage = x.SlotRebatePercentage,
+                    LotteryRebatePercentage = x.LotteryRebatePercentage,
+                    CardGameRebatePercentage = x.CardGameRebatePercentage,
+                    SportsRebatePercentage = x.SportsRebatePercentage,
+                    VirtualSportsRebatePercentage = x.VirtualSportsRebatePercentage,
                     TeamNumber = 1 + x.Players.Count + x.SubAgents.Count +
                         x.SubAgents.SelectMany(s => s.Players).Count()
                 }).CreatePagedResponseAsync(request);
