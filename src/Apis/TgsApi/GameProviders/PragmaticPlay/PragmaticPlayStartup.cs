@@ -34,6 +34,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
             services.AddScoped<AuthorizePragmaticPlayMiddleware>();
             services.AddScoped<HandlePragmaticPlayExceptionMiddleware>();
 
+            services.AddScoped<IPragmaticPlayServices, PragmaticPlayServices>();
+
             services.AddSingleton<IPragmaticPlayActionModelMapper, PragmaticPlayActionModelMapper>();
             services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
         }

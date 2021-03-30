@@ -24,12 +24,15 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         private readonly IGamePlayActions _actions;
         private readonly IPragmaticPlayActionModelMapper _map;
+        private readonly IPragmaticPlayServices _services;
 
         public PragmaticPlayGameController(
             IGamePlayActions actions,
+            IPragmaticPlayServices services,
             IPragmaticPlayActionModelMapper map)
         {
             _actions = actions;
+            _services = services;
             _map = map;
         }
 
@@ -55,6 +58,19 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
             var r = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
                 .ConfigureAwait(false);
 
+            return _map.Response(r);
+        }
+
+        [HttpPost]
+        [Route("bet")]
+        public async ValueTask<PlaceBetResponse> PlaceBetAsync([FromForm] PlaceBetRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
             return _map.Response(r);
         }
     }
