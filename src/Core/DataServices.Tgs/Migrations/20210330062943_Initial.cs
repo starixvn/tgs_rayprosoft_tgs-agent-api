@@ -726,7 +726,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     closing_round_explicit_request = table.Column<bool>(type: "boolean", nullable: true),
                     player_ip = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
-                    stored_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now() at time zone 'utc'")
+                    stored_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {
@@ -1271,7 +1271,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
+                    updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    extended_data = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
