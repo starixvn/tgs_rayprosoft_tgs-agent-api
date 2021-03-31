@@ -106,7 +106,63 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
             var betData = _map.Request(playerCode, data, request, gameActionExternalId);
             var r = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            var transaction = r.Transactions.First();
+            await _services.CacheRoundStatusAsync(data.GameProviderId, playerCode, externalRoundId, transaction.GameId);
+
             return _map.ResultResponse(r);
+        }
+
+        [HttpPost]
+        [Route("endRound")]
+        public async Task<EndRoundResponse> EndRoundAsync([FromForm] EndRoundRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var externalRoundId = request.RoundId;
+            var externalGameId = request.GameId;
+            var status = await _services.GetRoundStatusAsync(data.GameProviderId, playerCode, data.PlatformType,
+                    externalRoundId, externalGameId)
+                .ConfigureAwait(false);
+
+            if (status == RoundStatus.Closed)
+            {
+                var balanceResult = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
+                    .ConfigureAwait(false);
+
+                return _map.EndRoundResponse(balanceResult.Balance);
+            }
+
+            var gameActionExternalId = await _services
+                .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, data.PlatformType, externalRoundId,
+                    externalGameId, externalRoundId)
+                .ConfigureAwait(false);
+
+            if (gameActionExternalId.IsNullOrEmpty())
+            {
+                throw new InvalidGameActionException("Referenced transaction is not found.",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            var betData = _map.Request(playerCode, data, request, gameActionExternalId);
+            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+            return _map.EndRoundResponse(betResult.Balance);
+        }
+
+        [HttpPost]
+        [Route("refund")]
+        public async Task<RefundResponse> CancelTransactionAsync([FromForm] RefundRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+            return _map.RefundResponse(r);
         }
     }
 }

@@ -23,25 +23,36 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         ValueTask<string> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, PlatformType platform,
             string externalRoundId, string externalGameId, string externalGameActionGroupId);
+
+        ValueTask CacheRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
+
+        ValueTask<RoundStatus> GetRoundStatusAsync(Guid gameProviderId, string playerCode, PlatformType platformType,
+            string externalRoundId, string externalGameId);
     }
 
     public sealed class PragmaticPlayServices : IPragmaticPlayServices
     {
-        private static readonly string ExternalTransactionIdCacheType = "PP:TXID";
+        private static readonly string RoundCachePrefix = "PP:Round";
+        private static readonly string ExternalTransactionIdCacheType = $"{RoundCachePrefix}:TXID";
+        private static readonly string RoundStatusCacheType = $"{RoundCachePrefix}:Stautus";
+
         private readonly IRedisCacheManager _cacheManager;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly HttpContext _httpContext;
+        private readonly IRoundQueries _roundQueries;
 
         public PragmaticPlayServices(
             IHttpContextAccessor httpContextAccessor,
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
+            IRoundQueries roundQueries,
             IRedisCacheManager cacheManager)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
+            _roundQueries = roundQueries;
             _cacheManager = cacheManager;
         }
 
@@ -66,23 +77,15 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             };
         }
 
-        public async ValueTask CacheGameActionExternalIdAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId, int gameId, string externalTransactionId)
-        {
-            var cacheKey = GetExternalTransactionIdCacheKey(gameProviderId, playerCode, externalRoundId, gameId);
-            await _cacheManager.SafeCacheAsync(ExternalTransactionIdCacheType, cacheKey, TimeSpan.FromMinutes(5),
-                externalTransactionId).ConfigureAwait(false);
-        }
-
         async ValueTask<string> IPragmaticPlayServices.GetGameActionExternalIdAsync(Guid gameProviderId,
-            string playerCode, PlatformType platform, string externalRoundId, string externalGameId,
+            string playerCode, PlatformType platformType, string externalRoundId, string externalGameId,
             string externalGameActionGroupId)
         {
-            var gamePlatformType = platform.ToGamePlatformTypes();
+            var gamePlatformType = platformType.ToGamePlatformTypes();
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId);
             var gameId = games.Where(g => gamePlatformType.Contains(g.PlatformType)).Select(g => g.Id).FirstOrDefault();
 
-            var cacheKey = GetExternalTransactionIdCacheKey(gameProviderId, playerCode, externalRoundId, gameId);
+            var cacheKey = GetCachedKeyByRound(gameProviderId, playerCode, externalRoundId, gameId);
             var externalTransactionId = await _cacheManager.SafeGetAsync(ExternalTransactionIdCacheType, cacheKey,
                 () => Task.FromResult(default(string))).ConfigureAwait(false);
 
@@ -99,7 +102,39 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             return gameActionExternalIds.FirstOrDefault();
         }
 
-        private static string GetExternalTransactionIdCacheKey(Guid gameProviderId, string playerCode,
+        async ValueTask IPragmaticPlayServices.CacheGameActionExternalIdAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId, int gameId, string externalTransactionId)
+        {
+            var cacheKey = GetCachedKeyByRound(gameProviderId, playerCode, externalRoundId, gameId);
+            await _cacheManager.SafeCacheAsync(ExternalTransactionIdCacheType, cacheKey, TimeSpan.FromMinutes(5),
+                externalTransactionId).ConfigureAwait(false);
+        }
+
+        async ValueTask IPragmaticPlayServices.CacheRoundStatusAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId, int gameId)
+        {
+            var cacheKey = GetCachedKeyByRound(gameProviderId, playerCode, externalRoundId, gameId);
+            await _cacheManager.SafeCacheAsync(RoundStatusCacheType, cacheKey, TimeSpan.FromMinutes(5),
+                (RoundStatus?)RoundStatus.Closed).ConfigureAwait(false);
+        }
+
+        async ValueTask<RoundStatus> IPragmaticPlayServices.GetRoundStatusAsync(Guid gameProviderId, string playerCode,
+            PlatformType platformType, string externalRoundId, string externalGameId)
+        {
+            var gamePlatformType = platformType.ToGamePlatformTypes();
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId);
+            var gameId = games.Where(g => gamePlatformType.Contains(g.PlatformType)).Select(g => g.Id).FirstOrDefault();
+
+            var cacheKey = GetCachedKeyByRound(gameProviderId, playerCode, externalRoundId, gameId);
+            var roundStatus = await _cacheManager.SafeGetAsync(RoundStatusCacheType, cacheKey,
+                    async () => await _roundQueries.GetRoundStatusAsync(gameProviderId, playerCode,
+                        externalRoundId, gameId))
+                .ConfigureAwait(false);
+
+            return roundStatus ?? RoundStatus.Open;
+        }
+
+        private static string GetCachedKeyByRound(Guid gameProviderId, string playerCode,
             string externalRoundId, int gameId) => $"{gameProviderId}:{playerCode}:{externalRoundId}:{gameId}";
     }
 }

@@ -18,10 +18,22 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         BetData Request(string playerCode, GameProviderConfigurationData data, ResultRequest request,
             string externalTransactionReferenceId);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, EndRoundRequest request,
+            string externalTransactionReferenceId);
+
+        BetData Request(string playerCode, GameProviderConfigurationData data, RefundRequest request);
+
         AuthorizePlayerResponse Response(string playerCode, string token, PlayerValidationResult result);
+
         GetBalanceResponse Response(GetBalanceResult result);
+
         PlaceBetResponse BetResponse(BetResult result);
+
         ResultResponse ResultResponse(BetResult result);
+
+        EndRoundResponse EndRoundResponse(decimal balance);
+
+        RefundResponse RefundResponse(BetResult result);
     }
 
     public sealed class PragmaticPlayActionModelMapper : IPragmaticPlayActionModelMapper
@@ -73,6 +85,47 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             return GetBetData(playerCode, data, new[] {transaction});
         }
 
+        BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            EndRoundRequest request, string externalTransactionReferenceId)
+        {
+            var transaction = new TransactionData
+            {
+                ExternalBetId = externalTransactionReferenceId,
+                ExternalGameId = request.GameId,
+                ExternalRoundId = request.RoundId,
+                ExternalTransactionId = $"{externalTransactionReferenceId}_lose",
+                ExternalTransactionReferenceId = externalTransactionReferenceId,
+                ExternalGameActionGroupId = request.RoundId,
+                GameActionType = GameActionType.LoseBet,
+                Amount = 0,
+                RoundClosed = true,
+                TimeStamp = DateTimeOffset.UtcNow
+            };
+
+            return GetBetData(playerCode, data, new[] {transaction});
+        }
+
+        BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            RefundRequest request)
+        {
+            var externalTransactionReferenceId = request.Reference;
+
+            var transaction = new TransactionData
+            {
+                ExternalBetId = externalTransactionReferenceId,
+                ExternalGameId = request.GameId,
+                ExternalRoundId = request.RoundId,
+                ExternalTransactionId = $"{externalTransactionReferenceId}_cancel",
+                ExternalTransactionReferenceId = externalTransactionReferenceId,
+                ExternalGameActionGroupId = request.RoundId,
+                GameActionType = GameActionType.CancelTransaction,
+                RoundClosed = true,
+                TimeStamp = GetTimestamp(request.Timestamp)
+            };
+
+            return GetBetData(playerCode, data, new[] {transaction});
+        }
+
         AuthorizePlayerResponse IPragmaticPlayActionModelMapper.Response(string playerCode, string token,
             PlayerValidationResult result) =>
             new()
@@ -100,7 +153,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             {
                 Error = GameApiError.Success,
                 Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
-                TransactionId = transaction?.InternalTransactionId.ToString(),
+                TransactionId = transaction?.InternalTransactionId?.ToString(),
                 Currency = result.GameProviderCurrencyCode,
                 Balance = result.Balance,
                 Bonus = 0,
@@ -116,10 +169,29 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             {
                 Error = GameApiError.Success,
                 Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
-                TransactionId = transaction?.InternalTransactionId.ToString(),
+                TransactionId = transaction?.InternalTransactionId?.ToString(),
                 Currency = result.GameProviderCurrencyCode,
                 Balance = result.Balance,
                 Bonus = 0
+            };
+        }
+
+        EndRoundResponse IPragmaticPlayActionModelMapper.EndRoundResponse(decimal balance) =>
+            new()
+            {
+                Balance = balance,
+                Bonus = 0
+            };
+
+        RefundResponse IPragmaticPlayActionModelMapper.RefundResponse(BetResult result)
+        {
+            var transaction = result.Transactions.FirstOrDefault();
+
+            return new()
+            {
+                Error = GameApiError.Success,
+                Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
+                TransactionId = transaction?.InternalTransactionId?.ToString()
             };
         }
 
