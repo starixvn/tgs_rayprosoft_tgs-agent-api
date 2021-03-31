@@ -19,10 +19,10 @@ const BonusTrans = {
     en: "Bonus"
 }
 
-export const Recharge = "Recharge"
-const RechargeTrans = {
+export const Deposit = "Recharge"
+const DepositTrans = {
     zh: "充值",
-    en: "Recharge"
+    en: "Deposit"
 }
 
 export const Dividend = "Dividend"
@@ -48,8 +48,8 @@ export const AddBalanceTypeSelect = ({
             value: Bonus
         },
         {
-            label: useTrans(RechargeTrans),
-            value: Recharge
+            label: useTrans(DepositTrans),
+            value: Deposit
         },
         {
             label: useTrans(DividendTrans),

@@ -134,26 +134,40 @@ const FormBody = ({ brandId, username }) => {
             <Input type="hidden" name="brandId" value={brandId} />
             <Input type="hidden" name="username" value={username} />
             <FieldValues margin="1rem">
-                <Trans zh="代理用户名" en="Agent Username" />
+                <Text.Block alignY="center">
+                    <Trans zh="代理用户名" en="Agent Username" />
+                </Text.Block>
                 <Text.Block alignY="center">{username}</Text.Block>
 
-                <Trans zh="交易类型" en="Transaction Type" />
+                <Text.Block alignY="center">
+                    <Trans zh="交易类型" en="Transaction Type" />
+                </Text.Block>
                 <AddBalanceTypeSelect name={typeFieldName} required />
 
                 {type == DeductBalanceType.Transfer && (
                     <>
-                        <Trans zh="转账对象" en="Transfer Target" />
+                        <Text.Block alignY="center">
+                            <Trans zh="转账对象" en="Transfer Target" />
+                        </Text.Block>
                         <DeductBalanceTargetSelect name="target" required />
 
-                        <Trans zh="转账用户名" en="Transfer Username" />
+                        <Text.Block alignY="center">
+                            <Trans zh="转账用户名" en="Transfer Username" />
+                        </Text.Block>
                         <Input name="transferUsername" required />
                     </>
                 )}
 
-                <Trans zh="交易金额" en="Amount" />
+                <Text.Block alignY="center">
+                    <Trans zh="交易金额" en="Amount" />
+                </Text.Block>
+
                 <Input type="number" name="amount" min="0" required />
 
-                <Trans zh="备注" en="Remark" />
+                <Text.Block alignY="center">
+                    <Trans zh="备注" en="Remark" />
+                </Text.Block>
+
                 <Input name="remark" />
             </FieldValues>
         </>
