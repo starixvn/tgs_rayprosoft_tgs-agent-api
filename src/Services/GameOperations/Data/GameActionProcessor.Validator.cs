@@ -79,7 +79,8 @@ namespace TGS.Services.GameOperations.Data
                     InvalidGameActionErrorCode.ActionProhibited);
             }
 
-            return GetDuplicateTransactionResult(action.Id, s.ExternalTransactionId);
+            return GetDuplicateTransactionResult(action.Id, s.ExternalTransactionId, s.InternalRoundId!.Value,
+                s.GameId);
         }
 
         private static void ThrowIfReferenceGameActionOrRoundIsNotFound(GameActionState s)

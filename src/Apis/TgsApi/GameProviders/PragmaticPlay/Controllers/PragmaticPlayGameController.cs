@@ -1,12 +1,15 @@
-﻿using System.Net.Mime;
+﻿using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.PragmaticPlay.Incoming;
 
@@ -71,7 +74,39 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
             var betData = _map.Request(playerCode, data, request);
             var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-            return _map.Response(r);
+
+            var externalRoundId = request.RoundId;
+            var transaction = r.Transactions.First();
+            await _services.CacheGameActionExternalIdAsync(data.GameProviderId, playerCode,
+                externalRoundId, transaction.GameId, transaction.ExternalTransactionId);
+
+            return _map.BetResponse(r);
+        }
+
+        [HttpPost]
+        [Route("result")]
+        public async Task<ResultResponse> SettleBetAsync([FromForm] ResultRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var externalRoundId = request.RoundId;
+            var externalGameId = request.GameId;
+            var gameActionExternalId = await _services
+                .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, data.PlatformType, externalRoundId,
+                    externalGameId, externalRoundId)
+                .ConfigureAwait(false);
+
+            if (gameActionExternalId.IsNullOrEmpty())
+            {
+                throw new InvalidGameActionException("Referenced transaction is not found.",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            var betData = _map.Request(playerCode, data, request, gameActionExternalId);
+            var r = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+            return _map.ResultResponse(r);
         }
     }
 }

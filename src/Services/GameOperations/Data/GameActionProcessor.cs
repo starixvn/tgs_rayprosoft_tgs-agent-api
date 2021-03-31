@@ -137,6 +137,8 @@ namespace TGS.Services.GameOperations.Data
                 {
                     ExternalTransactionId = s.ExternalTransactionId,
                     InternalTransactionId = ga.Id,
+                    RoundId = ga.RoundId,
+                    GameId = s.GameId,
                     IsDuplicate = false
                 },
                 GameAction = ga,
@@ -383,13 +385,15 @@ namespace TGS.Services.GameOperations.Data
             !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
-            string externalTransactionId) =>
+            string externalTransactionId, Guid roundId, int gameId) =>
             new()
             {
                 TransactionResult = new()
                 {
                     ExternalTransactionId = externalTransactionId,
                     InternalTransactionId = gameActionId,
+                    RoundId = roundId,
+                    GameId = gameId,
                     IsDuplicate = true
                 }
             };

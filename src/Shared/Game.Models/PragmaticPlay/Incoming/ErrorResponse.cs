@@ -9,6 +9,6 @@ namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
         public GameApiError Error { get; init; } = GameApiError.Success;
 
         [JsonPropertyName("description")]
-        public string Description { get; init; } = string.Empty;
+        public string Description { get; init; } = GameApiError.Success.ToString();
     }
 }

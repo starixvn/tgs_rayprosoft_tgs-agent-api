@@ -3,6 +3,7 @@ using System.Linq;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
+using TGS.Shared.Game.Models.PragmaticPlay.Enums;
 using TGS.Shared.Game.Models.PragmaticPlay.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
@@ -14,9 +15,13 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         BetData Request(string playerCode, GameProviderConfigurationData data,
             PlaceBetRequest request);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, ResultRequest request,
+            string externalTransactionReferenceId);
+
         AuthorizePlayerResponse Response(string playerCode, string token, PlayerValidationResult result);
         GetBalanceResponse Response(GetBalanceResult result);
-        PlaceBetResponse Response(BetResult result);
+        PlaceBetResponse BetResponse(BetResult result);
+        ResultResponse ResultResponse(BetResult result);
     }
 
     public sealed class PragmaticPlayActionModelMapper : IPragmaticPlayActionModelMapper
@@ -48,6 +53,26 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             return GetBetData(playerCode, data, new[] {transaction});
         }
 
+        BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            ResultRequest request, string externalTransactionReferenceId)
+        {
+            var transaction = new TransactionData
+            {
+                ExternalBetId = externalTransactionReferenceId,
+                ExternalGameId = request.GameId,
+                ExternalRoundId = request.RoundId,
+                ExternalTransactionId = request.Reference,
+                ExternalTransactionReferenceId = externalTransactionReferenceId,
+                ExternalGameActionGroupId = request.RoundId,
+                GameActionType = GameActionType.WinBet,
+                Amount = request.Amount,
+                RoundClosed = true,
+                TimeStamp = GetTimestamp(request.Timestamp)
+            };
+
+            return GetBetData(playerCode, data, new[] {transaction});
+        }
+
         AuthorizePlayerResponse IPragmaticPlayActionModelMapper.Response(string playerCode, string token,
             PlayerValidationResult result) =>
             new()
@@ -67,15 +92,36 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Bonus = 0
             };
 
-        PlaceBetResponse IPragmaticPlayActionModelMapper.Response(BetResult result) =>
-            new()
+        PlaceBetResponse IPragmaticPlayActionModelMapper.BetResponse(BetResult result)
+        {
+            var transaction = result.Transactions.FirstOrDefault();
+
+            return new()
             {
-                TransactionId = result.Transactions.FirstOrDefault()?.InternalTransactionId.ToString(),
+                Error = GameApiError.Success,
+                Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
+                TransactionId = transaction?.InternalTransactionId.ToString(),
                 Currency = result.GameProviderCurrencyCode,
                 Balance = result.Balance,
                 Bonus = 0,
                 UsedPromo = 0
             };
+        }
+
+        ResultResponse IPragmaticPlayActionModelMapper.ResultResponse(BetResult result)
+        {
+            var transaction = result.Transactions.FirstOrDefault();
+
+            return new()
+            {
+                Error = GameApiError.Success,
+                Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
+                TransactionId = transaction?.InternalTransactionId.ToString(),
+                Currency = result.GameProviderCurrencyCode,
+                Balance = result.Balance,
+                Bonus = 0
+            };
+        }
 
         private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
             TransactionData[] transactions) =>
@@ -103,5 +149,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 throw new ArgumentException($"unexpected time format: {ex.Message}");
             }
         }
+
+        private static string GetTransactionResponseDescription(bool? isDuplicate) =>
+            isDuplicate == true ? "Bet is duplicate" : GameApiError.Success.ToString();
     }
 }
