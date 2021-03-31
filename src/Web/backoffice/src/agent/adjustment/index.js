@@ -40,7 +40,6 @@ import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
 import { useAgentList } from "../agent-list/client"
 import { AgentAddBalanceDisclosure } from "./AgentAddBalance"
 import { AgentDeductBalanceDisclosure } from "./AgentDeductBalance"
-import { mutate } from "swr"
 
 export { Code }
 

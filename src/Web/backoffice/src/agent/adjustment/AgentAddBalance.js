@@ -121,7 +121,7 @@ const AddDialog = ({ brandId, username, onSubmitted, dialog }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易类型" en="Transaction Type" />
                 </Text.Block>
-                <AddBalanceTypeSelect name="type" required autoFocus />
+                <AddBalanceTypeSelect name="type" required />
 
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />
