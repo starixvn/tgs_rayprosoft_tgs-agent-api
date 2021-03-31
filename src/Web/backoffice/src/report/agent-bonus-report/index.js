@@ -82,7 +82,7 @@ const ReportContent = ({ brandId }) => {
     })
 
     useEffect(() => {
-        setState({ brandId })
+        setState({ pageIndex: 0, brandId })
     }, [brandId])
 
     let { pageIndex, pageSize, username, from, to } = state

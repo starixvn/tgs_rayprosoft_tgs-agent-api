@@ -5,6 +5,10 @@ import {
     Code as AgentListCode,
     codeLabelPair as agentListPair
 } from "./agent-list/menu"
+import {
+    Code as AdjustmentCode,
+    codeLabelPair as adjustmentListPair
+} from "./adjustment/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const Name = ({}) => useTrans(nameMessages)
@@ -46,6 +50,15 @@ const label = ({ locale, code }) => {
                 },
                 locale
             )
+
+        case AdjustmentCode:
+            return getTrans(
+                {
+                    zh: "代理调账",
+                    en: "Adjustment"
+                },
+                locale
+            )
         default:
             return ""
     }
@@ -58,6 +71,6 @@ export const codeLabelPair = [
             locale,
             codes,
             label,
-            subLabelPairs: [agentListPair]
+            subLabelPairs: [agentListPair, adjustmentListPair]
         })
 ]
