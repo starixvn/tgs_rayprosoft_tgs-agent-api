@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
@@ -38,6 +40,9 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
 
             services.AddSingleton<IPragmaticPlayActionModelMapper, PragmaticPlayActionModelMapper>();
             services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(PragmaticPlayGameInitializer)},
+                (provider, _) => provider.GetRequiredService<PragmaticPlayGameInitializer>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
