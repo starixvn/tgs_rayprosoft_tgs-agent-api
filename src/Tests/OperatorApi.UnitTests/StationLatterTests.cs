@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.StationLatters;
 
@@ -17,10 +18,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var playerCode = "ThisIsPlayerCode";
 
-            var actual = sut.QueryAsync(new ListStationLattersQuery(playerCode));
+            var actual = sut.QueryAsync(new ListStationLattersQuery(playerCode, new PageableRequest()));
 
             moqStationLatterRepository.Verify(
-                fake => fake.QueryStationLattersAsync(It.Is<string>(x => x == playerCode)),
+                fake => fake.QueryStationLattersAsync(It.Is<string>(x => x == playerCode), It.IsAny<Paging<StationLatter>>()),
                 Times.Exactly(1));
         }
     }

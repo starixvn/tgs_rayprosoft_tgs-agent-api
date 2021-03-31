@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator;
@@ -15,6 +17,26 @@ namespace TGS.Operator.Repositories
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
+
+        public IAsyncEnumerable<StationLatter> QueryStationLattersAsync(string playerCode, Paging<StationLatter> paging)
+        {
+            var query = QueryStationLattersAsync(playerCode);
+
+            if (paging.OrderBy != null)
+                query = paging.IsDesc
+                    ? query.OrderByDescending(paging.OrderBy)
+                    : query.OrderBy(paging.OrderBy);
+
+            var page = paging.Page <= 0 ? 0 : paging.Page - 1;
+
+            var pageSize = paging.RowCount <= 0 ? 10 : paging.RowCount;
+            query = query.Skip(page * pageSize).Take(pageSize);
+
+            return query;
+        }
+
+        public ValueTask<int> QueryStationLattersTotalCountAsync(string playerCode)
+            => QueryStationLattersAsync(playerCode).CountAsync();
 
         public IAsyncEnumerable<StationLatter> QueryStationLattersAsync(string playerCode)
         {
