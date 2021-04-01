@@ -39,11 +39,11 @@ import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
 import { Update } from "./menu"
 import FormDialog from "../../form/FormDialog"
-import AddBalanceTypeSelect from "./AddBalanceType"
+import AddBalanceTypeSelect from "./AgentAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
-import DeductBalanceType from "./DeductBalanceType"
-import { DeductBalanceTargetSelect } from "./DeductBalanceTarget"
+import DeductBalanceType from "./AgentDeductBalanceType"
+import { DeductBalanceTargetSelect } from "./AgentDeductBalanceTarget"
 
 export const AgentDeductBalanceDisclosure = ({
     brandId,

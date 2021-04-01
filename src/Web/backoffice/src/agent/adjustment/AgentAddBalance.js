@@ -39,7 +39,7 @@ import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
 import { Update } from "./menu"
 import FormDialog from "../../form/FormDialog"
-import AddBalanceTypeSelect from "./AddBalanceType"
+import AddBalanceTypeSelect from "./AgentAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 

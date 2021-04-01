@@ -177,7 +177,7 @@ const SearchBar = ({ brandId, search, isLoading, ...props }) => {
         </FormProvider>
     )
 }
-const useColumns = ({ brandId, items = [] }) => {
+const useColumns = ({ brandId, items = [], mutate }) => {
     let hasUpdateMenu = useIsDisplayMenuByRoute([Update])
 
     return useMemo(() => {
