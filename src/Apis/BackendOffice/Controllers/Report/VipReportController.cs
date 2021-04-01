@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Report.Client;
+using Report.Client.Models.Vip;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.Vip;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -11,17 +11,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     [ApiController]
     public class VipReportController : BaseContextController
     {
-        private readonly IMediator _mediator;
+        private readonly IReportClient _client;
 
-        public VipReportController(IMediator mediator)
+        public VipReportController(IReportClient client)
         {
-            _mediator = mediator;
+            _client = client;
         }
 
         [HttpGet]
         [Description("Get vips")]
         public Task<PagedResponse<VipModel>> GetVipsAsync([FromQuery] GetVipReportRequest request) =>
-            _mediator.Send(request);
+            _client.GetVipReportAsync(request);
 
         [HttpGet("{username}")]
         [Description("Get vip rebates")]
@@ -29,7 +29,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromQuery] GetVipRebateReportRequest request)
         {
             request.Username = username;
-            return _mediator.Send(request);
+            return _client.GetVipRebateReportAsync(request);
         }
     }
 }

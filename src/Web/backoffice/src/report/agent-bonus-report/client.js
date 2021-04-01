@@ -12,7 +12,7 @@ const API = "/api/agentbonus"
 
 export const useAgentBonusList = (username, searchParams) => {
     //TODO: rm test code
-    return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
+    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
 
     let url =
         username && searchParams
@@ -23,7 +23,7 @@ export const useAgentBonusList = (username, searchParams) => {
 
 export const useAgentWinLossList = (username, searchParams) => {
     //TODO: rm test code
-    return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
+    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
 
     let url =
         username && searchParams
@@ -34,7 +34,7 @@ export const useAgentWinLossList = (username, searchParams) => {
 
 export const useAgentBonusDetailList = (username, searchParams) => {
     //TODO: rm test code
-    return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
+    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
 
     let url =
         username && searchParams

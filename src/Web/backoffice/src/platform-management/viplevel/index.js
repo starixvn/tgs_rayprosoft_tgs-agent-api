@@ -52,7 +52,7 @@ const BodyContent = ({ brandId }) => {
     })
 
     useEffect(() => {
-        setState({ brandId })
+        setState({ pageIndex: 0, brandId })
     }, [brandId])
 
     let { isLoading, data, error, mutate, deleteCache } = useVipLevelList(

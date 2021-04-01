@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Report.Client;
+using Report.Client.Models.Agent;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.Agent;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -11,17 +12,37 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     [ApiController]
     public class AgentReportController : BaseContextController
     {
-        private readonly IMediator _mediator;
+        private readonly IReportClient _client;
 
-        public AgentReportController(IMediator mediator)
+        public AgentReportController(IReportClient client)
         {
-            _mediator = mediator;
+            _client = client;
         }
 
         [HttpGet("contribution")]
         [Description("Get agent contributions")]
         public Task<PagedResponse<AgentContributionModel>> GetRoundsAsync(
             [FromQuery] GetAgentContributionsRequest request) =>
-            _mediator.Send(request);
+            _client.GetAgentContributionsAsync(request);
+
+        [HttpGet("{id}/teamInfo")]
+        [Description("Get agent team Information")]
+        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id) =>
+            _client.GetAgentTeamInfoAsync(new(id));
+
+        [HttpGet("bonus")]
+        [Description("Get agent bonus report")]
+        public Task<PagedResponse<AgentDividendModel>>
+            GetAgentBonusAsync([FromQuery] GetAgentDividendRequest request) =>
+            _client.GetAgentBonusAsync(request);
+
+        [HttpGet("{id}/winLoss")]
+        [Description("Get agent player Win/Loss report")]
+        public Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(Guid id,
+            [FromQuery] GetAgentPlayerWinLossRequest request)
+        {
+            request.AgentId = id;
+            return _client.GetAgentPlayerWinLossAsync(request);
+        }
     }
 }

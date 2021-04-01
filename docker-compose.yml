@@ -112,6 +112,8 @@ services:
     build:
       context: .
       dockerfile: ./src/Apis/BackendOffice/Dockerfile
+      args:
+        - BuildConfiguration=Release
     image: backoffice-api
     container_name: backoffice-api
     labels:
@@ -135,10 +137,14 @@ services:
     build:
       context: .
       dockerfile: ./src/Apis/ReportApi/Dockerfile
+      args:
+        - BuildConfiguration=Release
     image: report-api
     container_name: report-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
+    ports:
+      - 5051:80
     networks:
       tgs:
     depends_on:
@@ -148,6 +154,8 @@ services:
     build:
       context: .
       dockerfile: ./src/Apis/FileService/Dockerfile
+      args:
+        - BuildConfiguration=Release
     image: fileservice
     container_name: fileservice
     labels:
@@ -196,10 +204,12 @@ services:
       tgs:
 
   operator-api:
-    # build:
-    #   context: .
-    #   dockerfile: ./src/Apis/OperatorApi/Dockerfile
-    image: operator-api:latest
+    build:
+      context: .
+      dockerfile: ./src/Apis/OperatorApi/Dockerfile
+      args:
+        - BuildConfiguration=Release
+    image: operator-api
     container_name: operator-api
     labels:
       - traefik.enable=true
@@ -358,6 +368,8 @@ services:
     build:
       context: .
       dockerfile: ./src/Workers/Schedulers/Dockerfile
+      args:
+        - BuildConfiguration=Release
     image: scheduler
     container_name: scheduler
     environment:
@@ -374,6 +386,10 @@ services:
       - mongodb
       - redis
       - game-sbo
+
+secrets:
+  nuget:
+    file: '%USERPROFILE%\AppData\Roaming\NuGet\NuGet.Config'
 
 networks:
   tgs:

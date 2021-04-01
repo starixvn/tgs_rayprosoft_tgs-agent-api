@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 BrandId = brandId,
                 ParentAgentId = parentAgentId,
                 CommissionPercentage = 10,
-                BonusPercentage = 10,
+                DividendPercentage = 10,
                 LiveDealerRebatePercentage = 10,
                 SlotRebatePercentage = 10,
                 LotteryRebatePercentage = 10,

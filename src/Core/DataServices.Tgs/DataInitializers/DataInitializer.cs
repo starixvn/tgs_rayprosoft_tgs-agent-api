@@ -26,6 +26,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private static readonly IList<IReseller> Resellers = new IReseller[] {new TgsReseller()};
 
+        private readonly List<Agent> _agents = new();
+
         private readonly IDictionary<string, Brand> _brandCreated =
             new Dictionary<string, Brand>();
 
@@ -132,28 +134,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 .Select(brand => brand)
                 .ToArray();
 
-            var agents = new List<Agent>();
             foreach (var brand in brands)
             {
                 var chiefId = GuidExtensions.NewSequentialGuid();
-                agents.Add(CreateAgent($"{brand.Name}Chief", AgentStatus.Enabled,
+                _agents.Add(CreateAgent($"{brand.Name}Chief", AgentStatus.Enabled,
                     AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Chief,
                     AgentType.Cash, brand.Id, "CNY", chiefId));
-                agents.Add(CreateAgent($"{brand.Name}Agent", AgentStatus.Enabled,
+                _agents.Add(CreateAgent($"{brand.Name}Agent1", AgentStatus.Enabled,
                     AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Agent,
                     AgentType.Cash, brand.Id, "CNY", null,
                     chiefId));
-                agents.Add(CreateAgent($"{brand.Name}Agent", AgentStatus.Enabled,
+                _agents.Add(CreateAgent($"{brand.Name}Agent2", AgentStatus.Enabled,
                     AgentConfigStatus.WaitForConfigurePercentage,
                     AgentLevelType.Agent,
                     AgentType.Cash, brand.Id, "CNY", null,
                     chiefId));
             }
 
-            await _repository.BulkInsertAsync(agents);
-            await _repository.BulkInsertAsync(agents.SelectMany(a => a.Wallets).ToArray());
+            await _repository.BulkInsertAsync(_agents);
+            await _repository.BulkInsertAsync(_agents.SelectMany(a => a.Wallets).ToArray());
         }
 
         private Task GenerateVipLevelsAsync()
@@ -165,6 +166,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Id = GuidExtensions.NewSequentialGuid(),
                     BrandId = brand.Id,
                     Level = 1,
+                    LiveDealerRebatePercentage = 1,
+                    LotteryRebatePercentage = 2,
+                    CardGameRebatePercentage = 3,
+                    SlotRebatePercentage = 4,
+                    SportsRebatePercentage = 5,
+                    VirtualSportsRebatePercentage = 6,
                     CreatedByUsername = AdminUsername,
                     UpdatedByUsername = AdminUsername,
                     CreatedOn = Now,
@@ -260,21 +267,24 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var playerDefined = new PlayerDefined[]
             {
                 new("4ucmqplwxqlv", new("2EA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6)),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6),
+                    _agents[0].Id),
                 new("4ucmqplx11cs", new("30A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6)),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6),
+                    _agents[0].Id),
                 new("4ucmqplx4dti", new("32A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6)),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6),
+                    _agents[1].Id),
                 new("4ucmqplx7okb", new("34A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6)),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6), _agents[2].Id),
                 new("4ucmqplxb029", new("36A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6)),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null),
                 new("4ucmqplxe65x", new("38A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6)),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null),
                 new("4ucmqplxhfoe", new("3AA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6)),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null),
                 new("4ucmqplxkuyd", new("3CA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6))
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null)
             };
 
             var rnd = new Random();
@@ -302,7 +312,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 var vipId = _vipLevels.First(x => x.BrandId == brandId).Id;
 
                 return CreatePlayer(playerCode, brandId, p.WalletId, username, realName, salt, password, vipId,
-                    PlayerType.RealPlayer, invitationCode, parentPlayerCode, parentInvitationCode);
+                    PlayerType.RealPlayer, invitationCode, p.AgentId, parentPlayerCode, parentInvitationCode);
             }).ToArray();
 
             await _repository.BulkInsertAsync(_players);
@@ -313,6 +323,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private Player CreatePlayer(string playerCode,
             Guid brandId, Guid walletId, string username, string realName, byte[] salt,
             byte[] password, Guid vipId, PlayerType playerType, string invitationCode,
+            Guid? agentId,
             string parentPlayerCode = null, string parentInvitationCode = null,
             string currencyCode = "CNY")
         {
@@ -343,6 +354,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ParentInvitationCode = parentInvitationCode,
                 HasAgent = false,
                 VipId = vipId,
+                AgentId = agentId,
                 RegisteredOn = Now,
                 LastActiveOn = Now,
                 UpdatedOn = Now,

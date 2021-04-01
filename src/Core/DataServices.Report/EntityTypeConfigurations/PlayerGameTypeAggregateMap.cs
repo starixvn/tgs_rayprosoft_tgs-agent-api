@@ -26,63 +26,39 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
-            builder.Property(b => b.LiveDealerAmount)
+            builder.Property(b => b.Turnover)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.SlotAmount)
+            builder.Property(c => c.WinLoss)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.CardGameAmount)
+            builder.Property(c => c.VipLiveDealerRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.SportsAmount)
+            builder.Property(c => c.VipSlotRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.VirtualSportsAmount)
+            builder.Property(c => c.VipCardGameRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.LiveDealerValidBetAmount)
+            builder.Property(c => c.VipSportsRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.SlotValidBetAmount)
+            builder.Property(c => c.VipVirtualSportsRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.CardGameValidBetAmount)
+            builder.Property(c => c.VipLotteryRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.SportsValidBetAmount)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(b => b.VirtualSportsValidBetAmount)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(c => c.LiveDealerRebate)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(c => c.SlotRebate)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(c => c.CardGameRebate)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(c => c.SportsRebate)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(c => c.VirtualSportsRebate)
+            builder.Property(c => c.VipRebateAmount)
                 .HasPrecision(18, 6)
                 .IsRequired();
 

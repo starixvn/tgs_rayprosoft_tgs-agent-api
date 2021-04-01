@@ -226,6 +226,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("View")
                             }
                         },
+                        new MenuSetting("AgentContributionReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
                         new MenuSetting("PlayerContributionReport")
                         {
                             SubMenus = new[]

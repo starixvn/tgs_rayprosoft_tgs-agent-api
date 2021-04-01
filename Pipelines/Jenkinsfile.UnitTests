@@ -3,6 +3,15 @@ def sonar_url = "http://sonarqube.ci:9000"
 
 pipeline {
     agent any
+	
+	triggers {
+        gitlab(
+            triggerOnPush: true,
+            triggerOnMergeRequest: true,
+            branchFilterType: 'All',
+            addVoteOnMergeRequest: true)
+    }
+	
 	environment {
 		sonar_login = credentials('sonar_login')
 	}

@@ -10,6 +10,10 @@ import {
     codeLabelPair as orderReportPair
 } from "./order-report/menu"
 import {
+    Code as AgentContributionReportCode,
+    codeLabelPair as agentContributionReportPair
+} from "./agent-contribution-report/menu"
+import {
     Code as PlayerContributionReportCode,
     codeLabelPair as playerContributionReportPair
 } from "./player-contribution-report/menu"
@@ -68,6 +72,16 @@ const label = ({ locale, code }) => {
                 },
                 locale
             )
+
+        case AgentContributionReportCode:
+            return getTrans(
+                {
+                    zh: "代理贡献报表",
+                    en: "Agent Contribution Report"
+                },
+                locale
+            )
+
         case PlayerContributionReportCode:
             return getTrans(
                 {
@@ -109,6 +123,7 @@ export const codeLabelPair = [
             subLabelPairs: [
                 marketReportPair,
                 orderReportPair,
+                agentContributionReportPair,
                 playerContributionReportPair,
                 agentBonusReportPair,
                 vipReportPair

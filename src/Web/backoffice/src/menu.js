@@ -46,6 +46,12 @@ import {
     nameMessages as MerchantName,
     codeLabelPair as merchantLabelPair
 } from "./merchant/menu"
+import { codeMenuContentPair as fundPair } from "./fund"
+import {
+    Code as FundCode,
+    nameMessages as FundName,
+    codeLabelPair as fundLabelPair
+} from "./fund/menu"
 import { codeMenuContentPair as systemPair } from "./system"
 import {
     Code as SystemCode,
@@ -109,6 +115,7 @@ export const allMenuContentPairs = () => [
     gameManagementPair,
     reportManagementPair,
     merchantPair,
+    fundPair,
     systemPair
 ]
 
@@ -131,6 +138,7 @@ export const useLabel = ({ codes = [] }) => {
         gameManagementLabelPair,
         reportManagementLabelPair,
         merchantLabelPair,
+        fundLabelPair,
         platformLabelPair
     ]
     return findlLabel({
@@ -169,6 +177,8 @@ const moduleLabel = ({ code = "", locale }) => {
             return getTrans(ReportManagementNameMessages, locale)
         case MerchantCode:
             return getTrans(MerchantName, locale)
+        case FundCode:
+            return getTrans(FundName, locale)
         case SystemCode:
             return getTrans(SystemNameMessages, locale)
         default:
