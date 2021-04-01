@@ -2,20 +2,20 @@
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.StationLatters
+namespace TGS.Services.Operator.StationLetters
 {
     internal class SetHaveReadCommandService : ICommandService<SetHaveReadCommand>
     {
-        private readonly IStationLatterRepository _stationLatterRepository;
+        private readonly IStationLetterRepository _stationLetterRepository;
 
-        public SetHaveReadCommandService(IStationLatterRepository stationLatterRepository)
+        public SetHaveReadCommandService(IStationLetterRepository stationLetterRepository)
         {
-            _stationLatterRepository = stationLatterRepository ?? throw new ArgumentNullException(nameof(stationLatterRepository));
+            _stationLetterRepository = stationLetterRepository ?? throw new ArgumentNullException(nameof(stationLetterRepository));
         }
 
         public ValueTask ExecuteAsync(SetHaveReadCommand command)
         {
-            return _stationLatterRepository.SetStationLatterHaveReadAsync(command.PlayerCode, command.LatterId);
+            return _stationLetterRepository.SetStationLetterHaveReadAsync(command.PlayerCode, command.LetterId);
         }
     }
 }

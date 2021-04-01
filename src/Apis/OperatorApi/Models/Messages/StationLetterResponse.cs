@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record StationLatterResponse
+    public record StationLetterResponse
     {
         [JsonPropertyName("id")]
         public Guid Id { get; init; }
