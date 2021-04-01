@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Services\Operator.Core\Operator.Core.csproj" />
+    <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
   </ItemGroup>
 
 </Project>
