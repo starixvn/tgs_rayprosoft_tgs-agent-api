@@ -28,7 +28,7 @@ namespace TGS.Services.Operator
 
         private class TypeEqualityComparer : IEqualityComparer<Type>
         {
-            public static TypeEqualityComparer Default => new TypeEqualityComparer();
+            public static TypeEqualityComparer Default => new();
 
             public bool Equals(Type? x, Type? y)
             {

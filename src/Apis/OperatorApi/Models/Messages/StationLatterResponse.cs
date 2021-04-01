@@ -5,6 +5,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record StationLatterResponse
     {
+        [JsonPropertyName("id")]
+        public Guid Id { get; init; }
+
         [JsonPropertyName("createon")]
         public DateTimeOffset CreateOn { get; init; }
 

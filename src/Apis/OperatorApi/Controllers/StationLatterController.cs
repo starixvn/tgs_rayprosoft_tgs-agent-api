@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
@@ -17,6 +19,12 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class StationLatterController : ControllerBase
     {
+        /// <summary>
+        /// Gets the station latters.
+        /// </summary>
+        /// <param name="listStationLatterService">The list station latter service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
@@ -42,10 +50,26 @@ namespace TGS.Apis.OperatorApi.Controllers
             return listStationLatterService.QueryAsync(query)
                 .Select(latter => new StationLatterResponse
                 {
+                    Id = latter.Id,
                     Subject = latter.Subject,
                     Content = latter.Content,
                     CreateOn = latter.CreateOn
                 });
+        }
+
+        [HttpPost]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async Task SetHaveReadAsync(
+            [FromServices] ICommandService<SetHaveReadCommand> setHaveReadService,
+            [FromBody] IEnumerable<Guid> stationLatterIds)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            foreach (var id in stationLatterIds)
+                await setHaveReadService
+                    .ExecuteAsync(new SetHaveReadCommand(playerTokenData.PlayerCode, id))
+                    .ConfigureAwait(false);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace TGS.Services.Operator
@@ -10,5 +11,7 @@ namespace TGS.Services.Operator
         IAsyncEnumerable<StationLatter> QueryStationLattersAsync(string playerCode, Paging<StationLatter> paging);
 
         IAsyncEnumerable<StationLatter> QueryStationLattersAsync(string playerCode);
+
+        ValueTask SetStationLatterHaveReadAsync(string playerCode, Guid latterId);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
@@ -45,11 +44,27 @@ namespace TGS.Operator.Repositories
                             .AsAsyncEnumerable()
                         where latterPlayer.PlayerCode == playerCode
                         select new StationLatter(
+                            latterPlayer.StationLetterId,
                             latterPlayer.StationLetter.Subject,
                             latterPlayer.StationLetter.Content,
                             latterPlayer.StationLetter.CreatedOn);
 
             return query;
+        }
+
+        public async ValueTask SetStationLatterHaveReadAsync(string playerCode, Guid latterId)
+        {
+            var latter = await _tgsRepository.StationLetterPlayers
+                .FindAsync(latterId, playerCode)
+                .ConfigureAwait(false);
+
+            if (latter is not null)
+            {
+                latter.IsRead = true;
+                latter.ReadOn = DateTimeOffset.UtcNow;
+
+                await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
     }
 }
