@@ -4,8 +4,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-amd64 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS build
 WORKDIR /dest
+COPY ["nuget.config", "."]
 COPY ["src/Workers/Schedulers/Schedulers.csproj", "src/Workers/Schedulers/"]
 COPY ["src/Services/BackOffice/BackOffice.csproj", "src/Services/BackOffice/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]
@@ -15,6 +16,7 @@ COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServi
 COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
 COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
+COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
 COPY ["src/Shared/Game.ApiClients/Game.ApiClients.csproj", "src/Shared/Game.ApiClients/"]
 COPY ["src/Shared/Game.Models/Game.Models.csproj", "src/Shared/Game.Models/"]
