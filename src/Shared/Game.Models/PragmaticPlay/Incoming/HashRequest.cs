@@ -1,4 +1,4 @@
-﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Common
+﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
     public record HashRequest
     {

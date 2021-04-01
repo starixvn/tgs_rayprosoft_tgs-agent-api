@@ -43,6 +43,9 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(PragmaticPlayGameInitializer)},
                 (provider, _) => provider.GetRequiredService<PragmaticPlayGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(PragmaticPlayGameHistory)},
+                (provider, _) => provider.GetRequiredService<PragmaticPlayGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
