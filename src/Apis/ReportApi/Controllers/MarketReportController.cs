@@ -5,22 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Market;
 
-namespace TGS.Apis.BackendOffice.Controllers.Report
+namespace ReportApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MarketController : BaseContextController
+    public class MarketReportController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public MarketController(IMediator mediator)
+        public MarketReportController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpGet]
-        [Description("Get market report")]
-        public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
+        [Description("Get markets")]
+        public Task<PagedResponse<MarketModel>> GetVipsAsync([FromQuery] GetMarketsRequest request) =>
             _mediator.Send(request);
     }
 }

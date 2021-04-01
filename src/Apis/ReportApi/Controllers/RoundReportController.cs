@@ -7,15 +7,15 @@ using TGS.Core.Models.Messages;
 using TGS.Services.PluggableServices.Models;
 using TGS.Services.Report.Application.Models.Round;
 
-namespace TGS.Apis.BackendOffice.Controllers.Report
+namespace ReportApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RoundController : BaseContextController
+    public class RoundReportController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public RoundController(IMediator mediator)
+        public RoundReportController(IMediator mediator)
         {
             _mediator = mediator;
         }

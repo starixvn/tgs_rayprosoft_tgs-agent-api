@@ -17,6 +17,7 @@ namespace TGS.Services.BackOffice.Application.Models.VipLevel
         public decimal QuarterlyBenefit { get; init; }
         public decimal LiveDealerRebate { get; init; }
         public decimal SlotRebate { get; init; }
+        public decimal LotteryRebate { get; init; }
         public decimal CardGameRebate { get; init; }
         public decimal SportsRebate { get; init; }
         public decimal VirtualSportsRebate { get; init; }

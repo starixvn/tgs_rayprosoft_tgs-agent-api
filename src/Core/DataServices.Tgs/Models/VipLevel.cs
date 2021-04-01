@@ -17,11 +17,12 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal BirthReward { get; set; }
         public decimal PromotionReward { get; set; }
         public decimal QuarterlyReward { get; set; }
-        public decimal LiveDealerRebate { get; set; }
-        public decimal SlotRebate { get; set; }
-        public decimal CardGameRebate { get; set; }
-        public decimal SportsRebate { get; set; }
-        public decimal VirtualSportsRebate { get; set; }
+        public decimal LiveDealerRebatePercentage { get; set; }
+        public decimal SlotRebatePercentage { get; set; }
+        public decimal LotteryRebatePercentage { get; set; }
+        public decimal CardGameRebatePercentage { get; set; }
+        public decimal SportsRebatePercentage { get; set; }
+        public decimal VirtualSportsRebatePercentage { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }

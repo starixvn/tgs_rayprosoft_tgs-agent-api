@@ -44,7 +44,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     RegisteredOn = agent.RegisteredOn,
                     Balance = agent.Wallets.FirstOrDefault()?.Balance ?? 0,
                     CommissionPercentage = agent.CommissionPercentage,
-                    BonusPercentage = agent.BonusPercentage,
+                    DividendPercentage = agent.DividendPercentage,
                     LiveDealerRebatePercentage = agent.LiveDealerRebatePercentage,
                     SlotRebatePercentage = agent.SlotRebatePercentage,
                     LotteryRebatePercentage = agent.LotteryRebatePercentage,

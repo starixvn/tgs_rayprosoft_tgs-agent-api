@@ -18,7 +18,7 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public DateTimeOffset RegisteredOn { get; set; }
         public decimal Balance { get; set; }
         public decimal CommissionPercentage { get; set; } //佔成
-        public decimal BonusPercentage { get; set; }
+        public decimal DividendPercentage { get; set; }
         public decimal LiveDealerRebatePercentage { get; init; }
         public decimal SlotRebatePercentage { get; init; }
         public decimal LotteryRebatePercentage { get; init; }

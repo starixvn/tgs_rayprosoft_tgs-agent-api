@@ -9,7 +9,7 @@ namespace TGS.Services.Report.Application.Models.Agent
     {
         public Guid BrandId { get; set; }
         public string Username { get; set; }
-        public AgentType Type { get; set; }
+        public AgentType? Type { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public bool IncludeAgents { get; set; }
