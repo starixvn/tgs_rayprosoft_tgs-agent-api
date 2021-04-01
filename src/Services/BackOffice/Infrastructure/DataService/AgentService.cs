@@ -66,7 +66,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 Username = request.Username,
                 LevelType = request.LevelType,
-                Type = request.Type,
+                Type = parentAgent?.Type ?? request.Type,
                 BrandId = request.BrandId,
                 Status = AgentStatus.Enabled,
                 ParentAgentId = parentAgent?.Id,
@@ -78,7 +78,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         ? AgentConfigStatus.WaitForConfigurePercentage
                         : AgentConfigStatus.DoneForConfigurePercentage,
                 CommissionPercentage = request.CommissionPercentage,
-                BonusPercentage = request.BonusPercentage,
+                DividendPercentage = request.BonusPercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
                 SlotRebatePercentage = request.SlotRebatePercentage,
                 LotteryRebatePercentage = request.LotteryRebatePercentage,
@@ -157,7 +157,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             agent.Type = request.Type;
                             agent.CommissionPercentage =
                                 operation == AgentOperation.Agent ? -1 : request.CommissionPercentage;
-                            agent.BonusPercentage = operation == AgentOperation.Agent ? -1 : request.BonusPercentage;
+                            agent.DividendPercentage = operation == AgentOperation.Agent ? -1 : request.BonusPercentage;
                             agent.LiveDealerRebatePercentage = operation == AgentOperation.Agent
                                 ? -1
                                 : request.LiveDealerRebatePercentage;

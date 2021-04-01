@@ -5,7 +5,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
-using TGS.Services.Report.Application.Models.Player;
 
 namespace TGS.Apis.BackendOffice.Controllers.Agent
 {
@@ -44,15 +43,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
         {
             request.Id = id;
             return _mediator.Send(request);
-        }
-
-        [HttpGet("{id}/teamInfo")]
-        [Description("Get agent team Information")]
-        public Task<PagedResponse<PlayerModel>> GetAgentTeamInformationAsync(Guid id,
-            [FromQuery] GetAgentTeamInfoRequest request)
-        {
-            request.AgentId = id;
-            return _mediator.Send(new GetAgentTeamInfoRequest(id));
         }
     }
 }

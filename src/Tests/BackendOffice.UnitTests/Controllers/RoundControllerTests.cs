@@ -1,15 +1,14 @@
 ﻿using System.Data.SqlClient;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using NUnit.Framework;
+using Report.Client;
+using Report.Client.Models.Round;
 using TGS.Apis.BackendOffice.Controllers.Report;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.Round;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -21,18 +20,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new RoundController(
-                _mediatorMock.Object);
+            _controller = new(
+                _clientMock.Object);
         }
 
-        private RoundController _controller;
-        private readonly Mock<IMediator> _mediatorMock = new();
+        private RoundReportController _controller;
+        private readonly Mock<IReportClient> _clientMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
         public async Task Can_Get_Rounds(bool showAll)
         {
-            var list = CreateRoundModelFixture()
+            var list = new Fixture()
                 .CreateMany<RoundModel>(99)
                 .ToArray();
 
@@ -49,13 +48,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetRoundsRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<RoundModel>
-                {
-                    Valid = true,
-                    Items = expectedRoles
-                });
+            _clientMock
+                .Setup(m => m.GetRoundsAsync(It.IsAny<GetRoundsRequest>()))
+                .ReturnsAsync(new PagedResponse<RoundModel> {Valid = true, Items = expectedRoles});
 
             var response = await _controller.GetRoundsAsync(request);
             response.Valid.Should().BeTrue();
@@ -66,15 +61,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].ExternalRoundId.Should().Be(expectedRoles[i].ExternalRoundId);
             }
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetRoundsRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        private Fixture CreateRoundModelFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Create<RoundModel>();
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            return fixture;
+            _clientMock.Verify(x => x.GetRoundsAsync(It.IsAny<GetRoundsRequest>()));
         }
     }
 }

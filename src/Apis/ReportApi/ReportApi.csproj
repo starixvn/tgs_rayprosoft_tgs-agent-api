@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -17,8 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\..\Services\Report\Report.csproj" />
   </ItemGroup>
 
 </Project>

@@ -145,10 +145,6 @@ namespace TGS.Core.Infrastructures.ApiClient
                 request.Content.Headers.Remove("Content-Type");
                 request.Content.Headers.Add("Content-Type", "application/json");
             }
-            else if (content != null)
-            {
-                throw new InvalidOperationException($"Unexpected to have content for method {method}");
-            }
         }
 
         private static void AddHeaders(HttpRequestMessage request, IReadOnlyDictionary<string, string> headers,

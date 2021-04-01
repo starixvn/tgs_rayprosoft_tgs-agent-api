@@ -47,21 +47,15 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 Hour = model.Hour,
                 ReportDate = model.ReportDate,
                 CreatedOn = model.CreatedOn,
-                LiveDealerRebate = model.LiveDealerRebate,
-                LiveDealerAmount = model.LiveDealerAmount,
-                LiveDealerValidBetAmount = model.LiveDealerAmount,
-                SlotRebate = model.SlotRebate,
-                SlotAmount = model.SlotAmount,
-                SlotValidBetAmount = model.SlotValidBetAmount,
-                CardGameRebate = model.CardGameRebate,
-                CardGameAmount = model.CardGameAmount,
-                CardGameValidBetAmount = model.CardGameValidBetAmount,
-                SportsRebate = model.SportsRebate,
-                SportsAmount = model.SportsAmount,
-                SportsValidBetAmount = model.SportsValidBetAmount,
-                VirtualSportsRebate = model.VirtualSportsRebate,
-                VirtualSportsAmount = model.VirtualSportsAmount,
-                VirtualSportsValidBetAmount = model.VirtualSportsValidBetAmount
+                Turnover = model.Turnover,
+                WinLoss = model.WinLoss,
+                VipRebateAmount = model.VipRebateAmount,
+                VipLiveDealerRebatePercentage = model.VipLiveDealerRebatePercentage,
+                VipSlotRebatePercentage = model.VipSlotRebatePercentage,
+                VipCardGameRebatePercentage = model.VipCardGameRebatePercentage,
+                VipSportsRebatePercentage = model.VipSportsRebatePercentage,
+                VipVirtualSportsRebatePercentage = model.VipVirtualSportsRebatePercentage,
+                VipLotteryRebatePercentage = model.VipLotteryRebatePercentage
             }).ToArray());
 
         Task IPlayerGameTypeAggregateService.DeletePlayerGameTypeAggregatesAsync(PlayerGameTypeAggregate[] markets) =>

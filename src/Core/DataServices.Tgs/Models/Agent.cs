@@ -24,7 +24,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual Agent ParentAgent { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
         public decimal CommissionPercentage { get; set; } //佔成
-        public decimal BonusPercentage { get; set; }
+        public decimal DividendPercentage { get; set; }
         public decimal LiveDealerRebatePercentage { get; set; }
         public decimal SlotRebatePercentage { get; set; }
         public decimal LotteryRebatePercentage { get; set; }

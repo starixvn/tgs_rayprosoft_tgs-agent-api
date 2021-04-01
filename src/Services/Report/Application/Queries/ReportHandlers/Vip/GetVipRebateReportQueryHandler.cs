@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Vip;
 using TGS.Services.Report.Infrastructure.DataService;
@@ -37,44 +37,72 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
             DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,
                 requestTo.Offset);
 
-            var tgsPlayer = await _tgsPlayerService.GetPlayerAsync(x => x.Username == request.Username);
+            var tgsPlayer =
+                await _tgsPlayerService.GetPlayerAsync(x =>
+                    x.BrandId == request.BrandId && x.Username == request.Username);
 
-            var playerAggregate = await _service.GetPlayerGameTypeAggregateQueries()
+            return await _service.GetPlayerGameTypeAggregateQueries()
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.ReportDate >= from && x.ReportDate <= to)
-                .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode).ToArrayAsync(cancellationToken);
-
-            var vipModels = playerAggregate
-                .GroupBy(x => new
-                {
-                    x.ReportDate,
-                    x.LiveDealerRebate,
-                    x.CardGameRebate,
-                    x.SlotRebate,
-                    x.SportsRebate,
-                    x.VirtualSportsRebate
-                }, (x, players) =>
-                    new VipRebateModel
+                .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
+                .GroupBy(
+                    x => new
                     {
-                        ReportDate = x.ReportDate,
-                        LiveDealerRebate = x.LiveDealerRebate,
-                        LiveDealerAmount = players.Sum(m => m.LiveDealerAmount),
-                        LiveDealerValidBetAmount = players.Sum(m => m.LiveDealerValidBetAmount),
-                        SlotRebate = x.SlotRebate,
-                        SlotAmount = players.Sum(m => m.SlotAmount),
-                        SlotValidBetAmount = players.Sum(m => m.SlotValidBetAmount),
-                        CardGameRebate = x.CardGameRebate,
-                        CardGameAmount = players.Sum(m => m.CardGameAmount),
-                        CardGameValidBetAmount = players.Sum(m => m.CardGameValidBetAmount),
-                        SportsRebate = x.SportsRebate,
-                        SportsAmount = players.Sum(m => m.SportsAmount),
-                        SportsValidBetAmount = players.Sum(m => m.SportsValidBetAmount),
-                        VirtualSportsRebate = x.VirtualSportsRebate,
-                        VirtualSportsAmount = players.Sum(m => m.VirtualSportsAmount),
-                        VirtualSportsValidBetAmount = players.Sum(m => m.VirtualSportsValidBetAmount)
-                    });
-
-            return await vipModels.CreatePagedResponseAsync(vipModels.Count());
+                        x.ReportDate,
+                        LiveDealerRebatePercentage = x.VipLiveDealerRebatePercentage,
+                        CardGameRebatePercentage = x.VipCardGameRebatePercentage,
+                        LotteryRebatePercentage = x.VipLotteryRebatePercentage,
+                        SlotRebatePercentage = x.VipSlotRebatePercentage,
+                        SportsRebatePercentage = x.VipSportsRebatePercentage,
+                        VirtualSportsRebatePercentage = x.VipVirtualSportsRebatePercentage
+                    }, (x, players) =>
+                        new VipRebateModel
+                        {
+                            ReportDate = x.ReportDate,
+                            LiveDealerRebatePercentage = x.LiveDealerRebatePercentage,
+                            LiveDealerAmount =
+                                x.LiveDealerRebatePercentage * players.Where(p => p.GameType == GameType.LiveDealer)
+                                    .Sum(m => m.Turnover) / 100,
+                            LiveDealerTurnover =
+                                players.Where(p => p.GameType == GameType.LiveDealer).Sum(m => m.Turnover),
+                            SlotRebatePercentage = x.SlotRebatePercentage,
+                            SlotAmount =
+                                x.SlotRebatePercentage * players.Where(p =>
+                                    p.GameType == GameType.Fishing || p.GameType == GameType.Arcade ||
+                                    p.GameType == GameType.Slot || p.GameType == GameType.TableGame).Sum(m =>
+                                    m.Turnover) / 100,
+                            SlotTurnover =
+                                players.Where(p =>
+                                    p.GameType == GameType.Fishing || p.GameType == GameType.Arcade ||
+                                    p.GameType == GameType.Slot || p.GameType == GameType.TableGame).Sum(m =>
+                                    m.Turnover),
+                            LotteryRebatePercentage = x.LotteryRebatePercentage,
+                            LotteryAmount =
+                                x.LotteryRebatePercentage *
+                                players.Where(p => p.GameType == GameType.Lottery).Sum(m => m.Turnover) / 100,
+                            LotteryTurnover = players.Where(p => p.GameType == GameType.Lottery).Sum(m => m.Turnover),
+                            CardGameRebatePercentage = x.CardGameRebatePercentage,
+                            CardGameAmount =
+                                x.CardGameRebatePercentage * players.Where(p => p.GameType == GameType.CardGame)
+                                    .Sum(m => m.Turnover) / 100,
+                            CardGameTurnover = players.Where(p => p.GameType == GameType.CardGame).Sum(m => m.Turnover),
+                            SportsRebatePercentage = x.SportsRebatePercentage,
+                            SportsAmount =
+                                x.SportsRebatePercentage * players.Where(p =>
+                                        p.GameType == GameType.Sportsbook || p.GameType == GameType.ESports)
+                                    .Sum(m => m.Turnover) /
+                                100,
+                            SportsTurnover =
+                                players.Where(p => p.GameType == GameType.Sportsbook || p.GameType == GameType.ESports)
+                                    .Sum(m => m.Turnover),
+                            VirtualSportsRebatePercentage = x.VirtualSportsRebatePercentage,
+                            VirtualSportsAmount =
+                                x.VirtualSportsRebatePercentage *
+                                players.Where(p => p.GameType == GameType.VirtualSports).Sum(m => m.Turnover) / 100,
+                            VirtualSportsTurnover = players.Where(p => p.GameType == GameType.VirtualSports)
+                                .Sum(m => m.Turnover)
+                        })
+                .CreatePagedResponseAsync(request);
         }
     }
 }

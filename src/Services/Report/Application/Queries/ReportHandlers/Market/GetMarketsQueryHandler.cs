@@ -38,7 +38,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
 
             return dates.GroupJoin(_service.GetPlayerAggregateQueries()
                         .Where(x => x.BrandId == request.BrandId)
-                        .Where(x => x.ReportDate >= from && x.ReportDate < to), date => date,
+                        .Where(x => x.ReportDate >= from && x.ReportDate <= to), date => date,
                     market => market.ReportDate,
                     (date, markets) => new {date, markets})
                 .SelectMany(x => x.markets.DefaultIfEmpty(),
@@ -54,7 +54,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
                         AdjustmentAmount = markets.Sum(m => m.market?.AdjustmentAmount ?? 0),
                         BonusAmount = markets.Sum(m => m.market?.BonusAmount ?? 0),
                         BetAmount = markets.Sum(m => m.market?.BetAmount ?? 0),
-                        ValidBetAmount = markets.Sum(m => m.market?.ValidBetAmount ?? 0),
+                        Turnover = markets.Sum(m => m.market?.Turnover ?? 0),
                         WinLossAmount = markets.Sum(m => m.market?.WinLossAmount ?? 0),
                         NetProfit = markets.Sum(m => m.market?.NetProfit ?? 0)
                     })
