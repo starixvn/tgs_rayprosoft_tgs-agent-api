@@ -11,8 +11,7 @@ using TGS.Services.Report.Application.Models.Round;
 
 namespace TGS.Apis.OperatorApi.Handlers.PlayerReport
 {
-    public sealed class
-        GetPlayerReportHandler : IRequestHandler<GetPlayerRoundReportRequest, PagedResponse<PlayerRoundReportModel>>
+    public sealed class GetPlayerReportHandler : IRequestHandler<GetPlayerRoundReportRequest, PagedResponse<PlayerRoundReportModel>>
     {
         private readonly HttpContext _httpContext;
         private readonly IMediator _mediator;

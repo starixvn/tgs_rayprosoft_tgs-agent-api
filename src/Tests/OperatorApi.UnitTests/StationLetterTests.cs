@@ -8,6 +8,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
 using TGS.Services.Operator;
+using TGS.Services.Operator.StationLatters;
 using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -85,6 +86,22 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             Assert.IsTrue(targetPlayerLetter.IsRead);
             Assert.IsNotNull(targetPlayerLetter.ReadOn);
+        }
+
+        [Test]
+        public void Player_Can_Get_Station_Letters_Count()
+        {
+            var moqStationLetterRepository = new Mock<IStationLetterRepository>();
+
+            var sut = new CountStationLettersQueryService(moqStationLetterRepository.Object);
+
+            var playerCode = "ThisIsPlayerCode";
+
+            var actual = sut.GetAsync(new GetStationLettersQuery(playerCode, new PageableRequest()));
+
+            moqStationLetterRepository.Verify(
+                fake => fake.QueryStationLettersTotalCountAsync(It.Is<string>(x => x == playerCode)),
+                Times.Exactly(1));
         }
     }
 }

@@ -28,8 +28,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
-        public IAsyncEnumerable<StationLetterResponse> GetLettersAsync(
+        public async Task<PagingResponse<StationLetterResponse>> GetLettersAsync(
             [FromServices] IQueryService<GetStationLettersQuery, StationLetter> listStationLetterService,
+            [FromServices] IGetService<GetStationLettersQuery, int> countStationLetterService,
             [FromQuery] PagingRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -47,14 +48,21 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var query = new GetStationLettersQuery(playerTokenData.PlayerCode, paging);
 
-            return listStationLetterService.QueryAsync(query)
-                .Select(letter => new StationLetterResponse
-                {
-                    Id = letter.Id,
-                    Subject = letter.Subject,
-                    Content = letter.Content,
-                    CreateOn = letter.CreateOn
-                });
+            return new PagingResponse<StationLetterResponse>
+            {
+                TotalCount = await countStationLetterService
+                    .GetAsync(query)
+                    .ConfigureAwait(false),
+                Items = listStationLetterService.QueryAsync(query)
+                    .Select(letter => new StationLetterResponse
+                    {
+                        Id = letter.Id,
+                        Subject = letter.Subject,
+                        Content = letter.Content,
+                        CreateOn = letter.CreateOn
+                    })
+                    .ToEnumerable()
+            };
         }
 
         [HttpPost]
