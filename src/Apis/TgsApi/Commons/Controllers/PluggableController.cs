@@ -18,10 +18,11 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
     {
         [HttpPost]
         [Route("gameurl")]
-        public Task<GetGameUrlResponse> GetGameUrlAsync(
+        public async ValueTask<GetGameUrlResponse> GetGameUrlAsync(
             [FromServices] Func<string, IGameInitializer> initializerFactory,
             GetGameUrlRequest request) =>
-            initializerFactory(request.GameProviderCode).GetGameUrlAsync(request);
+            await initializerFactory(request.GameProviderCode).GetGameUrlAsync(request)
+                .ConfigureAwait(false);
 
         [HttpPost]
         [Route("history/round")]
