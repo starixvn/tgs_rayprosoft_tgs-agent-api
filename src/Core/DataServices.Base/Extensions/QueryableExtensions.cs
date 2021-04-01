@@ -15,10 +15,10 @@ namespace TGS.Core.DataServices.Base.Extensions
         {
             var name = isDesc ? "OrderByDescending" : "OrderBy";
             return (from x in typeof(Queryable).GetMethods()
-                where x.Name == name
-                let pars = x.GetParameters()
-                where pars.Length == 2
-                select x).Single();
+                    where x.Name == name
+                    let pars = x.GetParameters()
+                    where pars.Length == 2
+                    select x).Single();
         }
 
         public static async Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IQueryable<TModel> query,
@@ -77,7 +77,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
         public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption)
         {
-            return !string.IsNullOrEmpty(sortOption.PropertyName) ? 
+            return !string.IsNullOrEmpty(sortOption.PropertyName) ?
                 query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending) :
                 query;
         }
@@ -92,9 +92,9 @@ namespace TGS.Core.DataServices.Base.Extensions
 
             var genericMethod = OrderByMethod(descending).MakeGenericMethod(typeof(TSource), orderByProperty.Type);
 
-            var result = genericMethod.Invoke(null, new object[] {source, lambda});
+            var result = genericMethod.Invoke(null, new object[] { source, lambda });
 
-            return (IQueryable<TSource>) result;
+            return (IQueryable<TSource>)result;
         }
 
 
