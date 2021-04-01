@@ -42,17 +42,21 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             _client = client;
         }
 
-        protected override async Task<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider,
             CachedGame cachedGame, string language)
         {
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts
-                    .GameProviderConfigurations.PragmaticPlay);
+                await _settingOperations
+                    .GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts.GameProviderConfigurations
+                        .PragmaticPlay)
+                    .ConfigureAwait(false);
 
-            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId,
-                language);
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
+                .ConfigureAwait(false);
+
+            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId, language)
+                .ConfigureAwait(false);
 
             var model = new OpenHistoryExtendedRequest
             {
@@ -65,7 +69,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             var hash = _hashProvider.ComputeHash(model, configuration.SecretKey);
             var request = model with {Hash = hash};
 
-            var response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, request);
+            var response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, request)
+                .ConfigureAwait(false);
 
             if (response.Error.IgnoreCaseNotEquals("0"))
             {
