@@ -42,7 +42,7 @@ import FormDialog from "../../form/FormDialog"
 import AddBalanceTypeSelect from "./AgentAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
-import DeductBalanceType from "./AgentDeductBalanceType"
+import DeductBalanceType from "./AgDeductBalanceType"
 import { DeductBalanceTargetSelect } from "./AgentDeductBalanceTarget"
 
 export const AgentDeductBalanceDisclosure = ({

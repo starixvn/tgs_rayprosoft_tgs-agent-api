@@ -19,7 +19,7 @@ const BonusTrans = {
     en: "Bonus"
 }
 
-export const Deposit = "Recharge"
+export const Deposit = "Deposit"
 const DepositTrans = {
     zh: "充值",
     en: "Deposit"
