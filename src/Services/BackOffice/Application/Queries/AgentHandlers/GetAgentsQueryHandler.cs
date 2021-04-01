@@ -38,7 +38,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     Type = x.Type,
                     LevelType = x.LevelType,
                     CommissionPercentage = x.CommissionPercentage,
-                    BonusPercentage = x.BonusPercentage,
+                    DividendPercentage = x.DividendPercentage,
                     LiveDealerRebatePercentage = x.LiveDealerRebatePercentage,
                     SlotRebatePercentage = x.SlotRebatePercentage,
                     LotteryRebatePercentage = x.LotteryRebatePercentage,

@@ -19,7 +19,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
             bool tracking = false);
 
         Task CreatePlayerAggregatesAsync(PlayerAggregateModel[] request);
-        Task CreatePlayerAggregatesByGameTypeAsync(PlayerGameTypeAggregateModel[] request);
         Task DeletePlayerAggregatesAsync(PlayerAggregate[] markets);
         Task<bool> ExistsAsync(Expression<Func<PlayerAggregate, bool>> predicate);
     }
@@ -51,31 +50,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AdjustmentAmount = model.AdjustmentAmount,
                 BonusAmount = model.BonusAmount,
                 BetAmount = model.BetAmount,
-                ValidBetAmount = model.ValidBetAmount,
+                Turnover = model.ValidBetAmount,
                 WinLossAmount = model.WinLossAmount,
                 NetProfit = model.NetProfit
-            }).ToArray());
-
-        Task IPlayerAggregateService.CreatePlayerAggregatesByGameTypeAsync(PlayerGameTypeAggregateModel[] models) =>
-            CreateEntitiesAsync(models.Select(model => new PlayerGameTypeAggregate
-            {
-                BrandId = model.BrandId,
-                AgentId = model.AgentId,
-                PlayerCode = model.PlayerCode,
-                GameType = model.GameType,
-                Hour = model.Hour,
-                ReportDate = model.ReportDate,
-                CreatedOn = model.CreatedOn,
-                LiveDealerRebate = model.LiveDealerRebate,
-                LiveDealerAmount = model.LiveDealerAmount,
-                SlotRebate = model.SlotRebate,
-                SlotAmount = model.SlotAmount,
-                CardGameRebate = model.CardGameRebate,
-                CardGameAmount = model.CardGameAmount,
-                SportsRebate = model.SportsRebate,
-                SportsAmount = model.SportsAmount,
-                VirtualSportsRebate = model.VirtualSportsRebate,
-                VirtualSportsAmount = model.VirtualSportsAmount
             }).ToArray());
 
         Task IPlayerAggregateService.DeletePlayerAggregatesAsync(PlayerAggregate[] markets) =>

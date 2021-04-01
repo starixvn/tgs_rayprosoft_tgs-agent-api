@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210330062943_Initial")]
+    [Migration("20210331091900_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,11 +34,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("agent_status");
 
-                    b.Property<decimal>("BonusPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("bonus_percentage");
-
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
@@ -60,6 +55,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<decimal>("DividendPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_percentage");
 
                     b.Property<string>("Email")
                         .HasMaxLength(64)
@@ -3354,10 +3354,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<decimal>("CardGameRebate")
+                    b.Property<decimal>("CardGameRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("card_game_rebate");
+                        .HasColumnName("card_game_rebate_percentage");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
@@ -3397,10 +3397,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("level_up_accumulate_deposit");
 
-                    b.Property<decimal>("LiveDealerRebate")
+                    b.Property<decimal>("LiveDealerRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("live_dealer_rebate");
+                        .HasColumnName("live_dealer_rebate_percentage");
+
+                    b.Property<decimal>("LotteryRebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("lottery_rebate_percentage");
 
                     b.Property<decimal>("PromotionReward")
                         .HasPrecision(18, 6)
@@ -3412,15 +3417,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("quarterly_reward");
 
-                    b.Property<decimal>("SlotRebate")
+                    b.Property<decimal>("SlotRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("slot_rebate");
+                        .HasColumnName("slot_rebate_percentage");
 
-                    b.Property<decimal>("SportsRebate")
+                    b.Property<decimal>("SportsRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("sports_rebate");
+                        .HasColumnName("sports_rebate_percentage");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -3432,10 +3437,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on");
 
-                    b.Property<decimal>("VirtualSportsRebate")
+                    b.Property<decimal>("VirtualSportsRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("virtual_sports_rebate");
+                        .HasColumnName("virtual_sports_rebate_percentage");
 
                     b.HasKey("Id")
                         .HasName("pk_vip_levels");

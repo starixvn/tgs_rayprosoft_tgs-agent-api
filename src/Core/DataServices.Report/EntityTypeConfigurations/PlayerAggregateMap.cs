@@ -46,7 +46,7 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.ValidBetAmount)
+            builder.Property(b => b.Turnover)
                 .HasPrecision(18, 6)
                 .IsRequired();
 

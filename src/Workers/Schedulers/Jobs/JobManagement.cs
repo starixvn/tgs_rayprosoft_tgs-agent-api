@@ -46,7 +46,7 @@ namespace TGS.Workers.Schedulers.Jobs
 
             if (DateTimeOffset.TryParse($"{dateTime} +8:00", out _))
             {
-                return await _roundAggregateWorker.ExecutionAsync(dateTime, hour);
+                return await _roundAggregateWorker.ManualExecutionAsync(dateTime, hour);
             }
 
             return new() {ErrorMessage = "DateTime invalided"};

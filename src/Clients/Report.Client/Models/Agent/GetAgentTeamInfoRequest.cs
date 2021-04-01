@@ -1,10 +1,9 @@
 ﻿using System;
-using MediatR;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.Report.Application.Models.Player
+namespace Report.Client.Models.Agent
 {
-    public class GetAgentTeamInfoRequest : PageableRequest, IRequest<PagedResponse<PlayerModel>>
+    public class GetAgentTeamInfoRequest : PageableRequest
     {
         public GetAgentTeamInfoRequest(Guid id)
         {

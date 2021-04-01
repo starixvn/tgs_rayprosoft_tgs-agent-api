@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Report;
 namespace TGS.Core.DataServices.Report.Migrations
 {
     [DbContext(typeof(ReportRepository))]
-    [Migration("20210323033312_Initial")]
+    [Migration("20210331091824_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,9 +18,9 @@ namespace TGS.Core.DataServices.Report.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PlayerAggregate", b =>
                 {
@@ -28,7 +28,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id")
-                        .UseIdentityByDefaultColumn();
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<decimal>("AdjustmentAmount")
                         .HasPrecision(18, 6)
@@ -89,10 +89,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
 
-                    b.Property<decimal>("ValidBetAmount")
+                    b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("valid_bet_amount");
+                        .HasColumnName("turnover");
 
                     b.Property<decimal>("WinLossAmount")
                         .HasPrecision(18, 6)
@@ -125,7 +125,11 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id")
-                        .UseIdentityByDefaultColumn();
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("AgentDividendPercentage")
+                        .HasColumnType("numeric")
+                        .HasColumnName("agent_dividend_percentage");
 
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
@@ -134,21 +138,6 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
-
-                    b.Property<decimal>("CardGameAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("card_game_amount");
-
-                    b.Property<decimal>("CardGameRebate")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("card_game_rebate");
-
-                    b.Property<decimal>("CardGameValidBetAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("card_game_valid_bet_amount");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -162,21 +151,6 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("hour");
 
-                    b.Property<decimal>("LiveDealerAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("live_dealer_amount");
-
-                    b.Property<decimal>("LiveDealerRebate")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("live_dealer_rebate");
-
-                    b.Property<decimal>("LiveDealerValidBetAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("live_dealer_valid_bet_amount");
-
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -187,50 +161,50 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
 
-                    b.Property<decimal>("SlotAmount")
+                    b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("slot_amount");
+                        .HasColumnName("turnover");
 
-                    b.Property<decimal>("SlotRebate")
+                    b.Property<decimal>("VipCardGameRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("slot_rebate");
+                        .HasColumnName("vip_card_game_rebate_percentage");
 
-                    b.Property<decimal>("SlotValidBetAmount")
+                    b.Property<decimal>("VipLiveDealerRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("slot_valid_bet_amount");
+                        .HasColumnName("vip_live_dealer_rebate_percentage");
 
-                    b.Property<decimal>("SportsAmount")
+                    b.Property<decimal>("VipLotteryRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("sports_amount");
+                        .HasColumnName("vip_lottery_rebate_percentage");
 
-                    b.Property<decimal>("SportsRebate")
+                    b.Property<decimal>("VipRebateAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("sports_rebate");
+                        .HasColumnName("vip_rebate_amount");
 
-                    b.Property<decimal>("SportsValidBetAmount")
+                    b.Property<decimal>("VipSlotRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("sports_valid_bet_amount");
+                        .HasColumnName("vip_slot_rebate_percentage");
 
-                    b.Property<decimal>("VirtualSportsAmount")
+                    b.Property<decimal>("VipSportsRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("virtual_sports_amount");
+                        .HasColumnName("vip_sports_rebate_percentage");
 
-                    b.Property<decimal>("VirtualSportsRebate")
+                    b.Property<decimal>("VipVirtualSportsRebatePercentage")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("virtual_sports_rebate");
+                        .HasColumnName("vip_virtual_sports_rebate_percentage");
 
-                    b.Property<decimal>("VirtualSportsValidBetAmount")
+                    b.Property<decimal>("WinLoss")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("virtual_sports_valid_bet_amount");
+                        .HasColumnName("win_loss");
 
                     b.HasKey("Id")
                         .HasName("pk_player_game_type_rebate_aggregates_id");
@@ -253,7 +227,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id")
-                        .UseIdentityByDefaultColumn();
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")

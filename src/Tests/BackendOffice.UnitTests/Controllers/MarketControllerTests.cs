@@ -1,15 +1,14 @@
 ﻿using System.Data.SqlClient;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using NUnit.Framework;
+using Report.Client;
+using Report.Client.Models.Market;
 using TGS.Apis.BackendOffice.Controllers.Report;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.Market;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -22,17 +21,17 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new(
-                _mediatorMock.Object);
+                _clientMock.Object);
         }
 
-        private MarketController _controller;
-        private readonly Mock<IMediator> _mediatorMock = new();
+        private MarketReportController _controller;
+        private readonly Mock<IReportClient> _clientMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
         public async Task Can_Get_Markets(bool showAll)
         {
-            var list = CreateMarketModelFixture()
+            var list = new Fixture()
                 .CreateMany<MarketModel>(99)
                 .ToArray();
 
@@ -49,8 +48,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetMarketsRequest>(), It.IsAny<CancellationToken>()))
+            _clientMock
+                .Setup(m => m.GetMarketsAsync(It.IsAny<GetMarketsRequest>()))
                 .ReturnsAsync(new PagedResponse<MarketModel> {Valid = true, Items = expectedRoles});
 
             var response = await _controller.GetMarketsAsync(request);
@@ -61,15 +60,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].ReportDate.Should().Be(expectedRoles[i].ReportDate);
             }
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetMarketsRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        private Fixture CreateMarketModelFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Create<MarketModel>();
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            return fixture;
+            _clientMock.Verify(x => x.GetMarketsAsync(It.IsAny<GetMarketsRequest>()));
         }
     }
 }

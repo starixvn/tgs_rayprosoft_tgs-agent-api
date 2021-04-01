@@ -5,17 +5,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.Player;
+using TGS.Services.Report.Application.Models.Agent;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
+namespace TGS.Services.Report.Application.Queries.ReportHandlers.Agent
 {
-    public class GetPlayersQueryHandler : Handler<GetAgentTeamInfoRequest, PagedResponse<PlayerModel>>
+    public class GetAgentTeamInfoQueryHandler : Handler<GetAgentTeamInfoRequest, PagedResponse<TeamInfoModel>>
     {
         private readonly IPlayerAggregateService _playerAggregateService;
         private readonly ITgsPlayerService _tgsPlayerService;
 
-        public GetPlayersQueryHandler(IPlayerAggregateService playerAggregateService,
+        public GetAgentTeamInfoQueryHandler(IPlayerAggregateService playerAggregateService,
             ITgsPlayerService tgaPlayerService,
             IHttpContextAccessor accessor) : base(accessor)
         {
@@ -23,7 +23,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
             _tgsPlayerService = tgaPlayerService;
         }
 
-        public override async Task<PagedResponse<PlayerModel>> Handle(GetAgentTeamInfoRequest request,
+        public override async Task<PagedResponse<TeamInfoModel>> Handle(GetAgentTeamInfoRequest request,
             CancellationToken cancellationToken)
         {
             var reportPlayers = await _playerAggregateService
@@ -39,7 +39,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
                 .SelectMany(x => x.tgsPlayer.DefaultIfEmpty(),
                     (x, tgsPlayer) => new {x.player, tgsPlayer.Username, tgsPlayer.RegisteredOn})
                 .GroupBy(x => new {x.Username, x.RegisteredOn}, (player, tgsPlayer) =>
-                    new PlayerModel
+                    new TeamInfoModel
                     {
                         Username = player.Username,
                         RegisteredOn = player.RegisteredOn,
