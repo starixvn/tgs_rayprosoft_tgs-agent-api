@@ -7,7 +7,6 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
 WORKDIR /dest
-COPY ["nuget.config", "."]
 COPY ["src/Apis/ReportApi/ReportApi.csproj", "src/Apis/ReportApi/"]
 COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
 COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]

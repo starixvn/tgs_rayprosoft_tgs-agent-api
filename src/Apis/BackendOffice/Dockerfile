@@ -7,7 +7,6 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
 WORKDIR /dest
-COPY ["nuget.config", "."]
 COPY ["src/Apis/BackendOffice/BackendOffice.csproj", "src/Apis/BackendOffice/"]
 COPY ["src/Services/BackOffice/BackOffice.csproj", "src/Services/BackOffice/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]

@@ -4,9 +4,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-amd64 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
 WORKDIR /dest
-COPY ["nuget.config", "."]
 COPY ["src/Workers/Schedulers/Schedulers.csproj", "src/Workers/Schedulers/"]
 COPY ["src/Services/BackOffice/BackOffice.csproj", "src/Services/BackOffice/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]
