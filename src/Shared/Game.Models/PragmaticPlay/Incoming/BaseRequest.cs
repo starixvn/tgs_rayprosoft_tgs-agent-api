@@ -1,11 +1,17 @@
-﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
+﻿using System.Text.Json.Serialization;
+using TGS.Shared.Game.Models.PragmaticPlay.Common;
+
+namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
     public record BaseRequest : HashRequest
     {
-        public string Token { get; set; }
+        [JsonPropertyName("token")]
+        public string Token { get; init; }
 
-        public string ProviderId { get; set; }
+        [JsonPropertyName("providerId")]
+        public string ProviderId { get; init; }
 
-        public bool BypassHashVerify { get; set; }
+        [JsonPropertyName("bypassHashVerify")]
+        public bool BypassHashVerify { get; init; }
     }
 }

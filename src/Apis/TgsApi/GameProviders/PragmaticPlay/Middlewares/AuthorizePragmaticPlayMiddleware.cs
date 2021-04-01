@@ -41,18 +41,6 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
         {
             var form = await context.Request.ReadFormAsync();
 
-            var bypassHashVerify = form.GetValue<bool>(PragmaticPlayConsts.Parameters.BypassHashVerify);
-            if (!bypassHashVerify)
-            {
-                var hash = form.GetValue<string>(PragmaticPlayConsts.Parameters.Hash);
-                var computedHash = _hashProvider.ComputeHash(form);
-
-                if (hash.IgnoreCaseNotEquals(computedHash))
-                {
-                    throw new InvalidCredentialsException("Invalid hash");
-                }
-            }
-
             var configuration = await _settingOperations
                 .GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts.GameProviderConfigurations
                     .PragmaticPlay);
@@ -61,6 +49,18 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
             if (configuration.ProviderId.IgnoreCaseNotEquals(providerId))
             {
                 throw new InvalidCredentialsException("Invalid providerId");
+            }
+
+            var bypassHashVerify = form.GetValue<bool>(PragmaticPlayConsts.Parameters.BypassHashVerify);
+            if (!bypassHashVerify)
+            {
+                var hash = form.GetValue<string>(PragmaticPlayConsts.Parameters.Hash);
+                var computedHash = _hashProvider.ComputeHash(form, configuration.SecretKey);
+
+                if (hash.IgnoreCaseNotEquals(computedHash))
+                {
+                    throw new InvalidCredentialsException("Invalid hash");
+                }
             }
 
             var token = form.GetValue<string>(PragmaticPlayConsts.Parameters.Token);

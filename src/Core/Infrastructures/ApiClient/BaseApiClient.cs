@@ -70,6 +70,19 @@ namespace TGS.Core.Infrastructures.ApiClient
             return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
 
+        protected async ValueTask<TResponse> ExecuteFormRequestAsync<TResponse>(string path,
+            IReadOnlyDictionary<string, string> parameters,
+            IReadOnlyDictionary<string, string> headers = null,
+            IReadOnlyDictionary<string, string> contentHeaders = null,
+            string logPrefix = null, TimeSpan? timeout = null,
+            JsonSerializerOptions options = null)
+        {
+            var requestMessage = CreateHttpRequestMessage(path, HttpMethod.Post);
+            var httpRequestMessage = CreateFormRequest(requestMessage, headers, contentHeaders, parameters);
+            var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
+            return await ReadJsonContentAsync<TResponse>(response.Content, options);
+        }
+
         #region Private Methods
 
         private async ValueTask<HttpResponseMessage> SendAndLogAsync(HttpRequestMessage request, string logPrefix,

@@ -1,11 +1,16 @@
-﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
     public record EndRoundRequest : BaseRequest
     {
-        public string UserId { get; set; }
+        [JsonPropertyName("userId")]
+        public string UserId { get; init; }
 
-        public string GameId { get; set; }
+        [JsonPropertyName("gameId")]
+        public string GameId { get; init; }
 
-        public string RoundId { get; set; }
+        [JsonPropertyName("roundId")]
+        public string RoundId { get; init; }
     }
 }

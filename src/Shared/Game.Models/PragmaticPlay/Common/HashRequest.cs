@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.PragmaticPlay.Outgoing
+namespace TGS.Shared.Game.Models.PragmaticPlay.Common
 {
     public record HashRequest
     {

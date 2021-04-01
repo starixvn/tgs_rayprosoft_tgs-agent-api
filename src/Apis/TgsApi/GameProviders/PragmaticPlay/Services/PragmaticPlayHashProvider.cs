@@ -7,7 +7,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
-using TGS.Shared.Game.Models.PragmaticPlay.Outgoing;
+using TGS.Shared.Game.Models.PragmaticPlay.Common;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 {
@@ -45,9 +45,9 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         {
             var options = new JsonSerializerOptions {WriteIndented = false};
             var value = _json.SerializeToString(request, options);
-            var parameters = _json.DeserializeFromString<Dictionary<string, string>>(value, options);
-
-            _bypassHashKeys.ToList().ForEach(key => parameters.Remove(key));
+            var items = _json.DeserializeFromString<Dictionary<string, object>>(value, options);
+            var parameters = items.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))
+                .ToDictionary(p => p.Key, p => p.Value.ToString());
 
             return ComputeHash(parameters, additionalData);
         }
