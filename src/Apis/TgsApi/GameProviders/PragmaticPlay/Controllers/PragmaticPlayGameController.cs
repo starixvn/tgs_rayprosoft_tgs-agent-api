@@ -114,7 +114,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
         }
 
         [HttpPost]
-        [Route("endRound")]
+        [Route("endround")]
         public async Task<EndRoundResponse> EndRoundAsync([FromForm] EndRoundRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
