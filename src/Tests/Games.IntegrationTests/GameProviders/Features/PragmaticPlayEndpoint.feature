@@ -31,7 +31,7 @@ Scenario: 02.b - Get player balance with deauthorized player token
 
 Scenario: 03 - Place desktop bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
-		And player having balance of $125
+		And player having balance of $100
 	When I place bet of $10 for game "vs50aladdin"
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
@@ -39,7 +39,7 @@ Scenario: 03 - Place desktop bet
 
 Scenario: 04 - Win bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
-		And player having balance of $125
+		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I win bet for $15
 	Then I will receive result response of no error and balance of $105
@@ -48,16 +48,16 @@ Scenario: 04 - Win bet
 
 Scenario: 05 - Lose bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
-		And player having balance of $125
+		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I lose bet
 	Then I will receive endRound response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 07 - Cancel transaction
+Scenario: 06 - Cancel transaction
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
-		And player having balance of $125
+		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I cancel transaction
 	Then I will receive refund response of no error and balance of $100

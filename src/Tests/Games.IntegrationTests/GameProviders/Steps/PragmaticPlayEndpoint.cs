@@ -286,6 +286,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.ResultAsync(request).ConfigureAwait(false);
 
+            Set(SR.ExternalTransactionId, externalTransactionId);
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -302,6 +303,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var externalGameId = Get<string>(SR.ExternalGameId);
             var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var model = new EndRoundRequest
             {
@@ -318,6 +320,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.EndRoundAsync(request).ConfigureAwait(false);
 
+            Set(SR.ExternalTransactionId, $"{externalTransactionId}_lose");
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -353,6 +356,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.RefundAsync(request).ConfigureAwait(false);
 
+            Set(SR.ExternalTransactionId, $"{betRequest.Reference}_cancel");
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -450,14 +454,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
         public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeFor(GameActionType type, decimal amount)
         {
-            var externalRoundId = Get<int>(SR.ExternalRoundId);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
-                where r.ExternalRoundId == externalRoundId.ToString() &&
+                where r.ExternalRoundId == externalRoundId &&
                     act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
 
