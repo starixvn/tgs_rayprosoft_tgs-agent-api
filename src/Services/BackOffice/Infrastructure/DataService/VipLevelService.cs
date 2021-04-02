@@ -50,11 +50,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             vipLevel.BirthReward = request.BirthBenefit;
             vipLevel.PromotionReward = request.PromotionBenefit;
             vipLevel.QuarterlyReward = request.QuarterlyBenefit;
-            vipLevel.LiveDealerRebate = request.LiveDealerRebate;
-            vipLevel.SlotRebate = request.SlotRebate;
-            vipLevel.CardGameRebate = request.CardGameRebate;
-            vipLevel.SportsRebate = request.SportsRebate;
-            vipLevel.VirtualSportsRebate = request.VirtualSportsRebate;
+            vipLevel.LiveDealerRebatePercentage = request.LiveDealerRebate;
+            vipLevel.SlotRebatePercentage = request.SlotRebate;
+            vipLevel.LotteryRebatePercentage = request.LotteryRebate;
+            vipLevel.CardGameRebatePercentage = request.CardGameRebate;
+            vipLevel.SportsRebatePercentage = request.SportsRebate;
+            vipLevel.VirtualSportsRebatePercentage = request.VirtualSportsRebate;
             vipLevel.UpdatedOn = DateTimeOffset.Now;
 
             return UpdateEntityAsync(vipLevel);
@@ -74,13 +75,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 BirthReward = request.BirthBenefit,
                 PromotionReward = request.PromotionBenefit,
                 QuarterlyReward = request.QuarterlyBenefit,
-                LiveDealerRebate = request.LiveDealerRebate,
-                SlotRebate = request.SlotRebate,
-                CardGameRebate = request.CardGameRebate,
-                SportsRebate = request.SportsRebate,
-                VirtualSportsRebate = request.VirtualSportsRebate,
-                        CreatedByUsername = request.EditorUsername,
-                        UpdatedByUsername = request.EditorUsername,
+                LiveDealerRebatePercentage = request.LiveDealerRebate,
+                SlotRebatePercentage = request.SlotRebate,
+                LotteryRebatePercentage = request.LotteryRebate,
+                CardGameRebatePercentage = request.CardGameRebate,
+                SportsRebatePercentage = request.SportsRebate,
+                VirtualSportsRebatePercentage = request.VirtualSportsRebate,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             };

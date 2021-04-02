@@ -38,5 +38,13 @@ namespace TGS.Services.Operator.Configuration
 
             return this;
         }
+
+        public OperatorConfiguration UseStationLetterRepository<TStationLetterRepository>()
+            where TStationLetterRepository : class, IStationLetterRepository
+        {
+            Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
+
+            return this;
+        }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Report.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -19,7 +20,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Operations.Extensions;
-using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Reports;
@@ -53,6 +53,7 @@ namespace TGS.Workers.Schedulers
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddOperations()
+                .AddReportClientServices(_configuration)
                 .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes());
 
@@ -66,13 +67,6 @@ namespace TGS.Workers.Schedulers
 
             // BO services
             services.AddTransient<IBrandGameProviderService, BrandGameProviderService>();
-
-            // Report services
-            services.AddTransient<IPlayerAggregateService, PlayerAggregateService>();
-            services.AddTransient<IPlayerGameTypeAggregateService, PlayerGameTypeAggregateService>();
-            services.AddTransient<ITgsPlayerService, TgsPlayerService>();
-            services.AddTransient<ITgsRoundService, TgsRoundService>();
-            services.AddTransient<IRoundAggregateService, RoundAggregateService>();
 
             // job
             services.AddTransient<IPlayerAggregateReportWorkerService, PlayerAggregateReportWorkerService>();

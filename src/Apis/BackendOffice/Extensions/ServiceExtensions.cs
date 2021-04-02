@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Report.Client.Extensions;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -78,7 +79,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddOperations()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddTransactions();
+                .AddTransactions()
+                .AddReportClientServices(configuration);
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

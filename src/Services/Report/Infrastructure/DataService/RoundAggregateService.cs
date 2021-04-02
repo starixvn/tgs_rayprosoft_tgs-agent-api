@@ -16,6 +16,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface IRoundAggregateService
     {
+        IReportRepository Repository { get; }
+
         IQueryable<RoundAggregate> GetRoundAggregateQueries(
             Func<IQueryable<RoundAggregate>, IQueryable<RoundAggregate>> preQuery = null,
             bool tracking = false);
@@ -42,6 +44,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
             _tgsRepository = tgsRepository;
             _reportRepository = reportRepository;
         }
+
+        IReportRepository IRoundAggregateService.Repository => _reportRepository;
 
         Task IRoundAggregateService.CreateRoundAggregateAsync(RoundAggregateModel[] models) =>
             CreateEntitiesAsync(models.Select(model => new RoundAggregate
@@ -113,7 +117,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 market.BetAmount =
                     roundAggregates.Where(r => r.BrandId == market.BrandId)
                         .Sum(r => r.BetAmount);
-                market.ValidBetAmount =
+                market.Turnover =
                     roundAggregates.Where(r => r.BrandId == market.BrandId)
                         .Sum(r => r.Turnover);
                 market.WinLossAmount = roundAggregates
@@ -202,6 +206,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         AdjustmentAmount = players.Where(p =>
                             p.transaction.Type == TransactionType.Adjust && p.transaction.ConfirmedOn >= start &&
                             p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                        BonusAmount = 0,
                         CreatedOn = DateTimeOffset.Now
                     }).ToArrayAsync();
 
@@ -225,28 +230,22 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 x.AdjustmentAmount != 0 || x.BonusAmount > 0 || x.BetAmount > 0 || x.ValidBetAmount > 0 ||
                 x.WinLossAmount != 0 || x.NetProfit != 0).ToArray();
 
-            var playerAggregateByGameType = roundAggregates.Join(_tgsRepository.Players.Include(x => x.Vip),
-                    r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p})
+            var playerAggregateByGameType = roundAggregates.GroupJoin(
+                    _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
+                    r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p = p.DefaultIfEmpty()})
+                .SelectMany(x => x.p.Select(player => player),
+                    (x, player) => new {x.r, x.p, player.Vip, player.Agent})
                 .GroupBy(x => new
                     {
                         x.r.BrandId,
                         x.r.AgentId,
                         x.r.PlayerCode,
                         x.r.GameType,
-                        x.p.Vip
+                        x.Vip,
+                        x.Agent
                     },
                     (x, aggregate) =>
                     {
-                        var liveDealerValidBetAmount = aggregate.Where(a => a.r.GameType == GameType.LiveDealer)
-                            .Sum(a => a.r.ValidBetAmount);
-                        var slotValidBetAmount = aggregate.Where(a => a.r.GameType == GameType.Slot)
-                            .Sum(a => a.r.ValidBetAmount);
-                        var cardGameValidBetAmount = aggregate.Where(a => a.r.GameType == GameType.CardGame)
-                            .Sum(a => a.r.ValidBetAmount);
-                        var sportsValidBetAmount = aggregate.Where(a => a.r.GameType == GameType.Sportsbook)
-                            .Sum(a => a.r.ValidBetAmount);
-                        var virtualSportsValidBetAmount = aggregate.Where(a => a.r.GameType == GameType.VirtualSports)
-                            .Sum(a => a.r.ValidBetAmount);
                         return new PlayerGameTypeAggregateModel
                         {
                             BrandId = x.BrandId,
@@ -254,26 +253,32 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PlayerCode = x.PlayerCode,
                             GameType = x.GameType,
                             Hour = start.Hour,
-                            LiveDealerRebate = x.Vip.LiveDealerRebate,
-                            LiveDealerValidBetAmount = liveDealerValidBetAmount,
-                            LiveDealerAmount =
-                                x.Vip.LiveDealerRebate * liveDealerValidBetAmount / 100,
-                            SlotRebate = x.Vip.SlotRebate,
-                            SlotValidBetAmount = slotValidBetAmount,
-                            SlotAmount =
-                                x.Vip.SlotRebate * slotValidBetAmount / 100,
-                            CardGameRebate = x.Vip.CardGameRebate,
-                            CardGameValidBetAmount = cardGameValidBetAmount,
-                            CardGameAmount =
-                                x.Vip.CardGameRebate * cardGameValidBetAmount / 100,
-                            SportsRebate = x.Vip.SportsRebate,
-                            SportsValidBetAmount = sportsValidBetAmount,
-                            SportsAmount =
-                                x.Vip.SportsRebate * sportsValidBetAmount / 100,
-                            VirtualSportsRebate = x.Vip.CardGameRebate,
-                            VirtualSportsValidBetAmount = virtualSportsValidBetAmount,
-                            VirtualSportsAmount =
-                                x.Vip.VirtualSportsRebate * virtualSportsValidBetAmount / 100,
+                            AgentDividendPercentage = x.Agent.DividendPercentage,
+                            VipSportsRebatePercentage = x.Vip.SportsRebatePercentage,
+                            VipVirtualSportsRebatePercentage = x.Vip.CardGameRebatePercentage,
+                            VipLiveDealerRebatePercentage = x.Vip.LiveDealerRebatePercentage,
+                            VipCardGameRebatePercentage = x.Vip.CardGameRebatePercentage,
+                            VipLotteryRebatePercentage = x.Vip.LotteryRebatePercentage,
+                            VipSlotRebatePercentage = x.Vip.SlotRebatePercentage,
+                            Turnover = aggregate.Sum(a => a.r.Turnover),
+                            WinLoss = aggregate.Sum(a => a.r.WinLoss),
+                            VipRebateAmount = x.Vip.SportsRebatePercentage * aggregate.Where(a =>
+                                        a.r.GameType == GameType.Sportsbook || a.r.GameType == GameType.ESports)
+                                    .Sum(a => a.r.Turnover) / 100 +
+                                x.Vip.VirtualSportsRebatePercentage * aggregate
+                                    .Where(a => a.r.GameType == GameType.VirtualSports)
+                                    .Sum(a => a.r.Turnover) / 100 +
+                                x.Vip.LiveDealerRebatePercentage * aggregate
+                                    .Where(a => a.r.GameType == GameType.LiveDealer)
+                                    .Sum(a => a.r.Turnover) / 100 +
+                                x.Vip.CardGameRebatePercentage * aggregate.Where(a => a.r.GameType == GameType.CardGame)
+                                    .Sum(a => a.r.Turnover) / 100 +
+                                x.Vip.SlotRebatePercentage * aggregate.Where(a =>
+                                        a.r.GameType == GameType.Fishing || a.r.GameType == GameType.Arcade ||
+                                        a.r.GameType == GameType.Slot || a.r.GameType == GameType.TableGame)
+                                    .Sum(a => a.r.Turnover) / 100 +
+                                x.Vip.LotteryRebatePercentage * aggregate.Where(a => a.r.GameType == GameType.Lottery)
+                                    .Sum(a => a.r.Turnover) / 100,
                             CreatedOn = DateTimeOffset.Now,
                             ReportDate = reportDate
                         };

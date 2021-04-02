@@ -41,23 +41,27 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.LiveDealerRebate)
+            builder.Property(c => c.LiveDealerRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.SlotRebate)
+            builder.Property(c => c.SlotRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.CardGameRebate)
+            builder.Property(c => c.LotteryRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.SportsRebate)
+            builder.Property(c => c.CardGameRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.VirtualSportsRebate)
+            builder.Property(c => c.SportsRebatePercentage)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.VirtualSportsRebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
