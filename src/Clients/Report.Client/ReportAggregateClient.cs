@@ -23,38 +23,40 @@ namespace Report.Client
         {
         }
 
-        Task<MessageResponse> IReportAggregateClient.CreatePlayerAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.CreatePlayerAggregateAsync(
             CreateUpdatePlayerAggregateModel request)
         {
             var prefix = "Report.CreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<CreateUpdatePlayerAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreateUpdatePlayerAggregateModel, MessageResponse>(HttpMethod.Post,
                 "/api/playerAggregate", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<MessageResponse> IReportAggregateClient.ManualCreatePlayerAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.ManualCreatePlayerAggregateAsync(
             ManualCreateUpdatePlayerAggregateModel request)
         {
             var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<ManualCreateUpdatePlayerAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<ManualCreateUpdatePlayerAggregateModel, MessageResponse>(
+                HttpMethod.Post,
                 "/api/playerAggregate/manual", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<MessageResponse> IReportAggregateClient.CreateUpdateRoundAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.CreateUpdateRoundAggregateAsync(
             CreateUpdateRoundAggregateModel request)
         {
             var prefix = "Report.CreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<CreateUpdateRoundAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreateUpdateRoundAggregateModel, MessageResponse>(HttpMethod.Post,
                 "/api/roundAggregate", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<MessageResponse> IReportAggregateClient.ManualCreateUpdateRoundAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.ManualCreateUpdateRoundAggregateAsync(
             ManualCreateUpdateRoundAggregateModel request)
         {
             var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<ManualCreateUpdateRoundAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<ManualCreateUpdateRoundAggregateModel, MessageResponse>(
+                HttpMethod.Post,
                 "/api/roundAggregate/manual", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
