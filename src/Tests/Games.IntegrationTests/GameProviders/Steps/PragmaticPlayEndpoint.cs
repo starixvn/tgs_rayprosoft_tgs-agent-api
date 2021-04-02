@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +15,7 @@ using TechTalk.SpecFlow;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -24,10 +27,12 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.Models.PragmaticPlay.Common;
+using TGS.Shared.Game.Models.PragmaticPlay.Enums;
 using TGS.Shared.Game.Models.PragmaticPlay.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
 using TGS.Tests.ApiClients.Operators;
@@ -164,9 +169,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var configuration = await GetConfigurationAsync();
 
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
             var model = new AuthorizePlayerRequest
             {
-                Token = string.Empty,
+                Token = encryptedToken,
                 ProviderId = configuration.ProviderId
             };
 
@@ -176,6 +185,175 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.AuthorizePlayerAsync(request).ConfigureAwait(false);
 
+            Set(SR.Response, response);
+        }
+
+        [When(@"I request the player balance")]
+        public async Task WhenIRequestThePlayerBalanceAsync()
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var model = new GetBalanceRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.GetBalanceAsync(request).ConfigureAwait(false);
+
+            Set(SR.Response, response);
+        }
+
+        [Given(@"I place bet of \$(.*) for game ""(.*)""")]
+        [When(@"I place bet of \$(.*) for game ""(.*)""")]
+        public async Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalRoundId = Guid.NewGuid().ToString();
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var model = new PlaceBetRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                RoundDetails = string.Empty,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.PlaceBetAsync(request).ConfigureAwait(false);
+
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        [Given(@"I win bet for \$(.*)")]
+        [When(@"I win bet for \$(.*)")]
+        public async Task WhenIWinBetForAsync(decimal amount)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalGameId = Get<string>(SR.ExternalGameId);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var model = new ResultRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                RoundDetails = string.Empty,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.ResultAsync(request).ConfigureAwait(false);
+
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        [Given(@"I lose bet")]
+        [When(@"I lose bet")]
+        public async Task WhenILoseBetAsync()
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalGameId = Get<string>(SR.ExternalGameId);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+
+            var model = new EndRoundRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                GameId = externalGameId,
+                RoundId = externalRoundId
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.EndRoundAsync(request).ConfigureAwait(false);
+
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        [Given(@"I cancel transaction")]
+        [When(@"I cancel transaction")]
+        public async Task WhenICancelTransaction()
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
+
+            var model = new RefundRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                GameId = betRequest.GameId,
+                RoundId = betRequest.RoundId,
+                Reference = betRequest.Reference,
+                Amount = betRequest.Amount,
+                RoundDetails = string.Empty,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.RefundAsync(request).ConfigureAwait(false);
+
+            Set(SR.Request, request);
             Set(SR.Response, response);
         }
 
@@ -200,23 +378,117 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"I will get error authorize response and no player balance")]
-        public void ThenIWillGetErrorAuthorizeResponseAndNoPlayerBalance() => ScenarioContext.Current.Pending();
+        public void ThenIWillGetErrorAuthorizeResponseAndNoPlayerBalance()
+        {
+            var response = Get<AuthorizePlayerResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().NotBe(GameApiError.Success);
+            response.Balance.Should().Be(0);
+        }
+
+        [Then(@"player balance response will be for \$(.*)")]
+        public void ThenPlayerBalanceResponseWillBeFor(decimal expectedBalance)
+        {
+            var response = Get<GetBalanceResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().Be(GameApiError.Success);
+            response.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"I will receive bet response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<PlaceBetResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().Be(GameApiError.Success);
+            response.Balance.Should().Be(expectedBalance);
+            response.TransactionId.Should().NotBeNull();
+        }
+
+        [Then(@"I will receive result response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveResultResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<ResultResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().Be(GameApiError.Success);
+            response.Balance.Should().Be(expectedBalance);
+            response.TransactionId.Should().NotBeNull();
+        }
+
+        [Then(@"I will receive endRound response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveEndRoundResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<EndRoundResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().Be(GameApiError.Success);
+            response.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"I will receive refund response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveRefundResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<RefundResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().Be(GameApiError.Success);
+            response.TransactionId.Should().NotBeNull();
+        }
+
+        [Then(@"player wallet database record will be for \$(.*)")]
+        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
+        {
+            var wallet = await GetPlayerWalletAsync(_serviceProvider);
+
+            wallet.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
+        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeFor(GameActionType type, decimal amount)
+        {
+            var externalRoundId = Get<int>(SR.ExternalRoundId);
+            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var ga = await (
+                from act in db.GameActions.AsQueryable()
+                join r in db.Rounds on act.RoundId equals r.Id
+                where r.ExternalRoundId == externalRoundId.ToString() &&
+                    act.ExternalTransactionId == externalTransactionId
+                select act).AsNoTracking().FirstAsync();
+
+            Set(SR.GameAction, ga);
+
+            ga.Should().NotBeNull();
+            ga.Type.Should().Be(type);
+            ga.Amount.Should().Be(amount);
+        }
 
 
         #region Private Members
 
-        private async ValueTask<PragmaticPlayConfiguration> GetConfigurationAsync()
-        {
-            var settingOperations = _serviceProvider.GetRequiredService<ISettingOperations>();
-            return await settingOperations
-                .GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts.GameProviderConfigurations
-                    .PragmaticPlay).ConfigureAwait(false);
-        }
+        private async ValueTask<PragmaticPlayConfiguration> GetConfigurationAsync() =>
+            await GetSettingAsync<PragmaticPlayConfiguration>(_serviceProvider,
+                SettingConsts.GameProviderConfigurations.PragmaticPlay).ConfigureAwait(false);
 
         private string ComputeHash<T>(T model, string secretKey) where T : HashRequest
         {
             var provider = _serviceProvider.GetRequiredService<IPragmaticPlayHashProvider>();
             return provider.ComputeHash(model, secretKey);
+        }
+
+        private Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
+        {
+            var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
+            var tokenData = Get<PlayerTokenData>(key);
+            var loginRecordId = tokenData?.LoginRecordId ?? Guid.Empty;
+
+            var tokenProvider = _serviceProvider.GetRequiredService<ITokenProvider>();
+            return tokenProvider.EncryptAsync(loginRecordId);
         }
 
         #endregion

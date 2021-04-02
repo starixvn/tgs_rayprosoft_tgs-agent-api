@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ namespace TGS.Tests.ApiClients.GameProviders
     {
         ValueTask<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request);
 
-        ValueTask<BalanceResponse> GetBalanceAsync(GetBalanceRequest request);
+        ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request);
 
         ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
 
@@ -41,20 +40,40 @@ namespace TGS.Tests.ApiClients.GameProviders
                 .ConfigureAwait(false);
         }
 
-        ValueTask<EndRoundResponse> IPragmaticPlayApiClient.EndRoundAsync(EndRoundRequest request) =>
-            throw new NotImplementedException();
+        async ValueTask<GetBalanceResponse> IPragmaticPlayApiClient.GetBalanceAsync(GetBalanceRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<GetBalanceResponse>($"{RoutePrefix}/balance", parameters)
+                .ConfigureAwait(false);
+        }
 
-        ValueTask<BalanceResponse> IPragmaticPlayApiClient.GetBalanceAsync(GetBalanceRequest request) =>
-            throw new NotImplementedException();
+        async ValueTask<PlaceBetResponse> IPragmaticPlayApiClient.PlaceBetAsync(PlaceBetRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<PlaceBetResponse>($"{RoutePrefix}/bet", parameters)
+                .ConfigureAwait(false);
+        }
 
-        ValueTask<PlaceBetResponse> IPragmaticPlayApiClient.PlaceBetAsync(PlaceBetRequest request) =>
-            throw new NotImplementedException();
+        async ValueTask<RefundResponse> IPragmaticPlayApiClient.RefundAsync(RefundRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<RefundResponse>($"{RoutePrefix}/refund", parameters)
+                .ConfigureAwait(false);
+        }
 
-        ValueTask<RefundResponse> IPragmaticPlayApiClient.RefundAsync(RefundRequest request) =>
-            throw new NotImplementedException();
+        async ValueTask<ResultResponse> IPragmaticPlayApiClient.ResultAsync(ResultRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<ResultResponse>($"{RoutePrefix}/result", parameters)
+                .ConfigureAwait(false);
+        }
 
-        ValueTask<ResultResponse> IPragmaticPlayApiClient.ResultAsync(ResultRequest request) =>
-            throw new NotImplementedException();
+        async ValueTask<EndRoundResponse> IPragmaticPlayApiClient.EndRoundAsync(EndRoundRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<EndRoundResponse>($"{RoutePrefix}/endround", parameters)
+                .ConfigureAwait(false);
+        }
 
         private Dictionary<string, string> ConvertToKeyValue(object request)
         {
