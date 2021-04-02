@@ -34,8 +34,8 @@ namespace TGS.Services.GameOperations
         private TransactionSettings PlaceBetTransactionSettings => new()
         {
             GameActionType = GameActionType.PlaceBet,
-            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNotPositive,
-            HasWalletUpdate = _ => true,
+            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNegative,
+            HasWalletUpdate = t => t.Amount > 0,
             MustHaveExistingRound = false,
             MustHaveReferencedTransaction = false,
             GetTransactionAmount = a => -a // Get Transaction Amount - set parameter as negative
