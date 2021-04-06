@@ -217,6 +217,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         LoseBet = GameActionType.LoseBet,
         FreeBet = GameActionType.FreeBet,
         TieBet = GameActionType.TieBet,
+        WinJackpot = GameActionType.WinJackpot,
         Totals = short.MaxValue
     }
 

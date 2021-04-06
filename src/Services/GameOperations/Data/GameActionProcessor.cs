@@ -657,10 +657,12 @@ namespace TGS.Services.GameOperations.Data
 
         private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
         {
-            var hasFreeBet = current.Type == FreeBet ||
-                s.PreviousActions.Any(act => act.Type == FreeBet);
+            var gameActionWithSingleRound =
+                s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
+                current.Type == WinJackpot;
 
-            var clientStatus = _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, hasFreeBet);
+            var clientStatus =
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound);
 
             round.Status = s.NewRoundStatus;
             round.ClientStatus = clientStatus;

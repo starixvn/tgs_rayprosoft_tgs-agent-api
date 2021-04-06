@@ -47,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             var value = _json.SerializeToString(request, options);
             var items = _json.DeserializeFromString<Dictionary<string, object>>(value, options);
             var parameters = items.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))
-                .ToDictionary(p => p.Key, p => p.Value.ToString());
+                .ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
 
             return ComputeHash(parameters, additionalData);
         }

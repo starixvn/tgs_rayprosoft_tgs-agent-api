@@ -21,8 +21,5 @@ namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 
         [JsonPropertyName("timestamp")]
         public long Timestamp { get; init; }
-
-        [JsonPropertyName("roundDetails")]
-        public string RoundDetails { get; init; }
     }
 }

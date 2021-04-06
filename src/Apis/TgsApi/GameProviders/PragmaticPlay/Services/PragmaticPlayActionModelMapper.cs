@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
@@ -23,6 +26,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         BetData Request(string playerCode, GameProviderConfigurationData data, RefundRequest request);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, JackpotWinRequest request);
+
         AuthorizePlayerResponse Response(string playerCode, string token, PlayerValidationResult result);
 
         GetBalanceResponse Response(GetBalanceResult result);
@@ -34,11 +39,19 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         EndRoundResponse EndRoundResponse(decimal balance);
 
         RefundResponse RefundResponse(BetResult result);
+
+        JackpotWinResponse JackpotWinResponse(BetResult result);
     }
 
     public sealed class PragmaticPlayActionModelMapper : IPragmaticPlayActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.PragmaticPlay;
+        private readonly IJsonSerializationProvider _json;
+
+        public PragmaticPlayActionModelMapper(IJsonSerializationProvider json)
+        {
+            _json = json;
+        }
 
         PlayerValidationData IPragmaticPlayActionModelMapper.Request(string playerCode, PlatformType platformType) =>
             new()
@@ -59,10 +72,37 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 ExternalTransactionId = request.Reference,
                 ExternalGameActionGroupId = request.RoundId,
                 Amount = request.Amount,
+                Description = AddCustomDescription(AddJackpotData()),
+                RoundDetail = AddCustomDescription(AddBonusData()),
                 TimeStamp = GetTimestamp(request.Timestamp)
             };
 
             return GetBetData(playerCode, data, new[] {transaction});
+
+            Dictionary<string, object> AddJackpotData()
+            {
+                if (request.JackpotId.IsNullOrEmpty())
+                {
+                    return null;
+                }
+
+                return new()
+                {
+                    {nameof(request.JackpotId), request.JackpotId},
+                    {nameof(request.JackpotContribution), request.JackpotContribution},
+                    {nameof(request.JackpotDetails), request.JackpotDetails}
+                };
+            }
+
+            Dictionary<string, object> AddBonusData()
+            {
+                if (request.BonusCode.IsNullOrEmpty())
+                {
+                    return null;
+                }
+
+                return new() {{nameof(request.BonusCode), request.BonusCode}};
+            }
         }
 
         BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
@@ -120,6 +160,28 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 ExternalGameActionGroupId = request.RoundId,
                 GameActionType = GameActionType.CancelTransaction,
                 RoundClosed = true,
+                TimeStamp = GetTimestamp(request.Timestamp)
+            };
+
+            return GetBetData(playerCode, data, new[] {transaction});
+        }
+
+        BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            JackpotWinRequest request)
+        {
+            var extraData = new Dictionary<string, object> {{nameof(request.JackpotId), request.JackpotId}};
+
+            var transaction = new TransactionData
+            {
+                ExternalBetId = request.Reference,
+                ExternalGameId = request.GameId,
+                ExternalRoundId = $"{request.RoundId}_jackpot",
+                ExternalTransactionId = request.Reference,
+                ExternalGameActionGroupId = request.RoundId,
+                GameActionType = GameActionType.WinJackpot,
+                Amount = request.Amount,
+                RoundClosed = true,
+                RoundDetail = AddCustomDescription(extraData),
                 TimeStamp = GetTimestamp(request.Timestamp)
             };
 
@@ -195,6 +257,21 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             };
         }
 
+        JackpotWinResponse IPragmaticPlayActionModelMapper.JackpotWinResponse(BetResult result)
+        {
+            var transaction = result.Transactions.FirstOrDefault();
+
+            return new()
+            {
+                Error = GameApiError.Success,
+                Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
+                TransactionId = transaction?.InternalTransactionId?.ToString(),
+                Currency = result.GameProviderCurrencyCode,
+                Balance = result.Balance,
+                Bonus = 0
+            };
+        }
+
         private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
             TransactionData[] transactions) =>
             new()
@@ -224,5 +301,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         private static string GetTransactionResponseDescription(bool? isDuplicate) =>
             isDuplicate == true ? "Bet is duplicate" : GameApiError.Success.ToString();
+
+        private string AddCustomDescription(Dictionary<string, object> items) =>
+            items == null || items.Count == 0 ? null : _json.SerializeToString(items, new() {WriteIndented = false});
     }
 }

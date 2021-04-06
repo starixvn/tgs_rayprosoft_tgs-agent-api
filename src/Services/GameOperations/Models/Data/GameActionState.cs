@@ -21,7 +21,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
             GameActionType = td.GameActionType;
             Timestamp = td.TimeStamp;
-            Description = td.Description;
+            Description = td.Description ?? string.Empty;
             ExternalBetId = td.ExternalBetId;
             ExternalRoundId = td.ExternalRoundId;
             ExternalTransactionId = td.ExternalTransactionId;

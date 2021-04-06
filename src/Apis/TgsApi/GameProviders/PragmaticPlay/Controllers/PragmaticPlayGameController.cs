@@ -164,5 +164,19 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
             return _map.RefundResponse(r);
         }
+
+        [HttpPost]
+        [Route("jackpotwin")]
+        public async Task<JackpotWinResponse> WinJackpotAsync([FromForm] JackpotWinRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            return _map.JackpotWinResponse(r);
+        }
     }
 }

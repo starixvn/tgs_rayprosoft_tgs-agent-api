@@ -27,7 +27,8 @@ namespace TGS.Services.GameOperations
                 {GameActionType.LoseBet, LoseBetTransactionSettings},
                 {GameActionType.FreeBet, FreeBetTransactionSettings},
                 {GameActionType.TieBet, TieBetTransactionSettings},
-                {GameActionType.CancelTransaction, CancelTransactionSettings}
+                {GameActionType.CancelTransaction, CancelTransactionSettings},
+                {GameActionType.WinJackpot, WinJackpotTransactionSettings}
             };
         }
 
@@ -90,6 +91,16 @@ namespace TGS.Services.GameOperations
             MustHaveReferencedTransaction = true,
             GetTransactionAmount =
                 a => -a // Get Transaction Amount - inverse the sign (it will be set by the referenced amount)
+        };
+
+        private TransactionSettings WinJackpotTransactionSettings => new()
+        {
+            GameActionType = GameActionType.WinJackpot,
+            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNotPositive,
+            HasWalletUpdate = _ => true,
+            MustHaveExistingRound = false,
+            MustHaveReferencedTransaction = false,
+            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
         };
 
         TransactionSettings ITransactionSettingsGenerator.GetTransactionSettings(GameActionType type)

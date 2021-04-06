@@ -79,7 +79,7 @@ namespace TGS.Tests.ApiClients.GameProviders
         {
             var value = Json.SerializeToString(request, request.GetType());
             var items = Json.DeserializeFromString<Dictionary<string, object>>(value);
-            return items.ToDictionary(p => p.Key, p => p.Value.ToString());
+            return items.ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
         }
     }
 }

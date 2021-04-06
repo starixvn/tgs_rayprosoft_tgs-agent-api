@@ -106,8 +106,7 @@ namespace TGS.Services.GameOperations.Calculators
 
         private static (decimal BetAmount, decimal ValidBetAmount, decimal SettleAmount, decimal TieBetAdjustment,
             decimal Turnover, decimal WinLoss, decimal UnsettleBets) CalculateClosingActionBetValues(
-                bool hasTurnoverOnTieBet,
-                BetActionData current, IList<BetActionData> previousActions)
+                bool hasTurnoverOnTieBet, BetActionData current, IList<BetActionData> previousActions)
         {
             var allActions = GetAllActions(current, previousActions);
 
@@ -162,7 +161,7 @@ namespace TGS.Services.GameOperations.Calculators
         private static decimal CalculateSettleAmount(IList<BetActionData> allActions) =>
             // sum all amounts of settle actions without cancelled, include free bets
             allActions
-                .Where(a => a.Type.IsSettleBet() && a.IsCancelled == false)
+                .Where(a => (a.Type.IsSettleBet() || a.Type == WinJackpot) && a.IsCancelled == false)
                 .Sum(a => a.Amount);
 
         private static decimal CalculateTieBetAdjustment(bool hasTurnoverOnTieBet, IList<BetActionData> allActions) =>
