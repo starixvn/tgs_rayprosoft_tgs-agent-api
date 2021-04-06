@@ -361,6 +361,45 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
+        [When(@"I win jackpot of \$(.*) for game ""(.*)""")]
+        public async Task WhenIWinJackpotOfForGame(decimal amount, string externalGameId)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalRoundId = Guid.NewGuid().ToString();
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var model = new JackpotWinRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                JackpotId = externalTransactionId,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.WinJackpotAsync(request).ConfigureAwait(false);
+
+            Set(SR.ExternalRoundId, $"{externalRoundId}_jackpot");
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
         [Then(@"I will get authorize response and player balance will be \$(.*)")]
         public async Task ThenIWillGetAuthorizeResponseAndPlayerBalanceWillBe(decimal balance)
         {
@@ -437,6 +476,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public void ThenIWillReceiveRefundResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
         {
             var response = Get<RefundResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Error.Should().Be(GameApiError.Success);
+            response.TransactionId.Should().NotBeNull();
+        }
+
+        [Then(@"I will receive jackpot win response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveJackpotWinResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<JackpotWinResponse>(SR.Response);
 
             response.Should().NotBeNull();
             response.Error.Should().Be(GameApiError.Success);

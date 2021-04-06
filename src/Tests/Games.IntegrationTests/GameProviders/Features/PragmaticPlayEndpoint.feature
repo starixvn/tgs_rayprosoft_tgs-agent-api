@@ -63,3 +63,11 @@ Scenario: 06 - Cancel transaction
 	Then I will receive refund response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
+
+Scenario: 07 - Win jackpot
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	When I win jackpot of $1000 for game "vs50aladdin"
+	Then I will receive jackpot win response of no error and balance of $1100
+		And player wallet database record will be for $1100
+		And game action will be recorded in the database of type "WinJackpot" for $1000
