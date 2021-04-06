@@ -23,6 +23,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
   </ItemGroup>
 
 </Project>

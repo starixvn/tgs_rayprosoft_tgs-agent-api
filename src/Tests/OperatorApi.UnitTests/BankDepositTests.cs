@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
 using NUnit.Framework;
+using TGS.Apis.FileService.Clients;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BankDeposit;
 
@@ -148,6 +151,37 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqWalletRepository.Verify(
                 fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Submit_BankDepositForm_Should_Success()
+        {
+            var moqFileServiceClient = new Mock<IFileServiceClient>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
+
+            var sut = new SubmitBankDepositFormCommandService(
+                moqFileServiceClient.Object,
+                moqWalletRepository.Object);
+
+            var playerCode = "ThisIsPlayerCode";
+            var formId = Guid.NewGuid();
+            var contentType = "image/jpeg";
+            var fileStream = new MemoryStream();
+
+            var command = new SubmitBankDepositFormCommand(
+                playerCode,
+                formId,
+                contentType,
+                fileStream);
+
+            await sut.ExecuteAsync(command);
+
+            moqFileServiceClient.Verify(
+                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
+                Times.Exactly(1));
+            moqWalletRepository.Verify(
+                fake => fake.SubmitRemittanceReceiptToDepositFormAsync(It.IsAny<Guid>(), It.IsAny<string>()),
                 Times.Exactly(1));
         }
     }

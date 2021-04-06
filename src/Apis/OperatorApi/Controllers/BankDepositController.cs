@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,8 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public ValueTask SubmitDepositRequestAsync(
+        [TgsResponseWrapper]
+        public async ValueTask<Guid> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateBankDepositFormCommand> createDepositFormService,
             [FromBody] SubmitDepositRequest request)
         {
@@ -34,11 +34,16 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.BankAccount,
                 request.Amount);
 
-            return createDepositFormService.ExecuteAsync(command);
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
 
         [HttpGet("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public async Task<DepositFormResponse> GetDepositFormAsync(
             [FromServices] IGetService<GetBankDepositFormQuery, BankDepositForm> getBankDepositService,
             [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannel>> getAllPaymentChannelService,
@@ -78,12 +83,27 @@ namespace TGS.Apis.OperatorApi.Controllers
                 BankName = brandPayment.ChannelName
             };
         }
-        [HttpPost]
+
+        [HttpPost("{formId}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public void SubmitDepositForm(IFormFile remittanceReceipt)
+        [TgsResponseWrapper]
+        public ValueTask SubmitDepositFormAsync(
+            [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBandDepositFormCommandService,
+            Guid formId,
+            [FromForm(Name = "file")] IFormFile remittanceReceipt)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
+            var contentType = remittanceReceipt.ContentType;
+            using var fileStream = remittanceReceipt.OpenReadStream();
+
+            var command = new SubmitBankDepositFormCommand(
+                playerTokenData.PlayerCode,
+                formId,
+                contentType,
+                fileStream);
+
+            return submitBandDepositFormCommandService.ExecuteAsync(command);
         }
     }
 }

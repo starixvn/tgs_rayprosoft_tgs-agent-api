@@ -1,29 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Apis.FileService.Clients
 {
-    class FileServiceClient
+    internal class FileServiceClient : IFileServiceClient
     {
         private readonly HttpClient _httpClient;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
-        public FileServiceClient(HttpClient httpClient)
+        public FileServiceClient(HttpClient httpClient, IJsonSerializationProvider jsonSerializationProvider)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
-        public async Task UploadFileAsync(string path, Stream fileStream)
+        public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream)
         {
             using var uploadContent = new MultipartFormDataContent();
 
             using var fileContent = new StreamContent(fileStream);
 
             uploadContent.Add(fileContent, "file");
+            uploadContent.Headers.ContentType = contentType;
 
             var response = await _httpClient
                 .PostAsync(path, uploadContent)
@@ -33,7 +35,9 @@ namespace TGS.Apis.FileService.Clients
 
             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(json);
 
+            return view;
         }
     }
 }

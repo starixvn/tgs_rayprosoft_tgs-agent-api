@@ -21,11 +21,13 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask CreateDepositFormAsync(BankDepositForm form)
+        public async ValueTask<Guid> CreateDepositFormAsync(BankDepositForm form)
         {
+            var formId = Guid.NewGuid();
+
             _tgsRepository.DepositForms.Add(new DepositForm
             {
-                Id = Guid.NewGuid(),
+                Id = formId,
                 PlayerCode = form.PlayerCode,
                 BrandId = form.BrandId,
                 BrandPaymentId = form.BrandPaymentId,
@@ -34,6 +36,8 @@ namespace TGS.Operator.Repositories
             });
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+
+            return formId;
         }
 
         public async ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode)
@@ -77,6 +81,15 @@ namespace TGS.Operator.Repositories
             var data = await _tgsRepository.DepositForms.FindAsync(id).ConfigureAwait(false);
 
             return new BankDepositForm(data.PlayerCode, data.BrandId, data.BrandPaymentId, data.BankAccount, data.Amount);
+        }
+
+        public async ValueTask SubmitRemittanceReceiptToDepositFormAsync(Guid formId, string remittanceReceiptFileId)
+        {
+            var formData = await _tgsRepository.DepositForms.FindAsync(formId).ConfigureAwait(false);
+
+            formData.Status = 1000;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

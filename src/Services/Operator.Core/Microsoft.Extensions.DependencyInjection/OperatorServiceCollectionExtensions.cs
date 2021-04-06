@@ -36,7 +36,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
                 .AddFileServiceClient((sp, httpClient) =>
                 {
+                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
+                    httpClient.BaseAddress = options.FileServiceBaseUrl;
                 });
 
             var opConfiguration = new OperatorConfiguration(services);

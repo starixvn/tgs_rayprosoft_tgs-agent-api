@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddFileServiceClient(this IServiceCollection services, Action<IServiceProvider, HttpClient> configClient)
             => services
                 .AddHttpClient<FileServiceClient>(configClient)
-                .Services;
+                .Services
+                .AddTransient<IFileServiceClient, FileServiceClient>();
     }
 }
