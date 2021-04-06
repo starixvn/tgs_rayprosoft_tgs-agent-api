@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TGS.Apis.FileService.Controllers.Messages
 {
-    public class FileViewModel
+    public record FileViewModel
     {
         public string Id { get; init; }
 

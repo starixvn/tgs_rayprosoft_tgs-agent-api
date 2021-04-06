@@ -18,7 +18,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class BankDepositController : ControllerBase
     {
-        [HttpPost]
+        [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public ValueTask SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateBankDepositFormCommand> createDepositFormService,
@@ -77,6 +77,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 BankAccount = bankInfo["bankAccount"].ToString(),
                 BankName = brandPayment.ChannelName
             };
+        }
+        [HttpPost]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        public void SubmitDepositForm(IFormFile remittanceReceipt)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
         }
     }
 }

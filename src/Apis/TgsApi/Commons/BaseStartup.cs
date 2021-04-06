@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.Commons
             services.AddNats(Configuration)
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddJson()
+                .AddSystemJsonSerializer()
                 .AddRedis()
                 .AddSecurity()
                 .AddTransactions()

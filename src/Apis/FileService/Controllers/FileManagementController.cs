@@ -33,8 +33,11 @@ namespace TGS.Apis.FileService.Controllers
 
             throw new NotImplementedException();
         }
+
         [HttpPost("{*path}")]
-        public async Task<FileViewModel> UploadFile(string path, IFormFile file)
+        public async Task<FileViewModel> UploadFileAsync(
+            string path,
+            [FromForm(Name = "file")] IFormFile file)
         {
             var meta = await _fileManager
                 .SaveAsync(path, file.ContentType, file.Length, file.OpenReadStream())
