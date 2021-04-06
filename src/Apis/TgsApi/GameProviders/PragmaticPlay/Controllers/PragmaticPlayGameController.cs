@@ -178,5 +178,19 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
             return _map.JackpotWinResponse(r);
         }
+
+        /// <summary>
+        ///     This is a summary of all bonus win, we don't do anything about balance
+        ///     change as it's handled already in Bet / Result
+        /// </summary>
+        [HttpPost]
+        [Route("bonuswin")]
+        public async Task<BonusWinResponse> WinBonusAsync([FromForm] BonusWinRequest request)
+        {
+            var r = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
+                .ConfigureAwait(false);
+
+            return _map.BonusWinResponse(request, r);
+        }
     }
 }

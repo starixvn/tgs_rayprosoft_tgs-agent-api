@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -23,6 +25,8 @@ namespace TGS.Tests.ApiClients.GameProviders
         ValueTask<RefundResponse> RefundAsync(RefundRequest request);
 
         ValueTask<JackpotWinResponse> WinJackpotAsync(JackpotWinRequest request);
+
+        ValueTask<BonusWinResponse> WinBonusAsync(BonusWinRequest request);
     }
 
     public sealed class PragmaticPlayApiClient : BaseApiClient, IPragmaticPlayApiClient
@@ -84,10 +88,23 @@ namespace TGS.Tests.ApiClients.GameProviders
                 .ConfigureAwait(false);
         }
 
+        async ValueTask<BonusWinResponse> IPragmaticPlayApiClient.WinBonusAsync(BonusWinRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<BonusWinResponse>($"{RoutePrefix}/bonuswin", parameters)
+                .ConfigureAwait(false);
+        }
+
         private Dictionary<string, string> ConvertToKeyValue(object request)
         {
-            var value = Json.SerializeToString(request, request.GetType());
-            var items = Json.DeserializeFromString<Dictionary<string, object>>(value);
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var value = Json.SerializeToString(request, request.GetType(), options);
+            var items = Json.DeserializeFromString<Dictionary<string, object>>(value, options);
             return items.ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
         }
     }

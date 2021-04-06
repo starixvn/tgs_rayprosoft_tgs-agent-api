@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -43,7 +44,12 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         string IPragmaticPlayHashProvider.ComputeHash<T>(T request, params string[] additionalData)
         {
-            var options = new JsonSerializerOptions {WriteIndented = false};
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
             var value = _json.SerializeToString(request, options);
             var items = _json.DeserializeFromString<Dictionary<string, object>>(value, options);
             var parameters = items.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))

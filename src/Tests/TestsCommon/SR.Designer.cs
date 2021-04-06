@@ -79,6 +79,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Amount.
+        /// </summary>
+        public static string Amount {
+            get {
+                return ResourceManager.GetString("Amount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AutoCloseRound.
         /// </summary>
         public static string AutoCloseRound {
@@ -93,6 +102,15 @@ namespace TGS.Tests.TestsCommon {
         public static string BetValuesResults {
             get {
                 return ResourceManager.GetString("BetValuesResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BonusCode.
+        /// </summary>
+        public static string BonusCode {
+            get {
+                return ResourceManager.GetString("BonusCode", resourceCulture);
             }
         }
         

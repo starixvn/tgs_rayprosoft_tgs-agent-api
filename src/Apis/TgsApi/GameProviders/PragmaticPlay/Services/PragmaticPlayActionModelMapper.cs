@@ -41,6 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         RefundResponse RefundResponse(BetResult result);
 
         JackpotWinResponse JackpotWinResponse(BetResult result);
+
+        BonusWinResponse BonusWinResponse(BonusWinRequest request, GetBalanceResult r);
     }
 
     public sealed class PragmaticPlayActionModelMapper : IPragmaticPlayActionModelMapper
@@ -272,6 +274,18 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             };
         }
 
+        BonusWinResponse IPragmaticPlayActionModelMapper.BonusWinResponse(BonusWinRequest request,
+            GetBalanceResult result) =>
+            new()
+            {
+                TransactionId = request.Reference,
+                Currency = result.GameProviderCurrencyCode,
+                Balance = result.Balance,
+                Bonus = 0
+            };
+
+        #region Private Method
+
         private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
             TransactionData[] transactions) =>
             new()
@@ -304,5 +318,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         private string AddCustomDescription(Dictionary<string, object> items) =>
             items == null || items.Count == 0 ? null : _json.SerializeToString(items, new() {WriteIndented = false});
+
+        #endregion
     }
 }

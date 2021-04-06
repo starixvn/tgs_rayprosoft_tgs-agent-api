@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
@@ -164,6 +166,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
+        [Given(@"bonus code is ""(.*)""")]
+        public void GivenBonusCodeIs(string bonusCode) => Set(SR.BonusCode, bonusCode);
+
         [When(@"I call authorize endpoint")]
         public async Task WhenICallAuthorizeEndpoint()
         {
@@ -215,80 +220,46 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public async Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        public async Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
+            await PlaceBetAsync(amount, externalGameId);
+
+        [Given(@"I play the bonus for game ""(.*)""")]
+        public async Task GivenIPlayTheBonusForGame(string externalGameId)
         {
-            var configuration = await GetConfigurationAsync();
+            var bonusCode = Get<string>(SR.BonusCode);
+            await PlaceBetAsync(0, externalGameId, bonusCode);
+        }
 
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+        [Given(@"I finish all bonus of (.*) rounds and get total win \$(.*) for game ""(.*)""")]
+        public async Task GivenIFinishAllBonusOfRoundsAndGetTotalWin(int roundCount, decimal totalAmount,
+            string externalGameId)
+        {
+            var bonusCode = Get<string>(SR.BonusCode);
+            var amountOfEachRound = Math.Round(totalAmount / roundCount);
 
-            var externalRoundId = Guid.NewGuid().ToString();
-            var externalTransactionId = Guid.NewGuid().ToString();
-
-            var model = new PlaceBetRequest
+            for (var i = 0; i < roundCount; i++)
             {
-                Token = encryptedToken,
-                ProviderId = configuration.ProviderId,
-                UserId = playerCode,
-                Amount = amount,
-                GameId = externalGameId,
-                Reference = externalTransactionId,
-                RoundId = externalRoundId,
-                RoundDetails = string.Empty,
-                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            };
+                var amount = i == roundCount - 1
+                    ? totalAmount - amountOfEachRound * i
+                    : amountOfEachRound;
 
-            var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+                await PlaceBetAsync(0, externalGameId, bonusCode);
+                await WinBetAsync(amount, bonusCode);
+            }
 
-            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
-            var response = await client.PlaceBetAsync(request).ConfigureAwait(false);
-
-            Set(SR.ExternalRoundId, externalRoundId);
-            Set(SR.ExternalTransactionId, externalTransactionId);
-            Set(SR.ExternalGameId, externalGameId);
-            Set(SR.PlaceBetRequest, request);
-            Set(SR.Request, request);
-            Set(SR.Response, response);
+            Set(SR.Amount, totalAmount);
         }
 
         [Given(@"I win bet for \$(.*)")]
         [When(@"I win bet for \$(.*)")]
-        public async Task WhenIWinBetForAsync(decimal amount)
+        public async Task WhenIWinBetForAsync(decimal amount) =>
+            await WinBetAsync(amount);
+
+        [When(@"I win the bonus of \$(.*)")]
+        public async Task WhenIWinTheBonusOf(decimal amount)
         {
-            var configuration = await GetConfigurationAsync();
-
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-
-            var externalGameId = Get<string>(SR.ExternalGameId);
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var externalTransactionId = Guid.NewGuid().ToString();
-
-            var model = new ResultRequest
-            {
-                Token = encryptedToken,
-                ProviderId = configuration.ProviderId,
-                UserId = playerCode,
-                Amount = amount,
-                GameId = externalGameId,
-                Reference = externalTransactionId,
-                RoundId = externalRoundId,
-                RoundDetails = string.Empty,
-                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            };
-
-            var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
-
-            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
-            var response = await client.ResultAsync(request).ConfigureAwait(false);
-
-            Set(SR.ExternalTransactionId, externalTransactionId);
-            Set(SR.Request, request);
-            Set(SR.Response, response);
+            var bonusCode = Get<string>(SR.BonusCode);
+            await WinBetAsync(amount, bonusCode);
         }
 
         [Given(@"I lose bet")]
@@ -396,6 +367,44 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.ExternalTransactionId, externalTransactionId);
             Set(SR.ExternalGameId, externalGameId);
             Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        [When(@"bet win request is triggered after the bonus are finished")]
+        public async Task WhenBetWinRequestIsTriggeredAfterTheBonusAreFinished()
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var bonusCode = Get<string>(SR.BonusCode);
+            var amount = Get<decimal>(SR.Amount);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalGameId = Get<string>(SR.ExternalGameId);
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var model = new BonusWinRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                BonusCode = bonusCode,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.WinBonusAsync(request).ConfigureAwait(false);
+
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -521,6 +530,49 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ga.Amount.Should().Be(amount);
         }
 
+        [Then(@"bonus code in round detail is as set value")]
+        public async Task ThenBonusCodeInRoundDetailIsAsSetValue()
+        {
+            var bonusCode = Get<string>(SR.BonusCode);
+            var ga = Get<GameAction>(SR.GameAction);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var roundDetail = await (
+                from detail in db.RoundDetails.AsQueryable()
+                where detail.RoundId == ga.RoundId
+                select detail.AdditionalData).AsNoTracking().FirstAsync();
+
+            var json = _serviceProvider.GetRequiredService<IJsonSerializationProvider>();
+            var data = json.DeserializeFromString<Dictionary<string, string>>(roundDetail);
+
+            var isExist = data.TryGetValue("BonusCode", out var code);
+            isExist.Should().BeTrue();
+            code.Should().Be(bonusCode);
+        }
+
+        [Then(@"I will receive bet win response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetWinResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<BonusWinResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Balance.Should().Be(expectedBalance);
+        }
+
+        #region After Scenario
+
+        [After]
+        public void AfterHasBonusWinScenarioAsync()
+        {
+            if (!HasTag("HasBonusWin"))
+            {
+                return;
+            }
+
+            Remove(SR.BonusCode);
+        }
+
+        #endregion
 
         #region Private Members
 
@@ -542,6 +594,82 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var tokenProvider = _serviceProvider.GetRequiredService<ITokenProvider>();
             return tokenProvider.EncryptAsync(loginRecordId);
+        }
+
+        private async ValueTask PlaceBetAsync(decimal amount, string externalGameId, string bonusCode = null)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalRoundId = Guid.NewGuid().ToString();
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var model = new PlaceBetRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                RoundDetails = string.Empty,
+                BonusCode = bonusCode,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.PlaceBetAsync(request).ConfigureAwait(false);
+
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        private async ValueTask WinBetAsync(decimal amount, string bonusCode = null)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalGameId = Get<string>(SR.ExternalGameId);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var model = new ResultRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                RoundDetails = string.Empty,
+                BonusCode = bonusCode,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.ResultAsync(request).ConfigureAwait(false);
+
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
         }
 
         #endregion

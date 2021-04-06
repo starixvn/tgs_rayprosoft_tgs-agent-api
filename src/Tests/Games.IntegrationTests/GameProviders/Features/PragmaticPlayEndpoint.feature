@@ -71,3 +71,25 @@ Scenario: 07 - Win jackpot
 	Then I will receive jackpot win response of no error and balance of $1100
 		And player wallet database record will be for $1100
 		And game action will be recorded in the database of type "WinJackpot" for $1000
+
+@BonusWin
+Scenario: 08.a -  Win Bonus in Bet and Result
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given bonus code is "BigBonus"
+		And I play the bonus for game "vs50aladdin"
+	When I win the bonus of $30
+	Then I will receive result response of no error and balance of $130
+		And player wallet database record will be for $130
+		And game action will be recorded in the database of type "WinBet" for $30
+		And bonus code in round detail is as set value
+
+@BonusWin
+Scenario: 08.b -  Bonus Win
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given bonus code is "BigBonus"
+		And I finish all bonus of 10 rounds and get total win $100 for game "vs50aladdin"
+		And player having balance of $200
+	When bet win request is triggered after the bonus are finished
+	Then I will receive bet win response of no error and balance of $200
