@@ -92,7 +92,9 @@ const ReportContent = ({ brandId }) => {
         deleteCache
     } = usePlayerContributionList({
         ...toApiParams(state),
+        /*
         sortby: "username",
+        */
         from,
         to: startOfNextDay(to)
     })

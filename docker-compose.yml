@@ -147,6 +147,8 @@ services:
       - 5051:80
     networks:
       tgs:
+        aliases:
+          - report.api
     depends_on:
       - postgres
 

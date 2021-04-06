@@ -82,7 +82,7 @@ const ReportContent = ({ brandId }) => {
         brandId,
         pageSize: QueryMaxRangeDays,
         agentType: undefined,
-        includeAgent: true,
+        includeAgents: true,
         from: dateRange.start,
         to: dateRange.end
     })
@@ -102,13 +102,17 @@ const ReportContent = ({ brandId }) => {
         error,
         mutate,
         deleteCache
-    } = useAgentContributionList({
-        ...toApiParams(state),
-        username,
-        sortby: "username",
-        from,
-        to: startOfNextDay(to)
-    })
+    } = useAgentContributionList(
+        username
+            ? {
+                  ...toApiParams(state),
+                  username,
+                  sortby: "username",
+                  from,
+                  to: startOfNextDay(to)
+              }
+            : undefined
+    )
 
     let DataRetentionDays = 180
     let minDate = subDays(dateRange.start, DataRetentionDays)
@@ -130,7 +134,7 @@ const ReportContent = ({ brandId }) => {
                     brandId={brandId}
                     agentUsername={agentUsername}
                     agentType={state?.agentType}
-                    includeAgent={state?.includeAgent}
+                    includeAgents={state?.includeAgents}
                     start={from}
                     end={to}
                     minDate={minDate}
@@ -140,14 +144,14 @@ const ReportContent = ({ brandId }) => {
                     search={({
                         agentUsername,
                         agentType,
-                        includeAgent,
+                        includeAgents,
                         start,
                         end
                     }) => {
                         let newState = {
                             pageIndex: 0,
                             agentType,
-                            includeAgent,
+                            includeAgents,
                             from: start,
                             to: end
                         }
@@ -155,9 +159,8 @@ const ReportContent = ({ brandId }) => {
                         if (
                             equals(newState, {
                                 pageIndex,
-                                agentUsername: headOf(usernames),
                                 agentType: state?.agentType,
-                                includeAgent: state?.includeAgent,
+                                includeAgents: state?.includeAgents,
                                 from: state?.from,
                                 to: state?.to
                             })
@@ -170,7 +173,7 @@ const ReportContent = ({ brandId }) => {
                         setState({
                             pageIndex: 0,
                             agentType,
-                            includeAgent,
+                            includeAgents,
                             from: start,
                             to: end
                         })
@@ -248,7 +251,7 @@ const SearchBar = ({
     brandId,
     agentUsername,
     agentType,
-    includeAgent,
+    includeAgents,
     start,
     end,
     minDate,
@@ -262,7 +265,7 @@ const SearchBar = ({
         defaultValues: {
             agentUsername,
             agentType,
-            includeAgent,
+            includeAgents,
             start,
             end
         }
@@ -300,7 +303,7 @@ const SearchBar = ({
                         required
                     />
                     <Checkbox
-                        name="includeAgent"
+                        name="includeAgents"
                         label={includeAgentCheckboxLabel}
                     />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />

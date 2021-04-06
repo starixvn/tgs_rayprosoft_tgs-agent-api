@@ -8,9 +8,9 @@ import {
     usePostFormData
 } from "../../client"
 
-const API = "/api/playerContribution"
+const API = "/api/PlayerReport"
 
 export const usePlayerContributionList = (searchParams) => {
-    let url = searchParams ? urlWith(searchParams, API) : ""
+    let url = searchParams ? urlWith(searchParams, `${API}/contribution`) : ""
     return useGet(url)
 }
