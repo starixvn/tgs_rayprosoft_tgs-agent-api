@@ -1,9 +1,8 @@
 import React from "react"
 import { getTrans } from "../../i18n"
 
-export const Code = "setting"
+export const Code = "settings"
 
-//TODO: seems no need
 export const Update = "update"
 
 export const label = (codes = [], locale = Locales.zh) => {

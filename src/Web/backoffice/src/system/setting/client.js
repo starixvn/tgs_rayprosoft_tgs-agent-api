@@ -23,12 +23,12 @@ export const useAddSystemSetting = (data) => {
     return usePostData(url, data)
 }
 
-export const useUpdateSystemSetting = (id, data) => {
-    let url = id ? `${API}/${id}` : ""
+export const useUpdateSystemSetting = (key, data) => {
+    let url = key && data ? `${API}/${key}` : ""
     return usePutData(url, data)
 }
 
-export const useDeleteSystemSetting = (id) => {
-    let url = id ? `/api/role/${id}` : ""
+export const useDeleteSystemSetting = (key) => {
+    let url = key ? `/api/${key}` : ""
     return useDelete(url)
 }

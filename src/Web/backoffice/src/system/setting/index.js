@@ -9,7 +9,7 @@ import {
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Code } from "./menu"
-import { useSystemSetting } from "./client"
+import { useSystemSettingList } from "./client"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -17,6 +17,8 @@ import { InputField } from "../../input/Input"
 import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
+import { Trans } from "../../i18n"
+import { EditSettingDisclosure, ViewSettingDisclosure } from "./edit"
 
 export { Code }
 
@@ -36,7 +38,7 @@ const Body = () => {
         key: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useSystemSetting(
+    let { isLoading, data, error, mutate, deleteCache } = useSystemSettingList(
         toApiParams(state)
     )
 
@@ -47,7 +49,7 @@ const Body = () => {
             actionBar={
                 <>
                     <SearchBar
-                        key={key}
+                        key={state?.key}
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
@@ -94,7 +96,11 @@ const SearchBar = ({ key = "", search, isLoading }) => {
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
-                    <InputField name="key" showEmptyFieldValueAddonAfter />
+                    <InputField
+                        name="key"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Key"
+                    />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>
@@ -113,6 +119,7 @@ const useColumns = ({ items = [], mutate }) => {
             textColumn({
                 accessor: "description",
                 Header: <Trans zh="说明" en="Description" />,
+                whiteSpace: "normal",
                 disableSortBy: true
             }),
             dateTimeColumn({
@@ -131,27 +138,27 @@ const useColumns = ({ items = [], mutate }) => {
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "UpdatedByUsername",
+                accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
             }),
-            {
+            textColumn({
                 id: "actions",
+                Header: <Trans zh="操作" en="Actions" />,
                 accessor: (row) => row,
-                Cell: ({ value }) => {
+                disableSortBy: true,
+                Cell: ({ value: record }) => {
                     return (
                         <Set orientation="horizontal">
-                            TODO: edit & delete btn
+                            <ViewSettingDisclosure record={record} />
+                            <EditSettingDisclosure
+                                record={record}
+                                onSubmitted={mutate}
+                            />
                         </Set>
                     )
-                },
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
                 }
-            }
+            })
         ],
         [JSON.stringify(items)]
     )
