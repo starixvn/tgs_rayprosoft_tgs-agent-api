@@ -175,13 +175,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 contentType,
                 fileStream);
 
+            moqFileServiceClient
+                .Setup(fake => fake.UploadFileAsync(
+                    It.IsAny<string>(),
+                    It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
+                    It.IsAny<Stream>()))
+                .Returns(ValueTask.FromResult(new FileView
+                {
+                    Id = "testFileId",
+                    ContentType = contentType
+                }));
+
             await sut.ExecuteAsync(command);
 
             moqFileServiceClient.Verify(
                 fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
                 Times.Exactly(1));
             moqWalletRepository.Verify(
-                fake => fake.SubmitRemittanceReceiptToDepositFormAsync(It.IsAny<Guid>(), It.IsAny<string>()),
+                fake => fake.SubmitRemittanceReceiptToDepositFormAsync(It.IsAny<Guid>(), It.Is<string>(x => x == "testFileId")),
                 Times.Exactly(1));
         }
     }

@@ -84,12 +84,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        [HttpPost("{formId}")]
+        [HttpPost("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBandDepositFormCommandService,
-            Guid formId,
+            Guid id,
             [FromForm(Name = "file")] IFormFile remittanceReceipt)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -99,7 +99,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var command = new SubmitBankDepositFormCommand(
                 playerTokenData.PlayerCode,
-                formId,
+                id,
                 contentType,
                 fileStream);
 
