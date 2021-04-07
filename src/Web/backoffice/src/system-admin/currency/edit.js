@@ -53,7 +53,7 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
     )
 
     let title = useTrans({
-        zh: "Edit Currency",
+        zh: "编辑币种",
         en: "Edit Currency"
     })
 
@@ -111,7 +111,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
     )
 
     let title = useTrans({
-        zh: "Create Currency",
+        zh: "新增币种",
         en: "Create Currency"
     })
 
