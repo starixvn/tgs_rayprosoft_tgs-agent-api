@@ -301,11 +301,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
+                        new MenuSetting("Currency")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
                         new MenuSetting("Settings")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
                                 new MenuSetting("Update")
                             }
                         }
