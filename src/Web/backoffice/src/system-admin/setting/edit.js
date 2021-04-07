@@ -93,13 +93,6 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
             title={title}
             dialog={dialog}
             showActionButtons
-            // actionButtonsProps={{
-            //     addonButtons: (
-            //         <Button palette="primary" variant="outlined">
-            //             <Trans zh="预览变更" en="Preview Changes" />
-            //         </Button>
-            //     )
-            // }}
             maxWidth="90vw"
             width="90vw"
             height="90vh"

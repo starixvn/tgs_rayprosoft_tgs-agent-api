@@ -11,7 +11,8 @@ import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
     useUserRoleType,
-    useUserRoleId
+    useUserRoleId,
+    useUserIsRootAdmin
 } from "../../user/context"
 import { Code } from "./menu"
 import { useRoleList } from "./client"
@@ -44,8 +45,15 @@ const Body = () => {
     let { isLoading, data, error, mutate, deleteCache } = useRoleList(
         toApiParams(state)
     )
+    let isRootAdmin = useUserIsRootAdmin()
     let userRoleId = useUserRoleId()
-    let items = data?.items?.filter(({ id }) => id != userRoleId)
+    let items = data?.items?.filter(({ id }) => {
+        if (isRootAdmin) {
+            //no filtering
+            return true
+        }
+        return id != userRoleId
+    })
 
     let columns = useColumns({ mutate, items })
     return (

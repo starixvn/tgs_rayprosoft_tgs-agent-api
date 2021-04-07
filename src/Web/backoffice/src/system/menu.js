@@ -11,10 +11,6 @@ import {
     Code as BrandPaymentCode,
     codeLabelPair as brandPaymentPair
 } from "./brandpayments/menu"
-import {
-    Code as SettingsCode,
-    codeLabelPair as settingsPair
-} from "./setting/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const Code = "system"
@@ -80,14 +76,6 @@ const labelOf = ({ locale, code }) => {
                 },
                 locale
             )
-        case SettingsCode:
-            return getTrans(
-                {
-                    zh: "设定",
-                    en: "Settings"
-                },
-                locale
-            )
         default:
             return ""
     }
@@ -104,8 +92,7 @@ export const codeLabelPair = [
                 adminPair,
                 rolePair,
                 departmentPair,
-                brandPaymentPair,
-                settingsPair
+                brandPaymentPair
             ]
         })
 ]

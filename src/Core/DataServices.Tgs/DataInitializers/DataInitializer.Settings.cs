@@ -297,6 +297,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
+                new MenuSetting("SystemAdmin")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Settings")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
                 new MenuSetting("Log")
                 {
                     SubMenus = new[]
