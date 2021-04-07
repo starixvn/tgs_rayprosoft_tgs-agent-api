@@ -58,6 +58,18 @@ import {
     nameMessages as SystemNameMessages,
     codeLabelPair as systemLabelPair
 } from "./system/menu"
+import { codeMenuContentPair as systemAdminPair } from "./system-admin"
+import {
+    Code as SystemAdminCode,
+    nameMessages as SystemAdminNameMessages,
+    codeLabelPair as systemAdminLabelPair
+} from "./system-admin/menu"
+import { codeMenuContentPair as logPair } from "./log"
+import {
+    Code as LogCode,
+    nameMessages as LogNameMessages,
+    codeLabelPair as logLabelPair
+} from "./log/menu"
 import { useLocale, getTrans } from "./i18n"
 
 export const Menu = ({ title, url, codes, codePaths, itemLabel }) => {
@@ -116,7 +128,9 @@ export const allMenuContentPairs = () => [
     reportManagementPair,
     merchantPair,
     fundPair,
-    systemPair
+    systemPair,
+    systemAdminPair,
+    logPair
 ]
 
 export const AllMenus = ({ codes }) => {
@@ -124,7 +138,9 @@ export const AllMenus = ({ codes }) => {
     codes = codes ?? authCodes
     let list = allMenuContentPairs()
     return codes
-        .map((code) => <MenuByCode key={code} code={code} pairs={list} />)
+        .map((code) => {
+            return <MenuByCode key={code} code={code} pairs={list} />
+        })
         .filter((item) => !!item)
 }
 
@@ -139,7 +155,9 @@ export const useLabel = ({ codes = [] }) => {
         reportManagementLabelPair,
         merchantLabelPair,
         fundLabelPair,
-        platformLabelPair
+        platformLabelPair,
+        logLabelPair,
+        systemAdminLabelPair
     ]
     return findlLabel({
         locale,
@@ -181,6 +199,10 @@ const moduleLabel = ({ code = "", locale }) => {
             return getTrans(FundName, locale)
         case SystemCode:
             return getTrans(SystemNameMessages, locale)
+        case SystemAdminCode:
+            return getTrans(SystemAdminNameMessages, locale)
+        case LogCode:
+            return getTrans(LogNameMessages, locale)
         default:
             return ""
     }

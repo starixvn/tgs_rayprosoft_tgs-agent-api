@@ -8,7 +8,7 @@ import {
     usePostFormData
 } from "../../client"
 
-const API = "/api/market"
+const API = "/api/MarketReport"
 
 export const useMarketReportList = (searchParams) => {
     let url = searchParams ? urlWith(searchParams, API) : ""

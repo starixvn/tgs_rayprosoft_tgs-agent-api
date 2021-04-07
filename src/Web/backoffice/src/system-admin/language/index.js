@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Button, Set, Icon } from "bumbag"
+import { Box, Button, Set, Icon, Flex } from "bumbag"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
@@ -9,7 +9,6 @@ import {
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Code } from "./menu"
-import { useSystemSetting } from "./client"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -17,6 +16,10 @@ import { InputField } from "../../input/Input"
 import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
+import { Trans } from "../../i18n"
+import { AddLangDisclosure, EditLangDisclosure } from "./edit"
+import { useLanguageList } from "../../language/client"
+import equals from "fast-deep-equal"
 
 export { Code }
 
@@ -33,34 +36,44 @@ export const CodeContentPair = [Code, Content]
 
 const Body = () => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
-        key: ""
+        cultureCode: "",
+        name: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useSystemSetting(
+    let { isLoading, data, error, mutate, deleteCache } = useLanguageList(
         toApiParams(state)
     )
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
         <PageContent
-            title={<Trans zh="设定" en="Setting" />}
+            title={<Trans zh="语系" en="Language" />}
             actionBar={
-                <>
+                <Flex justifyContent="space-between">
                     <SearchBar
-                        key={key}
+                        cultureCode={state?.cultureCode}
+                        languageCode={state?.languageCode}
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
-                                key: data?.key
+                                cultureCode: data?.cultureCode,
+                                languageCode: data?.languageCode
                             }
-                            if (equals(newState, { pageIndex, key })) {
+                            if (
+                                equals(newState, {
+                                    pageIndex: state?.pageIndex,
+                                    cultureCode: state?.cultureCode,
+                                    languageCode: state?.languageCode
+                                })
+                            ) {
                                 mutate()
                             }
                             setState(newState)
                         }}
                         isLoading={isLoading}
                     />
-                </>
+                    <AddLangDisclosure onSubmitted={mutate} />
+                </Flex>
             }
         >
             <Table
@@ -85,16 +98,30 @@ const Body = () => {
     )
 }
 
-const SearchBar = ({ key = "", search, isLoading }) => {
+const SearchBar = ({
+    cultureCode = "",
+    languageCode = "",
+    search,
+    isLoading
+}) => {
     let formMethods = useForm({
-        defaultValues: { key }
+        defaultValues: { cultureCode, languageCode }
     })
 
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
-                    <InputField name="key" showEmptyFieldValueAddonAfter />
+                    <InputField
+                        name="cultureCode"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Culture Code"
+                    />
+                    <InputField
+                        name="languageCode"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Language Code"
+                    />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>
@@ -106,23 +133,33 @@ const useColumns = ({ items = [], mutate }) => {
     return useMemo(
         () => [
             textColumn({
-                accessor: "key",
-                Header: <Trans zh="Key" en="Key" />,
+                accessor: "cultureCode",
+                Header: <Trans zh="Culture Code" en="Culture Code" />,
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "description",
-                Header: <Trans zh="说明" en="Description" />,
+                accessor: "languageCode",
+                Header: <Trans zh="Language Code" en="Language Code" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "name",
+                Header: <Trans zh="Name" en="Name" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "localizedName",
+                Header: <Trans zh="Localized Name" en="Localized Name" />,
                 disableSortBy: true
             }),
             dateTimeColumn({
-                Header: <Trans zh="创建时间" en="Created Time" />,
                 accessor: "createdOn",
+                Header: <Trans zh="创建时间" en="Updated Time" />,
                 disableSortBy: true
             }),
             dateTimeColumn({
-                Header: <Trans zh="更改时间" en="Updated Time" />,
                 accessor: "updatedOn",
+                Header: <Trans zh="更改时间" en="Updated Time" />,
                 disableSortBy: true
             }),
             textColumn({
@@ -131,27 +168,26 @@ const useColumns = ({ items = [], mutate }) => {
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "UpdatedByUsername",
+                accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
             }),
-            {
+            textColumn({
                 id: "actions",
+                Header: <Trans zh="操作" en="Actions" />,
                 accessor: (row) => row,
-                Cell: ({ value }) => {
+                disableSortBy: true,
+                Cell: ({ value: record }) => {
                     return (
                         <Set orientation="horizontal">
-                            TODO: edit & delete btn
+                            <EditLangDisclosure
+                                record={record}
+                                onSubmitted={mutate}
+                            />
                         </Set>
                     )
-                },
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
                 }
-            }
+            })
         ],
         [JSON.stringify(items)]
     )

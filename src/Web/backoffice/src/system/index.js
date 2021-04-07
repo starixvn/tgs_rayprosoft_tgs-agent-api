@@ -11,7 +11,7 @@ export { Code } from "./menu"
 const pairs = () => [AdminPair, GroupPair, DepartmentPair, BrandPaymentPair]
 
 export const Content = ({ codes, path = DefaultCodePath, ...props }) => (
-  <Switch path={path} pairs={pairs()} />
+    <Switch path={path} pairs={pairs()} />
 )
 
 export const codeMenuContentPair = [Code, [Menu, Content]]

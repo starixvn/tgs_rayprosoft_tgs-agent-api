@@ -58,6 +58,8 @@ import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
 import Input from "../../input/Input"
 import { Code as RoleMenuCode } from "./menu"
+import { Code as SystemAdminCode } from "../../system-admin/menu"
+import { Code as LogCode } from "../../log/menu"
 import { useResellerLabel } from "../../merchant/resellers"
 import ResellerIdSelect from "../../merchant/resellers/ResellerIdSelect"
 import { useLicenseeLabel } from "../../merchant/licensees"
@@ -285,12 +287,12 @@ const AddDialog = ({ dialog, onSubmitted }) => {
 }
 
 const dropRoleModule = (menus = []) => {
-    return menus.map((menu) => {
+    return menus.map((moduleMenu) => {
         return {
-            ...menu,
-            subMenus: menu.subMenus.filter(
-                (menu) => menu.code.toLowerCase() != RoleMenuCode
-            )
+            ...moduleMenu,
+            subMenus: moduleMenu.subMenus.filter((menu) => {
+                return menu.code.toLowerCase() != RoleMenuCode
+            })
         }
     })
 }

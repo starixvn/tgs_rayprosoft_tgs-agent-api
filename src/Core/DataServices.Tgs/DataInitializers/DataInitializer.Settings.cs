@@ -154,33 +154,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
-                new MenuSetting("Log")
-                {
-                    SubMenus = new[]
-                    {
-                        new MenuSetting("AdminLog")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("ServiceLog")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("ApiLog")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        }
-                    }
-                },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
@@ -323,7 +296,54 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             }
                         }
                     }
-                }
+                },
+                new MenuSetting("SystemAdmin")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Currency")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Settings")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("Log")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("AdminLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("ApiLog")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                        new MenuSetting("Log")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
+                    }
+                },
             };
 
             return menus;

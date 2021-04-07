@@ -8,12 +8,9 @@ import {
     usePostFormData
 } from "../../client"
 
-const API = "/api/agentContribution"
+const API = "/api/AgentReport"
 
 export const useAgentContributionList = (searchParams) => {
-    //TODO: rm test
-    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
-
-    let url = searchParams ? urlWith(searchParams, API) : ""
+    let url = searchParams ? urlWith(searchParams, `${API}/contribution`) : ""
     return useGet(url)
 }
