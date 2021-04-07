@@ -93,3 +93,14 @@ Scenario: 08.b -  Bonus Win
 		And player having balance of $200
 	When bet win request is triggered after the bonus are finished
 	Then I will receive bet win response of no error and balance of $200
+
+@PromoWin
+Scenario: 09 -  Promo Win
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	Given a campaign id is "C001" and type is "T"
+	When I win the campaign of $100 
+	Then I will receive promo win response of no error and balance of $200
+		And player wallet database record will be for $200
+		And game action will be recorded in the database of type "FreeBet" for $100
+		And campaign data in round detail is as set value

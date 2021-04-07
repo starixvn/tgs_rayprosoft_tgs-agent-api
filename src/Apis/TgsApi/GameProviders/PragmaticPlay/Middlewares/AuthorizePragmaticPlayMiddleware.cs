@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Attributes;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
@@ -63,10 +65,24 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
                 }
             }
 
-            var token = form.GetValue<string>(PragmaticPlayConsts.Parameters.Token);
-            var loginRecord = await DecryptTokenAsync(token);
-            var playerCode = loginRecord.PlayerCode;
-            var platformType = loginRecord.PlatformType;
+            var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<RequirePlayerTokenAttribute>();
+
+            string playerCode;
+            PlatformType platformType;
+
+            if (attribute != null && attribute.IsRequired)
+            {
+                var token = form.GetValue<string>(PragmaticPlayConsts.Parameters.Token);
+                var loginRecord = await DecryptTokenAsync(token);
+
+                playerCode = loginRecord.PlayerCode;
+                platformType = loginRecord.PlatformType;
+            }
+            else
+            {
+                playerCode = form.GetValue<string>(PragmaticPlayConsts.Parameters.UserId);
+                platformType = PlatformType.Desktop;
+            }
 
             var gameProviderId =
                 await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.PragmaticPlay);

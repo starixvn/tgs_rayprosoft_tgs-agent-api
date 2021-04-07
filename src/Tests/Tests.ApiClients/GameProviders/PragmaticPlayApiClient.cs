@@ -27,6 +27,8 @@ namespace TGS.Tests.ApiClients.GameProviders
         ValueTask<JackpotWinResponse> WinJackpotAsync(JackpotWinRequest request);
 
         ValueTask<BonusWinResponse> WinBonusAsync(BonusWinRequest request);
+
+        ValueTask<PromoWinResponse> WinPromoAsync(PromoWinRequest request);
     }
 
     public sealed class PragmaticPlayApiClient : BaseApiClient, IPragmaticPlayApiClient
@@ -92,6 +94,13 @@ namespace TGS.Tests.ApiClients.GameProviders
         {
             var parameters = ConvertToKeyValue(request);
             return await ExecuteFormRequestAsync<BonusWinResponse>($"{RoutePrefix}/bonuswin", parameters)
+                .ConfigureAwait(false);
+        }
+
+        async ValueTask<PromoWinResponse> IPragmaticPlayApiClient.WinPromoAsync(PromoWinRequest request)
+        {
+            var parameters = ConvertToKeyValue(request);
+            return await ExecuteFormRequestAsync<PromoWinResponse>($"{RoutePrefix}/promowin", parameters)
                 .ConfigureAwait(false);
         }
 

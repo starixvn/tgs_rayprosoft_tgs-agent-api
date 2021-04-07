@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
-    public abstract record TransactionRequest : BaseRequest
+    public abstract record TransactionRequest : TokenRequest
     {
         [JsonPropertyName("userId")]
         public string UserId { get; init; }

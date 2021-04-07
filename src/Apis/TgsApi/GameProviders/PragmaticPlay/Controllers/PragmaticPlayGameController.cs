@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
+using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Attributes;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -41,6 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("authenticate")]
+        [RequirePlayerToken(IsRequired = true)]
         public async ValueTask<AuthorizePlayerResponse> AuthorizePlayerAsync([FromForm] AuthorizePlayerRequest request)
         {
             var items = HttpContext.Items;
@@ -56,6 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("balance")]
+        [RequirePlayerToken(IsRequired = false)]
         public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync([FromForm] GetBalanceRequest request)
         {
             var r = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
@@ -66,6 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("bet")]
+        [RequirePlayerToken(IsRequired = true)]
         public async ValueTask<PlaceBetResponse> PlaceBetAsync([FromForm] PlaceBetRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
@@ -85,7 +89,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("result")]
-        public async Task<ResultResponse> SettleBetAsync([FromForm] ResultRequest request)
+        [RequirePlayerToken(IsRequired = true)]
+        public async ValueTask<ResultResponse> SettleBetAsync([FromForm] ResultRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
@@ -115,7 +120,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("endround")]
-        public async Task<EndRoundResponse> EndRoundAsync([FromForm] EndRoundRequest request)
+        [RequirePlayerToken(IsRequired = true)]
+        public async ValueTask<EndRoundResponse> EndRoundAsync([FromForm] EndRoundRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
@@ -153,7 +159,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("refund")]
-        public async Task<RefundResponse> CancelTransactionAsync([FromForm] RefundRequest request)
+        [RequirePlayerToken(IsRequired = true)]
+        public async ValueTask<RefundResponse> CancelTransactionAsync([FromForm] RefundRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
@@ -167,7 +174,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 
         [HttpPost]
         [Route("jackpotwin")]
-        public async Task<JackpotWinResponse> WinJackpotAsync([FromForm] JackpotWinRequest request)
+        [RequirePlayerToken(IsRequired = true)]
+        public async ValueTask<JackpotWinResponse> WinJackpotAsync([FromForm] JackpotWinRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
@@ -185,12 +193,28 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
         /// </summary>
         [HttpPost]
         [Route("bonuswin")]
-        public async Task<BonusWinResponse> WinBonusAsync([FromForm] BonusWinRequest request)
+        [RequirePlayerToken(IsRequired = true)]
+        public async ValueTask<BonusWinResponse> WinBonusAsync([FromForm] BonusWinRequest request)
         {
             var r = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
                 .ConfigureAwait(false);
 
             return _map.BonusWinResponse(request, r);
+        }
+
+        [HttpPost]
+        [Route("promowin")]
+        [RequirePlayerToken(IsRequired = false)]
+        public async ValueTask<PromoWinResponse> WinPromoAsync([FromForm] PromoWinRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            return _map.PromoWinResponse(r);
         }
     }
 }

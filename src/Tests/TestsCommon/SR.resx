@@ -147,6 +147,12 @@
   <data name="BrandTokenExpireTime" xml:space="preserve">
     <value>BrandTokenExpireTime</value>
   </data>
+  <data name="CampaignId" xml:space="preserve">
+    <value>CampaignId</value>
+  </data>
+  <data name="CampaignType" xml:space="preserve">
+    <value>CampaignType</value>
+  </data>
   <data name="ClientRoundStatus" xml:space="preserve">
     <value>ClientRoundStatus</value>
   </data>

@@ -1,6 +1,6 @@
 ﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
-    public record AuthorizePlayerRequest : BaseRequest
+    public record AuthorizePlayerRequest : TokenRequest
     {
     }
 }

@@ -1,2 +1,3 @@
 Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
 3 Genie Wishes,,,vs50aladdin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Promo,,,promo,Slot,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,

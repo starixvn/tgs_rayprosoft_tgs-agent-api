@@ -169,6 +169,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"bonus code is ""(.*)""")]
         public void GivenBonusCodeIs(string bonusCode) => Set(SR.BonusCode, bonusCode);
 
+        [Given(@"a campaign id is ""(.*)"" and type is ""(.*)""")]
+        public void GivenACampaignIdIsAndTypeIs(string campaignId, string campaignType)
+        {
+            Set(SR.CampaignId, campaignId);
+            Set(SR.CampaignType, campaignType);
+        }
+
         [When(@"I call authorize endpoint")]
         public async Task WhenICallAuthorizeEndpoint()
         {
@@ -409,6 +416,42 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
+        [When(@"I win the campaign of \$(.*)")]
+        public async Task WhenIWinTheCampaignOf(decimal amount)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var campaignId = Get<string>(SR.CampaignId);
+            var campaignType = Get<string>(SR.CampaignType);
+            var currency = Get<string>(SR.CurrencyCode);
+
+            var externalRoundId = Guid.NewGuid().ToString();
+
+            var model = new PromoWinRequest
+            {
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = amount,
+                Reference = externalRoundId,
+                CampaignId = campaignId,
+                CampaignType = campaignType,
+                Currency = currency,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.WinPromoAsync(request).ConfigureAwait(false);
+
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalTransactionId, externalRoundId);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
         [Then(@"I will get authorize response and player balance will be \$(.*)")]
         public async Task ThenIWillGetAuthorizeResponseAndPlayerBalanceWillBe(decimal balance)
         {
@@ -545,9 +588,29 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var json = _serviceProvider.GetRequiredService<IJsonSerializationProvider>();
             var data = json.DeserializeFromString<Dictionary<string, string>>(roundDetail);
 
-            var isExist = data.TryGetValue("BonusCode", out var code);
-            isExist.Should().BeTrue();
-            code.Should().Be(bonusCode);
+            data["BonusCode"].Should().Be(bonusCode);
+        }
+
+        [Then(@"campaign data in round detail is as set value")]
+        public async Task ThenCampaignDataInRoundDetailIsAsSetValue()
+        {
+            var campaignId = Get<string>(SR.CampaignId);
+            var type = Get<string>(SR.CampaignType);
+            var ga = Get<GameAction>(SR.GameAction);
+
+            PragmaticPlayConsts.CampaignTypeMap.TryGetValue(type, out var campaignType);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var roundDetail = await (
+                from detail in db.RoundDetails.AsQueryable()
+                where detail.RoundId == ga.RoundId
+                select detail.AdditionalData).AsNoTracking().FirstAsync();
+
+            var json = _serviceProvider.GetRequiredService<IJsonSerializationProvider>();
+            var data = json.DeserializeFromString<Dictionary<string, string>>(roundDetail);
+
+            data["CampaignId"].Should().Be(campaignId);
+            data["CampaignType"].Should().Be(campaignType);
         }
 
         [Then(@"I will receive bet win response of no error and balance of \$(.*)")]
@@ -559,17 +622,40 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Balance.Should().Be(expectedBalance);
         }
 
+        [Then(@"I will receive promo win response of no error and balance of \$(.*)")]
+        public void ThenIWillReceivePromoWinResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<PromoWinResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.TransactionId.Should().NotBeNullOrEmpty();
+            response.Balance.Should().Be(expectedBalance);
+        }
+
+
         #region After Scenario
 
         [After]
-        public void AfterHasBonusWinScenarioAsync()
+        public void AfterBonusWinScenarioAsync()
         {
-            if (!HasTag("HasBonusWin"))
+            if (!HasTag("BonusWin"))
             {
                 return;
             }
 
             Remove(SR.BonusCode);
+        }
+
+        [After]
+        public void AfterPromoWinScenarioAsync()
+        {
+            if (!HasTag("PromoWin"))
+            {
+                return;
+            }
+
+            Remove(SR.CampaignId);
+            Remove(SR.CampaignType);
         }
 
         #endregion

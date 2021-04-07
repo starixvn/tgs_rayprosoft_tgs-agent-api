@@ -151,6 +151,24 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CampaignId.
+        /// </summary>
+        public static string CampaignId {
+            get {
+                return ResourceManager.GetString("CampaignId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CampaignType.
+        /// </summary>
+        public static string CampaignType {
+            get {
+                return ResourceManager.GetString("CampaignType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ClientRoundStatus.
         /// </summary>
         public static string ClientRoundStatus {

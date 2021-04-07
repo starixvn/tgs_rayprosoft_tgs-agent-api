@@ -28,6 +28,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         BetData Request(string playerCode, GameProviderConfigurationData data, JackpotWinRequest request);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, PromoWinRequest request);
+
         AuthorizePlayerResponse Response(string playerCode, string token, PlayerValidationResult result);
 
         GetBalanceResponse Response(GetBalanceResult result);
@@ -43,6 +45,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         JackpotWinResponse JackpotWinResponse(BetResult result);
 
         BonusWinResponse BonusWinResponse(BonusWinRequest request, GetBalanceResult r);
+
+        PromoWinResponse PromoWinResponse(BetResult r);
     }
 
     public sealed class PragmaticPlayActionModelMapper : IPragmaticPlayActionModelMapper
@@ -190,6 +194,39 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             return GetBetData(playerCode, data, new[] {transaction});
         }
 
+        BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            PromoWinRequest request)
+        {
+            if (!PragmaticPlayConsts.CampaignTypeMap.TryGetValue(request.CampaignType, out var campaignType))
+            {
+                campaignType = request.CampaignType;
+            }
+
+            var extraData = new Dictionary<string, object>
+            {
+                {nameof(request.CampaignId), request.CampaignId},
+                {nameof(request.CampaignType), campaignType}
+            };
+
+            var externalRoundId = request.Reference;
+
+            var transaction = new TransactionData
+            {
+                ExternalBetId = externalRoundId,
+                ExternalGameId = "promo",
+                ExternalRoundId = externalRoundId,
+                ExternalTransactionId = externalRoundId,
+                ExternalGameActionGroupId = externalRoundId,
+                GameActionType = GameActionType.FreeBet,
+                Amount = request.Amount,
+                RoundClosed = true,
+                RoundDetail = AddCustomDescription(extraData),
+                TimeStamp = GetTimestamp(request.Timestamp)
+            };
+
+            return GetBetData(playerCode, data, new[] {transaction}, true);
+        }
+
         AuthorizePlayerResponse IPragmaticPlayActionModelMapper.Response(string playerCode, string token,
             PlayerValidationResult result) =>
             new()
@@ -284,10 +321,25 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Bonus = 0
             };
 
+        PromoWinResponse IPragmaticPlayActionModelMapper.PromoWinResponse(BetResult result)
+        {
+            var transaction = result.Transactions.FirstOrDefault();
+
+            return new()
+            {
+                Error = GameApiError.Success,
+                Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
+                TransactionId = transaction?.InternalTransactionId?.ToString(),
+                Currency = result.GameProviderCurrencyCode,
+                Balance = result.Balance,
+                Bonus = 0
+            };
+        }
+
         #region Private Method
 
         private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
-            TransactionData[] transactions) =>
+            TransactionData[] transactions, bool freeBetAsSingleRound = false) =>
             new()
             {
                 PlayerCode = playerCode,
@@ -298,6 +350,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 AutoCloseRound = data.AutoCloseRound,
                 ForceGetPreviousActions = true,
                 HasCurrencyFromGameProvider = false,
+                FreeBetAsSingleRound = freeBetAsSingleRound,
                 Transactions = transactions
             };
 
@@ -314,7 +367,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         }
 
         private static string GetTransactionResponseDescription(bool? isDuplicate) =>
-            isDuplicate == true ? "Bet is duplicate" : GameApiError.Success.ToString();
+            isDuplicate == true ? "Transaction is duplicate" : GameApiError.Success.ToString();
 
         private string AddCustomDescription(Dictionary<string, object> items) =>
             items == null || items.Count == 0 ? null : _json.SerializeToString(items, new() {WriteIndented = false});

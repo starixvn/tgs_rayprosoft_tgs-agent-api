@@ -5,9 +5,6 @@ namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
 {
     public record BaseRequest : HashRequest
     {
-        [JsonPropertyName("token")]
-        public string Token { get; init; }
-
         [JsonPropertyName("providerId")]
         public string ProviderId { get; init; }
 
