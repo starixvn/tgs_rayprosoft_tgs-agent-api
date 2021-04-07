@@ -3,11 +3,19 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>30a457ed-c0fd-46c9-bd7e-2ef259ac9187</UserSecretsId>
-  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
     <RootNamespace>TGS.Apis.FileService</RootNamespace>
     <AssemblyName>TGS.Apis.FileService</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>obj\TGS.Apis.FileService.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,10 +23,10 @@
     <Compile Remove="UploadImages\**" />
     <Content Remove="DataService\EntityTypeConfigurations\**" />
     <Content Remove="UploadImages\**" />
-  <Compile Remove="Properties\GlobalAssemblyInfo.cs" />
-  <Compile Include="..\..\GlobalAssemblyInfo.cs">
-    <Link>GlobalAssemblyInfo.cs</Link>
-  </Compile>
+    <Compile Remove="Properties\GlobalAssemblyInfo.cs" />
+    <Compile Include="..\..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <EmbeddedResource Remove="DataService\EntityTypeConfigurations\**" />
     <EmbeddedResource Remove="UploadImages\**" />
     <None Remove="DataService\EntityTypeConfigurations\**" />
@@ -37,6 +45,7 @@
     <PackageReference Include="prometheus-net.AspNetCore" Version="4.1.1" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0-preview.10.21168.2" />
   </ItemGroup>
 
@@ -60,5 +69,4 @@
       <LastGenOutput>File.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 </Project>

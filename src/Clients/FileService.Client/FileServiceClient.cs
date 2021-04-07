@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Json;
 
@@ -24,18 +26,25 @@ namespace TGS.Apis.FileService.Clients
 
             using var fileContent = new StreamContent(fileStream);
 
-            uploadContent.Add(fileContent, "file");
-            uploadContent.Headers.ContentType = contentType;
+            var fileName = path.Split('/').Last();
+            fileContent.Headers.ContentType = contentType;
+
+            uploadContent.Add(fileContent, "file", fileName);
 
             var response = await _httpClient
-                .PostAsync(path, uploadContent)
+                .PostAsync($"/api/fs/{path.TrimStart('/')}", uploadContent)
                 .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(json);
+            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
 
             return view;
         }

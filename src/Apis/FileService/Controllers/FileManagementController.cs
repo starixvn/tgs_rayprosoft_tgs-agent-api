@@ -25,8 +25,8 @@ namespace TGS.Apis.FileService.Controllers
 
         [HttpGet("{*path}")]
         public async Task<IActionResult> GetFileAsync(
-            IHttpProxy httpProxy,
-            ITransformBuilder transformBuilder,
+            [FromServices] IHttpProxy httpProxy,
+            [FromServices] ITransformBuilder transformBuilder,
             string path)
         {
             var meta = await _fileManager.GetFileAsync(path);

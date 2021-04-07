@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Prometheus;
 using TGS.Apis.FileService.DataService;
@@ -77,16 +79,28 @@ namespace TGS.Apis.FileService
             services.AddControllers()
                 .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
 
-            services.AddHealthChecks()
+            services
+                .AddHealthChecks()
                 .AddNats()
                 .AddMongoDb(_configuration, "DatabaseSettings")
                 .AddAwsS3()
-                .ForwardToPrometheus(); ;
+                .ForwardToPrometheus();
+
+            services.AddHostedService<NatsMessageService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "TGS FileService API", Version = "v1" });
+
+                var xml = $"TGS.Apis.FileService.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+                if (File.Exists(path))
+                    c.IncludeXmlComments(path);
+            });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -95,8 +109,6 @@ namespace TGS.Apis.FileService
             app.UseRouting();
 
             app.UseHttpMetrics();
-
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -110,12 +122,12 @@ namespace TGS.Apis.FileService
 
                 endpoints.MapMetrics();
             });
-        }
 
-        private static void OnApplicationStarted(IServiceProvider serviceProvider)
-        {
-            var messageHandler = serviceProvider.GetRequiredService<INatsMessageHandler>();
-            messageHandler.SubscribeAsync();
+            if (!env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+            }
         }
     }
 }

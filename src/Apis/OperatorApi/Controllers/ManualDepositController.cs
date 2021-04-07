@@ -13,9 +13,9 @@ using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
-    [Route("api/deposit/bank")]
+    [Route("api/deposit/manual")]
     [ApiController]
-    public class BankDepositController : ControllerBase
+    public class ManualDepositController : ControllerBase
     {
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
@@ -87,7 +87,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
-        public ValueTask SubmitDepositFormAsync(
+        public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBandDepositFormCommandService,
             Guid id,
             [FromForm(Name = "file")] IFormFile remittanceReceipt)
@@ -103,7 +103,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 contentType,
                 fileStream);
 
-            return submitBandDepositFormCommandService.ExecuteAsync(command);
+            await submitBandDepositFormCommandService.ExecuteAsync(command);
         }
     }
 }
