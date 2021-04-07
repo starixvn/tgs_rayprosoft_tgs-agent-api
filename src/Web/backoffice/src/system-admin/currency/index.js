@@ -19,6 +19,7 @@ import AlertDialog from "../../dialog/Alert"
 import { Trans } from "../../i18n"
 import { AddCurrencyDisclosure, EditCurrencyDisclosure } from "./edit"
 import { useCurrencyList } from "../../currency/client"
+import equals from "fast-deep-equal"
 
 export { Code }
 
@@ -55,9 +56,16 @@ const Body = () => {
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
-                                key: data?.key
+                                code: data?.code,
+                                name: data?.name
                             }
-                            if (equals(newState, { pageIndex, key })) {
+                            if (
+                                equals(newState, {
+                                    pageIndex: state?.pageIndex,
+                                    code: state?.code,
+                                    name: state?.name
+                                })
+                            ) {
                                 mutate()
                             }
                             setState(newState)

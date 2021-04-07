@@ -19,6 +19,7 @@ import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
 import { Trans } from "../../i18n"
 import { EditSettingDisclosure, ViewSettingDisclosure } from "./edit"
+import equals from "fast-deep-equal"
 
 export { Code }
 
@@ -55,7 +56,12 @@ const Body = () => {
                                 pageIndex: 0,
                                 key: data?.key
                             }
-                            if (equals(newState, { pageIndex, key })) {
+                            if (
+                                equals(newState, {
+                                    pageIndex: state?.pageIndex,
+                                    key: state?.key
+                                })
+                            ) {
                                 mutate()
                             }
                             setState(newState)

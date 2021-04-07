@@ -34,6 +34,7 @@ namespace TGS.Services.BackOffice.Application.Queries.LanguageHandlers
                     LanguageCode = x.LanguageCode,
                     Name = x.Name,
                     LocalizedName = x.LocalizedName,
+                    CreatedByUsername = x.CreatedByUsername,
                     UpdatedByUsername = x.UpdatedByUsername,
                     UpdatedOn = x.UpdatedOn
                 }).CreatePagedResponseAsync(request);
