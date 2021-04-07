@@ -145,7 +145,7 @@ const useColumns = ({ items = [], mutate }) => {
             sequenceColumn(),
             {
                 accessor: "code",
-                Header: <Trans zh="公司代码" en="Code" />,
+                Header: <Trans zh="总公司代码" en="Code" />,
                 disableSortBy: true,
                 headCell: {
                     textAlign: "center",
@@ -158,7 +158,7 @@ const useColumns = ({ items = [], mutate }) => {
             },
             {
                 accessor: "name",
-                Header: <Trans zh="公司名称" en="Name" />,
+                Header: <Trans zh="总公司名称" en="Name" />,
                 disableSortBy: true,
                 headCell: {
                     textAlign: "center",
@@ -171,7 +171,7 @@ const useColumns = ({ items = [], mutate }) => {
             },
             {
                 accessor: "description",
-                Header: <Trans zh="公司简介" en="Description" />,
+                Header: <Trans zh="总公司简介" en="Description" />,
                 disableSortBy: true,
                 headCell: {
                     textAlign: "center",
@@ -183,7 +183,7 @@ const useColumns = ({ items = [], mutate }) => {
             },
             {
                 accessor: "operationalEmail",
-                Header: <Trans zh="公司邮箱" en="Email" />,
+                Header: <Trans zh="总公司邮箱" en="Email" />,
                 disableSortBy: true,
                 headCell: {
                     textAlign: "center",
