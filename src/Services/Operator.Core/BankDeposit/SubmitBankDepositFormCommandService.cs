@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Utility;
@@ -20,7 +21,7 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command)
+        public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command, CancellationToken cancellationToken = default)
         {
             var randomFileName = StringGenerator.GenerateAlphanumericString(32);
 

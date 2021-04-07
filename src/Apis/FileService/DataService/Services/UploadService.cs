@@ -61,7 +61,7 @@ namespace TGS.Apis.FileService.DataService.Services
                 await _stationLetterRepository.InsertAsync(stationLetterFile);
             }
 
-            await CleanFiles();
+            await CleanFilesAsync();
         }
 
         public ValueTask<string[]> GetObjectsAsync(string prefix)
@@ -69,7 +69,7 @@ namespace TGS.Apis.FileService.DataService.Services
                 .Select(meta => meta.FileName)
                 .ToArrayAsync();
 
-        private async Task CleanFiles()
+        private async Task CleanFilesAsync()
         {
             var stationLetterFileNames =
                 _stationLetterRepository.GetQueries()

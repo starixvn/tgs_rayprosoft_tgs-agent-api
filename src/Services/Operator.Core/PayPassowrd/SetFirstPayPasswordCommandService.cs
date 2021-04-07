@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
@@ -17,7 +18,7 @@ namespace TGS.Services.Operator.PayPassowrd
             _passwordHandler = passwordHandler;
         }
 
-        public async ValueTask ExecuteAsync(SetFirstPayPasswordCommand command)
+        public async ValueTask ExecuteAsync(SetFirstPayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)

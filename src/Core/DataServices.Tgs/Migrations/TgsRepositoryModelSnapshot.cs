@@ -1278,6 +1278,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
                     b.Property<string>("RemittanceCertificateExternalUrl")
                         .HasColumnType("text")
                         .HasColumnName("remittance_certificate_external_url");
@@ -1291,6 +1295,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdateOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_on")
+                        .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
                         .HasName("pk_deposit_forms");

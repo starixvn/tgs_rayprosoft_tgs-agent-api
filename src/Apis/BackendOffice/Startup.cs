@@ -9,28 +9,42 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Models;
+using Swashbuckle.AspNetCore;
+using System.IO;
+using System;
+using Microsoft.Extensions.Hosting;
 
 namespace TGS.Apis.BackendOffice
 {
     public class Startup
     {
         private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
-            _env = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddBackendOfficeServices(_configuration);
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "TGS FileService API", Version = "v1" });
+
+                c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
+
+                var xml = $"TGS.Apis.BackendOffice.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+                if (File.Exists(path))
+                    c.IncludeXmlComments(path);
+            });
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (_env.IsDevelopmentOrDocker())
+            if (env.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -42,17 +56,16 @@ namespace TGS.Apis.BackendOffice
             app.UseHttpMetrics();
 
             app.UseAuthentication();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health",  new()
+                endpoints.MapHealthChecks("/health", new()
                 {
                     ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                     ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
                 });
 
                 endpoints.MapMetrics();
@@ -61,6 +74,12 @@ namespace TGS.Apis.BackendOffice
             var requestLocalizationOptions =
                 app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
             app.UseRequestLocalization(requestLocalizationOptions);
+
+            if (!env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS BackOffice API"));
+            }
         }
     }
 }

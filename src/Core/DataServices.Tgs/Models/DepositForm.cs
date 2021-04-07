@@ -18,11 +18,15 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int Status { get; set; }
 
+        public string Remark { get; set; }
+
         public string RemittanceCertificateFileId { get; set; }
 
         public string RemittanceCertificateExternalUrl { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
+
+        public DateTimeOffset UpdateOn { get; set; }
 
         public virtual Player Player { get; set; }
 

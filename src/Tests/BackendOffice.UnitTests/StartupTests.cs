@@ -56,7 +56,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var envStub = new Mock<IWebHostEnvironment>();
             var services = new ServiceCollection();
-            var startup = new Startup(configurationStub.Object, envStub.Object);
+            var startup = new Startup(configurationStub.Object);
 
             startup.ConfigureServices(services);
             SetupHttpContext();

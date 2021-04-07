@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.Operator.Wallet
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public ValueTask<BalanceInfo> GetAsync(GetBalanceQuery query)
+        public ValueTask<BalanceInfo> GetAsync(GetBalanceQuery query, CancellationToken cancellationToken = default)
         {
             return _walletRepository.GetBalanceInfoAsync(query.PlayerCode);
         }

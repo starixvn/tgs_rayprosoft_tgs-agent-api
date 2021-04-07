@@ -126,7 +126,7 @@ namespace TGS.Apis.FileService
             if (!env.IsProduction())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS FileService API"));
             }
         }
     }
