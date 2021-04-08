@@ -47,7 +47,7 @@ namespace TGS.Workers.Schedulers
                 .AddWebApiServices()
                 .AddNats(_configuration)
                 .AddTgsLog()
-                .AddJson()
+                .AddSystemJsonSerializer()
                 .AddRedis()
                 .AddTransactions()
                 .AddApiClient()

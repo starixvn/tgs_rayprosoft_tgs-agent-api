@@ -22,8 +22,9 @@ namespace TGS.Apis.FileService.Services
             _service = service;
         }
 
-        Task INatsMessageHandler.SubscribeAsync()
+        public Task SubscribeAsync()
         {
+            var observer = _natsManager.SubscribeWithObserveAsync(nameof(ObjectFileEventModel));
             return Task.FromResult(_natsManager.SubscribeWithObserveAsync(nameof(ObjectFileEventModel)).Subscribe(
                 x =>
                 {

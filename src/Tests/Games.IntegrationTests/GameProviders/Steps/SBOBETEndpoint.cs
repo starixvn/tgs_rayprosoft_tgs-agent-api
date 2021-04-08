@@ -126,7 +126,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddTgsRepository(configuration, "Tgs");
 
-            services.AddJson()
+            services.AddSystemJsonSerializer()
                 .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()

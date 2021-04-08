@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210331091900_Initial")]
+    [Migration("20210407012119_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1279,6 +1279,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
+
+                    b.Property<string>("RemittanceCertificateExternalUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("remittance_certificate_external_url");
+
+                    b.Property<string>("RemittanceCertificateFileId")
+                        .HasColumnType("text")
+                        .HasColumnName("remittance_certificate_file_id");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()

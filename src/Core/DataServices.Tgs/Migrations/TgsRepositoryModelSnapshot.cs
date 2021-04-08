@@ -1278,6 +1278,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
+                    b.Property<string>("RemittanceCertificateExternalUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("remittance_certificate_external_url");
+
+                    b.Property<string>("RemittanceCertificateFileId")
+                        .HasColumnType("text")
+                        .HasColumnName("remittance_certificate_file_id");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")

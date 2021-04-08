@@ -40,6 +40,7 @@
     <PackageReference Include="prometheus-net.DotNetRuntime" Version="3.4.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.9.0" />
+    <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
     <PackageReference Include="TimeZoneConverter" Version="3.3.0" />
   </ItemGroup>
 

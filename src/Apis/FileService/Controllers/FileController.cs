@@ -27,10 +27,11 @@ namespace TGS.Apis.FileService.Controllers
             };
         }
 
-        [HttpGet("{bucket}")]
-        public async Task<GetFileNamesResponse> GetFileNamesFromS3Async(string bucket)
+        [HttpGet()]
+        public async Task<GetFileNamesResponse> GetFileNamesFromS3Async()
         {
-            var keys = await _uploadService.GetObjectsAsync(bucket);
+            var keys = await _uploadService.GetObjectsAsync();
+
             return new GetFileNamesResponse
             {
                 Valid = true,

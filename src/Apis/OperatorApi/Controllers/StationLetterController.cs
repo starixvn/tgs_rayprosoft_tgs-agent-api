@@ -22,7 +22,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Gets the station letters.
         /// </summary>
-        /// <param name="listStationLetterService">The list station letter service.</param>
+        /// <param name="getStationLetterService">The list station letter service.</param>
         /// <param name="countStationLetterService">The count station letter service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
@@ -30,7 +30,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<PagingResponse<StationLetterResponse>> GetLettersAsync(
-            [FromServices] IQueryService<GetStationLettersQuery, StationLetter> listStationLetterService,
+            [FromServices] IQueryService<GetStationLettersQuery, StationLetter> getStationLetterService,
             [FromServices] IGetService<GetStationLettersQuery, int> countStationLetterService,
             [FromQuery] PagingRequest request)
         {
@@ -54,7 +54,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 TotalCount = await countStationLetterService
                     .GetAsync(query)
                     .ConfigureAwait(false),
-                Items = listStationLetterService.QueryAsync(query)
+                Items = getStationLetterService.QueryAsync(query)
                     .Select(letter => new StationLetterResponse
                     {
                         Id = letter.Id,
@@ -67,6 +67,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
+        /// <summary>
+        /// Sets the letter have read.
+        /// </summary>
+        /// <param name="setHaveReadService">The set have read service.</param>
+        /// <param name="stationLetterIds">The station letter ids.</param>
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
