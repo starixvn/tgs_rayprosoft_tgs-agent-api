@@ -60,7 +60,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Id = letter.Id,
                         Subject = letter.Subject,
                         Content = letter.Content,
-                        CreateOn = letter.CreateOn
+                        CreateOn = letter.CreateOn,
+                        IsRead = letter.IsRead
                     })
                     .ToEnumerable()
             };

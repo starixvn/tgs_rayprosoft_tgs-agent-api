@@ -118,42 +118,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
-                new MenuSetting("AdminManagement")
-                {
-                    SubMenus = new[]
-                    {
-                        new MenuSetting("Currency")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("Language")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("Whitelist")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("View")
-                            }
-                        }
-                    }
-                },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
@@ -292,6 +256,40 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        }
+                    }
+                },
+                new MenuSetting("SystemAdmin")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Language")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Currency")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("BetLimit")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("Settings")
+                        {
+                            SubMenus = new[]
+                            {
                                 new MenuSetting("Update")
                             }
                         }

@@ -15,6 +15,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
         public string Role { get; set; }
         public Guid RoleId { get; set; }
         public RoleType RoleType { get; set; }
+        public bool IsRoot { get; set; }
         public MenuSetting[] Menus { get; set; }
     }
 }

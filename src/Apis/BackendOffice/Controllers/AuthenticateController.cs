@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
@@ -85,6 +86,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 {
                     Role = user.Role.Name,
                     RoleId = user.Role.Id,
+                    IsRoot = user.Role.IsRoot,
                     ResellerId = user.Role.ResellerId,
                     LicenseeId = user.Role.LicenseeId,
                     BrandId = user.Role.BrandId,

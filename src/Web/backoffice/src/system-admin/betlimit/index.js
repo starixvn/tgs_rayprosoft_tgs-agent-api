@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Button, Set, Icon } from "bumbag"
+import { Box, Button, Set, Icon, Flex } from "bumbag"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
@@ -9,7 +9,6 @@ import {
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Code } from "./menu"
-import { useSystemSetting } from "./client"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -17,6 +16,13 @@ import { InputField } from "../../input/Input"
 import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
+import { Trans } from "../../i18n"
+import {
+    AddBetLimitDisclosure as AddBetLimitDisclosure,
+    EditBetLimitDisclosure as EditBetLimitDisclosure
+} from "./edit"
+import equals from "fast-deep-equal"
+import { useBetLimitList } from "../../betlimit/client"
 
 export { Code }
 
@@ -33,34 +39,41 @@ export const CodeContentPair = [Code, Content]
 
 const Body = () => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
-        key: ""
+        keyword: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useSystemSetting(
+    let { isLoading, data, error, mutate, deleteCache } = useBetLimitList(
         toApiParams(state)
     )
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
         <PageContent
-            title={<Trans zh="设定" en="Setting" />}
+            title={<Trans zh="限红" en="Bet Limit" />}
             actionBar={
-                <>
+                <Flex justifyContent="space-between">
                     <SearchBar
-                        key={key}
+                        code={state?.code}
+                        name={state?.name}
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
-                                key: data?.key
+                                keyword: data?.keyword
                             }
-                            if (equals(newState, { pageIndex, key })) {
+                            if (
+                                equals(newState, {
+                                    pageIndex: state?.pageIndex,
+                                    keyword: state?.keyword
+                                })
+                            ) {
                                 mutate()
                             }
                             setState(newState)
                         }}
                         isLoading={isLoading}
                     />
-                </>
+                    <AddBetLimitDisclosure onSubmitted={mutate} />
+                </Flex>
             }
         >
             <Table
@@ -85,16 +98,20 @@ const Body = () => {
     )
 }
 
-const SearchBar = ({ key = "", search, isLoading }) => {
+const SearchBar = ({ keyword = "", search, isLoading }) => {
     let formMethods = useForm({
-        defaultValues: { key }
+        defaultValues: { keyword }
     })
 
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
-                    <InputField name="key" showEmptyFieldValueAddonAfter />
+                    <InputField
+                        name="keyword"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Keyword"
+                    />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>
@@ -106,23 +123,33 @@ const useColumns = ({ items = [], mutate }) => {
     return useMemo(
         () => [
             textColumn({
-                accessor: "key",
-                Header: <Trans zh="Key" en="Key" />,
+                accessor: "id",
+                Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "description",
-                Header: <Trans zh="说明" en="Description" />,
+                accessor: "currencyCode",
+                Header: <Trans zh="Currency Code" en="Currency Code" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "minBet",
+                Header: <Trans zh="Min Bet" en="Min Bet" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "maxBet",
+                Header: <Trans zh="Max Bet" en="Max Bet" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "maxBetPerMatch",
+                Header: <Trans zh="Max Bet Per Match" en="Max Bet Per Match" />,
                 disableSortBy: true
             }),
             dateTimeColumn({
-                Header: <Trans zh="创建时间" en="Created Time" />,
-                accessor: "createdOn",
-                disableSortBy: true
-            }),
-            dateTimeColumn({
-                Header: <Trans zh="更改时间" en="Updated Time" />,
                 accessor: "updatedOn",
+                Header: <Trans zh="更改时间" en="Updated Time" />,
                 disableSortBy: true
             }),
             textColumn({
@@ -131,27 +158,26 @@ const useColumns = ({ items = [], mutate }) => {
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "UpdatedByUsername",
+                accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
             }),
-            {
+            textColumn({
                 id: "actions",
+                Header: <Trans zh="操作" en="Actions" />,
                 accessor: (row) => row,
-                Cell: ({ value }) => {
+                disableSortBy: true,
+                Cell: ({ value: record }) => {
                     return (
                         <Set orientation="horizontal">
-                            TODO: edit & delete btn
+                            <EditBetLimitDisclosure
+                                record={record}
+                                onSubmitted={mutate}
+                            />
                         </Set>
                     )
-                },
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
                 }
-            }
+            })
         ],
         [JSON.stringify(items)]
     )
