@@ -1,6 +1,10 @@
 pipeline {
     agent any
-	 
+	
+	environment {
+		gitlab_user_pwd = credentials('gitlab-user-pwd')
+	}
+	
 	parameters {
 		gitParameter branchFilter: 'origin/(.*)', defaultValue: 'develop', name: 'BRANCH', type: 'PT_BRANCH'
 	}
@@ -15,7 +19,7 @@ pipeline {
 		
 		stage('Clone') {
 			steps {
-				git branch: "${params.BRANCH}", url: 'https://gitlab.com/rayprosoft/turnkey-gaming-system.git'
+				git branch: "${params.BRANCH}", url: "https://${gitlab_user_pwd_USR}:${gitlab_user_pwd_PSW}@gitlab.com/rayprosoft/turnkey-gaming-system.git"
 			}
 		}
 	
