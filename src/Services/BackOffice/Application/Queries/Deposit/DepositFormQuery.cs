@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
@@ -9,5 +10,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
         Guid? PaymentMethodId,
         int? Status,
         (DateTimeOffset Begin, DateTimeOffset End)? CreateOnRange,
-        (DateTimeOffset Begin, DateTimeOffset End)? UpdateOnRange);
+        (DateTimeOffset Begin, DateTimeOffset End)? UpdateOnRange,
+        PageableRequest Paging);
 }

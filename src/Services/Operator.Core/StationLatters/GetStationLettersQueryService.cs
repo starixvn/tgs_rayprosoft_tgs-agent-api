@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading;
+using TGS.Paging;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.StationLetters
@@ -26,15 +26,7 @@ namespace TGS.Services.Operator.StationLetters
                 RowCount = query.Paging.Rows
             };
 
-            if (!string.IsNullOrWhiteSpace(query.Paging.SortBy))
-            {
-                var type = typeof(StationLetter);
-
-                var orderByExp = type.MakeMemberAccess(query.Paging.SortBy);
-
-                paging.OrderBy = orderByExp;
-                paging.IsDesc = query.Paging.IsDesc;
-            }
+            paging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
 
             return _stationLetterRepository.QueryStationLettersAsync(query.PlayerCode, paging);
         }

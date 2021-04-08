@@ -18,8 +18,9 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         [AllowAnonymous]
         [HttpGet("{brandId}")]
-        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositForms(
+        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
             [FromServices] IQueryService<DepositFormQuery, DepositFormInfo> queryDepositFormsService,
+            [FromServices] IGetService<DepositFormQuery, int> countDepositFormsService,
             Guid brandId,
             [FromQuery] DepositFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -40,10 +41,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.PaymentMethodId,
                 request.Status,
                 createOnRange,
-                updateOnRange);
+                updateOnRange,
+                paging);
 
             var response = new PagedResponse<DepositFormViewModel>
             {
+                Valid = true,
+                TotalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false),
                 Items = await queryDepositFormsService.QueryAsync(query)
                     .Select(form => new DepositFormViewModel
                     {
