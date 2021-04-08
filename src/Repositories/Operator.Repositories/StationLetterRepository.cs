@@ -47,7 +47,8 @@ namespace TGS.Operator.Repositories
                             letterPlayer.StationLetterId,
                             letterPlayer.StationLetter.Subject,
                             letterPlayer.StationLetter.Content,
-                            letterPlayer.StationLetter.CreatedOn);
+                            letterPlayer.StationLetter.CreatedOn,
+                            letterPlayer.IsRead);
 
             return query;
         }
