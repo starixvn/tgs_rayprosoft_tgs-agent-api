@@ -71,7 +71,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
 
             services.AddNats(configuration)
-                .AddJson()
+                .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()

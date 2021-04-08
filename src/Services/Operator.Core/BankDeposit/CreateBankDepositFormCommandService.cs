@@ -22,9 +22,11 @@ namespace TGS.Services.Operator.BankDeposit
                 command.BankAccount,
                 command.Amount);
 
-            await _walletRepository
+            var createdFormId = await _walletRepository
                 .CreateDepositFormAsync(form)
                 .ConfigureAwait(false);
+
+            command.ReturnFormIdSource.SetResult(createdFormId);
         }
     }
 }

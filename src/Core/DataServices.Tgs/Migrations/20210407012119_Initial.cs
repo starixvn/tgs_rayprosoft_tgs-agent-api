@@ -1836,6 +1836,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
                     brand_payment_id = table.Column<Guid>(type: "uuid", nullable: false),
                     status = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    remittance_certificate_file_id = table.Column<string>(type: "text", nullable: true),
+                    remittance_certificate_external_url = table.Column<string>(type: "text", nullable: true),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()")
                 },
                 constraints: table =>

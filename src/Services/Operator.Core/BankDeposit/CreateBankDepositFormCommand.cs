@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TGS.Services.Operator.BankDeposit
 {
@@ -7,5 +8,8 @@ namespace TGS.Services.Operator.BankDeposit
         Guid BrandId,
         Guid BrandPaymentId,
         string BankAccount,
-        decimal Amount);
+        decimal Amount)
+    {
+        public TaskCompletionSource<Guid> ReturnFormIdSource { get; } = new TaskCompletionSource<Guid>();
+    }
 }

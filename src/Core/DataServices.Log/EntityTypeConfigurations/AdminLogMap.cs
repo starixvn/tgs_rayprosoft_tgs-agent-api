@@ -66,9 +66,6 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfigurations
 
             builder.Property(c => c.RecordedOn)
                 .IsRequired();
-
-            builder.HasIndex(c => c.RecordedOn)
-                .HasDatabaseName("ix_admin_logs_recorded_on");
         }
     }
 }
