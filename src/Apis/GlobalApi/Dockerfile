@@ -6,7 +6,11 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
+ARG BuildConfiguration=Release
+RUN --mount=type=secret,id=nuget,dst=/pat cp /pat ~/.nuget/NuGet/NuGet.Config
+RUN dotnet nuget remove source 'Microsoft Visual Studio Offline Packages' || true
 WORKDIR /dest
+COPY ["nuget.config", "."]
 COPY ["src/Apis/GlobalApi/GlobalApi.csproj", "src/Apis/GlobalApi/"]
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]
@@ -16,7 +20,7 @@ COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServi
 RUN dotnet restore "src/Apis/GlobalApi/GlobalApi.csproj"
 COPY . .
 WORKDIR "/dest/src/Apis/GlobalApi"
-RUN dotnet publish "GlobalApi.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "GlobalApi.csproj" -c ${BuildConfiguration} -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app
