@@ -88,7 +88,7 @@ namespace TGS.Operator.Repositories
             var formData = await _tgsRepository.DepositForms.FindAsync(formId).ConfigureAwait(false);
 
             formData.Status = 1000;
-            formData.RemittanceCertificateFileId = remittanceReceiptFileId;
+            formData.ManualReceiptFileId = remittanceReceiptFileId;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

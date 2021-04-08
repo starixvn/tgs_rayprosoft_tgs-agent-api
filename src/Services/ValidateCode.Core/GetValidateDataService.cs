@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.ValidateCode
             _validateCodeStore = validateCodeStore ?? throw new ArgumentNullException(nameof(validateCodeStore));
         }
 
-        public ValueTask<string?> GetAsync(GetValidateDataQuery query)
+        public ValueTask<string?> GetAsync(GetValidateDataQuery query, CancellationToken cancellationToken = default)
         {
             return _validateCodeStore.GetDataAsync(query.ValidateCode, query.Token);
         }

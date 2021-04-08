@@ -37,7 +37,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
         public void Setup()
         {
             _requestDelegate = (innerContext) => Task.FromResult(0);
-            _target = new ExceptionMiddleware(_requestAnalyzerMock.Object, _tgsLogMock.Object, _json.Object, _streamToString.Object);
+            _target = new ExceptionMiddleware(_requestAnalyzerMock.Object, _tgsLogMock.Object, _json.Object, _streamToString.Object, new NullLogger<ExceptionMiddleware>());
         }
 
         ///TODO: fix  cannot pass   using var sr = new StreamReader(context.Response.Body);

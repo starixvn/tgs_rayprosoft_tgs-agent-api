@@ -36,9 +36,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Remark);
 
-            builder.Property(c => c.RemittanceCertificateFileId);
+            builder.Property(c => c.ManualReceiptFileId);
 
-            builder.Property(c => c.RemittanceCertificateExternalUrl);
+            builder.Property(c => c.ManualReceiptExternalUrl);
 
             builder.Property(c => c.CreatedOn)
                 .IsRequired()

@@ -1837,8 +1837,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     brand_payment_id = table.Column<Guid>(type: "uuid", nullable: false),
                     status = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     remark = table.Column<string>(type: "text", nullable: true),
-                    remittance_certificate_file_id = table.Column<string>(type: "text", nullable: true),
-                    remittance_certificate_external_url = table.Column<string>(type: "text", nullable: true),
+                    manual_receipt_file_id = table.Column<string>(type: "text", nullable: true),
+                    manual_receipt_external_url = table.Column<string>(type: "text", nullable: true),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
                     update_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()")
                 },

@@ -1272,6 +1272,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<string>("ManualReceiptExternalUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("manual_receipt_external_url");
+
+                    b.Property<string>("ManualReceiptFileId")
+                        .HasColumnType("text")
+                        .HasColumnName("manual_receipt_file_id");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -1281,14 +1289,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");
-
-                    b.Property<string>("RemittanceCertificateExternalUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("remittance_certificate_external_url");
-
-                    b.Property<string>("RemittanceCertificateFileId")
-                        .HasColumnType("text")
-                        .HasColumnName("remittance_certificate_file_id");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()

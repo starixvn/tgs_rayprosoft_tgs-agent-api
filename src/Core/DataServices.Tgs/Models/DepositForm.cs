@@ -20,9 +20,9 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Remark { get; set; }
 
-        public string RemittanceCertificateFileId { get; set; }
+        public string ManualReceiptFileId { get; set; }
 
-        public string RemittanceCertificateExternalUrl { get; set; }
+        public string ManualReceiptExternalUrl { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
 
