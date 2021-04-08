@@ -2,5 +2,10 @@
 
 namespace TGS.Services.Operator
 {
-    public record StationLetter(Guid Id, string Subject, string Content, DateTimeOffset CreateOn);
+    public record StationLetter(
+        Guid Id,
+        string Subject,
+        string Content,
+        DateTimeOffset CreateOn,
+        bool IsRead);
 }

@@ -23,6 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Gets the station letters.
         /// </summary>
         /// <param name="listStationLetterService">The list station letter service.</param>
+        /// <param name="countStationLetterService">The count station letter service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpGet]
@@ -59,7 +60,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Id = letter.Id,
                         Subject = letter.Subject,
                         Content = letter.Content,
-                        CreateOn = letter.CreateOn
+                        CreateOn = letter.CreateOn,
+                        IsRead = letter.IsRead
                     })
                     .ToEnumerable()
             };
