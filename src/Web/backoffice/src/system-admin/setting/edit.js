@@ -119,7 +119,9 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
                 <Controller
                     control={control}
                     name="value"
-                    render={({ onChange, onBlur, value, name, ref }) => (
+                    render={({
+                        field: { onChange, onBlur, value, name, ref }
+                    }) => (
                         <MonacoEditor
                             defaultLanguage="JSON"
                             height="60vh"

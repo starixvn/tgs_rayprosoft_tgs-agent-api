@@ -72,6 +72,11 @@ const BodyContent = ({ brandId }) => {
             ? PublishedName
             : null
     })
+
+    useEffect(() => {
+        setState({ pageIndex: 0, brandId })
+    }, [brandId])
+
     let { pageSize, statusName } = state
     let {
         isLoading,

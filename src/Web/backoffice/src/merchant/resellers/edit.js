@@ -41,7 +41,6 @@ import { useLanguageList } from "../../language/client"
 import { useCurrencyList } from "../../currency/client"
 import { CurrencyFieldsBox, toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 import { LanguageFieldsBox, toCheckedCultureCodes } from "../LanguageFieldsBox"
-import { BetLimitFieldsBox, toCheckedBetLimitIds } from "../BetLimitFieldsBox"
 import GameProviderFieldsBox from "../GameProviderFieldsBox"
 import CurrencyBetLimitFieldsBox, {
     flatCheckedCurrencyBetLimitIds
@@ -518,9 +517,6 @@ const EditBody = ({ record = {}, readonly = false, isAdd = false }) => {
                 <LanguageFieldsBox readonly={readonly} />
 
                 <CurrencyBetLimitFieldsBox readonly={readonly} />
-                {/* <CurrencyFieldsBox readonly={readonly} />
-
-                <BetLimitFieldsBox readonly={readonly} /> */}
 
                 <GameProviderFieldsBox readonly={readonly} />
             </FieldValues>

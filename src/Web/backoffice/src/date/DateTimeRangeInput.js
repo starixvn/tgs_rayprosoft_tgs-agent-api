@@ -62,7 +62,7 @@ export const DateTimeRangeInput = ({
 
     const toasts = useToasts()
     const hasRangeError = (name) =>
-        formMethods?.errors?.[name]?.type === "range"
+        formMethods?.formState?.errors?.[name]?.type === "range"
     let rangeError = hasRangeError(startName) || hasRangeError(endName)
     let rangeErrorTitle = useRangeErrorTitle(maxRangeDays)
     useEffect(() => {

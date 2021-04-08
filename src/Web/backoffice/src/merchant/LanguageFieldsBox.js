@@ -7,37 +7,37 @@ import { useFormContext, useFieldArray } from "react-hook-form"
 import { LanguageCheckboxGroupTable } from "../language/LanguageCheckboxGroup"
 
 export const LanguageFieldsBox = ({ readonly }) => {
-  let { watch, control } = useFormContext()
+    let { watch, control } = useFormContext()
 
-  let fieldsName = "languages"
-  let fieldArrayContext = useFieldArray({
-    control,
-    name: fieldsName,
-    keyName: "_id"
-  })
-  let languages = watch(fieldsName)
+    let fieldsName = "languages"
+    let fieldArrayContext = useFieldArray({
+        control,
+        name: fieldsName,
+        keyName: "_id"
+    })
+    let languages = watch(fieldsName)
 
-  if (languages.length == 0) {
-    return null
-  }
+    if (languages.length == 0) {
+        return null
+    }
 
-  return (
-    <>
-      <NormalLabel>
-        <Trans zh="语言" en="Language" />
-      </NormalLabel>
-      <LanguageCheckboxGroupTable
-        fieldArrayContext={fieldArrayContext}
-        disabled={readonly}
-      />
-    </>
-  )
+    return (
+        <>
+            <NormalLabel>
+                <Trans zh="语言" en="Language" />
+            </NormalLabel>
+            <LanguageCheckboxGroupTable
+                fieldArrayContext={fieldArrayContext}
+                disabled={readonly}
+            />
+        </>
+    )
 }
 
 export const toCheckedCultureCodes = (languages = []) => {
-  return languages
-    .filter(({ checked }) => checked)
-    .map(({ cultureCode }) => cultureCode)
+    return languages
+        .filter(({ checked }) => checked)
+        .map(({ cultureCode }) => cultureCode)
 }
 
 export default LanguageFieldsBox

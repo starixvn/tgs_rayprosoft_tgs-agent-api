@@ -232,7 +232,6 @@ const AddDialog = ({ dialog, onSubmitted }) => {
                                     name="roleType"
                                     required
                                     defaultValue={userRoleType}
-                                    selectRef={register({ required: true })}
                                 />
                                 {roleType != RoleTypes.Admin && (
                                     <MerchantIdHookFormSelect
@@ -412,12 +411,13 @@ const RoleTemplateSelect = ({
     */
     }, [options, isRoot, resellerId, licenseeId, brandId])
 
+    let { ref, ...formProps } = register(name, { required: true })
     return (
         <Select
-            name={name}
             required
             defaultValue={defaultValue}
-            selectRef={register({ required: true })}
+            selectRef={ref}
+            {...formProps}
             placeholder={placeholder}
             options={options}
         />

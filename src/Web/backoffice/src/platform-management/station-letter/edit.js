@@ -237,10 +237,10 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                     <Controller
                         control={control}
                         name="playerUsernames"
-                        render={(
-                            { onChange, onBlur, value, name, ref },
-                            { invalid, isTouched, isDirty }
-                        ) => (
+                        render={({
+                            field: { onChange, onBlur, value, name, ref },
+                            fieldState: { invalid, isTouched, isDirty }
+                        }) => (
                             <>
                                 <input
                                     ref={uploadInputRef}
@@ -333,10 +333,10 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                 control={control}
                 name="content"
                 rules={{ required }}
-                render={(
-                    { onChange, onBlur, value, ref, ...props },
-                    { invalid, isTouched, isDirty }
-                ) => {
+                render={({
+                    field: { onChange, onBlur, value, ref, ...props },
+                    fieldState: { invalid, isTouched, isDirty }
+                }) => {
                     useEffect(() => {
                         if (formState.isSubmitting && invalid) {
                             editor?.focus()

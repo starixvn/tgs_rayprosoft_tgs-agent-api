@@ -207,7 +207,12 @@ export const MerchantIdHookFormSelect = ({
     required = true,
     ...props
 }) => {
-    let { register, setValue, getValues, errors, watch } = useFormContext()
+    let {
+        register,
+        setValue,
+        formState: { errors },
+        watch
+    } = useFormContext()
 
     let isResellerActive = isActive(Reseller, start, end)
     let resellerId = watch(resellerIdName)
@@ -253,22 +258,41 @@ export const MerchantIdHookFormSelect = ({
         onBrandChange?.(brandId)
     }, [brandId])
 
+    let {
+        ref: resellerRef,
+        onChange: onResellerChange,
+        ...resellerFormProps
+    } = register(resellerIdName, {
+        required
+    })
     let resellerPlaceholder = useResellerPlaceholder()
+
+    let {
+        ref: licenseeRef,
+        onChange: onLicenseeChange,
+        ...licenseeFormProps
+    } = register(licenseeIdName, {
+        required
+    })
     let licenseePlaceholder = useLicenseePlaceholder()
+
+    let { ref: brandRef, ...brandFormProps } = register(brandIdName, {
+        required
+    })
     let brandPlaceHolder = useBrandPlaceholder()
     return (
         <Group>
             {isResellerActive && (
                 <Select
-                    name={resellerIdName}
-                    required={required}
-                    selectRef={register({ required })}
+                    selectRef={resellerRef}
                     state={resellerError && "danger"}
                     isLoading={isResellerDataLoading}
                     options={resellerOptions}
                     defaultValue={resellerId}
                     placeholder={resellerPlaceholder}
+                    {...resellerFormProps}
                     onChange={(event) => {
+                        onResellerChange(event)
                         setValue(licenseeIdName, undefined)
                         setValue(brandIdName, undefined)
                     }}
@@ -276,24 +300,23 @@ export const MerchantIdHookFormSelect = ({
             )}
             {isLicenseeActive && (
                 <Select
-                    name={licenseeIdName}
-                    required={required}
-                    selectRef={register({ required })}
+                    selectRef={licenseeRef}
                     state={licenseeError && "danger"}
                     isLoading={isLicenseeDataLoading}
                     options={licenseeOptions}
                     defaultValue={licenseeId}
                     placeholder={licenseePlaceholder}
+                    {...licenseeFormProps}
                     onChange={(event) => {
+                        onLicenseeChange(event)
                         setValue(brandIdName, undefined)
                     }}
                 />
             )}
             {isBrandActive && (
                 <Select
-                    name={brandIdName}
-                    required={required}
-                    selectRef={register({ required })}
+                    selectRef={brandRef}
+                    {...brandFormProps}
                     state={brandError && "danger"}
                     isLoading={isBrandDataLoading}
                     options={brandOptions}

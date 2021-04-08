@@ -212,9 +212,9 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Cell: ({ value }) => <AgentStatusLabel value={value} />
             }),
             textColumn({
-                id: "bonusPercentage",
+                id: "dividendPercentage",
                 accessor: (row) => row,
-                Header: <Trans zh="分红比例" en="Bonus Percentage" />,
+                Header: <Trans zh="分红比例" en="Dividend Percentage" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -226,7 +226,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
 
                     return (
                         <FormattedNumberDecimal
-                            value={value?.bonusPercentage}
+                            value={value?.dividendPercentage}
                             postfix="%"
                         />
                     )

@@ -4,25 +4,25 @@ import { useForm, useFormContext, Controller } from "react-hook-form"
 import { RadioGroup as _RadioGroup } from "bumbag"
 
 export const RadioGroup = ({ name, ...props }) => {
-  let { control } = useFormContext() ?? {}
+    let { control } = useFormContext() ?? {}
 
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={(
-        { onChange, onBlur, value, name, ref },
-        { invalid, isTouched, isDirty }
-      ) => (
-        <_RadioGroup
-          onBlur={onBlur}
-          onChange={(e) => onChange(e.target.value)}
-          value={value}
-          {...props}
+    return (
+        <Controller
+            control={control}
+            name={name}
+            render={({
+                field: { onChange, onBlur, value, name, ref },
+                fieldState: { invalid, isTouched, isDirty }
+            }) => (
+                <_RadioGroup
+                    onBlur={onBlur}
+                    onChange={(e) => onChange(e.target.value)}
+                    value={value}
+                    {...props}
+                />
+            )}
         />
-      )}
-    />
-  )
+    )
 }
 
 export default RadioGroup

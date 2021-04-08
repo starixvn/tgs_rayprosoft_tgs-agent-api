@@ -383,10 +383,10 @@ const UploadListColumn = ({ name = "", title, fileName = "" }) => {
         <Controller
             control={control}
             name={name}
-            render={(
-                { onChange, onBlur, value, name, ref },
-                { invalid, isTouched, isDirty }
-            ) => (
+            render={({
+                field: { onChange, onBlur, value, name, ref },
+                fieldState: { invalid, isTouched, isDirty }
+            }) => (
                 <Columns.Column display="flex" flexDirection="column">
                     {error && (
                         <AlertDialog {...error} onClickClose={resetFormData} />

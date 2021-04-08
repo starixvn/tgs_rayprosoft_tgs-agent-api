@@ -23,6 +23,7 @@ import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import BrandBar from "../../report/BrandBar"
 import AlertDialog from "../../dialog/Alert"
+import textColumn from "../../table/column/textColumn"
 
 export { Code }
 
@@ -172,17 +173,12 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                     textAlign: "center"
                 }
             },
-            {
+            textColumn({
+                accessor: "vipLevel",
                 Header: <Trans zh="VIP 等级" en="VIP Level" />,
                 disableSortBy: true,
-                accessor: "vipLevel",
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            },
+                Cell: ({ value }) => `VIP ${value}`
+            }),
             {
                 disableSortBy: true,
                 Header: <Trans zh="状态" en="Status" />,

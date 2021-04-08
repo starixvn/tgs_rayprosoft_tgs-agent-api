@@ -87,6 +87,11 @@ const BodyContent = ({ brandId }) => {
             ? EffectiveName
             : null
     })
+
+    useEffect(() => {
+        setState({ pageIndex: 0, brandId })
+    }, [brandId])
+
     let { statusName } = state
     let isEffectiveTab = statusName === EffectiveName
     let {
