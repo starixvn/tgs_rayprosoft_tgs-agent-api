@@ -104,7 +104,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             await sut.UpdatePaymentAsync(source, request, "tester");
 
-            var logs = await repository.PaymentAuditLogs.ToArrayAsync();
+            var logs = await repository.PaymentAuditLogs.AsQueryable().ToArrayAsync();
 
             Assert.AreEqual(1, logs.Length);
 

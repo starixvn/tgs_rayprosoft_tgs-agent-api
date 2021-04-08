@@ -1,7 +1,10 @@
+using System;
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
@@ -9,10 +12,6 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Models;
-using Swashbuckle.AspNetCore;
-using System.IO;
-using System;
-using Microsoft.Extensions.Hosting;
 
 namespace TGS.Apis.BackendOffice
 {

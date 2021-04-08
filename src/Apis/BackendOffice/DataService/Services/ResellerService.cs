@@ -117,7 +117,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<ResellerLanguage> GenerateResellerLanguages(Reseller reseller, ResellerRequest request)
         {
-            var resellerLanguages = _repository.Languages
+            var resellerLanguages = _repository.Languages.AsQueryable()
                 .Where(x => request.CultureCodes.Contains(x.CultureCode)).Select(x =>
                     new ResellerLanguage
                     {
@@ -129,7 +129,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<ResellerCurrency> GenerateResellerCurrencies(Reseller reseller, ResellerRequest request)
         {
-            var resellerCurrencies = _repository.Currencies
+            var resellerCurrencies = _repository.Currencies.AsQueryable()
                 .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
                     new ResellerCurrency
                     {
@@ -141,7 +141,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<ResellerGameProvider> GenerateResellerGameProviders(Reseller reseller, ResellerRequest request)
         {
-            var resellerGameProviders = _repository.GameProviders
+            var resellerGameProviders = _repository.GameProviders.AsQueryable()
                 .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
                     new ResellerGameProvider
                     {

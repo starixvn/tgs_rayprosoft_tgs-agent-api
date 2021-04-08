@@ -116,7 +116,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<LicenseeLanguage> GenerateLicenseeLanguages(Licensee licensee, LicenseeRequest request)
         {
-            var licenseeLanguages = _repository.Languages
+            var licenseeLanguages = _repository.Languages.AsQueryable()
                 .Where(x => request.CultureCodes.Contains(x.CultureCode)).Select(x =>
                     new LicenseeLanguage
                     {
@@ -128,7 +128,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<LicenseeCurrency> GenerateLicenseeCurrencies(Licensee licensee, LicenseeRequest request)
         {
-            var licenseeCurrencies = _repository.Currencies
+            var licenseeCurrencies = _repository.Currencies.AsQueryable()
                 .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
                     new LicenseeCurrency
                     {
@@ -140,7 +140,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<LicenseeGameProvider> GenerateLicenseeGameProviders(Licensee licensee, LicenseeRequest request)
         {
-            var licenseeGameProviders = _repository.GameProviders
+            var licenseeGameProviders = _repository.GameProviders.AsQueryable()
                 .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
                     new LicenseeGameProvider
                     {
@@ -152,7 +152,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         private HashSet<LicenseeBetLimit> GenerateLicenseeBetLimits(Licensee licensee, LicenseeRequest request)
         {
-            var licenseeBetLimits = _repository.BetLimits
+            var licenseeBetLimits = _repository.BetLimits.AsQueryable()
                 .Where(x => request.BetLimitIds.Contains(x.Id)).Select(x =>
                     new LicenseeBetLimit
                     {

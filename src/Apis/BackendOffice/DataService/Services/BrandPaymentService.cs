@@ -79,11 +79,14 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
-            var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id))
+            var vips = await _repository.VipLevels.AsQueryable()
+                .Where(x => request.VipLevelIds.Contains(x.Id))
                 .ToArrayAsync();
             var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                BrandPaymentId = paymentId, VipLevelId = vip.Id, VipLevel = vip
+                BrandPaymentId = paymentId,
+                VipLevelId = vip.Id,
+                VipLevel = vip
             }).ToArray();
 
             payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
@@ -137,10 +140,13 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
-            var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
+            var vips = await _repository.VipLevels.AsQueryable()
+                .Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
             var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                BrandPaymentId = payment.Id, VipLevelId = vip.Id, VipLevel = vip
+                BrandPaymentId = payment.Id,
+                VipLevelId = vip.Id,
+                VipLevel = vip
             }).ToArray();
 
             payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
@@ -183,7 +189,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         async Task IBrandPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);
-            var payments = await _repository.BrandPayments.Where(q => ids.Contains(q.Id)).ToListAsync();
+            var payments = await _repository.BrandPayments.AsQueryable()
+                .Where(q => ids.Contains(q.Id)).ToListAsync();
             payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
             await _repository.BulkUpdateAsync(payments.ToArray());
@@ -219,7 +226,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             PlayerListType playerListType)
         {
             var playerWhitelist = list != null
-                ? await _repository.Players.Where(x => list.Contains(x.Username))
+                ? await _repository.Players.AsQueryable()
+                    .Where(x => list.Contains(x.Username))
                     .ToArrayAsync()
                 : Array.Empty<Player>();
             return playerWhitelist.Select(player => new BrandPaymentPlayer

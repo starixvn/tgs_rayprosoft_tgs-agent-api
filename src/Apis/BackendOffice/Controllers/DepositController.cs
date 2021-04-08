@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
+using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
 using TGS.ServiceUtility;
@@ -15,10 +18,11 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         [AllowAnonymous]
         [HttpGet("{brandId}")]
-        public IAsyncEnumerable<DepositFormInfo> QueryDepositForms(
+        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositForms(
             [FromServices] IQueryService<DepositFormQuery, DepositFormInfo> queryDepositFormsService,
             Guid brandId,
-            [FromQuery] DepositFormRequest request)
+            [FromQuery] DepositFormRequest request,
+            [FromQuery] PageableRequest paging)
         {
             var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
             var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
@@ -38,7 +42,26 @@ namespace TGS.Apis.BackendOffice.Controllers
                 createOnRange,
                 updateOnRange);
 
-            return queryDepositFormsService.QueryAsync(query);
+            var response = new PagedResponse<DepositFormViewModel>
+            {
+                Items = await queryDepositFormsService.QueryAsync(query)
+                    .Select(form => new DepositFormViewModel
+                    {
+                        Id = form.Id,
+                        PlayerCode = form.PlayerCode,
+                        UserName = form.UserName,
+                        BrandId = form.BrandId,
+                        BrandPaymentId = form.BrandPaymentId,
+                        Amount = form.Amount,
+                        Remark = form.Remark,
+                        CreateOn = form.CreateOn,
+                        UpdateOn = form.UpdateOn
+                    })
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
+
+            return response;
         }
     }
 }
