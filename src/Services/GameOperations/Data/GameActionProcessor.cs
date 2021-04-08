@@ -127,6 +127,8 @@ namespace TGS.Services.GameOperations.Data
 
             s = GetNewRoundStatus(s);
 
+            VerifyLockedAndUnlockedAmounts(s);
+
             await ThrowIfStatusesIsInvalidAsync(s).ConfigureAwait(false);
 
             var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
@@ -667,5 +669,11 @@ namespace TGS.Services.GameOperations.Data
             round.SettleAmount = s.BetValueResult.SettleAmount;
             round.Turnover = s.BetValueResult.Turnover;
         }
+
+        private static decimal GetRemainingLockedAmount(IList<BetActionData> validPreviousActions,
+            GameActionType gameActionType, BetActionData referencedGameAction) =>
+            validPreviousActions?.Where(a =>
+                a.Type.IsOneOf(LockAmount, UnlockAmount) &&
+                !(gameActionType == CancelTransaction && referencedGameAction.Id == a.Id)).Sum(a => a.Amount) ?? 0;
     }
 }
