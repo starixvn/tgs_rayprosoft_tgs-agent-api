@@ -33,12 +33,17 @@ namespace TGS.Services.GameOperations.Models.Data
             RoundDetail = td.RoundDetail;
             RoundClosed = td.RoundClosed;
             BetType = td.BetType;
+            OppositeBetPatterns = td.OppositeBetPatterns == null
+                ? Array.Empty<OppositeBetPattern>()
+                : td.OppositeBetPatterns
+                    .Select(p => new OppositeBetPattern(p.BetType, p.GroupId))
+                    .ToArray();
 
             UtcNow = DateTimeOffset.UtcNow;
         }
 
         public ITgsRepository Repository { get; init; }
-        public GameActionType GameActionType { get; init; }
+        public GameActionType GameActionType { get; }
         public PlatformType? PlatformType { get; init; }
         public Action<string, decimal> ValidateAmount { get; init; }
         public Func<decimal, decimal> PrepareAmount { get; init; }
@@ -110,5 +115,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool FreeBetAsSingleRound { get; init; }
         public bool AllowCancelCancelTransaction { get; init; }
         public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
+
+        public OppositeBetPattern[] OppositeBetPatterns { get; }
     }
 }

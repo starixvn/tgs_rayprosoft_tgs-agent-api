@@ -11,13 +11,13 @@ namespace TGS.Services.GameOperations.Calculators
     internal interface IBetValuesCalculator
     {
         BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current,
-            IList<BetActionData> previousActions);
+            IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns = null);
     }
 
     internal sealed class BetValuesCalculator : IBetValuesCalculator
     {
         BetValuesResult IBetValuesCalculator.Calculate(bool hasTurnoverOnTieBet, BetActionData current,
-            IList<BetActionData> previousActions)
+            IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns)
         {
             if (current.Type.IsOneOf(LockAmount, UnlockAmount))
             {
@@ -29,6 +29,7 @@ namespace TGS.Services.GameOperations.Calculators
             decimal unsettledBets = 0, tieBetAdjustment = 0;
 
             previousActions ??= Array.Empty<BetActionData>();
+            oppositeBetPatterns ??= Array.Empty<OppositeBetPattern>();
             var previouslyClosed = FindPreviouslyClosed(previousActions);
 
             // round has already been closed
@@ -42,7 +43,7 @@ namespace TGS.Services.GameOperations.Calculators
             else if (current.IsClosingRound)
             {
                 (betAmount, validBetAmount, settleAmount, tieBetAdjustment, turnover, winLoss, unsettledBets) =
-                    CalculateClosingActionBetValues(hasTurnoverOnTieBet, current, previousActions);
+                    CalculateClosingActionBetValues(hasTurnoverOnTieBet, current, previousActions, oppositeBetPatterns);
             }
             else
             {
@@ -106,8 +107,8 @@ namespace TGS.Services.GameOperations.Calculators
 
         private static (decimal BetAmount, decimal ValidBetAmount, decimal SettleAmount, decimal TieBetAdjustment,
             decimal Turnover, decimal WinLoss, decimal UnsettleBets) CalculateClosingActionBetValues(
-                bool hasTurnoverOnTieBet,
-                BetActionData current, IList<BetActionData> previousActions)
+                bool hasTurnoverOnTieBet, BetActionData current,
+                IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns)
         {
             var allActions = GetAllActions(current, previousActions);
 
@@ -118,10 +119,16 @@ namespace TGS.Services.GameOperations.Calculators
             var winLoss = CalculateWinLoss(allActions);
             var unsettledBets = CalculateUnsettledBets(previousActions);
 
-            var turnover = validBetAmount - tieBetAdjustment;
+            //var turnover = validBetAmount - tieBetAdjustment;
+            var turnover = oppositeBetPatterns.Count == 0
+                ? validBetAmount - tieBetAdjustment
+                : CalculateTurnover(hasTurnoverOnTieBet, allActions, oppositeBetPatterns);
 
             return (betAmount, validBetAmount, settleAmount, tieBetAdjustment, turnover, winLoss, unsettledBets);
         }
+
+        private static decimal CalculateTurnover(bool hasTurnoverOnTieBet, IList<BetActionData> allActions,
+            IList<OppositeBetPattern> oppositeBetPatterns) => throw new NotImplementedException();
 
         private static (decimal BetAmount, decimal validBetAmount, decimal UnsettleBets)
             CalculatePlaceBetActionBetValues(BetActionData current, IList<BetActionData> previousActions)

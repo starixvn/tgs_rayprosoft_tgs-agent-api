@@ -456,7 +456,8 @@ namespace TGS.Services.GameOperations.Data
                 throw error;
             }
 
-            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current, s.PreviousActions);
+            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
+                s.PreviousActions, s.OppositeBetPatterns);
 
             s.BetValueResult = betValues;
 
