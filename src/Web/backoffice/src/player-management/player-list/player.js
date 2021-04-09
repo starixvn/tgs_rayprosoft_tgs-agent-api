@@ -145,7 +145,7 @@ const EditForm = ({
                     />
                 </Box>
 
-                <AgentParentUsernameLabel />
+                <AgentUsernameLabel />
                 <Box>
                     <Input name="agentUsername" />
                 </Box>
@@ -205,7 +205,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
                     <Text>{`VIP ${vipLevel}`}</Text>
                 </Box>
 
-                <AgentParentUsernameLabel />
+                <AgentUsernameLabel />
                 <Box>
                     <Text>{player?.agentUsername}</Text>
                 </Box>
@@ -235,9 +235,7 @@ const RealNameLabel = () => <Trans zh="真实姓名" en="Real name" />
 
 const VIPLevelLabel = () => <Trans zh="VIP等级" en="VIP Level" />
 
-const AgentParentUsernameLabel = () => (
-    <Trans zh="上级代理" en="Upper Level Agent" />
-)
+const AgentUsernameLabel = () => <Trans zh="上级代理" en="Upper Level Agent" />
 
 const RegistrationLabel = () => <Trans zh="注册时间" en="Registration" />
 
