@@ -52,80 +52,80 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 }).AsNoTracking().CreatePagedResponseAsync(request);
         }
 
-        [HttpGet("{id}")]
-        [Description("Get a PaymentChannel")]
-        public async Task<GetPaymentChannelResponse> GetPaymentChannelAsync(Guid id)
-        {
-            var channel = await _queries.GetSingleAsync(q => q.Id == id,
-                p => p
-                    .Include(pc => pc.Payment)
-                    .Include(pc => pc.PaymentMethod)
-                    .AsNoTracking());
+        //[HttpGet("{id}")]
+        //[Description("Get a PaymentChannel")]
+        //public async Task<GetPaymentChannelResponse> GetPaymentChannelAsync(Guid id)
+        //{
+        //    var channel = await _queries.GetSingleAsync(q => q.Id == id,
+        //        p => p
+        //            .Include(pc => pc.Payment)
+        //            .Include(pc => pc.PaymentMethod)
+        //            .AsNoTracking());
 
-            return new GetPaymentChannelResponse
-            {
-                Valid = true,
-                PaymentChannel = new PaymentChannelModel
-                {
-                    Id = channel.Id,
-                    Code = channel.Code,
-                    Name = channel.Name,
-                    PaymentName = channel.Payment.Name,
-                    PaymentMethodName = channel.PaymentMethod.Name,
-                    Description = channel.Description,
-                    CreatedOn = channel.CreatedOn,
-                    UpdatedOn = channel.UpdatedOn,
-                    CreatedByUsername = channel.CreatedByUsername,
-                    UpdatedByUsername = channel.UpdatedByUsername
-                }
-            };
-        }
+        //    return new GetPaymentChannelResponse
+        //    {
+        //        Valid = true,
+        //        PaymentChannel = new PaymentChannelModel
+        //        {
+        //            Id = channel.Id,
+        //            Code = channel.Code,
+        //            Name = channel.Name,
+        //            PaymentName = channel.Payment.Name,
+        //            PaymentMethodName = channel.PaymentMethod.Name,
+        //            Description = channel.Description,
+        //            CreatedOn = channel.CreatedOn,
+        //            UpdatedOn = channel.UpdatedOn,
+        //            CreatedByUsername = channel.CreatedByUsername,
+        //            UpdatedByUsername = channel.UpdatedByUsername
+        //        }
+        //    };
+        //}
 
-        [HttpPost]
-        [Description("Create a PaymentChannel")]
-        public async Task<MessageResponse> CreateAsync(CreatePaymentChannelRequest request)
-        {
-            if (await _queries.ExistsAsync(p => p.Code == request.Code))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.CodeExists);
-            }
+        //[HttpPost]
+        //[Description("Create a PaymentChannel")]
+        //public async Task<MessageResponse> CreateAsync(CreatePaymentChannelRequest request)
+        //{
+        //    if (await _queries.ExistsAsync(p => p.Code == request.Code))
+        //    {
+        //        return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.CodeExists);
+        //    }
 
-            await _commands.CreateAsync(new PaymentChannel
-            {
-                Id = Guid.NewGuid(),
-                Name = request.Name,
-                Code = request.Code,
-                PaymentId = request.PaymentId,
-                PaymentMethodId = request.PaymentMethodId,
-                CreatedByUsername = Username,
-                UpdatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            });
+        //    await _commands.CreateAsync(new PaymentChannel
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Name = request.Name,
+        //        Code = request.Code,
+        //        PaymentId = request.PaymentId,
+        //        PaymentMethodId = request.PaymentMethodId,
+        //        CreatedByUsername = Username,
+        //        UpdatedByUsername = Username,
+        //        CreatedOn = DateTimeOffset.Now,
+        //        UpdatedOn = DateTimeOffset.Now
+        //    });
 
-            return CreateValidResponse<MessageResponse>();
-        }
+        //    return CreateValidResponse<MessageResponse>();
+        //}
 
-        [HttpPut("{id}")]
-        [Description("Update a PaymentChannel")]
-        public async Task<MessageResponse> UpdateAsync(Guid id, UpdatePaymentChannelRequest request)
-        {
-            var channel = await _queries.GetSingleAsync(p => p.Id == id);
+        //[HttpPut("{id}")]
+        //[Description("Update a PaymentChannel")]
+        //public async Task<MessageResponse> UpdateAsync(Guid id, UpdatePaymentChannelRequest request)
+        //{
+        //    var channel = await _queries.GetSingleAsync(p => p.Id == id);
 
-            if (channel == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.NotFound);
-            }
+        //    if (channel == null)
+        //    {
+        //        return CreateInvalidResponse<MessageResponse>(Resources.PaymentChannel.NotFound);
+        //    }
 
-            channel.PaymentId = request.PaymentId;
-            channel.PaymentMethodId = request.PaymentMethodId;
-            channel.Description = request.Description;
-            channel.UpdatedByUsername = Username;
-            channel.UpdatedOn = DateTimeOffset.Now;
+        //    channel.PaymentId = request.PaymentId;
+        //    channel.PaymentMethodId = request.PaymentMethodId;
+        //    channel.Description = request.Description;
+        //    channel.UpdatedByUsername = Username;
+        //    channel.UpdatedOn = DateTimeOffset.Now;
 
-            await _commands.UpdateAsync(channel);
+        //    await _commands.UpdateAsync(channel);
 
-            return CreateValidResponse<MessageResponse>();
-        }
+        //    return CreateValidResponse<MessageResponse>();
+        //}
     }
 }

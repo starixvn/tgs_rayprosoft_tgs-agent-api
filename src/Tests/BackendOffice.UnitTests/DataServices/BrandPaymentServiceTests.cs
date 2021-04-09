@@ -28,92 +28,94 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
-            var source = new BrandPayment
-            {
-                PaymentId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
-                PaymentMethodId = Guid.Parse("67252f3a-6826-45ce-8bbc-c53e2ca7cdcb"),
-                PaymentChannelId = Guid.Parse("e761a2d3-5705-417f-8d97-43cb7aea0142"),
-                ChannelName = "ChannelNass888",
-                TransferLimitFrom = 55,
-                TransferLimitTo = 55,
-                PlayerListCondition = PlayerListCondition.All,
-                AllPlayers = true,
-                IdentityAuthentication = true,
-                PhoneAuthentication = true,
-                DepositedAmountUnlimited = true,
-                DepositedAmountMax = 60000,
-                DepositedAmountMin = 33,
-                Reason = "source reason",
-                BrandPaymentPlayers = new BrandPaymentPlayer[0],
-                VipLevels = new BrandPaymentVipLevel[0]
-            };
+            Assert.Fail();
 
-            repository.BrandPayments.Add(source);
-            await repository.SaveChangesAsync();
+            //var source = new BrandPayment
+            //{
+            //    PaymentId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
+            //    PaymentMethodId = Guid.Parse("67252f3a-6826-45ce-8bbc-c53e2ca7cdcb"),
+            //    PaymentChannelId = Guid.Parse("e761a2d3-5705-417f-8d97-43cb7aea0142"),
+            //    ChannelName = "ChannelNass888",
+            //    TransferLimitFrom = 55,
+            //    TransferLimitTo = 55,
+            //    PlayerListCondition = PlayerListCondition.All,
+            //    AllPlayers = true,
+            //    IdentityAuthentication = true,
+            //    PhoneAuthentication = true,
+            //    DepositedAmountUnlimited = true,
+            //    DepositedAmountMax = 60000,
+            //    DepositedAmountMin = 33,
+            //    Reason = "source reason",
+            //    BrandPaymentPlayers = new BrandPaymentPlayer[0],
+            //    VipLevels = new BrandPaymentVipLevel[0]
+            //};
 
-            var request = new UpdateBrandPaymentRequest
-            {
-                PaymentId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
-                PaymentMethodId = Guid.Parse("67252f3a-6826-45ce-8bbc-c53e2ca7cdcb"),
-                PaymentChannelId = Guid.Parse("e761a2d3-5705-417f-8d97-43cb7aea0142"),
-                ChannelName = "ChannelNass9",
-                TransferLimitFrom = 33,
-                TransferLimitTo = 33,
-                PlayerListCondition = PlayerListCondition.All,
-                AllPlayers = true,
-                IdentityAuthentication = true,
-                PhoneAuthentication = true,
-                DepositedAmountUnlimited = true,
-                DepositedAmountMax = 50000,
-                DepositedAmountMin = 55,
-                Reason = "this is reason",
-                Whitelist = new[] { "4uc3t7zw2k38", "4uc3t7zw2zo1" },
-                VipLevelIds = new[] {
-                    Guid.Parse("0EAA7EC5-771E-EB11-8D6A-70B5E82B6B7C"),
-                    Guid.Parse("0FAA7EC5-771E-EB11-8D6A-70B5E82B6B7C")
-                }
-            };
+            //repository.BrandPayments.Add(source);
+            //await repository.SaveChangesAsync();
 
-            IBrandPaymentService sut = new BrandPaymentService(repository);
+            //var request = new UpdateBrandPaymentRequest
+            //{
+            //    PaymentId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
+            //    PaymentMethodId = Guid.Parse("67252f3a-6826-45ce-8bbc-c53e2ca7cdcb"),
+            //    PaymentChannelId = Guid.Parse("e761a2d3-5705-417f-8d97-43cb7aea0142"),
+            //    ChannelName = "ChannelNass9",
+            //    TransferLimitFrom = 33,
+            //    TransferLimitTo = 33,
+            //    PlayerListCondition = PlayerListCondition.All,
+            //    AllPlayers = true,
+            //    IdentityAuthentication = true,
+            //    PhoneAuthentication = true,
+            //    DepositedAmountUnlimited = true,
+            //    DepositedAmountMax = 50000,
+            //    DepositedAmountMin = 55,
+            //    Reason = "this is reason",
+            //    Whitelist = new[] { "4uc3t7zw2k38", "4uc3t7zw2zo1" },
+            //    VipLevelIds = new[] {
+            //        Guid.Parse("0EAA7EC5-771E-EB11-8D6A-70B5E82B6B7C"),
+            //        Guid.Parse("0FAA7EC5-771E-EB11-8D6A-70B5E82B6B7C")
+            //    }
+            //};
 
-            var beforeExpected = new BrandPaymentAuditData(
-                source.ChannelName,
-                source.PaymentStatus,
-                source.TransferLimitFrom,
-                source.TransferLimitTo,
-                source.PlayerListCondition,
-                source.AllPlayers,
-                source.IdentityAuthentication,
-                source.PhoneAuthentication,
-                source.DepositedAmountMin,
-                source.DepositedAmountMax,
-                source.DepositedAmountUnlimited).ToExpectedObject();
+            //IBrandPaymentService sut = new BrandPaymentService(repository);
 
-            var afterExpected = new BrandPaymentAuditData(
-                request.ChannelName,
-                request.PaymentStatus,
-                request.TransferLimitFrom,
-                request.TransferLimitTo,
-                request.PlayerListCondition,
-                request.AllPlayers,
-                request.IdentityAuthentication,
-                request.PhoneAuthentication,
-                request.DepositedAmountMin,
-                request.DepositedAmountMax,
-                request.DepositedAmountUnlimited).ToExpectedObject();
+            //var beforeExpected = new BrandPaymentAuditData(
+            //    source.ChannelName,
+            //    source.PaymentStatus,
+            //    source.TransferLimitFrom,
+            //    source.TransferLimitTo,
+            //    source.PlayerListCondition,
+            //    source.AllPlayers,
+            //    source.IdentityAuthentication,
+            //    source.PhoneAuthentication,
+            //    source.DepositedAmountMin,
+            //    source.DepositedAmountMax,
+            //    source.DepositedAmountUnlimited).ToExpectedObject();
 
-            await sut.UpdatePaymentAsync(source, request, "tester");
+            //var afterExpected = new BrandPaymentAuditData(
+            //    request.ChannelName,
+            //    request.PaymentStatus,
+            //    request.TransferLimitFrom,
+            //    request.TransferLimitTo,
+            //    request.PlayerListCondition,
+            //    request.AllPlayers,
+            //    request.IdentityAuthentication,
+            //    request.PhoneAuthentication,
+            //    request.DepositedAmountMin,
+            //    request.DepositedAmountMax,
+            //    request.DepositedAmountUnlimited).ToExpectedObject();
 
-            var logs = await repository.PaymentAuditLogs.AsQueryable().ToArrayAsync();
+            //await sut.UpdatePaymentAsync(source, request, "tester");
 
-            Assert.AreEqual(1, logs.Length);
+            //var logs = await repository.PaymentAuditLogs.AsQueryable().ToArrayAsync();
 
-            var auditLog = logs.First();
-            var beforeActual = JsonSerializer.Deserialize<BrandPaymentAuditData>(auditLog.Before);
-            var afterActual = JsonSerializer.Deserialize<BrandPaymentAuditData>(auditLog.After);
+            //Assert.AreEqual(1, logs.Length);
 
-            beforeExpected.ShouldMatch(beforeActual);
-            afterExpected.ShouldMatch(afterActual);
+            //var auditLog = logs.First();
+            //var beforeActual = JsonSerializer.Deserialize<BrandPaymentAuditData>(auditLog.Before);
+            //var afterActual = JsonSerializer.Deserialize<BrandPaymentAuditData>(auditLog.After);
+
+            //beforeExpected.ShouldMatch(beforeActual);
+            //afterExpected.ShouldMatch(afterActual);
         }
     }
 }

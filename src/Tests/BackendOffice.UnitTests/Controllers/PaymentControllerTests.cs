@@ -154,11 +154,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
         private Fixture CreatePaymentFixture()
         {
+            Assert.Fail();
+
+
             var fixture = new Fixture();
-            fixture.Customize<Payment>(u => u
-                .With(s => s.PaymentMethods, new PaymentMethod[] { })
-                .With(s => s.PaymentChannels, new PaymentChannel[] { }));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            //fixture.Customize<Payment>(u => u
+            //    .With(s => s.PaymentMethods, new PaymentMethod[] { })
+            //    .With(s => s.PaymentChannels, new PaymentChannel[] { }));
+            //fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }

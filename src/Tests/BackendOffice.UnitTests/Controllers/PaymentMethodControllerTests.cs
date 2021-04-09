@@ -54,23 +54,24 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .BuildMock().Object;
 
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
+            Assert.Fail();
+            //var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
 
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
+            //var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _queriesMock.Setup(x => x.GetQueries())
-                .Returns(list);
+            //_queriesMock.Setup(x => x.GetQueries())
+            //    .Returns(list);
 
-            var response = await _controller.GetPaymentMethodsAsync(request);
-            response.Valid.Should().BeTrue();
+            //var response = await _controller.GetPaymentMethodsAsync(request);
+            //response.Valid.Should().BeTrue();
 
-            for (var i = 0; i < response.Items.Length; i++)
-            {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].Name.Should().Be(expectedRoles[i].Name);
-            }
+            //for (var i = 0; i < response.Items.Length; i++)
+            //{
+            //    response.Items[i].Id.Should().Be(expectedRoles[i].Id);
+            //    response.Items[i].Name.Should().Be(expectedRoles[i].Name);
+            //}
 
-            _queriesMock.Verify(p => p.GetQueries());
+            //_queriesMock.Verify(p => p.GetQueries());
         }
 
         [Test]
@@ -81,9 +82,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.CreateAsync(request);
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentMethod.CodeExists);
+            Assert.Fail();
+            //var response = await _controller.CreateAsync(request);
+            //response.Valid.Should().BeFalse();
+            //response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentMethod.CodeExists);
         }
 
         [Test]
@@ -115,13 +117,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateAsync(payment.Id, request);
+            Assert.Fail();
+            //var response = await _controller.UpdateAsync(payment.Id, request);
 
-            response.Valid.Should().BeTrue();
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>(),
-                It.IsAny<Func<IQueryable<PaymentMethod>, IQueryable<PaymentMethod>>>()));
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentMethod>(r =>
-                r.Code == payment.Code)));
+            //response.Valid.Should().BeTrue();
+            //_queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>(),
+            //    It.IsAny<Func<IQueryable<PaymentMethod>, IQueryable<PaymentMethod>>>()));
+            //_commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentMethod>(r =>
+            //    r.Code == payment.Code)));
         }
 
         [Test]
@@ -140,24 +143,26 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     s.ExistsAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateAsync(payment.Id, request);
+            Assert.Fail();
+            //var response = await _controller.UpdateAsync(payment.Id, request);
 
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentMethod.NotFound);
-            _queriesMock.Verify(s => s.GetSingleAsync(
-                It.IsAny<Expression<Func<PaymentMethod, bool>>>(),
-                It.IsAny<Func<IQueryable<PaymentMethod>,
-                    IQueryable<PaymentMethod>>>()));
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentMethod>(r =>
-                r.Code == payment.Code)), Times.Never);
+            //response.Valid.Should().BeFalse();
+            //response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentMethod.NotFound);
+            //_queriesMock.Verify(s => s.GetSingleAsync(
+            //    It.IsAny<Expression<Func<PaymentMethod, bool>>>(),
+            //    It.IsAny<Func<IQueryable<PaymentMethod>,
+            //        IQueryable<PaymentMethod>>>()));
+            //_commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentMethod>(r =>
+            //    r.Code == payment.Code)), Times.Never);
         }
 
         private Fixture CreatePaymentMethodFixture()
         {
             var fixture = new Fixture();
-            fixture.Customize<PaymentMethod>(u => u
-                .With(s => s.PaymentChannels, new PaymentChannel[] { }));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            //fixture.Customize<PaymentMethod>(u => u
+            //    .With(s => s.PaymentChannels, new PaymentChannel[] { }));
+            //fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            Assert.Fail();
             return fixture;
         }
     }

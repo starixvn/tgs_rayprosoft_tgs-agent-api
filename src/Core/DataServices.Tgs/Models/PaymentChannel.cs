@@ -2,12 +2,12 @@
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class PaymentChannel : BaseEntity<Guid>
+    public class PaymentChannel
     {
+        public Guid Id { get; set; }
+
+        public string Code { get; set; }
+
         public string Description { get; set; }
-        public Guid PaymentId { get; set; }
-        public virtual Payment Payment { get; set; }
-        public Guid PaymentMethodId { get; set; }
-        public virtual PaymentMethod PaymentMethod { get; set; }
     }
 }

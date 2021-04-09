@@ -105,6 +105,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PaymentChannel> PaymentChannels { get; set; }
 
+        DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
+
         DbSet<BrandPayment> BrandPayments { get; set; }
 
         DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
@@ -274,6 +276,7 @@ namespace TGS.Core.DataServices.Tgs
             Database.CurrentTransaction;
 
         public DbSet<DepositForm> DepositForms { get; set; }
+        public DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {

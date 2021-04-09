@@ -64,34 +64,21 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Jsonb)
                 .IsRequired();
 
-            builder.HasOne(c => c.PaymentChannel)
+            builder.Property(c => c.PaymentMethodChannelId)
+                .IsRequired();
+
+            builder.HasOne(c => c.PaymentMethodChannel)
                 .WithMany()
-                .HasForeignKey(c => c.PaymentChannelId)
-                .HasConstraintName("fk_brand_payments_payment_channels_payment_channel_id");
+                .HasForeignKey(c => c.PaymentMethodChannelId)
+                .HasConstraintName("fk_brand_payments_payment_method_channels_id");
 
-            builder.HasIndex(c => c.PaymentChannelId)
-                .HasDatabaseName("ix_brand_payments_payment_channel_id");
-
-            builder.HasOne(c => c.PaymentMethod)
-                .WithMany()
-                .HasForeignKey(c => c.PaymentMethodId)
-                .HasConstraintName("fk_brand_payments_payment_methods_payment_method_id");
-
-            builder.HasIndex(c => c.PaymentMethodId)
-                .HasDatabaseName("ix_brand_payments_payment_method_id");
-
-            builder.HasOne(c => c.Payment)
-                .WithMany()
-                .HasForeignKey(c => c.PaymentId)
-                .HasConstraintName("fk_brand_payments_payments_payment_id");
+            builder.HasIndex(c => c.PaymentMethodChannelId)
+                .HasDatabaseName("ix_brand_payments_payment_method_channel_id");
 
             builder.HasOne(c => c.Brand)
                 .WithMany()
                 .HasForeignKey(c => c.BrandId)
                 .HasConstraintName("fk_brand_payments_brands_brand_id");
-
-            builder.HasIndex(c => c.PaymentId)
-                .HasDatabaseName("ix_brand_payments_payment_id");
         }
     }
 }

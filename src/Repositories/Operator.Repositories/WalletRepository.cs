@@ -53,13 +53,13 @@ namespace TGS.Operator.Repositories
         public IAsyncEnumerable<PaymentChannel> GetAllPaymentChannelsAsync()
         {
             return _tgsRepository.PaymentChannels.AsAsyncEnumerable()
-                .Select(row => new PaymentChannel(row.Id, row.Name));
+                .Select(row => new PaymentChannel(row.Id, row.Code));
         }
 
         public IAsyncEnumerable<PaymentMethod> GetAllPaymentMethodsAsync()
         {
             return _tgsRepository.PaymentMethods.AsAsyncEnumerable()
-                .Select(row => new PaymentMethod(row.Id, row.Name));
+                .Select(row => new PaymentMethod(row.Id, row.Code));
         }
 
         public async ValueTask<BrandPayment> GetBrandPaymentByIdAsync(Guid id)
@@ -70,8 +70,7 @@ namespace TGS.Operator.Repositories
 
             return new BrandPayment(
                 row.Id,
-                row.PaymentMethodId,
-                row.PaymentChannelId,
+                row.PaymentMethodChannelId,
                 row.ChannelName,
                 row.ExtendedData);
         }

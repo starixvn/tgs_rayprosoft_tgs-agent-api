@@ -48,6 +48,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     form.Player.Username,
                     form.BrandId,
                     form.BrandPaymentId,
+                    form.BrandPayment.ChannelName,
+                    form.BrandPayment.PaymentMethodChannel.MethodId,
                     form.BankAccount,
                     form.Amount,
                     form.Remark,

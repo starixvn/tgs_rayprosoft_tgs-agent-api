@@ -81,9 +81,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.CreateAsync(request);
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentChannel.CodeExists);
+            Assert.Fail();
+            //var response = await _controller.CreateAsync(request);
+            //response.Valid.Should().BeFalse();
+            //response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentChannel.CodeExists);
         }
 
         [Test]
@@ -94,12 +95,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreateAsync(request);
-            response.Valid.Should().BeTrue();
+            Assert.Fail();
+            //var response = await _controller.CreateAsync(request);
+            //response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()));
-            _commandsMock.Verify(p => p.CreateAsync(It.Is<PaymentChannel>(r =>
-                r.Code == request.Code)));
+            //_queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()));
+            //_commandsMock.Verify(p => p.CreateAsync(It.Is<PaymentChannel>(r =>
+            //    r.Code == request.Code)));
         }
 
         [Test]
@@ -115,13 +117,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateAsync(payment.Id, request);
+            Assert.Fail();
+            //var response = await _controller.UpdateAsync(payment.Id, request);
 
-            response.Valid.Should().BeTrue();
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>(),
-                It.IsAny<Func<IQueryable<PaymentChannel>, IQueryable<PaymentChannel>>>()));
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentChannel>(r =>
-                r.Code == payment.Code)));
+            //response.Valid.Should().BeTrue();
+            //_queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>(),
+            //    It.IsAny<Func<IQueryable<PaymentChannel>, IQueryable<PaymentChannel>>>()));
+            //_commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentChannel>(r =>
+            //    r.Code == payment.Code)));
         }
 
         [Test]

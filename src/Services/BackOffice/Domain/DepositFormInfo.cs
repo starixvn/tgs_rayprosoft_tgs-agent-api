@@ -8,6 +8,8 @@ namespace TGS.Services.BackOffice.Domain
         string UserName,
         Guid BrandId,
         Guid BrandPaymentId,
+        string ChannelName,
+        Guid PaymentMethodId,
         string BankAccount,
         decimal Amount,
         string Remark,

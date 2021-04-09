@@ -14,17 +14,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int DisplayOrder { get; set; }
 
-        public Guid PaymentId { get; set; }
-
-        public virtual Payment Payment { get; set; }
-
-        public Guid PaymentMethodId { get; set; }
-
-        public virtual PaymentMethod PaymentMethod { get; set; }
-
-        public Guid PaymentChannelId { get; set; }
-
-        public virtual PaymentChannel PaymentChannel { get; set; }
+        public Guid PaymentMethodChannelId { get; set; }
 
         public PaymentTransferType TransferType { get; set; }
 
@@ -67,6 +57,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string UpdatedByUsername { get; set; }
 
         public string ExtendedData { get; set; }
+
+        public PaymentMethodChannel PaymentMethodChannel { get; set; }
 
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 

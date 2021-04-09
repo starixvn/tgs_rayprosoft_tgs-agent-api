@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
@@ -51,7 +52,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async System.Threading.Tasks.Task Set_Db_Station_Letter_HaveRead_Should_Commit()
+        public async Task Set_Db_Station_Letter_HaveRead_Should_Commit()
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             dbContextOptionsBuilder
