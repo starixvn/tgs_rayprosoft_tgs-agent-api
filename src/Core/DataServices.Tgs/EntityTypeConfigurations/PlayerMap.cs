@@ -21,9 +21,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(16)
                 .IsRequired();
 
-            builder.Property(c => c.ParentPlayerCode)
-                .HasMaxLength(16);
-
             builder.Property(c => c.Username)
                 .HasMaxLength(32)
                 .IsRequired();
@@ -38,13 +35,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Type)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
-
-            builder.Property(c => c.InvitationCode)
-                .HasMaxLength(6)
-                .IsRequired();
-
-            builder.Property(c => c.ParentInvitationCode)
-                .HasMaxLength(6);
 
             builder.Property(c => c.Password)
                 .IsRequired();
@@ -108,12 +98,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(p => p.VipId)
                 .HasDatabaseName("ix_players_vip_id");
-
-            builder.HasOne(p => p.ParentPlayer)
-                .WithMany(p => p.SubPlayers)
-                .HasForeignKey(p => p.ParentPlayerCode)
-                .HasConstraintName("fk_players_parent_player_code")
-                .IsRequired(false);
 
             builder.HasOne(p => p.BetLimit)
                 .WithMany(p => p.Players)

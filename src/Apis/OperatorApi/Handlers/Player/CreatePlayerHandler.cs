@@ -53,10 +53,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNotNullOrEmpty())
             {
-                return new()
-                {
-                    PlayerCode = playerCode, IsNew = false
-                };
+                return new() {PlayerCode = playerCode, IsNew = false};
             }
 
             var externalCurrency = request.CurrencyCode;
@@ -64,15 +61,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
 
             var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
 
-            var invitationCode = request.ParentInvitationCode;
-            var parentPlayerCode = string.Empty;
-            if (invitationCode.IsNotNullOrEmpty())
-            {
-                parentPlayerCode = await _playerOperations.GetPlayerCodeByInvitationCodeAsync(invitationCode);
-                await _invitationCodeValidator.VerifyInviteeAsync(parentPlayerCode, brandId, currency, invitationCode);
-            }
-
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(brandId, currency);
+
+            var agent = request.AgentInvitationCode == null
+                ? null
+                : await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
 
             playerCode = await _playerOperations.CreatePlayerAsync(new()
             {
@@ -83,17 +76,12 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                 CurrencyCode = currency,
                 ExternalCurrencyCode = externalCurrency,
                 BetLimitId = betLimitId,
-                ParentPlayerCode = parentPlayerCode,
-                ParentInvitationCode = request.ParentInvitationCode,
-                Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
-                HasAgent = request.HasAgent
+                AgentId = agent?.Id,
+                AgentInvitationCode = request.AgentInvitationCode,
+                Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
             });
 
-            return new()
-            {
-                PlayerCode = playerCode,
-                IsNew = true
-            };
+            return new() {PlayerCode = playerCode, IsNew = true};
         }
     }
 }

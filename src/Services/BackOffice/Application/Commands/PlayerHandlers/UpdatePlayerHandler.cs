@@ -12,11 +12,14 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
     public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
     {
+        private readonly IAgentService _agentService;
         private readonly IPlayerService _service;
 
-        public UpdatePlayerHandler(IPlayerService service, IHttpContextAccessor accessor) : base(accessor)
+        public UpdatePlayerHandler(IPlayerService service, IAgentService agentService, IHttpContextAccessor accessor) :
+            base(accessor)
         {
             _service = service;
+            _agentService = agentService;
         }
 
         public override async Task<MessageResponse> Handle(UpdatePlayerRequest request,
@@ -36,16 +39,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.NotFound);
             }
 
-            if (!request.ParentUsername.IsNullOrEmpty())
+            if (!request.AgentUsername.IsNullOrEmpty())
             {
-                var parentPlayer = await _service.GetPlayerAsync(p => p.Username == request.ParentUsername);
-                if (parentPlayer == null)
+                var agent = await _agentService.GetAgentAsync(p => p.Username == request.AgentUsername);
+                if (agent == null)
                 {
-                    return CreateInvalidResponse<MessageResponse>(Player.ParentPlayerNotFound);
+                    return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
                 }
 
-                player.ParentInvitationCode = parentPlayer.InvitationCode;
-                player.ParentPlayerCode = parentPlayer.PlayerCode;
+                player.AgentId = agent.Id;
             }
 
 

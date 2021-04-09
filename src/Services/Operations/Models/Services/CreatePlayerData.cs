@@ -13,10 +13,9 @@ namespace TGS.Services.Operations.Models.Services
         public byte[] WithdrawSalt { get; init; } = Array.Empty<byte>();
         public string CurrencyCode { get; init; }
         public string ExternalCurrencyCode { get; init; }
-        public string ParentPlayerCode { get; init; }
-        public string ParentInvitationCode { get; init; }
         public int BetLimitId { get; init; }
         public PlayerType Type { get; init; }
-        public bool HasAgent { get; init; }
+        public Guid? AgentId { get; set; }
+        public string AgentInvitationCode { get; set; }
     }
 }

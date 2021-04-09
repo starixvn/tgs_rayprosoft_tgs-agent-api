@@ -39,9 +39,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     VipId = player.Vip?.Id,
                     Status = player.Status,
                     StatusName = player.Status.ToString(),
-                    HasAgent = player.HasAgent,
                     RegisteredOn = player.RegisteredOn,
-                    ParentUsername = player.ParentPlayer?.Username,
+                    AgentUsername = player.Agent?.Username,
                     Balance =
                         player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
                     Phone = player.Phone,

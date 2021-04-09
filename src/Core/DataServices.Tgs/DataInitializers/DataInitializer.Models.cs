@@ -13,7 +13,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         internal record GameProviderBetLimit(Guid Id, string CurrencyCode, int MinBet, int MaxBet, int MaxBetPerMatch,
             string ExternalSetting = "");
 
-        internal record PlayerDefined(string PlayerCode, Guid WalletId, Guid BrandId, string InvitationCode,
-            Guid? AgentId);
+        internal record PlayerDefined(string PlayerCode, Guid WalletId, Guid BrandId, Guid? AgentId);
     }
 }

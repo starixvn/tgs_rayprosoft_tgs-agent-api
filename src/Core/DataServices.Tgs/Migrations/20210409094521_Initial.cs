@@ -1706,7 +1706,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     id_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     real_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
-                    invitation_code = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: false),
                     password = table.Column<byte[]>(type: "bytea", nullable: false),
                     salt = table.Column<byte[]>(type: "bytea", nullable: false),
                     withdraw_password = table.Column<byte[]>(type: "bytea", nullable: false),
@@ -1723,17 +1722,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     phone = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     qq = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     wechat = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    has_agent = table.Column<bool>(type: "boolean", nullable: false),
                     agent_id = table.Column<Guid>(type: "uuid", nullable: true),
                     identity_authentication = table.Column<bool>(type: "boolean", nullable: false),
                     phone_authentication = table.Column<bool>(type: "boolean", nullable: false),
                     accumulated_deposit = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false, defaultValue: 0m),
-                    parent_player_code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: true),
-                    parent_invitation_code = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: true),
                     vip_id = table.Column<Guid>(type: "uuid", nullable: true),
                     updated_by_username = table.Column<string>(type: "text", nullable: true),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    player_code1 = table.Column<string>(type: "character varying(16)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1760,8 +1757,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_players_parent_player_code",
-                        column: x => x.parent_player_code,
+                        name: "fk_players_players_player_code1",
+                        column: x => x.player_code1,
                         principalSchema: "dbo",
                         principalTable: "players",
                         principalColumn: "player_code",
@@ -2483,10 +2480,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "brand_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_players_parent_player_code",
+                name: "ix_players_player_code1",
                 schema: "dbo",
                 table: "players",
-                column: "parent_player_code");
+                column: "player_code1");
 
             migrationBuilder.CreateIndex(
                 name: "ix_players_vip_id",
