@@ -3,6 +3,7 @@ import { css } from "@emotion/react"
 import {
     Box,
     Button,
+    Text,
     Set,
     Icon,
     useModalState,
@@ -12,7 +13,11 @@ import {
     Heading,
     FieldStack
 } from "bumbag"
-import MonacoEditor, { DiffEditor } from "@monaco-editor/react"
+import MonacoEditor, {
+    DiffEditor,
+    useMonaco,
+    loader
+} from "@monaco-editor/react"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 //TODO: obj -> pretty compact?
 //import stringifyPrettyCompact from "json-stringify-pretty-compact"
@@ -20,17 +25,13 @@ import { stringifyJSON } from "../json"
 import clone from "clone-deep"
 
 const DefaultJsonOptions = {
+    colorDecorators: true,
     contextmenu: false,
-    minimap: { enabled: false },
-    contextmenu: false,
-    hideCursorInOverviewRuler: true
+    minimap: { enabled: true },
+    hideCursorInOverviewRuler: false
 }
 
-export const JsonEditor = ({
-    options = DefaultJsonOptions,
-    disabled = false,
-    ...props
-}) => {
+export const JsonEditor = ({ options, disabled = false, ...props }) => {
     if (!options) {
         options = clone(DefaultJsonOptions)
     }
@@ -42,7 +43,6 @@ export const JsonEditor = ({
     return <Body options={options} {...props} />
 }
 
-//TODO: validate JSON
 const Body = ({
     name,
     value = "",
@@ -54,27 +54,35 @@ const Body = ({
     ...props
 }) => {
     let formMethods = useFormContext()
-
+    let [errorMarkers, setErrorMarkers] = useState([])
     if (name && formMethods) {
         return (
             <Controller
                 control={formMethods.control}
                 name={name}
                 defaultValue={stringifyJSON(value)}
-                rules={{ required }}
+                rules={{
+                    required,
+                    validate: () => {
+                        return errorMarkers.length ? false : true
+                    }
+                }}
                 render={({
                     field: { onBlur, value, name, ref },
                     fieldState: { invalid, isTouched, isDirty, error }
                 }) => {
                     return (
-                        <Editor
-                            value={value}
-                            {...props}
-                            onChange={(value, event) => {
-                                formMethods.setValue(name, value)
-                                onChange?.(value)
-                            }}
-                        />
+                        <Set orientation="vertical">
+                            <Editor
+                                value={value}
+                                {...props}
+                                onValidate={setErrorMarkers}
+                                onChange={(value, event) => {
+                                    formMethods.setValue(name, value)
+                                    onChange?.(value)
+                                }}
+                            />
+                        </Set>
                     )
                 }}
             />
@@ -89,7 +97,8 @@ const Body = ({
 const Editor = ({ ...props }) => {
     return (
         <MonacoEditor
-            defaultLanguage="JSON"
+            theme="light"
+            defaultLanguage="json"
             css={css`
                 border: 1px solid var(--bb-palette-white900, #000000);
                 border-radius: 6px;

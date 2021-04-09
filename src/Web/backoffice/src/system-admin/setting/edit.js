@@ -71,7 +71,6 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
             description
         }
     })
-    let { control, setValue } = formMethods
 
     const onSubmit = (data) => {
         setSubmit(data)
@@ -119,34 +118,6 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
                     <InputField name="description" label="Description" />
                 </FieldStack>
                 <JsonEditor name="value" required height="60vh" />
-                {/* <Controller
-                    control={control}
-                    name="value"
-                    render={({
-                        field: { onChange, onBlur, value, name, ref }
-                    }) => (
-                        <MonacoEditor
-                            defaultLanguage="JSON"
-                            height="60vh"
-                            value={value}
-                            options={{
-                                readOnly: false,
-                                scrollBeyondLastLine: true,
-                                minimap: { enabled: false },
-                                contextmenu: false,
-                                hideCursorInOverviewRuler: true
-                            }}
-                            onChange={(value, event) => {
-                                setValue(name, value)
-                            }}
-                            css={css`
-                                border: 1px solid
-                                    var(--bb-palette-white900, #000000);
-                                border-radius: 6px;
-                            `}
-                        />
-                    )}
-                /> */}
             </FieldStack>
         </FormDialog>
     )
