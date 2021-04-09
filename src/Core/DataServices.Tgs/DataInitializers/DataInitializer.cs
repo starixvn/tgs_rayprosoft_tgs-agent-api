@@ -739,6 +739,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
+            var beforeFromDate = DateTimeOffset.Now.AddDays(-7);
+            var beforeToDate = DateTimeOffset.Now.AddDays(-1);
+            var afterFromDate = DateTimeOffset.Now;
+            var afterToDate = DateTimeOffset.Now.AddDays(6);
+
             return new()
             {
                 Id = brand.Id,
@@ -756,6 +761,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ClientId = brand.ClientId,
                 SecretKey = brand.SecretKey,
                 ApiKey = brand.ApiKey,
+                SettlementIntervalType = SettlementIntervalType.Daily,
+                BeforeFromDateTime = new(beforeFromDate.Year, beforeFromDate.Month, beforeFromDate.Day, 0, 0, 0,
+                    beforeFromDate.Offset),
+                BeforeToDateTime = new(beforeToDate.Year, beforeToDate.Month, beforeToDate.Day, 0, 0, 0,
+                    beforeToDate.Offset),
+                AfterFromDateTime = new(afterFromDate.Year, afterFromDate.Month, afterFromDate.Day, 0, 0, 0,
+                    afterFromDate.Offset),
+                AfterToDateTime = new(afterToDate.Year, afterToDate.Month, afterToDate.Day, 0, 0, 0,
+                    afterToDate.Offset),
                 Currencies =
                     brand.Currencies.Select(curr => new BrandCurrency
                     {

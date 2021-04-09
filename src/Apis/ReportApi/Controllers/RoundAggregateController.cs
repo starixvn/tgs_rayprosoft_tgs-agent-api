@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Report.Client.Models.Aggregate;
 using TGS.Core.Models.Messages;
+using TGS.Services.Report.Application.Models.Aggregate;
 
 namespace ReportApi.Controllers
 {
