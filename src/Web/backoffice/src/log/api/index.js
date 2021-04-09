@@ -249,11 +249,6 @@ const useColumns = ({ items = [] } = {}) => {
                 Header: <Trans zh="Recorded On" en="Recorded On" />,
                 disableSortBy: true
             }),
-            numberColumn({
-                accessor: "totalCount",
-                Header: <Trans zh="Total Count" en="Total Count" />,
-                disableSortBy: true
-            }),
             textColumn({
                 id: "actions",
                 accessor: (row) => row,
@@ -262,9 +257,7 @@ const useColumns = ({ items = [] } = {}) => {
                 Cell: ({ value }) => {
                     return (
                         <Set alignX="center">
-                            <ApiLogDetailDialogDisclosure
-                                trackingId={value?.trackingId}
-                            />
+                            <ApiLogDetailDialogDisclosure id={value?.id} />
                         </Set>
                     )
                 }

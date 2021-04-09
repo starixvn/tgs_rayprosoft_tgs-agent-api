@@ -222,11 +222,6 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "recordedOn",
                 Header: <Trans zh="Recorded On" en="Recorded On" />,
                 disableSortBy: true
-            }),
-            numberColumn({
-                accessor: "totalCount",
-                Header: <Trans zh="Total Count" en="Total Count" />,
-                disableSortBy: true
             })
         ]
 
