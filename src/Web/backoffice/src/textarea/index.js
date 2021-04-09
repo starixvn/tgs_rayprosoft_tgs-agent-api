@@ -56,13 +56,17 @@ export const Textarea = ({
         <_Textarea
             textareaRef={textareaRef}
             state={state}
-            {...formProps}
-            {...props}
             css={css`
                 & textarea {
                     resize: ${resize};
                 }
             `}
+            {...formProps}
+            {...props}
+            onChange={(event) => {
+                formProps?.onChange?.(event)
+                props?.onChange?.(event)
+            }}
         />
     )
 }

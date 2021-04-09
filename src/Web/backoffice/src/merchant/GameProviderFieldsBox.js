@@ -7,32 +7,32 @@ import { useFormContext, useFieldArray } from "react-hook-form"
 import { GameProviderCheckboxGroup } from "../game/providers/GameProviderCheckboxGroup"
 
 export const GameProviderFieldsBox = ({ readonly }) => {
-  let { watch, control } = useFormContext()
+    let { watch, control } = useFormContext()
 
-  let fieldsName = "gameProviders"
-  let fieldArrayContext = useFieldArray({
-    control,
-    name: fieldsName,
-    keyName: "_id"
-  })
-  let gameProviders = watch(fieldsName)
+    let fieldsName = "gameProviders"
+    let fieldArrayContext = useFieldArray({
+        control,
+        name: fieldsName,
+        keyName: "_id"
+    })
+    let gameProviders = watch(fieldsName)
 
-  if (gameProviders.length == 0) {
-    return null
-  }
+    if (!gameProviders || gameProviders.length == 0) {
+        return null
+    }
 
-  return (
-    <>
-      <NormalLabel>
-        <Trans zh="游戏厂商" en="Game Provider" />
-      </NormalLabel>
-      <GameProviderCheckboxGroup
-        fieldArrayContext={fieldArrayContext}
-        gameProviderIdFieldName="gameProviderId"
-        disabled={readonly}
-      />
-    </>
-  )
+    return (
+        <>
+            <NormalLabel>
+                <Trans zh="游戏厂商" en="Game Provider" />
+            </NormalLabel>
+            <GameProviderCheckboxGroup
+                fieldArrayContext={fieldArrayContext}
+                gameProviderIdFieldName="gameProviderId"
+                disabled={readonly}
+            />
+        </>
+    )
 }
 
 export default GameProviderFieldsBox

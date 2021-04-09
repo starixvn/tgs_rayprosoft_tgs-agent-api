@@ -17,7 +17,7 @@ export const LanguageFieldsBox = ({ readonly }) => {
     })
     let languages = watch(fieldsName)
 
-    if (languages.length == 0) {
+    if (!languages || languages?.length == 0) {
         return null
     }
 

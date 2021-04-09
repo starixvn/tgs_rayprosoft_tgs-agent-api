@@ -8,7 +8,8 @@ import {
     Box,
     Set,
     FieldStack,
-    Columns
+    Columns,
+    Code
 } from "bumbag"
 import { useIsDisplayMenuByRoute, useUserResellerId } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
@@ -35,7 +36,7 @@ import {
     mapCheckedByCode,
     mapCheckedByProp
 } from "../../checkbox/mapChecked"
-import { MerchantIdHookFormSelect } from "../MerchantSelect"
+import { MerchantIdHookFormSelect, MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 import LanguageFieldsBox, { toCheckedCultureCodes } from "../LanguageFieldsBox"
@@ -156,6 +157,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
                 }
             `}
         >
+            <Code>{JSON.stringify(formMethods?.formState?.errors ?? {})}</Code>
             <EditBody isAdd />
         </FormDialog>
     )
@@ -423,9 +425,7 @@ const EditBody = ({
                         </NormalLabel>
                         <Box alignY="center">
                             {isAdd && (
-                                <MerchantIdHookFormSelect
-                                    end={RoleTypes.Reseller}
-                                />
+                                <MerchantIdSelect end={RoleTypes.Reseller} />
                             )}
                             {!isAdd && <Text.Block>{reseller.name}</Text.Block>}
                         </Box>
