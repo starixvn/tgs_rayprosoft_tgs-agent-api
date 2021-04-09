@@ -5,11 +5,12 @@ namespace TGS.Apis.BackendOffice.Services
 {
     public interface IStreamToString
     {
-        Task<string> GetString(Stream stream);
+        Task<string> GetStringAsync(Stream stream);
     }
+
     public class StreamToString : IStreamToString
     {
-       async Task<string> IStreamToString.GetString(Stream stream)
+        async Task<string> IStreamToString.GetStringAsync(Stream stream)
         {
             var sr = new StreamReader(stream);
             return await sr.ReadToEndAsync();

@@ -115,7 +115,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
             mockHttpContext.Setup(p => p.Features)
                 .Returns(fc);
 
-            _streamToString.Setup(p => p.GetString(It.IsAny<Stream>()))
+            _streamToString.Setup(p => p.GetStringAsync(It.IsAny<Stream>()))
                 .Returns(Task.FromResult("test"));
 
             _json.Setup(p => p.SerializeToString(It.IsAny<ErrorDetails>(), It.IsAny<JsonSerializerOptions>()))

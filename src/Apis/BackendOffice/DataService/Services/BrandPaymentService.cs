@@ -71,9 +71,9 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            var whitelist = await GeneratePaymentPlayerList(paymentId, request.Whitelist, PlayerListType.White);
+            var whitelist = await GeneratePaymentPlayerListAsync(paymentId, request.Whitelist, PlayerListType.White);
 
-            var blacklist = await GeneratePaymentPlayerList(paymentId, request.Blacklist, PlayerListType.Black);
+            var blacklist = await GeneratePaymentPlayerListAsync(paymentId, request.Blacklist, PlayerListType.Black);
 
             var playerList = whitelist.Union(blacklist);
 
@@ -134,8 +134,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             await _repository.SaveChangesAsync();
 
-            var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist, PlayerListType.White);
-            var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist, PlayerListType.Black);
+            var whitelist = await GeneratePaymentPlayerListAsync(payment.Id, request.Whitelist, PlayerListType.White);
+            var blacklist = await GeneratePaymentPlayerListAsync(payment.Id, request.Blacklist, PlayerListType.Black);
             var playerList = whitelist.Union(blacklist).ToArray();
 
             payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
@@ -222,7 +222,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
+        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerListAsync(Guid paymentId, string[] list,
             PlayerListType playerListType)
         {
             var playerWhitelist = list != null

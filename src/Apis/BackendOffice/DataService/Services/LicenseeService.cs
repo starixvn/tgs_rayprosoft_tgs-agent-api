@@ -13,13 +13,19 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 {
     public interface ILicenseeService
     {
-        Task<Licensee> GetLicenseeAsync(Expression<Func<Licensee, bool>> predicate,
-            Func<IQueryable<Licensee>, IQueryable<Licensee>> preQuery = null, bool tracking = false);
+        Task<Licensee> GetLicenseeAsync(
+            Expression<Func<Licensee, bool>> predicate,
+            Func<IQueryable<Licensee>, IQueryable<Licensee>> preQuery = null,
+            bool tracking = false);
 
-        IQueryable<Licensee> GetLicenseesAsync(GetLicenseesRequest request, bool tracking = false);
+        IQueryable<Licensee> GetLicensees(GetLicenseesRequest request, bool tracking = false);
+
         Task CreateLicenseeAsync(CreateLicenseeRequest request, string username);
+
         Task UpdateLicenseeAsync(Licensee licensee, UpdateLicenseeRequest request, string username);
+
         Task ChangeStatusAsync(Licensee licensee, Status status, string username);
+
         Task<bool> ExistsAsync(Expression<Func<Licensee, bool>> predicate);
     }
 
@@ -78,7 +84,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(licensee).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<Licensee> ILicenseeService.GetLicenseesAsync(GetLicenseesRequest request, bool tracking)
+        IQueryable<Licensee> ILicenseeService.GetLicensees(GetLicenseesRequest request, bool tracking)
         {
             var queryable = tracking ? _repository.Licensees : _repository.Licensees.AsNoTracking();
             return queryable.Where(x =>

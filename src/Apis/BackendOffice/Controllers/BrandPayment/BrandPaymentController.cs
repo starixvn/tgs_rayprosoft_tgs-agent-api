@@ -74,7 +74,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     TransferLimitFrom = x.TransferLimitFrom,
                     TransferLimitTo = x.TransferLimitTo,
                     PaymentStatus = x.PaymentStatus,
-                    DesignatedUsers = GetDesignatedUsersAsync(x).Any(),
+                    DesignatedUsers = GetDesignatedUsers(x).Any(),
                     PaymentFee =
                         new() {FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee},
                     VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
@@ -286,12 +286,12 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<GetDesignatedUsersResponse>(Resources.BrandPayment.NotFound);
             }
 
-            var players = GetDesignatedUsersAsync(brandPayment);
+            var players = GetDesignatedUsers(brandPayment);
 
             return new() {Valid = true, Players = players};
         }
 
-        private static string[] GetDesignatedUsersAsync(Core.DataServices.Tgs.Models.BrandPayment brandPayment)
+        private static string[] GetDesignatedUsers(Core.DataServices.Tgs.Models.BrandPayment brandPayment)
         {
             var vipLevelIds = brandPayment.VipLevels.Select(x => x.VipLevelId).ToArray();
             var playerCodes = brandPayment.BrandPaymentPlayers.Where(x => x.ListType == PlayerListType.White)

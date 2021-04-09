@@ -118,7 +118,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 sw.Stop();
                 var ms = (int)sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
-                var message = await _streamToString.GetString(context.Response.Body);
+                var message = await _streamToString.GetStringAsync(context.Response.Body);
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 await context.Response.Body.CopyToAsync(originalBodyStream);
                 return (message, ms);

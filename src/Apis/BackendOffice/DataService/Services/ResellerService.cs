@@ -16,7 +16,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task<Reseller> GetResellerAsync(Expression<Func<Reseller, bool>> predicate,
             Func<IQueryable<Reseller>, IQueryable<Reseller>> preQuery = null);
 
-        IQueryable<Reseller> GetResellersAsync(GetResellersRequest request, bool tracking = false);
+        IQueryable<Reseller> GetResellers(GetResellersRequest request, bool tracking = false);
         Task CreateResellerAsync(CreateResellerRequest request, string username);
         Task UpdateResellerAsync(Reseller reseller, UpdateResellerRequest request, string username);
         Task ChangeStatusAsync(Reseller reseller, Status status, string username);
@@ -105,7 +105,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task<bool> IResellerService.ExistsAsync(Expression<Func<Reseller, bool>> predicate) =>
             _repository.Resellers.AnyAsync(predicate);
 
-        IQueryable<Reseller> IResellerService.GetResellersAsync(GetResellersRequest request, bool tracking)
+        IQueryable<Reseller> IResellerService.GetResellers(GetResellersRequest request, bool tracking)
         {
             var queryable = tracking ? _repository.Resellers : _repository.Resellers.AsNoTracking();
             return queryable.Where(x =>

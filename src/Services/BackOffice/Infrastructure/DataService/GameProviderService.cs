@@ -69,8 +69,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await DeleteEntitiesAsync(gameProvider.Languages);
 
             gameProvider.Games = GenerateUpdateGames(gameProvider, request);
-            gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
-            gameProvider.Languages = await GenerateLanguages(gameProvider, request);
+            gameProvider.Currencies = await GenerateCurrenciesAsync(gameProvider, request);
+            gameProvider.Languages = await GenerateLanguagesAsync(gameProvider, request);
             gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await UpdateEntityAsync(gameProvider);
@@ -108,8 +108,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             };
 
             gameProvider.Games = GenerateGames(gameProvider, request);
-            gameProvider.Currencies = await GenerateCurrencies(gameProvider, request);
-            gameProvider.Languages = await GenerateLanguages(gameProvider, request);
+            gameProvider.Currencies = await GenerateCurrenciesAsync(gameProvider, request);
+            gameProvider.Languages = await GenerateLanguagesAsync(gameProvider, request);
             gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await CreateEntityAsync(gameProvider);
@@ -179,7 +179,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(games);
         }
 
-        private async Task<HashSet<GameProviderCurrency>> GenerateCurrencies(GameProvider gameProvider,
+        private async Task<HashSet<GameProviderCurrency>> GenerateCurrenciesAsync(GameProvider gameProvider,
             GameProviderRequest request)
         {
             var currencyCodes = request.Currencies.Select(x => x.Code);
@@ -194,7 +194,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(gameProviderCurrencies);
         }
 
-        private async Task<HashSet<GameProviderLanguage>> GenerateLanguages(GameProvider gameProvider,
+        private async Task<HashSet<GameProviderLanguage>> GenerateLanguagesAsync(GameProvider gameProvider,
             GameProviderRequest request)
         {
             var cultureCodes = request.Languages.Select(x => x.CultureCode);
