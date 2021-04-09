@@ -35,27 +35,31 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.VipLiveDealerRebatePercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
             builder.Property(c => c.VipSlotRebatePercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
             builder.Property(c => c.VipCardGameRebatePercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
             builder.Property(c => c.VipSportsRebatePercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
             builder.Property(c => c.VipVirtualSportsRebatePercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
             builder.Property(c => c.VipLotteryRebatePercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
+                .IsRequired();
+
+            builder.Property(b => b.AgentDividendPercentage)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
             builder.Property(c => c.VipRebateAmount)

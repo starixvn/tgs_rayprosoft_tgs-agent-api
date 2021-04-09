@@ -22,6 +22,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var (salt, passwordHash) = _passwordHandler.GenerateCredential(UserPassword);
             agentId ??= GuidExtensions.NewSequentialGuid();
             var invitationCode = InvitationCodeGenerator.NewId();
+            var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
             return new()
             {
@@ -47,11 +48,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 SportsRebatePercentage = 10,
                 VirtualSportsRebatePercentage = 10,
                 RegisteredOn = Now,
+                DefaultWalletId = defaultWalletId,
                 Wallets = new[]
                 {
                     new AgentWallet
                     {
-                        Id = GuidExtensions.NewSequentialGuid(),
+                        Id = defaultWalletId,
                         AgentId = agentId.Value,
                         CurrencyCode = currencyCode,
                         Balance = 10,

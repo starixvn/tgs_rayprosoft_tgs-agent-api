@@ -4,6 +4,9 @@
     {
         Deposit = 0,
         Withdrawal = 1,
-        Adjust = 2
+        Adjust = 2,
+        Bonus = 3,
+        Rebate = 4,
+        Dividend = 5
     }
 }

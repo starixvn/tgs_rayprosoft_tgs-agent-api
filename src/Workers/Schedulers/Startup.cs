@@ -22,6 +22,8 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
+using TGS.Workers.Schedulers.Jobs.Agents;
+using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Reports;
 using TGS.Workers.Schedulers.Jobs.Rounds;
 using TGS.Workers.Schedulers.Services;
@@ -71,6 +73,8 @@ namespace TGS.Workers.Schedulers
             // job
             services.AddTransient<IPlayerAggregateReportWorkerService, PlayerAggregateReportWorkerService>();
             services.AddTransient<IRoundAggregateWorkerService, RoundAggregateWorkerService>();
+            services.AddTransient<IPlayerRebateWorkerService, PlayerRebateWorkerService>();
+            services.AddTransient<IAgentDividendWorkerService, AgentDividendWorkerService>();
         }
 
         public void Configure(IApplicationBuilder app)

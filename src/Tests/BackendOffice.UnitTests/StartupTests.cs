@@ -35,24 +35,28 @@ namespace TGS.Tests.BackendOffice.UnitTests
             configurationSectionStub.Setup(x => x["Log"])
                 .Returns("server=localhost;database=Tgs;user=sa;password=1qaz2wsx!@");
 
+            configurationSectionStub.Setup(x => x["Report"])
+                .Returns("server=localhost;database=Report;user=sa;password=1qaz2wsx!@");
+
             var urls = new Mock<IConfigurationSection>();
             configurationSectionStub.Setup(x => x["Urls"])
                 .Returns("nats://localhost:4222");
 
-            var hangfire = new Mock<IConfigurationSection>();
-            var hangfireConnection = new Mock<IConfigurationSection>();
-            hangfireConnection.Setup(x => x.Value)
+            var reportClient = new Mock<IConfigurationSection>();
+            var reportClientConnection = new Mock<IConfigurationSection>();
+            reportClient.Setup(x => x.Value)
                 .Returns(
-                    "mongodb://root:1qaz2wsx!%40@localhost:27017/Hangfire?retryWrites=true&w=majority&authSource=admin");
-            hangfire.Setup(x => x.GetSection("ConnectionString"))
-                .Returns(hangfireConnection.Object);
+                    "http://localhost:5051");
+            reportClient.Setup(x => x.GetSection("Url"))
+                .Returns(reportClientConnection.Object);
+
 
             var configurationStub = new Mock<IConfiguration>();
             configurationStub.Setup(x => x.GetSection("ConnectionStrings")).Returns(configurationSectionStub.Object);
 
             configurationStub.Setup(x => x.GetSection("NatsSetting")).Returns(urls.Object);
 
-            configurationStub.Setup(x => x.GetSection("Hangfire")).Returns(hangfire.Object);
+            configurationStub.Setup(x => x.GetSection("Report")).Returns(reportClient.Object);
 
             var envStub = new Mock<IWebHostEnvironment>();
             var services = new ServiceCollection();

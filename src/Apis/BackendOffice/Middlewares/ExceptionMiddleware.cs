@@ -5,7 +5,9 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IO;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
@@ -20,6 +22,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
     public class ExceptionMiddleware : IMiddleware
     {
         private const int ResMessageSizeLimit = 1000012;
+        private readonly IWebHostEnvironment _env;
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
         private readonly IRequestAnalyzer _requestAnalyzer;
@@ -27,13 +30,15 @@ namespace TGS.Apis.BackendOffice.Middlewares
         private readonly ITgsLog _tgsLog;
 
         public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json,
+            IWebHostEnvironment env,
             IStreamToString streamToString)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
             _json = json;
+            _env = env;
             _streamToString = streamToString;
-            _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
+            _recyclableMemoryStreamManager = new();
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext httpContext, RequestDelegate next)
@@ -77,16 +82,20 @@ namespace TGS.Apis.BackendOffice.Middlewares
             {
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
                 adminLogEvent.StackTrace = ex.StackTrace.NoLongerThan(4000);
-                adminLogEvent.responsecode = (int) HttpStatusCode.InternalServerError;
+                adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
 
-                httpContext.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 httpContext.Response.ContentType = "application/json";
 
                 var message = new ErrorDetails
                 {
-                    StatusCode = (int) HttpStatusCode.InternalServerError,
-                    Message = "Internal Server Error."
+                    StatusCode = (int)HttpStatusCode.InternalServerError, Message = "Internal Server Error."
                 };
+
+                if (_env.IsDevelopment())
+                {
+                    message.Message = ex.Message;
+                }
 
                 var result = _json.SerializeToString(message);
                 await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
@@ -107,7 +116,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 var sw = Stopwatch.StartNew();
                 await next(context);
                 sw.Stop();
-                var ms = (int) sw.ElapsedMilliseconds;
+                var ms = (int)sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 var message = await _streamToString.GetString(context.Response.Body);
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
@@ -134,10 +143,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
             return message;
         }
 
-        private static string CutOffResponseContent(string responseContent)
-        {
-            return
-                $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
-        }
+        private static string CutOffResponseContent(string responseContent) =>
+            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
     }
 }
