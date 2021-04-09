@@ -7,51 +7,32 @@ import {
     Heading,
     Text,
     Code,
+    Card,
     FieldStack,
     FieldWrapper
 } from "bumbag"
-import Disclosure, { DetailDisclosure } from "../../dialog/Disclosure"
-import {
-    FormattedDateTime,
-    FormattedNumberDecimal,
-    Trans,
-    useTrans
-} from "../../i18n"
-import { useAdminLog } from "./client"
-import LoadingBackdrop from "../../dialog/LoadingBackdrop"
-import AlertDialog from "../../dialog/Alert"
+import { useTrans } from "../i18n"
+import { DetailDisclosure } from "../dialog/Disclosure"
 
-export const AdminLogDetailDialogDisclosure = ({ id, ...props }) => {
+export const LogDetailDialogDisclosure = ({ record, ...props }) => {
     let dialog = useModalState()
 
     return (
         <>
             <DetailDisclosure {...dialog} />
-            {dialog.visible && <DetailDialog id={id} dialog={dialog} />}
+            {dialog.visible && <DetailDialog record={record} dialog={dialog} />}
         </>
     )
 }
 
-const DetailDialog = ({ id, dialog, ...props }) => {
-    let { data, isLoading, error } = useAdminLog(id)
-
-    if (isLoading) {
-        return <LoadingBackdrop {...dialog} />
-    }
-
-    if (error) {
-        return (
-            <AlertDialog
-                {...error}
-                dialog={dialog}
-                onClickClose={dialog.hide}
-            />
-        )
-    }
-
+const DetailDialog = ({ record = {}, dialog, ...props }) => {
+    const title = useTrans({
+        zh: "详情",
+        en: "Detail"
+    })
     return (
         <Dialog.Modal
-            title="Admin Log"
+            title={title}
             showActionButtons={false}
             showCloseButton
             {...dialog}
@@ -60,10 +41,10 @@ const DetailDialog = ({ id, dialog, ...props }) => {
                 <Card variant="bordered" title="Request">
                     <FieldStack>
                         <FieldWrapper label="Headers">
-                            <Code>{data.requestHeaders}</Code>
+                            <Code>{record.requestHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Code>{data.requestContent}</Code>
+                            <Code>{record.requestContent}</Code>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>
@@ -71,10 +52,10 @@ const DetailDialog = ({ id, dialog, ...props }) => {
                 <Card variant="bordered" title="Response">
                     <FieldStack>
                         <FieldWrapper label="Headers">
-                            <Code>{data.responseHeaders}</Code>
+                            <Code>{record.responseHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Code>{data.responseContent}</Code>
+                            <Code>{record.responseContent}</Code>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>
@@ -82,3 +63,5 @@ const DetailDialog = ({ id, dialog, ...props }) => {
         </Dialog.Modal>
     )
 }
+
+export default DetailDialog

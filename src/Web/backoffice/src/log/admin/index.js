@@ -39,7 +39,7 @@ import numberColumn, {
 import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useAdminLogList } from "./client"
-import { AdminLogDetailDialogDisclosure } from "./AdminLogDetailDialog"
+import { LogDetailDialogDisclosure } from "../LogDetailDialog"
 
 export { Code }
 
@@ -160,11 +160,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput startName="start" endName="end" />
-                    <InputField
+                    {/* <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter
                         placeholder="Tracking Id"
-                    />
+                    /> */}
                     <InputField
                         name="ip"
                         showEmptyFieldValueAddonAfter
@@ -196,12 +196,12 @@ const useColumns = ({ items = [] } = {}) => {
                 disableSortBy: true,
                 Cell: ({ value }) => value
             }),
-            textColumn({
-                accessor: "trackingId",
-                Header: <Trans zh="Tracking Id" en="Tracking Id" />,
-                disableSortBy: true,
-                Cell: ({ value }) => value
-            }),
+            // textColumn({
+            //     accessor: "trackingId",
+            //     Header: <Trans zh="Tracking Id" en="Tracking Id" />,
+            //     disableSortBy: true,
+            //     Cell: ({ value }) => value
+            // }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
@@ -245,7 +245,7 @@ const useColumns = ({ items = [] } = {}) => {
                 Cell: ({ value }) => {
                     return (
                         <Set alignX="center">
-                            <AdminLogDetailDialogDisclosure id={value?.id} />
+                            <LogDetailDialogDisclosure record={value} />
                         </Set>
                     )
                 }

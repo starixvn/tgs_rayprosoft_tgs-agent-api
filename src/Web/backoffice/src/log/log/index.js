@@ -155,11 +155,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput startName="start" endName="end" />
-                    <InputField
+                    {/* <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter
                         placeholder="Tracking Id"
-                    />
+                    /> */}
                     <InputField
                         name="serverName"
                         showEmptyFieldValueAddonAfter
@@ -182,12 +182,12 @@ const useColumns = ({ items = [] } = {}) => {
                 disableSortBy: true,
                 Cell: ({ value }) => value
             }),
-            textColumn({
-                accessor: "trackingId",
-                Header: <Trans zh="Tracking Id" en="Tracking Id" />,
-                disableSortBy: true,
-                Cell: ({ value }) => value
-            }),
+            // textColumn({
+            //     accessor: "trackingId",
+            //     Header: <Trans zh="Tracking Id" en="Tracking Id" />,
+            //     disableSortBy: true,
+            //     Cell: ({ value }) => value
+            // }),
             textColumn({
                 accessor: "serverName",
                 Header: <Trans zh="Server Name" en="Server Name" />,
