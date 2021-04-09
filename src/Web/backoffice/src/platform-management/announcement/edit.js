@@ -29,11 +29,9 @@ import FormDialog from "../../form/FormDialog"
 import Input from "../../input/Input"
 import DateTimeInput from "../../date/DateTimeInput"
 import { useForm, useFormContext } from "react-hook-form"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
-import { nextRoleType } from "../../system/roles/type"
 import Textarea from "../../textarea"
 
-export const AddButton = ({ onSubmitted, ...props }) => {
+export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = Modal.useState()
 
     let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
@@ -47,18 +45,21 @@ export const AddButton = ({ onSubmitted, ...props }) => {
                 <Trans zh="新增" en="Add" />
             </Disclosure>
             {dialog.visible && (
-                <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+                <AddDialog
+                    brandId={brandId}
+                    onSubmitted={onSubmitted}
+                    dialog={dialog}
+                />
             )}
         </>
     )
 }
 
-const AddDialog = ({ onSubmitted, dialog, ...props }) => {
-    let userBrandId = useUserBrandId()
+const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     let [data, setSubmit] = useState()
     let { result, error, mutate, isLoading } = useAddAnnouncement(data)
 
-    const onSubmit = ({ brandId = userBrandId, form, to, ...formData }) => {
+    const onSubmit = ({ form, to, ...formData }) => {
         setSubmit({
             brandId,
             form: form ? form.toISOString() : form,
@@ -100,7 +101,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
     )
 }
 
-export const EditButton = ({ record, onSubmitted, ...props }) => {
+export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
     let dialog = Modal.useState()
 
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -115,6 +116,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
             </Disclosure>
             {dialog.visible && (
                 <EditDialog
+                    brandId={brandId}
                     record={record}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -177,6 +179,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
 }
 
 const EditDialog = ({
+    brandId,
     record,
     onSubmitted,
     dialog,
@@ -189,6 +192,7 @@ const EditDialog = ({
 
     const onSubmit = ({ from, to, ...formData }) => {
         setSubmit({
+            brandId,
             from: from?.toISOString(),
             to: to?.toISOString(),
             ...formData
@@ -229,11 +233,6 @@ const EditDialog = ({
 }
 
 const EditBody = ({ readonly = false, isAdd = false } = {}) => {
-    let resellerId = useUserResellerId()
-    let licenseeId = useUserLicenseeId()
-    let brandId = useUserBrandId()
-    let userRoleType = useUserRoleType()
-
     const { getValues } = useFormContext()
     let minDate = readonly ? undefined : getValues("from")
     let maxDate = readonly ? undefined : getValues("to")
@@ -242,19 +241,6 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
     let textareaHeight = readonly ? "15vh" : "30vh"
     return (
         <FieldValues>
-            {isAdd && !brandId && (
-                <Label required={required}>
-                    <Trans zh="品牌" en="Brand" />
-                </Label>
-            )}
-            {isAdd && !brandId && (
-                <MerchantIdHookFormSelect
-                    start={nextRoleType(userRoleType)}
-                    resellerId={resellerId}
-                    licenseeId={licenseeId}
-                />
-            )}
-
             <Label name="subject" required={required}>
                 <Trans zh="主题" en="Subject" />
             </Label>

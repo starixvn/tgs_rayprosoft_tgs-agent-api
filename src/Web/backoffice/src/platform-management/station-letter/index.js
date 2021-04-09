@@ -89,7 +89,7 @@ const BodyContent = ({ brandId }) => {
         status: statusFrom(statusName)
     })
 
-    let columns = useColumns({ mutate, statusName })
+    let columns = useColumns({ mutate, statusName, items: data?.items })
 
     let tab = useTabState({
         selectedId: statusName
@@ -111,7 +111,7 @@ const BodyContent = ({ brandId }) => {
             title={<Trans zh="站内信" en="Station Letter" />}
             actionBar={
                 <Box alignX="right">
-                    <AddButton onSubmitted={mutate} />
+                    <AddButton brandId={brandId} onSubmitted={mutate} />
                 </Box>
             }
         >
@@ -201,7 +201,7 @@ const BodyContent = ({ brandId }) => {
     )
 }
 
-const useColumns = ({ mutate, statusName }) => {
+const useColumns = ({ mutate, statusName, items = [] }) => {
     let hasVerifyAuth = useIsDisplayMenuByRoute([VerifyMenu])
     let hasViewAuth = useIsDisplayMenuByRoute([ViewMenu])
 
@@ -299,5 +299,5 @@ const useColumns = ({ mutate, statusName }) => {
             })
         }
         return columns
-    }, [statusName])
+    }, [statusName, JSON.stringify(items)])
 }

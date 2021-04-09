@@ -47,11 +47,8 @@ import {
     CloseButtonFooter,
     ConfirmCancelFooter
 } from "../../form/ConfirmButtonFooter"
-import { formatNumberDecimal } from "../../number/format"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
-import { nextRoleType } from "../../system/roles/type"
 
-export const AddButton = ({ onSubmitted, ...props }) => {
+export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
 
     let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
@@ -63,21 +60,27 @@ export const AddButton = ({ onSubmitted, ...props }) => {
         <>
             <AddDisclosure {...dialog} />
             {dialog.visible && (
-                <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+                <AddDialog
+                    brandId={brandId}
+                    onSubmitted={onSubmitted}
+                    dialog={dialog}
+                />
             )}
         </>
     )
 }
 
-const AddDialog = ({ onSubmitted, dialog }) => {
-    let userBrandId = useUserBrandId()
+const AddDialog = ({ brandId, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
     let { result, error, mutate, deleteCache, isLoading } = useAddVipLevel(
         formData
     )
 
     const onSubmit = (data) => {
-        setSubmit(data)
+        setSubmit({
+            ...data,
+            brandId
+        })
     }
 
     const reset = () => {
@@ -93,9 +96,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
 
     return (
         <FormDialog
-            defaultValues={{
-                brandId: userBrandId
-            }}
+            defaultValues={{}}
             onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
@@ -137,7 +138,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
     )
 }
 
-const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
+const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
     let { id } = record
 
     let [formData, setSubmit] = useState()
@@ -152,7 +153,10 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
     })
 
     const onSubmit = (data) => {
-        setSubmit(data)
+        setSubmit({
+            ...data,
+            brandId
+        })
     }
 
     const reset = () => {
@@ -184,15 +188,9 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
 }
 
 const EditBody = ({ record, readonly = false, isAdd = false }) => {
-    let userRoleType = useUserRoleType()
-    let brandId = useUserBrandId()
-
     let editable = !readonly
     return (
         <FieldStack orientation="vertical">
-            {isAdd && !brandId && (
-                <MerchantIdHookFormSelect start={nextRoleType(userRoleType)} />
-            )}
             <Level width="100%">
                 <Set orientation="vertical" isFilled flex="1">
                     <Heading use="h5">
@@ -577,6 +575,33 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                                 <Box alignY="center">
                                     <FormattedNumberDecimal
                                         value={record?.virtualSportsRebate}
+                                        postfix="%"
+                                    />
+                                </Box>
+                            )}
+
+                            <NormalLabel>
+                                <Trans
+                                    zh="彩票反水比例（%）："
+                                    en="Lottery Rebate（%）："
+                                />
+                            </NormalLabel>
+                            {editable && (
+                                <Box>
+                                    <InputField
+                                        type="number"
+                                        name="lotteryRebate"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        addonAfter={<Button isStatic>%</Button>}
+                                    />
+                                </Box>
+                            )}
+                            {readonly && (
+                                <Box alignY="center">
+                                    <FormattedNumberDecimal
+                                        value={record?.lotteryRebate}
                                         postfix="%"
                                     />
                                 </Box>
