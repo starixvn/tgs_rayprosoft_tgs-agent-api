@@ -113,22 +113,16 @@ namespace TGS.Services.GameOperations.Calculators
             var allActions = GetAllActions(current, previousActions);
 
             var betAmount = CalculateBetAmount(allActions);
-            var validBetAmount = CalculateValidBetAmount(allActions);
             var settleAmount = CalculateSettleAmount(allActions);
-            var tieBetAdjustment = CalculateTieBetAdjustment(hasTurnoverOnTieBet, allActions);
             var winLoss = CalculateWinLoss(allActions);
             var unsettledBets = CalculateUnsettledBets(previousActions);
 
-            //var turnover = validBetAmount - tieBetAdjustment;
-            var turnover = oppositeBetPatterns.Count == 0
-                ? validBetAmount - tieBetAdjustment
-                : CalculateTurnover(hasTurnoverOnTieBet, allActions, oppositeBetPatterns);
+            var (turnover, validBetAmount, tieBetAdjustment) =
+                CalculateTurnoverWithValidBetAmountAndTieBetAdjustment(hasTurnoverOnTieBet, allActions,
+                    oppositeBetPatterns);
 
             return (betAmount, validBetAmount, settleAmount, tieBetAdjustment, turnover, winLoss, unsettledBets);
         }
-
-        private static decimal CalculateTurnover(bool hasTurnoverOnTieBet, IList<BetActionData> allActions,
-            IList<OppositeBetPattern> oppositeBetPatterns) => throw new NotImplementedException();
 
         private static (decimal BetAmount, decimal validBetAmount, decimal UnsettleBets)
             CalculatePlaceBetActionBetValues(BetActionData current, IList<BetActionData> previousActions)
@@ -185,6 +179,60 @@ namespace TGS.Services.GameOperations.Calculators
                     .Sum(a => a.Reference.Amount)
                     .Negate();
 
+
+        private static (decimal Turnover, decimal ValidBetAmount, decimal tieBetAdjustment)
+            CalculateTurnoverWithValidBetAmountAndTieBetAdjustment(bool hasTurnoverOnTieBet,
+                IList<BetActionData> allActions, IList<OppositeBetPattern> oppositeBetPatterns)
+        {
+            decimal turnover = 0, tieBetAdjustment = 0;
+            var validBetAmount = CalculateValidBetAmount(allActions);
+
+            var allBets = allActions.Where(a => a.Type == PlaceBet && a.IsCancelled == false).ToArray();
+            var matchedPatternGroupIds = (from a in allBets
+                                          from p in oppositeBetPatterns
+                                          where a.BetType == p.BetType
+                                          select p.GroupId).Distinct().ToArray();
+
+            if (matchedPatternGroupIds.Length == 0)
+            {
+                tieBetAdjustment = CalculateTieBetAdjustment(hasTurnoverOnTieBet, allActions);
+                turnover = validBetAmount - tieBetAdjustment;
+                return (turnover, validBetAmount, tieBetAdjustment);
+            }
+
+            // calculate turnover if opposite bets exist
+            decimal rollingTurnover = 0;
+
+            var uncalculatedBets = allBets;
+            foreach (var id in matchedPatternGroupIds)
+            {
+                var betAmountOfBetTypes = oppositeBetPatterns.Where(p => p.GroupId == id)
+                    .Select(p => p.BetType).ToDictionary(p => p, _ => 0m);
+
+                var oppositeBetTypes = betAmountOfBetTypes.Keys;
+                var oppositeBets = allBets.Where(a => oppositeBetTypes.Contains(a.BetType)).ToArray();
+
+                foreach (var bet in oppositeBets)
+                {
+                    var betAmount = bet.Amount.Negate();
+                    var tieBet = allActions.FirstOrDefault(a => a.Reference.Id == bet.Id && a.Type == TieBet);
+                    var adjustment = hasTurnoverOnTieBet || tieBet == null ? 0 : tieBet.Amount;
+                    var actualBetAmount = betAmount - adjustment;
+
+                    betAmountOfBetTypes[bet.BetType] += actualBetAmount;
+                    tieBetAdjustment += adjustment;
+                }
+
+                rollingTurnover += CalculateRollingTurnover(betAmountOfBetTypes);
+
+                uncalculatedBets = uncalculatedBets.Except(oppositeBets).ToArray();
+            }
+
+            turnover = uncalculatedBets.Sum(a => a.Amount).Negate() + rollingTurnover;
+
+            return (turnover, validBetAmount, tieBetAdjustment);
+        }
+
         private static decimal CalculateWinLoss(IList<BetActionData> allActions) =>
             // here it means company WinLoss
             // WinLoss = -1 * Sum(Amount from all)
@@ -197,5 +245,11 @@ namespace TGS.Services.GameOperations.Calculators
         private static IList<BetActionData>
             GetAllActions(BetActionData current, IList<BetActionData> previousActions) =>
             previousActions.Concat(new[] {current}).ToArray();
+
+        private static decimal CalculateRollingTurnover(Dictionary<string, decimal> betAmountOfBetTypes)
+        {
+            var rolling = betAmountOfBetTypes.Values.Select((v, i) => i == 0 ? v : v.Negate()).Sum();
+            return Math.Abs(rolling);
+        }
     }
 }

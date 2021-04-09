@@ -15,19 +15,26 @@ namespace TGS.UnitTests.Operations.Bets.Steps
     [Scope(Tag = "BetValuesCalculator")]
     public sealed class BetValuesCalculator : SpecFlowBase
     {
+        private readonly IList<OppositeBetPattern> _oppositeBetPatterns;
+
         public BetValuesCalculator(ScenarioContext context)
             : base(context)
         {
+            _oppositeBetPatterns =
+                new OppositeBetPattern[] {new("Player", 1), new("Banker", 1), new("Dragon", 2), new("Tiger", 2)};
         }
 
         [Given(@"initial balance of \$(.*)")]
-        public void GivenInitialBalanceOf(decimal amount) => Set(SR.UserBalance, amount);
+        public void GivenInitialBalanceOf(decimal amount) =>
+            Set(SR.UserBalance, amount);
 
         [Given(@"game with no turnover on tie bet")]
-        public void GivenGameWithNoTurnoverOnTieBet() => Set(SR.TurnoverOnTieBet, false);
+        public void GivenGameWithNoTurnoverOnTieBet() =>
+            Set(SR.TurnoverOnTieBet, false);
 
         [Given(@"game with turnover on tie bet")]
-        public void GivenGameWithTurnoverOnTieBet() => Set(SR.TurnoverOnTieBet, true);
+        public void GivenGameWithTurnoverOnTieBet() =>
+            Set(SR.TurnoverOnTieBet, true);
 
         [When(@"I perform the following actions I will see the expected results")]
         public void WhenIPerformTheFollowingActionsIWillSeeTheExpectedResults(Table table)
@@ -69,6 +76,8 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var previousOutput = new List<BetValuesResult>();
             var calculator = (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
 
+            var oppositeBetPatterns = HasTag("OppositeBets") ? _oppositeBetPatterns : null;
+
             foreach (var current in rows)
             {
                 var action = actionById[current.Id];
@@ -88,7 +97,8 @@ namespace TGS.UnitTests.Operations.Bets.Steps
                         calculator.Calculate(
                             hasTurnoverOnTieBet,
                             action,
-                            previousInput);
+                            previousInput,
+                            oppositeBetPatterns);
 
                     previousOutput.Add(result);
 
