@@ -23,7 +23,7 @@ import {
     ConfirmButtonFooter
 } from "../../form/ConfirmButtonFooter"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { useAgentBonusDetailList } from "./client"
+import { useAgentDividendDetailList } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
@@ -87,14 +87,14 @@ const ReportDialog = ({
         error,
         mutate,
         deleteCache
-    } = useAgentBonusDetailList(username, toApiParams(state))
+    } = useAgentDividendDetailList(toApiParams(state))
 
     let { pageIndex, pageSize } = state
     let columns = useAgentBonusColumns({ username, items: data?.items })
 
     let title = useTrans({
         zh: "分红详情",
-        en: "Bonus Detail"
+        en: "Dividend Detail"
     })
 
     if (isLoading) {
@@ -122,7 +122,7 @@ const ReportDialog = ({
                     <Trans zh="代理用户名" en="Agent Username" />
                     <Text.Block alignY="center">{username}</Text.Block>
 
-                    <Trans zh="分红金额" en="Bonus Amount" />
+                    <Trans zh="分红金额" en="Dividend Amount" />
                     <Text.Block alignY="center">
                         {formatNumberDecimal(bonusAmount)}
                     </Text.Block>

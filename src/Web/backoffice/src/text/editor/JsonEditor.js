@@ -54,7 +54,9 @@ const Body = ({
     ...props
 }) => {
     let formMethods = useFormContext()
+
     let [errorMarkers, setErrorMarkers] = useState([])
+
     if (name && formMethods) {
         return (
             <Controller
@@ -76,6 +78,12 @@ const Body = ({
                             <Editor
                                 value={value}
                                 {...props}
+                                beforeMount={(monaco) => {
+                                    //init monaco
+                                }}
+                                onMount={(editor) => {
+                                    ref.current = editor
+                                }}
                                 onValidate={setErrorMarkers}
                                 onChange={(value, event) => {
                                     formMethods.setValue(name, value)

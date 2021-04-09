@@ -8,37 +8,22 @@ import {
     usePostFormData
 } from "../../client"
 
-const API = "/api/agentbonus"
+const API = "/api/AgentReport"
 
-export const useAgentBonusList = (username, searchParams) => {
-    //TODO: rm test code
-    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
-
-    let url =
-        username && searchParams
-            ? urlWith(searchParams, `${API}/${username}`)
-            : ""
+export const useAgentDividendList = (searchParams) => {
+    let url = searchParams ? urlWith(searchParams, `${API}/dividends`) : ""
     return useGet(url)
 }
 
-export const useAgentWinLossList = (username, searchParams) => {
-    //TODO: rm test code
-    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
-
-    let url =
-        username && searchParams
-            ? urlWith(searchParams, `${API}/${username}/winLoss`)
-            : ""
+export const useAgentDividendDetailList = (searchParams) => {
+    let url = searchParams
+        ? urlWith(searchParams, `${API}/dividendDetails`)
+        : ""
     return useGet(url)
 }
 
-export const useAgentBonusDetailList = (username, searchParams) => {
-    //TODO: rm test code
-    // return useGet(searchParams ? urlWith(searchParams, "/api/vipReport") : "")
-
+export const useAgentWinLossList = (id, searchParams) => {
     let url =
-        username && searchParams
-            ? urlWith(searchParams, `${API}/${username}/bonus`)
-            : ""
+        id && searchParams ? urlWith(searchParams, `${API}/${id}/winLoss`) : ""
     return useGet(url)
 }
