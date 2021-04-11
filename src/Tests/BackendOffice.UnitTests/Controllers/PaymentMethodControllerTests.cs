@@ -96,12 +96,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreateAsync(request);
-            response.Valid.Should().BeTrue();
+            Assert.Fail();
+            //var response = await _controller.CreateAsync(request);
+            //response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>()));
-            _commandsMock.Verify(p => p.CreateAsync(It.Is<PaymentMethod>(r =>
-                r.Code == request.Code)));
+            //_queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<PaymentMethod, bool>>>()));
+            //_commandsMock.Verify(p => p.CreateAsync(It.Is<PaymentMethod>(r =>
+            //    r.Code == request.Code)));
         }
 
         [Test]

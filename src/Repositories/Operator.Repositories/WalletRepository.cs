@@ -65,12 +65,17 @@ namespace TGS.Operator.Repositories
         public async ValueTask<BrandPayment> GetBrandPaymentByIdAsync(Guid id)
         {
             var row = await _tgsRepository.BrandPayments
-                .FindAsync(id)
+                .Include(bp => bp.PaymentMethodChannel)
+                .Where(bp => bp.Id == id)
+                .SingleAsync()
                 .ConfigureAwait(false);
 
             return new BrandPayment(
                 row.Id,
                 row.PaymentMethodChannelId,
+                row.PaymentMethodChannel.PaymentId,
+                row.PaymentMethodChannel.MethodId,
+                row.PaymentMethodChannel.ChannelId,
                 row.ChannelName,
                 row.ExtendedData);
         }

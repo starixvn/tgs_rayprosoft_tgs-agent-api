@@ -50,8 +50,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         [Description("Get a Payment")]
         public async Task<GetPaymentResponse> GetPaymentAsync(Guid id)
         {
-            var vendor = await _queries.GetSingleAsync(q => q.Id == id, q =>
-                q.Include(i => i.PaymentMethods));
+            var vendor = await _queries.GetSingleAsync(q => q.Id == id);
 
             return new GetPaymentResponse
             {

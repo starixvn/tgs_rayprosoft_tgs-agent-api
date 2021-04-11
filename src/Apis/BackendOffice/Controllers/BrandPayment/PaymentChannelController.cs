@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,26 +31,16 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get PaymentChannels")]
-        public Task<PagedResponse<PaymentChannelModel>> GetPaymentChannelsAsync(
-            [FromQuery] PaymentChannelsRequest request)
+        public IAsyncEnumerable<PaymentChannelModel> GetAllPaymentChannelsAsync()
         {
             return _queries.GetQueries()
-                .Include(pc => pc.Payment)
-                .Include(pc => pc.PaymentMethod)
-                .Where(request.Code, q => q.Code == request.Code)
                 .Select(q => new PaymentChannelModel
                 {
                     Id = q.Id,
                     Code = q.Code,
-                    Name = q.Name,
-                    PaymentName = q.Payment.Name,
-                    PaymentMethodName = q.PaymentMethod.Name,
-                    Description = q.Description,
-                    CreatedByUsername = q.CreatedByUsername,
-                    UpdatedByUsername = q.UpdatedByUsername,
-                    CreatedOn = q.CreatedOn,
-                    UpdatedOn = q.UpdatedOn
-                }).AsNoTracking().CreatePagedResponseAsync(request);
+                })
+                .AsNoTracking()
+                .ToAsyncEnumerable();
         }
 
         //[HttpGet("{id}")]

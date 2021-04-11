@@ -35,42 +35,31 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsCommands<PaymentChannel>> _commandsMock =
             new();
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_PaymentChannels(bool showAll)
+        public async Task Can_Get_PaymentChannels()
         {
-            var request = new PaymentChannelsRequest
-            {
-                Page = 1,
-                Rows = 10,
-                SortBy = "updatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
+            var sut = new PaymentChannelController(
+                _queriesMock.Object,
+                _commandsMock.Object);
 
             var list = CreatePaymentChannelFixture()
                 .CreateMany<PaymentChannel>(105)
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
-
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
-
             _queriesMock.Setup(x => x.GetQueries())
                 .Returns(list);
 
-            var response = await _controller.GetPaymentChannelsAsync(request);
-            response.Valid.Should().BeTrue();
+            Assert.Fail();
+            //var response = await _controller.GetPaymentChannelsAsync(request);
+            //response.Valid.Should().BeTrue();
 
-            for (var i = 0; i < response.Items.Length; i++)
-            {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].Name.Should().Be(expectedRoles[i].Name);
-            }
+            //for (var i = 0; i < response.Items.Length; i++)
+            //{
+            //    response.Items[i].Id.Should().Be(expectedRoles[i].Id);
+            //    response.Items[i].Name.Should().Be(expectedRoles[i].Name);
+            //}
 
-            _queriesMock.Verify(p => p.GetQueries());
+            //_queriesMock.Verify(p => p.GetQueries());
         }
 
         [Test]
@@ -143,16 +132,17 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     s.ExistsAsync(It.IsAny<Expression<Func<PaymentChannel, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateAsync(payment.Id, request);
+            Assert.Fail();
+            //var response = await _controller.UpdateAsync(payment.Id, request);
 
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentChannel.NotFound);
-            _queriesMock.Verify(s => s.GetSingleAsync(
-                It.IsAny<Expression<Func<PaymentChannel, bool>>>(),
-                It.IsAny<Func<IQueryable<PaymentChannel>,
-                    IQueryable<PaymentChannel>>>()));
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentChannel>(r =>
-                r.Code == payment.Code)), Times.Never);
+            //response.Valid.Should().BeFalse();
+            //response.Message.Should().Be(Apis.BackendOffice.Resources.PaymentChannel.NotFound);
+            //_queriesMock.Verify(s => s.GetSingleAsync(
+            //    It.IsAny<Expression<Func<PaymentChannel, bool>>>(),
+            //    It.IsAny<Func<IQueryable<PaymentChannel>,
+            //        IQueryable<PaymentChannel>>>()));
+            //_commandsMock.Verify(p => p.UpdateAsync(It.Is<PaymentChannel>(r =>
+            //    r.Code == payment.Code)), Times.Never);
         }
 
         private Fixture CreatePaymentChannelFixture()

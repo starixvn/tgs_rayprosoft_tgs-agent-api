@@ -63,6 +63,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
             var dataQuery = _tgsRepository.DepositForms
                             .Include(f => f.Player)
                             .Include(f => f.BrandPayment)
+                            .ThenInclude(bp => bp.PaymentMethodChannel)
                             .Where(form => form.BrandId == query.BrandId);
 
             if (!string.IsNullOrWhiteSpace(query.UserName))
@@ -72,7 +73,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 dataQuery = dataQuery.Where(form => form.BrandPayment.ChannelName == query.ChannelName);
 
             if (query.PaymentMethodId != null)
-                dataQuery = dataQuery.Where(form => form.BrandPayment.PaymentMethodId == query.PaymentMethodId);
+                dataQuery = dataQuery.Where(form => form.BrandPayment.PaymentMethodChannel.MethodId == query.PaymentMethodId);
 
             if (query.CreateOnRange != null)
                 dataQuery = dataQuery.Where(form => form.CreatedOn >= query.CreateOnRange.Value.Begin

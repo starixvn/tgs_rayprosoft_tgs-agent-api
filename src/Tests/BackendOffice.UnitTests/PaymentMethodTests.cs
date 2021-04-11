@@ -31,7 +31,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 new PaymentMethod
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Test"
+                    Code = "Test"
                 });
 
             await tgsRepository.SaveChangesAsync();
