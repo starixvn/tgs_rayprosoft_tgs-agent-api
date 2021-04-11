@@ -70,7 +70,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             _passwordHandler = new PasswordHandler(hashProvider);
             _jsonSerializationProvider = new JsonSerializationProvider();
 
-            _gameProviders = new IGameProvider[] {new SBOGameProvider(env), new HabaneroGameProvider(env)};
+            _gameProviders = new IGameProvider[] {new SBOGameProvider(env), new HabaneroGameProvider(env), new JDBGameProvider(env)};
         }
 
         protected override async Task SetInitialDataAsync()

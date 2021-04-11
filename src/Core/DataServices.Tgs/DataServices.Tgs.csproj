@@ -67,6 +67,8 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Views\vw_valid_game_actions.sql" />
+    <None Remove="DataInitializers\Games\JDB.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\JDB.csv" />
   </ItemGroup>
 
   <ItemGroup>

@@ -55,6 +55,7 @@ namespace TGS.Core.Models
             public const string RedTiger = "RT";
             public const string SBOBET = "SBO";
             public const string Habanero = "HABA";
+            public const string JDB = "JDB";
         }
 
         public static class EnvironmentVariable

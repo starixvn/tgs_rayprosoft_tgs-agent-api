@@ -1,0 +1,11 @@
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+Sun Archer,,,15011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Legendary5,,,15012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Mystery of Ninetails,,,15013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Dragon Fishing,,,7001,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Dragon Fishing II,,,7002,Fishing,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+Cai Shen Fishing,,,7003,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Five Dragons Fishing,,,7004,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Fishing YiLuFa,,,7005,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Dragon Master,,,7006,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Fishing Disco,,,7007,Fishing,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
