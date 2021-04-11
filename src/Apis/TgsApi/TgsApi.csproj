@@ -52,5 +52,9 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GameProviders\JDB\Controllers" />
+  </ItemGroup>
+
 
 </Project>
