@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using TGS.Apis.BackendOffice.Services;
@@ -34,6 +35,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
             IRequestAnalyzer requestAnalyzer,
             ITgsLog logger,
             IJsonSerializationProvider json,
+            IWebHostEnvironment env,
             IStreamToString streamToString,
             ILogger<ExceptionMiddleware> systemLogger)
         {
@@ -113,8 +115,11 @@ namespace TGS.Apis.BackendOffice.Middlewares
             _tgsLog.LogAdmin(adminLogEvent);
         }
 
+        private static string CutOffResponseContent(string responseContent) =>
+            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
+
         private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
-            RequestDelegate next)
+                    RequestDelegate next)
         {
             var originalBodyStream = context.Response.Body;
             var responseStream = _recyclableMemoryStreamManager.GetStream();
@@ -151,8 +156,5 @@ namespace TGS.Apis.BackendOffice.Middlewares
             context.Request.Body.Seek(0, SeekOrigin.Begin);
             return message;
         }
-
-        private static string CutOffResponseContent(string responseContent) =>
-            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
     }
 }

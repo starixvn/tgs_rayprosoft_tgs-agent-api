@@ -10,11 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-<<<<<<< HEAD:src/Core/DataServices.Tgs/Migrations/20210412033411_Initial.Designer.cs
-    [Migration("20210412033411_Initial")]
-=======
-    [Migration("20210412061929_Initial")]
->>>>>>> remotes/origin/develop:src/Core/DataServices.Tgs/Migrations/20210412061929_Initial.Designer.cs
+    [Migration("20210412064848_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
