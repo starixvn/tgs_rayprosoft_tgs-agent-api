@@ -28,8 +28,6 @@ import {
 import { AddButton, VerifyButton, ViewButton } from "./edit"
 import { Verify as VerifyMenu, View as ViewMenu } from "./menu"
 import { useFormContext, useForm, FormProvider } from "react-hook-form"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
-import { nextRoleType } from "../../system/roles/type"
 import BrandBar from "../../report/BrandBar"
 import AlertDialog from "../../dialog/Alert"
 

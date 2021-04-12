@@ -190,7 +190,7 @@ export const MerchantIdSelect = ({
     )
 }
 
-//TODO: rm
+/*
 export const MerchantIdHookFormSelect = ({
     start = Reseller,
     end = Brand,
@@ -329,3 +329,4 @@ export const MerchantIdHookFormSelect = ({
         </Group>
     )
 }
+*/
