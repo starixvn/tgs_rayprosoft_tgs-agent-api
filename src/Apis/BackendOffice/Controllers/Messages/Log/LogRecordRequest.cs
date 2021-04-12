@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Infrastructures.Log.Enums;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
@@ -9,6 +10,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public DateTimeOffset? To { get; set; }
         public Guid? TrackingId { get; set; }
         public string ServerName { get; set; }
-        public string Level { get; set; }
+        public TgsLogLevel Level { get; set; }
     }
 }

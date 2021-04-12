@@ -1,0 +1,25 @@
+﻿using System;
+using MediatR;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
+
+namespace TGS.Services.BackOffice.Application.Models.Promotion
+{
+    public class CreatePromotionRequest : BaseRequest, IRequest<MessageResponse>
+    {
+        public Guid BrandId { get; set; }
+        public string Name { get; set; }
+        public DateTimeOffset From { get; set; }
+        public DateTimeOffset To { get; set; }
+        public SwitchStatus Status { get; set; }
+        public PromotionType PromotionType { get; set; }
+        public decimal PromotionAmount { get; set; }
+        public bool Unlimited { get; set; }
+        public GameType? GameType { get; set; }
+        public decimal Percentage { get; set; }
+        public decimal TotalAmountLimit { get; set; }
+        public decimal TurnoverMultiple { get; set; }
+        public Guid[] GameProviderIds { get; set; }
+        public int[] VipLevels { get; set; }
+    }
+}

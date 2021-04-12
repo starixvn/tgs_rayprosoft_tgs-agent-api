@@ -139,7 +139,9 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<Agent> Agents { get; set; }
         DbSet<AgentBank> AgentBanks { get; set; }
         DbSet<AgentWallet> AgentWallets { get; set; }
-        DbSet<AgentTransaction> AgentTransactions { get; set; }
+        DbSet<Promotion> Promotions { get; set; }
+        DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+        DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
         DbSet<DepositForm> DepositForms { get; set; }
     }
 
@@ -274,12 +276,13 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<Agent> Agents { get; set; }
         public DbSet<AgentBank> AgentBanks { get; set; }
         public DbSet<AgentWallet> AgentWallets { get; set; }
-        public DbSet<AgentTransaction> AgentTransactions { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+        public DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
+        public DbSet<DepositForm> DepositForms { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
-
-        public DbSet<DepositForm> DepositForms { get; set; }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
