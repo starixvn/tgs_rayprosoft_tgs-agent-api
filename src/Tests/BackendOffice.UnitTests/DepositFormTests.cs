@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -36,13 +33,23 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     BrandId = brandId
                 });
 
-            var brandPaymentId = Guid.NewGuid();
+            var pmcId = Guid.NewGuid();
+            await tgsRepository.AddAsync(
+                new PaymentMethodChannel
+                {
+                    Id = pmcId,
+                    PaymentId = Guid.NewGuid(),
+                    MethodId = Guid.NewGuid(),
+                    ChannelId = Guid.NewGuid()
+                });
 
+            var brandPaymentId = Guid.NewGuid();
             await tgsRepository.BrandPayments.AddAsync(
                 new BrandPayment
                 {
                     Id = brandPaymentId,
-                    BrandId = brandId
+                    BrandId = brandId,
+                    PaymentMethodChannelId = pmcId
                 });
 
             await tgsRepository.DepositForms.AddRangeAsync(
