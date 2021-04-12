@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -30,16 +31,19 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get PaymentMethods")]
-        public IAsyncEnumerable<PaymentMethodModel> GetAllPaymentMethodsAsync()
+        public BoGenericReponse<IEnumerable<PaymentMethodModel>> GetAllPaymentMethods()
         {
-            return _queries.GetQueries()
-                .Select(q => new PaymentMethodModel
-                {
-                    Id = q.Id,
-                    Code = q.Code
-                })
-                .AsNoTracking()
-                .ToAsyncEnumerable();
+            return new BoGenericReponse<IEnumerable<PaymentMethodModel>>
+            {
+                Data = _queries.GetQueries()
+                    .Select(q => new PaymentMethodModel
+                    {
+                        Id = q.Id,
+                        Code = q.Code
+                    })
+                    .AsNoTracking()
+                    .ToArray()
+            };
         }
 
     }

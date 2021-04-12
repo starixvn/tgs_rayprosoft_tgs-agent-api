@@ -30,10 +30,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     }
                 }.AsQueryable());
 
-            var response = sut.GetAllPaymentMethodsAsync().ToEnumerable();
+            var response = sut.GetAllPaymentMethods();
 
             moqQueries.Verify(p => p.GetQueries());
-            Assert.IsTrue(response.Count() == 1);
+            Assert.IsTrue(response.Data.Count() == 1);
         }
     }
 }
