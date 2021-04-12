@@ -88,9 +88,7 @@ const ReportContent = ({ brandId }) => {
     let { isLoading, data = {}, error, mutate, deleteCache } = useVipReportList(
         {
             ...toApiParams(state),
-            /*
             sortby: "username",
-            */
             from,
             to: startOfNextDay(to)
         }
