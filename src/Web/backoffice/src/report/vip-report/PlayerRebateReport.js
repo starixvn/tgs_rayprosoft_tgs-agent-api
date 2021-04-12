@@ -26,6 +26,7 @@ import {
     numberDecimalPercentageColumn
 } from "../../table/column/numberColumn"
 import AlertDialog from "../../dialog/Alert"
+import { startOfNextDay } from "../../date/startOfNextDay"
 
 export const PlayerRebatDialogDisclosure = ({
     brandId,
@@ -63,15 +64,23 @@ const ReportDialog = ({ brandId, username, start, end, dialog }) => {
         to: end,
         showAll: true
     })
+
+    let { from, to } = state
     let {
         data,
         isLoading,
         error,
         mutate,
         deleteCache
-    } = usePlayerVipRebateList(username, toApiParams(state))
+    } = usePlayerVipRebateList(username, {
+        ...toApiParams(state),
+        /*
+        sortby: "reportDate",
+        */
+        from,
+        to: startOfNextDay(to)
+    })
 
-    let { pageIndex, pageSize } = state
     let columns = usePlayerVipRebateColumns({ items: data?.items })
 
     let title = useTrans({
@@ -130,20 +139,15 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
                 disableSortBy: true
             }),
             numberDecimalPercentageColumn({
-                accessor: "liveDealerRebate",
+                accessor: "liveDealerRebatePercentage",
                 Header: <Trans zh="真人反水比例" en="Live Dealer Rebate %" />,
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                accessor: "liveDealerValidBetAmount",
-                Header: (
-                    <Trans
-                        zh="真人投注金额"
-                        en="Live Dealer Valid Bet Amount"
-                    />
-                ),
-                sumColumn: "liveDealerValidBetAmount",
+                accessor: "liveDealerTurnover",
+                Header: <Trans zh="真人投注金额" en="Live Dealer Turnove" />,
+                sumColumn: "liveDealerTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
@@ -156,17 +160,15 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
 
             numberDecimalPercentageColumn({
-                accessor: "sportsRebate",
+                accessor: "sportsRebatePercentage",
                 Header: <Trans zh="体育反水比例" en="Sports Rebate %" />,
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                accessor: "sportsValidBetAmount",
-                Header: (
-                    <Trans zh="体育投注金额" en="Sports Valid Bet Amount" />
-                ),
-                sumColumn: "sportsValidBetAmount",
+                accessor: "sportsTurnover",
+                Header: <Trans zh="体育投注金额" en="Sports Turnover" />,
+                sumColumn: "sportsTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
@@ -177,15 +179,15 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
 
             numberDecimalPercentageColumn({
-                accessor: "slotRebate",
+                accessor: "slotRebatePercentage",
                 Header: <Trans zh="电子反水比例" en="Slot Rebate %" />,
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                accessor: "slotValidBetAmount",
-                Header: <Trans zh="电子投注金额" en="Slot Valid Bet Amount" />,
-                sumColumn: "slotValidBetAmount",
+                accessor: "slotTurnover",
+                Header: <Trans zh="电子投注金额" en="Slot Turnover" />,
+                sumColumn: "slotTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
@@ -196,17 +198,15 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
 
             numberDecimalPercentageColumn({
-                accessor: "cardGameRebate",
+                accessor: "cardGameRebatePercentage",
                 Header: <Trans zh="棋牌反水比例" en="Card Game Rebate %" />,
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                accessor: "cardGameValidBetAmount",
-                Header: (
-                    <Trans zh="棋牌投注金额" en="Card Game Valid Bet Amount" />
-                ),
-                sumColumn: "cardGameValidBetAmount",
+                accessor: "cardGameTurnover",
+                Header: <Trans zh="棋牌投注金额" en="Card Game Turnover" />,
+                sumColumn: "cardGameTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
@@ -219,7 +219,7 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
 
             numberDecimalPercentageColumn({
-                accessor: "virtualSportsRebate",
+                accessor: "virtualSportsRebatePercentage",
                 Header: (
                     <Trans zh="虚体反水比例" en="Virtual Sports Rebate %" />
                 ),
@@ -227,14 +227,11 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                accessor: "virtualSportsValidBetAmount",
+                accessor: "virtualSportsTurnover",
                 Header: (
-                    <Trans
-                        zh="虚体投注金额"
-                        en="Virtual Sports Valid Bet Amount"
-                    />
+                    <Trans zh="虚体投注金额" en="Virtual Sports Turnover" />
                 ),
-                sumColumn: "virtualSportsValidBetAmount",
+                sumColumn: "virtualSportsTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
@@ -250,17 +247,15 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
 
             numberDecimalPercentageColumn({
-                accessor: "lotteryRebate",
+                accessor: "lotteryRebatePercentage",
                 Header: <Trans zh="彩票反水比例" en="Lottery Rebate %" />,
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                accessor: "lotteryValidBetAmount",
-                Header: (
-                    <Trans zh="彩票投注金额" en="Lottery Valid Bet Amount" />
-                ),
-                sumColumn: "lotteryValidBetAmount",
+                accessor: "lotteryTurnover",
+                Header: <Trans zh="彩票投注金额" en="Lottery Turnover" />,
+                sumColumn: "lotteryTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
