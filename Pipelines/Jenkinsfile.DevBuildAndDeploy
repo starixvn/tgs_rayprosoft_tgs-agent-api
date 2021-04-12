@@ -40,13 +40,9 @@ pipeline {
 						println arr[i]
 						def data = arr[i].split("::")
 						
-						if (data[1] == "validatecode-api" || data[1] == "operator-api") {
-						    sh "sudo docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} --secret id=nuget,src=\"/var/lib/jenkins/.nuget/NuGet/NuGet.Config\" ."
-						} else {
-						    sh "sudo docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} ."
-						}
-						
+						sh "sudo docker build -f ${data[0]}/Dockerfile -t ${Registry}${data[1]}:${TAG} --secret id=nuget,src=\"/var/lib/jenkins/.nuget/NuGet/NuGet.Config\" ."
 						sh "sudo docker push ${Registry}${data[1]}:${TAG}"
+						sh "sudo docker push ${Registry}${data[1]}:${ENV}"
 						
 						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
 							sh "kubectl set image deployment/${data[2]} ${data[2]}=${Registry}${data[1]}:${TAG} --record -n ${params.Env}"
