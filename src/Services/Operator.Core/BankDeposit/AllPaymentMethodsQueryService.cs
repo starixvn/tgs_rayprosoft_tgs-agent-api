@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -16,7 +17,7 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public async ValueTask<IDictionary<Guid, PaymentMethod>> GetAsync(AllPaymentMethodsQuery query)
+        public async ValueTask<IDictionary<Guid, PaymentMethod>> GetAsync(AllPaymentMethodsQuery query, CancellationToken cancellationToken = default)
         {
             var allPaymentMethods = await _walletRepository.GetAllPaymentMethodsAsync()
                 .ToDictionaryAsync(method => method.Id)

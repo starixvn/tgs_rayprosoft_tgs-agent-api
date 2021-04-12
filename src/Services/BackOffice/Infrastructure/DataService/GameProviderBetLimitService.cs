@@ -65,7 +65,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GetQueriesAsync(preQuery, tracking);
 
         Task<string[]> IGameProviderBetLimitService.GetInUseBrandsAsync(Guid id) =>
-            _repository.BrandGroupGameProviderBetLimits
+            _repository.BrandGroupGameProviderBetLimits.AsQueryable()
                 .Where(x => x.GameProviderBetLimitId == id)
                 .Select(x => x.BrandGroupBetLimit.BrandGroup.Brand.Name).Distinct().ToArrayAsync();
 

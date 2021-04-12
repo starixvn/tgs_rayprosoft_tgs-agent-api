@@ -107,7 +107,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 DisplayName = role.DisplayName,
                 Description = role.Description,
                 IsRoot = role.IsRoot,
-                Menus = GetMenuSettingAsync(menuSetting, role.MenuSetting),
+                Menus = GetMenuSetting(menuSetting, role.MenuSetting),
                 CreatedOn = role.CreatedOn,
                 UpdatedOn = role.UpdatedOn,
                 CreatedByUsername = role.CreatedByUsername,
@@ -318,7 +318,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private MenuSetting[] GetMenuSettingByString(string setting) =>
             _jsonSerializationProvider.DeserializeFromString<MenuSetting[]>(setting);
 
-        private MenuSetting[] GetMenuSettingAsync(string template, string menuSetting)
+        private MenuSetting[] GetMenuSetting(string template, string menuSetting)
         {
             var templateMenus = GetMenuSettingByString(template);
             var roleMenus = GetMenuSettingByString(menuSetting);
@@ -352,7 +352,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             foreach (var roleItem in roles)
             {
-                var menus = GetMenuSettingAsync(templateRole.MenuSetting, roleItem.MenuSetting);
+                var menus = GetMenuSetting(templateRole.MenuSetting, roleItem.MenuSetting);
                 roleItem.MenuSetting = _jsonSerializationProvider.SerializeToString(menus);
             }
         }

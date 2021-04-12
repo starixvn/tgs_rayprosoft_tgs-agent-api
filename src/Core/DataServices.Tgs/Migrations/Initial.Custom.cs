@@ -126,10 +126,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.IndexSqlFormat, "payments"));
             migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.IndexSqlFormat, "paymentMethods"));
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.IndexSqlFormat, "paymentChannels"));
-            migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.IndexSqlFormat, "roles"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.IndexSqlFormat, "users"));

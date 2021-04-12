@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
     public class Payment : BaseEntity<Guid>
     {
         public string Description { get; set; }
-        public virtual ICollection<PaymentMethod> PaymentMethods { get; set; }
-        public virtual ICollection<PaymentChannel> PaymentChannels { get; set; }
+
+        public string ExtendData { get; set; }
+
+        public ActivateStatus Status { get; set; }
     }
 }

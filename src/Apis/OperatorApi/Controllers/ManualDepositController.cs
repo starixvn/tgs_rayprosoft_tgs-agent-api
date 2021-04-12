@@ -90,12 +90,12 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBandDepositFormCommandService,
             Guid id,
-            [FromForm(Name = "file")] IFormFile remittanceReceipt)
+            [FromForm(Name = "file")] IFormFile manualReceipt)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var contentType = remittanceReceipt.ContentType;
-            using var fileStream = remittanceReceipt.OpenReadStream();
+            var contentType = manualReceipt.ContentType;
+            using var fileStream = manualReceipt.OpenReadStream();
 
             var command = new SubmitBankDepositFormCommand(
                 playerTokenData.PlayerCode,

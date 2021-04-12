@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Services.Operations;
@@ -22,7 +23,7 @@ namespace TGS.Services.Operator.PayPassowrd
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
-        public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command)
+        public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)
