@@ -73,7 +73,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         player.RealName = request.RealName;
                         player.VipId = request.VipId;
                         player.Status = request.Status;
-                        player.HasAgent = request.HasAgent;
                     }
 
                     if (request.Type == updatePlayerType[1])

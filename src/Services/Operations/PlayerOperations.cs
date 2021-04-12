@@ -53,8 +53,6 @@ namespace TGS.Services.Operations
 
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
 
-        Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode);
-
         Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
 
         Task SetIdentityAsync(
@@ -63,10 +61,13 @@ namespace TGS.Services.Operations
             string identity,
             bool isAuthenticate,
             DateTimeOffset updatedOn);
+
+        Task<Agent> GetAgentAsync(string invitationCode);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
     {
+        private readonly IAgentQueries _agentQueries;
         private readonly IRedisCacheManager _cacheManager;
 
         private readonly IPlayerOperations _interface;
@@ -78,6 +79,7 @@ namespace TGS.Services.Operations
         public PlayerOperations(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
+            IAgentQueries agentQueries,
             Func<IWalletQueries> walletQueriesFactory,
             Func<IPlayerQueries> playerQueriesFactory,
             IPlayerCommands playerCommands)
@@ -87,7 +89,7 @@ namespace TGS.Services.Operations
             _walletQueriesFactory = walletQueriesFactory;
             _playerQueriesFactory = playerQueriesFactory;
             _playerCommands = playerCommands;
-
+            _agentQueries = agentQueries;
             _interface = this;
         }
 
@@ -185,16 +187,8 @@ namespace TGS.Services.Operations
             await _playerCommands.DeauthorizePlayerAsync(data.PlayerCode, data.LoginRecordId);
             await _cacheManager.ClearCacheByBatchAsync(new CacheKey[]
             {
-                new()
-                {
-                    CacheType = RedisCacheType.PlayerLoginRecords,
-                    Key = data.PlayerCode
-                },
-                new()
-                {
-                    CacheType = RedisCacheType.PlayerLoginRecords,
-                    Key = data.LoginRecordId
-                }
+                new() {CacheType = RedisCacheType.PlayerLoginRecords, Key = data.PlayerCode},
+                new() {CacheType = RedisCacheType.PlayerLoginRecords, Key = data.LoginRecordId}
             });
         }
 
@@ -216,23 +210,8 @@ namespace TGS.Services.Operations
                 value => (string)value,
                 cachedPlayer => cachedPlayer?.Username);
 
-        public async Task<string> GetPlayerCodeByInvitationCodeAsync(string invitationCode)
-        {
-            const RedisCacheType cacheType = RedisCacheType.InvitationCodeToPlayerCode;
-            var field = invitationCode;
-
-            var value = await _cacheManager.SafeGetHashSetAsync(cacheType, null, field);
-            if (value.HasValue)
-            {
-                return value;
-            }
-
-            var playerCode = await _playerQueriesFactory().GetPlayerCodeByInvitationCodeAsync(invitationCode);
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, null, new HashEntry[] {new(field, playerCode)},
-                TimeSpan.FromDays(1));
-
-            return playerCode;
-        }
+        public Task<Agent> GetAgentAsync(string invitationCode) =>
+            _agentQueries.GetAgentAsync(invitationCode);
 
         #region Private Methods
 
@@ -333,10 +312,7 @@ namespace TGS.Services.Operations
 
             var loginRecords = results.Select(r => new CachedPlayerLoginRecord
             {
-                PlayerCode = playerCode,
-                PlatformType = r.PlatformType,
-                Status = r.Status,
-                ExpiredOn = r.ExpiredOn
+                PlayerCode = playerCode, PlatformType = r.PlatformType, Status = r.Status, ExpiredOn = r.ExpiredOn
             }).ToArray();
 
             var expiresIn = loginRecords.Max(r => r.ExpiredOn) - DateTimeOffset.UtcNow;

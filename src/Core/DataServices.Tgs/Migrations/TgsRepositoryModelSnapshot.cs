@@ -2401,10 +2401,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_deposit_on");
 
-                    b.Property<bool>("HasAgent")
-                        .HasColumnType("boolean")
-                        .HasColumnName("has_agent");
-
                     b.Property<string>("IdNumber")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
@@ -2414,25 +2410,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");
 
-                    b.Property<string>("InvitationCode")
-                        .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("character varying(6)")
-                        .HasColumnName("invitation_code");
-
                     b.Property<DateTimeOffset>("LastActiveOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_active_on");
-
-                    b.Property<string>("ParentInvitationCode")
-                        .HasMaxLength(6)
-                        .HasColumnType("character varying(6)")
-                        .HasColumnName("parent_invitation_code");
-
-                    b.Property<string>("ParentPlayerCode")
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("parent_player_code");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
@@ -2447,6 +2427,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<bool>("PhoneAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("phone_authentication");
+
+                    b.Property<string>("PlayerCode1")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code1");
 
                     b.Property<string>("QQ")
                         .HasMaxLength(64)
@@ -2520,8 +2504,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_players_brand_id");
 
-                    b.HasIndex("ParentPlayerCode")
-                        .HasDatabaseName("ix_players_parent_player_code");
+                    b.HasIndex("PlayerCode1")
+                        .HasDatabaseName("ix_players_player_code1");
 
                     b.HasIndex("VipId")
                         .HasDatabaseName("ix_players_vip_id");
@@ -4432,10 +4416,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "ParentPlayer")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
                         .WithMany("SubPlayers")
-                        .HasForeignKey("ParentPlayerCode")
-                        .HasConstraintName("fk_players_parent_player_code");
+                        .HasForeignKey("PlayerCode1")
+                        .HasConstraintName("fk_players_players_player_code1");
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", "Vip")
                         .WithMany("Players")
@@ -4447,8 +4431,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("BetLimit");
 
                     b.Navigation("Brand");
-
-                    b.Navigation("ParentPlayer");
 
                     b.Navigation("Vip");
                 });
