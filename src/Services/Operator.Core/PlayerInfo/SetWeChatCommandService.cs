@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
@@ -14,7 +15,7 @@ namespace TGS.Services.Operator.PlayerInfo
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask ExecuteAsync(SetWeChatCommand command)
+        public async ValueTask ExecuteAsync(SetWeChatCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)

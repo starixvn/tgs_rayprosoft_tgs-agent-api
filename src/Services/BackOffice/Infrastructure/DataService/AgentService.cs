@@ -58,9 +58,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             }
 
             var parentAgent =
-                await _repository.Agents.FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
+                await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
 
-            var brand = await _repository.Brands.FirstAsync(x => x.Id == request.BrandId);
+            var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
 
             var agent = new Agent
             {
@@ -136,7 +136,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 async _ =>
                 {
                     var parentAgent =
-                        await _repository.Agents.FirstOrDefaultAsync(x =>
+                        await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x =>
                             x.BrandId == request.BrandId && x.Username == request.ParentUsername);
                     var operation = (AgentOperation)Enum.Parse(typeof(AgentOperation), request.UpdateType.ToString());
 

@@ -56,7 +56,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _resellerServiceMock.Setup(x => x.GetResellersAsync(It.IsAny<GetResellersRequest>(), false))
+            _resellerServiceMock.Setup(x => x.GetResellers(It.IsAny<GetResellersRequest>(), false))
                 .Returns(list);
 
             var response = await _controller.GetResellersAsync(request);
@@ -68,7 +68,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].Name.Should().Be(expectedRoles[i].Name);
             }
 
-            _resellerServiceMock.Verify(p => p.GetResellersAsync(It.IsAny<GetResellersRequest>(), false));
+            _resellerServiceMock.Verify(p => p.GetResellers(It.IsAny<GetResellersRequest>(), false));
         }
 
         [Test]

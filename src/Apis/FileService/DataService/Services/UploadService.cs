@@ -61,7 +61,7 @@ namespace TGS.Apis.FileService.DataService.Services
                 await _stationLetterRepository.InsertAsync(stationLetterFile);
             }
 
-            await CleanFiles();
+            await CleanFilesAsync();
         }
 
         public ValueTask<string[]> GetObjectsAsync(string prefix)
@@ -69,20 +69,21 @@ namespace TGS.Apis.FileService.DataService.Services
                 .Select(meta => meta.FileName)
                 .ToArrayAsync();
 
-        private async Task CleanFiles()
+        private async Task CleanFilesAsync()
         {
             var stationLetterFileNames =
                 _stationLetterRepository.GetQueries()
-                    .SelectMany(l => l.Files)
-                    .Select(f => f);
+                    .SelectMany(l => l.Files);
 
-            var files = _fileManager.FindExpiredFilesAsync("/", DateTimeOffset.Now.AddHours(-24))
-                .Where(meta => !stationLetterFileNames.Contains(meta.FileName));
+            var files = await _fileManager.FindExpiredFilesAsync("/", DateTimeOffset.Now.AddHours(-24))
+                .Where(meta => !stationLetterFileNames.Contains(meta.FileName))
+                .ToArrayAsync()
+                .ConfigureAwait(false);
 
-            if (!await files.AnyAsync().ConfigureAwait(false))
+            if (files.Length == 0)
                 return;
 
-            await _fileManager.DeleteFilesAsync(files.ToEnumerable());
+            await _fileManager.DeleteFilesAsync(files);
         }
     }
 }

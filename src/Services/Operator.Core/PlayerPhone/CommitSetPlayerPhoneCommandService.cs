@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
@@ -18,7 +19,7 @@ namespace TGS.Services.Operator.PlayerPhone
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command)
+        public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command, CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeOperator
                 .GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)

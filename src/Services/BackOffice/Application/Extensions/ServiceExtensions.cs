@@ -12,6 +12,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
     {
         public static IServiceCollection AddBackOfficeApplicationServices(this IServiceCollection services)
         {
+            services.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient);
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));

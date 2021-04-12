@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.Infrastructures.Mail;
@@ -23,7 +24,7 @@ namespace TGS.Services.Operator.PlayerEmail
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartSetPlayerEmailCommand command)
+        public async ValueTask<string> GetAsync(StartSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
         {
             var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
                 .RetryAsync(5)

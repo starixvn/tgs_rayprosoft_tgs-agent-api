@@ -33,8 +33,6 @@
     <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
-    <EmbeddedResource Include="SqlScripts\Indexes\paymentChannels.sql" />
-    <EmbeddedResource Include="SqlScripts\Indexes\paymentMethods.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\licensees.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\games.sql" />

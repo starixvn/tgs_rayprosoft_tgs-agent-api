@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
@@ -22,7 +23,7 @@ namespace TGS.Services.Operator.PlayerPassword
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask ExecuteAsync(ResetPasswordCommand command)
+        public async ValueTask ExecuteAsync(ResetPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeOperator
                 .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)

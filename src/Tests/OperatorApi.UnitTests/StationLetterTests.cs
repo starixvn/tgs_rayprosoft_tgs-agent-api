@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
@@ -7,6 +8,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
+using TGS.Paging;
 using TGS.Services.Operator;
 using TGS.Services.Operator.StationLatters;
 using TGS.Services.Operator.StationLetters;
@@ -50,7 +52,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async System.Threading.Tasks.Task Set_Db_Station_Letter_HaveRead_Should_Commit()
+        public async Task Set_Db_Station_Letter_HaveRead_Should_Commit()
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             dbContextOptionsBuilder

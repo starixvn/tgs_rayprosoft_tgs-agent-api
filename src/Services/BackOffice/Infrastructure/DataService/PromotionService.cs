@@ -63,7 +63,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IPromotionService.UpdatePromotionAsync(Promotion promotion, UpdatePromotionRequest request)
         {
-            var vips = await _repository.VipLevels
+            var vips = await _repository.VipLevels.AsQueryable()
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).ToArrayAsync();
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
@@ -128,7 +128,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(Promotion promotion,
             CreatePromotionRequest request)
         {
-            var promotionGameProviders = _repository.GameProviders
+            var promotionGameProviders = _repository.GameProviders.AsQueryable()
                 .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
                     new PromotionGameProvider {PromotionId = promotion.Id, GameProviderId = x.Id});
             return new(promotionGameProviders);
@@ -137,7 +137,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private HashSet<PromotionVipLevel> GeneratePromotionVipLevels(Promotion promotion,
             CreatePromotionRequest request)
         {
-            var promotionVipLevels = _repository.VipLevels
+            var promotionVipLevels = _repository.VipLevels.AsQueryable()
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
                     new PromotionVipLevel {PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level});
             return new(promotionVipLevels);
