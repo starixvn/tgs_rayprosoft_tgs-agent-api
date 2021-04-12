@@ -94,6 +94,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Player.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\Promotion.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Promotion.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\VipLevel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -149,6 +154,10 @@
     <EmbeddedResource Update="Application\Resources\Player.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Player.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Promotion.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Promotion.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\VipLevel.resx">
       <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>

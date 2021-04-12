@@ -1773,39 +1773,47 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "agent_transactions",
+                name: "promotions",
                 schema: "dbo",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    wallet_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    from = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    to = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    status = table.Column<short>(type: "smallint", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    external_transaction_id = table.Column<string>(type: "text", nullable: true),
-                    amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    balance = table.Column<decimal>(type: "numeric", nullable: false),
-                    description = table.Column<string>(type: "text", nullable: true),
-                    type = table.Column<int>(type: "integer", nullable: false),
-                    recorded_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    sent_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    confirmed_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    promotion_type = table.Column<short>(type: "smallint", nullable: false),
+                    promotion_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    amount_used = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    unlimited = table.Column<short>(type: "smallint", nullable: false),
+                    game_type = table.Column<short>(type: "smallint", nullable: true),
+                    percentage = table.Column<decimal>(type: "numeric(9,6)", precision: 9, scale: 6, nullable: false),
+                    total_amount_limit = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    turnover_multiple = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by_username = table.Column<string>(type: "text", nullable: true),
+                    updated_by_username = table.Column<string>(type: "text", nullable: true),
+                    vip_level_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_agent_transactions", x => x.id);
+                    table.PrimaryKey("pk_promotions_id", x => x.id);
                     table.ForeignKey(
-                        name: "fk_agent_transactions_agent_wallets_wallet_id",
-                        column: x => x.wallet_id,
-                        principalSchema: "dbo",
-                        principalTable: "agent_wallets",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_agent_transactions_brands_brand_id",
+                        name: "fk_promotions_brands_brand_id",
                         column: x => x.brand_id,
                         principalSchema: "dbo",
                         principalTable: "brands",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_promotions_vip_levels_vip_level_id",
+                        column: x => x.vip_level_id,
+                        principalSchema: "dbo",
+                        principalTable: "vip_levels",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -2057,6 +2065,61 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "promotion_game_providers",
+                schema: "dbo",
+                columns: table => new
+                {
+                    promotion_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    game_provider_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_promotion_game_providers", x => new { x.promotion_id, x.game_provider_id });
+                    table.ForeignKey(
+                        name: "fk_promotion_game_provide_game_provide_id",
+                        column: x => x.game_provider_id,
+                        principalSchema: "dbo",
+                        principalTable: "game_providers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_promotion_game_provide_promotion_id",
+                        column: x => x.promotion_id,
+                        principalSchema: "dbo",
+                        principalTable: "promotions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "promotion_vip_levels",
+                schema: "dbo",
+                columns: table => new
+                {
+                    promotion_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    vip_level_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    level = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_promotion_vip_levels", x => new { x.promotion_id, x.vip_level_id });
+                    table.ForeignKey(
+                        name: "fk_promotion_vip_level_promotion_id",
+                        column: x => x.promotion_id,
+                        principalSchema: "dbo",
+                        principalTable: "promotions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_promotion_vip_level_vip_level_id",
+                        column: x => x.vip_level_id,
+                        principalSchema: "dbo",
+                        principalTable: "vip_levels",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "transactions",
                 schema: "dbo",
                 columns: table => new
@@ -2103,18 +2166,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "agent_banks",
                 column: "agent_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_agent_transactions_brand_id",
-                schema: "dbo",
-                table: "agent_transactions",
-                column: "brand_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_agent_transactions_wallet_id",
-                schema: "dbo",
-                table: "agent_transactions",
-                column: "wallet_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_agent_wallets_agent_id",
@@ -2492,6 +2543,36 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "vip_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_promotion_game_provide_game_provider_id",
+                schema: "dbo",
+                table: "promotion_game_providers",
+                column: "game_provider_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotion_vip_level_vip_level_id",
+                schema: "dbo",
+                table: "promotion_vip_levels",
+                column: "level");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotion_vip_levels_vip_level_id",
+                schema: "dbo",
+                table: "promotion_vip_levels",
+                column: "vip_level_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotions_brand_id",
+                schema: "dbo",
+                table: "promotions",
+                column: "brand_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotions_vip_level_id",
+                schema: "dbo",
+                table: "promotions",
+                column: "vip_level_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_reseller_bet_limits_bet_limit_id",
                 schema: "dbo",
                 table: "reseller_bet_limits",
@@ -2652,7 +2733,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "agent_transactions",
+                name: "agent_wallets",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -2748,6 +2829,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "promotion_game_providers",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "promotion_vip_levels",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "reseller_bet_limits",
                 schema: "dbo");
 
@@ -2788,10 +2877,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "agent_wallets",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
                 name: "brand_game_providers",
                 schema: "dbo");
 
@@ -2817,6 +2902,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.DropTable(
                 name: "sport_market_types",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "promotions",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

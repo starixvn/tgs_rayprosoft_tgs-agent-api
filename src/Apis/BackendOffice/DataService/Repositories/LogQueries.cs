@@ -4,10 +4,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Log;
+using TGS.Core.Infrastructures.Log.Enums;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
@@ -75,19 +75,15 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
         Task<LogDetailModel> ILogQueries.GetAdminLogAsync(Guid trackingId)
         {
             const string spName = "dbo.log_get_admin_log";
-            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new Dictionary<string, object>
-            {
-                {"_tracking_id", trackingId}
-            });
+            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName,
+                parameters: new Dictionary<string, object> {{"_tracking_id", trackingId}});
         }
 
         Task<LogDetailModel> ILogQueries.GetApiLogAsync(Guid trackingId)
         {
             const string spName = "dbo.log_get_api_log";
-            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName, parameters: new Dictionary<string, object>
-            {
-                {"_tracking_id", trackingId}
-            });
+            return _repository.SqlQuerySingleAsync<LogDetailModel>(spName,
+                parameters: new Dictionary<string, object> {{"_tracking_id", trackingId}});
         }
 
         async Task<(IEnumerable<LogRecordModel>, int)> ILogQueries.GetLogRecordsAsync(LogRecordRequest request)
@@ -100,7 +96,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
                     {"_to", request.To},
                     {"_tracking_id", request.TrackingId},
                     {"_server_name", request.ServerName},
-                    {"_level", request.Level},
+                    {"_level", request.Level == TgsLogLevel.All ? null : request.Level},
                     {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
                     {"_page_number", request.ShowAll ? 1 : request.Page},
                     {"_sort_by", request.SortBy},
