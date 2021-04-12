@@ -1276,8 +1276,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     fee_percentage = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     lowest_fee = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
                     highest_fee = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: true),
-                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
+                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     extended_data = table.Column<string>(type: "jsonb", nullable: false)
@@ -2569,6 +2569,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "whitelists",
                 column: "reseller_id");
+
+            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

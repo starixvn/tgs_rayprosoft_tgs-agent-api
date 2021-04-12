@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210412011836_Initial")]
+    [Migration("20210412033411_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -921,8 +921,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
 
                     b.Property<decimal>("DepositedAmountMax")
                         .HasPrecision(18, 6)
@@ -1008,8 +1010,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_on");
+                        .HasColumnName("updated_on")
+                        .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_payments");

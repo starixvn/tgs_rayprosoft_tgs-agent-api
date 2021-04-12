@@ -30,10 +30,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValueSql("Now()");
 
             builder.Property(c => c.UpdatedOn)
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValueSql("Now()");
 
             builder.Property(c => c.TransferLimitFrom)
                 .HasPrecision(18, 6)

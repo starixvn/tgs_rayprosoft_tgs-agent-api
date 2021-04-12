@@ -46,6 +46,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await GeneratePaymentMethodsAsync();
             await GeneratePaymentChannelsAsync();
             await GeneratePaymentMethodChannelsAsync();
+
+            await _repository.SaveChangesAsync();
             await GenerateBrandPaymentsAsync();
         }
 
@@ -62,7 +64,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedByUsername = AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             }).ToArray();
-            return _repository.BulkInsertAsync(payments);
+
+            return _repository.Payments.AddRangeAsync(payments);
         }
 
         private Task GeneratePaymentMethodsAsync()
@@ -73,7 +76,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Code = p.Key,
                 Description = "online payment method",
             }).ToArray();
-            return _repository.BulkInsertAsync(paymentMethods);
+
+            return _repository.PaymentMethods.AddRangeAsync(paymentMethods);
         }
 
         private Task GeneratePaymentChannelsAsync()
@@ -84,7 +88,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Code = p.Key,
                 Description = "online payment channel",
             }).ToArray();
-            return _repository.BulkInsertAsync(paymentVendors);
+
+            return _repository.PaymentChannels.AddRangeAsync(paymentVendors);
         }
 
         private Task GeneratePaymentMethodChannelsAsync()
@@ -104,7 +109,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             UpdatedOn = DateTimeOffset.Now
                         };
 
-            return _repository.BulkInsertAsync(query);
+            return _repository.PaymentMethodChannels.AddRangeAsync(query);
         }
 
         private async Task GenerateBrandPaymentsAsync()
@@ -177,9 +182,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     UpdatedOn = DateTimeOffset.Now
                                 };
 
-            await _repository.BulkInsertAsync(brandPayments);
-            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.VipLevels).ToArray());
-            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.BrandPaymentPlayers).ToArray());
+            await _repository.BrandPayments.AddRangeAsync(brandPayments);
         }
     }
 }

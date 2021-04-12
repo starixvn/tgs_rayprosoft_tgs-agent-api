@@ -109,9 +109,9 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<BrandPayment> BrandPayments { get; set; }
 
-        DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
-        DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        DbSet<BrandPaymentVipLevel> BrandPaymentVipLevels { get; set; }
 
         DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
 
@@ -233,9 +233,9 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<BrandPayment> BrandPayments { get; set; }
 
-        public DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        public DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
-        public DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        public DbSet<BrandPaymentVipLevel> BrandPaymentVipLevels { get; set; }
 
         public DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
 

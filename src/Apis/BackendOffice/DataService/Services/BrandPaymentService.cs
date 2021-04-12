@@ -131,8 +131,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.UpdatedOn = DateTimeOffset.Now;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            _repository.PaymentPlayerList.RemoveRange(payment.BrandPaymentPlayers);
-            _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
+            _repository.BrandPaymentPlayers.RemoveRange(payment.BrandPaymentPlayers);
+            _repository.BrandPaymentVipLevels.RemoveRange(payment.VipLevels);
 
             await _repository.SaveChangesAsync();
 
