@@ -190,6 +190,7 @@ export const MerchantIdSelect = ({
     )
 }
 
+/*
 export const MerchantIdHookFormSelect = ({
     start = Reseller,
     end = Brand,
@@ -243,6 +244,7 @@ export const MerchantIdHookFormSelect = ({
         })) ?? []
 
     let isBrandActive = isActive(Brand, start, end)
+
     let brandId = watch(brandIdName)
     let brandError = errors[brandIdName]
     let { data: brandData, isLoading: isBrandDataLoading } = useBrandList(
@@ -327,3 +329,4 @@ export const MerchantIdHookFormSelect = ({
         </Group>
     )
 }
+*/

@@ -145,9 +145,9 @@ const EditForm = ({
                     />
                 </Box>
 
-                <AgentParentUsernameLabel />
+                <AgentUsernameLabel />
                 <Box>
-                    <Input name="parentUsername" />
+                    <Input name="agentUsername" />
                 </Box>
 
                 <RegistrationLabel />
@@ -180,20 +180,15 @@ const EditForm = ({
 }
 
 export const Panel = ({ player = {}, onSubmitted, ...props }) => {
-    //TODO: "parentUsername" -> use agent username
     let {
         username = "",
         realName = "",
         vipLevel = "",
-        parentUsername = "",
         registeredOn,
         balance,
-        status,
-        hasAgent
+        status
     } = player
 
-    let turnOnLabel = useTurnOnLabel()
-    let turnOffLabel = useTurnOffLabel()
     return (
         <TabPanel tabId={Key} {...props}>
             <FieldValues spacing="major-2">
@@ -210,9 +205,9 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
                     <Text>{`VIP ${vipLevel}`}</Text>
                 </Box>
 
-                <AgentParentUsernameLabel />
+                <AgentUsernameLabel />
                 <Box>
-                    <Text>{parentUsername}</Text>
+                    <Text>{player?.agentUsername}</Text>
                 </Box>
 
                 <RegistrationLabel />
@@ -229,14 +224,6 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
                 <Box>
                     <PlayerStatusLabel value={status} />
                 </Box>
-
-                <AgentLabel />
-                <Box>
-                    <Text>
-                        {hasAgent && turnOnLabel}
-                        {!hasAgent && turnOffLabel}
-                    </Text>
-                </Box>
             </FieldValues>
         </TabPanel>
     )
@@ -248,26 +235,10 @@ const RealNameLabel = () => <Trans zh="真实姓名" en="Real name" />
 
 const VIPLevelLabel = () => <Trans zh="VIP等级" en="VIP Level" />
 
-const AgentParentUsernameLabel = () => (
-    <Trans zh="上级代理" en="Upper Level Agent" />
-)
+const AgentUsernameLabel = () => <Trans zh="上级代理" en="Upper Level Agent" />
 
 const RegistrationLabel = () => <Trans zh="注册时间" en="Registration" />
 
 const BalanceLabel = () => <Trans zh="余额" en="Balance" />
 
 const StatusLabel = () => <Trans zh="状态" en="Status" />
-
-const AgentLabel = () => <Trans zh="代理功能" en="Agent" />
-
-const useTurnOnLabel = () =>
-    useTrans({
-        zh: "开启",
-        en: "Turn on"
-    })
-
-const useTurnOffLabel = () =>
-    useTrans({
-        zh: "关闭",
-        en: "Turn off"
-    })

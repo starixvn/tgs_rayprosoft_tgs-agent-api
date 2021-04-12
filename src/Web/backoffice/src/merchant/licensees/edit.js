@@ -8,7 +8,8 @@ import {
     Box,
     Set,
     FieldStack,
-    Columns
+    Columns,
+    Code
 } from "bumbag"
 import { useIsDisplayMenuByRoute, useUserResellerId } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
@@ -35,11 +36,10 @@ import {
     mapCheckedByCode,
     mapCheckedByProp
 } from "../../checkbox/mapChecked"
-import { MerchantIdHookFormSelect } from "../MerchantSelect"
+import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
-import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
+import { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 import LanguageFieldsBox, { toCheckedCultureCodes } from "../LanguageFieldsBox"
-import BetLimitFieldsBox, { toCheckedBetLimitIds } from "../BetLimitFieldsBox"
 import GameProviderFieldsBox from "../GameProviderFieldsBox"
 import useResellerLicensee from "./useResellerLicensee"
 import CurrencyBetLimitFieldsBox, {
@@ -289,7 +289,6 @@ const normalizeFormData = ({
         gameProviders
     )
 
-    // let betLimitIds = toCheckedBetLimitIds(betLimits)
     let betLimitIds = flatCheckedCurrencyBetLimitIds(currencies)
     return {
         ...data,
@@ -423,9 +422,7 @@ const EditBody = ({
                         </NormalLabel>
                         <Box alignY="center">
                             {isAdd && (
-                                <MerchantIdHookFormSelect
-                                    end={RoleTypes.Reseller}
-                                />
+                                <MerchantIdSelect end={RoleTypes.Reseller} />
                             )}
                             {!isAdd && <Text.Block>{reseller.name}</Text.Block>}
                         </Box>
@@ -475,9 +472,6 @@ const EditBody = ({
                 <LanguageFieldsBox readonly={readonly} />
 
                 <CurrencyBetLimitFieldsBox readonly={readonly} />
-                {/* <CurrencyFieldsBox readonly={readonly} />
-
-                <BetLimitFieldsBox readonly={readonly} /> */}
 
                 <GameProviderFieldsBox readonly={readonly} />
             </FieldValues>

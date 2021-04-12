@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Player;
+using TGS.Services.Report.Application.Models.PlayerRebate;
 
 namespace ReportApi.Controllers
 {
@@ -22,6 +23,11 @@ namespace ReportApi.Controllers
         [Description("Get agent contributions")]
         public Task<PagedResponse<PlayerContributionModel>> GetRoundsAsync(
             [FromQuery] GetPlayerContributionsRequest request) =>
+            _mediator.Send(request);
+
+        [HttpPost("rebates")]
+        [Description("Create player rebates")]
+        public Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request) =>
             _mediator.Send(request);
     }
 }

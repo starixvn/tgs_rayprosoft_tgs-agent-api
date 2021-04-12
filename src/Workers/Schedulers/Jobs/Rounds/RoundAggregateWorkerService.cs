@@ -7,7 +7,7 @@ namespace TGS.Workers.Schedulers.Jobs.Rounds
     public interface IRoundAggregateWorkerService
     {
         Task<TgsResponse> ExecutionAsync();
-        Task<TgsResponse> ManualExecutionAsync(string date = null, int hour = 0);
+        Task<TgsResponse> ManualExecutionAsync(string date, int hour);
     }
 
     public class RoundAggregateWorkerService : IRoundAggregateWorkerService

@@ -22,6 +22,8 @@ import Input, { InputField } from "../../input/Input"
 import { useUpdateSystemSetting } from "./client"
 import { useForm, Controller } from "react-hook-form"
 import { TextareaField } from "../../textarea"
+import { stringifyJSON } from "../../text/json"
+import { JsonEditor } from "../../text/editor/JsonEditor"
 
 export const EditSettingDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
@@ -69,7 +71,6 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
             description
         }
     })
-    let { control, setValue } = formMethods
 
     const onSubmit = (data) => {
         setSubmit(data)
@@ -116,34 +117,7 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
                     <InputField name="key" label="Key" disabled />
                     <InputField name="description" label="Description" />
                 </FieldStack>
-                <Controller
-                    control={control}
-                    name="value"
-                    render={({
-                        field: { onChange, onBlur, value, name, ref }
-                    }) => (
-                        <MonacoEditor
-                            defaultLanguage="JSON"
-                            height="60vh"
-                            value={value}
-                            options={{
-                                readOnly: false,
-                                scrollBeyondLastLine: true,
-                                minimap: { enabled: false },
-                                contextmenu: false,
-                                hideCursorInOverviewRuler: true
-                            }}
-                            onChange={(value, event) => {
-                                setValue(name, value)
-                            }}
-                            css={css`
-                                border: 1px solid
-                                    var(--bb-palette-white900, #000000);
-                                border-radius: 6px;
-                            `}
-                        />
-                    )}
-                />
+                <JsonEditor name="value" required height="60vh" />
             </FieldStack>
         </FormDialog>
     )
@@ -171,8 +145,6 @@ const ViewDialog = ({ record, dialog }) => {
         zh: "查看设定",
         en: "View Setting"
     })
-
-    let formattedValue = stringifyJSON(value)
 
     return (
         <Dialog.Modal
@@ -208,36 +180,8 @@ const ViewDialog = ({ record, dialog }) => {
                         disabled
                     />
                 </FieldStack>
-                <MonacoEditor
-                    defaultLanguage="JSON"
-                    height="60vh"
-                    value={formattedValue}
-                    options={{
-                        readOnly: true,
-                        scrollBeyondLastLine: true,
-                        minimap: { enabled: false },
-                        contextmenu: false,
-                        hideCursorInOverviewRuler: true
-                    }}
-                    css={css`
-                        border: 1px solid var(--bb-palette-white900, #000000);
-                        border-radius: 6px;
-                    `}
-                />
+                <JsonEditor height="60vh" value={value} disabled />
             </FieldStack>
         </Dialog.Modal>
     )
-}
-
-const stringifyJSON = (value) => {
-    try {
-        if (typeof value === "string") {
-            let parsed = JSON.parse(value)
-            return JSON.stringify(parsed, null, 4)
-        }
-    } catch {
-        //ignore
-    }
-
-    return value
 }

@@ -12,7 +12,6 @@ namespace TGS.Services.Report.Application.Models.Player
         public int Hour { get; set; }
         public decimal Turnover { get; set; }
         public decimal WinLoss { get; set; }
-        public decimal AgentDividendPercentage { get; set; }
         public decimal VipLiveDealerRebatePercentage { get; set; }
         public decimal VipSlotRebatePercentage { get; set; }
         public decimal VipCardGameRebatePercentage { get; set; }
@@ -20,6 +19,7 @@ namespace TGS.Services.Report.Application.Models.Player
         public decimal VipVirtualSportsRebatePercentage { get; set; }
         public decimal VipLotteryRebatePercentage { get; set; }
         public decimal VipRebateAmount { get; set; }
+        public decimal AgentDividendPercentage { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ReportDate { get; set; }
     }

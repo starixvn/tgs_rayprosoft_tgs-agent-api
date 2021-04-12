@@ -30,11 +30,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     .Where(request.Username, x => x.Username == request.Username))
                 .Select(x => new PlayersModel
                 {
-                    PlayerCode = x.PlayerCode,
-                    Username = x.Username,
-                    VipLevel = x.Vip.Level,
-                    Status = x.Status,
-                    HasAgent = x.HasAgent
+                    PlayerCode = x.PlayerCode, Username = x.Username, VipLevel = x.Vip.Level, Status = x.Status
                 }).CreatePagedResponseAsync(request);
     }
 }

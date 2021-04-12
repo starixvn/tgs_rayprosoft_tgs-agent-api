@@ -21,7 +21,11 @@ RETURNS TABLE (
 	 "StackTrace" text,	 
 	 "ServerName" character varying,
 	 "ResponseCode" smallint, 
-	 "ExecutionTimeMs" integer, 
+	 "ExecutionTimeMs" integer,
+	 "RequestHeaders" text, 
+	 "RequestContent" text, 
+	 "ResponseHeaders" text, 
+	 "ResponseContent" text,
 	 "TotalCount" bigint) 
 LANGUAGE plpgsql
 AS $$
@@ -40,6 +44,10 @@ BEGIN
 		a.server_name as "ServerName",
 		a.response_code as "ResponseCode",
 		a.execution_time_ms as "ExecutionTimeMs",
+		a.request_headers AS "RequestHeaders",
+		a.request_content AS "RequestContent",
+		a.response_headers AS "ResponseHeaders",
+		a.response_content AS "ResponseContent",
 		count(*) over() as "TotalCount"
     from dbo.admin_logs a
     where a.recorded_on >= _from        

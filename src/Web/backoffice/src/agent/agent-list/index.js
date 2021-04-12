@@ -87,11 +87,15 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, status, levelType, type, username } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = useAgentList({
-        ...toApiParams(state),
-        sortby: "username",
+    let { data = {}, isLoading, mutate, error, deleteCache } = useAgentList(
         brandId
-    })
+            ? {
+                  ...toApiParams(state),
+                  sortby: "username",
+                  brandId
+              }
+            : undefined
+    )
 
     let columns = useColumns({ mutate, items: data?.items, brandId })
 

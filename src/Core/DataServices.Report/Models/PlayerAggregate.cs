@@ -9,6 +9,7 @@ namespace TGS.Core.DataServices.Report.Models
         public Guid? AgentId { get; set; }
         public string PlayerCode { get; set; }
         public int Hour { get; set; }
+        public int Minute { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ReportDate { get; set; }
         public int RegisteredCount { get; set; }

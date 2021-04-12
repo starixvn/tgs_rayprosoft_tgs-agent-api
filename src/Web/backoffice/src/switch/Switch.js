@@ -37,6 +37,10 @@ export const Switch = ({
             state={state}
             {...formProps}
             {...props}
+            onChange={(event) => {
+                formProps?.onChange?.(event)
+                props?.onChange?.(event)
+            }}
         />
     )
 }

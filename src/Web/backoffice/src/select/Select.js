@@ -37,6 +37,10 @@ export const Select = ({
             state={state}
             {...formProps}
             {...props}
+            onChange={(event) => {
+                formProps?.onChange?.(event)
+                props?.onChange?.(event)
+            }}
         />
     )
 }

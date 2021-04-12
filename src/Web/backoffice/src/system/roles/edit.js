@@ -52,14 +52,12 @@ import {
     findParentRoleType,
     isSameOrAfterRoleType
 } from "./type"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { FormDialog } from "../../form/FormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
 import Input from "../../input/Input"
 import { Code as RoleMenuCode } from "./menu"
-import { Code as SystemAdminCode } from "../../system-admin/menu"
-import { Code as LogCode } from "../../log/menu"
 import { useResellerLabel } from "../../merchant/resellers"
 import ResellerIdSelect from "../../merchant/resellers/ResellerIdSelect"
 import { useLicenseeLabel } from "../../merchant/licensees"
@@ -234,14 +232,20 @@ const AddDialog = ({ dialog, onSubmitted }) => {
                                     defaultValue={userRoleType}
                                 />
                                 {roleType != RoleTypes.Admin && (
-                                    <MerchantIdHookFormSelect
+                                    <MerchantIdSelect
                                         start={adminOrNextRoleType(
                                             userRoleType
                                         )}
                                         end={roleType}
-                                        resellerId={userResellerId}
-                                        licenseeId={userLicenseeId}
-                                        brandId={userBrandId}
+                                        resellerProps={{
+                                            defaultValue: userResellerId
+                                        }}
+                                        licenseeProps={{
+                                            defaultValue: userLicenseeId
+                                        }}
+                                        brandProps={{
+                                            defaultValue: userBrandId
+                                        }}
                                     />
                                 )}
                             </Set>

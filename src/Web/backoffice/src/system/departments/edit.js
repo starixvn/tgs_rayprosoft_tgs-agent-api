@@ -23,10 +23,7 @@ import {
 import FormDialog from "../../form/FormDialog"
 import Input from "../../input/Input"
 import { nextRoleType, RoleTypeSelect, useRoleTypeOptions } from "../roles/type"
-import {
-    MerchantIdHookFormSelect,
-    MerchantIdSelect
-} from "../../merchant/MerchantSelect"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import ResellerIdSelect from "../../merchant/resellers/ResellerIdSelect"
 import { useResellerList } from "../../merchant/resellers/client"
 import { useResellerLabel } from "../../merchant/resellers"

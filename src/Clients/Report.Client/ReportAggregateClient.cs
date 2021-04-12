@@ -1,6 +1,8 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Report.Client.Models.Agent;
 using Report.Client.Models.Aggregate;
+using Report.Client.Models.Player;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
@@ -9,6 +11,8 @@ namespace Report.Client
 {
     public interface IReportAggregateClient
     {
+        Task<MessageResponse> CreatePlayerRebateAsync(CreatePlayerRebateRequest request);
+        Task<MessageResponse> CreateAgentDividendAsync(CreateAgentDividendsRequest request);
         Task<MessageResponse> CreatePlayerAggregateAsync(CreateUpdatePlayerAggregateModel request);
         Task<MessageResponse> ManualCreatePlayerAggregateAsync(ManualCreateUpdatePlayerAggregateModel request);
         Task<MessageResponse> CreateUpdateRoundAggregateAsync(CreateUpdateRoundAggregateModel request);
@@ -56,6 +60,22 @@ namespace Report.Client
             var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
             return ExecuteJsonRequestAsync<ManualCreateUpdateRoundAggregateModel, MessageResponse>(HttpMethod.Post,
                 "/api/roundAggregate/manual", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true});
+        }
+
+        Task<MessageResponse> IReportAggregateClient.CreatePlayerRebateAsync(CreatePlayerRebateRequest request)
+        {
+            var prefix = "Report.CreatePlayerRebate";
+            return ExecuteJsonRequestAsync<CreatePlayerRebateRequest, MessageResponse>(HttpMethod.Post,
+                "/api/playerReport/rebates", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true});
+        }
+
+        Task<MessageResponse> IReportAggregateClient.CreateAgentDividendAsync(CreateAgentDividendsRequest request)
+        {
+            var prefix = "Report.CreateAgentDividend";
+            return ExecuteJsonRequestAsync<CreateAgentDividendsRequest, MessageResponse>(HttpMethod.Post,
+                "/api/agentReport/dividends", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
     }

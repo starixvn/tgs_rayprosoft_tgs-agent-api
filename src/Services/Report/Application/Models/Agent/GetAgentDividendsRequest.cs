@@ -1,10 +1,11 @@
 ﻿using System;
+using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Agent
+namespace TGS.Services.Report.Application.Models.Agent
 {
-    public class GetAgentDividendRequest : PageableRequest
+    public class GetAgentDividendsRequest : PageableRequest, IRequest<PagedResponse<AgentDividendModel>>
     {
         public Guid BrandId { get; set; }
         public string Username { get; set; }

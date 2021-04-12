@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
@@ -21,6 +22,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
     public class ExceptionMiddleware : IMiddleware
     {
         private const int ResMessageSizeLimit = 1000012;
+        private readonly IWebHostEnvironment _env;
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
         private readonly IRequestAnalyzer _requestAnalyzer;
@@ -38,7 +40,9 @@ namespace TGS.Apis.BackendOffice.Middlewares
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
             _json = json;
+            _env = env;
             _streamToString = streamToString;
+            _recyclableMemoryStreamManager = new();
             _systemLogger = systemLogger ?? throw new ArgumentNullException(nameof(systemLogger));
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
@@ -97,6 +101,11 @@ namespace TGS.Apis.BackendOffice.Middlewares
                     Message = "Internal Server Error."
                 };
 
+                if (_env.IsDevelopment())
+                {
+                    message.Message = ex.Message;
+                }
+
                 var result = _json.SerializeToString(message);
                 await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
             }
@@ -143,10 +152,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
             return message;
         }
 
-        private static string CutOffResponseContent(string responseContent)
-        {
-            return
-                $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
-        }
+        private static string CutOffResponseContent(string responseContent) =>
+            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
     }
 }

@@ -141,13 +141,20 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<Agent> Agents { get; set; }
         DbSet<AgentBank> AgentBanks { get; set; }
         DbSet<AgentWallet> AgentWallets { get; set; }
-
+        DbSet<Promotion> Promotions { get; set; }
+        DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+        DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
         DbSet<DepositForm> DepositForms { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
         private readonly NpgsqlBulkUploader _uploader;
+
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+            _uploader = new(this);
+        }
 
         public DbSet<Reseller> Resellers { get; set; }
 
@@ -268,9 +275,13 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         public DbSet<Transaction> Transactions { get; set; }
-        DbSet<Agent> ITgsRepository.Agents { get; set; }
-        DbSet<AgentBank> ITgsRepository.AgentBanks { get; set; }
-        DbSet<AgentWallet> ITgsRepository.AgentWallets { get; set; }
+        public DbSet<Agent> Agents { get; set; }
+        public DbSet<AgentBank> AgentBanks { get; set; }
+        public DbSet<AgentWallet> AgentWallets { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+        public DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
+        public DbSet<DepositForm> DepositForms { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
@@ -285,10 +296,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
-        public void SetTimeoutToSeconds(int seconds)
-        {
-            Database.SetCommandTimeout(seconds);
-        }
+        public void SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);

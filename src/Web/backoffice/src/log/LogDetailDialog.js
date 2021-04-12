@@ -6,51 +6,33 @@ import {
     Stack,
     Heading,
     Text,
-    Box,
-    Set,
+    Code,
+    Card,
     FieldStack,
     FieldWrapper
 } from "bumbag"
-import Disclosure from "../../dialog/Disclosure"
-import {
-    FormattedDateTime,
-    FormattedNumberDecimal,
-    Trans,
-    useTrans
-} from "../../i18n"
-import { useAdminLog } from "./client"
-import LoadingBackdrop from "../../dialog/LoadingBackdrop"
-import AlertDialog from "../../dialog/Alert"
+import { useTrans } from "../i18n"
+import { DetailDisclosure } from "../dialog/Disclosure"
 
-export const AdminLogDetailDialogDisclosure = ({ trackingId, ...props }) => {
+export const LogDetailDialogDisclosure = ({ record, ...props }) => {
     let dialog = useModalState()
 
     return (
         <>
-            <Disclosure>
-                <Trans zh="Detail" en="Detail" />
-            </Disclosure>
-            {dialog.visible && (
-                <DetailDialog trackingId={trackingId} dialog={dialog} />
-            )}
+            <DetailDisclosure {...dialog} />
+            {dialog.visible && <DetailDialog record={record} dialog={dialog} />}
         </>
     )
 }
 
-const DetailDialog = ({ trackingId, dialog, ...props }) => {
-    let { data, isLoading, error } = useAdminLog(trackingId)
-
-    if (isLoading) {
-        return <LoadingBackdrop {...dialog} />
-    }
-
-    if (error) {
-        return <AlertDialog dialog={dialog} onClickClose={dialog.hide} />
-    }
-
+const DetailDialog = ({ record = {}, dialog, ...props }) => {
+    const title = useTrans({
+        zh: "详情",
+        en: "Detail"
+    })
     return (
         <Dialog.Modal
-            title="Log"
+            title={title}
             showActionButtons={false}
             showCloseButton
             {...dialog}
@@ -59,10 +41,10 @@ const DetailDialog = ({ trackingId, dialog, ...props }) => {
                 <Card variant="bordered" title="Request">
                     <FieldStack>
                         <FieldWrapper label="Headers">
-                            <Text.Block>{data.requestHeaders}</Text.Block>
+                            <Code>{record.requestHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Text.Block>{data.requestContent}</Text.Block>
+                            <Code>{record.requestContent}</Code>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>
@@ -70,10 +52,10 @@ const DetailDialog = ({ trackingId, dialog, ...props }) => {
                 <Card variant="bordered" title="Response">
                     <FieldStack>
                         <FieldWrapper label="Headers">
-                            <Text.Block>{data.responseHeaders}</Text.Block>
+                            <Code>{record.responseHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Text.Block>{data.responseContent}</Text.Block>
+                            <Code>{record.responseContent}</Code>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>
@@ -81,3 +63,5 @@ const DetailDialog = ({ trackingId, dialog, ...props }) => {
         </Dialog.Modal>
     )
 }
+
+export default DetailDialog
