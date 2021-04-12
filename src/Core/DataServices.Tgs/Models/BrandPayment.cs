@@ -58,7 +58,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string ExtendedData { get; set; }
 
-        public PaymentMethodChannel PaymentMethodChannel { get; set; }
+        public virtual PaymentMethodChannel PaymentMethodChannel { get; set; }
 
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 

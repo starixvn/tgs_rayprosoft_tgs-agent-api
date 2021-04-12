@@ -22,10 +22,10 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string UpdatedByUsername { get; set; }
 
-        public Payment Payment { get; set; }
+        public virtual Payment Payment { get; set; }
 
-        public PaymentMethod Method { get; set; }
+        public virtual PaymentMethod Method { get; set; }
 
-        public PaymentChannel Channel { get; set; }
+        public virtual PaymentChannel Channel { get; set; }
     }
 }

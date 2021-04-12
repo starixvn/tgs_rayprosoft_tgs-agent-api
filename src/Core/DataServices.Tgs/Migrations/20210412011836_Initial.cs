@@ -101,16 +101,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "payment_channels",
+                schema: "dbo",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    description = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_payment_channels", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "payment_methods",
+                schema: "dbo",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    description = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_payment_methods", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "payments",
                 schema: "dbo",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     description = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    extend_data = table.Column<string>(type: "jsonb", nullable: true),
+                    status = table.Column<short>(type: "smallint", nullable: false, defaultValueSql: "0"),
                     code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     name = table.Column<string>(type: "text", nullable: true),
-                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
+                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
@@ -518,25 +548,40 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "payment_methods",
+                name: "payment_method_channels",
                 schema: "dbo",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    description = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     payment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    name = table.Column<string>(type: "text", nullable: true),
-                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    method_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    channel_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    status = table.Column<short>(type: "smallint", nullable: false, defaultValueSql: "0"),
+                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
+                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "Now()"),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_payment_methods", x => x.id);
+                    table.PrimaryKey("pk_payment_method_channels", x => x.id);
+                    table.UniqueConstraint("ak_payment_method_channels_payment_id_method_id_channed_id", x => new { x.payment_id, x.method_id, x.channel_id });
                     table.ForeignKey(
-                        name: "fk_payment_methods_payments_payment_id",
+                        name: "fk_payment_method_channels_payment_channels_id",
+                        column: x => x.channel_id,
+                        principalSchema: "dbo",
+                        principalTable: "payment_channels",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_payment_method_channels_payment_methods_id",
+                        column: x => x.method_id,
+                        principalSchema: "dbo",
+                        principalTable: "payment_methods",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_payment_method_channels_payments_id",
                         column: x => x.payment_id,
                         principalSchema: "dbo",
                         principalTable: "payments",
@@ -779,41 +824,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         column: x => x.sport_type_id,
                         principalSchema: "dbo",
                         principalTable: "sport_types",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "payment_channels",
-                schema: "dbo",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    description = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    payment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    payment_method_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    name = table.Column<string>(type: "text", nullable: true),
-                    created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    updated_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_payment_channels", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_payment_channels_payment_methods_payment_method_id",
-                        column: x => x.payment_method_id,
-                        principalSchema: "dbo",
-                        principalTable: "payment_methods",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_payment_channels_payments_payment_id",
-                        column: x => x.payment_id,
-                        principalSchema: "dbo",
-                        principalTable: "payments",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -1249,9 +1259,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     display_order = table.Column<int>(type: "integer", nullable: false),
-                    payment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    payment_method_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    payment_channel_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    payment_method_channel_id = table.Column<Guid>(type: "uuid", nullable: false),
                     transfer_type = table.Column<int>(type: "integer", nullable: false),
                     channel_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     payment_status = table.Column<int>(type: "integer", nullable: false),
@@ -1285,24 +1293,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_brand_payments_payment_channels_payment_channel_id",
-                        column: x => x.payment_channel_id,
+                        name: "fk_brand_payments_payment_method_channels_id",
+                        column: x => x.payment_method_channel_id,
                         principalSchema: "dbo",
-                        principalTable: "payment_channels",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_brand_payments_payment_methods_payment_method_id",
-                        column: x => x.payment_method_id,
-                        principalSchema: "dbo",
-                        principalTable: "payment_methods",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_brand_payments_payments_payment_id",
-                        column: x => x.payment_id,
-                        principalSchema: "dbo",
-                        principalTable: "payments",
+                        principalTable: "payment_method_channels",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -2214,22 +2208,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "brand_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_brand_payments_payment_channel_id",
+                name: "ix_brand_payments_payment_method_channel_id",
                 schema: "dbo",
                 table: "brand_payments",
-                column: "payment_channel_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_brand_payments_payment_id",
-                schema: "dbo",
-                table: "brand_payments",
-                column: "payment_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_brand_payments_payment_method_id",
-                schema: "dbo",
-                table: "brand_payments",
-                column: "payment_method_id");
+                column: "payment_method_channel_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_brands_licensee_id",
@@ -2331,8 +2313,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "ix_games_game_provider_id",
                 schema: "dbo",
                 table: "games",
-                column: "game_provider_id")
-                .Annotation("Npgsql:IndexInclude", new[] { "id", "code", "name", "external_id", "platform_type", "type", "status", "available_currencies", "endpoint_path", "sub_game", "has_turnover_on_tie_bet", "rule_url", "description" });
+                column: "game_provider_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_licensee_bet_limits_bet_limit_id",
@@ -2371,21 +2352,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "culture_code");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_channels_payment_id",
+                name: "ix_payment_method_channels_channel_id",
                 schema: "dbo",
-                table: "payment_channels",
-                column: "payment_id");
+                table: "payment_method_channels",
+                column: "channel_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_channels_payment_method_id",
+                name: "ix_payment_method_channels_method_id",
                 schema: "dbo",
-                table: "payment_channels",
-                column: "payment_method_id");
+                table: "payment_method_channels",
+                column: "method_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_methods_payment_id",
+                name: "ix_payment_method_channels_payment_id",
                 schema: "dbo",
-                table: "payment_methods",
+                table: "payment_method_channels",
                 column: "payment_id");
 
             migrationBuilder.CreateIndex(
@@ -2588,8 +2569,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "whitelists",
                 column: "reseller_id");
-
-            InitAfterRun(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -2803,7 +2782,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "payment_channels",
+                name: "payment_method_channels",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -2819,7 +2798,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
+                name: "payment_channels",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
                 name: "payment_methods",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "payments",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -2836,10 +2823,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.DropTable(
                 name: "vip_levels",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "payments",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
