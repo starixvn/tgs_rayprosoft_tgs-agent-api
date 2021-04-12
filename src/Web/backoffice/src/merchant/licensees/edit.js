@@ -36,11 +36,10 @@ import {
     mapCheckedByCode,
     mapCheckedByProp
 } from "../../checkbox/mapChecked"
-import { MerchantIdHookFormSelect, MerchantIdSelect } from "../MerchantSelect"
+import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
-import CurrencyFieldsBox, { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
+import { toCheckedCurrencyCodes } from "../CurrencyFieldsBox"
 import LanguageFieldsBox, { toCheckedCultureCodes } from "../LanguageFieldsBox"
-import BetLimitFieldsBox, { toCheckedBetLimitIds } from "../BetLimitFieldsBox"
 import GameProviderFieldsBox from "../GameProviderFieldsBox"
 import useResellerLicensee from "./useResellerLicensee"
 import CurrencyBetLimitFieldsBox, {
@@ -157,7 +156,6 @@ const AddDialog = ({ onSubmitted, dialog }) => {
                 }
             `}
         >
-            <Code>{JSON.stringify(formMethods?.formState?.errors ?? {})}</Code>
             <EditBody isAdd />
         </FormDialog>
     )
@@ -291,7 +289,6 @@ const normalizeFormData = ({
         gameProviders
     )
 
-    // let betLimitIds = toCheckedBetLimitIds(betLimits)
     let betLimitIds = flatCheckedCurrencyBetLimitIds(currencies)
     return {
         ...data,
@@ -475,9 +472,6 @@ const EditBody = ({
                 <LanguageFieldsBox readonly={readonly} />
 
                 <CurrencyBetLimitFieldsBox readonly={readonly} />
-                {/* <CurrencyFieldsBox readonly={readonly} />
-
-                <BetLimitFieldsBox readonly={readonly} /> */}
 
                 <GameProviderFieldsBox readonly={readonly} />
             </FieldValues>
