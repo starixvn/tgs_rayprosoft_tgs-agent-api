@@ -1,4 +1,4 @@
-﻿namespace TGS.Core.Models.Services.Games
+﻿namespace TGS.Core.Models.Services.Data
 {
     public record GameActionData
     {

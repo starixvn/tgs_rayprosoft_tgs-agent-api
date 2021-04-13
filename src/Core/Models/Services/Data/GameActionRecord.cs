@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Services.Games
+namespace TGS.Core.Models.Services.Data
 {
     public record GameActionRecord
     {
@@ -12,6 +12,6 @@ namespace TGS.Core.Models.Services.Games
         public decimal Amount { get; init; }
         public DateTimeOffset RecordedOn { get; init; }
         public GameActionType Type { get; init; }
-        public Guid? ReferencedGameActionId {  get; init; }
+        public Guid? ReferencedGameActionId { get; init; }
     }
 }

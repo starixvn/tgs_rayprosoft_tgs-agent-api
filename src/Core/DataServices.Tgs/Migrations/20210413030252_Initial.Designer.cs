@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210412091804_Initial")]
+    [Migration("20210413030252_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1467,10 +1467,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("closing_round_explicit_request");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
                     b.Property<string>("ExternalBetId")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -1489,6 +1485,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("external_transaction_id");
 
+                    b.Property<string>("ExtraData")
+                        .HasColumnType("text")
+                        .HasColumnName("extra_data");
+
                     b.Property<Guid?>("GameActionBatchId")
                         .HasColumnType("uuid")
                         .HasColumnName("game_action_batch_id");
@@ -1496,6 +1496,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<bool>("IsClosingRound")
                         .HasColumnType("boolean")
                         .HasColumnName("is_closing_round");
+
+                    b.Property<string>("JackpotContribution")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("jackpot_contribution");
 
                     b.Property<string>("PlayerIp")
                         .IsRequired()

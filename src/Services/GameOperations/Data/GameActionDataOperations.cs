@@ -364,7 +364,7 @@ namespace TGS.Services.GameOperations.Data
                         ExternalTransactionId = transaction.ExternalTransactionId,
                         ExternalTransactionReferenceId = transaction.ExternalTransactionReferenceId,
                         BetType = transaction.BetType,
-                        Description = transaction.Description,
+                        ExtraData = transaction.Description,
                         RoundDetail = transaction.RoundDetail,
                         RoundClosed = transaction.RoundClosed,
                         GameActionType = transaction.GameActionType,
