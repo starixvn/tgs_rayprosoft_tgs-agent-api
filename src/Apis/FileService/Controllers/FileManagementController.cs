@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Net.Http;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.FileService.Controllers.Messages;
 using TGS.FileService;
-using Yarp.ReverseProxy.Service;
-using Yarp.ReverseProxy.Service.Proxy;
-using Microsoft.Extensions.DependencyInjection;
-using Yarp.ReverseProxy.Abstractions;
 
 namespace TGS.Apis.FileService.Controllers
 {
@@ -25,13 +21,15 @@ namespace TGS.Apis.FileService.Controllers
 
         [HttpGet("{*path}")]
         public async Task<IActionResult> GetFileAsync(
-            [FromServices] IHttpProxy httpProxy,
-            [FromServices] ITransformBuilder transformBuilder,
             string path)
         {
-            var meta = await _fileManager.GetFileAsync(path);
+            var meta = await _fileManager.ListPathAsync(path)
+                .FirstAsync()
+                .ConfigureAwait(false);
 
-            throw new NotImplementedException();
+            var fileStream = await _fileManager.OpenFileStreamAsync(meta).ConfigureAwait(false);
+
+            return File(fileStream, meta.ContentType);
         }
 
         [HttpPost("{*path}")]
