@@ -44,9 +44,9 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
                 .ToArrayAsync(cancellationToken);
 
             var tgsPlayer = request.Username.IsNotNullOrEmpty()
-                ? null
-                : players.FirstOrDefault(x =>
-                    x.BrandId == request.BrandId && x.Username == request.Username);
+                ? players.FirstOrDefault(x =>
+                    x.BrandId == request.BrandId && x.Username == request.Username)
+                : null;
 
             var tgsPlayers = request.Level == null
                 ? null
@@ -57,12 +57,11 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
                 .GetPlayerAggregateQueries(q => q.Where(x => x.BrandId == request.BrandId)
                     .Where(x => x.ReportDate >= from && x.ReportDate <= to)
                     .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
-                    .Where(tgsPlayers, x => tgsPlayers.Contains(x.PlayerCode)))
+                    .Where(request.Level, x => tgsPlayers.Contains(x.PlayerCode)))
                 .GroupBy(x => x.PlayerCode,
-                    (playerCode, players) => new PlayerContributionModel
+                    (playerCode, players) => new
                     {
                         PlayerCode = playerCode,
-                        Type = AccountType.Player,
                         DepositAmount = players.Sum(p => p.DepositAmount),
                         WithdrawalAmount = players.Sum(p => p.WithdrawalAmount),
                         AdjustmentAmount = players.Sum(p => p.AdjustmentAmount),
@@ -72,16 +71,28 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
                         WinLossAmount = players.Sum(p => p.Turnover),
                         NetProfit = players.Sum(p => p.NetProfit)
                     })
-                .CreatePagedResponseAsync(request);
+                .ToArrayAsync(cancellationToken);
 
-            foreach (var model in reportPlayers.Items)
+            return reportPlayers.Select(x =>
             {
-                var player = players.FirstOrDefault(x => x.PlayerCode == model.PlayerCode);
-                model.Username = player?.Username;
-                model.Level = player?.Vip?.Level;
-            }
+                var player = players.FirstOrDefault(p => p.PlayerCode == x.PlayerCode);
 
-            return reportPlayers;
+                return new PlayerContributionModel
+                {
+                    Username = player?.Username,
+                    PlayerCode = x.PlayerCode,
+                    Level = player?.Vip?.Level,
+                    Type = AccountType.Player,
+                    DepositAmount = x.DepositAmount,
+                    WithdrawalAmount = x.WithdrawalAmount,
+                    AdjustmentAmount = x.AdjustmentAmount,
+                    BonusAmount = x.BonusAmount,
+                    BetAmount = x.BetAmount,
+                    ValidBetAmount = x.ValidBetAmount,
+                    WinLossAmount = x.WinLossAmount,
+                    NetProfit = x.NetProfit
+                };
+            }).AsQueryable().CreatePagedResponse(request);
         }
     }
 }

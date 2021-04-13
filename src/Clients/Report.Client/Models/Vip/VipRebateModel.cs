@@ -7,18 +7,21 @@ namespace Report.Client.Models.Vip
         public DateTimeOffset ReportDate { get; set; }
         public decimal LiveDealerAmount { get; set; }
         public decimal SlotAmount { get; set; }
+        public decimal LotteryAmount { get; set; }
         public decimal CardGameAmount { get; set; }
         public decimal SportsAmount { get; set; }
         public decimal VirtualSportsAmount { get; set; }
-        public decimal LiveDealerValidBetAmount { get; set; }
-        public decimal SlotValidBetAmount { get; set; }
-        public decimal CardGameValidBetAmount { get; set; }
-        public decimal SportsValidBetAmount { get; set; }
-        public decimal VirtualSportsValidBetAmount { get; set; }
-        public decimal LiveDealerRebate { get; set; }
-        public decimal SlotRebate { get; set; }
-        public decimal CardGameRebate { get; set; }
-        public decimal SportsRebate { get; set; }
-        public decimal VirtualSportsRebate { get; set; }
+        public decimal LiveDealerTurnover { get; set; }
+        public decimal SlotTurnover { get; set; }
+        public decimal LotteryTurnover { get; set; }
+        public decimal CardGameTurnover { get; set; }
+        public decimal SportsTurnover { get; set; }
+        public decimal VirtualSportsTurnover { get; set; }
+        public decimal LiveDealerRebatePercentage { get; set; }
+        public decimal SlotRebatePercentage { get; set; }
+        public decimal LotteryRebatePercentage { get; set; }
+        public decimal CardGameRebatePercentage { get; set; }
+        public decimal SportsRebatePercentage { get; set; }
+        public decimal VirtualSportsRebatePercentage { get; set; }
     }
 }

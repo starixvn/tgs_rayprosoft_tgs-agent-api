@@ -16,15 +16,15 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasOne(p => p.Promotion)
                 .WithMany(p => p.PromotionGameProviders)
                 .HasForeignKey(p => p.PromotionId)
-                .HasConstraintName("fk_promotion_game_provide_promotion_id");
+                .HasConstraintName("fk_promotion_game_provider_promotion_id");
 
             builder.HasOne(p => p.GameProvider)
                 .WithMany()
                 .HasForeignKey(p => p.GameProviderId)
-                .HasConstraintName("fk_promotion_game_provide_game_provide_id");
+                .HasConstraintName("fk_promotion_game_provider_game_provider_id");
 
             builder.HasIndex(c => c.GameProviderId)
-                .HasDatabaseName("ix_promotion_game_provide_game_provider_id");
+                .HasDatabaseName("ix_promotion_game_provider_game_provider_id");
         }
     }
 }

@@ -277,7 +277,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Level = 1})
                 .With(s => s.Brand, new Brand())
                 .With(s => s.BetLimit, new BetLimit())
-                .With(s => s.SubPlayers, new Player[] { })
                 .With(s => s.Banks,
                     new[]
                     {
