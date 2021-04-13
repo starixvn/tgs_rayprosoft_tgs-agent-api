@@ -1,21 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import {
-    Stack,
-    Heading,
-    Box,
-    Button,
-    Select as _Select,
-    SelectMenu,
-    DropdownMenu,
-    styled,
-    palette
-} from "bumbag"
+import { Stack, Heading, Box, Button, DropdownMenu } from "bumbag"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import { useChangeGameProviderStatus } from "./client"
 import Alert from "../../dialog/Alert"
 import { useTrans, Trans } from "../../i18n"
-import Select from "../../select/Select"
 
 const Active = "Active"
 const ActiveTrans = {

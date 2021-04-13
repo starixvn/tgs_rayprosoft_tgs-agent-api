@@ -3,12 +3,10 @@ import { css, Global } from "@emotion/react"
 import Select from "../../select/Select"
 import { Locales, Trans, useTrans } from "../../i18n"
 import { useGameProviderList } from "./client"
-import AlertDialog from "../../dialog/Alert"
 
 export const GameProviderSelect = ({
     placeholder,
     valueField = "id",
-    required,
     ...props
 }) => {
     let defaultPlaceholder = useTrans({
@@ -18,22 +16,18 @@ export const GameProviderSelect = ({
     placeholder = placeholder ?? defaultPlaceholder
 
     let { data, isLoading, error } = useGameProviderList({ showAll: true })
-    let options =
-        data?.items.map((item) => ({
-            label: item.name,
-            value: item[valueField]
-        })) ?? []
+    let options = data?.items.map((item) => ({
+        label: item.name,
+        value: item[valueField]
+    }))
 
     return (
-        <>
-            {/* {error && <AlertDialog {...error} />} */}
-            <Select
-                isLoading={isLoading}
-                placeholder={placeholder}
-                options={options}
-                {...props}
-            />
-        </>
+        <Select
+            placeholder={placeholder}
+            isLoading={isLoading}
+            options={options}
+            {...props}
+        />
     )
 }
 

@@ -28,7 +28,6 @@ import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
-import { PlayerAgentSelect } from "../PlayerAgent"
 import { FormProvider, useForm } from "react-hook-form"
 import Input from "../../input/Input"
 

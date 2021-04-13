@@ -21,11 +21,13 @@ export const isAgentConfigDone = (value) => value === Done
 export const isAgentConfigRequired = (value) =>
     value === WaitForConfigurePercentage
 
-export const AgentConfigStatusSelect = ({
-    placeholder,
-    placeholderDisabled,
-    ...props
-}) => {
+export const AgentConfigStatusSelect = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useTrans({
+        zh: "配置状态",
+        en: "Config Status"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
     let options = [
         {
             label: useTrans(DoneTrans),
@@ -36,25 +38,7 @@ export const AgentConfigStatusSelect = ({
             value: WaitForConfigurePercentage
         }
     ]
-
-    let defaultPlaceholder = useTrans({
-        zh: "配置状态",
-        en: "Config Status"
-    })
-    placeholder = placeholder ?? defaultPlaceholder
-
-    if (placeholder) {
-        options = [
-            {
-                label: placeholder,
-                value: "",
-                disabled: placeholderDisabled
-            },
-            ...options
-        ]
-    }
-
-    return <Select options={options} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export const AgentConfigStatusLabel = ({ value = "", ...props }) => {

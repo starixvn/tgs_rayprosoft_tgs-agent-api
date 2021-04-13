@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { SelectField, Dialog, Modal, Table, useClassName } from "bumbag"
-import AlertDialog from "../../dialog/Alert"
 import { useRoleList } from "./client"
 import {
     useUserBrandId,
@@ -11,17 +9,14 @@ import {
 } from "../../user/context"
 import Select from "../../select/Select"
 import { useTrans } from "../../i18n"
-import { Controller, useFormContext } from "react-hook-form"
 
 export const RoleSelect = ({
     resellerId,
     licenseeId,
     brandId,
     placeholder,
-    placeholderDisabled,
     ...props
 }) => {
-    let formMethods = useFormContext()
     let defaultPlaceholder = useTrans({
         zh: "选择权限组",
         en: "Select Role"
@@ -37,54 +32,27 @@ export const RoleSelect = ({
     let userBrandId = useUserBrandId()
     brandId = brandId ?? userBrandId
 
-    let { error, data = {}, isLoading } = useRoleList({
+    let { isLoading, data, error } = useRoleList({
         showAll: true,
         resellerId,
         licenseeId,
         brandId
     })
-
-    if (
-        isLoading &&
-        props?.name &&
-        props?.defaultValue &&
-        formMethods?.control
-    ) {
-        return (
-            <Controller
-                name={props?.name}
-                control={formMethods?.control}
-                render={() => <Select isLoading={isLoading} options={[]} />}
-                defaultValue={props?.defaultValue}
-            />
-        )
-    }
-
-    let roleOptions =
-        toOptions({ resellerId, licenseeId, brandId }, data?.items).map(
-            ({ id, name }) => ({
-                label: name,
-                value: id
-            })
-        ) ?? []
-
-    let options =
-        typeof placeholder === "string"
-            ? [
-                  {
-                      label: placeholder,
-                      value: "",
-                      disabled: placeholderDisabled
-                  },
-                  ...roleOptions
-              ]
-            : roleOptions
+    let options = toOptions(
+        { resellerId, licenseeId, brandId },
+        data?.items
+    ).map(({ id, name }) => ({
+        label: name,
+        value: id
+    }))
 
     return (
-        <>
-            <Select options={options} {...props} />
-            {error && <AlertDialog {...error} />}
-        </>
+        <Select
+            placeholder={placeholder}
+            isLoading={isLoading}
+            options={options}
+            {...props}
+        />
     )
 }
 

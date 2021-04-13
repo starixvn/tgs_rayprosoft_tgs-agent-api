@@ -25,11 +25,7 @@ const AgentTrans = {
     en: "Agent"
 }
 
-export const DeductBalanceTargetSelect = ({
-    placeholder,
-    placeholderDisabled = false,
-    ...props
-}) => {
+export const DeductBalanceTargetSelect = ({ placeholder, ...props }) => {
     let options = [
         {
             label: useTrans(PlayerTrans),
@@ -46,18 +42,8 @@ export const DeductBalanceTargetSelect = ({
         en: "Target"
     })
     placeholder = placeholder ?? defaultPlaceholder
-    if (placeholder) {
-        options = [
-            {
-                label: placeholder,
-                value: "",
-                disabled: placeholderDisabled
-            },
-            ...options
-        ]
-    }
 
-    return <Select options={options} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export default {

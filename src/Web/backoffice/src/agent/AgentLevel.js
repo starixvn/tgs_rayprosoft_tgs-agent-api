@@ -25,11 +25,13 @@ export const isAgentHead = (value) => value === Chief
 
 export const isAgentParentRequired = (value) => !isAgentHead(value)
 
-export const AgentLevelSelect = ({
-    placeholder,
-    placeholderDisabled,
-    ...props
-}) => {
+export const AgentLevelSelect = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useTrans({
+        zh: "代理种类",
+        en: "Level Type"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
     let options = [
         {
             label: useTrans(ChiefTrans),
@@ -41,24 +43,7 @@ export const AgentLevelSelect = ({
         }
     ]
 
-    let defaultPlaceholder = useTrans({
-        zh: "代理种类",
-        en: "Level Type"
-    })
-    placeholder = placeholder ?? defaultPlaceholder
-
-    if (placeholder) {
-        options = [
-            {
-                label: placeholder,
-                value: "",
-                disabled: placeholderDisabled
-            },
-            ...options
-        ]
-    }
-
-    return <Select options={options} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export const AgentLevelLabel = ({ value = "" }) => {

@@ -131,16 +131,16 @@ const EditBody = ({ record = {} }) => {
                         <Label fontWeight="normal">
                             <Trans zh="厂商" en="Vendor" />
                         </Label>
-                        <ValueBlock>{gameProviderName}</ValueBlock>
+                        <Box alignY="center">{gameProviderName}</Box>
                     </FieldValues>
 
                     <FieldValues>
                         <Label fontWeight="normal">
                             <Trans zh="游戏类型" en="Game Type" />
                         </Label>
-                        <ValueBlock>
+                        <Box alignY="center">
                             <GameTypeLabel value={gameType} />
-                        </ValueBlock>
+                        </Box>
                     </FieldValues>
                 </Stack>
                 <Stack orientation="horizontal" marginBottom="major-1">
@@ -148,13 +148,13 @@ const EditBody = ({ record = {} }) => {
                         <Label fontWeight="normal">
                             <Trans zh="游戏名称" en="Game Name" />
                         </Label>
-                        <ValueBlock>{gameName}</ValueBlock>
+                        <Box alignY="center">{gameName}</Box>
                     </FieldValues>
                     <FieldValues>
                         <Label fontWeight="normal">
                             <Trans zh="游戏 ID" en="Game ID" />
                         </Label>
-                        <ValueBlock>{gameId}</ValueBlock>
+                        <Box alignY="center">{gameId}</Box>
                     </FieldValues>
                 </Stack>
                 <Stack orientation="horizontal" marginBottom="major-1">
@@ -162,22 +162,22 @@ const EditBody = ({ record = {} }) => {
                         <Label fontWeight="normal">
                             <Trans zh="支持设备" en="Platform" />
                         </Label>
-                        <ValueBlock>
+                        <Box alignY="center">
                             <GamePlatformLabel value={platform} />
-                        </ValueBlock>
+                        </Box>
                     </FieldValues>
 
                     <FieldValues>
                         <Label fontWeight="normal">
                             <Trans zh="支持HTML5" en="HTML5" />
                         </Label>
-                        <ValueBlock>
+                        <Box alignY="center">
                             {supportHtml5 ? (
                                 <Trans zh="是" en="Yes" />
                             ) : (
                                 <Trans zh="不" en="No" />
                             )}
-                        </ValueBlock>
+                        </Box>
                     </FieldValues>
                 </Stack>
             </Stack>
@@ -192,7 +192,7 @@ const EditBody = ({ record = {} }) => {
                         en="Effective Betting Proportion"
                     />
                 </Label>
-                <ValueBlock>
+                <Box alignY="center">
                     <Input
                         name="effectiveBettingPercentage"
                         type="number"
@@ -204,21 +204,13 @@ const EditBody = ({ record = {} }) => {
                         max="100"
                         addonAfter={<Button isStatic>%</Button>}
                     />
-                </ValueBlock>
+                </Box>
 
                 <Label fontWeight="normal">
                     <Trans zh="是否发放返水" en="Rebate" />
                 </Label>
-                <ValueBlock>
-                    <Switch name="rebate" />
-                </ValueBlock>
+                <Switch name="rebate" />
             </FieldValues>
         </Stack>
     )
 }
-
-const ValueBlock = ({ children, ...props }) => (
-    <Text.Block alignY="center" {...props}>
-        {children}
-    </Text.Block>
-)

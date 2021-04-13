@@ -101,7 +101,7 @@ export const FormattedNumber = ({
     }
 
     if (Number.isInteger(digits) && digits >= 0 && digits <= MaxDigits) {
-        value = value.toFixed()
+        value = value.toFixed(digits)
     }
     return (
         <Text>
@@ -122,7 +122,7 @@ export const FormattedNumberDecimal = ({
     }
 
     if (Number.isInteger(digits) && digits >= 0 && digits <= MaxDigits) {
-        value = value.toFixed()
+        value = value.toFixed(digits)
     }
     return (
         <Text>
