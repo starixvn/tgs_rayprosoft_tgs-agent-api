@@ -3,11 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
+using TGS.Services.BackOffice.Domain;
+using TGS.Services.BackOffice.Domain.Enums;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -83,6 +87,25 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var actual = await sut.QueryAsync(query).ToArrayAsync();
 
             Assert.IsTrue(actual.Length == 1);
+        }
+
+        [Test]
+        public async Task Manager_Can_Review_DepositForm()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new ReviewDepositFormCommandService(moqDepositRepository.Object);
+
+            var formId = Guid.NewGuid();
+            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve);
+
+            await sut.ExecuteAsync(command);
+
+            moqDepositRepository.Verify(
+                fake => fake.SignOffDepositFormAsync(
+                    It.Is<Guid>(x => x == formId),
+                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve)),
+                Times.Exactly(1));
         }
     }
 }

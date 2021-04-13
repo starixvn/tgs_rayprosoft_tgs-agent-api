@@ -33,10 +33,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     }
                 }.AsQueryable());
 
-            var response = sut.GetAllPaymentsAsync().ToEnumerable();
+            var response = sut.GetAllPayments();
 
             moqQueries.Verify(p => p.GetQueries(), Times.Exactly(1));
-            Assert.IsTrue(response.Count() == 1);
+            Assert.IsTrue(response.Data.Count() == 1);
         }
     }
 }
