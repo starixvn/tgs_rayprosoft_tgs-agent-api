@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210412064848_Initial")]
+    [Migration("20210412091804_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2382,10 +2382,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("phone_authentication");
 
-                    b.Property<string>("PlayerCode1")
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code1");
-
                     b.Property<string>("QQ")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
@@ -2457,9 +2453,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_players_brand_id");
-
-                    b.HasIndex("PlayerCode1")
-                        .HasDatabaseName("ix_players_player_code1");
 
                     b.HasIndex("VipId")
                         .HasDatabaseName("ix_players_vip_id");
@@ -2762,7 +2755,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_promotion_game_providers");
 
                     b.HasIndex("GameProviderId")
-                        .HasDatabaseName("ix_promotion_game_provide_game_provider_id");
+                        .HasDatabaseName("ix_promotion_game_provider_game_provider_id");
 
                     b.ToTable("promotion_game_providers");
                 });
@@ -4471,11 +4464,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
-                        .WithMany("SubPlayers")
-                        .HasForeignKey("PlayerCode1")
-                        .HasConstraintName("fk_players_players_player_code1");
-
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", "Vip")
                         .WithMany("Players")
                         .HasForeignKey("VipId")
@@ -4566,14 +4554,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
                         .WithMany()
                         .HasForeignKey("GameProviderId")
-                        .HasConstraintName("fk_promotion_game_provide_game_provide_id")
+                        .HasConstraintName("fk_promotion_game_provider_game_provider_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
                         .WithMany("PromotionGameProviders")
                         .HasForeignKey("PromotionId")
-                        .HasConstraintName("fk_promotion_game_provide_promotion_id")
+                        .HasConstraintName("fk_promotion_game_provider_promotion_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -5060,8 +5048,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("PlayerLoginRecords");
 
                     b.Navigation("SportsBetLimits");
-
-                    b.Navigation("SubPlayers");
 
                     b.Navigation("Wallets");
                 });

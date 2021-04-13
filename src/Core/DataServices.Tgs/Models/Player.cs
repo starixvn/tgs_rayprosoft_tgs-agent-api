@@ -72,8 +72,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<PlayerBank> Banks { get; set; }
 
-        public virtual ICollection<Player> SubPlayers { get; set; }
-
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
         public virtual ICollection<StationLetterPlayer> Letters { get; set; }

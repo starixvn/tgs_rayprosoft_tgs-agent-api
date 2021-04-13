@@ -126,4 +126,10 @@
   <data name="ParentAgentNotExists" xml:space="preserve">
     <value>找不到上层代理</value>
   </data>
+  <data name="WalletNotFound" xml:space="preserve">
+    <value>找不到钱包</value>
+  </data>
+  <data name="BalanceMustGreaterThanZero" xml:space="preserve">
+    <value>余额必须大于零</value>
+  </data>
 </root>

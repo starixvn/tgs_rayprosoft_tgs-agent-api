@@ -1723,8 +1723,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     vip_id = table.Column<Guid>(type: "uuid", nullable: true),
                     updated_by_username = table.Column<string>(type: "text", nullable: true),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    player_code1 = table.Column<string>(type: "character varying(16)", nullable: true)
+                    first_deposit_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1750,13 +1749,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalTable: "brands",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_players_players_player_code1",
-                        column: x => x.player_code1,
-                        principalSchema: "dbo",
-                        principalTable: "players",
-                        principalColumn: "player_code",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_players_vip_levels_vip_id",
                         column: x => x.vip_id,
@@ -2072,14 +2064,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     table.PrimaryKey("pk_promotion_game_providers", x => new { x.promotion_id, x.game_provider_id });
                     table.ForeignKey(
-                        name: "fk_promotion_game_provide_game_provide_id",
+                        name: "fk_promotion_game_provider_game_provider_id",
                         column: x => x.game_provider_id,
                         principalSchema: "dbo",
                         principalTable: "game_providers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_promotion_game_provide_promotion_id",
+                        name: "fk_promotion_game_provider_promotion_id",
                         column: x => x.promotion_id,
                         principalSchema: "dbo",
                         principalTable: "promotions",
@@ -2514,19 +2506,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "brand_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_players_player_code1",
-                schema: "dbo",
-                table: "players",
-                column: "player_code1");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_players_vip_id",
                 schema: "dbo",
                 table: "players",
                 column: "vip_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_promotion_game_provide_game_provider_id",
+                name: "ix_promotion_game_provider_game_provider_id",
                 schema: "dbo",
                 table: "promotion_game_providers",
                 column: "game_provider_id");
