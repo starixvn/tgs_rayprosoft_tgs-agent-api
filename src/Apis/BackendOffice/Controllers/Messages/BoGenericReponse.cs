@@ -3,7 +3,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages
 {
-    public record BoGenericReponse<TData> : TgsResponse
+    public class BoGenericReponse<TData> : MessageResponse
     {
         [JsonPropertyName("data")]
         public TData Data { get; set; }

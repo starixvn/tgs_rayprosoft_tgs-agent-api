@@ -35,6 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         {
             return new BoGenericReponse<IEnumerable<PaymentMethodModel>>
             {
+                Valid = true,
                 Data = _queries.GetQueries()
                     .Select(q => new PaymentMethodModel
                     {

@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
+using TGS.Services.BackOffice.Domain.Enums;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -15,7 +17,15 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class DepositController : ControllerBase
     {
-        [AllowAnonymous]
+        /// <summary>
+        /// Queries the deposit forms.
+        /// </summary>
+        /// <param name="queryDepositFormsService">The query deposit forms service.</param>
+        /// <param name="countDepositFormsService">The count deposit forms service.</param>
+        /// <param name="brandId">The brand identifier.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="paging">The paging.</param>
+        /// <returns></returns>
         [HttpGet("{brandId}")]
         public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
             [FromServices] IQueryService<DepositFormQuery, DepositFormInfo> queryDepositFormsService,
@@ -66,6 +76,28 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             return response;
+        }
+
+        /// <summary>
+        /// Reviews the deposit form.
+        /// </summary>
+        /// <param name="reviewCommandService">The review command service.</param>
+        /// <param name="formId">The form identifier.</param>
+        /// <param name="reviewResponses">The review responses.</param>
+        [AllowAnonymous]
+        [HttpPost("{formId}")]
+        public async Task ReviewDepositFormAsync(
+            [FromServices] ICommandService<ReviewDepositFormCommand> reviewCommandService,
+            Guid formId,
+            [FromBody] ReviewStatus reviewResponses)
+        {
+            var command = new ReviewDepositFormCommand(
+                formId,
+                reviewResponses);
+
+            await reviewCommandService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
         }
     }
 }
