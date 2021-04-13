@@ -250,6 +250,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to JackpotContribution.
+        /// </summary>
+        public static string JackpotContribution {
+            get {
+                return ResourceManager.GetString("JackpotContribution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PlaceBetRequest.
         /// </summary>
         public static string PlaceBetRequest {

@@ -230,6 +230,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
             await PlaceBetAsync(amount, externalGameId);
 
+        [When(@"I place bet with jackpot of \$(.*)  for game ""(.*)""")]
+        public async Task WhenIPlaceBetWithJackpotOfForGame(decimal amount, string externalGameId, Table table)
+        {
+            var row = table.Rows[0];
+            var jackpotContribution =
+                new JackpotContribution(row["JackpotId"], decimal.Parse(row["ContributionAmount"]));
+            await PlaceBetAsync(amount, externalGameId, jackpotContribution: jackpotContribution);
+        }
+
         [Given(@"I play the bonus for game ""(.*)""")]
         public async Task GivenIPlayTheBonusForGame(string externalGameId)
         {
@@ -573,6 +582,21 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ga.Amount.Should().Be(amount);
         }
 
+        [Then(@"jackpot contribute data in game action is as set value")]
+        public void ThenJackpotContributeDataInGameActionIsAsSetValue()
+        {
+            var jackpotContribution = Get<JackpotContribution>(SR.JackpotContribution);
+            var ga = Get<GameAction>(SR.GameAction);
+
+            var json = _serviceProvider.GetRequiredService<IJsonSerializationProvider>();
+            var contrib =
+                json.DeserializeFromString<Core.Models.Services.Games.JackpotContribution>(ga.JackpotContribution);
+
+            contrib.Should().NotBeNull();
+            contrib.JackpotId.Should().Be(jackpotContribution.Id);
+            contrib.TotalAmount.Should().Be(jackpotContribution.Amount);
+        }
+
         [Then(@"bonus code in round detail is as set value")]
         public async Task ThenBonusCodeInRoundDetailIsAsSetValue()
         {
@@ -682,7 +706,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return tokenProvider.EncryptAsync(loginRecordId);
         }
 
-        private async ValueTask PlaceBetAsync(decimal amount, string externalGameId, string bonusCode = null)
+        private async ValueTask PlaceBetAsync(decimal amount, string externalGameId, string bonusCode = null,
+            JackpotContribution jackpotContribution = null)
         {
             var configuration = await GetConfigurationAsync();
 
@@ -704,7 +729,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 RoundId = externalRoundId,
                 RoundDetails = string.Empty,
                 BonusCode = bonusCode,
-                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                JackpotId = jackpotContribution?.Id,
+                JackpotContribution = jackpotContribution?.Amount
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
@@ -719,6 +746,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.PlaceBetRequest, request);
             Set(SR.Request, request);
             Set(SR.Response, response);
+
+            if (jackpotContribution != null)
+            {
+                Set(SR.JackpotContribution, jackpotContribution);
+            }
         }
 
         private async ValueTask WinBetAsync(decimal amount, string bonusCode = null)
@@ -757,6 +789,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
+
+        private record JackpotContribution(string Id, decimal Amount);
 
         #endregion
     }

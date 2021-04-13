@@ -29,13 +29,32 @@ Scenario: 02.b - Get player balance with deauthorized player token
 	When I request the player balance
 	Then player balance response will be for $125
 
-Scenario: 03 - Place desktop bet
+Scenario: 03.a - Place desktop bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	When I place bet of $10 for game "vs50aladdin"
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
+
+Scenario: 03.b - Place mobile bet
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+		And player having balance of $100
+	When I place bet of $10 for game "vs50aladdin"
+	Then I will receive bet response of no error and balance of $90
+		And player wallet database record will be for $90
+		And game action will be recorded in the database of type "PlaceBet" for $-10
+
+Scenario: 03.c - Place bet with jackpot contribution
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+	When I place bet with jackpot of $10  for game "vs50aladdin"
+		| JackpotId | ContributionAmount |
+		| Mega      | 10                 |
+	Then I will receive bet response of no error and balance of $90
+		And player wallet database record will be for $90
+		And game action will be recorded in the database of type "PlaceBet" for $-10
+		And jackpot contribute data in game action is as set value
 
 Scenario: 04 - Win bet
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"

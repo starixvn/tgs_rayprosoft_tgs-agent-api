@@ -180,6 +180,9 @@
   <data name="HasTurnoverOnTieBet" xml:space="preserve">
     <value>HasTurnoverOnTieBet</value>
   </data>
+  <data name="JackpotContribution" xml:space="preserve">
+    <value>JackpotContribution</value>
+  </data>
   <data name="PlaceBetRequest" xml:space="preserve">
     <value>PlaceBetRequest</value>
   </data>

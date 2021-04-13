@@ -70,6 +70,10 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
             PlaceBetRequest request)
         {
+            var jackpotId = request.JackpotId;
+            var contributeAmount = request.JackpotContribution;
+            var hasJackpot = jackpotId.IsNotNullOrEmpty();
+
             var transaction = new TransactionData
             {
                 ExternalBetId = request.Reference,
@@ -80,22 +84,29 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Amount = request.Amount,
                 ExtraData = AddCustomDescription(AddJackpotData()),
                 RoundDetail = AddCustomDescription(AddBonusData()),
-                TimeStamp = GetTimestamp(request.Timestamp)
+                TimeStamp = GetTimestamp(request.Timestamp),
+                JackpotContribution = hasJackpot
+                    ? new JackpotContribution
+                    {
+                        JackpotId = jackpotId,
+                        TotalAmount = contributeAmount!.Value
+                    }
+                    : null
             };
 
             return GetBetData(playerCode, data, new[] {transaction});
 
             Dictionary<string, object> AddJackpotData()
             {
-                if (request.JackpotId.IsNullOrEmpty())
+                if (!hasJackpot)
                 {
                     return null;
                 }
 
                 return new()
                 {
-                    {nameof(request.JackpotId), request.JackpotId},
-                    {nameof(request.JackpotContribution), request.JackpotContribution},
+                    {nameof(request.JackpotId), jackpotId},
+                    {nameof(request.JackpotContribution), contributeAmount},
                     {nameof(request.JackpotDetails), request.JackpotDetails}
                 };
             }
