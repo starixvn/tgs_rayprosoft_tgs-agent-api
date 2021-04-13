@@ -26,7 +26,9 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBackendOfficeServices(_configuration);
+            services
+                .AddBackendOfficeServices(_configuration)
+                .AddBackendOfficeRepositories();
 
             services.AddSwaggerGen(c =>
             {

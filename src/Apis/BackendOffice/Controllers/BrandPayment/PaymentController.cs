@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -30,22 +27,26 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get Payments")]
-        public IAsyncEnumerable<PaymentModel> GetAllPaymentsAsync()
+        public BoGenericReponse<IEnumerable<PaymentModel>> GetAllPayments()
         {
-            return _queries.GetQueries()
-                .Select(q => new PaymentModel
-                {
-                    Id = q.Id,
-                    Name = q.Name,
-                    Code = q.Code,
-                    Description = q.Description,
-                    CreatedByUsername = q.CreatedByUsername,
-                    UpdatedByUsername = q.UpdatedByUsername,
-                    CreatedOn = q.CreatedOn,
-                    UpdatedOn = q.UpdatedOn
-                })
-                .AsNoTracking()
-                .ToAsyncEnumerable();
+            return new BoGenericReponse<IEnumerable<PaymentModel>>
+            {
+                Valid = true,
+                Data = _queries.GetQueries()
+                    .Select(q => new PaymentModel
+                    {
+                        Id = q.Id,
+                        Name = q.Name,
+                        Code = q.Code,
+                        Description = q.Description,
+                        CreatedByUsername = q.CreatedByUsername,
+                        UpdatedByUsername = q.UpdatedByUsername,
+                        CreatedOn = q.CreatedOn,
+                        UpdatedOn = q.UpdatedOn
+                    })
+                    .AsNoTracking()
+                    .ToArray()
+            };
         }
     }
 }

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
@@ -26,16 +27,20 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get PaymentChannels")]
-        public IAsyncEnumerable<PaymentChannelModel> GetAllPaymentChannelsAsync()
+        public BoGenericReponse<IEnumerable<PaymentChannelModel>> GetAllPaymentChannels()
         {
-            return _queries.GetQueries()
-                .Select(q => new PaymentChannelModel
-                {
-                    Id = q.Id,
-                    Code = q.Code,
-                })
-                .AsNoTracking()
-                .ToAsyncEnumerable();
+            return new BoGenericReponse<IEnumerable<PaymentChannelModel>>
+            {
+                Valid = true,
+                Data = _queries.GetQueries()
+                    .Select(q => new PaymentChannelModel
+                    {
+                        Id = q.Id,
+                        Code = q.Code,
+                    })
+                    .AsNoTracking()
+                    .ToArray()
+            };
         }
     }
 }
