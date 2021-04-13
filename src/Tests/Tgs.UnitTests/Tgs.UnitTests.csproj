@@ -30,4 +30,8 @@
     <ProjectReference Include="..\TestsCommon\TestsCommon.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Infrastructures\" />
+  </ItemGroup>
+
 </Project>

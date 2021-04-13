@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -7,9 +8,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Prometheus;
 using TGS.Apis.FileService.DataService;
+using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
 using TGS.Apis.FileService.Services;
@@ -18,6 +21,7 @@ using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Models;
+using TGS.FileService.Repositories;
 
 namespace TGS.Apis.FileService
 {
@@ -53,23 +57,50 @@ namespace TGS.Apis.FileService
                 .AddFile(_configuration)
                 .AddAws(_configuration);
 
-            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+            services.AddFileServiceCore()
+                .ConfigureAwsOptions((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    config.GetSection("AWS").Bind(options);
+                    options.Bucket = config.GetValue<string>("AWS:S3:Bucket");
+                })
+                .UseMongoRepository((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.MongoConnectionString = config.GetValue<string>("DatabaseSettings:ConnectionString");
+                });
+
+            services.AddTransient<IMongoContext<StationLetterFile>, MongoContext<StationLetterFile>>();
             services.AddTransient<IUploadService, UploadService>();
             services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
 
             services.AddControllers()
                 .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
 
-            services.AddHealthChecks()
+            services
+                .AddHealthChecks()
                 .AddNats()
                 .AddMongoDb(_configuration, "DatabaseSettings")
                 .AddAwsS3()
-                .ForwardToPrometheus(); ;
+                .ForwardToPrometheus();
+
+            services.AddHostedService<NatsMessageService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "TGS FileService API", Version = "v1" });
+
+                var xml = $"TGS.Apis.FileService.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+                if (File.Exists(path))
+                    c.IncludeXmlComments(path);
+            });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            appLifetime.ApplicationStarted.Register(() => OnApplicationStarted(app.ApplicationServices));
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -78,8 +109,6 @@ namespace TGS.Apis.FileService
             app.UseRouting();
 
             app.UseHttpMetrics();
-
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -93,12 +122,12 @@ namespace TGS.Apis.FileService
 
                 endpoints.MapMetrics();
             });
-        }
 
-        private static void OnApplicationStarted(IServiceProvider serviceProvider)
-        {
-            var messageHandler = serviceProvider.GetRequiredService<INatsMessageHandler>();
-            messageHandler.SubscribeAsync();
+            if (!env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS FileService API"));
+            }
         }
     }
 }

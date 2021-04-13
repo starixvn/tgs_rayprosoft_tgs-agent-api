@@ -14,6 +14,6 @@ namespace Report.Client.Models.Agent
         public decimal Turnover { get; set; }
         public decimal WinLossAmount { get; set; }
         public decimal NetProfit { get; set; }
-        public decimal AgentBonusAmount { get; set; }
+        public decimal AgentDividendAmount { get; set; }
     }
 }

@@ -83,17 +83,15 @@ namespace TGS.Services.Operations.Commands
                         Salt = data.Salt,
                         WithdrawPassword = data.WithdrawPassword,
                         WithdrawSalt = data.WithdrawSalt,
-                        InvitationCode = InvitationCodeGenerator.NewId(),
                         BrandId = data.BrandId,
                         DefaultWalletId = walletId,
                         DefaultWalletCurrencyCode = data.CurrencyCode,
-                        ParentInvitationCode = data.ParentInvitationCode,
                         RegisteredOn = createdOn,
                         LastActiveOn = createdOn,
                         Status = PlayerStatus.Enabled,
                         Type = data.Type,
                         BetLimitId = data.BetLimitId,
-                        HasAgent = data.HasAgent,
+                        AgentId = data.AgentId,
                         UpdatedByUsername = username,
                         UpdatedOn = createdOn,
                         Wallets = new HashSet<Wallet>
@@ -143,10 +141,7 @@ namespace TGS.Services.Operations.Commands
         {
             var player = new Player
             {
-                PlayerCode = data.PlayerCode,
-                Salt = data.Salt,
-                Password = data.Password,
-                UpdatedOn = data.UpdatedOn
+                PlayerCode = data.PlayerCode, Salt = data.Salt, Password = data.Password, UpdatedOn = data.UpdatedOn
             };
 
             _repository.Players.Attach(player);
@@ -181,14 +176,14 @@ namespace TGS.Services.Operations.Commands
         {
             const string sql = "call dbo.player_deauthorize_by_login_record_id(:player_code, :login_record_id)";
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> { { ":player_code", playerCode }, { ":login_record_id", loginRecordId } });
+                new Dictionary<string, object> {{":player_code", playerCode}, {":login_record_id", loginRecordId}});
         }
 
         public Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
         {
             const string sql = "call dbo.player_deauthorize_by_platform_type";
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> { { ":player_code", playerCode }, { ":platform_type", platformType } });
+                new Dictionary<string, object> {{":player_code", playerCode}, {":platform_type", platformType}});
         }
 
         public Task UpdatePlayerIdNumberAsync(Player player)
@@ -217,12 +212,7 @@ namespace TGS.Services.Operations.Commands
 
         public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                Email = email,
-                UpdatedOn = updatedOn
-            };
+            var updateInfo = new Player {PlayerCode = playerCode, Email = email, UpdatedOn = updatedOn};
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
@@ -235,10 +225,7 @@ namespace TGS.Services.Operations.Commands
         {
             var updateInfo = new Player
             {
-                PlayerCode = playerCode,
-                Phone = phone,
-                PhoneAuthentication = true,
-                UpdatedOn = updatedOn
+                PlayerCode = playerCode, Phone = phone, PhoneAuthentication = true, UpdatedOn = updatedOn
             };
 
             _repository.Players.Attach(updateInfo);
@@ -249,7 +236,8 @@ namespace TGS.Services.Operations.Commands
             return _repository.SaveChangesAsync();
         }
 
-        public Task SetIdentityAsync(string playerCode, string realName, string identity, bool isAuthenticate, DateTimeOffset updatedOn)
+        public Task SetIdentityAsync(string playerCode, string realName, string identity, bool isAuthenticate,
+            DateTimeOffset updatedOn)
         {
             var updateInfo = new Player
             {
@@ -271,12 +259,7 @@ namespace TGS.Services.Operations.Commands
 
         public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                QQ = qqId,
-                UpdatedOn = updatedOn
-            };
+            var updateInfo = new Player {PlayerCode = playerCode, QQ = qqId, UpdatedOn = updatedOn};
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.QQ)).IsModified = true;
@@ -287,12 +270,7 @@ namespace TGS.Services.Operations.Commands
 
         public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                Wechat = weChatId,
-                UpdatedOn = updatedOn
-            };
+            var updateInfo = new Player {PlayerCode = playerCode, Wechat = weChatId, UpdatedOn = updatedOn};
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.Wechat)).IsModified = true;

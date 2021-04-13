@@ -87,6 +87,11 @@ const BodyContent = ({ brandId }) => {
             ? EffectiveName
             : null
     })
+
+    useEffect(() => {
+        setState({ pageIndex: 0, brandId })
+    }, [brandId])
+
     let { statusName } = state
     let isEffectiveTab = statusName === EffectiveName
     let {
@@ -130,7 +135,7 @@ const BodyContent = ({ brandId }) => {
             title={<Trans zh="公告管理" en="Announcements" />}
             actionBar={
                 <Box alignX="right">
-                    <AddButton onSubmitted={mutate} />
+                    <AddButton brandId={brandId} onSubmitted={mutate} />
                 </Box>
             }
         >
@@ -179,7 +184,7 @@ const BodyContent = ({ brandId }) => {
                                 setSortOrder={setSortOrder}
                                 isLoading={isLoading}
                                 mutate={mutate}
-                                clearCache={clearCache}
+                                brandId={brandId}
                             />
                         )}
                     </TabPanel>
@@ -194,7 +199,7 @@ const BodyContent = ({ brandId }) => {
                             state={state}
                             isLoading={isLoading}
                             mutate={mutate}
-                            clearCache={clearCache}
+                            brandId={brandId}
                             tab={tab}
                         />
                     )}
@@ -209,7 +214,7 @@ const BodyContent = ({ brandId }) => {
                             setSortOrder={setSortOrder}
                             isLoading={isLoading}
                             mutate={mutate}
-                            clearCache={clearCache}
+                            brandId={brandId}
                         />
                     )}
                 </TabPanel>
@@ -223,7 +228,7 @@ const BodyContent = ({ brandId }) => {
                             setSortOrder={setSortOrder}
                             isLoading={isLoading}
                             mutate={mutate}
-                            clearCache={clearCache}
+                            brandId={brandId}
                         />
                     )}
                 </TabPanel>
@@ -249,14 +254,14 @@ const AsyncTable = ({
     data,
     isLoading,
     mutate,
-    clearCache
+    brandId
 }) => {
     let { pageSize } = state
     let columns = useColumns({
         mutate,
-        clearCache,
         statusName,
-        items: data?.items
+        items: data?.items,
+        brandId
     })
 
     return (
@@ -281,7 +286,7 @@ const EffectiveTable = ({
     data,
     isLoading,
     mutate,
-    clearCache
+    brandId
 }) => {
     let { pageSize } = state
     let [displayOrders, setDisplayOrder] = useState({})
@@ -321,10 +326,10 @@ const EffectiveTable = ({
 
     let columns = useColumns({
         mutate,
-        clearCache,
         changeDisplayOrder,
         statusName,
-        items: data?.items
+        items: data?.items,
+        brandId
     })
     return (
         <>
@@ -365,7 +370,7 @@ const EffectiveTable = ({
 
 const useColumns = ({
     mutate,
-    clearCache,
+    brandId,
     statusName: tabStatusName,
     changeDisplayOrder,
     items = []
@@ -519,6 +524,7 @@ const useColumns = ({
                             )}
                             {tabStatusName === EffectiveName && (
                                 <EditButton
+                                    brandId={brandId}
                                     record={value}
                                     onSubmitted={mutate}
                                 />

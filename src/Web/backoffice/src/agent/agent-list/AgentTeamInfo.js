@@ -8,12 +8,6 @@ import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
 import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
-import {
-    useAgent,
-    useAgentOperations,
-    useAgentTeamInfo,
-    useUpdateAgent
-} from "./client"
 import { pastWeek } from "../../date/range"
 import { Table, useTable, toApiParams, pageCount } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -23,6 +17,7 @@ import SearchButton from "../../button/SearchButton"
 import isSameDate from "date-fns/isEqual"
 import { Ascending, Descending } from "../../table/order"
 import { coloredNumberDecimalColumn } from "../../table/column/numberColumn"
+import { useAgentTeamInfo } from "../../report/agent-contribution-report/client"
 
 const Key = "AgentTeamInfo"
 

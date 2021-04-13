@@ -267,24 +267,24 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var playerDefined = new PlayerDefined[]
             {
                 new("4ucmqplwxqlv", new("2EA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
                     _agents[0].Id),
                 new("4ucmqplx11cs", new("30A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
                     _agents[0].Id),
                 new("4ucmqplx4dti", new("32A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
                     _agents[1].Id),
                 new("4ucmqplx7okb", new("34A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), Generator.RandomString(6), _agents[2].Id),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), _agents[2].Id),
                 new("4ucmqplxb029", new("36A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null),
                 new("4ucmqplxe65x", new("38A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null),
                 new("4ucmqplxhfoe", new("3AA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null),
                 new("4ucmqplxkuyd", new("3CA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), Generator.RandomString(6), null)
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null)
             };
 
             var rnd = new Random();
@@ -294,15 +294,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             _players = playerDefined.Select(p =>
             {
                 var players = addedPlayers.Where(a => a.BrandId == p.BrandId).ToArray();
-                var len = players.Length;
 
                 var playerCode = p.PlayerCode;
-                var parentPlayerCode = len == 0 ? null :
-                    rnd.NextDouble() > 0.5      ? null : players[rnd.Next(0, len - 1)].PlayerCode;
-
-                var invitationCode = p.InvitationCode;
-                var parentInvitationCode = len == 0 ? null :
-                    rnd.NextDouble() > 0.5          ? null : players[rnd.Next(0, len - 1)].InvitationCode;
 
                 addedPlayers.Add(p);
 
@@ -312,7 +305,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 var vipId = _vipLevels.First(x => x.BrandId == brandId).Id;
 
                 return CreatePlayer(playerCode, brandId, p.WalletId, username, realName, salt, password, vipId,
-                    PlayerType.RealPlayer, invitationCode, p.AgentId, parentPlayerCode, parentInvitationCode);
+                    PlayerType.RealPlayer, p.AgentId);
             }).ToArray();
 
             await _repository.BulkInsertAsync(_players);
@@ -322,10 +315,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private Player CreatePlayer(string playerCode,
             Guid brandId, Guid walletId, string username, string realName, byte[] salt,
-            byte[] password, Guid vipId, PlayerType playerType, string invitationCode,
-            Guid? agentId,
-            string parentPlayerCode = null, string parentInvitationCode = null,
-            string currencyCode = "CNY")
+            byte[] password, Guid vipId, PlayerType playerType,
+            Guid? agentId, string currencyCode = "CNY")
         {
             var brand = _brandCreated.Values.First(b => b.Id == brandId);
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
@@ -336,7 +327,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 PlayerCode = playerCode,
                 Username = username,
                 RealName = realName,
-                InvitationCode = invitationCode,
                 Password = password,
                 Salt = salt,
                 WithdrawPassword = Array.Empty<byte>(),
@@ -350,9 +340,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Phone = Generator.RandomIntString(10),
                 QQ = Generator.RandomString(20),
                 Wechat = Generator.RandomString(20),
-                ParentPlayerCode = parentPlayerCode,
-                ParentInvitationCode = parentInvitationCode,
-                HasAgent = false,
                 VipId = vipId,
                 AgentId = agentId,
                 RegisteredOn = Now,
@@ -360,19 +347,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now,
                 UpdatedByUsername = username,
                 BrandId = brand.Id,
-                Wallets = new[]
-                {
-                    new Wallet
+                Wallets =
+                    new[]
                     {
-                        Id = walletId,
-                        PlayerCode = playerCode,
-                        CurrencyCode = currencyCode,
-                        ExternalCurrencyCode = currencyCode,
-                        Balance = 1000,
-                        CreatedOn = Now,
-                        UpdatedOn = Now
-                    }
-                },
+                        new Wallet
+                        {
+                            Id = walletId,
+                            PlayerCode = playerCode,
+                            CurrencyCode = currencyCode,
+                            ExternalCurrencyCode = currencyCode,
+                            Balance = 1000,
+                            CreatedOn = Now,
+                            UpdatedOn = Now
+                        }
+                    },
                 Banks = new[]
                 {
                     new PlayerBank
@@ -739,6 +727,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
+            var beforeFromDate = DateTimeOffset.Now.AddDays(-7);
+            var beforeToDate = DateTimeOffset.Now.AddDays(-1);
+            var afterFromDate = DateTimeOffset.Now;
+            var afterToDate = DateTimeOffset.Now.AddDays(6);
+
             return new()
             {
                 Id = brand.Id,
@@ -756,6 +749,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ClientId = brand.ClientId,
                 SecretKey = brand.SecretKey,
                 ApiKey = brand.ApiKey,
+                SettlementIntervalType = SettlementIntervalType.Daily,
+                BeforeFromDateTime = new(beforeFromDate.Year, beforeFromDate.Month, beforeFromDate.Day, 0, 0, 0,
+                    beforeFromDate.Offset),
+                BeforeToDateTime = new(beforeToDate.Year, beforeToDate.Month, beforeToDate.Day, 0, 0, 0,
+                    beforeToDate.Offset),
+                AfterFromDateTime = new(afterFromDate.Year, afterFromDate.Month, afterFromDate.Day, 0, 0, 0,
+                    afterFromDate.Offset),
+                AfterToDateTime = new(afterToDate.Year, afterToDate.Month, afterToDate.Day, 0, 0, 0,
+                    afterToDate.Offset),
                 Currencies =
                     brand.Currencies.Select(curr => new BrandCurrency
                     {

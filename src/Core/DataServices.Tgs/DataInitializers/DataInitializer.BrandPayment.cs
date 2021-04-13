@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -44,6 +45,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await GeneratePaymentsAsync();
             await GeneratePaymentMethodsAsync();
             await GeneratePaymentChannelsAsync();
+            await GeneratePaymentMethodChannelsAsync();
+
+            await _repository.SaveChangesAsync();
             await GenerateBrandPaymentsAsync();
         }
 
@@ -60,7 +64,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedByUsername = AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             }).ToArray();
-            return _repository.BulkInsertAsync(payments);
+
+            return _repository.Payments.AddRangeAsync(payments);
         }
 
         private Task GeneratePaymentMethodsAsync()
@@ -69,15 +74,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 Id = p.Value.Item1,
                 Code = p.Key,
-                Name = p.Key,
-                PaymentId = p.Value.Item2,
                 Description = "online payment method",
-                CreatedByUsername = AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
             }).ToArray();
-            return _repository.BulkInsertAsync(paymentMethods);
+
+            return _repository.PaymentMethods.AddRangeAsync(paymentMethods);
         }
 
         private Task GeneratePaymentChannelsAsync()
@@ -86,91 +86,103 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 Id = p.Value.Item1,
                 Code = p.Key,
-                Name = p.Key,
                 Description = "online payment channel",
-                PaymentId = p.Value.Item2.Item2,
-                PaymentMethodId = p.Value.Item2.Item1,
-                CreatedByUsername = AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
             }).ToArray();
-            return _repository.BulkInsertAsync(paymentVendors);
+
+            return _repository.PaymentChannels.AddRangeAsync(paymentVendors);
+        }
+
+        private Task GeneratePaymentMethodChannelsAsync()
+        {
+            var query = from payment in Payments
+                        from method in PaymentMethods
+                        from channel in PaymentChannels
+                        select new PaymentMethodChannel
+                        {
+                            Id = Guid.NewGuid(),
+                            PaymentId = payment.Value,
+                            MethodId = method.Value.Item1,
+                            ChannelId = channel.Value.Item1,
+                            CreatedByUsername = AdminUsername,
+                            CreatedOn = DateTimeOffset.Now,
+                            UpdatedByUsername = AdminUsername,
+                            UpdatedOn = DateTimeOffset.Now
+                        };
+
+            return _repository.PaymentMethodChannels.AddRangeAsync(query);
         }
 
         private async Task GenerateBrandPaymentsAsync()
         {
-            var brandPayments = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
-                .Distinct()
-                .Select(x =>
-                {
-                    var paymentId = GuidExtensions.NewSequentialGuid();
-                    return new BrandPayment
-                    {
-                        Id = paymentId,
-                        DisplayOrder = 1,
-                        BrandId = x.Id,
-                        PaymentId = Payments[Help2Pay],
-                        PaymentMethodId = PaymentMethods[AlipayPayment].Item1,
-                        PaymentChannelId = PaymentChannels[BankTransfer].Item1,
-                        TransferType = PaymentTransferType.Deposit,
-                        ChannelName = "阿里pay",
-                        PaymentStatus = SwitchStatus.Enabled,
-                        TransferLimitFrom = 10,
-                        TransferLimitTo = 100000,
-                        PlayerListCondition = PlayerListCondition.All,
-                        AllPlayers = true,
-                        IdentityAuthentication = true,
-                        PhoneAuthentication = true,
-                        DepositedAmountUnlimited = true,
-                        DepositedAmountMin = 100,
-                        DepositedAmountMax = 1000,
-                        Reason = "Reason",
-                        FeePercentage = 50,
-                        LowestFee = 50,
-                        HighestFee = 500,
-                        BrandPaymentPlayers =
-                            new[]
-                            {
-                                new BrandPaymentPlayer
-                                {
-                                    PlayerCode = _players[0].PlayerCode,
-                                    ListType = PlayerListType.White,
-                                    BrandPaymentId = paymentId
-                                },
-                                new BrandPaymentPlayer
-                                {
-                                    PlayerCode = _players[1].PlayerCode,
-                                    ListType = PlayerListType.Black,
-                                    BrandPaymentId = paymentId
-                                }
-                            },
-                        VipLevels = new[]
-                        {
-                            new BrandPaymentVipLevel { BrandPaymentId = paymentId, VipLevelId = _vipLevels[0].Id },
-                            new BrandPaymentVipLevel { BrandPaymentId = paymentId, VipLevelId = _vipLevels[1].Id }
-                        },
-                        ExtendedData = JsonSerializer.Serialize(
-                            new
-                            {
-                                BankAccount = "987654321",
-                                Name = "測試者"
-                            },
-                            new JsonSerializerOptions
-                            {
-                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                                WriteIndented = false
-                            }),
-                        CreatedByUsername = AdminUsername,
-                        CreatedOn = DateTimeOffset.Now,
-                        UpdatedByUsername = AdminUsername,
-                        UpdatedOn = DateTimeOffset.Now
-                    };
-                }).ToArray();
+            var allPaymentMethodChannels = await _repository.PaymentMethodChannels.ToArrayAsync();
+            var allBrands = Resellers
+                .SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+                .Distinct();
 
-            await _repository.BulkInsertAsync(brandPayments);
-            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.VipLevels).ToArray());
-            await _repository.BulkInsertAsync(brandPayments.SelectMany(p => p.BrandPaymentPlayers).ToArray());
+            var brandPayments = from brand in allBrands
+                                from pmc in allPaymentMethodChannels
+                                let brandPaymentId = GuidExtensions.NewSequentialGuid()
+                                select new BrandPayment
+                                {
+                                    Id = brandPaymentId,
+                                    DisplayOrder = 1,
+                                    BrandId = brand.Id,
+                                    PaymentMethodChannelId = pmc.Id,
+                                    TransferType = PaymentTransferType.Deposit,
+                                    ChannelName = "阿里pay",
+                                    PaymentStatus = SwitchStatus.Enabled,
+                                    TransferLimitFrom = 10,
+                                    TransferLimitTo = 100000,
+                                    PlayerListCondition = PlayerListCondition.All,
+                                    AllPlayers = true,
+                                    IdentityAuthentication = true,
+                                    PhoneAuthentication = true,
+                                    DepositedAmountUnlimited = true,
+                                    DepositedAmountMin = 100,
+                                    DepositedAmountMax = 1000,
+                                    Reason = "Reason",
+                                    FeePercentage = 50,
+                                    LowestFee = 50,
+                                    HighestFee = 500,
+                                    BrandPaymentPlayers =
+                                    new[]
+                                    {
+                                        new BrandPaymentPlayer
+                                        {
+                                            PlayerCode = _players[0].PlayerCode,
+                                            ListType = PlayerListType.White,
+                                            BrandPaymentId = brandPaymentId
+                                        },
+                                        new BrandPaymentPlayer
+                                        {
+                                            PlayerCode = _players[1].PlayerCode,
+                                            ListType = PlayerListType.Black,
+                                            BrandPaymentId = brandPaymentId
+                                        }
+                                    },
+                                    VipLevels = new[]
+                                    {
+                                        new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
+                                        new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                    },
+                                    ExtendedData = JsonSerializer.Serialize(
+                                        new
+                                        {
+                                            BankAccount = "987654321",
+                                            Name = "測試者"
+                                        },
+                                        new JsonSerializerOptions
+                                        {
+                                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                            WriteIndented = false
+                                        }),
+                                    CreatedByUsername = AdminUsername,
+                                    CreatedOn = DateTimeOffset.Now,
+                                    UpdatedByUsername = AdminUsername,
+                                    UpdatedOn = DateTimeOffset.Now
+                                };
+
+            await _repository.BrandPayments.AddRangeAsync(brandPayments);
         }
     }
 }

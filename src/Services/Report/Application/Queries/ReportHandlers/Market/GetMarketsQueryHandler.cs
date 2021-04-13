@@ -38,7 +38,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
 
             return dates.GroupJoin(_service.GetPlayerAggregateQueries()
                         .Where(x => x.BrandId == request.BrandId)
-                        .Where(x => x.ReportDate >= from && x.ReportDate <= to), date => date,
+                        .Where(x => x.ReportDate >= from && x.ReportDate < to), date => date,
                     market => market.ReportDate,
                     (date, markets) => new {date, markets})
                 .SelectMany(x => x.markets.DefaultIfEmpty(),

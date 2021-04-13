@@ -123,7 +123,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             services.AddSingleton<IConfiguration>(configuration);
 
             services.AddTgsRepository(configuration, "Tgs")
-                .AddJson()
+                .AddSystemJsonSerializer()
                 .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()

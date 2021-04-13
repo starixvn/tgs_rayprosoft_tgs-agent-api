@@ -92,9 +92,7 @@ const ReportContent = ({ brandId }) => {
         deleteCache
     } = usePlayerContributionList({
         ...toApiParams(state),
-        /*
         sortby: "username",
-        */
         from,
         to: startOfNextDay(to)
     })
@@ -242,9 +240,9 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 disableSortBy: true
             }),
             textColumn({
-                id: "accountType",
+                id: "type",
                 accessor: (row) => row,
-                Header: <Trans zh="账户类型" en="Account Type" />,
+                Header: <Trans zh="账户类型" en="Type" />,
                 Cell: ({ value }) => (
                     <Text.Block>
                         <Trans zh="玩家" en="Player" />

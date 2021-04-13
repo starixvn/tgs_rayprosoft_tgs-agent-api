@@ -289,18 +289,20 @@ const useColumns = ({
                 Cell: ({ value }) => {
                     let { id } = value
                     let displayOrder = displayOrders[id] ?? value.displayOrder
+                    let { ref: inputRef, ...formProps } = register(id, {
+                        valueAsNumber: true
+                    })
                     return (
                         <Input
                             name={id}
-                            inputRef={register({
-                                valueAsNumber: true
-                            })}
+                            inputRef={inputRef}
                             type="number"
                             size="small"
                             min="0"
                             minLength="1"
                             width="5em"
                             defaultValue={displayOrder}
+                            {...formProps}
                             onChange={(event) => {
                                 let displayOrder = parseInt(event.target.value)
                                 if (Number.isFinite(displayOrder)) {

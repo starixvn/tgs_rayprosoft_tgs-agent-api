@@ -16,8 +16,9 @@ export const Input = ({
     let formContext = useFormContext()
     register = register ?? formContext?.register
 
+    let formProps = {}
     if (name && !inputRef && register) {
-        inputRef = register({
+        let { ref, ...rest } = register(name, {
             required: props.required,
             min: props.min,
             max: props.max,
@@ -26,12 +27,16 @@ export const Input = ({
             validate: props.validate,
             ...registerOptions
         })
+        formProps = rest
+        inputRef = ref
     }
 
-    let error = formContext?.errors[name]
+    let error = formContext?.formState?.errors[name]
     let state = error && "danger"
 
-    return <_Input name={name} inputRef={inputRef} state={state} {...props} />
+    return (
+        <_Input state={state} inputRef={inputRef} {...formProps} {...props} />
+    )
 }
 
 export const InputField = ({
@@ -47,36 +52,23 @@ export const InputField = ({
     let formContext = useFormContext()
     register = register ?? formContext?.register
 
-    let defaultRequiredMessage = useRequiredMessage()
-
+    let formProps = {}
     if (name && !inputRef && register) {
-        inputRef = register({
-            required: {
-                value: props.required,
-                message: props.requiredMessage ?? defaultRequiredMessage
-            },
-            min: {
-                value: props.min,
-                message: props.minMessage
-            },
-            max: {
-                value: props.max,
-                message: props.maxMessage
-            },
-            minLength: {
-                value: props.minLength,
-                message: props.minLengthMessage
-            },
-            maxLength: {
-                value: props.maxLength,
-                message: props.maxLengthMessage
-            },
+        let { ref, ...rest } = register(name, {
+            required: props.required,
+            min: props.min,
+            max: props.max,
+            minLength: props.minLength,
+            maxLength: props.maxLength,
             validate: props.validate,
             ...registerOptions
         })
+        formProps = rest
+        inputRef = ref
     }
 
-    let error = formContext?.errors[name]
+    let error = formContext?.formState?.errors[name]
+
     let state = error && "danger"
     validationText = validationText ?? error?.message
 
@@ -88,11 +80,11 @@ export const InputField = ({
 
     return (
         <_InputField
-            name={name}
             inputRef={inputRef}
             state={state}
             validationText={validationText}
             addonAfter={addonAfter}
+            {...formProps}
             {...props}
         />
     )

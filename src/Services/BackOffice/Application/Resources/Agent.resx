@@ -106,4 +106,10 @@
   <data name="ParentAgentNotExists" xml:space="preserve">
     <value>Parent agent is not exists.</value>
   </data>
+  <data name="WalletNotFound" xml:space="preserve">
+    <value>Wallet is not found.</value>
+  </data>
+  <data name="BalanceMustGreaterThanZero" xml:space="preserve">
+    <value>Balance must greater than 0.</value>
+  </data>
 </root>

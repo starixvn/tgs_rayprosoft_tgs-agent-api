@@ -16,93 +16,96 @@ const Friday = "Friday"
 const Saturday = "Saturday"
 
 export const Day = {
-  Sunday,
-  Monday,
-  Tuesday,
-  Wednesday,
-  Thursday,
-  Friday,
-  Saturday
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday
 }
 
 const toLocale = (code) => {
-  switch (code) {
-    case Locales.en:
-      return enUS
-    default:
-      return zhCN
-  }
+    switch (code) {
+        case Locales.en:
+            return enUS
+        default:
+            return zhCN
+    }
 }
 
 export const fromWeekDayString = (value) => {
-  const map = {
-    Sunday: 0,
-    Monday: 1,
-    Tuesday: 2,
-    Wednesday: 3,
-    Thursday: 4,
-    Friday: 5,
-    Saturday: 6
-  }
-  return map[value]
+    const map = {
+        Sunday: 0,
+        Monday: 1,
+        Tuesday: 2,
+        Wednesday: 3,
+        Thursday: 4,
+        Friday: 5,
+        Saturday: 6
+    }
+    return map[value]
 }
 
 export const useFormattedDay = (value) => {
-  value = typeof value === "string" ? fromWeekDayString(value) : value
+    value = typeof value === "string" ? fromWeekDayString(value) : value
 
-  let code = useLocale()
-  let locale = toLocale(code)
-  let date = setDay(new Date(), value)
-  return format(date, `EEEE`, { locale })
+    let code = useLocale()
+    let locale = toLocale(code)
+    let date = setDay(new Date(), value)
+    return format(date, `EEEE`, { locale })
 }
 
 export const WeekDaySelect = ({ name, required, selectRef, ...props }) => {
-  let { register, errors } = useFormContext()
-  if (!selectRef) {
-    selectRef = register({ required })
-  }
+    let { register, formState } = useFormContext()
 
-  let options = [
-    {
-      label: useFormattedDay(Monday),
-      value: Monday
-    },
-    {
-      label: useFormattedDay(Tuesday),
-      value: Tuesday
-    },
-    {
-      label: useFormattedDay(Wednesday),
-      value: Wednesday
-    },
-    {
-      label: useFormattedDay(Thursday),
-      value: Thursday
-    },
-    {
-      label: useFormattedDay(Friday),
-      value: Friday
-    },
-    {
-      label: useFormattedDay(Saturday),
-      value: Saturday
-    },
-    {
-      label: useFormattedDay(Sunday),
-      value: Sunday
+    let formProps = {}
+    if (!selectRef) {
+        let { ref, ...rest } = register(name, { required })
+        formProps = rest
+        selectRef = ref
     }
-  ]
 
-  let error = errors?.[name]
-  let state = error && "danger"
-  return (
-    <Select
-      name={name}
-      options={options}
-      required={required}
-      state={state}
-      selectRef={selectRef}
-      {...props}
-    />
-  )
+    let options = [
+        {
+            label: useFormattedDay(Monday),
+            value: Monday
+        },
+        {
+            label: useFormattedDay(Tuesday),
+            value: Tuesday
+        },
+        {
+            label: useFormattedDay(Wednesday),
+            value: Wednesday
+        },
+        {
+            label: useFormattedDay(Thursday),
+            value: Thursday
+        },
+        {
+            label: useFormattedDay(Friday),
+            value: Friday
+        },
+        {
+            label: useFormattedDay(Saturday),
+            value: Saturday
+        },
+        {
+            label: useFormattedDay(Sunday),
+            value: Sunday
+        }
+    ]
+
+    let error = formState?.errors?.[name]
+    let state = error && "danger"
+    return (
+        <Select
+            options={options}
+            state={state}
+            selectRef={selectRef}
+            {...formProps}
+            {...props}
+        />
+    )
 }

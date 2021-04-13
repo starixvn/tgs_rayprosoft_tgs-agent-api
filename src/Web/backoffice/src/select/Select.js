@@ -13,8 +13,10 @@ export const Select = ({
 }) => {
     let formContext = useFormContext()
     register = register ?? formContext?.register
-    if (!selectRef && register) {
-        selectRef = register({
+
+    let formProps = {}
+    if (name && !selectRef && register) {
+        let { ref, ...rest } = register(name, {
             required: props.required,
             min: props.min,
             max: props.max,
@@ -23,12 +25,23 @@ export const Select = ({
             validate: props.validate,
             ...registerOptions
         })
+        formProps = rest
+        selectRef = ref
     }
 
-    state = state ?? (formContext?.errors?.[name] && "danger")
+    state = state ?? (formContext?.formState?.errors?.[name] && "danger")
 
     return (
-        <_Select name={name} selectRef={selectRef} state={state} {...props} />
+        <_Select
+            selectRef={selectRef}
+            state={state}
+            {...formProps}
+            {...props}
+            onChange={(event) => {
+                formProps?.onChange?.(event)
+                props?.onChange?.(event)
+            }}
+        />
     )
 }
 
@@ -43,41 +56,29 @@ export const SelectField = ({
     let formContext = useFormContext()
 
     register = register ?? formContext?.register
-    if (!selectRef && register) {
-        selectRef = register({
-            required: {
-                value: props.required,
-                message: props.requiredMessage
-            },
-            min: {
-                value: props.min,
-                message: props.minMessage
-            },
-            max: {
-                value: props.max,
-                message: props.maxMessage
-            },
-            minLength: {
-                value: props.minLength,
-                message: props.minLengthMessage
-            },
-            maxLength: {
-                value: props.maxLength,
-                message: props.maxLengthMessage
-            },
+    let formProps = {}
+    if (name && !selectRef && register) {
+        let { ref, ...rest } = register(name, {
+            required: props.required,
+            min: props.min,
+            max: props.max,
+            minLength: props.minLength,
+            maxLength: props.maxLength,
             validate: props.validate,
             ...registerOptions
         })
+        formProps = rest
+        selectRef = ref
     }
 
-    let error = formContext?.errors[name]
+    let error = formContext?.formState?.errors[name]
     let state = error && "danger"
     validationText = validationText ?? error?.message
 
     return (
         <_SelectField
-            name={name}
             selectRef={selectRef}
+            {...formProps}
             state={state}
             validationText={validationText}
             {...props}

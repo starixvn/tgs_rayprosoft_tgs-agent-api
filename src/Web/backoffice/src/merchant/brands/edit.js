@@ -21,7 +21,7 @@ import {
     ConfirmButtonFooter
 } from "../../form/ConfirmButtonFooter"
 import { Input, InputField } from "../../input/Input"
-import { MerchantIdHookFormSelect } from "../MerchantSelect"
+import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import { useAddBrand, useBrand, useUpdateBrand } from "./client"
 import { useFormContext, useFieldArray, useForm } from "react-hook-form"
@@ -455,9 +455,7 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
                         </NormalLabel>
                         <Box alignY="center">
                             {isAdd && (
-                                <MerchantIdHookFormSelect
-                                    end={RoleTypes.Licensee}
-                                />
+                                <MerchantIdSelect end={RoleTypes.Licensee} />
                             )}
                             {!isAdd && (
                                 <Text.Block>{licensee?.name}</Text.Block>
@@ -540,12 +538,6 @@ const EditBody = ({ record, readonly, isAdd = false }) => {
                     readonly={readonly}
                     showBetLimitDefault
                 />
-                {/* <CurrencyFieldsBox readonly={readonly} />
-
-                <BrandBetLimitFieldsBox
-                    readonly={readonly}
-                    currencyFieldArrayName={currencyFieldArrayName}
-                /> */}
 
                 <BrandGameProviderFieldsBox readonly={readonly} />
             </FieldValues>
@@ -564,7 +556,7 @@ const LanguageFieldsBox = ({ readonly }) => {
     })
     let languages = watch(fieldsName)
 
-    if (languages.length == 0) {
+    if (!languages || languages.length == 0) {
         return null
     }
 
@@ -592,8 +584,8 @@ const BrandGameProviderFieldsBox = ({ readonly }) => {
         keyName: "_id"
     })
     let gameProviders = watch(fieldsName)
-    console.log("gameProviders", gameProviders)
-    if (gameProviders.length == 0) {
+
+    if (!gameProviders || gameProviders.length == 0) {
         return null
     }
 
@@ -607,47 +599,6 @@ const BrandGameProviderFieldsBox = ({ readonly }) => {
                 fieldArrayContext={fieldArrayContext}
                 disabled={readonly}
             />
-        </>
-    )
-}
-
-//TODO: rm
-const BrandBetLimitFieldsBox = ({ currencyFieldArrayName, readonly }) => {
-    let { watch, control, getValues } = useFormContext()
-
-    let fieldsName = "betLimits"
-    let fieldArrayContext = useFieldArray({
-        control,
-        name: fieldsName,
-        keyName: "_id"
-    })
-
-    let currencies = watch(currencyFieldArrayName)
-    let betLimits = watch(fieldsName)
-
-    if (betLimits.length == 0) {
-        return null
-    }
-
-    let requiredCurrencyCodes = mapCheckedCurrencyCodes(
-        currencyFieldArrayName,
-        toCheckedFieldName,
-        getValues,
-        currencies
-    )
-
-    return (
-        <>
-            <NormalLabel>
-                <Trans zh="品牌限红" en="Brand Bet Limit" />
-            </NormalLabel>
-            <FieldStack marginTop="major-1">
-                <BrandBetLimitCheckboxGroupTable
-                    fieldArrayContext={fieldArrayContext}
-                    disabled={readonly}
-                    requiredCurrencyCodes={requiredCurrencyCodes}
-                />
-            </FieldStack>
         </>
     )
 }

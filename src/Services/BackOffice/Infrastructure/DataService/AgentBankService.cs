@@ -18,7 +18,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<AgentBank> GetAgentBankAsync(Expression<Func<AgentBank, bool>> predicate,
             Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery = null);
 
-        IQueryable<AgentBank> GetAgentBanksAsync(Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery = null,
+        IQueryable<AgentBank> GetAgentBanks(Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery = null,
             bool tracking = false);
 
         Task CreateAgentBankAsync(CreateAgentBankRequest request);
@@ -59,7 +59,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<AgentBank> IAgentBankService.GetAgentBanksAsync(
+        IQueryable<AgentBank> IAgentBankService.GetAgentBanks(
             Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);

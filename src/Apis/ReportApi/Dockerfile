@@ -6,7 +6,11 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
+ARG BuildConfiguration=Release
+RUN --mount=type=secret,id=nuget,dst=/pat cp /pat ~/.nuget/NuGet/NuGet.Config
+RUN dotnet nuget remove source 'Microsoft Visual Studio Offline Packages' || true
 WORKDIR /dest
+COPY ["nuget.config", "."]
 COPY ["src/Apis/ReportApi/ReportApi.csproj", "src/Apis/ReportApi/"]
 COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
 COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
@@ -20,7 +24,7 @@ COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataS
 RUN dotnet restore "src/Apis/ReportApi/ReportApi.csproj"
 COPY . .
 WORKDIR "/dest/src/Apis/ReportApi"
-RUN dotnet publish "ReportApi.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "ReportApi.csproj" -c ${BuildConfiguration} -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app

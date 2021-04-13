@@ -55,7 +55,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 VipCardGameRebatePercentage = model.VipCardGameRebatePercentage,
                 VipSportsRebatePercentage = model.VipSportsRebatePercentage,
                 VipVirtualSportsRebatePercentage = model.VipVirtualSportsRebatePercentage,
-                VipLotteryRebatePercentage = model.VipLotteryRebatePercentage
+                VipLotteryRebatePercentage = model.VipLotteryRebatePercentage,
+                AgentDividendPercentage = model.AgentDividendPercentage
             }).ToArray());
 
         Task IPlayerGameTypeAggregateService.DeletePlayerGameTypeAggregatesAsync(PlayerGameTypeAggregate[] markets) =>

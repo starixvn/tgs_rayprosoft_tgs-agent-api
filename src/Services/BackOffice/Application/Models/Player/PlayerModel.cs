@@ -8,12 +8,12 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public string Username { get; init; }
         public string RealName { get; init; }
         public int? VipLevel { get; init; }
-        public string ParentUsername { get; init; }
+        public Guid? VipId { get; init; }
+        public string AgentUsername { get; init; }
         public DateTimeOffset RegisteredOn { get; init; }
         public decimal Balance { get; init; }
         public PlayerStatus Status { get; init; }
         public string StatusName { get; init; }
-        public bool HasAgent { get; init; }
 
         public string Phone { get; init; }
         public string Email { get; init; }

@@ -34,7 +34,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(0);
 
+            builder.Property(c => c.Remark);
+
+            builder.Property(c => c.ManualReceiptFileId);
+
+            builder.Property(c => c.ManualReceiptExternalUrl);
+
             builder.Property(c => c.CreatedOn)
+                .IsRequired()
+                .HasDefaultValueSql("Now()");
+
+            builder.Property(c => c.UpdateOn)
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 

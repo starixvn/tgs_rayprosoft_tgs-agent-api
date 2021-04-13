@@ -23,6 +23,11 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string SecretKey { get; set; }
 
         public string ApiKey { get; set; }
+        public SettlementIntervalType SettlementIntervalType { get; set; }
+        public DateTimeOffset BeforeFromDateTime { get; set; }
+        public DateTimeOffset BeforeToDateTime { get; set; }
+        public DateTimeOffset AfterFromDateTime { get; set; }
+        public DateTimeOffset AfterToDateTime { get; set; }
 
         public virtual ICollection<Player> Players { get; set; }
 

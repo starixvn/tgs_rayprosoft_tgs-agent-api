@@ -30,11 +30,7 @@ import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel as Label } from "../../form/Label"
 import { BrandPaymentStatusToggleButton } from "./status"
-import {
-    useBrandPayment,
-    useUpdatePayment,
-    useBrandPaymentUpload
-} from "./client"
+import { useUpdatePayment, useBrandPaymentUpload } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
     AllPlayerText,
@@ -53,6 +49,7 @@ import Textarea from "../../textarea"
 import Input from "../../input/Input"
 import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
+import clone from "clone-deep"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -82,19 +79,22 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
         en: "Edit"
     })
 
+    /*
     let {
         data: brandPaymentData = {},
         isLoading: isLoadingPayment,
         error: getPaymentDataError,
         deleteCache: deleteGetPaymentCache
     } = useBrandPayment(record?.id)
+    */
 
     let [submitData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useUpdatePayment(
+
+    let { result, isLoading, error, mutate, deleteCache } = useUpdatePayment(
         record.id,
         submitData
     )
-
+    /*
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
     }
@@ -104,17 +104,20 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             <AlertDialog {...getPaymentDataError} onClickClose={dialog.hide} />
         )
     }
+    */
 
     return (
         <FormDialog
-            defaultValues={{
-                ...brandPaymentData.payment,
+            defaultValues={clone({
+                ...record,
                 reason: ""
-            }}
+            })}
             onSubmit={(data) => {
                 setSubmit({
                     ...record,
+                    /*
                     ...brandPaymentData.payment,
+                    */
                     ...data,
                     depositedAmountMax:
                         data?.depositedAmountMax ?? record?.depositedAmountMax
@@ -124,11 +127,12 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             isLoading={isLoading}
             error={error}
             onCloseErrorAlert={() => {
-                setSubmit(undefined)
+                deleteCache()
                 mutate(undefined, false)
+                setSubmit(undefined)
             }}
             onSubmitted={() => {
-                deleteGetPaymentCache()
+                // deleteGetPaymentCache()
                 onSubmitted?.()
             }}
             footer={
@@ -163,7 +167,7 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             `}
             dialog={dialog}
         >
-            <EditBody record={brandPaymentData.payment} />
+            <EditBody record={record} />
         </FormDialog>
     )
 }
@@ -383,10 +387,10 @@ const UploadListColumn = ({ name = "", title, fileName = "" }) => {
         <Controller
             control={control}
             name={name}
-            render={(
-                { onChange, onBlur, value, name, ref },
-                { invalid, isTouched, isDirty }
-            ) => (
+            render={({
+                field: { onChange, onBlur, value, name, ref },
+                fieldState: { invalid, isTouched, isDirty }
+            }) => (
                 <Columns.Column display="flex" flexDirection="column">
                     {error && (
                         <AlertDialog {...error} onClickClose={resetFormData} />

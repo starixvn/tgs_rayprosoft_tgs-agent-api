@@ -26,7 +26,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Reseller
         [Description("Get resellers: 總公司列表")]
         public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
         {
-            return _service.GetResellersAsync(request)
+            return _service.GetResellers(request)
                 .Where(ResellerId, x => x.Id == ResellerId)
                 .Select(x => new ResellerModel
                 {

@@ -31,16 +31,28 @@ namespace ReportApi.Controllers
         public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id) =>
             _mediator.Send(new GetAgentTeamInfoRequest(id));
 
-        [HttpGet("bonus")]
-        [Description("Get agent bonus report")]
+        [HttpGet("dividends")]
+        [Description("Get agent dividends report")]
         public Task<PagedResponse<AgentDividendModel>>
-            GetAgentBonusAsync([FromQuery] GetAgentDividendRequest request) =>
+            GetAgentDividendsAsync([FromQuery] GetAgentDividendsRequest request) =>
+            _mediator.Send(request);
+
+        [HttpGet("dividendDetails")]
+        [Description("Get agent dividend details report")]
+        public Task<PagedResponse<AgentDividendDetailModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendDetailsRequest request) =>
             _mediator.Send(request);
 
         [HttpGet("{id}/winLoss")]
         [Description("Get agent player Win/Loss report")]
         public Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(
             [FromQuery] GetAgentPlayerWinLossRequest request) =>
+            _mediator.Send(request);
+
+        [HttpPost("dividends")]
+        [Description("Create agent dividends")]
+        public Task<MessageResponse> CreateAgentDividendsAsync(
+            [FromQuery] CreateAgentDividendsRequest request) =>
             _mediator.Send(request);
     }
 }

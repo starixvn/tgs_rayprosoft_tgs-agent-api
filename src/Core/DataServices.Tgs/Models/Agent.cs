@@ -23,6 +23,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid? ParentAgentId { get; set; }
         public virtual Agent ParentAgent { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
+        public Guid DefaultWalletId { get; set; }
         public decimal CommissionPercentage { get; set; } //佔成
         public decimal DividendPercentage { get; set; }
         public decimal LiveDealerRebatePercentage { get; set; }

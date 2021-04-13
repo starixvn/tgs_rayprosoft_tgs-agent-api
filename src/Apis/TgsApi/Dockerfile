@@ -5,7 +5,11 @@ WORKDIR /app
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS publish
+ARG BuildConfiguration=Release
+RUN --mount=type=secret,id=nuget,dst=/pat cp /pat ~/.nuget/NuGet/NuGet.Config
+RUN dotnet nuget remove source 'Microsoft Visual Studio Offline Packages' || true
 WORKDIR /dest
+COPY ["nuget.config", "."]
 COPY ["src/Apis/TgsApi/TgsApi.csproj", "src/Apis/TgsApi/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]
 COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
@@ -19,7 +23,7 @@ COPY ["src/Services/GameOperations/GameOperations.csproj", "src/Services/GameOpe
 RUN dotnet restore "src/Apis/TgsApi/TgsApi.csproj"
 COPY . .
 WORKDIR "/dest/src/Apis/TgsApi"
-RUN dotnet publish "TgsApi.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "TgsApi.csproj" -c ${BuildConfiguration} -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app

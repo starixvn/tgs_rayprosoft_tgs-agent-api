@@ -36,7 +36,7 @@ import startOfToday from "date-fns/startOfToday"
 import AlertDialog from "../../dialog/Alert"
 import textColumn from "../../table/column/textColumn"
 import VipLevelSelect from "../../vip-levels/VipLevelSelect"
-import { useAgentBonusList } from "./client"
+import { useAgentDividendList } from "./client"
 import { AgentWinLossDialogDisclosure } from "./AgentWinLoss"
 import { AgentBonusDetailDialogDisclosure } from "./AgentBonusDetail"
 
@@ -86,15 +86,12 @@ const ReportContent = ({ brandId }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, username, from, to } = state
-    let { isLoading, data, error, mutate, deleteCache } = useAgentBonusList(
-        username,
-        {
-            ...toApiParams(state),
-            sortby: "username",
-            from,
-            to: startOfNextDay(to)
-        }
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useAgentDividendList({
+        ...toApiParams(state),
+        sortby: "username",
+        from,
+        to: startOfNextDay(to)
+    })
 
     let DataRetentionDays = 180
     let minDate = subDays(dateRange.start, DataRetentionDays)
@@ -144,7 +141,7 @@ const ReportContent = ({ brandId }) => {
                     }}
                 />
             }
-            title={<Trans zh="代理分红报表" en="Agent Bonus Report" />}
+            title={<Trans zh="代理分红报表" en="Agent Dividend Report" />}
         >
             {username && (
                 <Table

@@ -5,6 +5,7 @@ import AlertDialog from "../dialog/Alert"
 import { useVipLevelList } from "./client"
 import Select from "../select/Select"
 import { useTrans } from "../i18n"
+import { Controller, useFormContext } from "react-hook-form"
 
 export const VipLevelSelect = ({
     placeholder,
@@ -13,16 +14,29 @@ export const VipLevelSelect = ({
     optionValue,
     ...props
 }) => {
+    let formMethods = useFormContext()
     let defaultPlaceholder = useTrans({
         zh: "选择 VIP 等级",
         en: "Select VIP Level"
     })
-    placeholder = placeholder ?? defaultPlaceholder
 
     let { isLoading, data, error, mutate, deleteCache } = useVipLevelList({
         brandId,
         showAll: true
     })
+
+    if (props.name && formMethods && isLoading) {
+        return (
+            <Controller
+                name={props.name}
+                control={formMethods.control}
+                defaultValue={props.defaultValue}
+                render={({ field, fieldState, formState }) => {
+                    return <Select isLoading={true} options={[]} />
+                }}
+            />
+        )
+    }
 
     let vipLevelOptions =
         data?.items?.map((item) => {
@@ -33,6 +47,7 @@ export const VipLevelSelect = ({
             }
         }) ?? []
 
+    placeholder = placeholder ?? defaultPlaceholder
     let options =
         typeof placeholder === "string"
             ? [
