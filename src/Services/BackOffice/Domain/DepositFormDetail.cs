@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace TGS.Services.BackOffice.Domain
+{
+    public record DepositFormDetail(
+        Guid Id,
+        string PlayerCode,
+        string UserName,
+        Guid BrandId,
+        Guid BrandPaymentId,
+        string ChannelName,
+        Guid PaymentMethodId,
+        string BankAccount,
+        decimal Amount,
+        string Remark,
+        DateTimeOffset CreateOn,
+        DateTimeOffset UpdateOn,
+        string BrandPaymentExtendData);
+}

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
@@ -78,13 +81,51 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         /// <summary>
+        /// Gets the deposit form detail.
+        /// </summary>
+        /// <param name="getDepositFormService">The get deposit form service.</param>
+        /// <param name="brandId">The brand identifier.</param>
+        /// <param name="formId">The form identifier.</param>
+        /// <returns></returns>
+        [HttpGet("{brandId}/{formId}")]
+        public async Task<GenericResponse<DepositFormDetailViewModel>> GetDepositFormDetailAsync(
+            [FromServices] IGetService<GetDepositFormDetailQuery, DepositFormDetail> getDepositFormService,
+            Guid brandId,
+            Guid formId)
+        {
+            var formDetail = await getDepositFormService
+                .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
+                .ConfigureAwait(false);
+
+            return new GenericResponse<DepositFormDetailViewModel>
+            {
+                Valid = true,
+                Data = new DepositFormDetailViewModel
+                {
+                    Id = formDetail.Id,
+                    PlayerCode = formDetail.PlayerCode,
+                    UserName = formDetail.UserName,
+                    BrandId = formDetail.BrandId,
+                    BrandPaymentId = formDetail.BrandPaymentId,
+                    PaymentMethodId = formDetail.PaymentMethodId,
+                    ChannelName = formDetail.ChannelName,
+                    Amount = formDetail.Amount,
+                    Remark = formDetail.Remark,
+                    CreateOn = formDetail.CreateOn,
+                    UpdateOn = formDetail.UpdateOn,
+                    BrandPaymentExtendData = JsonDocument.Parse(formDetail.BrandPaymentExtendData)
+                }
+            };
+        }
+
+        /// <summary>
         /// Reviews the deposit form.
         /// </summary>
         /// <param name="reviewCommandService">The review command service.</param>
         /// <param name="formId">The form identifier.</param>
         /// <param name="reviewResponses">The review responses.</param>
         [HttpPost("{formId}")]
-        public async Task ReviewDepositFormAsync(
+        public async Task<MessageResponse> ReviewDepositFormAsync(
             [FromServices] ICommandService<ReviewDepositFormCommand> reviewCommandService,
             Guid formId,
             [FromBody] ReviewStatus reviewResponses)
@@ -96,6 +137,11 @@ namespace TGS.Apis.BackendOffice.Controllers
             await reviewCommandService
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
+
+            return new MessageResponse
+            {
+                Valid = true
+            };
         }
     }
 }
