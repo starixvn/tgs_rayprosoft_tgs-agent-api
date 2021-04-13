@@ -50,21 +50,14 @@ export const EditPanel = ({
     onClickClose,
     ...props
 }) => {
-    let {
-        realName = "",
-        vipId = "",
-        parentUsername = "",
-        status = "",
-        hasAgent
-    } = player
+    let { realName = "", vipId = "", parentUsername = "", status = "" } = player
 
     let formMethods = useForm({
         defaultValues: {
             realName: realName ?? "",
             vipId,
             parentUsername: parentUsername ?? "",
-            status,
-            hasAgent: hasAgent.toString()
+            status
         }
     })
 
@@ -87,11 +80,7 @@ export const EditPanel = ({
     }, [result])
 
     const onSubmit = (data = {}) => {
-        let hasAgent = data.hasAgent === Boolean(true).toString() ? true : false
-        setSubmit({
-            ...data,
-            hasAgent
-        })
+        setSubmit(data)
     }
 
     return (
