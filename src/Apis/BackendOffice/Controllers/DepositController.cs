@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -56,6 +55,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         UserName = form.UserName,
                         BrandId = form.BrandId,
                         BrandPaymentId = form.BrandPaymentId,
+                        PaymentMethodId = form.PaymentMethodId,
                         Amount = form.Amount,
                         Remark = form.Remark,
                         CreateOn = form.CreateOn,
