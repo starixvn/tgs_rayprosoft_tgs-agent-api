@@ -13,5 +13,7 @@ namespace TGS.FileService
         IAsyncEnumerable<FileMeta> ListFileMetasAsync(string prefix);
 
         ValueTask DeleteFileMetaByIdsAsync(IEnumerable<string> fileIds);
+
+        ValueTask<FileMeta> FindByIdAsync(string objectId);
     }
 }

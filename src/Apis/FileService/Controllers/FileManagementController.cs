@@ -32,6 +32,22 @@ namespace TGS.Apis.FileService.Controllers
             return File(fileStream, meta.ContentType);
         }
 
+        [HttpGet("~/api/meta/{objectId}")]
+        public async Task<FileViewModel> GetFileMetaAsync(string objectId)
+        {
+            var meta = await _fileManager.GetFileMetaByObjectIdAsync(objectId).ConfigureAwait(false);
+
+            return new FileViewModel
+            {
+                Id = meta.Id,
+                FileName = meta.FileName,
+                ContentType = meta.ContentType,
+                FileLength = meta.FileLength,
+                CreatedOn = meta.CreatedOn,
+                ExternalUrl = meta.ExternalUrl
+            };
+        }
+
         [HttpPost("{*path}")]
         public async Task<FileViewModel> UploadFileAsync(
             string path,

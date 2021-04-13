@@ -47,6 +47,11 @@ namespace TGS.FileService
         public IAsyncEnumerable<FileMeta> FindExpiredFilesAsync(string prefix, DateTimeOffset expireTime)
             => _fileMetaRepository.ListExpiredFileMetasAsync(prefix, expireTime);
 
+        public async Task<FileMeta> GetFileMetaByObjectIdAsync(string objectId)
+        {
+            return await _fileMetaRepository.FindByIdAsync(objectId).ConfigureAwait(false);
+        }
+
         public IAsyncEnumerable<FileMeta> ListPathAsync(string prefix)
             => _fileMetaRepository.ListFileMetasAsync(prefix);
 
