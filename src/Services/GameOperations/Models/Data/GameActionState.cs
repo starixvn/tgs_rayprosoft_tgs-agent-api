@@ -21,7 +21,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
             GameActionType = td.GameActionType;
             Timestamp = td.TimeStamp;
-            Description = td.Description;
+            ExtraData = td.ExtraData;
             ExternalBetId = td.ExternalBetId;
             ExternalRoundId = td.ExternalRoundId;
             ExternalTransactionId = td.ExternalTransactionId;
@@ -38,6 +38,8 @@ namespace TGS.Services.GameOperations.Models.Data
                 : td.OppositeBetPatterns
                     .Select(p => new OppositeBetPattern(p.BetType, p.GroupId))
                     .ToArray();
+
+            JackpotContribution = td.JackpotContribution;
 
             UtcNow = DateTimeOffset.UtcNow;
         }
@@ -92,7 +94,7 @@ namespace TGS.Services.GameOperations.Models.Data
         // set from TransactionData
         public DateTimeOffset Timestamp { get; init; }
 
-        public string Description { get; init; }
+        public string ExtraData { get; init; }
         public string ExternalBetId { get; init; }
         public string ExternalRoundId { get; init; }
         public string ExternalTransactionId { get; init; }
@@ -117,5 +119,6 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
 
         public OppositeBetPattern[] OppositeBetPatterns { get; }
+        public JackpotContribution JackpotContribution { get; }
     }
 }

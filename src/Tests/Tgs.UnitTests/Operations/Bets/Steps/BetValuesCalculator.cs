@@ -4,10 +4,12 @@ using System.Linq;
 using FluentAssertions;
 using TechTalk.SpecFlow;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Tests.TestsCommon;
 using TGS.Tests.TestsCommon.Extensions;
+using OppositeBetPattern = TGS.Services.GameOperations.Models.Data.OppositeBetPattern;
 
 namespace TGS.UnitTests.Operations.Bets.Steps
 {
@@ -50,7 +52,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var hasTurnoverOnTieBet = Get(SR.TurnoverOnTieBet, true);
 
             var actionById = rows
-                .Select((bvcr, i) => new BetActionData
+                .Select((bvcr, _) => new BetActionData
                 {
                     Id = bvcr.Id,
                     ReferenceId = bvcr.RefId,
@@ -61,7 +63,14 @@ namespace TGS.UnitTests.Operations.Bets.Steps
                     IsExplicitlyNotClosingRound = bvcr.RoundClosed.HasValue && !bvcr.RoundClosed.Value,
                     GameProviderCode = "Test",
                     GameName = "Test",
-                    BetType = bvcr.BetType
+                    BetType = bvcr.BetType,
+                    JackpotContribution = bvcr.JackpotContributionAmount.HasValue
+                        ? new JackpotContribution
+                        {
+                            JackpotId = Guid.NewGuid().ToString(),
+                            TotalAmount = bvcr.JackpotContributionAmount.Value
+                        }
+                        : null
                 }).ToDictionary(a => a.Id, a => a);
 
             foreach (var a in actionById.Values)
@@ -149,14 +158,26 @@ namespace TGS.UnitTests.Operations.Bets.Steps
                 WinLoss = ParseDecimal(row, "WinLoss"),
                 UnsettledBets = ParseDecimal(row, "Unsettled Bets"),
                 RoundClosed = ParseNullableBool(row, "Is Closing Round"),
-                BetType = row["Bet Type"]
+                BetType = row["Bet Type"],
+                JackpotContributionAmount = ParseNullableDecimal(row, "JackpotContributionAmount")
             };
 
         private static Guid? ParseGuid(TableRow row, string name) =>
-            Guid.TryParse((row[name] ?? string.Empty).PadLeft(32, '0'), out var id) ? id : (Guid?)null;
+            Guid.TryParse((row[name] ?? string.Empty).PadLeft(32, '0'), out var id) ? id : null;
 
         private static decimal ParseDecimal(TableRow row, string name) =>
             decimal.Parse(row[name].Replace("$", string.Empty));
+
+        private static decimal? ParseNullableDecimal(TableRow row, string name)
+        {
+            var value = row[name];
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
+            return decimal.Parse(value.Replace("$", string.Empty));
+        }
 
         private static BetValuesCalculatorRowName ParseRowName(TableRow row, string name) =>
             (BetValuesCalculatorRowName)Enum.Parse(typeof(BetValuesCalculatorRowName), row[name], true);
@@ -244,5 +265,6 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         public decimal UnsettledBets { get; set; }
         public string BetType { get; set; }
         public bool? RoundClosed { get; set; }
+        public decimal? JackpotContributionAmount { get; set; }
     }
 }

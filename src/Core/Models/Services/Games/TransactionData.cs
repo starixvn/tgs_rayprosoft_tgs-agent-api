@@ -14,11 +14,12 @@ namespace TGS.Core.Models.Services.Games
         public string ExternalTransactionReferenceId { get; init; }
         public string ExternalGameActionGroupId { get; init; }
         public GameActionType GameActionType { get; init; }
-        public string Description { get; init; }
+        public string ExtraData { get; init; }
         public bool? RoundClosed { get; init; }
         public DateTimeOffset TimeStamp { get; init; }
         public string BetType { get; init; }
         public string RoundDetail { get; init; }
         public OppositeBetPattern[] OppositeBetPatterns { get; init; }
+        public JackpotContribution JackpotContribution { get; init; }
     }
 }

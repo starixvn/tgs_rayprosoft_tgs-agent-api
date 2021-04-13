@@ -1,6 +1,4 @@
-﻿using TGS.Core.Models.Services.Games;
-
-namespace TGS.Core.Models.Services.Data
+﻿namespace TGS.Core.Models.Services.Data
 {
     public record GameActionData
     {

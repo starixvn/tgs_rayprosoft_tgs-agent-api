@@ -80,6 +80,7 @@ namespace TGS.Services.GameOperations.Calculators
             }
 
             BetActionData closingAction = null;
+
             foreach (var a in actions)
             {
                 if (a.IsClosingRound)
@@ -186,6 +187,9 @@ namespace TGS.Services.GameOperations.Calculators
         {
             decimal turnover = 0, tieBetAdjustment = 0;
             var validBetAmount = CalculateValidBetAmount(allActions);
+            var jackpotContributionAmount = allActions.Where(a => a.JackpotContribution != null)
+                .Sum(a => a.JackpotContribution.TotalAmount);
+
 
             var allBets = allActions.Where(a => a.Type == PlaceBet && a.IsCancelled == false).ToArray();
             var matchedPatternGroupIds = (from a in allBets
@@ -196,7 +200,10 @@ namespace TGS.Services.GameOperations.Calculators
             if (matchedPatternGroupIds.Length == 0)
             {
                 tieBetAdjustment = CalculateTieBetAdjustment(hasTurnoverOnTieBet, allActions);
+
                 turnover = validBetAmount - tieBetAdjustment;
+                turnover = CalculateTurnoverWithJackpotContribution(turnover, jackpotContributionAmount);
+
                 return (turnover, validBetAmount, tieBetAdjustment);
             }
 
@@ -229,6 +236,7 @@ namespace TGS.Services.GameOperations.Calculators
             }
 
             turnover = uncalculatedBets.Sum(a => a.Amount).Negate() + rollingTurnover;
+            turnover = CalculateTurnoverWithJackpotContribution(turnover, jackpotContributionAmount);
 
             return (turnover, validBetAmount, tieBetAdjustment);
         }
@@ -248,8 +256,16 @@ namespace TGS.Services.GameOperations.Calculators
 
         private static decimal CalculateRollingTurnover(Dictionary<string, decimal> betAmountOfBetTypes)
         {
+            // substract the bet amount of opposite bets, and return absolute value
             var rolling = betAmountOfBetTypes.Values.Select((v, i) => i == 0 ? v : v.Negate()).Sum();
             return Math.Abs(rolling);
+        }
+
+        private static decimal CalculateTurnoverWithJackpotContribution(decimal turnover,
+            decimal jackpotContributionAmount)
+        {
+            var contrib = turnover > 0 ? jackpotContributionAmount : 0;
+            return turnover - contrib;
         }
     }
 }
