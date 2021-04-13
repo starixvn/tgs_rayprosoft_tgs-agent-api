@@ -36,6 +36,7 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
             showActionButtons={false}
             hideOnClickOutside={false}
             showCloseButton
+            maxWidth="70vw"
             {...dialog}
         >
             <FieldStack orientation="vertical">
