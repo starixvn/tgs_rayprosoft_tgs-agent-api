@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Core.Models.Messages;
@@ -84,7 +83,6 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <param name="reviewCommandService">The review command service.</param>
         /// <param name="formId">The form identifier.</param>
         /// <param name="reviewResponses">The review responses.</param>
-        [AllowAnonymous]
         [HttpPost("{formId}")]
         public async Task ReviewDepositFormAsync(
             [FromServices] ICommandService<ReviewDepositFormCommand> reviewCommandService,
