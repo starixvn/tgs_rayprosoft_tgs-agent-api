@@ -53,8 +53,3 @@ export const useAgentOperations = (agentId, searchParams) => {
         : ""
     return useGet(url)
 }
-
-export const useAgentTeamInfo = (agentId, searchParams) => {
-    let url = agentId ? urlWith(searchParams, `${API}/${agentId}/teamInfo`) : ""
-    return useGet(url)
-}

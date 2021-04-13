@@ -46,50 +46,55 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
         async Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
         {
-            var paymentId = Guid.NewGuid();
-            var payment = new BrandPayment
-            {
-                Id = paymentId,
-                DisplayOrder = 99,
-                PaymentId = request.PaymentId,
-                PaymentMethodId = request.PaymentMethodId,
-                PaymentChannelId = request.PaymentChannelId,
-                ChannelName = request.ChannelName,
-                TransferLimitFrom = request.TransferLimitFrom,
-                TransferLimitTo = request.TransferLimitTo,
-                PlayerListCondition = request.PlayerListCondition,
-                AllPlayers = request.AllPlayers,
-                IdentityAuthentication = request.IdentityAuthentication,
-                PhoneAuthentication = request.PhoneAuthentication,
-                DepositedAmountUnlimited = request.DepositedAmountUnlimited,
-                DepositedAmountMin = request.DepositedAmountMin,
-                DepositedAmountMax = request.DepositedAmountMax,
-                Reason = request.Reason,
-                CreatedByUsername = username,
-                UpdatedByUsername = username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
+            throw new NotImplementedException();
 
-            var whitelist = await GeneratePaymentPlayerList(paymentId, request.Whitelist, PlayerListType.White);
+            //var paymentId = Guid.NewGuid();
+            //var payment = new BrandPayment
+            //{
+            //    Id = paymentId,
+            //    DisplayOrder = 99,
+            //    PaymentId = request.PaymentId,
+            //    PaymentMethodId = request.PaymentMethodId,
+            //    PaymentChannelId = request.PaymentChannelId,
+            //    ChannelName = request.ChannelName,
+            //    TransferLimitFrom = request.TransferLimitFrom,
+            //    TransferLimitTo = request.TransferLimitTo,
+            //    PlayerListCondition = request.PlayerListCondition,
+            //    AllPlayers = request.AllPlayers,
+            //    IdentityAuthentication = request.IdentityAuthentication,
+            //    PhoneAuthentication = request.PhoneAuthentication,
+            //    DepositedAmountUnlimited = request.DepositedAmountUnlimited,
+            //    DepositedAmountMin = request.DepositedAmountMin,
+            //    DepositedAmountMax = request.DepositedAmountMax,
+            //    Reason = request.Reason,
+            //    CreatedByUsername = username,
+            //    UpdatedByUsername = username,
+            //    CreatedOn = DateTimeOffset.Now,
+            //    UpdatedOn = DateTimeOffset.Now
+            //};
 
-            var blacklist = await GeneratePaymentPlayerList(paymentId, request.Blacklist, PlayerListType.Black);
+            //var whitelist = await GeneratePaymentPlayerListAsync(paymentId, request.Whitelist, PlayerListType.White);
 
-            var playerList = whitelist.Union(blacklist);
+            //var blacklist = await GeneratePaymentPlayerListAsync(paymentId, request.Blacklist, PlayerListType.Black);
 
-            payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
+            //var playerList = whitelist.Union(blacklist);
 
-            var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id))
-                .ToArrayAsync();
-            var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
-            {
-                BrandPaymentId = paymentId, VipLevelId = vip.Id, VipLevel = vip
-            }).ToArray();
+            //payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
-            payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
+            //var vips = await _repository.VipLevels.AsQueryable()
+            //    .Where(x => request.VipLevelIds.Contains(x.Id))
+            //    .ToArrayAsync();
+            //var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
+            //{
+            //    BrandPaymentId = paymentId,
+            //    VipLevelId = vip.Id,
+            //    VipLevel = vip
+            //}).ToArray();
 
-            await _repository.BrandPayments.AddAsync(payment);
-            await _repository.SaveChangesAsync();
+            //payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
+
+            //await _repository.BrandPayments.AddAsync(payment);
+            //await _repository.SaveChangesAsync();
         }
 
         async Task IBrandPaymentService.UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
@@ -126,21 +131,24 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.UpdatedOn = DateTimeOffset.Now;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            _repository.PaymentPlayerList.RemoveRange(payment.BrandPaymentPlayers);
-            _repository.PaymentVipLevels.RemoveRange(payment.VipLevels);
+            _repository.BrandPaymentPlayers.RemoveRange(payment.BrandPaymentPlayers);
+            _repository.BrandPaymentVipLevels.RemoveRange(payment.VipLevels);
 
             await _repository.SaveChangesAsync();
 
-            var whitelist = await GeneratePaymentPlayerList(payment.Id, request.Whitelist, PlayerListType.White);
-            var blacklist = await GeneratePaymentPlayerList(payment.Id, request.Blacklist, PlayerListType.Black);
+            var whitelist = await GeneratePaymentPlayerListAsync(payment.Id, request.Whitelist, PlayerListType.White);
+            var blacklist = await GeneratePaymentPlayerListAsync(payment.Id, request.Blacklist, PlayerListType.Black);
             var playerList = whitelist.Union(blacklist).ToArray();
 
             payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
 
-            var vips = await _repository.VipLevels.Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
+            var vips = await _repository.VipLevels.AsQueryable()
+                .Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
             var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                BrandPaymentId = payment.Id, VipLevelId = vip.Id, VipLevel = vip
+                BrandPaymentId = payment.Id,
+                VipLevelId = vip.Id,
+                VipLevel = vip
             }).ToArray();
 
             payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
@@ -183,7 +191,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         async Task IBrandPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);
-            var payments = await _repository.BrandPayments.Where(q => ids.Contains(q.Id)).ToListAsync();
+            var payments = await _repository.BrandPayments.AsQueryable()
+                .Where(q => ids.Contains(q.Id)).ToListAsync();
             payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
             await _repository.BulkUpdateAsync(payments.ToArray());
@@ -215,11 +224,12 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerList(Guid paymentId, string[] list,
+        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerListAsync(Guid paymentId, string[] list,
             PlayerListType playerListType)
         {
             var playerWhitelist = list != null
-                ? await _repository.Players.Where(x => list.Contains(x.Username))
+                ? await _repository.Players.AsQueryable()
+                    .Where(x => list.Contains(x.Username))
                     .ToArrayAsync()
                 : Array.Empty<Player>();
             return playerWhitelist.Select(player => new BrandPaymentPlayer

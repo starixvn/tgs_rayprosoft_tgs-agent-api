@@ -58,7 +58,7 @@ namespace TGS.Apis.OperatorApi
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddRedis()
-                .AddJson()
+                .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddOperations()
                 .AddErrorMappers()

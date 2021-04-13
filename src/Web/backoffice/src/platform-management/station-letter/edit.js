@@ -43,10 +43,8 @@ import Alert from "../../dialog/Alert"
 import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
-import { nextRoleType } from "../../system/roles/type"
 
-export const AddButton = ({ onSubmitted, ...props }) => {
+export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
     let isDisplay = useIsDisplayMenuByRoute([CreateMenu])
     if (!isDisplay) {
@@ -59,14 +57,17 @@ export const AddButton = ({ onSubmitted, ...props }) => {
                 <Trans zh="新增" en="Add" />
             </Disclosure>
             {dialog.visible && (
-                <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+                <AddDialog
+                    brandId={brandId}
+                    onSubmitted={onSubmitted}
+                    dialog={dialog}
+                />
             )}
         </>
     )
 }
 
-const AddDialog = ({ onSubmitted, dialog, ...props }) => {
-    let userBrandId = useUserBrandId()
+const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     let [data, setSubmit] = useState()
     let { result, isLoading, error } = useAddStationLetter(data)
 
@@ -86,7 +87,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
                 subject: "",
                 content: ""
             }}
-            onSubmit={({ target, brandId = userBrandId, ...data }) => {
+            onSubmit={({ target, ...data }) => {
                 if (target === AllPlayers) {
                     data.assignedAllPlayers = true
                 }
@@ -127,11 +128,6 @@ const DialogCss = css`
 `
 
 const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
-    let resellerId = useUserResellerId()
-    let licenseeId = useUserLicenseeId()
-    let brandId = useUserBrandId()
-    let userRoleType = useUserRoleType()
-
     let {
         setValue,
         control,
@@ -225,22 +221,15 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                 <Trans zh="对象" en="Target" />
             </Label>
             <Set>
-                {isAdd && !brandId && (
-                    <MerchantIdHookFormSelect
-                        start={nextRoleType(userRoleType)}
-                        resellerId={resellerId}
-                        licenseeId={licenseeId}
-                    />
-                )}
                 <PlayerTargetSelect required={required} disabled={readonly} />
                 {!readonly && target === DesignatedPlayers && (
                     <Controller
                         control={control}
                         name="playerUsernames"
-                        render={(
-                            { onChange, onBlur, value, name, ref },
-                            { invalid, isTouched, isDirty }
-                        ) => (
+                        render={({
+                            field: { onChange, onBlur, value, name, ref },
+                            fieldState: { invalid, isTouched, isDirty }
+                        }) => (
                             <>
                                 <input
                                     ref={uploadInputRef}
@@ -333,10 +322,10 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                 control={control}
                 name="content"
                 rules={{ required }}
-                render={(
-                    { onChange, onBlur, value, ref, ...props },
-                    { invalid, isTouched, isDirty }
-                ) => {
+                render={({
+                    field: { onChange, onBlur, value, ref, ...props },
+                    fieldState: { invalid, isTouched, isDirty }
+                }) => {
                     useEffect(() => {
                         if (formState.isSubmitting && invalid) {
                             editor?.focus()

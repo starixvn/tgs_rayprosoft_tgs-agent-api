@@ -14,8 +14,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string RealName { get; set; }
 
-        public string InvitationCode { get; set; }
-
         public byte[] Password { get; set; }
 
         public byte[] Salt { get; set; }
@@ -52,7 +50,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Wechat { get; set; }
 
-        public bool HasAgent { get; set; }
         public Guid? AgentId { get; set; }
         public virtual Agent Agent { get; set; }
         public bool IdentityAuthentication { get; set; }
@@ -60,12 +57,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public bool PhoneAuthentication { get; set; }
 
         public decimal AccumulatedDeposit { get; set; }
-
-        public string ParentPlayerCode { get; set; }
-
-        public string ParentInvitationCode { get; set; }
-
-        public virtual Player ParentPlayer { get; set; }
 
         public Guid? VipId { get; set; }
 
@@ -80,8 +71,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<Wallet> Wallets { get; set; }
 
         public virtual ICollection<PlayerBank> Banks { get; set; }
-
-        public virtual ICollection<Player> SubPlayers { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 

@@ -5,93 +5,83 @@ import { Checkbox as _Checkbox, CheckboxField as _CheckboxField } from "bumbag"
 import get from "lodash-es/get"
 
 export const Checkbox = ({
-  name,
-  state,
-  checkboxRef,
-  register,
-  registerOptions = {},
-  ...props
+    name,
+    state,
+    checkboxRef,
+    register,
+    registerOptions = {},
+    ...props
 }) => {
-  let formContext = useFormContext()
-  register = register ?? formContext?.register
+    let formContext = useFormContext()
+    register = register ?? formContext?.register
 
-  if (name && !checkboxRef && register) {
-    checkboxRef = register({
-      required: props.required,
-      min: props.min,
-      max: props.max,
-      minLength: props.minLength,
-      maxLength: props.maxLength,
-      validate: props.validate,
-      ...registerOptions
-    })
-  }
+    let formProps = {}
+    if (name && !checkboxRef && register) {
+        let { ref, ...rest } = register(name, {
+            required: props.required,
+            min: props.min,
+            max: props.max,
+            minLength: props.minLength,
+            maxLength: props.maxLength,
+            validate: props.validate,
+            ...registerOptions
+        })
+        formProps = rest
+        checkboxRef = ref
+    }
 
-  let error = get(formContext?.errors ?? {}, name) //formContext?.errors[name]
-  state = state ?? (error && "danger")
+    let error = get(formContext?.formState?.errors ?? {}, name)
+    state = state ?? (error && "danger")
 
-  return (
-    <_Checkbox
-      name={name}
-      state={state}
-      checkboxRef={checkboxRef}
-      state={state}
-      {...props}
-    />
-  )
+    return (
+        <_Checkbox
+            state={state}
+            checkboxRef={checkboxRef}
+            {...formProps}
+            {...props}
+        />
+    )
 }
 
 export const CheckboxField = ({
-  name,
-  checkboxRef,
-  validationText,
-  register,
-  registerOptions = {},
-  ...props
+    name,
+    checkboxRef,
+    validationText,
+    register,
+    registerOptions = {},
+    ...props
 }) => {
-  let formContext = useFormContext()
-  register = register ?? formContext?.register
+    let formContext = useFormContext()
+    register = register ?? formContext?.register
 
-  if (name && !checkboxRef && register) {
-    checkboxRef = register({
-      required: {
-        value: props.required,
-        message: props.requiredMessage
-      },
-      min: {
-        value: props.min,
-        message: props.minMessage
-      },
-      max: {
-        value: props.max,
-        message: props.maxMessage
-      },
-      minLength: {
-        value: props.minLength,
-        message: props.minLengthMessage
-      },
-      maxLength: {
-        value: props.maxLength,
-        message: props.maxLengthMessage
-      },
-      validate: props.validate,
-      ...registerOptions
-    })
-  }
+    let formProps = {}
+    if (name && !checkboxRef && register) {
+        let { ref, ...rest } = register(name, {
+            required: props.required,
+            min: props.min,
+            max: props.max,
+            minLength: props.minLength,
+            maxLength: props.maxLength,
+            validate: props.validate,
+            ...registerOptions
+        })
+        formProps = rest
+        checkboxRef = ref
+    }
 
-  let error = formContext?.errors[name]
-  let state = error && "danger"
-  validationText = validationText ?? error?.message
+    let error = formContext?.formState?.errors[name]
+    let state = error && "danger"
+    validationText = validationText ?? error?.message
 
-  return (
-    <_CheckboxField
-      name={name}
-      checkboxRef={checkboxRef}
-      state={state}
-      validationText={validationText}
-      {...props}
-    />
-  )
+    return (
+        <_CheckboxField
+            checkboxRef={checkboxRef}
+            state={state}
+            validationText={validationText}
+            {...formProps}
+            {...props}
+        />
+    )
 }
 
 export default Checkbox

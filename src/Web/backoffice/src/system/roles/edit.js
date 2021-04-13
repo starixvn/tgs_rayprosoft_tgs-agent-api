@@ -8,12 +8,9 @@ import {
     Card,
     Button,
     Text,
-    Checkbox,
     FieldStack,
     FieldWrapper,
-    SelectField,
     Table,
-    Select,
     Group,
     Set
 } from "bumbag"
@@ -52,20 +49,20 @@ import {
     findParentRoleType,
     isSameOrAfterRoleType
 } from "./type"
-import { MerchantIdHookFormSelect } from "../../merchant/MerchantSelect"
+import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import { FormDialog } from "../../form/FormDialog"
 import { useForm, useFormContext } from "react-hook-form"
 import equals from "fast-deep-equal"
 import Input from "../../input/Input"
 import { Code as RoleMenuCode } from "./menu"
-import { Code as SystemAdminCode } from "../../system-admin/menu"
-import { Code as LogCode } from "../../log/menu"
 import { useResellerLabel } from "../../merchant/resellers"
 import ResellerIdSelect from "../../merchant/resellers/ResellerIdSelect"
 import { useLicenseeLabel } from "../../merchant/licensees"
 import LicenseeIdSelect from "../../merchant/licensees/LicenseeIdSelect"
 import { useBrandLabel } from "../../merchant/brands"
 import BrandIdSelect from "../../merchant/brands/BrandIdSelect"
+import Checkbox from "../../checkbox/Checkbox"
+import Select from "../../select/Select"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -232,17 +229,22 @@ const AddDialog = ({ dialog, onSubmitted }) => {
                                     name="roleType"
                                     required
                                     defaultValue={userRoleType}
-                                    selectRef={register({ required: true })}
                                 />
                                 {roleType != RoleTypes.Admin && (
-                                    <MerchantIdHookFormSelect
+                                    <MerchantIdSelect
                                         start={adminOrNextRoleType(
                                             userRoleType
                                         )}
                                         end={roleType}
-                                        resellerId={userResellerId}
-                                        licenseeId={userLicenseeId}
-                                        brandId={userBrandId}
+                                        resellerProps={{
+                                            defaultValue: userResellerId
+                                        }}
+                                        licenseeProps={{
+                                            defaultValue: userLicenseeId
+                                        }}
+                                        brandProps={{
+                                            defaultValue: userBrandId
+                                        }}
                                     />
                                 )}
                             </Set>
@@ -254,10 +256,7 @@ const AddDialog = ({ dialog, onSubmitted }) => {
                                     <Trans zh="根管理权限" en="Root Admin" />
                                 </Label>
                                 <Box alignY="center">
-                                    <Checkbox
-                                        name="isRoot"
-                                        checkboxRef={register}
-                                    />
+                                    <Checkbox name="isRoot" />
                                 </Box>
                             </>
                         )}
@@ -369,7 +368,7 @@ const RoleTemplateSelect = ({
     defaultValue,
     ...props
 }) => {
-    let { register, watch, setValue, formState } = useFormContext()
+    let { watch, setValue, formState } = useFormContext()
     let isRoot = watch("isRoot")
 
     let roleType = watch("roleType")
@@ -417,7 +416,6 @@ const RoleTemplateSelect = ({
             name={name}
             required
             defaultValue={defaultValue}
-            selectRef={register({ required: true })}
             placeholder={placeholder}
             options={options}
         />

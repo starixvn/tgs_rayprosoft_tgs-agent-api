@@ -59,12 +59,12 @@ const BodyContent = ({ brandId }) => {
         toApiParams(state)
     )
 
-    let columns = useColumns({ items: data?.items, mutate })
+    let columns = useColumns({ brandId, items: data?.items, mutate })
     return (
         <PageContent
             actionBar={
                 <Box alignX="right">
-                    <AddButton onSubmitted={mutate} />
+                    <AddButton brandId={brandId} onSubmitted={mutate} />
                 </Box>
             }
             title={<Trans zh="VIP等级" en="VIP Level" />}
@@ -91,7 +91,7 @@ const BodyContent = ({ brandId }) => {
     )
 }
 
-const useColumns = ({ items = [], mutate }) => {
+const useColumns = ({ brandId, items = [], mutate }) => {
     let hasAnyMenu = useHasSubMenuByRoute()
 
     return useMemo(() => {
@@ -119,7 +119,11 @@ const useColumns = ({ items = [], mutate }) => {
                     return (
                         <Set alignX="center">
                             <ViewButton record={value} />
-                            <EditButton record={value} onSubmitted={mutate} />
+                            <EditButton
+                                brandId={brandId}
+                                record={value}
+                                onSubmitted={mutate}
+                            />
                         </Set>
                     )
                 }

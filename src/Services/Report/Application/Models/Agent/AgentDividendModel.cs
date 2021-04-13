@@ -4,7 +4,7 @@ namespace TGS.Services.Report.Application.Models.Agent
 {
     public class AgentDividendModel
     {
-        public Guid? id { get; set; }
+        public Guid Id { get; set; }
         public string Username { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal WithdrawalAmount { get; set; }

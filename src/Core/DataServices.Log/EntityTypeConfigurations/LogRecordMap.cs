@@ -31,10 +31,6 @@ namespace TGS.Core.DataServices.Log.EntityTypeConfigurations
 
             builder.Property(c => c.RecordedOn)
                 .IsRequired();
-
-
-            builder.HasIndex(c => c.RecordedOn)
-                .HasDatabaseName("ix_log_records_recorded_on");
         }
     }
 }

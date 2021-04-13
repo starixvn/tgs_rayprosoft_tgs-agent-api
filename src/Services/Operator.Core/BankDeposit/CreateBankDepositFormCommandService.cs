@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public async ValueTask ExecuteAsync(CreateBankDepositFormCommand command)
+        public async ValueTask ExecuteAsync(CreateBankDepositFormCommand command, CancellationToken cancellationToken = default)
         {
             var form = new BankDepositForm(
                 command.PlayerCode,
@@ -22,9 +23,11 @@ namespace TGS.Services.Operator.BankDeposit
                 command.BankAccount,
                 command.Amount);
 
-            await _walletRepository
+            var createdFormId = await _walletRepository
                 .CreateDepositFormAsync(form)
                 .ConfigureAwait(false);
+
+            command.ReturnFormIdSource.SetResult(createdFormId);
         }
     }
 }

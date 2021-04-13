@@ -322,6 +322,8 @@ const RoleSelectGroup = ({
                         required
                         onChange={(event) => {
                             let role = event.target.value
+                            setValue("roleType", role)
+
                             if (
                                 !role ||
                                 role === RoleTypes.Admin ||
@@ -331,18 +333,14 @@ const RoleSelectGroup = ({
                                 setLicenseeId("")
                                 setBrandId("")
                             }
-
                             if (role === RoleTypes.Licensee) {
                                 setLicenseeId("")
                                 setBrandId("")
                             }
-
                             if (role === RoleTypes.Brand) {
                                 setBrandId("")
                             }
-
                             onMerchantResetted()
-
                             let values = getValues()
                             reset(values)
                         }}
@@ -463,8 +461,9 @@ const EditDialog = ({ user = {}, onSubmitted, dialog, ...props }) => {
 }
 
 const EditBody = ({ user }) => {
-    let { watch, setValue } = useFormContext()
+    let { watch, setValue, getValues } = useFormContext()
 
+    let username = watch("username")
     let userResellerId = useUserResellerId()
     let [resellerId, setResellerState] = useState(user?.resellerId)
     const setResellerId = (value) => {
@@ -499,12 +498,14 @@ const EditBody = ({ user }) => {
     }
 
     let departmentId = watch("departmentId")
+
     return (
         <Stack spacing="major-3" margin="major-1">
             <FieldValues>
                 <UsernameLabel />
                 <Box>
-                    <InputField name="username" disabled />
+                    <InputField type="hidden" name="username" />
+                    <InputField value={username} disabled />
                 </Box>
 
                 <RoleLabel />

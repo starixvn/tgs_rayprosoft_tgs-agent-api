@@ -33,7 +33,7 @@ namespace TGS.Apis.GlobalApi
         {
             services.AddTgsRepository(_configuration, "Tgs");
 
-            services.AddJson()
+            services.AddSystemJsonSerializer()
                 .AddNats(_configuration)
                 .AddWebApiServices()
                 .AddTgsLog()

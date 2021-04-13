@@ -122,5 +122,30 @@ namespace TGS.Services.GameOperations.Data
             await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(brandId, gameProviderId, gameId,
                 s.ExternalGameId, status, gameStatus);
         }
+
+        private static void VerifyLockedAndUnlockedAmounts(GameActionState s)
+        {
+            var remainingLockedAmount =
+                GetRemainingLockedAmount(s.ValidPreviousActions, s.GameActionType, s.ReferencedGameAction);
+
+            if (s.GameActionType == UnlockAmount)
+            {
+                if (s.Amount > 0 && s.Amount > remainingLockedAmount)
+                {
+                    throw new InvalidGameActionException(
+                        $"Insufficient locked amount to be unlocked, locked amount left:{remainingLockedAmount}, amount intend to be unlocked:{s.Amount}");
+                }
+
+                remainingLockedAmount += s.Amount;
+            }
+
+            // closing round if there's amount still locked
+
+            if (s.NewRoundStatus == RoundStatus.Closed && remainingLockedAmount != 0)
+            {
+                throw new InvalidGameActionException(
+                    $"Cannot close round when locked amount is {remainingLockedAmount} left");
+            }
+        }
     }
 }

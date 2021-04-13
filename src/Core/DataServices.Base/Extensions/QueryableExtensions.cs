@@ -29,32 +29,33 @@ namespace TGS.Core.DataServices.Base.Extensions
             if (request.ShowAll || request.Rows == 0)
             {
                 var allResult = await result.ToArrayAsync();
-                return new PagedResponse<TModel>
-                {
-                    Valid = true,
-                    TotalCount = allResult.Length,
-                    Items = allResult
-                };
+                return new() {Valid = true, TotalCount = allResult.Length, Items = allResult};
             }
 
             var pagedResult = await result.ToPagedArrayAsync(request.Page, request.Rows);
 
-            return new PagedResponse<TModel>
+            return new() {Valid = true, TotalCount = pagedResult.TotalCount, Items = pagedResult.Items};
+        }
+
+        public static PagedResponse<TModel> CreatePagedResponse<TModel>(this IQueryable<TModel> query,
+            PageableRequest request)
+        {
+            var result = request.SortBy == null ? query : query.OrderBy(request.GetSortOption());
+
+            if (request.ShowAll || request.Rows == 0)
             {
-                Valid = true,
-                TotalCount = pagedResult.TotalCount,
-                Items = pagedResult.Items
-            };
+                var allResult = result.ToArray();
+                return new() {Valid = true, TotalCount = allResult.Length, Items = allResult};
+            }
+
+            var pagedResult = result.ToPagedArray(request.Page, request.Rows);
+
+            return new() {Valid = true, TotalCount = pagedResult.TotalCount, Items = pagedResult.Items};
         }
 
         public static Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IEnumerable<TModel> query,
             int totalCount) =>
-            Task.FromResult(new PagedResponse<TModel>
-            {
-                Valid = true,
-                TotalCount = totalCount,
-                Items = query.ToArray()
-            });
+            Task.FromResult(new PagedResponse<TModel> {Valid = true, TotalCount = totalCount, Items = query.ToArray()});
 
         public static PagedArray<T> ToPagedArray<T>(this IQueryable<T> query, int page, int pageSize)
         {
@@ -62,9 +63,8 @@ namespace TGS.Core.DataServices.Base.Extensions
             page = page <= 0 ? 0 : page - 1;
             pageSize = pageSize <= 0 ? 10 : pageSize;
             var items = query.Skip(page * pageSize).Take(pageSize).ToArray();
-            return new PagedArray<T>(totalCount, items);
+            return new(totalCount, items);
         }
-
 
         public static async Task<PagedArray<T>> ToPagedArrayAsync<T>(this IQueryable<T> query, int page, int pageSize)
         {
@@ -72,15 +72,13 @@ namespace TGS.Core.DataServices.Base.Extensions
             page = page <= 0 ? 0 : page - 1;
             pageSize = pageSize <= 0 ? 10 : pageSize;
             var items = await query.Skip(page * pageSize).Take(pageSize).ToArrayAsync();
-            return new PagedArray<T>(totalCount, items);
+            return new(totalCount, items);
         }
 
-        public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption)
-        {
-            return !string.IsNullOrEmpty(sortOption.PropertyName) ?
-                query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending) :
-                query;
-        }
+        public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, SortOption sortOption) =>
+            !string.IsNullOrEmpty(sortOption.PropertyName)
+                ? query.OrderByProperty(sortOption.PropertyName, sortOption.IsDescending)
+                : query;
 
         public static IQueryable<TSource> OrderByProperty<TSource>(this IQueryable<TSource> source, string propertyName,
             bool descending)
@@ -92,7 +90,7 @@ namespace TGS.Core.DataServices.Base.Extensions
 
             var genericMethod = OrderByMethod(descending).MakeGenericMethod(typeof(TSource), orderByProperty.Type);
 
-            var result = genericMethod.Invoke(null, new object[] { source, lambda });
+            var result = genericMethod.Invoke(null, new object[] {source, lambda});
 
             return (IQueryable<TSource>)result;
         }

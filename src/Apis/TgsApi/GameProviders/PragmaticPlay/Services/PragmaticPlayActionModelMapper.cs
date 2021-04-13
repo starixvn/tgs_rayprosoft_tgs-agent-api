@@ -78,7 +78,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 ExternalTransactionId = request.Reference,
                 ExternalGameActionGroupId = request.RoundId,
                 Amount = request.Amount,
-                Description = AddCustomDescription(AddJackpotData()),
+                ExtraData = AddCustomDescription(AddJackpotData()),
                 RoundDetail = AddCustomDescription(AddBonusData()),
                 TimeStamp = GetTimestamp(request.Timestamp)
             };

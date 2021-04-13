@@ -43,6 +43,12 @@ export const DeleteDisclosure = forwardRef((props, ref) => (
     </Disclosure>
 ))
 
+export const DetailDisclosure = forwardRef((props, ref) => (
+    <Disclosure ref={ref} {...props}>
+        <Trans zh="详情" en="Detail" />
+    </Disclosure>
+))
+
 export const ConfigIconDisclosure = forwardRef((props, ref) => (
     <Disclosure ref={ref} {...props}>
         <Icon icon={faCog} type="font-awesome" />

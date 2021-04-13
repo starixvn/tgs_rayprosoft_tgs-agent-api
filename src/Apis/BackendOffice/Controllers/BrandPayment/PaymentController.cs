@@ -1,14 +1,12 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -29,89 +27,26 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get Payments")]
-        public Task<PagedResponse<PaymentModel>> GetPaymentsAsync([FromQuery] PaymentsRequest request)
+        public BoGenericReponse<IEnumerable<PaymentModel>> GetAllPayments()
         {
-            return _queries.GetQueries()
-                .Where(request.Code, q => q.Code == request.Code)
-                .Select(q => new PaymentModel
-                {
-                    Id = q.Id,
-                    Name = q.Name,
-                    Code = q.Code,
-                    Description = q.Description,
-                    CreatedByUsername = q.CreatedByUsername,
-                    UpdatedByUsername = q.UpdatedByUsername,
-                    CreatedOn = q.CreatedOn,
-                    UpdatedOn = q.UpdatedOn
-                }).CreatePagedResponseAsync(request);
-        }
-
-        [HttpGet("{id}")]
-        [Description("Get a Payment")]
-        public async Task<GetPaymentResponse> GetPaymentAsync(Guid id)
-        {
-            var vendor = await _queries.GetSingleAsync(q => q.Id == id, q =>
-                q.Include(i => i.PaymentMethods));
-
-            return new GetPaymentResponse
+            return new BoGenericReponse<IEnumerable<PaymentModel>>
             {
                 Valid = true,
-                Payment = new PaymentModel
-                {
-                    Id = vendor.Id,
-                    Name = vendor.Name,
-                    Code = vendor.Code,
-                    Description = vendor.Description,
-                    CreatedOn = vendor.CreatedOn,
-                    UpdatedOn = vendor.UpdatedOn,
-                    CreatedByUsername = vendor.CreatedByUsername,
-                    UpdatedByUsername = vendor.UpdatedByUsername
-                }
+                Data = _queries.GetQueries()
+                    .Select(q => new PaymentModel
+                    {
+                        Id = q.Id,
+                        Name = q.Name,
+                        Code = q.Code,
+                        Description = q.Description,
+                        CreatedByUsername = q.CreatedByUsername,
+                        UpdatedByUsername = q.UpdatedByUsername,
+                        CreatedOn = q.CreatedOn,
+                        UpdatedOn = q.UpdatedOn
+                    })
+                    .AsNoTracking()
+                    .ToArray()
             };
-        }
-
-        [HttpPost]
-        [Description("Create a Payment")]
-        public async Task<MessageResponse> CreateAsync(CreatePaymentRequest request)
-        {
-            if (await _queries.ExistsAsync(p => p.Code == request.Code))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Payment.CodeExists);
-            }
-
-            await _commands.CreateAsync(new Payment
-            {
-                Id = Guid.NewGuid(),
-                Name = request.Name,
-                Code = request.Code,
-                CreatedByUsername = Username,
-                UpdatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            });
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPut("{id}")]
-        [Description("Update a Payment")]
-        public async Task<MessageResponse> UpdateAsync(Guid id, UpdatePaymentRequest request)
-        {
-            var vendor = await _queries.GetSingleAsync(p => p.Id == id);
-
-            if (vendor == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Payment.NotFound);
-            }
-
-            vendor.Name = request.Name;
-            vendor.Description = request.Description;
-            vendor.UpdatedByUsername = Username;
-            vendor.UpdatedOn = DateTimeOffset.Now;
-
-            await _commands.UpdateAsync(vendor);
-
-            return CreateValidResponse<MessageResponse>();
         }
     }
 }

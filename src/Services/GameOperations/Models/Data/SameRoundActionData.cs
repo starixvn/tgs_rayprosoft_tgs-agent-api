@@ -24,5 +24,6 @@ namespace TGS.Services.GameOperations.Models.Data
         internal DateTimeOffset GameActionSentOn { get; init; }
         internal string BetType { get; init; }
         internal Guid WalletId { get; init; }
+        internal string JackpotContribution { get; init; }
     }
 }

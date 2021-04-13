@@ -16,11 +16,7 @@ const CreditTrans = {
     en: "Credit"
 }
 
-export const AgentTypeSelect = ({
-    placeholder,
-    placeholderDisabled,
-    ...props
-}) => {
+export const AgentTypeSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "代理类型",
         en: "Agent Type"
@@ -38,18 +34,7 @@ export const AgentTypeSelect = ({
         }
     ]
 
-    if (placeholder) {
-        options = [
-            {
-                label: placeholder,
-                value: "",
-                disabled: placeholderDisabled
-            },
-            ...options
-        ]
-    }
-
-    return <Select options={options} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export const AgentTypeLabel = ({ value }) => {

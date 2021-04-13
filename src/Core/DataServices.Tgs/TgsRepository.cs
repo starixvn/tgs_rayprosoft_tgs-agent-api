@@ -105,11 +105,13 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PaymentChannel> PaymentChannels { get; set; }
 
+        DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
+
         DbSet<BrandPayment> BrandPayments { get; set; }
 
-        DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
-        DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        DbSet<BrandPaymentVipLevel> BrandPaymentVipLevels { get; set; }
 
         DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
 
@@ -136,9 +138,18 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         DbSet<Transaction> Transactions { get; set; }
+
         DbSet<Agent> Agents { get; set; }
+
         DbSet<AgentBank> AgentBanks { get; set; }
+
         DbSet<AgentWallet> AgentWallets { get; set; }
+
+        DbSet<Promotion> Promotions { get; set; }
+
+        DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+
+        DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
 
         DbSet<DepositForm> DepositForms { get; set; }
     }
@@ -231,9 +242,9 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<BrandPayment> BrandPayments { get; set; }
 
-        public DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        public DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
-        public DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        public DbSet<BrandPaymentVipLevel> BrandPaymentVipLevels { get; set; }
 
         public DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
 
@@ -266,14 +277,25 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         public DbSet<Transaction> Transactions { get; set; }
-        DbSet<Agent> ITgsRepository.Agents { get; set; }
-        DbSet<AgentBank> ITgsRepository.AgentBanks { get; set; }
-        DbSet<AgentWallet> ITgsRepository.AgentWallets { get; set; }
+
+        public DbSet<Agent> Agents { get; set; }
+
+        public DbSet<AgentBank> AgentBanks { get; set; }
+
+        public DbSet<AgentWallet> AgentWallets { get; set; }
+
+        public DbSet<Promotion> Promotions { get; set; }
+
+        public DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+
+        public DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
+
+        public DbSet<DepositForm> DepositForms { get; set; }
+
+        public DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
-
-        public DbSet<DepositForm> DepositForms { get; set; }
 
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
@@ -282,10 +304,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
-        public void SetTimeoutToSeconds(int seconds)
-        {
-            Database.SetCommandTimeout(seconds);
-        }
+        public void SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);

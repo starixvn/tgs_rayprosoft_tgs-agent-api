@@ -68,23 +68,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasConstraintName("fk_games_game_providers_game_provider_id");
 
             builder.HasIndex(e => e.GameProviderId)
-                .HasDatabaseName("ix_games_game_provider_id")
-                .IncludeProperties(e => new
-                {
-                    e.Id,
-                    e.Code,
-                    e.Name,
-                    e.ExternalId,
-                    e.PlatformType,
-                    e.Type,
-                    e.Status,
-                    e.AvailableCurrencies,
-                    e.EndpointPath,
-                    e.SubGame,
-                    e.HasTurnoverOnTieBet,
-                    e.RuleUrl,
-                    e.Description
-                });
+                .HasDatabaseName("ix_games_game_provider_id");
         }
     }
 }

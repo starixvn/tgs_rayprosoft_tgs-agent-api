@@ -53,23 +53,6 @@ export const BrandGameProviderCheckboxGroupTable = ({
                     <Table.Row>
                         <Table.HeadCell textAlign="center">
                             <Box></Box>
-                            {/* <Checkbox
-                                checked={allChecked}
-                                onChange={(event) => {
-                                    let checked = event.target.checked
-                                    fields.forEach((field, index) => {
-                                        setValue(
-                                            checkedFieldName(
-                                                name,
-                                                field,
-                                                index
-                                            ),
-                                            checked
-                                        )
-                                    })
-                                }}
-                                disabled={disabled}
-                            /> */}
                         </Table.HeadCell>
                         <Table.HeadCell textAlign="center">
                             <Trans zh="游戏厂商" en="Game Provider" />
@@ -104,31 +87,53 @@ const Row = ({ name, disabled, field, index }) => {
     let desktopQueryStringDialog = useModalState()
     let mobileQueryStringDialog = useModalState()
 
+    let checkedFieldName = toCheckedFieldName(name, field, index)
+    let {
+        ref: checkedRef,
+        onChange: onCheckedChange,
+        ...checkedFormProps
+    } = formContext?.register?.(checkedFieldName)
+
+    let editable = !disabled
     return (
         <Table.Row>
             <Table.Cell textAlign="center">
                 <Box>
-                    <Checkbox
-                        key={field._id}
-                        name={checkedFieldName(name, field, index)}
-                        checkboxRef={formContext?.register?.()}
-                        defaultChecked={field.checked}
-                        disabled={disabled}
-                        onChange={(event) => {
-                            let checked = event.target.checked
-                            if (checked) {
-                                configDialog.show()
-                            }
-                        }}
-                    />
+                    {disabled && (
+                        <>
+                            <Checkbox
+                                display="none"
+                                checked={field.checked}
+                                checkboxRef={checkedRef}
+                                {...checkedFormProps}
+                            />
+                            <Checkbox checked={field.checked} disabled />
+                        </>
+                    )}
+                    {editable && (
+                        <Checkbox
+                            checkboxRef={checkedRef}
+                            defaultChecked={field.checked}
+                            {...checkedFormProps}
+                            onChange={(event) => {
+                                onCheckedChange(event)
+                                let checked = event.target.checked
+
+                                setValue(checkedFieldName, checked)
+                                if (checked) {
+                                    configDialog.show()
+                                }
+                            }}
+                        />
+                    )}
                     <Input
                         type="hidden"
-                        name={`${name}[${index}].id`}
+                        name={`${name}.${index}.id`}
                         value={field.id}
                     />
                     <Input
                         type="hidden"
-                        name={`${name}[${index}].gameProviderId`}
+                        name={`${name}.${index}.gameProviderId`}
                         value={field.gameProviderId}
                     />
                 </Box>
@@ -143,17 +148,23 @@ const Row = ({ name, disabled, field, index }) => {
                         rules={{
                             validate: (value) => {
                                 let isChecked = getValues(
-                                    checkedFieldName(name, field, index)
+                                    toCheckedFieldName(name, field, index)
                                 )
                                 if (isChecked && !value) {
                                     return "required"
                                 }
                             }
                         }}
-                        render={(
-                            { onChange, onBlur, value, name: configName, ref },
-                            { invalid, isTouched, isDirty }
-                        ) => {
+                        render={({
+                            field: {
+                                onChange,
+                                onBlur,
+                                value,
+                                name: configName,
+                                ref
+                            },
+                            fieldState: { invalid, isTouched, isDirty }
+                        }) => {
                             let palette = invalid ? "danger" : "default"
                             let variant = invalid ? "outlined" : "default"
                             return (
@@ -181,35 +192,43 @@ const Row = ({ name, disabled, field, index }) => {
                         }}
                     />
                     {/* TODO: only show default lang select when B2B? */}
-                    {/* 
-          <Controller
-            control={control}
-            name={langFieldName(name, field, index)}
-            defaultValue={field.defaultLanguageCode ?? ""}
-            render={(
-              { onChange, onBlur, value, name: fieldName, ref },
-              { invalid, isTouched, isDirty }
-            ) => {
-              return (
-                <>
-                  <Disclosure {...defaultLangDialog}>
-                    <Icon icon={faLanguage} type="font-awesome" />
-                  </Disclosure>
-                  {defaultLangDialog.visible && (
-                    <DefaultLangDialog
-                      defaultLanguageCode={value}
-                      gameProvider={field}
-                      disabled={disabled}
-                      dialog={defaultLangDialog}
-                      onChange={(code) => {
-                        setValue(fieldName, code)
-                      }}
-                    />
-                  )}
-                </>
-              )
-            }}
-          /> */}
+                    {/* <Controller
+                        control={control}
+                        name={langFieldName(name, field, index)}
+                        defaultValue={field.defaultLanguageCode ?? ""}
+                        render={({
+                            field: {
+                                onChange,
+                                onBlur,
+                                value,
+                                name: fieldName,
+                                ref
+                            },
+                            fieldState: { invalid, isTouched, isDirty }
+                        }) => {
+                            return (
+                                <>
+                                    <Disclosure {...defaultLangDialog}>
+                                        <Icon
+                                            icon={faLanguage}
+                                            type="font-awesome"
+                                        />
+                                    </Disclosure>
+                                    {defaultLangDialog.visible && (
+                                        <DefaultLangDialog
+                                            defaultLanguageCode={value}
+                                            gameProvider={field}
+                                            disabled={disabled}
+                                            dialog={defaultLangDialog}
+                                            onChange={(code) => {
+                                                setValue(fieldName, code)
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            )
+                        }}
+                    /> */}
                     <Controller
                         control={control}
                         name={queryStringFieldName(
@@ -219,10 +238,16 @@ const Row = ({ name, disabled, field, index }) => {
                             QueryStringType.Desktop
                         )}
                         defaultValue={field.desktopQueryString ?? ""}
-                        render={(
-                            { onChange, onBlur, value, name: fieldName, ref },
-                            { invalid, isTouched, isDirty }
-                        ) => {
+                        render={({
+                            field: {
+                                onChange,
+                                onBlur,
+                                value,
+                                name: fieldName,
+                                ref
+                            },
+                            fieldState: { invalid, isTouched, isDirty }
+                        }) => {
                             return (
                                 <>
                                     <Disclosure {...desktopQueryStringDialog}>
@@ -255,10 +280,16 @@ const Row = ({ name, disabled, field, index }) => {
                             QueryStringType.Mobile
                         )}
                         defaultValue={field.mobileQueryString ?? ""}
-                        render={(
-                            { onChange, onBlur, value, name: fieldName, ref },
-                            { invalid, isTouched, isDirty }
-                        ) => {
+                        render={({
+                            field: {
+                                onChange,
+                                onBlur,
+                                value,
+                                name: fieldName,
+                                ref
+                            },
+                            fieldState: { invalid, isTouched, isDirty }
+                        }) => {
                             return (
                                 <>
                                     <Disclosure {...mobileQueryStringDialog}>
@@ -419,13 +450,13 @@ const DefaultLangDialog = ({
     )
 }
 
-const checkedFieldName = (name, field, index) => `${name}[${index}].checked`
+const toCheckedFieldName = (name, field, index) => `${name}.${index}.checked`
 
 const queryStringFieldName = (name, field, index, type) =>
-    `${name}[${index}].${type}`
+    `${name}.${index}.${type}`
 
 const configFieldName = (name, field, index) =>
-    `${name}[${index}].configurationId`
+    `${name}.${index}.configurationId`
 
 const langFieldName = (name, field, index) =>
-    `${name}[${index}].defaultLanguageCode`
+    `${name}.${index}.defaultLanguageCode`

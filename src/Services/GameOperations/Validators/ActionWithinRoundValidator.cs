@@ -151,7 +151,8 @@ namespace TGS.Services.GameOperations.Validators
             if (current.AllowCancelCancelTransaction && current.Type.IsSettleBet() &&
                 cancellationOfReference != null)
             {
-                var previousCancellation = previousActions.FirstOrDefault(a => a.Type == CancelTransaction && a.ReferenceId == cancellationOfReference.ReferenceId);
+                var previousCancellation = previousActions.FirstOrDefault(a =>
+                    a.Type == CancelTransaction && a.ReferenceId == cancellationOfReference.ReferenceId);
                 cancellationOfReference = previousCancellation != null ? null : cancellationOfReference;
             }
 
@@ -220,8 +221,7 @@ namespace TGS.Services.GameOperations.Validators
                 .ToArray();
 
             var existingReferenceIds = referencesOfTheReference
-                .Select(e => (Guid?) e.Id)
-                .ToList();
+                .Select(e => (Guid?)e.Id).ToArray();
 
             var cancelledReferences = previousActions
                 .Where(ga => existingReferenceIds.Contains(ga.ReferenceId) && ga.Type == CancelTransaction)
@@ -301,6 +301,7 @@ namespace TGS.Services.GameOperations.Validators
             BetActionData previouslyClosed, out Exception error)
         {
             error = null;
+
             if (previouslyClosed == null)
             {
                 return false;

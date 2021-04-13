@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Services.Operations;
@@ -27,7 +28,7 @@ namespace TGS.Services.Operator.PlayerPhone
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartSetPlayerPhoneCommand command)
+        public async ValueTask<string> GetAsync(StartSetPlayerPhoneCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)

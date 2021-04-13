@@ -4,17 +4,19 @@ namespace TGS.Services.Report.Application.Models.Agent
 {
     public class AgentDividendDetailModel
     {
-        public Guid? id { get; set; }
+        public Guid Id { get; set; }
+        public string Username { get; set; }
         public DateTimeOffset SettlementDate { get; set; }
         public DateTimeOffset SettlementDateFrom { get; set; }
         public DateTimeOffset SettlementDateTo { get; set; }
-        public decimal WithdrawalAmount { get; set; }
-        public decimal AdjustmentAmount { get; set; }
-        public decimal BonusAmount { get; set; }
-        public decimal BetAmount { get; set; }
-        public decimal Turnover { get; set; }
+        public decimal LiveDealerWinLoss { get; set; }
+        public decimal SlotWinLoss { get; set; }
+        public decimal LotteryWinLoss { get; set; }
+        public decimal CardGameWinLoss { get; set; }
+        public decimal SportsWinLoss { get; set; }
+        public decimal VirtualSportsWinLoss { get; set; }
         public decimal WinLossAmount { get; set; }
-        public decimal NetProfit { get; set; }
         public decimal AgentDividendAmount { get; set; }
+        public decimal AgentDividendPercentage { get; set; }
     }
 }

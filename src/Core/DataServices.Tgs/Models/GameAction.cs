@@ -28,7 +28,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public bool IsClosingRound { get; set; }
         public bool? ClosingRoundExplicitRequest { get; set; }
         public string PlayerIp { get; set; }
-        public string Description { get; set; }
+        public string ExtraData { get; set; }
+        public string JackpotContribution { get; init; }
         public virtual ICollection<GameAction> FollowUpGameActions { get; set; }
     }
 }

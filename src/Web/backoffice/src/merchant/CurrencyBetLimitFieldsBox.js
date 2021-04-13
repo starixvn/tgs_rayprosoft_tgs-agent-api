@@ -43,7 +43,11 @@ const Body = ({
     disabled,
     width = "100%"
 }) => {
-    let { control, watch, setValue, errors, clearErrors } = useFormContext()
+    let {
+        control,
+        watch,
+        formState: { errors }
+    } = useFormContext()
 
     let currencyFieldArray = useFieldArray({
         control,
@@ -80,20 +84,6 @@ const Body = ({
                             <Table.Row>
                                 <Table.HeadCell>
                                     <Box></Box>
-                                    {/* <Checkbox
-                                        checked={isAllCurrencyChecked}
-                                        disabled={disabled}
-                                        onChange={(event) => {
-                                            let checked = event.target.checked
-                                            setAllCurrencyChecked({
-                                                currencyFieldName,
-                                                value: checked,
-                                                setValue,
-                                                clearErrors,
-                                                currencyBetLimitsPairs
-                                            })
-                                        }}
-                                    /> */}
                                 </Table.HeadCell>
                                 <Table.HeadCell
                                     colSpan={showBetLimitDefault ? "5" : "4"}
@@ -131,7 +121,7 @@ const Body = ({
 }
 
 const toCurrencyCheckedFieldName = (name, index) => {
-    return `${name}[${index}].checked`
+    return `${name}.${index}.checked`
 }
 
 const CurrencyBetLimitsRow = ({
@@ -142,18 +132,21 @@ const CurrencyBetLimitsRow = ({
     showBetLimitDefault = false,
     disabled
 }) => {
-    let { register, watch } = useFormContext()
+    let { register, watch, setValue } = useFormContext()
 
     let currencyCheckedFieldName = toCurrencyCheckedFieldName(
         currencyFieldName,
         currencyFieldIndex
+    )
+    let { ref: currencyCheckedRef, ...currencyCheckedFormProps } = register(
+        currencyCheckedFieldName
     )
 
     let isCurrencyChecked = watch(currencyCheckedFieldName)
     let betLimitHeaderVisibility = isCurrencyChecked ? "visible" : "hidden"
 
     let currencyFieldRow = useMemo(() => {
-        let currencyCodeFieldName = `${currencyFieldName}[${currencyFieldIndex}].code`
+        let currencyCodeFieldName = `${currencyFieldName}.${currencyFieldIndex}.code`
         return (
             <>
                 <Table.Row key={currencyField._id}>
@@ -164,12 +157,36 @@ const CurrencyBetLimitsRow = ({
                                 name={currencyCodeFieldName}
                                 value={currencyField.code}
                             />
-                            <Checkbox
-                                name={currencyCheckedFieldName}
-                                checkboxRef={register?.()}
-                                defaultChecked={currencyField.checked}
-                                disabled={disabled}
-                            />
+                            {disabled && (
+                                <>
+                                    <Checkbox
+                                        display="none"
+                                        checkboxRef={currencyCheckedRef}
+                                        checked={currencyField.checked}
+                                        {...currencyCheckedFormProps}
+                                    />
+                                    <Checkbox
+                                        disabled
+                                        checked={currencyField.checked}
+                                    />
+                                </>
+                            )}
+                            {!disabled && (
+                                <>
+                                    <Checkbox
+                                        defaultChecked={currencyField.checked}
+                                        checkboxRef={currencyCheckedRef}
+                                        {...currencyCheckedFormProps}
+                                        onChange={(event) => {
+                                            let checked = event.target.checked
+                                            setValue(
+                                                currencyCheckedFieldName,
+                                                checked
+                                            )
+                                        }}
+                                    />
+                                </>
+                            )}
                         </Box>
                     </Table.HeadCell>
                     <Table.HeadCell>{currencyField.code}</Table.HeadCell>
@@ -235,7 +252,7 @@ const BetLimitRow = ({
         watch,
         setValue,
         getValues,
-        errors,
+        formState: { errors },
         clearErrors,
         trigger
     } = useFormContext()
@@ -243,29 +260,47 @@ const BetLimitRow = ({
         currencyFieldName,
         currencyFieldIndex
     )
-    let currencyBetLimitCheckedFieldName = toBetLimitCheckedFieldName({
+    let betLimitCheckedFieldName = toBetLimitCheckedFieldName({
         currencyFieldName,
         currencyFieldIndex,
         betLimitFieldIndex
     })
+    let {
+        ref: betLimitCheckedRef,
+        onChange: onBetLimitCheckedChange,
+        ...betLimitCheckedFormProps
+    } = register(betLimitCheckedFieldName, {
+        validate: () => {
+            if (isCurrencyChecked) {
+                let checked = anyCheckedBetLimit({
+                    currencyFieldName,
+                    currencyFieldIndex,
+                    betLimitFields,
+                    getValues
+                })
+
+                return !checked ? betLimitField.currencyCode : true //error message
+            }
+        }
+    })
 
     let isCurrencyChecked = watch(currencyCheckedFieldName)
-    let isBetLimitChecked = watch(currencyBetLimitCheckedFieldName)
+    let isBetLimitChecked = watch(betLimitCheckedFieldName)
     let visibility = isCurrencyChecked ? "visible" : "collapse"
 
     useEffect(() => {
         if (!isCurrencyChecked) {
-            setValue(currencyBetLimitCheckedFieldName, false)
-            clearErrors(currencyBetLimitCheckedFieldName)
+            setValue(betLimitCheckedFieldName, false)
+            clearErrors(betLimitCheckedFieldName)
         }
     }, [isCurrencyChecked])
 
-    let checkedCheckboxError = get(errors, currencyBetLimitCheckedFieldName)
+    let checkedCheckboxError = get(errors, betLimitCheckedFieldName)
     let checkedCheckboxState = checkedCheckboxError && "warning"
 
     return useMemo(() => {
-        let currencyBetLimitIdFieldName = `${currencyFieldName}[${currencyFieldIndex}].betLimits[${betLimitFieldIndex}].id`
-        let currencyBetLimitCurrencyCodeFieldName = `${currencyFieldName}[${currencyFieldIndex}].betLimits[${betLimitFieldIndex}].currencyCode`
+        let currencyBetLimitIdFieldName = `${currencyFieldName}.${currencyFieldIndex}.betLimits.${betLimitFieldIndex}.id`
+        let currencyBetLimitCurrencyCodeFieldName = `${currencyFieldName}.${currencyFieldIndex}.betLimits.${betLimitFieldIndex}.currencyCode`
 
         return (
             <Table.Row visibility={visibility}>
@@ -282,59 +317,65 @@ const BetLimitRow = ({
                             name={currencyBetLimitCurrencyCodeFieldName}
                             value={betLimitField.currencyCode}
                         />
-                        <Checkbox
-                            key={betLimitField._id}
-                            name={currencyBetLimitCheckedFieldName}
-                            checkboxRef={register?.({
-                                validate: () => {
-                                    if (isCurrencyChecked) {
-                                        let checked = anyCheckedBetLimit({
+                        {disabled && (
+                            <>
+                                <Checkbox
+                                    display="none"
+                                    checked={betLimitField.checked}
+                                    checkboxRef={betLimitCheckedRef}
+                                    {...betLimitCheckedFormProps}
+                                />
+                                <Checkbox
+                                    disabled
+                                    checked={betLimitField.checked}
+                                />
+                            </>
+                        )}
+                        {!disabled && (
+                            <Checkbox
+                                checkboxRef={betLimitCheckedRef}
+                                state={checkedCheckboxState}
+                                defaultChecked={betLimitField.checked}
+                                {...betLimitCheckedFormProps}
+                                onChange={(event) => {
+                                    let checked = event.target.checked
+                                    setValue(
+                                        betLimitCheckedFieldName,
+                                        event.target.checked
+                                    )
+
+                                    onBetLimitCheckedChange(event)
+
+                                    if (checked && checkedCheckboxState) {
+                                        clearBetLimitCheckedErrors({
                                             currencyFieldName,
                                             currencyFieldIndex,
                                             betLimitFields,
-                                            getValues
+                                            clearErrors
+                                        })
+                                    }
+
+                                    if (showBetLimitDefault) {
+                                        autoCurrencyBetLimitDefault({
+                                            betLimitChecked: checked,
+                                            betLimitFieldIndex,
+                                            currencyFieldName,
+                                            currencyFieldIndex,
+                                            betLimitFields,
+                                            getValues,
+                                            setValue
                                         })
 
-                                        return !checked
-                                            ? betLimitField.currencyCode
-                                            : true //error message
+                                        validateHasDefaultBetLimit({
+                                            currencyFieldIndex,
+                                            currencyFieldName,
+                                            betLimitFields,
+                                            trigger
+                                        })
                                     }
-                                }
-                            })}
-                            state={checkedCheckboxState}
-                            defaultChecked={betLimitField.checked}
-                            disabled={disabled}
-                            onChange={(event) => {
-                                let checked = event.target.checked
-                                if (checked && checkedCheckboxState) {
-                                    clearBetLimitCheckedErrors({
-                                        currencyFieldName,
-                                        currencyFieldIndex,
-                                        betLimitFields,
-                                        clearErrors
-                                    })
-                                }
-
-                                if (showBetLimitDefault) {
-                                    autoCurrencyBetLimitDefault({
-                                        betLimitChecked: checked,
-                                        betLimitFieldIndex,
-                                        currencyFieldName,
-                                        currencyFieldIndex,
-                                        betLimitFields,
-                                        getValues,
-                                        setValue
-                                    })
-
-                                    validateHasDefaultBetLimit({
-                                        currencyFieldIndex,
-                                        currencyFieldName,
-                                        betLimitFields,
-                                        trigger
-                                    })
-                                }
-                            }}
-                        />
+                                }}
+                            />
+                        )}
                     </Box>
                 </Table.Cell>
                 <Table.Cell textAlign="center">
@@ -579,7 +620,7 @@ const toBetLimitCheckedFieldName = ({
     currencyFieldIndex,
     betLimitFieldIndex
 }) => {
-    return `${currencyFieldName}[${currencyFieldIndex}].betLimits[${betLimitFieldIndex}].checked`
+    return `${currencyFieldName}.${currencyFieldIndex}.betLimits.${betLimitFieldIndex}.checked`
 }
 
 const toBetLimitIsDefaultFieldName = ({
@@ -587,7 +628,7 @@ const toBetLimitIsDefaultFieldName = ({
     currencyFieldIndex,
     betLimitFieldIndex
 }) => {
-    return `${currencyFieldName}[${currencyFieldIndex}].betLimits[${betLimitFieldIndex}].isDefault`
+    return `${currencyFieldName}.${currencyFieldIndex}.betLimits.${betLimitFieldIndex}.isDefault`
 }
 
 const isBetLimitChecked = ({
@@ -681,6 +722,29 @@ const CurrencyBetLimitDefaultSwitch = ({
         betLimitFieldIndex
     })
 
+    let {
+        ref: isDefaultRef,
+        onChange: onIsDefaultChange,
+        ...isDefaultFormProps
+    } = register?.(isDefaultFieldName, {
+        validate: () => {
+            if (isCurrencyChecked) {
+                let defaultBetLimitCount = countDefaultBetLimit({
+                    currencyFieldName,
+                    currencyFieldIndex,
+                    betLimitFields,
+                    getValues
+                })
+
+                if (defaultBetLimitCount === 0 || defaultBetLimitCount > 1) {
+                    return betLimitField.currencyCode
+                }
+
+                return true //must has one default bet limit
+            }
+        }
+    })
+
     useEffect(() => {
         if (!isCurrencyChecked) {
             setValue(isDefaultFieldName, false)
@@ -690,62 +754,60 @@ const CurrencyBetLimitDefaultSwitch = ({
 
     let noDefaultError = get(errors, isDefaultFieldName)
     let state = noDefaultError && "warning"
+
+    let editable = !disabled
     return (
-        <Switch
-            name={isDefaultFieldName}
-            switchRef={register?.({
-                validate: () => {
-                    if (isCurrencyChecked) {
-                        let defaultBetLimitCount = countDefaultBetLimit({
+        <>
+            {disabled && (
+                <>
+                    <Switch
+                        display="none"
+                        switchRef={isDefaultRef}
+                        {...isDefaultFormProps}
+                    />
+                    <Switch disabled checked={betLimitField.isDefault} />
+                </>
+            )}
+            {editable && (
+                <Switch
+                    switchRef={isDefaultRef}
+                    defaultChecked={betLimitField.isDefault}
+                    state={state}
+                    {...isDefaultFormProps}
+                    onChange={(event) => {
+                        onIsDefaultChange(event)
+                        let checked = event.target.checked
+                        setValue(isDefaultFieldName, checked)
+
+                        if (checked) {
+                            setBetLimitChecked({
+                                betLimitFieldIndex,
+                                currencyFieldName,
+                                currencyFieldIndex,
+                                setValue,
+                                checked: true
+                            })
+                            validateHasDefaultBetLimit({
+                                currencyFieldName,
+                                currencyFieldIndex,
+                                betLimitFields,
+                                trigger
+                            })
+                        }
+
+                        autoToggleIsDefault({
+                            isDefaultChecked: checked,
+                            betLimitFieldIndex,
                             currencyFieldName,
                             currencyFieldIndex,
                             betLimitFields,
-                            getValues
+                            getValues,
+                            setValue
                         })
-
-                        if (
-                            defaultBetLimitCount === 0 ||
-                            defaultBetLimitCount > 1
-                        ) {
-                            return betLimitField.currencyCode
-                        }
-
-                        return true //must has one default bet limit
-                    }
-                }
-            })}
-            defaultChecked={betLimitField.isDefault}
-            disabled={disabled}
-            state={state}
-            onChange={(event) => {
-                let checked = event.target.checked
-                if (checked) {
-                    setBetLimitChecked({
-                        betLimitFieldIndex,
-                        currencyFieldName,
-                        currencyFieldIndex,
-                        setValue,
-                        checked: true
-                    })
-                    validateHasDefaultBetLimit({
-                        currencyFieldName,
-                        currencyFieldIndex,
-                        betLimitFields,
-                        trigger
-                    })
-                }
-
-                autoToggleIsDefault({
-                    isDefaultChecked: checked,
-                    betLimitFieldIndex,
-                    currencyFieldName,
-                    currencyFieldIndex,
-                    betLimitFields,
-                    getValues,
-                    setValue
-                })
-            }}
-        />
+                    }}
+                />
+            )}
+        </>
     )
 }
 

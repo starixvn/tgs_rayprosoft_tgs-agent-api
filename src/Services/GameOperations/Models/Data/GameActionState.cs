@@ -21,7 +21,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
             GameActionType = td.GameActionType;
             Timestamp = td.TimeStamp;
-            Description = td.Description ?? string.Empty;
+            ExtraData = td.ExtraData ?? string.Empty;
             ExternalBetId = td.ExternalBetId;
             ExternalRoundId = td.ExternalRoundId;
             ExternalTransactionId = td.ExternalTransactionId;
@@ -33,12 +33,19 @@ namespace TGS.Services.GameOperations.Models.Data
             RoundDetail = td.RoundDetail;
             RoundClosed = td.RoundClosed;
             BetType = td.BetType;
+            OppositeBetPatterns = td.OppositeBetPatterns == null
+                ? Array.Empty<OppositeBetPattern>()
+                : td.OppositeBetPatterns
+                    .Select(p => new OppositeBetPattern(p.BetType, p.GroupId))
+                    .ToArray();
+
+            JackpotContribution = td.JackpotContribution;
 
             UtcNow = DateTimeOffset.UtcNow;
         }
 
         public ITgsRepository Repository { get; init; }
-        public GameActionType GameActionType { get; init; }
+        public GameActionType GameActionType { get; }
         public PlatformType? PlatformType { get; init; }
         public Action<string, decimal> ValidateAmount { get; init; }
         public Func<decimal, decimal> PrepareAmount { get; init; }
@@ -87,7 +94,7 @@ namespace TGS.Services.GameOperations.Models.Data
         // set from TransactionData
         public DateTimeOffset Timestamp { get; init; }
 
-        public string Description { get; init; }
+        public string ExtraData { get; init; }
         public string ExternalBetId { get; init; }
         public string ExternalRoundId { get; init; }
         public string ExternalTransactionId { get; init; }
@@ -110,5 +117,8 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool FreeBetAsSingleRound { get; init; }
         public bool AllowCancelCancelTransaction { get; init; }
         public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
+
+        public OppositeBetPattern[] OppositeBetPatterns { get; }
+        public JackpotContribution JackpotContribution { get; }
     }
 }

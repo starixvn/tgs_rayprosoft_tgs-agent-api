@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/react"
-import { useForm, useFormContext } from "react-hook-form"
+import { useForm, useFormContext, Controller } from "react-hook-form"
 import { Spinner, Select as _Select, SelectField as _SelectField } from "bumbag"
 
 export const Select = ({
@@ -9,12 +9,18 @@ export const Select = ({
     registerOptions = {},
     selectRef,
     state,
+    options = [],
+    placeholder,
+    placeholderDisabled = false,
     ...props
 }) => {
     let formContext = useFormContext()
     register = register ?? formContext?.register
-    if (!selectRef && register) {
-        selectRef = register({
+
+    let formProps = {}
+    let autoRegisterFormField = name && !selectRef && register
+    if (autoRegisterFormField) {
+        let { ref, ...rest } = register(name, {
             required: props.required,
             min: props.min,
             max: props.max,
@@ -23,12 +29,48 @@ export const Select = ({
             validate: props.validate,
             ...registerOptions
         })
+        formProps = rest
+        selectRef = ref
     }
 
-    state = state ?? (formContext?.errors?.[name] && "danger")
+    let loadingOptions = props.isLoading && (!options || options.length === 0)
+    if (autoRegisterFormField && loadingOptions) {
+        return (
+            <Controller
+                name={name}
+                control={formContext.control}
+                render={() => {
+                    return <Select isLoading options={[]} />
+                }}
+            />
+        )
+    }
+
+    if (typeof placeholder === "string") {
+        options = [
+            {
+                label: placeholder,
+                value: "",
+                disabled: placeholderDisabled
+            },
+            ...options
+        ]
+    }
+
+    state = state ?? (formContext?.formState?.errors?.[name] && "danger")
 
     return (
-        <_Select name={name} selectRef={selectRef} state={state} {...props} />
+        <_Select
+            options={options}
+            selectRef={selectRef}
+            state={state}
+            {...formProps}
+            {...props}
+            onChange={(event) => {
+                formProps?.onChange?.(event)
+                props?.onChange?.(event)
+            }}
+        />
     )
 }
 
@@ -38,46 +80,64 @@ export const SelectField = ({
     registerOptions = {},
     selectRef,
     validationText,
+    options = [],
+    placeholder,
+    placeholderDisabled = false,
     ...props
 }) => {
     let formContext = useFormContext()
 
     register = register ?? formContext?.register
-    if (!selectRef && register) {
-        selectRef = register({
-            required: {
-                value: props.required,
-                message: props.requiredMessage
-            },
-            min: {
-                value: props.min,
-                message: props.minMessage
-            },
-            max: {
-                value: props.max,
-                message: props.maxMessage
-            },
-            minLength: {
-                value: props.minLength,
-                message: props.minLengthMessage
-            },
-            maxLength: {
-                value: props.maxLength,
-                message: props.maxLengthMessage
-            },
+    let formProps = {}
+    let autoRegisterFormField = name && !selectRef && register
+    if (autoRegisterFormField) {
+        let { ref, ...rest } = register(name, {
+            required: props.required,
+            min: props.min,
+            max: props.max,
+            minLength: props.minLength,
+            maxLength: props.maxLength,
             validate: props.validate,
             ...registerOptions
         })
+        formProps = rest
+        selectRef = ref
     }
 
-    let error = formContext?.errors[name]
+    let loadingOptions = props.isLoading && (!options || options.length === 0)
+    if (autoRegisterFormField && loadingOptions) {
+        return (
+            <Controller
+                name={name}
+                control={formContext.control}
+                defaultValue={props?.defaultValue}
+                render={() => {
+                    return <Select isLoading options={[]} />
+                }}
+            />
+        )
+    }
+
+    if (typeof placeholder === "string") {
+        options = [
+            {
+                label: placeholder,
+                value: "",
+                disabled: placeholderDisabled
+            },
+            ...options
+        ]
+    }
+
+    let error = formContext?.formState?.errors[name]
     let state = error && "danger"
     validationText = validationText ?? error?.message
 
     return (
         <_SelectField
-            name={name}
+            options={options}
             selectRef={selectRef}
+            {...formProps}
             state={state}
             validationText={validationText}
             {...props}

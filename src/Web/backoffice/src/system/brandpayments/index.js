@@ -41,6 +41,7 @@ import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert, { AlertDialog } from "../../dialog/Alert"
 import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
 import { InputField } from "../../input/Input"
+import { formatNumber } from "../../number/format"
 
 export { Code }
 
@@ -414,10 +415,11 @@ const useColumns = ({
                     whiteSpace: "nowrap"
                 },
                 Cell: ({ value }) => {
-                    //TODO: format number?
+                    let from = formatNumber(value.transferLimitFrom)
+                    let to = formatNumber(value.transferLimitTo)
                     return (
                         <Text.Block whiteSpace="nowrap">
-                            {value.transferLimitFrom} - {value.transferLimitTo}
+                            {`${from} - ${to}`}
                         </Text.Block>
                     )
                 }

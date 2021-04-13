@@ -22,11 +22,7 @@ const InBlacklistTrans = {
     en: "In Blacklist"
 }
 
-export const AgentStatusSelect = ({
-    placeholder,
-    placeholderDisabled,
-    ...props
-}) => {
+export const AgentStatusSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "状态",
         en: "Status"
@@ -48,18 +44,7 @@ export const AgentStatusSelect = ({
         }
     ]
 
-    if (placeholder) {
-        options = [
-            {
-                label: placeholder,
-                value: "",
-                disabled: placeholderDisabled
-            },
-            ...options
-        ]
-    }
-
-    return <Select options={options} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export const AgentStatusLabel = ({ value }) => {

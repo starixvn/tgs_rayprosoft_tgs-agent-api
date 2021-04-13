@@ -174,41 +174,45 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     q => q.Where(x => x.ReportDate == reportDate && x.Hour == start.Hour && x.Minute == start.Minute),
                     false).ToArrayAsync();
 
-            var playerAggregates = await _tgsRepository.Players
+            var playerAggregates = await _tgsRepository.Players.Include(x => x.Agent)
                 .GroupJoin(_tgsRepository.Transactions, p => p.PlayerCode, t => t.Wallet.PlayerCode,
-                    (p, t) => new {p.BrandId, player = p, transaction = t})
+                    (p, t) => new {p.BrandId, Player = p, transaction = t})
                 .SelectMany(x => x.transaction.DefaultIfEmpty(),
-                    (x, transaction) => new {x.BrandId, x.player, transaction})
-                .GroupBy(x => new {x.BrandId, x.player.AgentId, x.player.PlayerCode}, (x, players) =>
-                    new PlayerAggregateModel
-                    {
-                        BrandId = x.BrandId,
-                        Hour = start.Hour,
-                        ReportDate = reportDate,
-                        AgentId = x.AgentId,
-                        PlayerCode = x.PlayerCode,
-                        RegisteredCount =
-                            players.Count(p =>
-                                p.player.RegisteredOn >= start && p.player.RegisteredOn < end),
-                        FirstFundInCount =
-                            players.Count(p =>
-                                p.player.FirstDepositOn >= start &&
-                                p.player.FirstDepositOn < end),
-                        DepositAmount =
-                            players.Where(p =>
-                                p.transaction.Type == TransactionType.Deposit && p.transaction.ConfirmedOn >= start &&
+                    (x, transaction) => new {x.BrandId, x.Player, transaction})
+                .GroupBy(x => new {x.BrandId, x.Player.AgentId, x.Player.PlayerCode},
+                    (x, players) =>
+                        new PlayerAggregateModel
+                        {
+                            BrandId = x.BrandId,
+                            Hour = start.Hour,
+                            ReportDate = reportDate,
+                            AgentId = x.AgentId,
+                            PlayerCode = x.PlayerCode,
+                            RegisteredCount =
+                                players.Count(p =>
+                                    p.Player.RegisteredOn >= start && p.Player.RegisteredOn < end),
+                            FirstFundInCount =
+                                players.Count(p =>
+                                    p.Player.FirstDepositOn >= start &&
+                                    p.Player.FirstDepositOn < end),
+                            DepositAmount =
+                                players.Where(p =>
+                                    p.transaction.Type == TransactionType.Deposit &&
+                                    p.transaction.ConfirmedOn >= start &&
+                                    p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                            WithdrawalAmount =
+                                players.Where(p =>
+                                    p.transaction.Type == TransactionType.Withdrawal &&
+                                    p.transaction.ConfirmedOn >= start &&
+                                    p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                            AdjustmentAmount = players.Where(p =>
+                                p.transaction.Type == TransactionType.Adjust && p.transaction.ConfirmedOn >= start &&
                                 p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
-                        WithdrawalAmount =
-                            players.Where(p =>
-                                p.transaction.Type == TransactionType.Withdrawal &&
-                                p.transaction.ConfirmedOn >= start &&
+                            BonusAmount = players.Where(p =>
+                                p.transaction.Type == TransactionType.Bonus && p.transaction.ConfirmedOn >= start &&
                                 p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
-                        AdjustmentAmount = players.Where(p =>
-                            p.transaction.Type == TransactionType.Adjust && p.transaction.ConfirmedOn >= start &&
-                            p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
-                        BonusAmount = 0,
-                        CreatedOn = DateTimeOffset.Now
-                    }).ToArrayAsync();
+                            CreatedOn = DateTimeOffset.Now
+                        }).ToArrayAsync();
 
             foreach (var playerAggregate in playerAggregates)
             {
@@ -253,7 +257,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PlayerCode = x.PlayerCode,
                             GameType = x.GameType,
                             Hour = start.Hour,
-                            AgentDividendPercentage = x.Agent.DividendPercentage,
                             VipSportsRebatePercentage = x.Vip.SportsRebatePercentage,
                             VipVirtualSportsRebatePercentage = x.Vip.CardGameRebatePercentage,
                             VipLiveDealerRebatePercentage = x.Vip.LiveDealerRebatePercentage,
@@ -279,6 +282,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                                     .Sum(a => a.r.Turnover) / 100 +
                                 x.Vip.LotteryRebatePercentage * aggregate.Where(a => a.r.GameType == GameType.Lottery)
                                     .Sum(a => a.r.Turnover) / 100,
+                            AgentDividendPercentage = x.Agent?.DividendPercentage ?? 0,
                             CreatedOn = DateTimeOffset.Now,
                             ReportDate = reportDate
                         };

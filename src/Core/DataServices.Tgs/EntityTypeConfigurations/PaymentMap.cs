@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -20,6 +21,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Description)
                 .HasMaxLength(128);
 
+            builder.Property(c => c.ExtendData)
+                .HasColumnType(ColumnTypes.Jsonb);
+
+            builder.Property(c => c.Status)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .HasDefaultValueSql("0")
+                .IsRequired();
+
             builder.Property(c => c.CreatedByUsername)
                 .HasMaxLength(32)
                 .IsRequired();
@@ -29,10 +38,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValueSql("Now()");
 
             builder.Property(c => c.UpdatedOn)
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValueSql("Now()");
         }
     }
 }

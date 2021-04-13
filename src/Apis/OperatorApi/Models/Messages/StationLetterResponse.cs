@@ -16,5 +16,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("content")]
         public string Content { get; init; }
+
+        [JsonPropertyName("isread")]
+        public bool IsRead { get; init; }
     }
 }

@@ -22,7 +22,8 @@ RETURNS TABLE(
 	"GameActionRecordedOn" timestamptz,
 	"GameActionSentOn" timestamptz,
 	"BetType" varchar,
-	"WalletId" uuid)
+	"WalletId" uuid,
+	"JackpotContribution" jsonb)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -65,7 +66,8 @@ BEGIN
 		ga.recorded_on as "GameActionRecordedOn",
 		ga.sent_on as "GameActionSentOn",
 		ga.bet_type as "BetType",
-		r.wallet_id as "WalletId"
+		r.wallet_id as "WalletId",
+		ga.jackpot_contribution as "JackpotContribution"
 	from round r 
 	join bet.game_actions ga on ga.round_id = r.id 
 	where ga.recorded_on >= (r.created_on - 5 * interval '1 minute')

@@ -1,5 +1,6 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Games;
 
 namespace TGS.Services.GameOperations.Models.Data
 {
@@ -9,7 +10,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public Guid? ReferenceId { get; init; }
         public string ExternalId { get; init; }
         public string ExternalRoundId { get; init; }
-        public string ExternalGameActionGroupId { get;init; }
+        public string ExternalGameActionGroupId { get; init; }
         public BetActionData Reference { get; set; }
         public decimal Amount { get; init; }
         public decimal UnsettledBets { get; set; }
@@ -31,5 +32,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool IsExplicitlyClosingRound { get; init; }
         public bool IsExplicitlyNotClosingRound { get; init; }
         public bool AllowCancelCancelTransaction { get; init; }
+
+        public JackpotContribution JackpotContribution { get; init; }
     }
 }

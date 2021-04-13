@@ -10,6 +10,10 @@ import {
     codeLabelPair as currencyPair
 } from "./currency/menu"
 import {
+    Code as BetLimitCode,
+    codeLabelPair as betLimitPair
+} from "./betlimit/menu"
+import {
     Code as SettingsCode,
     codeLabelPair as settingsPair
 } from "./setting/menu"
@@ -62,6 +66,14 @@ const labelOf = ({ locale, code }) => {
                 },
                 locale
             )
+        case BetLimitCode:
+            return getTrans(
+                {
+                    zh: "限红",
+                    en: "Bet Limit"
+                },
+                locale
+            )
         case SettingsCode:
             return getTrans(
                 {
@@ -82,6 +94,11 @@ export const codeLabelPair = [
             locale,
             codes,
             label: labelOf,
-            subLabelPairs: [languagePair, currencyPair, settingsPair]
+            subLabelPairs: [
+                languagePair,
+                currencyPair,
+                betLimitPair,
+                settingsPair
+            ]
         })
 ]

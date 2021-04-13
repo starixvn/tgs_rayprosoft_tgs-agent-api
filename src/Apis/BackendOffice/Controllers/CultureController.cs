@@ -23,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Route("")]
         [HttpPost]
         [Description("Change culture")]
-        public MessageResponse ChangeCultureAsync(string culture)
+        public MessageResponse ChangeCulture(string culture)
         {
             SetCulture(culture);
 

@@ -6,7 +6,7 @@ namespace TGS.Services.Operator
 {
     public interface IWalletRepository
     {
-        ValueTask CreateDepositFormAsync(BankDepositForm form);
+        ValueTask<Guid> CreateDepositFormAsync(BankDepositForm form);
 
         ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode);
 
@@ -17,5 +17,7 @@ namespace TGS.Services.Operator
         IAsyncEnumerable<PaymentChannel> GetAllPaymentChannelsAsync();
 
         ValueTask<BrandPayment> GetBrandPaymentByIdAsync(Guid id);
+
+        ValueTask SubmitRemittanceReceiptToDepositFormAsync(Guid formId, string remittanceReceiptFileId);
     }
 }

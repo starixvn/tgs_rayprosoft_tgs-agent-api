@@ -36,7 +36,7 @@ namespace ReportApi
             services.AddTgsRepository(_configuration, "Tgs");
 
             services.AddNats(_configuration)
-                .AddJson()
+                .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()

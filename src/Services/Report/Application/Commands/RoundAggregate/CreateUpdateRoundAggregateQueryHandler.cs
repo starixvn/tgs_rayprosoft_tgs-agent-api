@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Report.Client.Models.Aggregate;
 using TGS.Core.Models.Messages;
+using TGS.Services.Report.Application.Models.Aggregate;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Commands.RoundAggregate

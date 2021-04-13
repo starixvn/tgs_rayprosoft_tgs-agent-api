@@ -12,6 +12,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
     {
         public static IServiceCollection AddBackOfficeApplicationServices(this IServiceCollection services)
         {
+            services.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient);
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));
@@ -32,6 +33,8 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<IPlayerService, PlayerService>();
             services.AddTransient<IPlayerBankService, PlayerBankService>();
             services.AddTransient<ICredentialGenerator, CredentialGenerator>();
+            services.AddTransient<IPromotionService, PromotionService>();
+            services.AddTransient<IAgentTransactionService, AgentTransactionService>();
 
             return services;
         }

@@ -123,7 +123,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                             <BounsBox>
                                 <InputField
                                     type="number"
-                                    name="bonusPercentage"
+                                    name="dividendPercentage"
                                     step="0.1"
                                     min="0"
                                     addonAfter={<Button isStatic>%</Button>}

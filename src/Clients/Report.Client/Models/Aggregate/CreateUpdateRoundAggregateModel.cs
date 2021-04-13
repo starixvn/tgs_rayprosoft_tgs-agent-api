@@ -1,7 +1,4 @@
-﻿using MediatR;
-using TGS.Core.Models.Messages;
-
-namespace Report.Client.Models.Aggregate
+﻿namespace Report.Client.Models.Aggregate
 {
-    public record CreateUpdateRoundAggregateModel : IRequest<MessageResponse>;
+    public record CreateUpdateRoundAggregateModel;
 }

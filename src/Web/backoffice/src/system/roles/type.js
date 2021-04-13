@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Trans, useTrans } from "../../i18n"
-import { Spinner, Stack, Flex, Box, Card, Label } from "bumbag"
 import { useUserRoleType } from "../../user/context"
 import Select from "../../select/Select"
 
@@ -121,28 +120,15 @@ export const useRoleTypeOptions = () => {
     return opitons
 }
 
-export const RoleTypeSelect = ({
-    options = useRoleTypeOptions(),
-    placeholder,
-    placeholderDisabled,
-    ...props
-}) => {
+export const RoleTypeSelect = ({ placeholder, options, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "选择权限组类型",
         en: "Select Role Type"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    options =
-        typeof placeholder === "string"
-            ? [
-                  {
-                      label: placeholder,
-                      value: "",
-                      disabled: placeholderDisabled
-                  },
-                  ...options
-              ]
-            : options
-    return <Select options={options} {...props} />
+    let defaultOptions = useRoleTypeOptions()
+    options = options ?? defaultOptions
+
+    return <Select placeholder={placeholder} options={options} {...props} />
 }

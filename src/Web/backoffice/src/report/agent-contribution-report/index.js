@@ -313,6 +313,11 @@ const SearchBar = ({
     )
 }
 
+const AgentType = "Agent"
+const PlayerType = "Player"
+const isPlayer = (type = "") => type === PlayerType
+const isAgent = (type = "") => type === AgentType
+
 const useColumns = ({
     brandId,
     start,
@@ -328,18 +333,20 @@ const useColumns = ({
                 accessor: (row) => row,
                 Header: <Trans zh="用户名" en="Username" />,
                 Cell: ({ value }) => {
-                    //TODO: if type is Agent, setUsernames?
-                    return (
-                        <Link
-                            onClick={(event) => {
-                                let path = [...usernames, value?.username]
-                                console.log("path", path)
-                                setUsernames(path)
-                            }}
-                        >
-                            {value?.username}
-                        </Link>
-                    )
+                    let { type } = value
+                    if (isAgent(type)) {
+                        return (
+                            <Link
+                                onClick={(event) => {
+                                    let path = [...usernames, value?.username]
+                                    setUsernames(path)
+                                }}
+                            >
+                                {value?.username}
+                            </Link>
+                        )
+                    }
+                    return <Text.Block>{value?.username}</Text.Block>
                 },
                 Footer: () => <Trans zh="总计" en="Total" />,
                 footerCellProps: {
@@ -348,15 +355,18 @@ const useColumns = ({
                 disableSortBy: true
             }),
             textColumn({
-                id: "accountType",
-                accessor: (row) => row,
+                accessor: "type",
                 Header: <Trans zh="账户类型" en="Account Type" />,
-                Cell: ({ value }) => (
-                    <Text.Block>
-                        <Trans zh="玩家" en="Player" /> or
-                        <Trans zh="代理" en="Agent" />
-                    </Text.Block>
-                ),
+                Cell: ({ value = "" }) => {
+                    switch (value) {
+                        case "Player":
+                            return <Trans zh="玩家" en="Player" />
+                        case AgentType:
+                            return <Trans zh="代理" en="Agent" />
+                        default:
+                            return value
+                    }
+                },
                 Footer: () => <Box />,
                 disableSortBy: true
             }),

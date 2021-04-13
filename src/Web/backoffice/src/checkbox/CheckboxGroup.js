@@ -4,32 +4,27 @@ import { useForm, useFormContext, Controller } from "react-hook-form"
 import { CheckboxGroup as _CheckboxGroup } from "bumbag"
 
 export const CheckboxGroup = ({ name, ...props }) => {
-  let { control } = useFormContext()
+    let { control } = useFormContext()
 
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={(
-        { onChange, onBlur, value, name, ref },
-        { invalid, isTouched, isDirty }
-      ) => (
-        <_CheckboxGroup
-          onBlur={onBlur}
-          onChange={(value) => {
-            onChange(value)
-          }}
-          value={value}
-          {...props}
+    return (
+        <Controller
+            control={control}
+            name={name}
+            render={({
+                field: { onChange, onBlur, value, name, ref },
+                fieldState: { invalid, isTouched, isDirty }
+            }) => (
+                <_CheckboxGroup
+                    onBlur={onBlur}
+                    onChange={(value) => {
+                        onChange(value)
+                    }}
+                    value={value}
+                    {...props}
+                />
+            )}
         />
-      )}
-    />
-  )
+    )
 }
-
-/* TODO
-export const CheckboxGroupTable = () => {
-}
-*/
 
 export default CheckboxGroup

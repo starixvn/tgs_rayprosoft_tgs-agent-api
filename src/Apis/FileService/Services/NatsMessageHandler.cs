@@ -22,13 +22,14 @@ namespace TGS.Apis.FileService.Services
             _service = service;
         }
 
-        Task INatsMessageHandler.SubscribeAsync()
+        public Task SubscribeAsync()
         {
+            var observer = _natsManager.SubscribeWithObserveAsync(nameof(ObjectFileEventModel));
             return Task.FromResult(_natsManager.SubscribeWithObserveAsync(nameof(ObjectFileEventModel)).Subscribe(
                 x =>
                 {
                     var fileObject = _natsManager.Deserialize<ObjectFileEventModel>(x.Data);
-                    _service.AddStationLetterFileAsync(fileObject);
+                    _ = _service.AddStationLetterFileAsync(fileObject);
                 }));
         }
     }
