@@ -187,32 +187,58 @@ Scenario: 15 - Opposite Bets with different amount.
 	Then the final bet amount is 150 and valid bet amount is 150 and settle amount is 100
 
 @OppositeBets
-Scenario: 16 - Opposite Bets with different amount, and tie turnover.
+Scenario: 16 - Opposite Bets with different amount, and tie turnover. (Banker and Player)
 	Given initial balance of $500
 		And game with turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
-	| 1  |        | PlaceBet | -50    | 450          | 0        | 0       | 0                | 50             |                  | Dragon   |                           |
-	| 2  |        | PlaceBet | -100   | 350          | 0        | 0       | 0                | 100            |                  | Tiger    |                           |
+	| 1  |        | PlaceBet | -50    | 450          | 0        | 0       | 0                | 50             |                  | Banker   |                           |
+	| 2  |        | PlaceBet | -100   | 350          | 0        | 0       | 0                | 100            |                  | Player   |                           |
 	| 3  | 1      | TieBet   | 50     | 400          | 0        | 0       | 0                | 0              |                  |          |                           |
 	| 4  | 2      | TieBet   | 100    | 500          | 50       | 0       | 0                | -150           | Yes              |          |                           |
 	|    |        | Totals   | 0      | 500          | 50       | 0       | 0                | 0              |                  |          |                           |
 	Then the final bet amount is 150 and valid bet amount is 150 and settle amount is 150
 
 @OppositeBets
-Scenario: 17 - Opposite Bets with different amount, and No tie turnover.
+Scenario: 17 - Opposite Bets with different amount, and No tie turnover. (Banker and Player)
+	Given initial balance of $500
+		And game with no turnover on tie bet
+	When I perform the following actions I will see the expected results
+	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
+	| 1  |        | PlaceBet | -50    | 450          | 0        | 0       | 0                | 50             |                  | Banker   |                           |
+	| 2  |        | PlaceBet | -100   | 350          | 0        | 0       | 0                | 100            |                  | Player   |                           |
+	| 3  | 1      | TieBet   | 50     | 400          | 0        | 0       | 0                | 0              |                  |          |                           |
+	| 4  | 2      | TieBet   | 100    | 500          | 0        | 0       | 150              | -150           | Yes              |          |                           |
+	|    |        | Totals   | 0      | 500          | 0        | 0       | 150              | 0              |                  |          |                           |
+	Then the final bet amount is 150 and valid bet amount is 150 and settle amount is 150
+
+@OppositeBets
+Scenario: 18 - Opposite Bets with different amount, and tie turnover. (Dragon and Tiger)
+	Given initial balance of $500
+		And game with turnover on tie bet
+	When I perform the following actions I will see the expected results
+	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
+	| 1  |        | PlaceBet | -50    | 450          | 0        | 0       | 0                | 50             |                  | Dragon   |                           |
+	| 2  |        | PlaceBet | -100   | 350          | 0        | 0       | 0                | 100            |                  | Tiger    |                           |
+	| 3  | 1      | TieBet   | 25     | 375          | 0        | 0       | 0                | 0              |                  |          |                           |
+	| 4  | 2      | TieBet   | 50     | 425          | 50       | 75      | 0                | -150           | Yes              |          |                           |
+	|    |        | Totals   | -75    | 425          | 50       | 75      | 0                | 0              |                  |          |                           |
+	Then the final bet amount is 150 and valid bet amount is 150 and settle amount is 75
+
+@OppositeBets
+Scenario: 19 - Opposite Bets with different amount, and No tie turnover. (Dragon and Tiger)
 	Given initial balance of $500
 		And game with no turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
 	| 1  |        | PlaceBet | -50    | 450          | 0        | 0       | 0                | 50             |                  | Dragon   |                           |
 	| 2  |        | PlaceBet | -100   | 350          | 0        | 0       | 0                | 100            |                  | Tiger    |                           |
-	| 3  | 1      | TieBet   | 50     | 400          | 0        | 0       | 0                | 0              |                  |          |                           |
-	| 4  | 2      | TieBet   | 100    | 500          | 0        | 0       | 150              | -150           | Yes              |          |                           |
-	|    |        | Totals   | 0      | 500          | 0        | 0       | 150              | 0              |                  |          |                           |
-	Then the final bet amount is 150 and valid bet amount is 150 and settle amount is 150
+	| 3  | 1      | TieBet   | 25     | 375          | 0        | 0       | 0                | 0              |                  |          |                           |
+	| 4  | 2      | TieBet   | 50     | 425          | 25       | 75      | 75               | -150           | Yes              |          |                           |
+	|    |        | Totals   | -75    | 425          | 25       | 75      | 75               | 0              |                  |          |                           |
+ 	Then the final bet amount is 150 and valid bet amount is 150 and settle amount is 75
 
-Scenario: 18 - Bet with jackpot contribution, then Lose, cancel the Loss, then Win.
+Scenario: 20 - Bet with jackpot contribution, then Lose, cancel the Loss, then Win.
 	Given initial balance of $500
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type              | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
