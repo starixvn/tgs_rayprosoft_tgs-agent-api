@@ -17,7 +17,7 @@ namespace TGS.Services.Report.Application.Models.Player
         public decimal AdjustmentAmount { get; set; }
         public decimal BonusAmount { get; set; }
         public decimal BetAmount { get; set; }
-        public decimal ValidBetAmount { get; set; }
+        public decimal Turnover { get; set; }
         public decimal WinLossAmount { get; set; }
         public decimal NetProfit { get; set; }
     }
