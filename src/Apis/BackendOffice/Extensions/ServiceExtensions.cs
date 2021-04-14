@@ -147,6 +147,13 @@ namespace TGS.Apis.BackendOffice.Extensions
                     Task.FromResult(new ProviderCultureResult(zhCNCulture))));
             });
 
+            services.AddFileServiceClient((sp, httpClient) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
+            });
+
             return services;
         }
     }

@@ -31,9 +31,9 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get PaymentMethods")]
-        public BoGenericReponse<IEnumerable<PaymentMethodModel>> GetAllPaymentMethods()
+        public GenericResponse<IEnumerable<PaymentMethodModel>> GetAllPaymentMethods()
         {
-            return new BoGenericReponse<IEnumerable<PaymentMethodModel>>
+            return new GenericResponse<IEnumerable<PaymentMethodModel>>
             {
                 Valid = true,
                 Data = _queries.GetQueries()

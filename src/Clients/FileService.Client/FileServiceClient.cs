@@ -20,6 +20,33 @@ namespace TGS.Apis.FileService.Clients
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
+        public async ValueTask<FileView> FindFileByObjectIdAsync(string objectId)
+        {
+            var response = await _httpClient
+                .GetAsync($"/api/meta/{objectId}")
+                .ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+            return view;
+        }
+
+        public async ValueTask<Stream> OpenFileReaderAsync(string path)
+        {
+            return await _httpClient
+                .GetStreamAsync($"/api/fs/{path.TrimStart('/')}")
+                .ConfigureAwait(false);
+        }
+
         public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream)
         {
             using var uploadContent = new MultipartFormDataContent();

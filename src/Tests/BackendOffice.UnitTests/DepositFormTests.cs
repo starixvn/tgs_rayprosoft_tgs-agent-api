@@ -107,5 +107,24 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<ReviewStatus>(x => x == ReviewStatus.Approve)),
                 Times.Exactly(1));
         }
+
+        [Test]
+        public async Task Manager_Can_Get_The_DepositForm_Detail()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new GetDepositFormDetailQueryService(moqDepositRepository.Object);
+
+            var formId = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
+
+            var query = new GetDepositFormDetailQuery(formId, brandId);
+
+            await sut.GetAsync(query);
+
+            moqDepositRepository.Verify(
+                fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)),
+                Times.Exactly(1));
+        }
     }
 }

@@ -61,10 +61,10 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
         private IQueryable<DepositForm> MakeQuery(DepositFormQuery query)
         {
             var dataQuery = _tgsRepository.DepositForms
-                            .Include(f => f.Player)
-                            .Include(f => f.BrandPayment)
-                            .ThenInclude(bp => bp.PaymentMethodChannel)
-                            .Where(form => form.BrandId == query.BrandId);
+                .Include(f => f.Player)
+                .Include(f => f.BrandPayment)
+                .ThenInclude(bp => bp.PaymentMethodChannel)
+                .Where(form => form.BrandId == query.BrandId);
 
             if (!string.IsNullOrWhiteSpace(query.UserName))
                 dataQuery = dataQuery.Where(form => form.Player.Username == query.UserName);
