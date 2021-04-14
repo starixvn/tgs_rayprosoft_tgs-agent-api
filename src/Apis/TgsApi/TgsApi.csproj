@@ -54,7 +54,6 @@
 
   <ItemGroup>
     <Folder Include="GameProviders\Saba\Middlewares\" />
-    <Folder Include="GameProviders\Saba\Services\" />
   </ItemGroup>
 
 

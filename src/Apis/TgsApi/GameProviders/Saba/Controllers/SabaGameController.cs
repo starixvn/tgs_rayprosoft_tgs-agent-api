@@ -1,9 +1,12 @@
 ﻿using System.Net.Mime;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Core.Models;
 using TGS.Services.GameOperations;
+using TGS.Shared.Game.Models.Saba.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 {
@@ -15,24 +18,28 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
     [FeatureGate(Consts.GameProvider.Saba)]
     public class SabaGameController : ControllerBase
     {
-        private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
+        private static readonly string GameProviderCode = Consts.GameProvider.Saba;
 
         private readonly IGamePlayActions _actions;
+        private readonly ISabaActionModelMapper _map;
 
         public SabaGameController(
-            IGamePlayActions actions)
+            IGamePlayActions actions,
+            ISabaActionModelMapper map)
         {
             _actions = actions;
+            _map = map;
         }
 
-        //[HttpPost]
-        //[Route("balance")]
-        //public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync([FromForm] GetBalanceRequest request)
-        //{
-        //    var r = await _actions.GetBalanceAsync(GameProviderCode, request.UserId)
-        //        .ConfigureAwait(false);
+        [HttpPost]
+        [Route("getbalance")]
+        public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request)
+        {
+            var playerCode = request.Body.PlayerCode;
+            var r = await _actions.GetBalanceAsync(GameProviderCode, request.Body.PlayerCode)
+                .ConfigureAwait(false);
 
-        //    return _map.Response(r);
-        //}
+            return _map.Response(playerCode, r);
+        }
     }
 }
