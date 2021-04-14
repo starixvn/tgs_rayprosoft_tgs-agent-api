@@ -17,7 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DepositController : ControllerBase
+    public class DepositController : BaseContextController
     {
         /// <summary>
         /// Queries the deposit forms.
@@ -139,10 +139,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
 
-            return new MessageResponse
-            {
-                Valid = true
-            };
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }
