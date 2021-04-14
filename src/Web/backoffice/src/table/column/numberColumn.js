@@ -1,5 +1,6 @@
 import React from "react"
 import { css, Global } from "@emotion/react"
+import { Text } from "bumbag"
 import { FormattedNumber } from "../../i18n"
 import { sumColumn, sumColumnValue } from "../sumColumn"
 
