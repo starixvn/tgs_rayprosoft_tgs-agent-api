@@ -113,7 +113,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Remark = formDetail.Remark,
                     CreateOn = formDetail.CreateOn,
                     UpdateOn = formDetail.UpdateOn,
-                    BrandPaymentExtendData = JsonDocument.Parse(formDetail.BrandPaymentExtendData)
+                    BrandPaymentExtendData = JsonDocument.Parse(formDetail.BrandPaymentExtendData),
+                    ManualReceiptFileId = formDetail.ManualReciptFileId
                 }
             };
         }

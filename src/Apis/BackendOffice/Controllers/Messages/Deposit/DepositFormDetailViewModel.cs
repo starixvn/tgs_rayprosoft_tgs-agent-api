@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json;
-using Newtonsoft.Json.Linq;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
@@ -29,5 +28,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         public DateTimeOffset UpdateOn { get; init; }
 
         public JsonDocument BrandPaymentExtendData { get; init; }
+
+        public string ManualReceiptFileId { get; init; }
     }
 }

@@ -38,7 +38,8 @@ namespace TGS.BackOffice.Repositories
                             df.Remark,
                             df.CreatedOn,
                             df.UpdateOn,
-                            df.BrandPayment.ExtendedData);
+                            df.BrandPayment.ExtendedData,
+                            df.ManualReceiptFileId);
 
             return query.SingleAsync();
         }

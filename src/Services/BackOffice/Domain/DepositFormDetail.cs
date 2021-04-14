@@ -15,5 +15,6 @@ namespace TGS.Services.BackOffice.Domain
         string Remark,
         DateTimeOffset CreateOn,
         DateTimeOffset UpdateOn,
-        string BrandPaymentExtendData);
+        string BrandPaymentExtendData,
+        string ManualReciptFileId);
 }
