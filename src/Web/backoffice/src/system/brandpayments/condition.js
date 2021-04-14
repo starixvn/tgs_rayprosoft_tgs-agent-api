@@ -50,6 +50,7 @@ const VipLevelsTrans = {
 
 export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
     let {
+        brandId,
         playerListCondition,
         allPlayers,
         depositedAmountMin,
@@ -74,7 +75,7 @@ export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
         }`,
         identityAuthentication ? useTrans(IdentityAuthenticationTrans) : "",
         phoneAuthentication ? useTrans(PhoneAuthenticationTrans) : "",
-        useVipLevelDetail(vipLevelIds)
+        useVipLevelDetail(brandId, vipLevelIds)
     ].filter((string) => !!string)
 
     return (
@@ -125,9 +126,9 @@ export const PlayerLabel = ({ value }) => {
 
 export const VipLevelsText = () => <Trans {...VipLevelsTrans} />
 
-export const useVipLevelDetail = (vipLevels = []) => {
+export const useVipLevelDetail = (brandId, vipLevels = []) => {
     let vipLevel = useTrans(VipLevelsTrans)
-    let { data } = useVipLevelList()
+    let { data } = useVipLevelList({ brandId, showAll: true })
     if (vipLevels.length > 0) {
         return `${vipLevel}${toVipLevelNames(vipLevels, data?.items)}`
     }
@@ -141,6 +142,10 @@ const toVipLevelNames = (ids = [], list = []) => {
 
     let names = ids.reduce((detail, id) => {
         let item = list.find((item) => item.id === id)
+        if (!item) {
+            console.warn(`VIP id [${id}] not found`)
+            return detail
+        }
         return detail ? `${detail}/${item.name}` : item.name
     }, "")
 
