@@ -406,7 +406,6 @@ const EditBody = ({
 
     let userResellerId = useUserResellerId()
     let reseller = watch("reseller")
-    let code = watch("code")
 
     let editable = !readonly
     return (
@@ -438,7 +437,7 @@ const EditBody = ({
                         type={isAdd ? "input" : "hidden"}
                         required={isAdd}
                     />
-                    {!isAdd && <Text.Block>{code}</Text.Block>}
+                    {!isAdd && <Text.Block>{getValues("code")}</Text.Block>}
                 </Box>
 
                 <NormalLabel>

@@ -16,6 +16,12 @@ import {
     nameMessage as PlatformNameMessages,
     codeLabelPair as platformLabelPair
 } from "./platform-management/menu"
+import { codeMenuContentPair as promotionPair } from "./promotion"
+import {
+    Code as PromotionCode,
+    nameMessages as PromotionNameMessages,
+    codeLabelPair as promotionLabelPair
+} from "./promotion/menu"
 import { codeMenuContentPair as playerManagementPair } from "./player-management"
 import {
     Code as PlayerManagementCode,
@@ -122,6 +128,7 @@ const MenuItem = ({ code, path, label, ...props }) => {
 
 export const allMenuContentPairs = () => [
     platformPair,
+    promotionPair,
     playerManagementPair,
     agentManagementPair,
     gameManagementPair,
@@ -156,6 +163,7 @@ export const useLabel = ({ codes = [] }) => {
         merchantLabelPair,
         fundLabelPair,
         platformLabelPair,
+        promotionLabelPair,
         logLabelPair,
         systemAdminLabelPair
     ]
@@ -185,6 +193,8 @@ const moduleLabel = ({ code = "", locale }) => {
     switch (code) {
         case PlatformCode:
             return getTrans(PlatformNameMessages, locale)
+        case PromotionCode:
+            return getTrans(PromotionNameMessages, locale)
         case PlayerManagementCode:
             return getTrans(PlayerManagementNameMessages, locale)
         case AgentManagementCode:

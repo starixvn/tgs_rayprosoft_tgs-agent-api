@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Report;
 using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Report.Application.Models.Market;
 using TGS.Services.Report.Application.Models.Player;
@@ -173,6 +175,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 await GetQueriesAsync<RoundAggregate>(
                     q => q.Where(x => x.ReportDate == reportDate && x.Hour == start.Hour && x.Minute == start.Minute),
                     false).ToArrayAsync();
+            var playerCodes = roundAggregates.Select(x => x.PlayerCode).Distinct().ToArray();
+            var players = _tgsRepository.Players.Where(x => playerCodes.Contains(x.PlayerCode)).ToArray();
 
             var playerAggregates = await _tgsRepository.Players.Include(x => x.Agent)
                 .GroupJoin(_tgsRepository.Transactions, p => p.PlayerCode, t => t.Wallet.PlayerCode,
@@ -216,22 +220,28 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             foreach (var playerAggregate in playerAggregates)
             {
+                var player = players.FirstOrDefault(x => x.PlayerCode == playerAggregate.PlayerCode);
+                var playerRoundAggregates =
+                    roundAggregates.Where(r => r.PlayerCode == playerAggregate.PlayerCode).ToArray();
+                var rebate = GetPlayerRebateAmount(player?.Vip, playerRoundAggregates);
+                var agentDividend = (playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
+                    playerAggregate.BonusAmount - rebate) * player?.Agent.DividendPercentage / 100;
+
                 playerAggregate.BetAmount =
-                    roundAggregates.Where(r => r.PlayerCode == playerAggregate.PlayerCode)
+                    playerRoundAggregates
                         .Sum(r => r.BetAmount);
-                playerAggregate.ValidBetAmount =
-                    roundAggregates.Where(r => r.PlayerCode == playerAggregate.PlayerCode)
+                playerAggregate.Turnover =
+                    playerRoundAggregates
                         .Sum(r => r.Turnover);
-                playerAggregate.WinLossAmount = roundAggregates
-                    .Where(r => r.PlayerCode == playerAggregate.PlayerCode)
+                playerAggregate.WinLossAmount = playerRoundAggregates
                     .Sum(r => r.WinLoss);
                 playerAggregate.NetProfit = playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
-                    playerAggregate.BonusAmount;
+                    playerAggregate.BonusAmount - rebate - (agentDividend ?? 0);
             }
 
             playerAggregates = playerAggregates.Where(x =>
                 x.RegisteredCount > 0 || x.FirstFundInCount > 0 || x.DepositAmount > 0 || x.WithdrawalAmount > 0 ||
-                x.AdjustmentAmount != 0 || x.BonusAmount > 0 || x.BetAmount > 0 || x.ValidBetAmount > 0 ||
+                x.AdjustmentAmount != 0 || x.BonusAmount > 0 || x.BetAmount > 0 || x.Turnover > 0 ||
                 x.WinLossAmount != 0 || x.NetProfit != 0).ToArray();
 
             var playerAggregateByGameType = roundAggregates.GroupJoin(
@@ -265,23 +275,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             VipSlotRebatePercentage = x.Vip.SlotRebatePercentage,
                             Turnover = aggregate.Sum(a => a.r.Turnover),
                             WinLoss = aggregate.Sum(a => a.r.WinLoss),
-                            VipRebateAmount = x.Vip.SportsRebatePercentage * aggregate.Where(a =>
-                                        a.r.GameType == GameType.Sportsbook || a.r.GameType == GameType.ESports)
-                                    .Sum(a => a.r.Turnover) / 100 +
-                                x.Vip.VirtualSportsRebatePercentage * aggregate
-                                    .Where(a => a.r.GameType == GameType.VirtualSports)
-                                    .Sum(a => a.r.Turnover) / 100 +
-                                x.Vip.LiveDealerRebatePercentage * aggregate
-                                    .Where(a => a.r.GameType == GameType.LiveDealer)
-                                    .Sum(a => a.r.Turnover) / 100 +
-                                x.Vip.CardGameRebatePercentage * aggregate.Where(a => a.r.GameType == GameType.CardGame)
-                                    .Sum(a => a.r.Turnover) / 100 +
-                                x.Vip.SlotRebatePercentage * aggregate.Where(a =>
-                                        a.r.GameType == GameType.Fishing || a.r.GameType == GameType.Arcade ||
-                                        a.r.GameType == GameType.Slot || a.r.GameType == GameType.TableGame)
-                                    .Sum(a => a.r.Turnover) / 100 +
-                                x.Vip.LotteryRebatePercentage * aggregate.Where(a => a.r.GameType == GameType.Lottery)
-                                    .Sum(a => a.r.Turnover) / 100,
+                            VipRebateAmount =
+                                GetPlayerRebateAmountByGameType(x.Vip, x.GameType, aggregate.Select(a => a.r)),
                             AgentDividendPercentage = x.Agent?.DividendPercentage ?? 0,
                             CreatedOn = DateTimeOffset.Now,
                             ReportDate = reportDate
@@ -290,5 +285,63 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             return (playerAggregates, playerAggregateByGameType);
         }
+
+        private decimal GetPlayerRebateAmountByGameType(VipLevel vip, GameType type,
+            IEnumerable<RoundAggregate> roundAggregates)
+        {
+            switch (type)
+            {
+                case GameType.Sportsbook:
+                case GameType.ESports:
+                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                            a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
+                        .Sum(a => a.Turnover) / 100;
+                case GameType.VirtualSports:
+                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                            a.GameType == GameType.VirtualSports)
+                        .Sum(a => a.Turnover) / 100;
+                case GameType.LiveDealer:
+                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                            a.GameType == GameType.LiveDealer)
+                        .Sum(a => a.Turnover) / 100;
+                case GameType.CardGame:
+                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                            a.GameType == GameType.Sportsbook || a.GameType == GameType.CardGame)
+                        .Sum(a => a.Turnover) / 100;
+                case GameType.Fishing:
+                case GameType.Arcade:
+                case GameType.Slot:
+                case GameType.TableGame:
+                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                            a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
+                            a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
+                        .Sum(a => a.Turnover) / 100;
+                case GameType.Lottery:
+                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                            a.GameType == GameType.Lottery)
+                        .Sum(a => a.Turnover) / 100;
+                default:
+                    return 0;
+            }
+        }
+
+        private decimal GetPlayerRebateAmount(VipLevel vip, IEnumerable<RoundAggregate> roundAggregates) =>
+            vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
+                .Sum(a => a.Turnover) / 100 +
+            vip.VirtualSportsRebatePercentage * roundAggregates
+                .Where(a => a.GameType == GameType.VirtualSports)
+                .Sum(a => a.Turnover) / 100 +
+            vip.LiveDealerRebatePercentage * roundAggregates
+                .Where(a => a.GameType == GameType.LiveDealer)
+                .Sum(a => a.Turnover) / 100 +
+            vip.CardGameRebatePercentage * roundAggregates.Where(a => a.GameType == GameType.CardGame)
+                .Sum(a => a.Turnover) / 100 +
+            vip.SlotRebatePercentage * roundAggregates.Where(a =>
+                    a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
+                    a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
+                .Sum(a => a.Turnover) / 100 +
+            vip.LotteryRebatePercentage * roundAggregates.Where(a => a.GameType == GameType.Lottery)
+                .Sum(a => a.Turnover) / 100;
     }
 }
