@@ -26,6 +26,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     .Where(BrandId, l => l.Brand.Id == BrandId)
                     .Where(x => x.BrandId == request.BrandId)
                     .Where(request.Status, x => x.Status == request.Status)
+                    .Where(request.Type, x => x.Type == request.Type)
                     .Where(request.LevelType, x => x.LevelType == request.LevelType)
                     .Where(request.Username, x => EF.Functions.ILike(x.Username, $"%{request.Username}%"))
                 )
