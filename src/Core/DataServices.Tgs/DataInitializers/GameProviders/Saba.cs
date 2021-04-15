@@ -52,15 +52,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"), new IDRCurrency("IDR"),
-                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), new JPYCurrency("JPY"),
-                new KRWCurrency("KRW"), new MYRCurrency("MYR"), new THBCurrency("THB"), new GBPCurrency("GBP")
+                new CNYCurrency("13"), new USDCurrency("3"), new VND1000Currency("51"), new IDR1000Currency("15"),
+                new JPYCurrency("32"), new KRWCurrency("45"), new MYRCurrency("2"), new THBCurrency("4"),
+                new GBPCurrency("12")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-CN"), new IDLanguage("id"), new JPLanguage("ja"),
-                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vi"), new TWLanguage("zh-TW")
+                new USLanguage("en"), new CNLanguage("cs"), new IDLanguage("id"), new JPLanguage("jp"),
+                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vn"), new TWLanguage("ch")
             };
 
             IGame[] IGameProvider.Games => _games;

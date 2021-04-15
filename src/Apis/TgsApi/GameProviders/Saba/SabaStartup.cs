@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
+using TGS.Core.Infrastructures.ErrorMappers;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba
 {
@@ -15,7 +16,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         protected override string LogPrefix => "saba";
 
-        protected override void AddCustomDependencyServices(IServiceCollection services) =>
+        protected override void AddCustomDependencyServices(IServiceCollection services)
+        {
+            services.AddErrorMappers();
+
             services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
+        }
     }
 }
