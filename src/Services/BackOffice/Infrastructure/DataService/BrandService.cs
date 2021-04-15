@@ -9,6 +9,7 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -53,12 +54,18 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)
         {
+            var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+                BrandSettlementIntervalGenerator.GetInterval(request.SettlementIntervalType);
             var brand = new Brand
             {
                 Id = Guid.NewGuid(),
                 LicenseeId = request.LicenseeId,
                 Code = request.Code,
                 Name = request.Name,
+                BeforeFromDateTime = beforeFromDate,
+                BeforeToDateTime = beforeToDate,
+                AfterFromDateTime = afterFromDate,
+                AfterToDateTime = afterToDate,
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,

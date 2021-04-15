@@ -50,13 +50,13 @@ namespace TGS.Core.DataServices.Base
 
         public async Task CreateEntitiesAsync<T>(T[] entities) where T : class
         {
-            await _repository.BulkInsertAsync(entities);
+            await _repository.Set<T>().AddRangeAsync(entities);
             await _repository.SaveChangesAsync();
         }
 
         public async Task UpdateEntitiesAsync<T>(T[] entities) where T : class
         {
-            await _repository.BulkUpdateAsync(entities);
+            _repository.Set<T>().UpdateRange(entities);
             await _repository.SaveChangesAsync();
         }
 
