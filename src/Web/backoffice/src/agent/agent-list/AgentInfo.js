@@ -32,6 +32,7 @@ import { AgentStatusLabel, AgentStatusSelect } from "../AgentStatus"
 import { AgentLevelLabel, AgentLevelSelect, isAgentHead } from "../AgentLevel"
 import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
 import clone from "clone-deep"
+import Select from "../../select/Select"
 
 const Key = "AgentInfo"
 
@@ -114,10 +115,24 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                             </AgentStatusBox>
 
                             <AgentTypeBox>
-                                <AgentTypeSelect
-                                    name="type"
-                                    disabled={!agentHead}
-                                />
+                                <Box alignY="center">
+                                    {!agentHead && (
+                                        <>
+                                            <AgentTypeSelect
+                                                name="type"
+                                                value={record?.type}
+                                                display="none"
+                                            />
+                                            <AgentTypeSelect
+                                                value={record?.type}
+                                                disabled
+                                            />
+                                        </>
+                                    )}
+                                    {agentHead && (
+                                        <AgentTypeSelect name="type" />
+                                    )}
+                                </Box>
                             </AgentTypeBox>
 
                             <BounsBox>
